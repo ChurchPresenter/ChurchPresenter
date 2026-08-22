@@ -35,6 +35,14 @@ import kotlin.math.min
  * the hand-written styles use. One instance serves both the developer Style Editor's
  * live preview and — for shipped spec-based styles — the user-facing generator.
  */
+/**
+ * Whether this element is drawn at all for the current config: hidden by a visibility rule, or
+ * hidden by an override for the alignment in use.
+ */
+private fun ElementSpec.isDrawn(layout: SpecLayoutContext, cfg: LottieGenConfig): Boolean =
+    layout.visible(visibleWhen) && placement.alignOverrides[cfg.align]?.hidden != true
+
+
 class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
 
     /** Warnings from the most recent [generate] call (editor status display). */
@@ -43,9 +51,7 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
 
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val layout = SpecLayoutContext(spec, cfg)
-        for (element in spec.elements) {
-            if (!layout.visible(element.visibleWhen)) continue
-            if (element.placement.alignOverrides[cfg.align]?.hidden == true) continue
+        for (element in spec.elements.filter { it.isDrawn(layout, cfg) }) {
             when (element) {
                 is LogoElement -> buildLogo(builder, cfg, layout, element)
                 is ImageElement -> buildImage(builder, cfg, layout, element)

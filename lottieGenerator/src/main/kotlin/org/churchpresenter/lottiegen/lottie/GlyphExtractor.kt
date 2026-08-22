@@ -10,6 +10,9 @@ import java.awt.font.FontRenderContext
 import java.awt.geom.PathIterator
 import kotlin.math.roundToInt
 
+/** Lottie's layer-type discriminator for a text layer. */
+private const val TEXT_LAYER_TYPE = "5"
+
 /** Lottie glyph outlines are authored on a 100-unit em box, so every coordinate is a percentage. */
 private const val GLYPH_EM_SIZE = 100
 
@@ -62,18 +65,10 @@ object GlyphExtractor {
 
         // (family, style) -> characters used, in first-seen order
         val used = LinkedHashMap<Pair<String, String>, LinkedHashSet<Char>>()
-        for (layer in layers) {
-            if ((layer["ty"] as? JsonPrimitive)?.content != "5") continue
-            val doc = layer["t"] as? JsonObject ?: continue
-            val keyframes = (doc["d"] as? JsonObject)?.get("k") as? JsonArray ?: continue
-            for (kf in keyframes) {
-                val style = ((kf as? JsonObject)?.get("s") as? JsonObject) ?: continue
-                val fName = (style["f"] as? JsonPrimitive)?.content ?: continue
-                val text = (style["t"] as? JsonPrimitive)?.content ?: continue
-                val familyStyle = familyStyleByName[fName] ?: continue
-                val chars = used.getOrPut(familyStyle) { LinkedHashSet() }
-                for (ch in text) if (!ch.isISOControl()) chars.add(ch)
-            }
+        for ((fName, text) in layers.textRuns()) {
+            val familyStyle = familyStyleByName[fName] ?: continue
+            val chars = used.getOrPut(familyStyle) { LinkedHashSet() }
+            for (ch in text) if (!ch.isISOControl()) chars.add(ch)
         }
         if (used.isEmpty()) return null
 
@@ -110,6 +105,25 @@ object GlyphExtractor {
         val inTan = ArrayList<DoubleArray>()
         val outTan = ArrayList<DoubleArray>()
     }
+
+    /**
+     * Every (font name, text) pair the text layers carry, skipping anything that is not a text
+     * layer or does not hold a document keyframe. Each `?: return@…` here was a `continue` in one
+     * of two nested loops, which said nothing about which shape was being skipped or why.
+     */
+    private fun List<JsonObject>.textRuns(): List<Pair<String, String>> =
+        asSequence()
+            .filter { (it["ty"] as? JsonPrimitive)?.content == TEXT_LAYER_TYPE }
+            .mapNotNull { it["t"] as? JsonObject }
+            .mapNotNull { (it["d"] as? JsonObject)?.get("k") as? JsonArray }
+            .flatten()
+            .mapNotNull { (it as? JsonObject)?.get("s") as? JsonObject }
+            .mapNotNull { style ->
+                val fName = (style["f"] as? JsonPrimitive)?.content ?: return@mapNotNull null
+                val text = (style["t"] as? JsonPrimitive)?.content ?: return@mapNotNull null
+                fName to text
+            }
+            .toList()
 
     private fun outlineToContours(path: PathIterator): List<Contour> {
         val contours = ArrayList<Contour>()
