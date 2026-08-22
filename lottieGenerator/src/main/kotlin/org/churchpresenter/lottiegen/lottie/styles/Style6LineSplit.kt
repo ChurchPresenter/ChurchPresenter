@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.LINE_HEIGHT_FACTOR
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -229,7 +230,7 @@ private fun makeTextDataWithAnimators(
                         put("ca", JsonPrimitive(0))
                         put("j", JsonPrimitive(justify))
                         put("tr", JsonPrimitive(0))
-                        put("lh", JsonPrimitive(fontSizePx * 1.2))
+                        put("lh", JsonPrimitive(fontSizePx * LINE_HEIGHT_FACTOR))
                         put("ls", JsonPrimitive(0))
                         put("fc", jsonArrayOf(color))
                     })

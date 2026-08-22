@@ -20,6 +20,14 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 
+/** The pill behind each line: padding either side, and its height as a multiple of the line size. */
+private const val PILL_PAD_PX = 20.0
+private const val PILL_HEIGHT_FACTOR = 1.5
+
+/** A baseline sits below a line's optical centre; nudge it up by this fraction of the line size. */
+private const val BASELINE_NUDGE_FACTOR = 0.15
+
+
 class Style3Circular : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val inF = builder.inFrames
@@ -137,14 +145,14 @@ class Style3Circular : StyleGenerator {
                 "Name Mask",
                 buildJsonArray {
                     add(makeGroup(listOf(
-                        makeRect(nameM.width + 20.0, nameSizePx * 1.5, 0.0),
+                        makeRect(nameM.width + PILL_PAD_PX, nameSizePx * PILL_HEIGHT_FACTOR, 0.0),
                         makeFill(listOf(1.0, 1.0, 1.0))
                     )))
                 },
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.staticPropArray(
                         textBaseX + nameMaskOffsetX,
-                        nameY - nameSizePx * 0.15,
+                        nameY - nameSizePx * BASELINE_NUDGE_FACTOR,
                         0.0,
                     )
                 ),
@@ -186,14 +194,14 @@ class Style3Circular : StyleGenerator {
                 "Info Mask",
                 buildJsonArray {
                     add(makeGroup(listOf(
-                        makeRect(infoM.width + 20.0, infoSizePx * 1.5, 0.0),
+                        makeRect(infoM.width + PILL_PAD_PX, infoSizePx * PILL_HEIGHT_FACTOR, 0.0),
                         makeFill(listOf(1.0, 1.0, 1.0))
                     )))
                 },
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.staticPropArray(
                         textBaseX + infoMaskOffsetX,
-                        infoY - infoSizePx * 0.15,
+                        infoY - infoSizePx * BASELINE_NUDGE_FACTOR,
                         0.0,
                     )
                 ),

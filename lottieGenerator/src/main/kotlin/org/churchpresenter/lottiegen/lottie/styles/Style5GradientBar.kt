@@ -23,6 +23,10 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 
+/** Lottie writes a gradient's stop count in `p`; this bar is built from four. */
+private const val GRADIENT_STOP_COUNT = 4
+
+
 class Style5GradientBar : StyleGenerator {
 
     /**
@@ -57,7 +61,7 @@ class Style5GradientBar : StyleGenerator {
                 put("k", jsonArrayOf(barW / 2, 0.0))
             })
             put("g", buildJsonObject {
-                put("p", JsonPrimitive(4))
+                put("p", JsonPrimitive(GRADIENT_STOP_COUNT))
                 put("k", buildJsonObject {
                     put("a", JsonPrimitive(0))
                     put("k", buildJsonArray {

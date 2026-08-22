@@ -24,6 +24,14 @@ import org.churchpresenter.lottiegen.persistence.PresetStorage
 import java.io.File
 import java.time.Instant
 
+/**
+ * How long to wait before regenerating. A dragged slider or a held key settles quickly, so those
+ * paths pass the shorter window; the default covers a control whose value arrives in one step.
+ */
+private const val SETTLE_DEBOUNCE_MS = 300L
+private const val TYPING_DEBOUNCE_MS = 100L
+
+
 class LottieGenViewModel(
     private val scope: CoroutineScope,
     private val outputDir: File? = null,
@@ -68,7 +76,7 @@ class LottieGenViewModel(
         scheduleGenerate()
     }
 
-    private fun scheduleGenerate(delayMs: Long = 300) {
+    private fun scheduleGenerate(delayMs: Long = SETTLE_DEBOUNCE_MS) {
         generateJob?.cancel()
         generateJob = scope.launch {
             delay(delayMs)
@@ -180,7 +188,7 @@ class LottieGenViewModel(
             logoW = config.logoW,
             logoH = config.logoH
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun deletePreset(index: Int) {
@@ -260,7 +268,7 @@ class LottieGenViewModel(
             accentColorAlpha = theme.colors.accentColorAlpha, bgColorAlpha = theme.colors.bgColorAlpha,
             borderColorAlpha = theme.colors.borderColorAlpha
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun deleteColorTheme(index: Int) {
@@ -279,7 +287,7 @@ class LottieGenViewModel(
             logoH = data.height,
             logoSelect = file.name
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun importAndLoadLogo(sourceFile: File) {
@@ -290,7 +298,7 @@ class LottieGenViewModel(
 
     override fun clearLogo() {
         config = config.copy(logoEnabled = false, logoData = null, logoW = 0, logoH = 0, logoSelect = "")
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun selectLogo(name: String) {

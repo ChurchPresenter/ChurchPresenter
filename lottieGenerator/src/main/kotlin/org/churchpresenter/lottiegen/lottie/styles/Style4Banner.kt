@@ -19,6 +19,10 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 
+/** A stroke straddles its path, so the visible edge sits a quarter of its width off centre. */
+private const val BORDER_CENTRE_FACTOR = 0.25
+
+
 class Style4Banner : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val inF = builder.inFrames
@@ -272,7 +276,7 @@ class Style4Banner : StyleGenerator {
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.staticPropArray(
                         accentCX,
-                        nameBgCY + (if (borderPx > 0) borderPx * 0.25 else 0.0),
+                        nameBgCY + (if (borderPx > 0) borderPx * BORDER_CENTRE_FACTOR else 0.0),
                         0.0,
                     ),
                     scale = LottieBuilder.animatedProp(accentScaleKFs)

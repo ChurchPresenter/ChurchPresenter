@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
@@ -18,6 +19,10 @@ import org.churchpresenter.lottiegen.lottie.makeTextData
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
+
+/** A baseline sits below a line's optical centre; nudge it up by this fraction of the line size. */
+private const val BASELINE_NUDGE_FACTOR = 0.15
+
 
 class Style1Bar : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
@@ -123,7 +128,7 @@ class Style1Bar : StyleGenerator {
                     opacity = LottieBuilder.animatedProp(opKFs),
                     position = LottieBuilder.animatedProp(posKFs),
                     anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
-                    scale = LottieBuilder.staticPropArray(scale, scale, 100.0)
+                    scale = LottieBuilder.staticPropArray(scale, scale, FULL_PERCENT_D)
                 )
             )
         }
@@ -178,7 +183,7 @@ class Style1Bar : StyleGenerator {
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.staticPropArray(
                         textBaseX + nameMaskOffsetX,
-                        nameY - nameSizePx * 0.15,
+                        nameY - nameSizePx * BASELINE_NUDGE_FACTOR,
                         0.0,
                     )
                 ),
@@ -231,7 +236,7 @@ class Style1Bar : StyleGenerator {
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.staticPropArray(
                         textBaseX + infoMaskOffsetX,
-                        infoY - infoSizePx * 0.15,
+                        infoY - infoSizePx * BASELINE_NUDGE_FACTOR,
                         0.0,
                     )
                 ),

@@ -1,5 +1,7 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
@@ -19,6 +21,11 @@ import org.churchpresenter.lottiegen.lottie.makeTextData
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
+
+/** Padding around the logo's backing plate, in em, wider than it is tall. */
+private const val LOGO_BG_PAD_W_EM = 1.2
+private const val LOGO_BG_PAD_H_EM = 0.8
+
 
 class Style2Boxed : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
@@ -87,8 +94,8 @@ class Style2Boxed : StyleGenerator {
         var _logoSlideOffset = 0.0
         var _logoScale = 0.0
         if (cfg.logoEnabled && cfg.logoData != null) {
-            _logoBgW = logoSizePx + emToPx(1.2, baseSize)
-            _logoBgH = logoSizePx + emToPx(0.8, baseSize)
+            _logoBgW = logoSizePx + emToPx(LOGO_BG_PAD_W_EM, baseSize)
+            _logoBgH = logoSizePx + emToPx(LOGO_BG_PAD_H_EM, baseSize)
             val logoGap = lineSpacingPx
             val maxBoxW = max(nameBoxW, infoBoxW)
             if (isRight) {
@@ -101,7 +108,7 @@ class Style2Boxed : StyleGenerator {
                 baseX += _logoBgW + logoGap * 2
             }
             _logoSlideOffset = totalH + _logoBgH
-            _logoScale = (logoSizePx / max(cfg.logoW, cfg.logoH).toDouble()) * 100
+            _logoScale = (logoSizePx / max(cfg.logoW, cfg.logoH).toDouble()) * PERCENT_SCALE
         }
 
         // Background/mask X positions (center of each box)
@@ -166,7 +173,7 @@ class Style2Boxed : StyleGenerator {
                     opacity = LottieBuilder.animatedProp(logoOpKFs),
                     position = LottieBuilder.animatedProp(logoPosKFs),
                     anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
-                    scale = LottieBuilder.staticPropArray(_logoScale, _logoScale, 100.0)
+                    scale = LottieBuilder.staticPropArray(_logoScale, _logoScale, FULL_PERCENT_D)
                 )
             )
         }

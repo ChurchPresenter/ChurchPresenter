@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.spec
 
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
@@ -154,7 +155,7 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
                 rotation = rotationProp(builder, cfg, element),
                 position = positionProp(builder, cfg, layout, element, rest, w, h),
                 anchor = LottieBuilder.staticPropArray(element.naturalW / 2.0, element.naturalH / 2.0, 0.0),
-                scale = scalePropXY(builder, cfg, element, baseX * 100.0, baseY * 100.0)
+                scale = scalePropXY(builder, cfg, element, baseX * PERCENT_SCALE, baseY * PERCENT_SCALE)
             ),
             tt = if (matted) 1 else null
         )

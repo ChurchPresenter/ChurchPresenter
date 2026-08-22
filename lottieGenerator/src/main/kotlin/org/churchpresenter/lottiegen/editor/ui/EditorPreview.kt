@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -130,7 +131,7 @@ fun EditorPreview(
             )
 
             Text(
-                "%.0f%%".format(seek * 100),
+                "%.0f%%".format(seek * PERCENT_SCALE),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

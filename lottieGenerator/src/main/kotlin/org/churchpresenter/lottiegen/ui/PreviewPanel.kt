@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.ui
 
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -245,7 +246,7 @@ fun PreviewPanel(
                 trackColor = Tokens.TransportTrack
             )
             Text(
-                "%.0f%%".format(seekValue * 100),
+                "%.0f%%".format(seekValue * PERCENT_SCALE),
                 modifier = Modifier.widthIn(min = 42.dp),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
