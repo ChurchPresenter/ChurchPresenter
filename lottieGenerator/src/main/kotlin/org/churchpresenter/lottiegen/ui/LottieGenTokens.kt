@@ -19,6 +19,18 @@ import androidx.compose.ui.unit.sp
  * the two palettes are only comparable through it: light is the same hue and role at a mirrored
  * lightness, not an independent set of hex codes.
  */
+/*
+ * Suppressed rather than restructured: see the **Theme** section of `lottieGenerator/AGENT.md`.
+ *
+ * These 51 roles are the hand-drawn panel chrome Material has no equivalent for, and a flat token
+ * list is what they want to be. `constructorThreshold` is 7, and no shallower grouping reaches it —
+ * the nine natural banner groups are themselves 8-11 members each and would each be flagged in
+ * turn, so satisfying the rule needs three levels of nesting (3 super-groups → 14 groups → 51
+ * colours) and turns `palette.appBg` into `palette.chrome.surfaces.appBg`. That is contortion for a
+ * lint score, and it is what leaving this one finding standing kept the whole module off the CI
+ * detekt gate for.
+ */
+@Suppress("LongParameterList")
 @Immutable
 class LottieGenPalette(
     // ── Surfaces ────────────────────────────────────────────────────────────
