@@ -53,7 +53,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
-import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
+import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
