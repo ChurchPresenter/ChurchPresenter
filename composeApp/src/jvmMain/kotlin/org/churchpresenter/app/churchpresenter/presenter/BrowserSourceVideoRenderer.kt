@@ -513,7 +513,10 @@ internal fun BrowserSourceContent(
                     contentAlignment = Alignment.Center
                 ) {
                     BasicText(
-                        text = "Browser Source ${outputIndex + 1}",
+                        // Rendered into the OBS feed rather than into the app's own UI, which has
+                        // no compose-resource environment here — hence the literal fallback. A
+                        // renamed output shows the operator's own name instead.
+                        text = screenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}"),
                         style = TextStyle(
                             color = Color.White,
                             fontSize = 96.sp,

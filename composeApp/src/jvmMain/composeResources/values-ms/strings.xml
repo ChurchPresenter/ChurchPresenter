@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Output maya yang disajikan sebagai laman web — tampal URL itu ke dalam Browser Source untuk menindih kandungan langsung, latar belakang lutsinar disokong.</string>
     <string name="add_browser_source_output">Tambah Output</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Beri nama pada output ini — Penonton, Pentas, Koir, Kord…</string>
     <string name="browser_source_confirm_remove_message">Adakah anda pasti mahu membuang %1$s?</string>
     <string name="browser_source_require_api_key">Wajibkan Kunci API</string>
     <string name="browser_source_uses_server_api_key">Menggunakan kunci yang sama dengan tetapan Pelayan; hidupkannya di sana dahulu.</string>

@@ -2099,6 +2099,7 @@
     <string name="browser_source_outputs_help">Salidas virtuales servidas como una página web — pega la URL en una Browser Source para superponer contenido en vivo, se admite fondo transparente.</string>
     <string name="add_browser_source_output">Añadir Salida</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Da un nombre a esta salida — Público, Escenario, Coro, Acordes…</string>
     <string name="browser_source_confirm_remove_message">¿Está seguro de que desea eliminar %1$s?</string>
     <string name="browser_source_require_api_key">Requerir Clave de API</string>
     <string name="browser_source_uses_server_api_key">Usa la misma clave que los ajustes del Servidor; actívela allí primero.</string>

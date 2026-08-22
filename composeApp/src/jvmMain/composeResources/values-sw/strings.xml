@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Matoleo pepe yanayotolewa kama ukurasa wa wavuti — nakili URL kwenye Browser Source kuweka maudhui ya live juu ya picha, usuli wa uwazi unatumika.</string>
     <string name="add_browser_source_output">Ongeza Utoaji</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Ipe pato hili jina — Hadhira, Jukwaa, Kwaya, Kodi…</string>
     <string name="browser_source_confirm_remove_message">Una hakika unataka kuondoa %1$s?</string>
     <string name="browser_source_require_api_key">Hitaji API Key</string>
     <string name="browser_source_uses_server_api_key">Hutumia key ile ile ya mipangilio ya Seva; iwezeshe hapo kwanza.</string>

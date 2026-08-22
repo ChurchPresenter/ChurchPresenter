@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Virtuāli izvadi, kas tiek pasniegti kā tīmekļa lapa — ielīmējiet URL pārlūka avotā (Browser Source), lai uzklātu saturu tiešraidē; caurspīdīgs fons tiek atbalstīts.</string>
     <string name="add_browser_source_output">Pievienot izvadu</string>
     <string name="browser_source_output_label">Pārlūka avots %1$d</string>
+    <string name="browser_source_name_tooltip">Piešķiriet šai izejai nosaukumu — Skatītāji, Skatuve, Koris, Akordi…</string>
     <string name="browser_source_confirm_remove_message">Vai tiešām vēlaties noņemt %1$s?</string>
     <string name="browser_source_require_api_key">Pieprasīt API atslēgu</string>
     <string name="browser_source_uses_server_api_key">Izmanto to pašu atslēgu, kas servera iestatījumos; vispirms ieslēdziet to tur.</string>

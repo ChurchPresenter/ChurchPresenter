@@ -50,6 +50,7 @@ import churchpresenter.composeapp.generated.resources.add_browser_source_output
 import churchpresenter.composeapp.generated.resources.browser_source_confirm_remove_message
 import churchpresenter.composeapp.generated.resources.browser_source_enabled
 import churchpresenter.composeapp.generated.resources.browser_source_fps
+import churchpresenter.composeapp.generated.resources.browser_source_name_tooltip
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.browser_source_outputs
 import churchpresenter.composeapp.generated.resources.browser_source_outputs_help
@@ -73,12 +74,14 @@ import churchpresenter.composeapp.generated.resources.projection_web_decklink_to
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val DISABLED_ALPHA = 0.5f
+private val NAME_FIELD_WIDTH = 150.dp
 private val BROWSER_SOURCE_RESOLUTIONS = listOf(1280 to 720, 1920 to 1080, 2560 to 1440, 3840 to 2160)
 private val BROWSER_SOURCE_FRAME_RATES = listOf(10, 15, 24, 30, 60)
 
@@ -134,6 +137,8 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             var showRemoveConfirm by remember { mutableStateOf(false) }
+            val defaultLabel = stringResource(Res.string.browser_source_output_label, i + 1)
+            val outputLabel = output.browserSourceLabelOr(defaultLabel)
             val overlayUrl = if (serverUrl.isNotBlank()) "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}" else null
             val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
                 "apiKey=${settings.serverSettings.apiKey}" else null
@@ -163,10 +168,32 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         spacing = 4.dp,
                     )
-                    Text(
-                        text = stringResource(Res.string.browser_source_output_label, i + 1),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_name_tooltip)) } },
+                        state = rememberTooltipState()
+                    ) {
+                        SettingsTextField(
+                            value = output.browserSourceName,
+                            onValueChange = { name ->
+                                val updated = output.copy(browserSourceName = name)
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                }
+                            },
+                            placeholder = {
+                                Text(
+                                    text = defaultLabel,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            modifier = Modifier.width(NAME_FIELD_WIDTH)
+                        )
+                    }
                     if (overlayUrl != null) {
                         Text(
                             text = overlayUrl,
@@ -221,7 +248,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                     onDismissRequest = { showRemoveConfirm = false },
                     title = { Text(stringResource(Res.string.confirm_delete)) },
                     text = {
-                        Text(stringResource(Res.string.browser_source_confirm_remove_message, stringResource(Res.string.browser_source_output_label, i + 1)))
+                        Text(stringResource(Res.string.browser_source_confirm_remove_message, outputLabel))
                     },
                     confirmButton = {
                         TextButton(
@@ -428,10 +455,9 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             )
                         }
                         if (showContentDialog) {
-                            val browserSourceLabel = stringResource(Res.string.browser_source_output_label, i + 1)
                             ContentOutputsDialog(
-                                title = stringResource(Res.string.content_outputs_for, browserSourceLabel),
-                                screenLabel = browserSourceLabel,
+                                title = stringResource(Res.string.content_outputs_for, outputLabel),
+                                screenLabel = outputLabel,
                                 assignment = output,
                                 contentGroup = contentGroup,
                                 backgroundGroup = backgroundGroup,

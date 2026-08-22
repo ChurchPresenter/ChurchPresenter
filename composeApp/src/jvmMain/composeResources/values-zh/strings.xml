@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">以网页形式提供的虚拟输出——把 URL 粘贴到浏览器源中即可叠加实时内容，支持透明背景。</string>
     <string name="add_browser_source_output">添加输出</string>
     <string name="browser_source_output_label">浏览器源 %1$d</string>
+    <string name="browser_source_name_tooltip">为此输出命名——观众、舞台、诗班、和弦…</string>
     <string name="browser_source_confirm_remove_message">确定要移除 %1$s 吗？</string>
     <string name="browser_source_require_api_key">需要 API 密钥</string>
     <string name="browser_source_uses_server_api_key">使用与服务器设置相同的密钥；请先在那里启用。</string>
