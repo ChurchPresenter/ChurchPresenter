@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.persistence
 
+import java.io.IOException
 import org.churchpresenter.lottiegen.spec.SpecJson
 import org.churchpresenter.lottiegen.spec.StyleSpec
 import java.io.File
@@ -23,7 +24,11 @@ object StyleSpecStorage {
 
     fun load(file: File): StyleSpec? = try {
         SpecJson.decode(file.readText(Charsets.UTF_8))
-    } catch (e: Exception) {
+    } catch (e: IOException) {
+        System.err.println("Failed to load style spec ${file.name}: ${e.message}")
+        null
+    } catch (e: IllegalArgumentException) {
+        // SpecJson.decode's contract for malformed JSON or an unsupported formatVersion.
         System.err.println("Failed to load style spec ${file.name}: ${e.message}")
         null
     }
@@ -31,7 +36,7 @@ object StyleSpecStorage {
     fun save(spec: StyleSpec, file: File): Boolean = try {
         file.writeText(SpecJson.encode(spec), Charsets.UTF_8)
         true
-    } catch (e: Exception) {
+    } catch (e: IOException) {
         System.err.println("Failed to save style spec ${file.name}: ${e.message}")
         false
     }

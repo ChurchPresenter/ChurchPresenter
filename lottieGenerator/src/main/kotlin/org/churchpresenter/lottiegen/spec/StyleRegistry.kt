@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.spec
 
+import java.io.IOException
 import kotlinx.serialization.Serializable
 
 /**
@@ -19,7 +20,10 @@ data class StyleRegistry(val entries: List<RegistryEntry> = emptyList()) {
                 ?: return StyleRegistry()
             return try {
                 decode(stream.bufferedReader(Charsets.UTF_8).use { it.readText() })
-            } catch (e: Exception) {
+            } catch (e: IOException) {
+                System.err.println("Failed to load style registry: ${e.message}")
+                StyleRegistry()
+            } catch (e: IllegalArgumentException) {
                 System.err.println("Failed to load style registry: ${e.message}")
                 StyleRegistry()
             }

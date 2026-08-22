@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.persistence
 
+import java.io.IOException
 import java.io.File
 import java.util.Base64
 import javax.imageio.ImageIO
@@ -58,7 +59,7 @@ object LogoStorage {
             val dest = File(logosDir(), sourceFile.name)
             sourceFile.copyTo(dest, overwrite = true)
             dest
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             System.err.println("Failed to import logo: ${e.message}")
             null
         }

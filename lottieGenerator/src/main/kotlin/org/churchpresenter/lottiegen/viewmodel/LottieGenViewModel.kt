@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.viewmodel
 
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -80,7 +81,13 @@ class LottieGenViewModel(
                 }
                 generatedJson = jsonString
                 statusText = ""
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }
@@ -98,7 +105,13 @@ class LottieGenViewModel(
                 }
                 generatedJson = jsonString
                 statusText = ""
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }

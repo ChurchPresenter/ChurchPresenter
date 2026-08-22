@@ -1,5 +1,7 @@
 package org.churchpresenter.lottiegen.lottie
 
+import java.awt.FontFormatException
+import java.io.IOException
 import java.awt.Font
 import java.awt.GraphicsEnvironment
 
@@ -40,7 +42,9 @@ object FontRegistry {
                         loadedFonts[key] = font
                         stream.close()
                     }
-                } catch (e: Exception) {
+                } catch (e: FontFormatException) {
+                    System.err.println("Failed to load font $fileName: ${e.message}")
+                } catch (e: IOException) {
                     System.err.println("Failed to load font $fileName: ${e.message}")
                 }
             }

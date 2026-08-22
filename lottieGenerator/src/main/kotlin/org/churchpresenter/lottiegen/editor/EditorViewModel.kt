@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor
 
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -180,7 +181,10 @@ class EditorViewModel(
         val stylesDir = BuildRegistrar.locateStylesDir() ?: return null
         return try {
             BuildRegistrar.register(spec.copy(id = spec.id.trim()), stylesDir)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            statusText = "Error: ${e.message}"
+            null
+        } catch (e: IllegalArgumentException) {
             statusText = "Error: ${e.message}"
             null
         }
@@ -215,7 +219,13 @@ class EditorViewModel(
                     }
                 }
                 matrixCells = cells
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }
@@ -235,7 +245,13 @@ class EditorViewModel(
                 }
                 generatedJson = jsonString
                 statusText = generator.lastWarnings.joinToString("; ")
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }
