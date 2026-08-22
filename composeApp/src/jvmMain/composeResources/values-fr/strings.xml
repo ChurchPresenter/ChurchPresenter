@@ -2382,4 +2382,22 @@
     <string name="tab_strip_scroll_forward">Faire défiler les onglets vers la droite</string>
     <string name="stock_photo_show_key">Afficher la clé API</string>
     <string name="stock_photo_hide_key">Masquer la clé API</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Rechercher des polices…</string>
+    <string name="font_picker_clear_search">Effacer la recherche</string>
+    <string name="font_group_recent">Utilisées récemment</string>
+    <string name="font_group_recommended">Adaptées à la projection</string>
+    <string name="font_group_all">Toutes les polices</string>
+    <string name="font_group_matches">Correspondances</string>
+    <string name="font_category_sans">Sans</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Titrage</string>
+    <string name="font_preview">Aperçu</string>
+    <string name="font_preview_sample">Exemple de texte dans la police choisie</string>
+    <string name="font_warning_no_cyrillic">%1$s n'a pas de glyphes cyrilliques : les versets en cyrillique s'afficheront dans une autre police.</string>
+    <string name="font_warning_no_hebrew">%1$s n'a pas de glyphes hébreux : le texte hébreu s'affichera dans une autre police.</string>
+    <string name="font_hidden_note">%1$d polices système et de symboles masquées · %2$d sur %3$d affichées</string>
+    <string name="font_shown_note">%1$d sur %2$d affichées</string>
+    <string name="font_picker_keys">↑↓ déplacer · ⏎ choisir · échap fermer</string>
 </resources>

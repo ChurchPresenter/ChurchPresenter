@@ -2354,4 +2354,22 @@
     <string name="tab_strip_scroll_forward">Przewiń karty do przodu</string>
     <string name="stock_photo_show_key">Pokaż klucz API</string>
     <string name="stock_photo_hide_key">Ukryj klucz API</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Szukaj czcionek…</string>
+    <string name="font_picker_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="font_group_recent">Ostatnio używane</string>
+    <string name="font_group_recommended">Dobre do projekcji</string>
+    <string name="font_group_all">Wszystkie czcionki</string>
+    <string name="font_group_matches">Dopasowania</string>
+    <string name="font_category_sans">Bezszeryfowa</string>
+    <string name="font_category_serif">Szeryfowa</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Ozdobna</string>
+    <string name="font_preview">Podgląd</string>
+    <string name="font_preview_sample">Przykładowy tekst wybraną czcionką</string>
+    <string name="font_warning_no_cyrillic">%1$s nie ma znaków cyrylicy – wersety cyrylicą pojawią się na ekranie w innej czcionce.</string>
+    <string name="font_warning_no_hebrew">%1$s nie ma znaków hebrajskich – tekst hebrajski pojawi się na ekranie w innej czcionce.</string>
+    <string name="font_hidden_note">%1$d czcionek symboli i systemowych ukryto · pokazano %2$d z %3$d</string>
+    <string name="font_shown_note">Pokazano %1$d z %2$d</string>
+    <string name="font_picker_keys">↑↓ przejdź · ⏎ wybierz · esc zamknij</string>
 </resources>

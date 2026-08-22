@@ -2368,4 +2368,22 @@
     <string name="story_prompt_later">Maybe later</string>
     <string name="story_prompt_reassurance">Nothing is published without your OK.</string>
     <string name="menu_developer_story_prompt">Share Your Story Dialog</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Search fonts…</string>
+    <string name="font_picker_clear_search">Clear search</string>
+    <string name="font_group_recent">Recently used</string>
+    <string name="font_group_recommended">Good for projection</string>
+    <string name="font_group_all">All fonts</string>
+    <string name="font_group_matches">Matches</string>
+    <string name="font_category_sans">Sans</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Preview</string>
+    <string name="font_preview_sample">Amazing grace, how sweet the sound</string>
+    <string name="font_warning_no_cyrillic">%1$s has no Cyrillic glyphs — Cyrillic verses fall back to another font on screen.</string>
+    <string name="font_warning_no_hebrew">%1$s has no Hebrew glyphs — Hebrew text falls back to another font on screen.</string>
+    <string name="font_hidden_note">%1$d symbol and system fonts hidden · showing %2$d of %3$d</string>
+    <string name="font_shown_note">Showing %1$d of %2$d</string>
+    <string name="font_picker_keys">↑↓ move · ⏎ choose · esc close</string>
 </resources>

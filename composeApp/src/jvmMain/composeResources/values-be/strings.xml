@@ -2354,4 +2354,22 @@
     <string name="tab_strip_scroll_forward">Пракруціць укладкі наперад</string>
     <string name="stock_photo_show_key">Паказаць API-ключ</string>
     <string name="stock_photo_hide_key">Схаваць API-ключ</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Пошук шрыфтоў…</string>
+    <string name="font_picker_clear_search">Ачысціць пошук</string>
+    <string name="font_group_recent">Нядаўна выкарыстаныя</string>
+    <string name="font_group_recommended">Добра для праекцыі</string>
+    <string name="font_group_all">Усе шрыфты</string>
+    <string name="font_group_matches">Супадзенні</string>
+    <string name="font_category_sans">Без засечак</string>
+    <string name="font_category_serif">З засечкамі</string>
+    <string name="font_category_mono">Монашырынны</string>
+    <string name="font_category_display">Акцыдэнтны</string>
+    <string name="font_preview">Папярэдні прагляд</string>
+    <string name="font_preview_sample">Узор тэксту выбраным шрыфтом</string>
+    <string name="font_warning_no_cyrillic">%1$s не мае кірылічных гліфаў — вершы кірыліцай на экране будуць паказаны іншым шрыфтом.</string>
+    <string name="font_warning_no_hebrew">%1$s не мае яўрэйскіх гліфаў — яўрэйскі тэкст на экране будзе паказаны іншым шрыфтом.</string>
+    <string name="font_hidden_note">%1$d сімвальных і сістэмных шрыфтоў схавана · паказана %2$d з %3$d</string>
+    <string name="font_shown_note">Паказана %1$d з %2$d</string>
+    <string name="font_picker_keys">↑↓ выбар · ⏎ ужыць · esc закрыць</string>
 </resources>
