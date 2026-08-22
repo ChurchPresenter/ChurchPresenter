@@ -45,6 +45,7 @@ import churchpresenter.composeapp.generated.resources.language_spanish
 import churchpresenter.composeapp.generated.resources.language_swahili
 import churchpresenter.composeapp.generated.resources.language_swedish
 import churchpresenter.composeapp.generated.resources.language_tagalog
+import churchpresenter.composeapp.generated.resources.language_tamil
 import churchpresenter.composeapp.generated.resources.language_thai
 import churchpresenter.composeapp.generated.resources.language_turkish
 import churchpresenter.composeapp.generated.resources.language_ukrainian
@@ -395,6 +396,7 @@ private val LANGUAGES = listOf(
     LanguageEntry("🇨🇳", Res.string.language_chinese, Language.CHINESE),
     LanguageEntry("🇮🇩", Res.string.language_indonesian, Language.INDONESIAN),
     LanguageEntry("🇲🇾", Res.string.language_malay, Language.MALAY),
+    LanguageEntry("🇱🇰", Res.string.language_tamil, Language.TAMIL),
     LanguageEntry("🇵🇭", Res.string.language_tagalog, Language.TAGALOG),
     LanguageEntry("🇹🇿", Res.string.language_swahili, Language.SWAHILI),
 )

@@ -199,13 +199,26 @@ class UsfxConversionTest {
 
     @Test
     fun `an unknown language with no book list falls back to English`() {
+        // Vietnamese: a real archive language the app has no curated table for. Swahili used to
+        // stand here and no longer can -- it has a table now, which is what the test below checks.
+        val bible = parse(
+            """<book id="GEN"><c id="1"/><v id="1"/>text<ve/></book>""",
+            names = null,
+            language = "VIE"
+        )
+
+        assertEquals("Genesis", bible.books.single().name)
+    }
+
+    @Test
+    fun `a curated language with no book list is named from its table`() {
         val bible = parse(
             """<book id="GEN"><c id="1"/><v id="1"/>text<ve/></book>""",
             names = null,
             language = "SWA"
         )
 
-        assertEquals("Genesis", bible.books.single().name)
+        assertEquals("Mwanzo", bible.books.single().name, "Swahili has a table, so English is not the answer")
     }
 
     // --- metadata ---
