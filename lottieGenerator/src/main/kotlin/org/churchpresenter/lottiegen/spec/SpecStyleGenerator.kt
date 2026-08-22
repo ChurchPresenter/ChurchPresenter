@@ -165,7 +165,7 @@ internal class SpecBuild(
                     add(
                         makeGroup(
                             listOf(
-                                makeRect(w, h, layout.cornerPx(element.corner)),
+                                makeRect(w, h, layout.paint.cornerPx(element.corner)),
                                 makeFill(listOf(1.0, 1.0, 1.0))
                             )
                         )
@@ -219,8 +219,8 @@ internal class SpecBuild(
         }
         val paintRole = element.colorRole
             ?: if (element.field == TextFieldRef.NAME) ColorRole.NAME else ColorRole.INFO
-        alpha = layout.roleAlpha(paintRole)
-        color = layout.roleColor(paintRole)
+        alpha = layout.paint.roleAlpha(paintRole)
+        color = layout.paint.roleColor(paintRole)
         val (w, h) = layout.resolveSize(element)
         val justify = layout.justify()
         val rest = layout.resolve(element.placement)

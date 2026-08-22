@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.spec
 
+import org.churchpresenter.lottiegen.lottie.TextSize
 import org.churchpresenter.lottiegen.lottie.TextMeasurer
 import org.churchpresenter.lottiegen.lottie.emToPx
 import org.churchpresenter.lottiegen.lottie.hexToLottie
@@ -192,7 +193,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             val ys = element.verticesEm.map { em(it.getOrElse(1) { 0.0 }) }
             val natural = if (xs.isEmpty()) 0.0 else (xs.max() - xs.min())
             val h = if (ys.isEmpty()) 0.0 else (ys.max() - ys.min())
-            natural * fitFactor(element.fitWidthTo, natural) to h
+            natural * fit.fitFactor(element.fitWidthTo, natural) to h
         }
         // Vertex bounding box; bezier tangents deliberately ignored.
         is PathElement -> {
@@ -200,7 +201,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             val ys = element.verticesEm.map { em(it.y) }
             val natural = if (xs.isEmpty()) 0.0 else (xs.max() - xs.min())
             val h = if (ys.isEmpty()) 0.0 else (ys.max() - ys.min())
-            natural * fitFactor(element.fitWidthTo, natural) to h
+            natural * fit.fitFactor(element.fitWidthTo, natural) to h
         }
     }
 
@@ -217,6 +218,53 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         is SizeSpec.CanvasWidth -> canvasW to em(size.hEm)
     }
 
+    /** How a spec's paint refers to the operator's configured colours and weights. */
+    val paint = SpecPaint(cfg, ::em, borderPx)
+
+    /** Fitting a shape to the measured width of the text. */
+    val fit = SpecFit(nameMeasured, infoMeasured)
+
+    private fun slotFor(id: String): ResolvedSlot {
+        if (id.isEmpty() || id == BLOCK_SLOT) {
+            return ResolvedSlot(blockStartX, baseX, blockEndX, totalContentW)
+        }
+        resolvedSlots[id]?.let { return it }
+        if (spec.layout.slots.any { it.id == id }) {
+            // The slot exists but is collapsed — anchor where it would sit: fall back
+            // to the block center so dependent elements stay inside the composition.
+            return ResolvedSlot(baseX, baseX, baseX, 0.0)
+        }
+        warnings.add("Unknown slot '$id' — using block center")
+        return ResolvedSlot(baseX, baseX, baseX, 0.0)
+    }
+
+    private fun coreWidth(slot: SlotSpec): Double = when (slot.kind) {
+        SlotKind.LOGO -> em(cfg.logoSize.toDouble())
+        SlotKind.FIXED -> em(slot.widthEm)
+        SlotKind.TEXT -> max(nameMeasured.width, infoMeasured.width) + TEXT_CORE_PAD_PX
+    }
+
+    companion object {
+        /** Pseudo slot id resolving to the whole content block. */
+        const val BLOCK_SLOT = "block"
+
+        /** Fixed pad the classic styles add to the measured text width (Style1's `+ 10`). */
+        const val TEXT_CORE_PAD_PX = 10.0
+    }
+}
+
+
+/**
+ * The colour and weight lookups a spec's paint resolves through.
+ *
+ * Split out of [SpecLayoutContext], which was carrying fifteen members across three jobs: where
+ * things go, what colour they are, and how wide they stretch.
+ */
+class SpecPaint(
+    private val cfg: LottieGenConfig,
+    private val em: (Double) -> Double,
+    private val borderPx: Double,
+) {
     fun cornerPx(corner: CornerSpec): Double = when (corner) {
         is CornerSpec.None -> 0.0
         is CornerSpec.FromConfig -> em(cfg.corners.toDouble()) * corner.factor
@@ -245,12 +293,19 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         is StrokeWidthSpec.FromConfig -> borderPx
         is StrokeWidthSpec.Em -> em(width.em)
     }
+}
 
+/** Fitting a shape to the measured width of the text. */
+class SpecFit(
+    private val nameMeasured: TextSize,
+    private val infoMeasured: TextSize,
+) {
     /** The measured width a fit-to-width shape stretches to. */
     fun basisWidthPx(basis: WidthBasis): Double = when (basis) {
         WidthBasis.NAME -> nameMeasured.width.toDouble()
         WidthBasis.INFO -> infoMeasured.width.toDouble()
-        WidthBasis.TEXT_BLOCK -> max(nameMeasured.width, infoMeasured.width) + TEXT_CORE_PAD_PX
+        WidthBasis.TEXT_BLOCK ->
+            max(nameMeasured.width, infoMeasured.width) + SpecLayoutContext.TEXT_CORE_PAD_PX
     }
 
     /**
@@ -260,33 +315,5 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     fun fitFactor(fitWidthTo: WidthBasis?, naturalWidthPx: Double): Double {
         if (fitWidthTo == null || naturalWidthPx <= 0.0) return 1.0
         return basisWidthPx(fitWidthTo) / naturalWidthPx
-    }
-
-    private fun slotFor(id: String): ResolvedSlot {
-        if (id.isEmpty() || id == BLOCK_SLOT) {
-            return ResolvedSlot(blockStartX, baseX, blockEndX, totalContentW)
-        }
-        resolvedSlots[id]?.let { return it }
-        if (spec.layout.slots.any { it.id == id }) {
-            // The slot exists but is collapsed — anchor where it would sit: fall back
-            // to the block center so dependent elements stay inside the composition.
-            return ResolvedSlot(baseX, baseX, baseX, 0.0)
-        }
-        warnings.add("Unknown slot '$id' — using block center")
-        return ResolvedSlot(baseX, baseX, baseX, 0.0)
-    }
-
-    private fun coreWidth(slot: SlotSpec): Double = when (slot.kind) {
-        SlotKind.LOGO -> em(cfg.logoSize.toDouble())
-        SlotKind.FIXED -> em(slot.widthEm)
-        SlotKind.TEXT -> max(nameMeasured.width, infoMeasured.width) + TEXT_CORE_PAD_PX
-    }
-
-    companion object {
-        /** Pseudo slot id resolving to the whole content block. */
-        const val BLOCK_SLOT = "block"
-
-        /** Fixed pad the classic styles add to the measured text width (Style1's `+ 10`). */
-        const val TEXT_CORE_PAD_PX = 10.0
     }
 }

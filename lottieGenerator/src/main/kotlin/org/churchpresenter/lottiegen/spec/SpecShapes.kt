@@ -41,7 +41,7 @@ internal class SpecShapes(
             // Full-canvas bands are always horizontally centered on the canvas.
             if (size is SizeSpec.CanvasWidth) SpecPoint(layout.canvasW / 2, point.y) else point
         }
-        val cornerPx = layout.cornerPx(attrs.corner)
+        val cornerPx = layout.paint.cornerPx(attrs.corner)
         val sizeTrack = tracks.trackFor(element, AnimProperty.RECT_SIZE)
 
         val shapeItem = if (element is EllipseElement) {
@@ -91,7 +91,7 @@ internal class SpecShapes(
         val flow = layout.flowSign(element.placement)
         val naturalXs = element.verticesEm.map { layout.em(it.getOrElse(0) { 0.0 }) }
         val naturalW = if (naturalXs.isEmpty()) 0.0 else naturalXs.max() - naturalXs.min()
-        val fit = layout.fitFactor(element.fitWidthTo, naturalW)
+        val fit = layout.fit.fitFactor(element.fitWidthTo, naturalW)
         val vertices = element.verticesEm.map { v ->
             listOf(layout.em(v.getOrElse(0) { 0.0 }) * flow * fit, layout.em(v.getOrElse(1) { 0.0 }))
         }
@@ -119,7 +119,7 @@ internal class SpecShapes(
         // fitted curve keeps its shape proportions.
         val naturalXs = element.verticesEm.map { layout.em(it.x) }
         val naturalW = if (naturalXs.isEmpty()) 0.0 else naturalXs.max() - naturalXs.min()
-        val fx = layout.flowSign(element.placement) * layout.fitFactor(element.fitWidthTo, naturalW)
+        val fx = layout.flowSign(element.placement) * layout.fit.fitFactor(element.fitWidthTo, naturalW)
         val vertices = element.verticesEm.map { listOf(layout.em(it.x) * fx, layout.em(it.y)) }
         val inTangents = element.verticesEm.map { listOf(layout.em(it.inX) * fx, layout.em(it.inY)) }
         val outTangents = element.verticesEm.map { listOf(layout.em(it.outX) * fx, layout.em(it.outY)) }
@@ -183,7 +183,7 @@ internal class SpecShapes(
         val basis = repeat.fitWidthTo
         val offsetXPx = if (basis != null && repeat.copies > 1) {
             val sign = if (repeat.offsetXEm < 0) -1.0 else 1.0
-            sign * layout.basisWidthPx(basis) / (repeat.copies - 1)
+            sign * layout.fit.basisWidthPx(basis) / (repeat.copies - 1)
         } else {
             layout.em(repeat.offsetXEm)
         }
@@ -205,8 +205,8 @@ internal class SpecShapes(
 
     /** A flat fill, or a linear gradient when the spec asks for one. */
     private fun fillItem(element: ElementSpec, fill: FillSpec): JsonObject {
-        val color = layout.roleColor(fill.role)
-        val alpha = layout.roleAlpha(fill.role) * fill.alphaFactor
+        val color = layout.paint.roleColor(fill.role)
+        val alpha = layout.paint.roleAlpha(fill.role) * fill.alphaFactor
         val gradient = fill.gradient ?: return makeFill(color, alpha)
         val flow = layout.flowSign(element.placement)
         return makeGradientFill(
@@ -218,10 +218,10 @@ internal class SpecShapes(
 
     /** A stroke, animated when the element has a STROKE_WIDTH track. Null when it is hairline. */
     private fun strokeItem(element: ElementSpec, stroke: StrokeSpec): JsonObject? {
-        val widthPx = layout.strokeWidthPx(stroke.width)
+        val widthPx = layout.paint.strokeWidthPx(stroke.width)
         if (widthPx <= 0) return null
-        val color = layout.roleColor(stroke.role)
-        val alpha = layout.roleAlpha(stroke.role) * stroke.alphaFactor
+        val color = layout.paint.roleColor(stroke.role)
+        val alpha = layout.paint.roleAlpha(stroke.role) * stroke.alphaFactor
         val dashPx = layout.em(stroke.dashEm)
         val widthTrack = tracks.trackFor(element, AnimProperty.STROKE_WIDTH)
             ?: return makeStroke(color, widthPx, alpha, dashPx)
