@@ -17,10 +17,32 @@ import java.util.concurrent.atomic.AtomicReference
  * not in the class name.** A dump of every thread is, and that is what this writes.
  *
  * It is deliberately NOT a per-test timeout in the assertion sense: nothing here decides whether a
- * test passes, [THRESHOLD_MS] is minutes past anything this suite legitimately does (`AGENT.md`
- * budgets ~1s a test, and the slowest screenshot class is ~33s for all of its tests together), and
- * a test that trips it was never going to finish. Halting rather than merely reporting is the point
- * -- the fork stops in five minutes with a diagnosis instead of being killed at thirty with none.
+ * test passes, the threshold is far past anything this suite legitimately does (`AGENT.md` budgets
+ * ~1s a test, and the slowest class is 37.1s for all of its tests together), and a test that trips
+ * it was never going to finish. Halting rather than merely reporting is the point -- the fork stops
+ * with a diagnosis instead of being killed at thirty minutes with none.
+ *
+ * ## What has been ruled out
+ *
+ * The hang has not been reproduced locally, on macOS, as of 2026-08-22. Recorded here so the next
+ * attempt starts further along than this one did:
+ *
+ * - **`LowerThirdTabTest` alone does not do it.** Six consecutive runs of just that class under
+ *   six-way CPU load, all green in ~82s. Note that passing `--tests` both stands the serial-class
+ *   exclusion down *and* drops `jvmTest` to a single fork, so an isolated run is not the shape CI
+ *   hangs in; do not read a green isolated run as evidence.
+ * - **The full suite on four forks under load does not do it either** -- one clean run.
+ * - **It is not the frozen test clock.** Twenty-four sites across the suite set
+ *   `mainClock.autoAdvance = false` and none restore it, including the last test in
+ *   `LowerThirdTabTest`, which leaves an animation live with the clock stopped. That looked like
+ *   the answer and is not: a probe that tears down with (a) a ten-minute animation running and the
+ *   clock frozen, (b) an unbounded `delay` loop with the clock frozen, and (c) the same loop with
+ *   the clock auto-advancing, completes all three in under three seconds.
+ *
+ * The lead that remains unexamined is the recorded stack itself: `runComposeUiTest` teardown ->
+ * `waitForIdle` -> `advanceTimeByFrame` -> `SwingUtilities.invokeAndWait`, blocked on the AWT event
+ * queue. Whatever the event queue was busy with is the thing to find, and that is what the dump
+ * this class writes is for.
  */
 class HungTestReporter internal constructor(
     private val thresholdMs: Long,
