@@ -378,6 +378,26 @@
     <string name="language_romanian">Румынский</string>
     <string name="language_slovak">Словацкий</string>
     <string name="language_estonian">Эстонский</string>
+    <string name="language_latvian">Латышский</string>
+    <string name="language_croatian">Хорватский</string>
+    <string name="language_swedish">Шведский</string>
+    <string name="language_norwegian">Норвежский</string>
+    <string name="language_finnish">Финский</string>
+    <string name="language_turkish">Турецкий</string>
+    <string name="language_uzbek">Узбекский</string>
+    <string name="language_arabic">Арабский</string>
+    <string name="language_persian">Персидский</string>
+    <string name="language_hindi">Хинди</string>
+    <string name="language_nepali">Непальский</string>
+    <string name="language_thai">Тайский</string>
+    <string name="language_lao">Лаосский</string>
+    <string name="language_japanese">Японский</string>
+    <string name="language_chinese">Китайский (упрощённый)</string>
+    <string name="language_indonesian">Индонезийский</string>
+    <string name="language_malay">Малайский</string>
+    <string name="language_tamil">Тамильский</string>
+    <string name="language_tagalog">Тагальский</string>
+    <string name="language_swahili">Суахили</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Результаты не найдены для "%1$s"</string>

@@ -351,6 +351,26 @@
     <string name="language_romanian">Rumuński</string>
     <string name="language_slovak">Słowacki</string>
     <string name="language_estonian">Estoński</string>
+    <string name="language_latvian">Łotewski</string>
+    <string name="language_croatian">Chorwacki</string>
+    <string name="language_swedish">Szwedzki</string>
+    <string name="language_norwegian">Norweski</string>
+    <string name="language_finnish">Fiński</string>
+    <string name="language_turkish">Turecki</string>
+    <string name="language_uzbek">Uzbecki</string>
+    <string name="language_arabic">Arabski</string>
+    <string name="language_persian">Perski</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepalski</string>
+    <string name="language_thai">Tajski</string>
+    <string name="language_lao">Laotański</string>
+    <string name="language_japanese">Japoński</string>
+    <string name="language_chinese">Chiński (uproszczony)</string>
+    <string name="language_indonesian">Indonezyjski</string>
+    <string name="language_malay">Malajski</string>
+    <string name="language_tamil">Tamilski</string>
+    <string name="language_tagalog">Tagalski</string>
+    <string name="language_swahili">Suahili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>

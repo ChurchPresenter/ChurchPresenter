@@ -351,6 +351,26 @@
     <string name="language_romanian">Румынская</string>
     <string name="language_slovak">Славацкая</string>
     <string name="language_estonian">Эстонская</string>
+    <string name="language_latvian">Латышская</string>
+    <string name="language_croatian">Харвацкая</string>
+    <string name="language_swedish">Шведская</string>
+    <string name="language_norwegian">Нарвежская</string>
+    <string name="language_finnish">Фінская</string>
+    <string name="language_turkish">Турэцкая</string>
+    <string name="language_uzbek">Узбекская</string>
+    <string name="language_arabic">Арабская</string>
+    <string name="language_persian">Персідская</string>
+    <string name="language_hindi">Хіндзі</string>
+    <string name="language_nepali">Непальская</string>
+    <string name="language_thai">Тайская</string>
+    <string name="language_lao">Лаоская</string>
+    <string name="language_japanese">Японская</string>
+    <string name="language_chinese">Кітайская (спрошчаная)</string>
+    <string name="language_indonesian">Інданезійская</string>
+    <string name="language_malay">Малайская</string>
+    <string name="language_tamil">Тамільская</string>
+    <string name="language_tagalog">Тагальская</string>
+    <string name="language_swahili">Суахілі</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Вынікі не знойдзены для "%1$s"</string>

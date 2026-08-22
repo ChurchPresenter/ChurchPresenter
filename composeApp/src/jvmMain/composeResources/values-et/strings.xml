@@ -524,6 +524,26 @@
     <string name="language_romanian">Rumeenia</string>
     <string name="language_slovak">Slovaki</string>
     <string name="language_estonian">Eesti keel</string>
+    <string name="language_latvian">Läti</string>
+    <string name="language_croatian">Horvaadi</string>
+    <string name="language_swedish">Rootsi</string>
+    <string name="language_norwegian">Norra</string>
+    <string name="language_finnish">Soome</string>
+    <string name="language_turkish">Türgi</string>
+    <string name="language_uzbek">Usbeki</string>
+    <string name="language_arabic">Araabia</string>
+    <string name="language_persian">Pärsia</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepali</string>
+    <string name="language_thai">Tai</string>
+    <string name="language_lao">Lao</string>
+    <string name="language_japanese">Jaapani</string>
+    <string name="language_chinese">Hiina (lihtsustatud)</string>
+    <string name="language_indonesian">Indoneesia</string>
+    <string name="language_malay">Malai</string>
+    <string name="language_tamil">Tamili</string>
+    <string name="language_tagalog">Tagalogi</string>
+    <string name="language_swahili">Suahiili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Tulemusi ei leitud päringule "%1$s"</string>

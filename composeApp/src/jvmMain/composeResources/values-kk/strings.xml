@@ -351,6 +351,26 @@
     <string name="language_romanian">Румын</string>
     <string name="language_slovak">Словак</string>
     <string name="language_estonian">Эстон тілі</string>
+    <string name="language_latvian">Латыш</string>
+    <string name="language_croatian">Хорват</string>
+    <string name="language_swedish">Швед</string>
+    <string name="language_norwegian">Норвег</string>
+    <string name="language_finnish">Фин</string>
+    <string name="language_turkish">Түрік</string>
+    <string name="language_uzbek">Өзбек</string>
+    <string name="language_arabic">Араб</string>
+    <string name="language_persian">Парсы</string>
+    <string name="language_hindi">Хинди</string>
+    <string name="language_nepali">Непал</string>
+    <string name="language_thai">Тай</string>
+    <string name="language_lao">Лаос</string>
+    <string name="language_japanese">Жапон</string>
+    <string name="language_chinese">Қытай (жеңілдетілген)</string>
+    <string name="language_indonesian">Индонезия</string>
+    <string name="language_malay">Малай</string>
+    <string name="language_tamil">Тамил</string>
+    <string name="language_tagalog">Тагал</string>
+    <string name="language_swahili">Суахили</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>

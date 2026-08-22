@@ -195,6 +195,26 @@
     <string name="language_romanian">Rumunština</string>
     <string name="language_slovak">Slovenština</string>
     <string name="language_estonian">Estonština</string>
+    <string name="language_latvian">Lotyština</string>
+    <string name="language_croatian">Chorvatština</string>
+    <string name="language_swedish">Švédština</string>
+    <string name="language_norwegian">Norština</string>
+    <string name="language_finnish">Finština</string>
+    <string name="language_turkish">Turečtina</string>
+    <string name="language_uzbek">Uzbečtina</string>
+    <string name="language_arabic">Arabština</string>
+    <string name="language_persian">Perština</string>
+    <string name="language_hindi">Hindština</string>
+    <string name="language_nepali">Nepálština</string>
+    <string name="language_thai">Thajština</string>
+    <string name="language_lao">Laoština</string>
+    <string name="language_japanese">Japonština</string>
+    <string name="language_chinese">Čínština (zjednodušená)</string>
+    <string name="language_indonesian">Indonéština</string>
+    <string name="language_malay">Malajština</string>
+    <string name="language_tamil">Tamilština</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Svahilština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>

@@ -42,6 +42,7 @@ import churchpresenter.composeapp.generated.resources.language_russian
 import churchpresenter.composeapp.generated.resources.language_slovak
 import churchpresenter.composeapp.generated.resources.language_spanish
 import churchpresenter.composeapp.generated.resources.language_swahili
+import churchpresenter.composeapp.generated.resources.language_tamil
 import churchpresenter.composeapp.generated.resources.language_swedish
 import churchpresenter.composeapp.generated.resources.language_tagalog
 import churchpresenter.composeapp.generated.resources.language_thai
@@ -398,6 +399,10 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 text = "🇲🇾 ${stringResource(Res.string.language_malay)}",
                 onClick = { onLanguageChange(Language.MALAY) }
+            )
+            Item(
+                text = "🇱🇰 ${stringResource(Res.string.language_tamil)}",
+                onClick = { onLanguageChange(Language.TAMIL) }
             )
             Item(
                 text = "🇵🇭 ${stringResource(Res.string.language_tagalog)}",
