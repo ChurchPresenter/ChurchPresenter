@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">वेब पेज के रूप में दिए जाने वाले वर्चुअल आउटपुट — लाइव सामग्री को ओवरले करने के लिए URL को किसी Browser Source में डालें; पारदर्शी बैकग्राउंड भी समर्थित है।</string>
     <string name="add_browser_source_output">आउटपुट जोड़ें</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">इस आउटपुट को नाम दें — श्रोता, स्टेज, गायक मंडली, कॉर्ड…</string>
     <string name="browser_source_confirm_remove_message">क्या आप वाकई %1$s हटाना चाहते हैं?</string>
     <string name="browser_source_require_api_key">API की अनिवार्य करें</string>
     <string name="browser_source_uses_server_api_key">यह सर्वर सेटिंग्स वाली वही की उपयोग करता है; पहले वहाँ चालू करें।</string>

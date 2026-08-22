@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Web sayfası olarak sunulan sanal çıkışlar — canlı içeriği üst katman olarak göstermek için URL'yi bir Browser Source'a yapıştırın; saydam arka plan desteklenir.</string>
     <string name="add_browser_source_output">Çıkış Ekle</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Bu çıkışa bir ad verin — İzleyici, Sahne, Koro, Akorlar…</string>
     <string name="browser_source_confirm_remove_message">%1$s çıkışını kaldırmak istediğinizden emin misiniz?</string>
     <string name="browser_source_require_api_key">API Anahtarı İste</string>
     <string name="browser_source_uses_server_api_key">Sunucu ayarlarındaki anahtarın aynısını kullanır; önce orada etkinleştirin.</string>

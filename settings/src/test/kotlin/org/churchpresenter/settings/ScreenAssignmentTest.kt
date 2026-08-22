@@ -219,4 +219,36 @@ class StageMonitorZoneMappingTest {
             "a style zone nothing maps to would be configurable but never used",
         )
     }
+
+    // ── What a Browser Source output is called ──────────────────────────────────
+
+    @Test
+    fun `an unnamed browser source falls back to the numbered label`() {
+        assertEquals("Browser Source 2", ScreenAssignment().browserSourceLabelOr("Browser Source 2"))
+    }
+
+    @Test
+    fun `a named browser source is called what the operator named it`() {
+        val output = ScreenAssignment(browserSourceName = "Choir")
+
+        assertEquals("Choir", output.browserSourceLabelOr("Browser Source 2"))
+    }
+
+    @Test
+    fun `a name of nothing but spaces is no name at all`() {
+        val output = ScreenAssignment(browserSourceName = "   ")
+
+        assertEquals(
+            "Browser Source 2",
+            output.browserSourceLabelOr("Browser Source 2"),
+            "a blank name would label every screen with an empty string",
+        )
+    }
+
+    @Test
+    fun `surrounding space is trimmed off a real name`() {
+        val output = ScreenAssignment(browserSourceName = "  Stage  ")
+
+        assertEquals("Stage", output.browserSourceLabelOr("Browser Source 1"))
+    }
 }

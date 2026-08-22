@@ -97,6 +97,24 @@ class LivePreviewPanelTest {
         onNodeWithText("Browser Source 2").assertExists()
     }
 
+    @Test
+    fun `a renamed browser source is previewed under its own name`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(browserSourceOutputs = listOf(
+                ScreenAssignment(browserSourceName = "Stage"),
+                ScreenAssignment(),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Stage").assertExists("the operator's name, not the number")
+        onNodeWithText("Browser Source 1").assertDoesNotExist()
+        onNodeWithText("Browser Source 2").assertExists("the unnamed one keeps its number")
+    }
+
     // ── Mode dispatch → Live badge ────────────────────────────────────────────────────────────
 
     @Test

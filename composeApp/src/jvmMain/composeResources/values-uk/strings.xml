@@ -2071,6 +2071,7 @@
     <string name="browser_source_outputs_help">Віртуальні виходи, що подаються як веб-сторінка — вставте URL-адресу в Browser Source, щоб накласти живий вміст, підтримується прозорий фон.</string>
     <string name="add_browser_source_output">Додати вихід</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Дайте цьому виходу назву — Глядачі, Сцена, Хор, Акорди…</string>
     <string name="browser_source_confirm_remove_message">Ви впевнені, що хочете видалити %1$s?</string>
     <string name="browser_source_require_api_key">Вимагати API-ключ</string>
     <string name="browser_source_uses_server_api_key">Використовує той самий ключ, що й налаштування сервера; спершу увімкніть його там.</string>

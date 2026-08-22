@@ -725,6 +725,7 @@
     <string name="browser_source_outputs_help">Virtuaalsed väljundid, mida pakutakse veebilehena — kleebi URL brauseriallikasse (Browser Source), et kuvada peale live-sisu, toetatud on ka läbipaistev taust.</string>
     <string name="add_browser_source_output">Lisa väljund</string>
     <string name="browser_source_output_label">Brauseriallikas %1$d</string>
+    <string name="browser_source_name_tooltip">Anna sellele väljundile nimi — Publik, Lava, Koor, Akordid…</string>
     <string name="browser_source_confirm_remove_message">Kas oled kindel, et soovid eemaldada %1$s?</string>
     <string name="browser_source_require_api_key">Nõua API-võtit</string>
     <string name="browser_source_uses_server_api_key">Kasutab sama võtit kui serveri seaded; luba see seal esmalt.</string>

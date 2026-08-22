@@ -154,6 +154,21 @@ class ProjectionSettingsTabScreenshotTest {
         ),
     )
 
+    /** Renamed: the operator's own names sit where the numbers were, on the row and everywhere
+     *  else the output is named. */
+    @Test
+    fun `named browser source outputs`() = shoot(
+        "browser_sources_named",
+        settings = settings(
+            ProjectionSettings(
+                browserSourceOutputs = listOf(
+                    ScreenAssignment(browserSourceName = "Audience"),
+                    ScreenAssignment(browserSourceName = "Stage"),
+                )
+            )
+        ),
+    )
+
     /** The frame size an overlay renders at. */
     @Test
     fun `the browser source resolution menu`() = shoot(

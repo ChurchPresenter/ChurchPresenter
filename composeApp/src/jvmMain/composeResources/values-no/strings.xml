@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Virtuelle utganger som leveres som en nettside – lim URL-en inn i en Browser Source for å legge live innhold over bildet, med støtte for gjennomsiktig bakgrunn.</string>
     <string name="add_browser_source_output">Legg til utgang</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Gi denne utgangen et navn — Publikum, Scene, Kor, Akkorder…</string>
     <string name="browser_source_confirm_remove_message">Er du sikker på at du vil fjerne %1$s?</string>
     <string name="browser_source_require_api_key">Krev API-nøkkel</string>
     <string name="browser_source_uses_server_api_key">Bruker samme nøkkel som Server-innstillingene; aktiver den der først.</string>
