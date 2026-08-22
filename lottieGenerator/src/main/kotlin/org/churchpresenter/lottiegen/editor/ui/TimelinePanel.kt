@@ -129,7 +129,13 @@ fun TimelinePanel(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(RowHeight * elements.size)
-                        .pointerInputScrub(elements, rowHeightPx, inFraction, state, onSeekChange, onPlayingChange)
+                        .pointerInputScrub(
+                            elements,
+                            rowHeightPx,
+                            inFraction,
+                            state,
+                            Scrub(onSeekChange, onPlayingChange),
+                        )
                 ) {
                     drawGrid(elements.size, rowHeightPx)
                     elements.forEachIndexed { rowIndex, element ->
@@ -144,13 +150,24 @@ fun TimelinePanel(
     }
 }
 
+/** What scrubbing the timeline does: move the playhead, and stop playback while dragging. */
+private class Scrub(
+    val onSeekChange: (Float) -> Unit,
+    val onPlayingChange: (Boolean) -> Unit,
+) {
+    /** A pointer at [x] across a track [width] wide, as a position in the animation. */
+    fun to(x: Float, width: Float, inFraction: Float) {
+        onPlayingChange(false)
+        onSeekChange((x / width).coerceIn(0f, 1f) * inFraction)
+    }
+}
+
 private fun Modifier.pointerInputScrub(
     elements: List<ElementSpec>,
     rowHeightPx: Float,
     inFraction: Float,
     state: EditorState,
-    onSeekChange: (Float) -> Unit,
-    onPlayingChange: (Boolean) -> Unit
+    scrub: Scrub,
 ): Modifier = this
     .pointerInput(elements) {
         detectTapGestures { offset ->
@@ -158,15 +175,13 @@ private fun Modifier.pointerInputScrub(
             if (hit != null) {
                 state.selectElement(hit)
             } else {
-                onPlayingChange(false)
-                onSeekChange((offset.x / size.width).coerceIn(0f, 1f) * inFraction)
+                scrub.to(offset.x, size.width.toFloat(), inFraction)
             }
         }
     }
     .pointerInput(elements) {
         detectDragGestures { change, _ ->
-            onPlayingChange(false)
-            onSeekChange((change.position.x / size.width).coerceIn(0f, 1f) * inFraction)
+            scrub.to(change.position.x, size.width.toFloat(), inFraction)
         }
     }
 
