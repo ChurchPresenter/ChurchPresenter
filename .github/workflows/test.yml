@@ -186,10 +186,14 @@ jobs:
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the
-        # module suites below (`if: always()`) and the report upload still get to run. Runs land
-        # around 11-14 minutes; one run was killed at a 25-minute budget with no diagnosis that
-        # survived scrutiny, so the budget is set well clear of the observed band rather than
-        # doubling as an alarm on a suite that is still growing.
+        # module suites below (`if: always()`) and the report upload still get to run.
+        #
+        # Runs land around 19 minutes (18m45s and 19m24s, measured 2026-08-21) -- they used to be
+        # 11-14, and this comment said so long after it stopped being true, which is how a 20-minute
+        # Gradle-side cap came to be proposed that would have failed both of those healthy runs.
+        # Re-measure before quoting a band. Two other things now fire before this budget does:
+        # jvmTest's own 30-minute task timeout, and HungTestReporter, which halts a fork whose
+        # single test has been running five minutes and writes a thread dump into the results.
         timeout-minutes: 40
         run: ./gradlew :composeApp:jvmTest
 

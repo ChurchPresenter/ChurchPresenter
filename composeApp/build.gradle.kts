@@ -789,6 +789,21 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // the suite grows rather than leaving it to bite a green run.
     timeout.set(Duration.ofMinutes(30))
 
+    // Lets a session chasing a hang tighten HungTestReporter's threshold:
+    //   ./gradlew :composeApp:jvmTest -PhangThresholdMs=30000
+    // Absent, the reporter uses its own five-minute default. A Gradle `-D` would set the property on
+    // the daemon, not on the forked test JVM, which is the whole reason this line exists.
+    providers.gradleProperty("hangThresholdMs").orNull?.let {
+        systemProperty("churchpresenter.test.hangThresholdMs", it)
+    }
+
+    // Where HungTestReporter writes its thread dump. Inside test-results so the workflow's existing
+    // upload carries it off a CI runner that would otherwise take the diagnosis to the grave.
+    systemProperty(
+        "churchpresenter.test.hangDumpDir",
+        layout.buildDirectory.dir("test-results/" + name).get().asFile.absolutePath,
+    )
+
     testLogging {
         events("failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL

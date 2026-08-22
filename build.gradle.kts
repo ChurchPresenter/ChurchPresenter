@@ -59,6 +59,12 @@ subprojects {
             tasks.withType<Test>().configureEach {
                 useJUnitPlatform()
                 finalizedBy("jacocoTestReport")
+                // A watchdog on the harness, not a wait inside a test: nothing asserts on it, and
+                // every module suite here runs in seconds to a couple of minutes. It exists so a
+                // hung suite ends as a failure with the log intact rather than running until the CI
+                // step gives up -- the same reason :composeApp has one, applied to the modules that
+                // were left unbounded when it was added.
+                timeout.set(java.time.Duration.ofMinutes(10))
             }
 
             tasks.withType<JacocoReport>().configureEach {
