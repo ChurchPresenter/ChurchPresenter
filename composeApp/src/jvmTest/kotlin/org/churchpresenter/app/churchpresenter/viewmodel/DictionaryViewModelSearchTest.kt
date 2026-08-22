@@ -1,12 +1,11 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import churchpresenter.composeapp.generated.resources.Res
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
-import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
+import org.churchpresenter.dictionary.DictionaryFixture
+import org.churchpresenter.dictionary.InterlinearRepository
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -20,7 +19,7 @@ import kotlin.test.assertTrue
  * box, the Hebrew/Greek toggle and the book/chapter/verse passage filter — so the interesting cases
  * are the combinations.
  *
- * The bundled dictionary JSON is replaced by [DictionaryFixture]'s four-entry corpus, and
+ * The bundled dictionary is replaced by [DictionaryFixture]'s four-entry corpus, and
  * `InterlinearRepository` is stubbed with `mockkConstructor`, so no data file is read and no
  * background work escapes the test.
  */
@@ -30,7 +29,6 @@ class DictionaryViewModelSearchTest {
 
     @BeforeTest
     fun stubData() {
-        DictionaryFixture.stubResources()
         mockkConstructor(InterlinearRepository::class)
         coEvery { anyConstructed<InterlinearRepository>().ensureGreekLoaded() } returns Unit
         coEvery { anyConstructed<InterlinearRepository>().ensureHebrewLoaded() } returns Unit
@@ -51,7 +49,6 @@ class DictionaryViewModelSearchTest {
         created.forEach { runCatching { it.dispose() } }
         created.clear()
         unmockkConstructor(InterlinearRepository::class)
-        unmockkObject(Res)
     }
 
     private fun awaitUntil(what: String, timeoutMs: Long = 5_000, condition: () -> Boolean) {
@@ -65,7 +62,7 @@ class DictionaryViewModelSearchTest {
 
     /** A view model with the fixture dictionary already loaded. */
     private fun loaded(): DictionaryViewModel {
-        val d = DictionaryViewModel().also { created.add(it) }
+        val d = DictionaryViewModel(DictionaryFixture.catalog()).also { created.add(it) }
         d.load()
         awaitUntil("the dictionary to finish loading") { d.entries.isNotEmpty() && !d.isLoading }
         return d
@@ -367,7 +364,7 @@ class DictionaryViewModelSearchTest {
 
     @Test
     fun `no books are offered until the interlinear data is in`() {
-        val d = DictionaryViewModel().also { created.add(it) }
+        val d = DictionaryViewModel(DictionaryFixture.catalog()).also { created.add(it) }
         assertTrue(
             d.entryAvailableBooks.isEmpty(),
             "a book list built before the data lands would be empty and look like there is nothing to filter by"

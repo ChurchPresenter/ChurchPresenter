@@ -15,6 +15,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.dictionary.DictionaryVerseDto
+import org.churchpresenter.dictionary.DictionaryVersesResponse
+import org.churchpresenter.dictionary.StrongsDictionaryRepository
+import org.churchpresenter.dictionary.StrongsEntryDto
 import org.churchpresenter.settings.utils.Constants
 
 private const val SUMMARY_PREVIEW_CHARS = 60
@@ -126,7 +130,7 @@ private fun Route.dictionaryRoutes(
                     val chapter = call.request.queryParameters["chapter"]?.toIntOrNull()
                     val verse   = call.request.queryParameters["verse"]?.toIntOrNull()
                     val results = try {
-                        StrongsDictionaryRepository.search(q, lang, filter, limit, book, chapter, verse)
+                        StrongsDictionaryRepository.shared.search(q, lang, filter, limit, book, chapter, verse)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get
@@ -150,7 +154,7 @@ private fun Route.dictionaryRoutes(
                     }
                     val lang = call.request.queryParameters["lang"]
                     val entry = try {
-                        StrongsDictionaryRepository.lookup(number, lang)
+                        StrongsDictionaryRepository.shared.lookup(number, lang)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get
@@ -190,7 +194,7 @@ private fun Route.dictionaryRoutes(
                         return@get
                     }
                     val (total, refs) = try {
-                        StrongsDictionaryRepository.versesFor(number, limit, book, chapter, verse)
+                        StrongsDictionaryRepository.shared.versesFor(number, limit, book, chapter, verse)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get

@@ -73,6 +73,14 @@ class AppPreviewDictionaryScreenshotTest {
         val deadline = System.currentTimeMillis() + RENDER_TIMEOUT_MS
         var seen: String? = null
         while (System.currentTimeMillis() < deadline) {
+            // The dictionary is read and parsed on `Dispatchers.IO`, which `waitForIdle` does not
+            // wait for, so the row is not there on the first pass. Wait for the row itself rather
+            // than for the composition — the deadline below is what fails if it never arrives.
+            if (onAllNodes(hasText("chêçêd", substring = true))
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()) {
+                waitForIdle()
+                continue
+            }
             onAllNodes(hasText("chêçêd", substring = true))[0].performClick()
             waitForIdle()
             seen = onAllNodesWithText(SCRIPTURE_COUNT_PREFIX, substring = true)

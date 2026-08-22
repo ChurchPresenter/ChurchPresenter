@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.dictionary
 
 import kotlinx.serialization.Serializable
 

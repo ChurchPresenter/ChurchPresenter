@@ -19,8 +19,8 @@ import kotlin.test.assertTrue
  *
  * The shipped dataset is not asserted on here. Parsing 245,662 links would cost more wall clock
  * than every other test in this file put together, and the suite has no precedent for reading a
- * bundled resource — `StrongsDictionaryRepositoryTest` stubs `Res.readBytes` rather than loading
- * the real dictionary. The file is instead validated where it is produced: the last thing
+ * bundled resource — `:dictionary`'s repositories take an injected loader rather than reading the
+ * real files. The file is instead validated where it is produced: the last thing
  * `scripts/build_cross_references.py` does is re-read its own output and check every key and
  * target against the KJV versification, so a bad regeneration fails at the point it happens.
  */

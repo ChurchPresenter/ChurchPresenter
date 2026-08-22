@@ -6,7 +6,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
+import org.churchpresenter.dictionary.DictionaryFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

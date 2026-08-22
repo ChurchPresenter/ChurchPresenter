@@ -327,6 +327,8 @@ kotlin {
             implementation(projects.bibleFormats)
             // The Bible itself: the loaded translation, its books, verses and search.
             implementation(projects.bible)
+            // The bundled study data: the Strong's dictionary and the interlinear index over it.
+            implementation(projects.dictionary)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             implementation(projects.songChords)
@@ -455,6 +457,10 @@ dependencies {
     // SpbFixture: the .spb writer the Bible tab, view-model and server suites build fixtures with.
     // It stays with the module that owns the format.
     add("jvmTestImplementation", testFixtures(projects.bible))
+    // DictionaryFixture: the four-entry dictionary and the interlinear index over it. It stays with
+    // the module that owns the bundled files, so the tab, view-model and server suites here and the
+    // module's own suite assert against one corpus rather than two.
+    add("jvmTestImplementation", testFixtures(projects.dictionary))
     // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
     // synthetic deck build it through the module's own fixtures.
     add("jvmTestImplementation", testFixtures(projects.presentationEngine))

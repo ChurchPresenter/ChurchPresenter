@@ -44,6 +44,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > detection) or `:bible-formats` (the download catalogues and the converters that *produce* `.spb`).
 > `./gradlew :bible:test`.
 >
+> **[`dictionary/`](./dictionary)** — the bundled study data behind the Dictionary tab: the
+> Strong's dictionary in English and Russian, and the interlinear index that says where each of its
+> numbers occurs in scripture. Six JSON files and the lookups over them, and nothing else — no
+> Compose, no Ktor. `./gradlew :dictionary:test`.
+>
 > **[`song-chords/`](./song-chords)** — the grammar songs are written in: what counts as a chord,
 > what counts as a section heading, transposition, and turning a pasted chord sheet into the inline
 > `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.

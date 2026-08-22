@@ -1,13 +1,6 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.dictionary
 
-import churchpresenter.composeapp.generated.resources.Res
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -22,41 +15,13 @@ import kotlin.test.assertTrue
  * a read from one of those tables, and which table gets consulted is decided by the shape of what
  * was asked: a number beginning with G goes to the Greek side, and the passage filters try Greek
  * first and fall back to Hebrew.
- *
- * The real files are far too large to read in a test, so `Res.readBytes` is stubbed with a handful
- * of verses. That also makes the failure paths reachable, which they otherwise are not.
  */
 class InterlinearRepositoryTest {
 
-    private val greekJson = """
-        [
-          {"r":"043003016","w":[{"t":"ἀγάπη","s":"G26"},{"t":"θεός","s":"G2316"}]},
-          {"r":"043003017","w":[{"t":"θεός","s":"G2316"}]},
-          {"r":"040005003","w":[{"t":"ἀγάπη","s":"G26"}]}
-        ]
-    """.trimIndent()
-
-    private val hebrewJson = """
-        [
-          {"r":"001001001","w":[{"t":"אֱלֹהִים","s":"H430"},{"t":"רֵאשִׁית","s":"H7225"}]},
-          {"r":"019023001","w":[{"t":"אֱלֹהִים","s":"H430"}]}
-        ]
-    """.trimIndent()
-
-    @BeforeTest
-    fun stubResources() {
-        mockkObject(Res)
-        coEvery { Res.readBytes("files/dictionary/interlinear_g.json") } returns greekJson.toByteArray()
-        coEvery { Res.readBytes("files/dictionary/interlinear_h.json") } returns hebrewJson.toByteArray()
-    }
-
-    @AfterTest
-    fun unstubResources() {
-        unmockkObject(Res)
-    }
+    private val files = RecordingFiles()
 
     /** A repository with both testaments indexed. */
-    private fun loaded() = InterlinearRepository().also {
+    private fun loaded() = files.repository().also {
         runBlocking {
             it.ensureGreekLoaded()
             it.ensureHebrewLoaded()
@@ -69,7 +34,7 @@ class InterlinearRepositoryTest {
 
     @Test
     fun `nothing is known until the data is read`() {
-        val repository = InterlinearRepository()
+        val repository = files.repository()
 
         assertTrue(repository.getVersesForEntry("G26").isEmpty())
         assertTrue(repository.getBooksWithGreekData().isEmpty())
@@ -77,6 +42,8 @@ class InterlinearRepositoryTest {
         assertTrue(repository.getChaptersForBook(43).isEmpty())
         assertTrue(repository.getVersesInChapter(43, 3).isEmpty())
         assertTrue(repository.getStrongsForBookChapter(43, null).isEmpty())
+        assertEquals(0, files.greekReads, "construction alone must not read anything")
+        assertEquals(0, files.hebrewReads)
     }
 
     // ── Finding a word ──────────────────────────────────────────────────────────
@@ -101,8 +68,10 @@ class InterlinearRepositoryTest {
 
     @Test
     fun `a word that appears nowhere lists nothing`() {
-        assertTrue(loaded().getVersesForEntry("G9999").isEmpty())
-        assertTrue(loaded().getVersesForEntry("H9999").isEmpty())
+        val repository = loaded()
+
+        assertTrue(repository.getVersesForEntry("G9999").isEmpty())
+        assertTrue(repository.getVersesForEntry("H9999").isEmpty())
     }
 
     @Test
@@ -152,8 +121,10 @@ class InterlinearRepositoryTest {
 
     @Test
     fun `a whole book offers every word used in it`() {
-        assertEquals(setOf("G26", "G2316"), loaded().getStrongsForBookChapter(43, null))
-        assertEquals(setOf("H430", "H7225"), loaded().getStrongsForBookChapter(1, null))
+        val repository = loaded()
+
+        assertEquals(setOf("G26", "G2316"), repository.getStrongsForBookChapter(43, null))
+        assertEquals(setOf("H430", "H7225"), repository.getStrongsForBookChapter(1, null))
     }
 
     @Test
@@ -182,7 +153,7 @@ class InterlinearRepositoryTest {
 
     @Test
     fun `each testament is read only once`() {
-        val repository = InterlinearRepository()
+        val repository = files.repository()
 
         runBlocking {
             repository.ensureGreekLoaded()
@@ -190,12 +161,12 @@ class InterlinearRepositoryTest {
             repository.ensureGreekLoaded()
         }
 
-        coVerify(exactly = 1) { Res.readBytes("files/dictionary/interlinear_g.json") }
+        assertEquals(1, files.greekReads)
     }
 
     @Test
     fun `loading one testament does not load the other`() {
-        val repository = InterlinearRepository()
+        val repository = files.repository()
 
         runBlocking { repository.ensureGreekLoaded() }
 
@@ -204,13 +175,13 @@ class InterlinearRepositoryTest {
             repository.getBooksWithHebrewData().isEmpty(),
             "the Hebrew file is 8 MB — a Greek-only lookup must not pay for it",
         )
-        coVerify(exactly = 0) { Res.readBytes("files/dictionary/interlinear_h.json") }
+        assertEquals(0, files.hebrewReads)
     }
 
     @Test
     fun `two repositories keep their own indexes`() {
         val first = loaded()
-        val second = InterlinearRepository()
+        val second = files.repository()
 
         assertTrue(first.getBooksWithGreekData().isNotEmpty())
         assertTrue(second.getBooksWithGreekData().isEmpty())
@@ -228,18 +199,19 @@ class InterlinearRepositoryTest {
      */
     @Test
     fun `a failed read disables the data for the whole session -- known gap`() {
-        val repository = InterlinearRepository()
-        coEvery { Res.readBytes("files/dictionary/interlinear_g.json") } throws IllegalStateException("disk gone")
+        val repository = files.repository()
+        files.greekFailure = IllegalStateException("disk gone")
 
         assertFailsWith<IllegalStateException> { runBlocking { repository.ensureGreekLoaded() } }
 
         // The file is readable again, but the repository will not try.
-        coEvery { Res.readBytes("files/dictionary/interlinear_g.json") } returns greekJson.toByteArray()
+        files.greekFailure = null
         runBlocking { repository.ensureGreekLoaded() }
 
+        assertEquals(1, files.greekReads, "current behaviour: the retry returns without reading")
         assertTrue(
             repository.getVersesForEntry("G26").isEmpty(),
-            "current behaviour: the retry returns without reading, and the index stays empty",
+            "current behaviour: the index stays empty",
         )
     }
 

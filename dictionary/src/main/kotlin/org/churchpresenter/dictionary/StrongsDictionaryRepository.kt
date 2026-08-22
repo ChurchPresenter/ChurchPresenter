@@ -1,15 +1,8 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.dictionary
 
-import churchpresenter.composeapp.generated.resources.Res
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 private const val MAX_SEARCH_RESULTS = 500
 private const val MAX_OCCURRENCE_RESULTS = 200
@@ -56,21 +49,19 @@ data class DictionaryVersesResponse(
 )
 
 /**
- * Loads the bundled Strong's dictionary JSON (`files/dictionary/strongs_h*.json`,
- * `strongs_g*.json`) and serves search / lookup over it for the companion REST API.
+ * Search and lookup over the bundled Strong's dictionary, for the companion REST API.
  *
- * Entries are loaded lazily on first request and cached per language. Mirrors the
- * loading logic in [org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel].
+ * Entries are loaded lazily on first request and cached per language, so the app holds one parsed
+ * copy however many phones are browsing it. That is what [shared] is for: construct an instance
+ * directly only in tests, where a fixture catalogue takes the place of the bundled files.
  */
-object StrongsDictionaryRepository {
-    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+class StrongsDictionaryRepository(
+    private val catalog: StrongsCatalog = StrongsCatalog(),
+    private val interlinear: InterlinearRepository = InterlinearRepository(),
+) {
     private val mutex = Mutex()
-    internal val cache = mutableMapOf<String, List<StrongsEntry>>()
-
-    internal val interlinear = InterlinearRepository()
+    private val cache = mutableMapOf<String, List<StrongsEntry>>()
     private val strongsRef = Regex("[HG]\\d{1,5}")
-
-    internal fun normalizeLang(lang: String?): String = if (lang?.lowercase() == "ru") "ru" else "en"
 
     /** Loads both interlinear indexes (once) so occurrence counts are available. */
     private suspend fun ensureInterlinear() {
@@ -97,19 +88,12 @@ object StrongsDictionaryRepository {
     )
 
     /** All entries (Hebrew + Greek) for the given language, loaded once and cached. */
-    @OptIn(ExperimentalResourceApi::class)
     suspend fun all(lang: String?): List<StrongsEntry> {
-        val key = normalizeLang(lang)
+        val key = StrongsCatalog.normalizeLanguage(lang)
         cache[key]?.let { return it }
         return mutex.withLock {
             cache[key]?.let { return it }
-            val hFile = if (key == "ru") "files/dictionary/strongs_h_ru.json" else "files/dictionary/strongs_h.json"
-            val gFile = if (key == "ru") "files/dictionary/strongs_g_ru.json" else "files/dictionary/strongs_g.json"
-            val loaded = withContext(Dispatchers.IO) {
-                val h = json.decodeFromString<List<StrongsEntry>>(Res.readBytes(hFile).decodeToString())
-                val g = json.decodeFromString<List<StrongsEntry>>(Res.readBytes(gFile).decodeToString())
-                h + g
-            }
+            val loaded = catalog.load(key).all
             cache[key] = loaded
             loaded
         }
@@ -206,5 +190,13 @@ object StrongsDictionaryRepository {
                 (verse == null || ref.substring(REF_CHAPTER_END, REF_VERSE_END).toInt() == verse)
         }
         return inScope + rest
+    }
+
+    companion object {
+        /**
+         * The app-wide instance, reading the bundled files. The dictionary is immutable and large,
+         * so one parsed copy serves every connected device.
+         */
+        val shared: StrongsDictionaryRepository by lazy { StrongsDictionaryRepository() }
     }
 }

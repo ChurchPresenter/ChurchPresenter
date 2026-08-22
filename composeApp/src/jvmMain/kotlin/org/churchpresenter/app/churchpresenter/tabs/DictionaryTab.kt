@@ -112,10 +112,10 @@ import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
+import org.churchpresenter.dictionary.InterlinearVerse
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.InterlinearWord
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.InterlinearWord
+import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 import org.churchpresenter.theme.semantic

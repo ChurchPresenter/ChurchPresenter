@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
+import org.churchpresenter.dictionary.InterlinearRepository
 import org.churchpresenter.bible.SpbFixture
 import java.io.File
 import java.nio.file.Files

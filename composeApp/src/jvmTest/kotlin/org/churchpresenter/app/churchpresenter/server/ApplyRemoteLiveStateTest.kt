@@ -242,7 +242,7 @@ class ApplyRemoteLiveStateTest {
 
     @Test
     fun `a full dictionary entry is shown as sent`() {
-        val entry = org.churchpresenter.app.churchpresenter.data.StrongsEntry(
+        val entry = org.churchpresenter.dictionary.StrongsEntry(
             number = "G5485", word = "χάρις", transliteration = "charis",
             pronunciation = "khar'-ece", definition = "grace",
         )
