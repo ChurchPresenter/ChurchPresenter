@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.FontStyle
+import java.util.concurrent.ConcurrentHashMap
 
 /** What a family is shaped like, which is what the picker groups and labels it by. */
 enum class FontCategory { SANS, SERIF, MONO, DISPLAY }
@@ -62,10 +63,12 @@ object FontCatalog {
     private const val LATIN_WIDE = "W"
     private const val PROBE_SIZE = 12f
 
-    @Volatile
-    private var measured: Map<String, FontFace>? = null
-
-    private val lock = Any()
+    /**
+     * One entry per family, measured once and kept for the process — the installed set cannot
+     * change while the app runs. Per family rather than per list: the canvas asks about a different
+     * set from the settings dialog, and a snapshot keyed by the whole list would re-measure both.
+     */
+    private val measured = ConcurrentHashMap<String, FontFace>()
 
     /**
      * Families a text picker has no business offering: icon and dingbat sets, and the internal
@@ -107,25 +110,30 @@ object FontCatalog {
 
     /** Blocking — never call this from composition. [rememberFontCatalog] is what the UI uses. */
     fun snapshot(families: List<String>, keep: String = ""): FontCatalogSnapshot =
-        build(families, keep, measured ?: measureAll(families))
+        build(families, keep, measured = true) { name -> measured.computeIfAbsent(name, ::measure) }
 
     /** The description available without the glyph scan: shapes and recommendations, no coverage. */
     fun unmeasuredSnapshot(families: List<String>, keep: String = ""): FontCatalogSnapshot =
-        build(families, keep, null)
+        build(families, keep, measured = false, describe = ::unmeasured)
 
-    private fun build(families: List<String>, keep: String, glyphs: Map<String, FontFace>?): FontCatalogSnapshot {
+    private fun build(
+        families: List<String>,
+        keep: String,
+        measured: Boolean,
+        describe: (String) -> FontFace,
+    ): FontCatalogSnapshot {
         val visible = families.filter { !isHidden(it) || it.equals(keep, ignoreCase = true) }
-        val faces = visible.map { name ->
-            glyphs?.get(name) ?: FontFace(
-                name = name,
-                category = categoryOf(name, monospaced = null),
-                cyrillic = false,
-                hebrew = false,
-                recommended = isRecommended(name),
-            )
-        }
-        return FontCatalogSnapshot(faces, families.size - visible.size, measured = glyphs != null)
+        return FontCatalogSnapshot(visible.map(describe), families.size - visible.size, measured)
     }
+
+    /** What can be said about a family without opening it: its shape, and whether to lead with it. */
+    private fun unmeasured(name: String) = FontFace(
+        name = name,
+        category = categoryOf(name, monospaced = null),
+        cyrillic = false,
+        hebrew = false,
+        recommended = isRecommended(name),
+    )
 
     internal fun isHidden(name: String): Boolean =
         name.startsWith(".") || name.startsWith("#") || name.lowercase() in HIDDEN_FAMILIES
@@ -146,15 +154,9 @@ object FontCatalog {
         }
     }
 
-    private fun measureAll(families: List<String>): Map<String, FontFace> {
-        measured?.let { return it }
-        return synchronized(lock) {
-            measured ?: families.mapNotNull { measure(it) }.associateBy { it.name }.also { measured = it }
-        }
-    }
-
-    private fun measure(name: String): FontFace? {
-        val typeface = FontMgr.default.matchFamilyStyle(name, FontStyle.NORMAL) ?: return null
+    /** A family Skia cannot produce a typeface for is described as far as its name allows. */
+    private fun measure(name: String): FontFace {
+        val typeface = FontMgr.default.matchFamilyStyle(name, FontStyle.NORMAL) ?: return unmeasured(name)
         return typeface.use { face ->
             val hasLatin = face.getUTF32Glyph(LATIN_NARROW[0].code) != NO_GLYPH &&
                 face.getUTF32Glyph(LATIN_WIDE[0].code) != NO_GLYPH
@@ -174,7 +176,7 @@ object FontCatalog {
 
     /** Drops the scan so the next [snapshot] measures again. Tests only. */
     internal fun reset() {
-        synchronized(lock) { measured = null }
+        measured.clear()
     }
 
     private const val NO_GLYPH: Short = 0

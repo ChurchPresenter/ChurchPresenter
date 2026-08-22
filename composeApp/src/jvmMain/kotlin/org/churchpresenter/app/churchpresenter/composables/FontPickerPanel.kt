@@ -32,6 +32,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -75,6 +77,7 @@ internal fun FontSearchRow(
     onClear: () -> Unit,
     focusRequester: FocusRequester,
 ) {
+    val searchLabel = stringResource(Res.string.font_picker_search)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,7 +97,7 @@ internal fun FontSearchRow(
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) {
                 Text(
-                    text = stringResource(Res.string.font_picker_search),
+                    text = searchLabel,
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
@@ -108,7 +111,12 @@ internal fun FontSearchRow(
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                // The box has a placeholder and no label, so without this a screen reader reaches a
+                // text field that says nothing about itself.
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .semantics { contentDescription = searchLabel },
             )
         }
         if (query.isNotEmpty()) {
@@ -349,26 +357,29 @@ private fun FontScriptWarning(name: String, script: PreviewScript) {
     }
 }
 
+/** How much of the machine's set the list is showing, and what it left out. */
+@Composable
+internal fun FontCatalogNote(note: String) {
+    Text(
+        text = note,
+        fontSize = 9.5.sp,
+        lineHeight = 14.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 6.dp, bottom = 3.dp),
+    )
+}
+
 /** The keys the panel answers to, spelled out where a first-time user will look for them. */
 @Composable
-internal fun FontPickerFooter(note: String) {
+internal fun FontPickerFooter() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
     ) {
-        Text(
-            text = note,
-            fontSize = 9.5.sp,
-            lineHeight = 11.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(Modifier.width(9.dp))
         Text(
             text = stringResource(Res.string.font_picker_keys),
             fontSize = 9.5.sp,

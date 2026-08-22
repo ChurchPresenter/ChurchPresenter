@@ -42,6 +42,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -164,6 +165,9 @@ private fun FontPickerTrigger(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
+                // It reads as a plain box otherwise: the field opens a list, and both a screen
+                // reader and a test have to be able to tell that from the label and value alone.
+                role = Role.DropdownList,
                 onClick = onClick,
             )
             .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -259,8 +263,15 @@ private fun FontPickerPopup(
     }
 }
 
+/**
+ * The panel itself, taking the catalog rather than measuring one.
+ *
+ * `internal` so tests and screenshots can drive it with a catalog they wrote: measured through the
+ * machine's own installed fonts, every assertion about a badge, a group or a warning would say
+ * something different on a machine with different fonts, and CI has almost none.
+ */
 @Composable
-private fun FontPickerPanel(
+internal fun FontPickerPanel(
     value: String,
     catalog: FontCatalogSnapshot,
     previewLines: List<String>,
@@ -326,6 +337,7 @@ private fun FontPickerPanel(
             }
             FontPickerList(
                 groups = groups,
+                note = catalogNote(catalog, visible.size),
                 query = query,
                 selected = value,
                 highlighted = highlighted,
@@ -338,7 +350,7 @@ private fun FontPickerPanel(
             val quoted = previewLines.ifEmpty { fontPreviewLines() }
             visible.firstOrNull { it.name == highlighted }
                 ?.let { FontPreviewPane(it, catalog.measured, quoted) }
-            FontPickerFooter(note = catalogNote(catalog, visible.size))
+            FontPickerFooter()
         }
     }
 }
@@ -355,6 +367,7 @@ private fun catalogNote(catalog: FontCatalogSnapshot, shown: Int): String =
 @Composable
 private fun FontPickerList(
     groups: List<FontGroup>,
+    note: String,
     query: String,
     selected: String,
     highlighted: String,
@@ -392,6 +405,9 @@ private fun FontPickerList(
             if (rows.isEmpty()) {
                 item { FontPickerNoResults(query = query, onClearSearch = onClearSearch) }
             }
+            // Under the last row rather than in the footer: it is a remark about the list, and it is
+            // far too long to sit beside the key hints without being cut off.
+            item { FontCatalogNote(note) }
         }
     }
 }
