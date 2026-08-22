@@ -2071,6 +2071,7 @@
     <string name="browser_source_outputs_help">Wirtualne wyjścia udostępniane jako strona internetowa — wklej adres URL do Browser Source, aby nakładać treści na żywo, obsługiwane jest przezroczyste tło.</string>
     <string name="add_browser_source_output">Dodaj wyjście</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Nadaj temu wyjściu nazwę — Publiczność, Scena, Chór, Akordy…</string>
     <string name="browser_source_confirm_remove_message">Czy na pewno chcesz usunąć %1$s?</string>
     <string name="browser_source_require_api_key">Wymagaj klucza API</string>
     <string name="browser_source_uses_server_api_key">Używa tego samego klucza co ustawienia Serwera; najpierw włącz go tam.</string>

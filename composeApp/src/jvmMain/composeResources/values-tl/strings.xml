@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Mga virtual output na inihahain bilang web page — i-paste ang URL sa isang Browser Source para i-overlay ang live content, suportado ang transparent na background.</string>
     <string name="add_browser_source_output">Magdagdag ng Output</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Bigyan ng pangalan ang output na ito — Manonood, Entablado, Koro, Mga Chord…</string>
     <string name="browser_source_confirm_remove_message">Sigurado ka bang aalisin ang %1$s?</string>
     <string name="browser_source_require_api_key">Kailanganin ang API Key</string>
     <string name="browser_source_uses_server_api_key">Ginagamit ang parehong key ng mga setting ng Server; i-enable muna ito roon.</string>

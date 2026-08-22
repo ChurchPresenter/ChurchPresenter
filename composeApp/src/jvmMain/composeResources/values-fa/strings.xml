@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">خروجی‌های مجازی که به‌صورت یک صفحه وب ارائه می‌شوند — نشانی را در یک Browser Source بچسبانید تا محتوای زنده روی تصویر بیفتد؛ پس‌زمینه شفاف پشتیبانی می‌شود.</string>
     <string name="add_browser_source_output">افزودن خروجی</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">به این خروجی نامی بدهید — حضار، صحنه، گروه کر، آکوردها…</string>
     <string name="browser_source_confirm_remove_message">آیا از حذف %1$s مطمئن هستید؟</string>
     <string name="browser_source_require_api_key">نیاز به کلید API</string>
     <string name="browser_source_uses_server_api_key">از همان کلید تنظیمات سرور استفاده می‌کند؛ نخست آن را همان‌جا فعال کنید.</string>

@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">Virtualni izlazi koji se poslužuju kao web stranica — zalijepite URL u Browser Source da preklopite sadržaj uživo, uz podršku za prozirnu pozadinu.</string>
     <string name="add_browser_source_output">Dodaj izlaz</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Dajte ovom izlazu naziv — Publika, Pozornica, Zbor, Akordi…</string>
     <string name="browser_source_confirm_remove_message">Jeste li sigurni da želite ukloniti %1$s?</string>
     <string name="browser_source_require_api_key">Zahtijevaj API ključ</string>
     <string name="browser_source_uses_server_api_key">Koristi isti ključ kao postavke poslužitelja; najprije ga tamo omogućite.</string>

@@ -2099,6 +2099,7 @@
     <string name="browser_source_outputs_help">Saídas virtuais servidas como uma página web — cole o URL numa Browser Source para sobrepor conteúdo ao vivo, fundo transparente suportado.</string>
     <string name="add_browser_source_output">Adicionar Saída</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Dê um nome a esta saída — Plateia, Palco, Coro, Acordes…</string>
     <string name="browser_source_confirm_remove_message">Tem certeza de que deseja remover %1$s?</string>
     <string name="browser_source_require_api_key">Exigir Chave de API</string>
     <string name="browser_source_uses_server_api_key">Usa a mesma chave das configurações do Servidor; ative-a lá primeiro.</string>

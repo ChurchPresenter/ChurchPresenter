@@ -2099,6 +2099,7 @@
     <string name="browser_source_outputs_help">Virtuálne výstupy poskytované ako webová stránka — vložte adresu URL do Browser Source na prekrytie živého obsahu, priehľadné pozadie je podporované.</string>
     <string name="add_browser_source_output">Pridať výstup</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Pomenujte tento výstup — Publikum, Scéna, Zbor, Akordy…</string>
     <string name="browser_source_confirm_remove_message">Naozaj chcete odstrániť %1$s?</string>
     <string name="browser_source_require_api_key">Vyžadovať API kľúč</string>
     <string name="browser_source_uses_server_api_key">Používa rovnaký kľúč ako nastavenia Servera; najprv ho povoľte tam.</string>

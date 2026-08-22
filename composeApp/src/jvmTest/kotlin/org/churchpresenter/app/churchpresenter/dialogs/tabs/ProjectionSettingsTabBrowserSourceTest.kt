@@ -22,6 +22,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -89,6 +90,49 @@ class ProjectionSettingsTabBrowserSourceTest {
             for (n in 1..3) onNodeWithText("Browser Source $n").assertExists()
             onAllNodesWithText("Remove").assertCountEquals(3)
             onAllNodesWithText("Require API Key").assertCountEquals(3)
+        }
+    }
+
+    // ── Naming an output ────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `an output can be given a name`() {
+        projectionTab(initial = withOutputs(1)) { get ->
+            assertEquals("", output(get).browserSourceName, "a new output is unnamed")
+
+            onNodeWithText("Browser Source 1").performScrollTo().performTextInput("Choir")
+            waitForIdle()
+
+            assertEquals("Choir", output(get).browserSourceName, "the typed name must be stored")
+            onNodeWithText("Choir").assertExists("and shown on the row")
+        }
+    }
+
+    @Test
+    fun `a named output is called by its name everywhere the row names it`() {
+        projectionTab(initial = withOutputs(1).let {
+            it.copy(projectionSettings = it.projectionSettings.withBrowserSourceOutput(
+                0, ScreenAssignment(browserSourceName = "Stage"),
+            ))
+        }) { _ ->
+            onNodeWithText("Browser Source 1").assertDoesNotExist()
+
+            onAllNodesWithText("16 of 17 enabled").onLast().performScrollTo().performClick()
+            waitForIdle()
+            onNodeWithText("Content Outputs — Stage")
+                .assertExists("the content dialog must name the output the operator named")
+        }
+    }
+
+    @Test
+    fun `each output keeps its own name`() {
+        projectionTab(initial = withOutputs(2)) { get ->
+            onNodeWithText("Browser Source 2").performScrollTo().performTextInput("Chords")
+            waitForIdle()
+
+            assertEquals("", output(get, 0).browserSourceName, "the first output must be untouched")
+            assertEquals("Chords", output(get, 1).browserSourceName, "the second must take the name")
+            onNodeWithText("Browser Source 1").assertExists("and the unnamed one keeps its number")
         }
     }
 

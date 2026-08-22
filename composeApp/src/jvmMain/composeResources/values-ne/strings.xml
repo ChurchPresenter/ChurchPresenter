@@ -855,6 +855,7 @@
     <string name="browser_source_outputs_help">वेब पृष्ठका रूपमा दिइने भर्चुअल आउटपुट — प्रत्यक्ष सामग्री ओभरले गर्न URL लाई Browser Source मा टाँस्नुहोस्, पारदर्शी पृष्ठभूमि पनि चल्छ।</string>
     <string name="add_browser_source_output">आउटपुट थप्नुहोस्</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">यो आउटपुटलाई नाम दिनुहोस् — श्रोता, स्टेज, गायकमण्डली, कर्ड…</string>
     <string name="browser_source_confirm_remove_message">के तपाईं %1$s हटाउन निश्चित हुनुहुन्छ?</string>
     <string name="browser_source_require_api_key">API कुञ्जी अनिवार्य</string>
     <string name="browser_source_uses_server_api_key">सर्भर सेटिङकै कुञ्जी प्रयोग गर्छ; पहिले त्यहीँ सक्षम गर्नुहोस्।</string>
