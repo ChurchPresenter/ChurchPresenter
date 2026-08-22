@@ -196,9 +196,20 @@ jobs:
         # Gradle-side cap came to be proposed that would have failed both of those healthy runs.
         # Re-measure before quoting a band. Two other things now fire before this budget does:
         # jvmTest's own 30-minute task timeout, and HungTestReporter, which halts a fork whose
-        # single test has been running five minutes and writes a thread dump into the results.
+        # single test has outlived the threshold below and writes a thread dump into the results.
+        #
+        # That threshold is 150s HERE rather than the five-minute default, and it is the whole
+        # point of this line: the suite has hung outright three times, each occurrence costing a
+        # ~22-minute run that ends with NO failing assertion and NO diagnosis. At 150s the reporter
+        # halts the fork with a full thread dump instead, and the dump travels in `test-reports`.
+        #
+        # 150s is measured, not guessed. In a full local run the slowest CLASS is 37.1s for all of
+        # its tests together (InstanceLinkClientTest), so no single test -- which is what the
+        # reporter times -- comes close; 150s leaves four times that class's entire runtime as
+        # headroom for a slower runner. If a legitimate test ever trips this, the answer is to fix
+        # the test, not to raise the number: AGENT.md budgets ~1s a test.
         timeout-minutes: 40
-        run: ./gradlew :composeApp:jvmTest
+        run: ./gradlew :composeApp:jvmTest -PhangThresholdMs=150000
 
       # So an outlier explains itself instead of needing a guess: the one killed run above was
       # attributed to the wrong fixture precisely because nothing recorded where the time went.
