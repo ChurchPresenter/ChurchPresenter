@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.presentation.AnimationType
@@ -212,6 +214,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             }
             val cacheDir = File(File(System.getProperty("user.home"), ".churchpresenter/slides"), "remote_$scheduleItemId")
                 .also { it.mkdirs() }
+            // The tab prunes orphaned slide caches on startup, and every `remote_*` entry is
+            // orphaned by definition. Without this claim that prune races the download, deletes
+            // this directory mid-write, and every renameTo below fails into a vanished parent —
+            // a load that lands zero slides and reports RENDER_FAILED.
+            SlideDiskCache.claimDir(cacheDir)
             var success = false
             try {
                 for (index in 0 until slideCount) {
@@ -237,7 +244,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                     withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }
                 }
             } finally {
-                if (!success) cacheDir.deleteRecursively()
+                // A superseded load must not delete the directory its successor is already
+                // filling: both share `remote_$scheduleItemId`. On cancellation the newer load
+                // owns the entry, so leave it — only a load that failed on its own terms cleans up.
+                if (!success && currentCoroutineContext().isActive) cacheDir.deleteRecursively()
+                SlideDiskCache.releaseDir(cacheDir)
                 withContext(Dispatchers.Main) { _isLoading.value = false }
             }
         }
