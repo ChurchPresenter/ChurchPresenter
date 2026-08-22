@@ -171,7 +171,9 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.canvasW.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(canvasW = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_W_PX)) }
+                                viewModel.updateConfig { c ->
+                                    c.copy(canvasW = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_W_PX))
+                                }
                             }
                         },
                         label = Strings.width,
@@ -181,7 +183,9 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.canvasH.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(canvasH = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_H_PX)) }
+                                viewModel.updateConfig { c ->
+                                    c.copy(canvasH = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_H_PX))
+                                }
                             }
                         },
                         label = Strings.height,
@@ -289,7 +293,9 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.baseSize.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(baseSize = it.coerceIn(MIN_BASE_SIZE, MAX_BASE_SIZE)) }
+                                viewModel.updateConfig { c ->
+                                    c.copy(baseSize = it.coerceIn(MIN_BASE_SIZE, MAX_BASE_SIZE))
+                                }
                             }
                         },
                         label = Strings.baseSize,
@@ -539,7 +545,9 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.animDuration.toString(),
                         onValueChange = { v ->
                             v.toFloatOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(animDuration = it.coerceIn(MIN_ANIM_SECONDS, MAX_ANIM_SECONDS)) }
+                                viewModel.updateConfig { c ->
+                                    c.copy(animDuration = it.coerceIn(MIN_ANIM_SECONDS, MAX_ANIM_SECONDS))
+                                }
                             }
                         },
                         label = Strings.animDuration, modifier = Modifier.weight(1f),

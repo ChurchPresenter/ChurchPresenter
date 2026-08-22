@@ -775,7 +775,9 @@ private fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
                 onCheckedChange = {
                     onChange(
                         paint.copy(
-                            fill = fill.copy(gradient = if (it) GradientSpec(0.0, 0.0, NEW_GRADIENT_SPAN, 0.0) else null)
+                            fill = fill.copy(
+                                gradient = if (it) GradientSpec(0.0, 0.0, NEW_GRADIENT_SPAN, 0.0) else null,
+                            )
                         )
                     )
                 }
@@ -903,7 +905,9 @@ private fun TextOptionsEditor(element: TextElement, onChange: (TextElement) -> U
             onCheckedChange = {
                 onChange(
                     element.copy(
-                        animator = if (it) TextAnimatorSpec(TextAnimatorKind.SEQUENTIAL_REVEAL, 0.0, NEW_REVEAL_SPAN_PCT, NEW_REVEAL_EASE)
+                        animator = if (it) TextAnimatorSpec(
+                            TextAnimatorKind.SEQUENTIAL_REVEAL, 0.0, NEW_REVEAL_SPAN_PCT, NEW_REVEAL_EASE,
+                        )
                         else null
                     )
                 )

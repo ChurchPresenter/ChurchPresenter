@@ -151,7 +151,9 @@ object GlyphExtractor {
                     if (it.v.size > 1) {
                         val first = it.v.first()
                         val last = it.v.last()
-                        if (kotlin.math.abs(first[0] - last[0]) < CLOSE_EPSILON && kotlin.math.abs(first[1] - last[1]) < CLOSE_EPSILON) {
+                        val closedBackOnStart = kotlin.math.abs(first[0] - last[0]) < CLOSE_EPSILON &&
+                            kotlin.math.abs(first[1] - last[1]) < CLOSE_EPSILON
+                        if (closedBackOnStart) {
                             it.inTan[0] = it.inTan.last()
                             it.v.removeAt(it.v.size - 1)
                             it.inTan.removeAt(it.inTan.size - 1)

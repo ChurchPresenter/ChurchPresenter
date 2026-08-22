@@ -21,6 +21,9 @@ import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+/** A reveal mask is filled opaque white; only its shape matters. */
+private val WHITE = listOf(1.0, 1.0, 1.0)
+
 /** Where each element's slide-in has settled, as a percentage of the animation. */
 private const val SETTLE_PCT = 42
 private const val BAND_START_PCT = 18.0
@@ -153,7 +156,9 @@ class Style11NewsTicker : StyleGenerator {
             builder.addShapeLayer(
                 "Name Mask",
                 buildJsonArray {
-                    add(makeGroup(listOf(makeRect(maskW, bandH * BAND_MASK_FACTOR, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
+                    add(
+                        makeGroup(listOf(makeRect(maskW, bandH * BAND_MASK_FACTOR, 0.0), makeFill(WHITE))),
+                    )
                 },
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.animatedProp(makeBandKFs(BAND_START_PCT, maskCX, bandCY))
@@ -197,7 +202,9 @@ class Style11NewsTicker : StyleGenerator {
             builder.addShapeLayer(
                 "Info Mask",
                 buildJsonArray {
-                    add(makeGroup(listOf(makeRect(infoMaskW, tickerH * TICKER_MASK_FACTOR, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
+                    add(
+                        makeGroup(listOf(makeRect(infoMaskW, tickerH * TICKER_MASK_FACTOR, 0.0), makeFill(WHITE))),
+                    )
                 },
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.animatedProp(makeBandKFs(TICKER_START_PCT, bandCX, tickerCY))
@@ -327,7 +334,11 @@ class Style11NewsTicker : StyleGenerator {
                 makeRect(bandW, tickerH, cornerPx * 0.2),
                 makeFill(accentLottie, tickerAlpha)
             )
-            makeStroke(borderLottie, borderPx * TICKER_BORDER_FACTOR, cfg.borderColorAlpha.toDouble())?.let { tickerItems.add(it) }
+            makeStroke(
+                borderLottie,
+                borderPx * TICKER_BORDER_FACTOR,
+                cfg.borderColorAlpha.toDouble(),
+            )?.let { tickerItems.add(it) }
             builder.addShapeLayer(
                 "Ticker Bar",
                 buildJsonArray { add(makeGroup(tickerItems)) },
