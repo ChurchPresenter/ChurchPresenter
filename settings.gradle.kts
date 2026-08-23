@@ -94,7 +94,12 @@ include(":dictionary")
 // then *does* to the app stays in :composeApp, under `remote/`.
 include(":companion-server")
 
-// Every icon the app draws, in one place: the vector drawables the tabs, dialogs and widgets all
-// reach for. Assets and their generated accessor, no Kotlin of its own — so nothing has to
-// duplicate an icon to use it.
+// Every asset the app draws or reads, in one place: the icons, the interface strings in all 35
+// languages, the fonts and the bundled files. Assets and the one `Res` accessor generated from
+// them, no Kotlin of its own — so nothing has to duplicate a resource to use it.
 include(":resources")
+
+// Everything the app has ever put on the screen, counted: the song and verse tallies, the
+// timestamped play log behind them, the periods a report covers and the CSV/Excel export CCLI
+// licence reporting needs. The window that draws it stays in :composeApp.
+include(":statistics")

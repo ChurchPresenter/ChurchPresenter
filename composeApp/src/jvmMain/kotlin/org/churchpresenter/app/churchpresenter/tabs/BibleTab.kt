@@ -65,7 +65,7 @@ import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.data.sharedCrossReferences
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation

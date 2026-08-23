@@ -16,13 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.DisplayStatistics
-import org.churchpresenter.app.churchpresenter.data.PlayEventLog
-import org.churchpresenter.app.churchpresenter.data.SongDisplayEntry
-import org.churchpresenter.app.churchpresenter.data.SongPlayEvent
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.VerseDisplayEntry
-import org.churchpresenter.app.churchpresenter.data.VersePlayEvent
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
@@ -30,6 +24,12 @@ import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.test.Test
+import org.churchpresenter.core.models.statistics.DisplayStatistics
+import org.churchpresenter.core.models.statistics.PlayEventLog
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 class AppPreviewStatisticsScreenshotTest {
 

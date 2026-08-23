@@ -246,9 +246,11 @@
 - **Tidy the numbers** — remove a single song or verse from the selected period, or clear everything; both ask first.
 
 **Source locations:**
-- `data/StatisticsManager.kt`
-- `dialogs/CCLIReportDialog.kt` — the statistics window itself
-- `data/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
+- `statistics/` (the `:statistics` Gradle module) — the behaviour: `StatisticsManager.kt` (the two
+  stores, the queries, the CSV/Excel export) and `StatisticsPeriod.kt` (resolving a period into dates)
+- `core-models/src/main/kotlin/.../models/statistics/` (the `:core-models` module) — the models the
+  two above read and return, one type per file
+- `dialogs/CCLIReportDialog.kt` — the statistics window itself, which stays in the app
 
 ## Personalization & Workflow
 - **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.

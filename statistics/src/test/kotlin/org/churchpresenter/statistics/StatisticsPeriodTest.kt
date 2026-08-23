@@ -1,9 +1,10 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
 
 /**
  * The reporting periods offered by the statistics window, resolved against a fixed `today` so the

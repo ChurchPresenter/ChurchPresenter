@@ -88,6 +88,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary/`          | `:dictionary`          | The bundled Strong's dictionary and the interlinear index over it — 18 MB of data  | [AGENT.md](dictionary/AGENT.md)          |
 | `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
+| `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -120,7 +121,7 @@ they must be set **above everything else** in the file:
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
   each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
   `:diagnostics`, `:atem`, `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`,
-  `:dictionary` and `:companion-server` name none.
+  `:dictionary`, `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

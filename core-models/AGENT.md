@@ -34,6 +34,7 @@ than dropping a file at the root.
 | `companion/` | `CompanionSurfaceSlot.kt`, `CompanionSurfacePlacement.kt` — where a Companion surface is docked |
 | `shortcuts/` | `KeyChord.kt` — a keyboard binding, serialized into settings |
 | `presentation/` | `PresentationLoadError.kt`, `AnimationType.kt` |
+| `statistics/` | What was sung and read: the two stores on disk (`DisplayStatistics`, `PlayEventLog` and their entry/event types), the computed report rows (`SongSummary`, `VerseSummary`, `ActivityPoint`), the identity keys (`SongKey`, `VerseKey`) and the reporting period (`StatisticsPeriod`, `DateRange`). One type per file. The logic over them is `:statistics` |
 
 The songs package was `core.models.songs` — a second package root left over from the Song Library
 extraction — until it was folded in here. **One package root: `org.churchpresenter.app.churchpresenter`.**
