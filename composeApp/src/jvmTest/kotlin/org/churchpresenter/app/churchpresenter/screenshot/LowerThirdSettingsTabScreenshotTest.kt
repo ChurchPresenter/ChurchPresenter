@@ -24,6 +24,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTa
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The Lower Third tab of the settings dialog, in both themes.

@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.GoLiveButton
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -156,14 +156,14 @@ import org.churchpresenter.resources.generated.resources.top_center
 import org.churchpresenter.resources.generated.resources.top_left
 import org.churchpresenter.resources.generated.resources.top_right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.ui.DropdownSettingsField
+import org.churchpresenter.ui.SegmentedButton
+import org.churchpresenter.ui.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.ui.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

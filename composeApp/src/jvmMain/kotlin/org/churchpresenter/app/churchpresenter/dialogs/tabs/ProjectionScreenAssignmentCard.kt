@@ -65,8 +65,8 @@ import org.churchpresenter.resources.generated.resources.screen
 import org.churchpresenter.resources.generated.resources.screen_assignment
 import org.churchpresenter.resources.generated.resources.screen_col_label
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.NumberSettingsTextField
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene

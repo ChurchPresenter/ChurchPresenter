@@ -22,6 +22,8 @@ import org.churchpresenter.app.churchpresenter.tabs.webButton
 import org.churchpresenter.app.churchpresenter.tabs.webTab
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * Every state of the Web tab, in both themes.

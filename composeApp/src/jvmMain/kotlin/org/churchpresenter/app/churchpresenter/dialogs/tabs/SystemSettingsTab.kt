@@ -20,11 +20,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.ScanningRow
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator

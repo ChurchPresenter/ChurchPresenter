@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
-import org.churchpresenter.app.churchpresenter.composables.keySignal
+import org.churchpresenter.ui.keySignal
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.utils.Constants

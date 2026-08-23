@@ -43,6 +43,7 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
 
 class AppPreviewOutputScreenshotTest {
 

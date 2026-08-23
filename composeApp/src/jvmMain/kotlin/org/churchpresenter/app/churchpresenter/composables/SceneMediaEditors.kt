@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -82,6 +81,12 @@ import org.jetbrains.compose.resources.painterResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.LabeledCheckbox
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.StyledTextField
+import org.churchpresenter.ui.VerticalAlignmentButtons
 
 private const val MAX_ANGLE_DEGREES = 360f
 private const val PERCENT_SCALE = 100f

@@ -72,9 +72,9 @@ import org.churchpresenter.resources.generated.resources.display_mode
 import org.churchpresenter.resources.generated.resources.identify_screen
 import org.churchpresenter.resources.generated.resources.projection_web_decklink_tooltip
 import org.churchpresenter.resources.generated.resources.remove
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.ui.LabeledSwitch
+import org.churchpresenter.ui.SettingsSection
+import org.churchpresenter.ui.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.settings.utils.Constants

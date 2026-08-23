@@ -44,6 +44,7 @@ import org.churchpresenter.resources.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.ui.DropdownSelector
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f

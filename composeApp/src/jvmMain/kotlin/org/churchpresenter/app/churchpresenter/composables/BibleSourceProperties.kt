@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -59,6 +58,12 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.LabeledCheckbox
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.StyledTextField
+import org.churchpresenter.ui.VerticalAlignmentButtons
 
 @Composable
 internal fun BibleProperties(

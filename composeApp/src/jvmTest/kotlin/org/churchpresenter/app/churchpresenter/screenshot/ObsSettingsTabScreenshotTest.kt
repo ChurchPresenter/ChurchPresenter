@@ -31,6 +31,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The OBS tab of the settings dialog, in both themes.

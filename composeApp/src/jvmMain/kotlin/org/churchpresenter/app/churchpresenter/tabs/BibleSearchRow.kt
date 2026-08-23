@@ -39,7 +39,7 @@ import org.churchpresenter.resources.generated.resources.ic_search
 import org.churchpresenter.resources.generated.resources.mode
 import org.churchpresenter.resources.generated.resources.scope
 import org.churchpresenter.resources.generated.resources.search
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

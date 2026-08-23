@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.CommandResult
 
 /**
  * How the camera and window listings *drive* the tools whose output

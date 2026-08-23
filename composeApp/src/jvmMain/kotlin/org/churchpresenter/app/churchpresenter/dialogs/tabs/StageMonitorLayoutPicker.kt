@@ -64,7 +64,7 @@ import org.churchpresenter.resources.generated.resources.stage_monitor_layout_to
 import org.churchpresenter.resources.generated.resources.stage_monitor_layout_top_two_below
 import org.churchpresenter.resources.generated.resources.stage_monitor_zone_count
 import org.churchpresenter.resources.generated.resources.stage_monitor_zone_n
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
+import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.settings.MetronomePosition
 import org.churchpresenter.settings.StageMonitorContentType
 import org.churchpresenter.settings.StageMonitorLayout

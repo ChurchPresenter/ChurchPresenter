@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import org.churchpresenter.ui.cpColorToHex
 
 /** A schedule label's two colours: the band it is drawn on, and the text on that band. */
 @Serializable

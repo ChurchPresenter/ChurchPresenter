@@ -66,13 +66,13 @@ import org.churchpresenter.resources.generated.resources.auto_fit_checkbox_toolt
 import org.churchpresenter.resources.generated.resources.auto_fit_button_tooltip
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.NumberSettingsTextField
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.ui.TextStyleButtons
+import org.churchpresenter.ui.VerticalAlignmentButtons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -80,7 +80,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.ui.LabeledCheckbox
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

@@ -108,10 +108,10 @@ import org.churchpresenter.resources.generated.resources.ic_search
 import org.churchpresenter.resources.generated.resources.search_clear
 import org.churchpresenter.resources.generated.resources.verse
 import java.awt.Cursor
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.dictionary.InterlinearVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.dictionary.InterlinearWord

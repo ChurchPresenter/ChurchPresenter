@@ -38,6 +38,8 @@ import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The stage monitor — the screen the worship leader and the speaker read from.

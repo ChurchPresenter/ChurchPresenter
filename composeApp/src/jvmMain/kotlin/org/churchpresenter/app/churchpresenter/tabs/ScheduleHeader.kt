@@ -97,8 +97,8 @@ import org.churchpresenter.resources.generated.resources.tooltip_schedule_zoom_o
 import org.churchpresenter.resources.generated.resources.tooltip_new_schedule
 import org.churchpresenter.resources.generated.resources.tooltip_open_schedule
 import org.churchpresenter.resources.generated.resources.tooltip_save_schedule
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.ui.ConditionalTooltipArea
+import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.utils.DroppedFileAction
 import org.churchpresenter.app.churchpresenter.utils.IMAGE_EXTENSIONS
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity

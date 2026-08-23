@@ -16,10 +16,10 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.ui.initialPassClickable
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

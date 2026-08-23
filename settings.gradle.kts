@@ -103,3 +103,7 @@ include(":resources")
 // timestamped play log behind them, the periods a report covers and the CSV/Excel export CCLI
 // licence reporting needs. The window that draws it stays in :composeApp.
 include(":statistics")
+// The app's own widget library: the custom composables every tab and dialog is built from —
+// dropdowns, settings fields, segmented buttons, the colour picker, tooltips and the rest. Generic
+// by construction: it knows the theme and the resources, and nothing else about the app.
+include(":ui-components")

@@ -48,7 +48,7 @@ import org.churchpresenter.resources.generated.resources.bible_history_clear
 import org.churchpresenter.resources.generated.resources.ic_arrow_down
 import org.churchpresenter.resources.generated.resources.ic_arrow_up
 import org.churchpresenter.resources.generated.resources.ic_delete
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.ui.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource

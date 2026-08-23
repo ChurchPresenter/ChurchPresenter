@@ -21,7 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.ui.SettingsTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,15 +71,15 @@ import org.churchpresenter.resources.generated.resources.atem_test_connection_hi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.ui.LabeledSwitch
 import org.churchpresenter.theme.semantic
 
 @Composable

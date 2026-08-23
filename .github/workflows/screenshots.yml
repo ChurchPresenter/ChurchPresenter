@@ -82,7 +82,9 @@ jobs:
       # log lines the build now prints will name the offender if that is what it turns out to be.
       - name: Render screenshots
         timeout-minutes: 35
-        run: ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
+        run: >-
+          ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :ui-components:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -94,7 +96,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: composeApp/screenshots
+          path: |
+            composeApp/screenshots
+            ui-components/screenshots
           retention-days: 30
           if-no-files-found: error
 
@@ -105,6 +109,10 @@ jobs:
           # Where the record step above writes — `roborazzi.outputDir` in composeApp/build.gradle.kts
           # and `ScreenshotSupport.SCREENSHOT_ROOT` both point here. Committed, so a local re-record
           # also updates what is in git.
+          # NOTE: reg-actions takes ONE directory, so this comparison still covers only
+          # :composeApp's images. The widget images under ui-components/screenshots are recorded
+          # and uploaded above, but not diffed in the PR comment — verify them locally with
+          # `./gradlew :ui-components:verifyRoborazzi`.
           image-directory-path: ./composeApp/screenshots
           # Every changed image is shown in the comment; with a handful of surfaces there is no
           # reason to make a reviewer expand a details block to see what moved.

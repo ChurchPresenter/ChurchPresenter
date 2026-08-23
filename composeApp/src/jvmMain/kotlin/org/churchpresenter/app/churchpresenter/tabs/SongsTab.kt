@@ -44,8 +44,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import org.churchpresenter.statistics.StatisticsManager
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
+import org.churchpresenter.ui.focusRescuePressHook
+import org.churchpresenter.ui.rememberFocusLostRescue
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import java.awt.Cursor
 import java.awt.Window as AwtWindow
@@ -66,7 +66,7 @@ import org.churchpresenter.resources.generated.resources.number
 import org.churchpresenter.resources.generated.resources.starts_with
 import org.churchpresenter.resources.generated.resources.title
 import org.churchpresenter.resources.generated.resources.author
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.ui.initialPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog

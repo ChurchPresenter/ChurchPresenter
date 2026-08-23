@@ -1,13 +1,14 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import org.churchpresenter.core.models.scene.SceneSource
 import java.io.File
+import org.churchpresenter.ui.readCommandOutput
+import org.churchpresenter.ui.CommandRunner
 
 internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =
     if (source.isDeckLink) {

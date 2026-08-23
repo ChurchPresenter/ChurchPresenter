@@ -23,6 +23,9 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.PinnedRecentColors
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The Dictionary tab of the settings dialog, in both themes.

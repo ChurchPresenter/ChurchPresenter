@@ -342,6 +342,8 @@ kotlin {
             // module. One `Res` class, so `Res.drawable.x` and `Res.string.y` read exactly as they
             // did when the assets lived here.
             api(projects.resources)
+            // The custom composables the tabs and dialogs are built from.
+            implementation(projects.uiComponents)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -461,6 +463,8 @@ val resolvedJdk21Home: String? = run {
 // jvmTest configuration directly. Gives the app's keyboard tests the shared keyDown() builder that
 // now lives in :core-models.
 dependencies {
+    // ScreenshotSupport: the theme-stacking/trim/capture machinery every screenshot suite uses.
+    add("jvmTestImplementation", testFixtures(projects.uiComponents))
     add("jvmTestImplementation", testFixtures(projects.coreModels))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own

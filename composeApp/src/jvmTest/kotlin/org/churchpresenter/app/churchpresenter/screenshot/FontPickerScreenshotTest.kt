@@ -16,6 +16,7 @@ import org.churchpresenter.app.churchpresenter.utils.FontCategory
 import org.churchpresenter.app.churchpresenter.utils.FontFace
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureComponent
 
 /**
  * The font panel, state by state.

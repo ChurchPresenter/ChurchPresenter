@@ -125,12 +125,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.SegmentedButton
+import org.churchpresenter.ui.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch

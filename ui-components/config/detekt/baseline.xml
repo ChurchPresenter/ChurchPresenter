@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:AlignmentButtons.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun HorizontalAlignmentButtons( selectedAlignment: String, onAlignmentChange: (String) -&gt; Unit, leftValue: String, centerValue: String, rightValue: String, buttonSize: Dp = 28.dp, cornerRadius: Dp = 4.dp )</ID>
+    <ID>LongMethod:AlignmentButtons.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun VerticalAlignmentButtons( selectedAlignment: String, onAlignmentChange: (String) -&gt; Unit, topValue: String, middleValue: String, bottomValue: String, buttonSize: Dp = 28.dp, cornerRadius: Dp = 4.dp )</ID>
+    <ID>LongMethod:ColorPickerDialog.kt$@Composable fun ColorPickerDialog( initialHex: String, onDismiss: () -&gt; Unit, onColorSelected: (String) -&gt; Unit, )</ID>
+    <ID>LongMethod:NumberSettingsTextField.kt$@Composable fun NumberSettingsTextField( modifier: Modifier = Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max), label: String = "", initialText: Int = 8, range: IntRange, onValueChange: (Int) -&gt; Unit, )</ID>
+    <ID>LongMethod:SearchableDropdownField.kt$@Composable fun SearchableDropdownField( value: String, options: List&lt;String&gt;, onValueChange: (String) -&gt; Unit, modifier: Modifier = Modifier, label: String = "", leadingIcon: @Composable (() -&gt; Unit)? = null, horizontalPadding: Dp = 8.dp, menuWidth: Dp = 200.dp, menuHeight: Dp = 300.dp, clearOnFocus: Boolean = false, fillWidth: Boolean = false, onClear: (() -&gt; Unit)? = null, valueTextStyle: TextStyle? = null, itemContent: @Composable (String) -&gt; Unit = { option -&gt; Text( text = option, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis ) }, )</ID>
+    <ID>LongMethod:SettingsTextField.kt$@Composable fun SettingsTextField( value: String, onValueChange: (String) -&gt; Unit, modifier: Modifier = Modifier, label: String = "", enabled: Boolean = true, readOnly: Boolean = false, singleLine: Boolean = true, maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE, placeholder: @Composable (() -&gt; Unit)? = null, trailingIcon: @Composable (() -&gt; Unit)? = null, isError: Boolean = false, supportingText: @Composable (() -&gt; Unit)? = null, keyboardOptions: KeyboardOptions = KeyboardOptions.Default, keyboardActions: KeyboardActions = KeyboardActions.Default, visualTransformation: VisualTransformation = VisualTransformation.None, fillWidth: Boolean = false, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

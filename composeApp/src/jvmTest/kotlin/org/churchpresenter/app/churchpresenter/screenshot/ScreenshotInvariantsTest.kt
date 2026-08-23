@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The two rules that decide whether a screenshot is compared in CI at all.
@@ -28,6 +29,11 @@ class ScreenshotInvariantsTest {
     private val packageDir =
         File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot")
 
+    /** The one copy of the capture machinery, in the module both sides consume it from. */
+    private val supportFile = File(
+        "../ui-components/src/testFixtures/kotlin/org/churchpresenter/ui/screenshot/ScreenshotSupport.kt"
+    )
+
     /** Every `.kt` in the screenshot package, paired with its text. */
     private fun sources(): List<Pair<File, String>> {
         val files = packageDir.listFiles { f: File -> f.extension == "kt" }?.sortedBy { it.name }
@@ -43,7 +49,15 @@ class ScreenshotInvariantsTest {
     fun `the screenshot package is where this test thinks it is`() {
         val names = sources().map { (file, _) -> file.name }
         assertTrue(names.size > 20, "expected the whole screenshot package, saw ${names.size} files")
-        assertTrue("ScreenshotSupport.kt" in names, "saw $names")
+        // `ScreenshotSupport.kt` used to sit in this package. It now lives in :ui-components'
+        // testFixtures, shared with the widget screenshot suites that moved there, and reaches
+        // this package through `testFixtures(projects.uiComponents)` — so the support file is
+        // checked for at its own path rather than among these sources.
+        assertTrue(
+            supportFile.isFile,
+            "ScreenshotSupport.kt is not at ${supportFile.path}; the capture machinery moved and " +
+                "this test can no longer confirm the suites share one copy of it",
+        )
     }
 
     @Test

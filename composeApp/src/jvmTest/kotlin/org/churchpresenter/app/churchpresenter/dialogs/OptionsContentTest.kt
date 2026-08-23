@@ -19,8 +19,8 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_BACK_TAG
-import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_FORWARD_TAG
+import org.churchpresenter.ui.TAB_STRIP_ARROW_BACK_TAG
+import org.churchpresenter.ui.TAB_STRIP_ARROW_FORWARD_TAG
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings

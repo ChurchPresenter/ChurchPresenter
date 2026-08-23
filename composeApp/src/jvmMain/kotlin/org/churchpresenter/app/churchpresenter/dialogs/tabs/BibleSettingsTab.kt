@@ -59,10 +59,8 @@ import org.churchpresenter.resources.generated.resources.move_translation_up
 import org.churchpresenter.resources.generated.resources.move_translation_down
 import org.churchpresenter.resources.generated.resources.remove
 import org.churchpresenter.resources.generated.resources.vertical_alignment
-import org.churchpresenter.resources.generated.resources.animation_crossfade
 import org.churchpresenter.resources.generated.resources.fade_in
 import org.churchpresenter.resources.generated.resources.fade_out
-import org.churchpresenter.resources.generated.resources.bible_transition_settings
 import org.churchpresenter.resources.generated.resources.bottom
 import org.churchpresenter.resources.generated.resources.left
 import org.churchpresenter.resources.generated.resources.right
@@ -70,30 +68,28 @@ import org.churchpresenter.resources.generated.resources.scanning_directory
 import org.churchpresenter.resources.generated.resources.screen
 import org.churchpresenter.resources.generated.resources.text_margins
 import org.churchpresenter.resources.generated.resources.top
-import org.churchpresenter.resources.generated.resources.milliseconds_suffix
 import org.churchpresenter.resources.generated.resources.transition_duration
-import org.churchpresenter.resources.generated.resources.vertical_alignment
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.ui.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
+import org.churchpresenter.ui.DropdownSettingsField
+import org.churchpresenter.ui.rememberDropdownWidthFor
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderListing
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.PositionButtons
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.NumberSettingsTextField
+import org.churchpresenter.ui.PositionButtons
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.TextStyleButtons
+import org.churchpresenter.ui.TvScreenBox
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -101,7 +97,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import org.churchpresenter.resources.generated.resources.auto_fit
-import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.ui.VerticalAlignmentButtons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.removeBibleTranslation
@@ -114,7 +110,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.ui.LabeledCheckbox
 
 private const val COLUMN_WEIGHT = 0.48f
 

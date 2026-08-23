@@ -31,6 +31,8 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.separateThemes
 
 /**
  * The Keyboard Shortcuts dialog (Help → Keyboard Shortcuts, F1), in both themes.

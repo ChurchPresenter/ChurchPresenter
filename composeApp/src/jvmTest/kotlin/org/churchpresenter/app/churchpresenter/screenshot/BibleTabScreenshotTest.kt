@@ -25,6 +25,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 class BibleTabScreenshotTest {
 

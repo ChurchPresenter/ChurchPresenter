@@ -16,6 +16,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialogC
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The Presentation Remote dialog — the QR code an operator hands a speaker so they can advance

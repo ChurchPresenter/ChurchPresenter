@@ -18,6 +18,8 @@ import org.churchpresenter.app.churchpresenter.tabs.translate
 import org.churchpresenter.app.churchpresenter.tabs.translateInProgress
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * Every state of the live-captions tab, in both themes.

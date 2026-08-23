@@ -80,18 +80,18 @@ import org.churchpresenter.resources.generated.resources.stt_word_highlighting
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.ui.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.StyledTextField
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.StyledTextField
+import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.ui.LabeledCheckbox
 
 private const val POSITION_GRID_COLUMNS = 3
 

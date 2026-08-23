@@ -16,6 +16,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.ui.screenshot.THEMES
+import org.churchpresenter.ui.screenshot.captureTo
 
 class AppPreviewRemotePermissionScreenshotTest {
 

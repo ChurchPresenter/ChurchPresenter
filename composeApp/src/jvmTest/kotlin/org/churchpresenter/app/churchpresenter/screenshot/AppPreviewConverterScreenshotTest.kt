@@ -18,6 +18,8 @@ import org.churchpresenter.converter.ui.App
 import org.churchpresenter.converter.ui.ConverterTheme
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.ui.screenshot.captureTo
 
 /**
  * The bundled format converter, reached from the Help menu. It ships its own colour scheme rather

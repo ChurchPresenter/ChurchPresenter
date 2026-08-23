@@ -127,9 +127,9 @@ import org.churchpresenter.resources.generated.resources.qa_approved
 import org.churchpresenter.resources.generated.resources.qa_denied
 import org.churchpresenter.resources.generated.resources.qa_done
 import org.churchpresenter.resources.generated.resources.qa_incoming_approved
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
 import org.churchpresenter.core.models.qa.Question

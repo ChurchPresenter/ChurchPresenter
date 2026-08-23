@@ -161,6 +161,12 @@ jobs:
               - *shared
               - 'bible/**'
               - 'diagnostics/**'          # implementation(projects.diagnostics)
+            uicomponents:
+              - *shared
+              - 'ui-components/**'
+              - 'theme/**'            # implementation(projects.theme)
+              - 'resources/**'        # api(projects.resources)
+              - 'settings/**'         # testImplementation, for the alignment screenshots
             dictionary:
               - *shared
               - 'dictionary/**'           # depends on nothing else: the files and the lookups
@@ -210,6 +216,7 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
+          :ui-components:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -371,6 +378,14 @@ jobs:
         if: always() && steps.modules.outputs.engine == 'true'
         run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
 
+      - name: UI components tests
+        if: always() && steps.modules.outputs.uicomponents == 'true'
+        run: ./gradlew :ui-components:test
+
+      - name: UI components coverage floor
+        if: always() && steps.modules.outputs.uicomponents == 'true'
+        run: ./gradlew :ui-components:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -519,6 +534,7 @@ jobs:
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
             statistics/build/test-results/**/TEST-*.xml
+            ui-components/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
@@ -694,6 +710,8 @@ jobs:
             song-chords/build/test-results/
             statistics/build/reports/tests/
             statistics/build/test-results/
+            ui-components/build/reports/tests/
+            ui-components/build/test-results/
             bible/build/reports/tests/
             bible/build/test-results/
             dictionary/build/reports/tests/

@@ -30,6 +30,9 @@ import org.churchpresenter.core.models.statistics.SongDisplayEntry
 import org.churchpresenter.core.models.statistics.SongPlayEvent
 import org.churchpresenter.core.models.statistics.VerseDisplayEntry
 import org.churchpresenter.core.models.statistics.VersePlayEvent
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.ui.screenshot.THEMES
+import org.churchpresenter.ui.screenshot.captureTo
 
 class AppPreviewStatisticsScreenshotTest {
 

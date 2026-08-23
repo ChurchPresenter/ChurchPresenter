@@ -14,12 +14,13 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
+import org.churchpresenter.ui.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.ui.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.ui.SlimSlider
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureComponent
 
 /**
  * The labelled settings fields the Announcements tab's bars are built from — a colour swatch, two

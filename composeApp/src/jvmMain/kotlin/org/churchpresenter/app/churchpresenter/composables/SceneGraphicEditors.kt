@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -71,6 +70,8 @@ import org.churchpresenter.resources.generated.resources.timer_reset
 import org.churchpresenter.resources.generated.resources.pause
 import org.churchpresenter.core.models.scene.SceneSource
 import androidx.compose.foundation.layout.PaddingValues
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.LabeledCheckbox
 
 private const val MAX_STROKE_WIDTH = 20f
 private const val MAX_ANGLE_DEGREES = 360f

@@ -105,10 +105,10 @@ import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.ui.TooltipIconButton
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.GoLiveButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.event.InputEvent

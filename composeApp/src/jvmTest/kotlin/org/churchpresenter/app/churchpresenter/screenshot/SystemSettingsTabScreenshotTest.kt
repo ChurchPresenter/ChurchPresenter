@@ -18,6 +18,8 @@ import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The System tab of the settings dialog, in both themes.
