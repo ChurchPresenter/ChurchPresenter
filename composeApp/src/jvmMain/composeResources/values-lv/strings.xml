@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Varbūt vēlāk</string>
     <string name="story_prompt_reassurance">Bez jūsu piekrišanas nekas netiek publicēts.</string>
     <string name="menu_developer_story_prompt">Dialogs “Pastāstiet savu stāstu”</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Meklēt fontus…</string>
+    <string name="font_picker_clear_search">Notīrīt meklēšanu</string>
+    <string name="font_group_recent">Nesen izmantotie</string>
+    <string name="font_group_recommended">Piemēroti projicēšanai</string>
+    <string name="font_group_all">Visi fonti</string>
+    <string name="font_group_matches">Atbilstības</string>
+    <string name="font_category_sans">Grotesks</string>
+    <string name="font_category_serif">Antīkva</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Priekšskatījums</string>
+    <string name="font_preview_sample">Parauga teksts izvēlētajā fontā</string>
+    <string name="font_warning_no_cyrillic">%1$s nav kirilicas zīmju – kirilicas panti ekrānā tiks rādīti citā fontā.</string>
+    <string name="font_warning_no_hebrew">%1$s nav ebreju zīmju – ebreju teksts ekrānā tiks rādīts citā fontā.</string>
+    <string name="font_hidden_note">%1$d simbolu un sistēmas fonti paslēpti · rāda %2$d no %3$d</string>
+    <string name="font_shown_note">Rāda %1$d no %2$d</string>
+    <string name="font_picker_keys">↑↓ pārvietoties · ⏎ izvēlēties · esc aizvērt</string>
 </resources>

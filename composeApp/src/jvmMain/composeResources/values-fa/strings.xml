@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">شاید بعداً</string>
     <string name="story_prompt_reassurance">بدون اجازهٔ شما چیزی منتشر نمی‌شود.</string>
     <string name="menu_developer_story_prompt">پنجرهٔ «داستان خود را بگویید»</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">جست‌وجوی قلم‌ها…</string>
+    <string name="font_picker_clear_search">پاک کردن جست‌وجو</string>
+    <string name="font_group_recent">اخیراً استفاده‌شده</string>
+    <string name="font_group_recommended">مناسب برای نمایش</string>
+    <string name="font_group_all">همهٔ قلم‌ها</string>
+    <string name="font_group_matches">نتایج</string>
+    <string name="font_category_sans">بدون سریف</string>
+    <string name="font_category_serif">سریف</string>
+    <string name="font_category_mono">تک‌عرض</string>
+    <string name="font_category_display">نمایشی</string>
+    <string name="font_preview">پیش‌نمایش</string>
+    <string name="font_preview_sample">نمونهٔ متن با قلم انتخاب‌شده</string>
+    <string name="font_warning_no_cyrillic">%1$s حروف سیریلیک ندارد — آیات سیریلیک روی صفحه با قلم دیگری نمایش داده می‌شوند.</string>
+    <string name="font_warning_no_hebrew">%1$s حروف عبری ندارد — متن عبری روی صفحه با قلم دیگری نمایش داده می‌شود.</string>
+    <string name="font_hidden_note">%1$d قلم نمادی و سیستمی پنهان شد · نمایش %2$d از %3$d</string>
+    <string name="font_shown_note">نمایش %1$d از %2$d</string>
+    <string name="font_picker_keys">↑↓ جابه‌جایی · ⏎ انتخاب · esc بستن</string>
 </resources>

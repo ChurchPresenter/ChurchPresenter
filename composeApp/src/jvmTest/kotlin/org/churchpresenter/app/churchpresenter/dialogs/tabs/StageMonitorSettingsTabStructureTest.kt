@@ -118,14 +118,14 @@ class StageMonitorSettingsTabStructureTest {
         }
 
     /**
-     * The one control on the tab that carries no text, no content description and no role: the
-     * expand arrow inside each font dropdown. It is invisible to both of
+     * A control carrying no text, no content description and no role is invisible to both of
      * `StageMonitorSettingsTabLabelsTest`'s completeness guards — one sweeps text, the other
-     * descriptions — so its count is pinned here instead. A new unlabelled control fails this.
+     * descriptions — so the tab is swept for them here. It used to find six: the expand arrow inside
+     * each font dropdown, a bare clickable `Icon`. The font field is one named control now.
      */
     @Test
-    fun `the only unlabelled controls are the six font dropdown arrows`() = stageMonitorTab { _ ->
-        fontDropdownArrows().assertCountEquals(ZoneOrdinal.COUNT)
+    fun `no control on the tab is left unlabelled`() = stageMonitorTab { _ ->
+        unlabelledControls().assertCountEquals(0)
     }
 
     // ── The ordinals themselves ─────────────────────────────────────────────────────────────────

@@ -2384,4 +2384,22 @@
     <string name="tab_strip_scroll_forward">Posunúť karty vpred</string>
     <string name="stock_photo_show_key">Zobraziť kľúč API</string>
     <string name="stock_photo_hide_key">Skryť kľúč API</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Hľadať písma…</string>
+    <string name="font_picker_clear_search">Vymazať hľadanie</string>
+    <string name="font_group_recent">Naposledy použité</string>
+    <string name="font_group_recommended">Vhodné na projekciu</string>
+    <string name="font_group_all">Všetky písma</string>
+    <string name="font_group_matches">Zhody</string>
+    <string name="font_category_sans">Bezpätkové</string>
+    <string name="font_category_serif">Pätkové</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Ozdobné</string>
+    <string name="font_preview">Náhľad</string>
+    <string name="font_preview_sample">Ukážkový text vybraným písmom</string>
+    <string name="font_warning_no_cyrillic">%1$s nemá znaky cyriliky – verše v cyrilike sa na obrazovke zobrazia iným písmom.</string>
+    <string name="font_warning_no_hebrew">%1$s nemá hebrejské znaky – hebrejský text sa na obrazovke zobrazí iným písmom.</string>
+    <string name="font_hidden_note">%1$d symbolových a systémových písem skrytých · zobrazených %2$d z %3$d</string>
+    <string name="font_shown_note">Zobrazených %1$d z %2$d</string>
+    <string name="font_picker_keys">↑↓ pohyb · ⏎ vybrať · esc zavrieť</string>
 </resources>

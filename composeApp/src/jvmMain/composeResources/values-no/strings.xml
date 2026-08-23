@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Kanskje senere</string>
     <string name="story_prompt_reassurance">Ingenting publiseres uten at du sier ja.</string>
     <string name="menu_developer_story_prompt">Dialogen «Del historien din»</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Søk i skrifttyper…</string>
+    <string name="font_picker_clear_search">Tøm søket</string>
+    <string name="font_group_recent">Nylig brukt</string>
+    <string name="font_group_recommended">Bra for projisering</string>
+    <string name="font_group_all">Alle skrifttyper</string>
+    <string name="font_group_matches">Treff</string>
+    <string name="font_category_sans">Grotesk</string>
+    <string name="font_category_serif">Antikva</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Forhåndsvisning</string>
+    <string name="font_preview_sample">Eksempeltekst i den valgte skrifttypen</string>
+    <string name="font_warning_no_cyrillic">%1$s mangler kyrilliske tegn – kyrilliske vers vises på skjermen med en annen skrifttype.</string>
+    <string name="font_warning_no_hebrew">%1$s mangler hebraiske tegn – hebraisk tekst vises på skjermen med en annen skrifttype.</string>
+    <string name="font_hidden_note">%1$d symbol- og systemskrifter skjult · viser %2$d av %3$d</string>
+    <string name="font_shown_note">Viser %1$d av %2$d</string>
+    <string name="font_picker_keys">↑↓ flytt · ⏎ velg · esc lukk</string>
 </resources>
