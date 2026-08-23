@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Color as ComposeColor
 import org.churchpresenter.dictionary.StrongsEntry
-import org.churchpresenter.dictionary.ui.DictionaryPresenter
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings

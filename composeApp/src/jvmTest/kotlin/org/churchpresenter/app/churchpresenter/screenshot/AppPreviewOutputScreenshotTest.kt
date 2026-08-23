@@ -21,7 +21,7 @@ import org.apache.pdfbox.rendering.PDFRenderer
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.dictionary.StrongsEntry
-import org.churchpresenter.dictionary.ui.DictionaryPresenter
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question

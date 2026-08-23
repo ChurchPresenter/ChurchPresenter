@@ -329,7 +329,7 @@ kotlin {
             implementation(projects.bible)
             // The bundled study data: the Strong's dictionary and the interlinear index over it.
             implementation(projects.dictionary)
-            implementation(projects.dictionaryUi)
+            implementation(projects.dictionaryTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is
             // `remote/` here.
@@ -478,7 +478,6 @@ dependencies {
     // the module that owns the bundled files, so the tab, view-model and server suites here and the
     // module's own suite assert against one corpus rather than two.
     add("jvmTestImplementation", testFixtures(projects.dictionary))
-    add("jvmTestImplementation", testFixtures(projects.dictionaryUi))
     // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
     // synthetic deck build it through the module's own fixtures.
     add("jvmTestImplementation", testFixtures(projects.presentationEngine))

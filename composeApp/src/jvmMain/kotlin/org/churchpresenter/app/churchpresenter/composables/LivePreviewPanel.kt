@@ -51,7 +51,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.dictionary.ui.DictionaryPresenter
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.ic_pause
 import org.churchpresenter.resources.generated.resources.ic_play

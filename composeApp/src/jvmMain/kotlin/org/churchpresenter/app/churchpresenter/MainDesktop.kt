@@ -61,8 +61,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import org.churchpresenter.app.churchpresenter.composables.previewLinesFrom
-import org.churchpresenter.dictionary.ui.DictionaryTab
-import org.churchpresenter.dictionary.ui.DictionaryViewModel
+import org.churchpresenter.dictionary.tab.DictionaryTab
+import org.churchpresenter.dictionary.tab.DictionaryViewModel
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.connect
 import org.churchpresenter.resources.generated.resources.instance_link_controlling_host

@@ -39,10 +39,7 @@
     <ID>LongMethod:ContactUsDialog.kt$@Composable internal fun ContactUsDialogContent( onDismiss: () -&gt; Unit, types: List&lt;Pair&lt;String, String&gt;&gt;, selectedType: Pair&lt;String, String&gt;, onSelectedTypeChange: (Pair&lt;String, String&gt;) -&gt; Unit, name: String, onNameChange: (String) -&gt; Unit, email: String, onEmailChange: (String) -&gt; Unit, message: String, onMessageChange: (String) -&gt; Unit, status: SendStatus, onSend: () -&gt; Unit, sentText: String, )</ID>
     <ID>LongMethod:CrosswordTab.kt$@OptIn(ExperimentalResourceApi::class) @Composable fun CrosswordTab( modifier: Modifier = Modifier, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit )</ID>
     <ID>LongMethod:DeckLinkComposeOutput.kt$@Composable fun DeckLinkComposeOutput( deviceIndex: Int, outputRole: String, appSettings: AppSettings, mediaViewModel: MediaViewModel, isLowerThird: Boolean = false, content: @Composable BoxScope.() -&gt; Unit )</ID>
-    <ID>LongMethod:DictionaryPresenter.kt$@Composable fun DictionaryPresenter( modifier: Modifier = Modifier, entry: StrongsEntry?, dictionarySettings: DictionarySettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, transitionAlpha: Float = 1f, )</ID>
     <ID>LongMethod:DictionarySettingsTab.kt$@Composable fun DictionarySettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
-    <ID>LongMethod:DictionaryTab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun DictionaryDetailPane( modifier: Modifier = Modifier, entry: StrongsEntry?, canGoBack: Boolean = false, canGoForward: Boolean = false, onGoBack: () -&gt; Unit = {}, onGoForward: () -&gt; Unit = {}, dictLanguage: String = "en", onToggleDictLanguage: () -&gt; Unit = {}, interlinearVerses: List&lt;InterlinearVerse&gt;, totalInterlinearCount: Int, isInterlinearLoading: Boolean, interlinearDisplayLimit: Int, onShowMore: () -&gt; Unit, cardBookFilter: Int? = null, cardChapterFilter: Int? = null, cardAvailableBooks: List&lt;Int&gt; = emptyList(), cardAvailableChapters: List&lt;Int&gt; = emptyList(), onFilterCardsByBook: (Int?) -&gt; Unit = {}, onFilterCardsByChapter: (Int?) -&gt; Unit = {}, getVerseText: ((bookId: Int, chapter: Int, verse: Int) -&gt; String?)? = null, getBookName: ((bookId: Int) -&gt; String?)? = null, onWordClick: ((String) -&gt; Unit)? = null, onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -&gt; Unit)? = null, getEntry: ((strongsNumber: String) -&gt; StrongsEntry?)? = null, onAddToSchedule: ((StrongsEntry) -&gt; Unit)? = null, onGoLive: ((StrongsEntry) -&gt; Unit)? = null, )</ID>
-    <ID>LongMethod:DictionaryTab.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun DictionaryListPane( modifier: Modifier = Modifier, viewModel: DictionaryViewModel, getBookName: ((bookId: Int) -&gt; String?)? = null, )</ID>
     <ID>LongMethod:EBibleSource.kt$EBibleSource$internal suspend fun installEBible( module: BibleModule, targetDir: File, http: HttpClient, retryFloorMs: Long = BibleInstallSupport.DEFAULT_DOWNLOAD_RETRY_FLOOR_MS, onProgress: (InstallProgress) -&gt; Unit, ): BibleInstallOutcome</ID>
     <ID>LongMethod:EditSongDialog.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable internal fun EditSongContent( song: SongItem, songbooks: List&lt;String&gt;, existingSongs: List&lt;SongItem&gt;, isNewSong: Boolean, theme: ThemeMode, tuning: SongTuning = SongTuning(), showTuningFields: Boolean = false, chordsVisible: Boolean = true, onChordsVisibleChange: (Boolean) -&gt; Unit = {}, isVisible: Boolean = true, onDismiss: () -&gt; Unit, onSave: (SongItem, SongTuning) -&gt; Unit )</ID>
     <ID>LongMethod:InstanceLinkDialog.kt$@Composable internal fun InstanceLinkDialogContent( isVisible: Boolean, settings: InstanceLinkSettings, connectionStatus: InstanceLinkStatus, remoteLiveState: LiveStateDto?, remoteScheduleCount: Int, lastMessageAtMs: Long? = null, onConnect: (InstanceLinkSettings) -&gt; Unit, /** * Persists the edited settings and leaves the connection alone. Connect used to be the only way * to save, so changing a setting that is consumed reactively — the role, Bible sync mode, * background mirroring — forced a reconnect that nothing about the change required. */ onSave: (InstanceLinkSettings) -&gt; Unit, onDisconnect: () -&gt; Unit, onDismiss: () -&gt; Unit )</ID>
@@ -391,7 +388,6 @@
     <ID>MaxLineLength:CanvasTab.kt$val</ID>
     <ID>MaxLineLength:CanvasTab.kt$val displayAr0 = if (presentationBounds0.height &gt; 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f</ID>
     <ID>MaxLineLength:CanvasTab.kt$val sceneAr = if (currentScene.canvasHeight &gt; 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f</ID>
-    <ID>MaxLineLength:ColorPickerField.kt$.</ID>
     <ID>MaxLineLength:CompanionApiDtos.kt$ScheduleItemDto$val type: String</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$?:</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$Text(stringResource(Res.string.companion_satellite_remove_connection), color = MaterialTheme.colorScheme.error)</ID>
@@ -462,44 +458,6 @@
     <ID>MaxLineLength:DeviceInfoReport.kt$DeviceInfoReport$try { DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) } } catch (_: Exception) { emptyList() }</ID>
     <ID>MaxLineLength:DeviceInfoReport.kt$DeviceInfoReport$val bibleFiles = try { fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory) } catch (_: Exception) { emptyList() }</ID>
     <ID>MaxLineLength:DeviceInfoReport.kt$DeviceInfoReport$val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowColor = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onOpacityChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowOpacity = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onOpacityChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowOpacity = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onSizeChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onSizeChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontType = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(transitionDuration = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontSize = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontType = it)) } }</ID>
-    <ID>MaxLineLength:DictionarySettingsTab.kt$trailingLabel = "${ds.transitionDuration.toInt()} ${stringResource(Res.string.milliseconds_suffix)}"</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$Surface</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$Text(goToVerseStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$Text(switchLangStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$onAddToSchedule = onAddToSchedule?.let { cb -&gt; { e -&gt; cb(e.number, e.word, e.transliteration, e.definition) } }</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomEnd, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:DictionaryTab.kt$val verseText = getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)</ID>
-    <ID>MaxLineLength:DictionaryViewModel.kt$DictionaryViewModel$(interlinearRepository.getBooksWithHebrewData() + interlinearRepository.getBooksWithGreekData()).sorted()</ID>
     <ID>MaxLineLength:EditSongDialog.kt$Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))</ID>
     <ID>MaxLineLength:EditSongDialog.kt$enabled = !isDuplicate &amp;&amp; (!isNewSong || (editedSongbook.isNotBlank() &amp;&amp; editedTitle.isNotBlank()))</ID>
     <ID>MaxLineLength:EditSongDialog.kt$if (it.all { line -&gt; line.isBlank() || line.trim().startsWith("[") }) emptyList() else it</ID>
@@ -1446,8 +1404,6 @@
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:Constants.kt$org.churchpresenter.app.churchpresenter.utils.Constants.kt</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
-    <ID>TooManyFunctions:DictionaryTab.kt$org.churchpresenter.app.churchpresenter.tabs.DictionaryTab.kt</ID>
-    <ID>TooManyFunctions:DictionaryViewModel.kt$DictionaryViewModel</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
     <ID>TooManyFunctions:FileKitFileChooser.kt$FileKitFileChooser : FileChooser</ID>
     <ID>TooManyFunctions:FileManager.kt$FileManager</ID>

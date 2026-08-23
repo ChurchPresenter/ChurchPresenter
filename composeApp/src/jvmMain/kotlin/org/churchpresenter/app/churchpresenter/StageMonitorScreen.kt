@@ -53,7 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.churchpresenter.dictionary.StrongsEntry
-import org.churchpresenter.dictionary.ui.DictionaryPresenter
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.StageMonitorContentType
