@@ -1,8 +1,11 @@
 package org.churchpresenter.presentationengine
 
+import org.apache.poi.common.usermodel.fonts.FontInfo
 import org.junit.jupiter.api.Test
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import java.awt.Font
+import java.awt.Graphics2D
+import java.awt.image.BufferedImage
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -92,5 +95,43 @@ class SlideFontRegistryTest {
             )
             return
         }
+    }
+
+    // ── The POI font handler ──────────────────────────────────────────────────
+
+    /** Runs [block] against a throwaway raster's graphics, which is all the font handler needs. */
+    private fun <T> withGraphics(block: (Graphics2D) -> T): T {
+        val image = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+        val graphics = image.createGraphics()
+        return try {
+            block(graphics)
+        } finally {
+            graphics.dispose()
+        }
+    }
+
+    @Test
+    fun `a run that states no font of its own does not take the slide down with it`() {
+        // POI hands the handler a null FontInfo for a run with no font set — its own
+        // getFontWithFallback is written for it, and its caller answers null by retrying with the
+        // paragraph's default family. A non-null Kotlin parameter turned that into an NPE that
+        // escaped POI's draw and failed the slide, and every text slide in a deck alike.
+        assertNull(withGraphics { SlideFontRegistry.drawFontManager.getMappedFont(it, null) })
+    }
+
+    @Test
+    fun `a font nobody has installed is still mapped to something renderable`() {
+        javaClass.getResourceAsStream("/fonts/OpenSans-Regular.ttf")?.let {
+            SlideFontRegistry.registerFontStream(it)
+        }
+        val requested = object : FontInfo {
+            override fun getTypeface(): String = "Definitely Not A Font 123"
+        }
+        val mapped = assertNotNull(withGraphics { SlideFontRegistry.drawFontManager.getMappedFont(it, requested) })
+        val typeface = assertNotNull(mapped.typeface)
+        assertTrue(
+            SlideFontRegistry.isFamilyAvailable(typeface) || typeface == Font.SANS_SERIF,
+            "the handler must never pass on a family that cannot be rendered, got $typeface",
+        )
     }
 }

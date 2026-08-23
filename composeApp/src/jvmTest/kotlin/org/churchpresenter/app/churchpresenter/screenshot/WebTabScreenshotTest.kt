@@ -44,6 +44,7 @@ class WebTabScreenshotTest {
         selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
         cefInitialized: Boolean = true,
         cefMacOsUnsupported: Boolean = false,
+        cefWindowsUnsupported: Boolean = false,
         schedule: Boolean = true,
         width: Dp? = null,
         drive: ComposeUiTest.(PresenterManager) -> Unit = {},
@@ -53,6 +54,7 @@ class WebTabScreenshotTest {
             selectedWebsiteItem = selectedWebsiteItem,
             cefInitialized = cefInitialized,
             cefMacOsUnsupported = cefMacOsUnsupported,
+            cefWindowsUnsupported = cefWindowsUnsupported,
             includeAddToSchedule = schedule,
             width = width,
             themeMode = mode,
@@ -174,6 +176,10 @@ class WebTabScreenshotTest {
     @Test
     fun `the browser engine needs a newer macOS`() =
         shoot("engine_unavailable_macos", cefInitialized = false, cefMacOsUnsupported = true)
+
+    @Test
+    fun `the browser engine needs a newer Windows`() =
+        shoot("engine_unavailable_windows", cefInitialized = false, cefWindowsUnsupported = true)
 
     // ── Toolbar widths ──────────────────────────────────────────────────────────────────────────
 

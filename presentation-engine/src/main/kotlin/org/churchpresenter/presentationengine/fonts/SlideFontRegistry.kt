@@ -213,8 +213,20 @@ object SlideFontRegistry {
      * POI builds its AWT font. Everything else defers to POI's default behavior.
      */
     private class SubstitutingFontManager : DrawFontManagerDefault() {
-        override fun getMappedFont(graphics: Graphics2D, fontInfo: FontInfo): FontInfo {
-            val mapped = super.getMappedFont(graphics, fontInfo)
+        /**
+         * [fontInfo] is nullable because POI passes null: `DrawTextParagraph.processGlyphs` asks the
+         * run for its font, falls back to asking for the LATIN group, and hands on whatever came
+         * back — which for a run that states no font at all is null. Declaring the parameter
+         * non-null put an `Intrinsics.checkNotNullParameter` in front of the body, so such a run
+         * threw an NPE that escaped POI's own draw, failed the slide, and — every text slide in a
+         * deck being alike — could leave the whole deck rendering nothing.
+         *
+         * Null in and null out is POI's own contract here: `getFontWithFallback` handles a null
+         * argument, and the caller answers a null result by retrying with the paragraph's default
+         * family and then with the fallback font. Returning null is deferring to that, not giving up.
+         */
+        override fun getMappedFont(graphics: Graphics2D, fontInfo: FontInfo?): FontInfo? {
+            val mapped = super.getMappedFont(graphics, fontInfo) ?: return null
             val typeface = mapped.typeface ?: return mapped
             if (isFamilyAvailable(typeface)) return mapped
             val substitute = resolveFamily(typeface)

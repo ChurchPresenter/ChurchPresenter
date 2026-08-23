@@ -445,7 +445,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                     tags = mapOf(
                         "subsystem" to "presentation",
                         "file.type" to file.extension.lowercase(),
-                        "failure.reason" to (_loadError.value?.name?.lowercase() ?: "unknown")
+                        // Not read back from _loadError, which the line above just set: that made
+                        // the tag always say "render_failed" and told nobody anything. The deck
+                        // parsed and then rendered nothing, which is a different failure from the
+                        // loader's empty_document — say so.
+                        "failure.reason" to "no_slides_rendered"
                     )
                 )
             }
@@ -476,7 +480,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 "subsystem" to "presentation",
                 "file.type" to file.extension.lowercase(),
                 "failure.reason" to failure.error.name.lowercase()
-            )
+            ),
+            // High-cardinality, so an extra rather than a tag — see the same call in
+            // PresentationStore.renderSlidesForServer.
+            extras = failure.detail?.let { mapOf("failure.detail" to it) } ?: emptyMap()
         )
     }
 

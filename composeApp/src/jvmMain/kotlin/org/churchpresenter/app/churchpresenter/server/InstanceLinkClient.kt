@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
@@ -238,6 +239,9 @@ class InstanceLinkClient(
      * that crashed mid-session, or a protocol/certificate bug).
      */
     internal fun classifyConnectFailure(e: Exception): String = when (e) {
+        // Ktor's own ConnectTimeoutException extends java.net.ConnectException, so it has to be
+        // matched first or every connect timeout is filed under the benign "refused" bucket.
+        is ConnectTimeoutException -> "timeout"
         is ConnectException -> "refused"
         is UnknownHostException -> "dns"
         is SocketTimeoutException -> "timeout"

@@ -52,6 +52,10 @@ object CefManager {
     var macOsUnsupported = false
         private set
 
+    /** True when [init] was skipped because the running Windows version is below [MIN_WINDOWS_MAJOR]. */
+    var windowsUnsupported = false
+        private set
+
     /**
      * Chromium 139+ (bundled here as CEF 143, see build.gradle.kts) dropped support for
      * macOS 11 (Big Sur) — Chrome 138 was the last version to run there. CefApp.startup()
@@ -60,6 +64,24 @@ object CefManager {
      * misleading "JCef did not initialize correctly!" crash to Sentry for a known, unfixable case.
      */
     private const val MIN_MACOS_MAJOR = 12
+
+    /**
+     * The same wall on the other platform: Chromium dropped Windows 7/8/8.1 at version 110, and
+     * the CEF 143 bundled here loads `chrome_elf.dll` against APIs those releases do not export.
+     * The failure is an `UnsatisfiedLinkError` reading "The specified procedure could not be
+     * found" — caught below, so the app survives, but reported to Sentry as if a broken install
+     * were to blame. `os.version` is 6.1 on Windows 7, 6.3 on 8.1 and 10.0 on both 10 and 11.
+     */
+    private const val MIN_WINDOWS_MAJOR = 10
+
+    internal fun isUnsupportedWindows(
+        osName: String = System.getProperty("os.name", ""),
+        osVersion: String = System.getProperty("os.version", "")
+    ): Boolean {
+        if (!osName.lowercase().contains("win")) return false
+        val major = osVersion.substringBefore('.').toIntOrNull() ?: return false
+        return major < MIN_WINDOWS_MAJOR
+    }
 
     internal fun isUnsupportedMacOS(
         osName: String = System.getProperty("os.name", ""),
@@ -179,6 +201,10 @@ object CefManager {
         if (initialized) return
         if (isUnsupportedMacOS()) {
             macOsUnsupported = true
+            return
+        }
+        if (isUnsupportedWindows()) {
+            windowsUnsupported = true
             return
         }
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()

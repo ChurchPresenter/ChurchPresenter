@@ -33,6 +33,26 @@ private const val GREEN_SHIFT = 8
 private const val BGRA_BYTES_PER_PIXEL = 4
 
 /**
+ * Why a camera has no picture.
+ *
+ * A reason, not a sentence: this object has no access to Compose string resources, and the message
+ * an operator reads has to be translatable. The renderer owns the wording.
+ */
+enum class CameraFailure {
+    /** The DeckLink input would not open — most often the card is already feeding an output. */
+    DECKLINK_INPUT_IN_USE,
+    /** ffmpeg is not installed, or not on PATH. Nothing to retry. */
+    FFMPEG_MISSING,
+    /** The stored device path matches no capture scheme this OS knows. */
+    UNSUPPORTED_DEVICE_PATH,
+    /** ffmpeg ran but never delivered a picture — device busy, unplugged, or refusing the format. */
+    DEVICE_UNAVAILABLE,
+}
+
+/** What one ffmpeg attempt produced — the success signal, and why it failed when it didn't. */
+private enum class CaptureOutcome { FRAMES, NO_DIMENSIONS, NO_FRAMES }
+
+/**
  * Shared camera frame cache — ensures only one capture process runs per device,
  * even when multiple composable instances (canvas preview + presenter output)
  * need to display the same camera.
@@ -44,7 +64,7 @@ object SharedCameraFrameCache {
 
     private class CacheEntry(
         val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
-        val error: MutableStateFlow<String?> = MutableStateFlow(null),
+        val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
         var refCount: Int = 0,
         var captureJob: Job? = null,
         var ffmpegProcess: Process? = null
@@ -61,7 +81,7 @@ object SharedCameraFrameCache {
 
     data class CameraFlows(
         val frame: StateFlow<ImageBitmap?>,
-        val error: StateFlow<String?>
+        val error: StateFlow<CameraFailure?>
     )
 
     /**
@@ -166,7 +186,7 @@ object SharedCameraFrameCache {
                 "DeckLink: Failed to open input on device ${source.deckLinkIndex}",
                 tags = mapOf("subsystem" to "decklink")
             )
-            entry.error.value = "Cannot open input — device may already be in use for output"
+            entry.error.value = CameraFailure.DECKLINK_INPUT_IN_USE
             return
         }
         entry.error.value = null
@@ -198,11 +218,11 @@ object SharedCameraFrameCache {
 
 
     /**
-     * Reads raw BGRA frames off a running ffmpeg into [entry] until the stream ends. True when at
-     * least one frame arrived, which is what tells a dropped stream apart from a device that never
-     * opened.
+     * Reads raw BGRA frames off a running ffmpeg into [entry] until the stream ends. A frame having
+     * arrived is what tells a dropped stream apart from a device that never opened; the two failing
+     * outcomes are kept apart so the diagnostic can say which one it was.
      */
-    private suspend fun streamFrames(process: Process, entry: CacheEntry): Boolean {
+    private suspend fun streamFrames(process: Process, entry: CacheEntry): CaptureOutcome {
         entry.ffmpegProcess = process
 
         // Drain stderr and extract video dimensions from ffmpeg output
@@ -230,7 +250,7 @@ object SharedCameraFrameCache {
             stderrJob.cancel()
             withContext(Dispatchers.IO) { killFfmpegProcess(process) }
             entry.ffmpegProcess = null
-            return false
+            return CaptureOutcome.NO_DIMENSIONS
         }
 
         val (videoW, videoH) = resolved
@@ -254,7 +274,7 @@ object SharedCameraFrameCache {
                 stderrLines.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
             }
         }
-        return frameCount > 0
+        return if (frameCount > 0) CaptureOutcome.FRAMES else CaptureOutcome.NO_FRAMES
     }
 
     /** Waits up to five seconds for ffmpeg to announce the stream's size. */
@@ -316,10 +336,15 @@ object SharedCameraFrameCache {
 
         val command = buildFfmpegCommand(source) ?: run {
             System.err.println("[Camera] Unknown device path scheme: $path")
+            // Nothing was ever going to open. Without this the source sits on the generic
+            // "Camera" placeholder for ever, indistinguishable from one still starting up.
+            entry.error.value = CameraFailure.UNSUPPORTED_DEVICE_PATH
             return
         }
 
         var consecutiveFailures = 0
+        var lastOutcome = CaptureOutcome.NO_FRAMES
+        var lastExitCode: Int? = null
         while (currentCoroutineContext().isActive && consecutiveFailures < MAX_CONSECUTIVE_FAILURES) {
             // Kill any lingering process and wait for the OS to release the device
             val old = entry.ffmpegProcess
@@ -340,18 +365,28 @@ object SharedCameraFrameCache {
                     null
                 }
             }
+            if (process == null) {
+                // The binary isn't there — ffmpeg ships with the OS on nobody's machine, and the
+                // camera picker already tells people to install it. Five more attempts two seconds
+                // apart cannot change that, so stop now and say what is actually wrong.
+                reportGaveUp(source, CaptureOutcome.NO_FRAMES, exitCode = null, missing = true)
+                entry.error.value = CameraFailure.FFMPEG_MISSING
+                return
+            }
             // Check whether ffmpeg managed to open the device
-            val exitedImmediately = process != null && withContext(Dispatchers.IO) {
+            val exitedImmediately = withContext(Dispatchers.IO) {
                 process.waitFor(2000, java.util.concurrent.TimeUnit.MILLISECONDS)
             } && process.exitValue() != 0
             if (exitedImmediately) {
-                System.err.println("[Camera] ffmpeg exited immediately with code ${process.exitValue()}")
+                lastExitCode = process.exitValue()
+                System.err.println("[Camera] ffmpeg exited immediately with code $lastExitCode")
                 withContext(Dispatchers.IO) { killFfmpegProcess(process) }
             }
-            val framesProduced =
-                if (process != null && !exitedImmediately) streamFrames(process, entry) else false
-            if (framesProduced) {
+            val outcome = if (exitedImmediately) CaptureOutcome.NO_FRAMES else streamFrames(process, entry)
+            lastOutcome = outcome
+            if (outcome == CaptureOutcome.FRAMES) {
                 consecutiveFailures = 0
+                entry.error.value = null
                 delay(RESTART_DELAY_MS)
             } else {
                 consecutiveFailures++
@@ -361,12 +396,42 @@ object SharedCameraFrameCache {
 
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
             System.err.println("[Camera] Giving up after $consecutiveFailures consecutive failures")
-            CrashReporter.reportWarning(
-                "Camera: Giving up on device after $consecutiveFailures consecutive ffmpeg failures",
-                tags = mapOf("subsystem" to "camera")
-            )
+            reportGaveUp(source, lastOutcome, lastExitCode, missing = false)
+            // The capture coroutine is about to end. Nothing else will ever set this, so without it
+            // the operator watches an empty rectangle with no idea the app has stopped trying.
+            entry.error.value = CameraFailure.DEVICE_UNAVAILABLE
         }
     }
+}
+
+/**
+ * The diagnostic for a camera that never opened.
+ *
+ * The scheme and the outcome are what separate the causes this warning collapses together —
+ * a missing binary, a device another app holds, a format the device refuses. The device *name*
+ * is deliberately not sent: it is the one part of a capture command that identifies a person's
+ * hardware, and it is not needed to tell those cases apart.
+ */
+private fun reportGaveUp(
+    source: SceneSource.CameraSource,
+    outcome: CaptureOutcome,
+    exitCode: Int?,
+    missing: Boolean,
+) {
+    val reason = if (missing) "ffmpeg_missing" else outcome.name.lowercase()
+    CrashReporter.reportWarning(
+        if (missing) "Camera: ffmpeg could not be started"
+        else "Camera: Giving up on device after $MAX_CONSECUTIVE_FAILURES consecutive ffmpeg failures",
+        tags = mapOf(
+            "subsystem" to "camera",
+            "camera.scheme" to source.devicePath.substringBefore("://", "unknown"),
+            "failure.reason" to reason
+        ),
+        extras = buildMap {
+            put("camera.format", source.videoFormat.ifEmpty { "auto" })
+            exitCode?.let { put("ffmpeg.exit_code", it.toString()) }
+        }
+    )
 }
 
 /**

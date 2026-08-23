@@ -125,6 +125,7 @@ class DeviceInfoReportTest {
         vlcReason: String = "",
         jcefInitialized: Boolean = false,
         jcefMacUnsupported: Boolean = false,
+        jcefWindowsUnsupported: Boolean = false,
         songFolderCount: Int = 0,
         totalSongs: Int = 0,
         bibleCount: Int = 0,
@@ -135,6 +136,7 @@ class DeviceInfoReportTest {
         screens = screens, deckLinkAvailable = deckLinkAvailable, deckLinkDevices = deckLinkDevices,
         vlcAvailable = vlcAvailable, vlcReason = vlcReason,
         jcefInitialized = jcefInitialized, jcefMacUnsupported = jcefMacUnsupported,
+        jcefWindowsUnsupported = jcefWindowsUnsupported,
         songFolderCount = songFolderCount, totalSongs = totalSongs, bibleCount = bibleCount,
         analyticsEnabled = analyticsEnabled,
     )
@@ -201,6 +203,14 @@ class DeviceInfoReportTest {
         assertTrue(
             "Web browser (JCEF): not initialized (macOS version too old)"
                 in render(facts(jcefInitialized = false, jcefMacUnsupported = true)),
+        )
+    }
+
+    @Test
+    fun `uninitialized JCEF on old Windows notes the version`() {
+        assertTrue(
+            "Web browser (JCEF): not initialized (Windows version too old)"
+                in render(facts(jcefInitialized = false, jcefWindowsUnsupported = true)),
         )
     }
 

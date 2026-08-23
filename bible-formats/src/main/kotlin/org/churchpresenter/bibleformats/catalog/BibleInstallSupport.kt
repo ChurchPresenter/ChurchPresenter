@@ -56,6 +56,21 @@ object BibleInstallSupport {
         return outcome
     }
 
+    /**
+     * Whether a failing status is the host's problem rather than ours, and so not worth reporting.
+     *
+     * 429 and every 5xx — Cloudflare's own 520-530 range included, which is the origin being
+     * unreachable — are transient and outside the app's control. They are still handled the same
+     * way (stale cache, then a failure outcome); they are simply not sent to Sentry, because
+     * [CrashReporter.reportWarning] has no throttle behind it and a host having a bad hour would
+     * otherwise post one unactionable event per fetch attempt per install. A 4xx is kept: that is a
+     * wrong URL or a changed API, and it is ours to fix.
+     */
+    fun isTransientUpstreamStatus(status: Int): Boolean = status == TOO_MANY_REQUESTS || status >= SERVER_ERROR_FLOOR
+
+    private const val TOO_MANY_REQUESTS = 429
+    private const val SERVER_ERROR_FLOOR = 500
+
     const val COPY_BUFFER_BYTES = 64 * 1024
     private const val MAX_ARCHIVE_ENTRIES = 64
     private const val MAX_EXTRACTED_BYTES = 256L * 1024 * 1024
