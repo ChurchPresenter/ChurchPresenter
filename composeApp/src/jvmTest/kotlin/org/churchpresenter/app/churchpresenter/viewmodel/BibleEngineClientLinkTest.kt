@@ -39,6 +39,30 @@ import kotlin.test.assertTrue
  * takes.
  *
  * Message parsing is covered separately by [BibleEngineClientMessageTest].
+ *
+ * **`starting again drops the previous link rather than stacking a second one` is a regression test
+ * for a real race, and it caught it as a flake first.** It timed out on `main` on 2026-08-23
+ * (`24403e98`, run 32612691663) waiting 15s for the second link — 1 of 9,625 tests, on a commit that
+ * touched only `lottieGenerator/`. It never reproduced in isolation, and it never would have:
+ * `--tests` drops `jvmTest` to a single fork, and the race needs the outgoing link's teardown to be
+ * slow enough to overtake the new link's handshake.
+ *
+ * The fault was in [BibleEngineClient], not in the fixture. `start()` calls `stop()`, which cancels
+ * the connect job **without waiting for it** — it cannot, being called from the UI thread. The
+ * outgoing `connectLoop` then unwound through its generic `catch` (ktor's CIO engine surfaces the
+ * cancellation as an I/O failure, not always as a `CancellationException`), cleared `_connected`,
+ * `session` and `_engineSttConnected`, and only noticed it was cancelled at the next `delay`. When
+ * that landed after the new link had reported itself up, the client held a live socket it believed
+ * was down — permanently, since a healthy socket produces no further event to correct it. Hence the
+ * timeout on `connected.value`.
+ *
+ * The fix is a generation counter bumped by `stop()`: a replaced link's writes are ignored, and it
+ * returns instead of retrying. No join, no blocked frame. `BibleEngineClientRestartTest` pins the
+ * guard directly, without a server.
+ *
+ * The wait below is 15s and stays 15s: it is a deadline for a loopback handshake that takes
+ * milliseconds, not a budget anything is expected to use. **Do not** widen it, retry, or loosen an
+ * assertion here.
  */
 class BibleEngineClientLinkTest {
 
