@@ -3,27 +3,11 @@ package org.churchpresenter.statistics
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import org.churchpresenter.core.models.statistics.DateRange
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
 
 /** The rolling windows offered alongside the calendar years, in months. */
 val ROLLING_MONTHS = listOf(3, 6, 12)
-
-/**
- * A reporting period for the statistics views. Resolved against a caller-supplied `today` rather
- * than the clock, so screenshots and tests are deterministic.
- */
-sealed interface StatisticsPeriod {
-    /** Everything ever recorded. */
-    data object AllTime : StatisticsPeriod
-
-    /** A rolling window ending today, e.g. the last 3 months. */
-    data class LastMonths(val months: Int) : StatisticsPeriod
-
-    /** A single calendar year, January 1 to December 31. */
-    data class Year(val year: Int) : StatisticsPeriod
-}
-
-/** An inclusive epoch-millis range, as the [StatisticsManager] range queries expect. */
-data class DateRange(val fromMs: Long, val toMs: Long)
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59

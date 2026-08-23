@@ -10,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.SongPlayEvent
 
 /**
  * Where the CCLI number on the licence report comes from.

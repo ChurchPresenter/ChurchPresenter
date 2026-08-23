@@ -8,6 +8,11 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.DisplayStatistics
+import org.churchpresenter.core.models.statistics.PlayEventLog
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 /**
  * The two files the usage history lives in.

@@ -5,12 +5,12 @@ import org.churchpresenter.bible.BibleSearch
 import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.core.models.songs.SongCache
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.statistics.SongDisplayEntry
-import org.churchpresenter.statistics.SongPlayEvent
-import org.churchpresenter.statistics.VerseDisplayEntry
-import org.churchpresenter.statistics.VersePlayEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 /**
  * Default values for the small `data class`es in this package that every call site so far has

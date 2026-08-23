@@ -4,6 +4,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongKey
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VerseKey
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 /**
  * The pure helpers behind the statistics screen and its CCLI export: how the activity chart picks

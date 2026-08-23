@@ -10,15 +10,15 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.statistics.ActivityPoint
 import org.churchpresenter.statistics.StatisticsManager
-import org.churchpresenter.statistics.SongSummary
-import org.churchpresenter.statistics.VerseSummary
 import java.io.File
 import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.churchpresenter.core.models.statistics.ActivityPoint
+import org.churchpresenter.core.models.statistics.SongSummary
+import org.churchpresenter.core.models.statistics.VerseSummary
 
 /**
  * Harness, fixtures and labels shared by the `CCLIReportDialog` test classes.

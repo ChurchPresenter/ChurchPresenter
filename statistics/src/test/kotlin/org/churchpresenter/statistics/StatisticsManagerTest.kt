@@ -13,6 +13,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.DisplayStatistics
+import org.churchpresenter.core.models.statistics.PlayEventLog
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongKey
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VerseKey
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 /**
  * What was sung and read, and the CCLI report built from it.

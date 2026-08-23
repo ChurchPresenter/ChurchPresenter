@@ -158,14 +158,8 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
-import org.churchpresenter.statistics.ActivityPoint
 import org.churchpresenter.statistics.ROLLING_MONTHS
-import org.churchpresenter.statistics.SongKey
-import org.churchpresenter.statistics.SongSummary
 import org.churchpresenter.statistics.StatisticsManager
-import org.churchpresenter.statistics.StatisticsPeriod
-import org.churchpresenter.statistics.VerseKey
-import org.churchpresenter.statistics.VerseSummary
 import org.churchpresenter.statistics.availableYears
 import org.churchpresenter.statistics.resolveDates
 import org.churchpresenter.theme.AppThemeWrapper
@@ -180,6 +174,12 @@ import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.semantic
+import org.churchpresenter.core.models.statistics.ActivityPoint
+import org.churchpresenter.core.models.statistics.SongKey
+import org.churchpresenter.core.models.statistics.SongSummary
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
+import org.churchpresenter.core.models.statistics.VerseKey
+import org.churchpresenter.core.models.statistics.VerseSummary
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59
