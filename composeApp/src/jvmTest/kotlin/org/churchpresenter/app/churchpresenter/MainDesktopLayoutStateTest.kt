@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.companionserver.InstanceLinkStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

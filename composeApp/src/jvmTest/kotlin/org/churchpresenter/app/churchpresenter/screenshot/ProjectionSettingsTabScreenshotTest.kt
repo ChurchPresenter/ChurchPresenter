@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.noExternalScreens
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.oneExternalScreen
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.threeTranslations
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.twoExternalScreens
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test

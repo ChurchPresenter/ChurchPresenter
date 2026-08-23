@@ -7,9 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.companionserver.ScheduleItemDto
+import org.churchpresenter.companionserver.InstanceLinkLogSide
+import org.churchpresenter.companionserver.InstanceLinkLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
@@ -683,7 +683,7 @@ class ScheduleViewModel(
     }
 
     /**
-     * Inverse of [org.churchpresenter.app.churchpresenter.server.CompanionServer.updateSchedule]'s
+     * Inverse of [org.churchpresenter.companionserver.CompanionServer.updateSchedule]'s
      * ScheduleItem → ScheduleItemDto mapping. Some fields the DTO doesn't carry (extra announcement
      * formatting/timer options, lower-third pause settings, scene id, dictionary detail beyond the
      * word) fall back to defaults — a known limitation of mirroring through the flat companion DTO

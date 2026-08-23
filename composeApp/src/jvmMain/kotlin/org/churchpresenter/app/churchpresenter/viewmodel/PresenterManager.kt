@@ -26,7 +26,8 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.dictionary.StrongsEntry
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.companionserver.LottieRenderCache
+import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
 import org.churchpresenter.settings.utils.Constants
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
@@ -610,7 +611,7 @@ class PresenterManager {
                     val variant = LottieRenderCache.desktopVariant(json, atemRenderSettings)
                         ?: return@launch // JSON has no timing — stay on the live renderer
                     // Instant on a cache hit; renders in the background otherwise
-                    val cached = LottieRenderCache.prepare(json, variant).await()
+                    val cached = LottieRenderCache.prepare(json, variant, SkiaLottieFrameRenderer).await()
                     stream = LottieFrameStream(file = cached, scope = preRenderScope) { frame ->
                         // Identity guard: a decode already in flight when newer content replaced
                         // this stream must not publish into the new content's cleared state (the

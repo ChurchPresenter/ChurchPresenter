@@ -9,6 +9,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.companionserver.InstanceLinkLogSide
+import org.churchpresenter.companionserver.InstanceLinkLogger
 
 /**
  * [InstanceLinkLogger] is the only window into Instance Link sync bugs — the feature's REST fetches

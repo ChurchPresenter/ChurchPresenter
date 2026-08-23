@@ -1518,7 +1518,7 @@
     <ID>TooManyFunctions:PresentationViewModel.kt$PresentationViewModel</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
     <ID>TooManyFunctions:QAManager.kt$QAManager</ID>
-    <ID>TooManyFunctions:RemoteApply.kt$org.churchpresenter.app.churchpresenter.server.RemoteApply.kt</ID>
+    <ID>TooManyFunctions:RemoteApply.kt$org.churchpresenter.app.churchpresenter.remote.RemoteApply.kt</ID>
     <ID>TooManyFunctions:RemoteClientManager.kt$RemoteClientManager</ID>
     <ID>TooManyFunctions:STTManager.kt$STTManager</ID>
     <ID>TooManyFunctions:SceneSourceRenderer.kt$org.churchpresenter.app.churchpresenter.composables.SceneSourceRenderer.kt</ID>

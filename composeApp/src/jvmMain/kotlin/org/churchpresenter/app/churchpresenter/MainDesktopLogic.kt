@@ -17,8 +17,8 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.companionserver.InstanceLinkStatus
+import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.settings.utils.Constants

@@ -149,9 +149,10 @@ import javax.swing.JOptionPane
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.atem.AtemClient
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.companionserver.LottieRenderCache
+import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
 import org.churchpresenter.atem.AtemUploadStatus
-import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
+import org.churchpresenter.companionserver.LowerThirdSequencer
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
@@ -161,7 +162,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
-import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import org.churchpresenter.companionserver.isLottieFile
 import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
@@ -265,7 +266,7 @@ fun LowerThirdTab(
     // Pre-render ATEM uploads in the background for every lottie file as soon as it
     // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
     LaunchedEffect(lottieFiles, appSettings.atemSettings) {
-        lottieFiles.forEach { LottieRenderCache.ensureForFile(it, appSettings.atemSettings) }
+        lottieFiles.forEach { LottieRenderCache.ensureForFile(it, appSettings.atemSettings, SkiaLottieFrameRenderer) }
     }
 
     val scope = rememberCoroutineScope()
@@ -405,7 +406,7 @@ fun LowerThirdTab(
     LaunchedEffect(showAtemDialog, atemIsClip, jsonContent, atemDetectedFps) {
         if (!showAtemDialog || jsonContent.isBlank()) return@LaunchedEffect
         val variant = atemVariant(atemIsClip)
-        LottieRenderCache.prepare(jsonContent, variant)
+        LottieRenderCache.prepare(jsonContent, variant, SkiaLottieFrameRenderer)
         LottieRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
     }
 
@@ -423,7 +424,7 @@ fun LowerThirdTab(
             try {
                 // Awaits the background render when it isn't done yet;
                 // instant when the cache file already exists
-                val cached = LottieRenderCache.prepare(jsonContent, variant).await()
+                val cached = LottieRenderCache.prepare(jsonContent, variant, SkiaLottieFrameRenderer).await()
                 atemProgress = 0f
                 // Publish to the shared status so the tab's upload bar shows the file +
                 // slot for in-app uploads too (same source the API uploads use)

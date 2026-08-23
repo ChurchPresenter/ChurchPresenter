@@ -132,7 +132,7 @@ class ProjectionSettingsTabStructureTest {
                 ProjectionSettingsTab(
                     settings = state.value,
                     onSettingsChange = { transform -> state.value = transform(state.value) },
-                    companionServer = org.churchpresenter.app.churchpresenter.server.CompanionServer(),
+                    companionServer = org.churchpresenter.companionserver.CompanionServer(),
                     onIdentifyScreen = {},
                     onIdentifyBrowserSource = {},
                     scenes = emptyList(),

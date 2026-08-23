@@ -87,6 +87,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
+import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -102,9 +103,9 @@ import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
+import org.churchpresenter.companionserver.LottieRenderCache
+import org.churchpresenter.companionserver.CompanionServer
+import org.churchpresenter.companionserver.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
@@ -122,8 +123,8 @@ import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.companionserver.InstanceLinkLogSide
+import org.churchpresenter.companionserver.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
@@ -145,22 +146,22 @@ import java.io.File
 import java.net.URI
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
-import org.churchpresenter.app.churchpresenter.server.applyRemoteLiveState
-import org.churchpresenter.app.churchpresenter.server.downloadMirroredBackgroundSettings
-import org.churchpresenter.app.churchpresenter.server.remoteAccessDecision
-import org.churchpresenter.app.churchpresenter.server.addScheduleItem
-import org.churchpresenter.app.churchpresenter.server.batchEventSummary
-import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.server.RemoteApproval
-import org.churchpresenter.app.churchpresenter.server.remoteApproval
-import org.churchpresenter.app.churchpresenter.server.executeProjectItem
-import org.churchpresenter.app.churchpresenter.server.instanceLinkBackgroundCacheDir
-import org.churchpresenter.app.churchpresenter.server.qaActionType
-import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
-import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrounds
-import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
-import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
-import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.remote.applyRemoteLiveState
+import org.churchpresenter.app.churchpresenter.remote.downloadMirroredBackgroundSettings
+import org.churchpresenter.companionserver.remoteAccessDecision
+import org.churchpresenter.app.churchpresenter.remote.addScheduleItem
+import org.churchpresenter.app.churchpresenter.remote.batchEventSummary
+import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
+import org.churchpresenter.app.churchpresenter.remote.RemoteApproval
+import org.churchpresenter.app.churchpresenter.remote.remoteApproval
+import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.remote.instanceLinkBackgroundCacheDir
+import org.churchpresenter.app.churchpresenter.remote.qaActionType
+import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
+import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteBackgrounds
+import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteOutput
+import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent
+import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
@@ -311,7 +312,8 @@ fun main() {
 
     LottieRenderCache.ensureForFolder(
         startupSettings.streamingSettings.lowerThirdFolder,
-        startupSettings.atemSettings
+        startupSettings.atemSettings,
+        SkiaLottieFrameRenderer
     )
 
     application(exitProcessOnExit = true) {
@@ -386,7 +388,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
 
     var theme by remember { mutableStateOf(themeFromSettings(appSettings.theme)) }
-    val companionServer = remember { CompanionServer() }
+    val companionServer = remember { CompanionServer(appCompanionHost()) }
     val qaManager = remember { QAManager() }
     val sttManager = remember { STTManager() }
     LaunchedEffect(appSettings.bibleEngineSettings.helpDevMode) {
@@ -550,7 +552,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         screenCountForUsage = screenCountForUsage,
         deckLinkCountForUsage = deckLinkCountForUsage,
     )
-    remember(qaManager) { companionServer.qaManager = qaManager; true }
+    remember(qaManager) { companionServer.qaStore = qaManager; true }
     ObsSceneWiring(appSettings, companionServer, obsManager, presenterManager)
     val tunnelStatus by companionServer.tunnelManager.status.collectAsState()
     val tunnelUrl by companionServer.tunnelManager.tunnelUrl.collectAsState()
@@ -1111,6 +1113,41 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             companionServer.broadcastSongSectionSelected(index)
                                         }
                                     }
+                            }
+
+                            // Content actions — putting something on the screen, clearing it, or
+                            // writing an uploaded file to disk — now ask before they happen, on the
+                            // same allow/block rules the schedule endpoints have always used. The
+                            // route suspends on `pending.decision` until this resolves it, so a
+                            // denial means the action never runs rather than being undone after.
+                            LaunchedEffect(Unit) {
+                                companionServer.onInstantApproval.collect { pending ->
+                                    val clientId = pending.clientId
+                                    val access = remoteAccessDecision(
+                                        clientId,
+                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
+                                        sessionAllowedClients, sessionBlockedClients,
+                                    )
+                                    when (val outcome = remoteApproval(
+                                        access,
+                                        type = remoteActionType(pending.actionType),
+                                        title = pending.title,
+                                        detail = pending.detail,
+                                        clientId = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId),
+                                    )) {
+                                        RemoteApproval.Reject -> pending.decision.complete(false)
+                                        is RemoteApproval.Approve -> {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(outcome.notification)
+                                        }
+                                        is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
+                                            outcome.event,
+                                            { pending.decision.complete(true); Unit },
+                                            { pending.decision.complete(false); Unit },
+                                        ))
+                                    }
+                                }
                             }
 
                             LaunchedEffect(Unit) {

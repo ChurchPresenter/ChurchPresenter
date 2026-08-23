@@ -134,7 +134,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
