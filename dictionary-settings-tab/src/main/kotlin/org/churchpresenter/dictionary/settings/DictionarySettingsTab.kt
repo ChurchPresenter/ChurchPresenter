@@ -45,6 +45,7 @@ import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.ui.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
@@ -57,6 +58,12 @@ fun DictionarySettingsTab(
 ) {
     val availableFonts = rememberSystemFonts()
     val ds = settings.dictionarySettings
+
+    // Every control on this tab changes one field of DictionarySettings, so they all go through one
+    // updater rather than restating the two nested copies at each of the thirty call sites below.
+    val updateDict: (DictionarySettings.() -> DictionarySettings) -> Unit = { change ->
+        onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.change()) }
+    }
 
     val scrollState = rememberScrollState()
     Box(
@@ -76,7 +83,7 @@ fun DictionarySettingsTab(
                 SettingRow(label = stringResource(Res.string.show)) {
                     Switch(
                         checked = ds.showWord,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
+                        onCheckedChange = { updateDict { copy(showWord = it) } }
                     )
                 }
 
@@ -87,7 +94,7 @@ fun DictionarySettingsTab(
                 ) {
                     ColorPickerField(
                         color = ds.wordColor,
-                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } },
+                        onColorChange = { updateDict { copy(wordColor = it) } },
                         label = stringResource(Res.string.color).removeSuffix(":"),
                         modifier = Modifier.widthIn(max = 150.dp)
                     )
@@ -96,10 +103,10 @@ fun DictionarySettingsTab(
                         italic = ds.wordItalic,
                         underline = false,
                         shadow = ds.wordShadow,
-                        onBoldChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } },
-                        onItalicChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } },
+                        onBoldChange = { updateDict { copy(wordBold = it) } },
+                        onItalicChange = { updateDict { copy(wordItalic = it) } },
                         onUnderlineChange = { },
-                        onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }
+                        onShadowChange = { updateDict { copy(wordShadow = it) } }
                     )
                 }
                 AnimatedVisibility(visible = ds.wordShadow) {
@@ -107,9 +114,9 @@ fun DictionarySettingsTab(
                         shadowColor = ds.wordShadowColor,
                         shadowSize = ds.wordShadowSize,
                         shadowOpacity = ds.wordShadowOpacity,
-                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowColor = it)) } },
-                        onSizeChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowSize = it)) } },
-                        onOpacityChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowOpacity = it)) } }
+                        onColorChange = { updateDict { copy(wordShadowColor = it) } },
+                        onSizeChange = { updateDict { copy(wordShadowSize = it) } },
+                        onOpacityChange = { updateDict { copy(wordShadowOpacity = it) } }
                     )
                 }
                 Row(
@@ -122,13 +129,13 @@ fun DictionarySettingsTab(
                         label = stringResource(Res.string.font_type).removeSuffix(":"),
                         value = ds.wordFontType,
                         fonts = availableFonts,
-                        onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontType = it)) } }
+                        onValueChange = { updateDict { copy(wordFontType = it) } }
                     )
                     NumberSettingsTextField(
                         label = stringResource(Res.string.font_size).removeSuffix(":"),
                         initialText = ds.wordFontSize,
                         range = 8..200,
-                        onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontSize = it)) } }
+                        onValueChange = { updateDict { copy(wordFontSize = it) } }
                     )
                 }
 
@@ -139,7 +146,7 @@ fun DictionarySettingsTab(
                 SettingRow(label = stringResource(Res.string.show)) {
                     Switch(
                         checked = ds.showDefinition,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
+                        onCheckedChange = { updateDict { copy(showDefinition = it) } }
                     )
                 }
 
@@ -150,7 +157,7 @@ fun DictionarySettingsTab(
                 ) {
                     ColorPickerField(
                         color = ds.definitionColor,
-                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } },
+                        onColorChange = { updateDict { copy(definitionColor = it) } },
                         label = stringResource(Res.string.color).removeSuffix(":"),
                         modifier = Modifier.widthIn(max = 150.dp)
                     )
@@ -158,7 +165,7 @@ fun DictionarySettingsTab(
                         label = stringResource(Res.string.font_size).removeSuffix(":"),
                         initialText = ds.definitionFontSize,
                         range = 8..120,
-                        onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }
+                        onValueChange = { updateDict { copy(definitionFontSize = it) } }
                     )
                 }
             } // end Definition SettingsSection
@@ -167,7 +174,7 @@ fun DictionarySettingsTab(
             SettingsSection(title = stringResource(Res.string.dictionary_settings_card_background)) {
                 ColorPickerField(
                     color = ds.cardBackgroundColor,
-                    onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
+                    onColorChange = { updateDict { copy(cardBackgroundColor = it) } },
                     label = stringResource(Res.string.color).removeSuffix(":"),
                     modifier = Modifier.widthIn(max = 150.dp)
                 )
@@ -178,7 +185,7 @@ fun DictionarySettingsTab(
                     ) {
                         SlimSlider(
                             value = ds.cardBackgroundOpacity,
-                            onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } },
+                            onValueChange = { updateDict { copy(cardBackgroundOpacity = it) } },
                             valueRange = 0f..1f,
                             modifier = Modifier.weight(1f),
                             trailingLabel = "${(ds.cardBackgroundOpacity * 100).toInt()}%"
@@ -198,7 +205,7 @@ fun DictionarySettingsTab(
                     SettingRow(label = stringResource(Res.string.show)) {
                         Switch(
                             checked = ds.showReference,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
+                            onCheckedChange = { updateDict { copy(showReference = it) } }
                         )
                     }
 
@@ -209,7 +216,7 @@ fun DictionarySettingsTab(
                     ) {
                         ColorPickerField(
                             color = ds.referenceColor,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } },
+                            onColorChange = { updateDict { copy(referenceColor = it) } },
                             label = stringResource(Res.string.color).removeSuffix(":"),
                             modifier = Modifier.widthIn(max = 150.dp)
                         )
@@ -221,7 +228,7 @@ fun DictionarySettingsTab(
                             onBoldChange = { },
                             onItalicChange = { },
                             onUnderlineChange = { },
-                            onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }
+                            onShadowChange = { updateDict { copy(referenceShadow = it) } }
                         )
                     }
                     AnimatedVisibility(visible = ds.referenceShadow) {
@@ -229,9 +236,9 @@ fun DictionarySettingsTab(
                             shadowColor = ds.referenceShadowColor,
                             shadowSize = ds.referenceShadowSize,
                             shadowOpacity = ds.referenceShadowOpacity,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowColor = it)) } },
-                            onSizeChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowSize = it)) } },
-                            onOpacityChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowOpacity = it)) } }
+                            onColorChange = { updateDict { copy(referenceShadowColor = it) } },
+                            onSizeChange = { updateDict { copy(referenceShadowSize = it) } },
+                            onOpacityChange = { updateDict { copy(referenceShadowOpacity = it) } }
                         )
                     }
                     Row(
@@ -244,13 +251,13 @@ fun DictionarySettingsTab(
                             label = stringResource(Res.string.font_type).removeSuffix(":"),
                             value = ds.referenceFontType,
                             fonts = availableFonts,
-                            onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontType = it)) } }
+                            onValueChange = { updateDict { copy(referenceFontType = it) } }
                         )
                         NumberSettingsTextField(
                             label = stringResource(Res.string.font_size).removeSuffix(":"),
                             initialText = ds.referenceFontSize,
                             range = 8..120,
-                            onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontSize = it)) } }
+                            onValueChange = { updateDict { copy(referenceFontSize = it) } }
                         )
                     }
                 }
@@ -260,7 +267,7 @@ fun DictionarySettingsTab(
                     SettingRow(label = stringResource(Res.string.show)) {
                         Switch(
                             checked = ds.showKjvUsage,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
+                            onCheckedChange = { updateDict { copy(showKjvUsage = it) } }
                         )
                     }
 
@@ -271,7 +278,7 @@ fun DictionarySettingsTab(
                     ) {
                         ColorPickerField(
                             color = ds.kjvUsageColor,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } },
+                            onColorChange = { updateDict { copy(kjvUsageColor = it) } },
                             label = stringResource(Res.string.color).removeSuffix(":"),
                             modifier = Modifier.widthIn(max = 150.dp)
                         )
@@ -279,7 +286,7 @@ fun DictionarySettingsTab(
                             label = stringResource(Res.string.font_size).removeSuffix(":"),
                             initialText = ds.kjvUsageFontSize,
                             range = 8..80,
-                            onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }
+                            onValueChange = { updateDict { copy(kjvUsageFontSize = it) } }
                         )
                     }
                 }
@@ -289,13 +296,13 @@ fun DictionarySettingsTab(
                     SettingRow(label = stringResource(Res.string.fade_in)) {
                         Switch(
                             checked = ds.fadeIn,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }
+                            onCheckedChange = { updateDict { copy(fadeIn = it) } }
                         )
                     }
                     SettingRow(label = stringResource(Res.string.fade_out)) {
                         Switch(
                             checked = ds.fadeOut,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }
+                            onCheckedChange = { updateDict { copy(fadeOut = it) } }
                         )
                     }
 
@@ -304,12 +311,13 @@ fun DictionarySettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            val ms = stringResource(Res.string.milliseconds_suffix)
                             SlimSlider(
                                 value = ds.transitionDuration,
-                                onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(transitionDuration = it)) } },
+                                onValueChange = { updateDict { copy(transitionDuration = it) } },
                                 valueRange = 100f..2000f,
                                 modifier = Modifier.weight(1f),
-                                trailingLabel = "${ds.transitionDuration.toInt()} ${stringResource(Res.string.milliseconds_suffix)}"
+                                trailingLabel = "${ds.transitionDuration.toInt()} $ms"
                             )
                         }
                     }
