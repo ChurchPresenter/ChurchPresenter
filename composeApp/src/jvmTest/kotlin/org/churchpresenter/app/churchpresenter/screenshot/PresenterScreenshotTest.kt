@@ -21,6 +21,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
 
 /**
  * Pictures of what the congregation sees.

@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The lower third — the band across the foot of the screen a broadcast keys over its camera feed.

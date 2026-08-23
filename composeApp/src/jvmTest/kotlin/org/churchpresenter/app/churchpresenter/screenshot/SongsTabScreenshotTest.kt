@@ -15,6 +15,8 @@ import org.churchpresenter.app.churchpresenter.tabs.songsTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 class SongsTabScreenshotTest {
 

@@ -20,6 +20,8 @@ import org.churchpresenter.app.churchpresenter.remote.batchEventSummary
 import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The remote-permission dialog — what an operator is asked when a phone tries to do something — in

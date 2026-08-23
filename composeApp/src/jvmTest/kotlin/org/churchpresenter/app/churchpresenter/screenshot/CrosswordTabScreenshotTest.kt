@@ -22,6 +22,9 @@ import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.showsExactly
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The Crossword tab, in both themes.

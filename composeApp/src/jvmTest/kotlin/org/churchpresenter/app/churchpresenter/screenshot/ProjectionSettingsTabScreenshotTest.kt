@@ -34,6 +34,8 @@ import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The Projection tab of the settings dialog, and the Content Outputs dialog it opens, in both themes.

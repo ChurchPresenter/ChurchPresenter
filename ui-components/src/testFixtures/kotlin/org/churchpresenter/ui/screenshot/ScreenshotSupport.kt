@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.ui.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-internal val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DARK)
+val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DARK)
 
 /**
  * Where every screenshot is written, relative to the module directory a Gradle test task runs in.
@@ -53,7 +53,7 @@ internal val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DAR
  *   '*ScreenshotTest*'`; a class outside that pattern is never rendered in CI and its images are
  *   never compared.
  */
-internal const val SCREENSHOT_ROOT = "screenshots"
+const val SCREENSHOT_ROOT = "screenshots"
 
 /**
  * How long to let real work — decoding thumbnails, rasterising a deck — finish before failing.
@@ -82,7 +82,7 @@ internal const val SCREENSHOT_ROOT = "screenshots"
  * completion`, which names neither the wait nor the condition. 30s leaves room for the rest of the
  * test and still fails with the message that says what was being waited for.
  */
-internal const val RENDER_TIMEOUT_MS = 30_000L
+const val RENDER_TIMEOUT_MS = 30_000L
 private val PARTS = File("$SCREENSHOT_ROOT/.parts")
 
 /**
@@ -147,7 +147,7 @@ private val PARTS = File("$SCREENSHOT_ROOT/.parts")
  * `SimpleImageComparator` counts a pixel as differing only past a color distance of 0.007, which is
  * about four levels of one 8-bit channel.
  */
-internal const val CHANGE_THRESHOLD = 0.001f
+const val CHANGE_THRESHOLD = 0.001f
 
 /**
  * What the record/compare/verify tasks apply to a **golden** — the stacked image that is committed.
@@ -184,7 +184,7 @@ private val PART_OPTIONS =
  *
  * [rootIndex] 1 shoots an open popup — a dropdown or menu is a compose root of its own.
  */
-internal fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
+fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
     dismissHover()
     val options = if (file.absoluteFile.startsWith(PARTS.absoluteFile)) PART_OPTIONS else GOLDEN_OPTIONS
     onAllNodes(isRoot())[rootIndex].captureRoboImage(file.path, options)
@@ -224,7 +224,7 @@ private val OFF_SCREEN = Offset(-1f, -1f)
  * Stacked afterwards rather than composed together because each render fills the test window: two
  * in one composition would get half the height each instead of two full-size views.
  */
-internal fun stackedThemes(
+fun stackedThemes(
     section: String,
     name: String,
     trim: Boolean = false,
@@ -249,7 +249,7 @@ internal fun stackedThemes(
  * whose states are tall enough that stacking makes a strip too long to read at a glance. Both write
  * under [SCREENSHOT_ROOT], so either way the CI comparison matches the files by path.
  */
-internal fun separateThemes(section: String, name: String, shoot: (ThemeMode, File) -> Unit) {
+fun separateThemes(section: String, name: String, shoot: (ThemeMode, File) -> Unit) {
     THEMES.forEach { (suffix, mode) ->
         shoot(mode, File("$SCREENSHOT_ROOT/$section/${name}_$suffix.png"))
     }
@@ -269,7 +269,7 @@ internal fun separateThemes(section: String, name: String, shoot: (ThemeMode, Fi
  * black-on-black. Every tab in the app draws inside a Surface, so this is also what the component
  * really looks like there.
  */
-internal fun captureComponent(
+fun captureComponent(
     section: String,
     name: String,
     rootIndex: Int = 0,
@@ -382,7 +382,7 @@ private fun BufferedImage.trimmed(margin: Int = 8): BufferedImage {
  * @AfterTest fun unpinRecents() = recents.restore()
  * ```
  */
-internal class PinnedRecentColors {
+class PinnedRecentColors {
     private val stashed = mutableListOf<String>()
 
     fun clear() {

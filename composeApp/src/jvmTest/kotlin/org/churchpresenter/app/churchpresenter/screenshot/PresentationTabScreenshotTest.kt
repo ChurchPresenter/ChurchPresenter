@@ -39,6 +39,9 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 class PresentationTabScreenshotTest {
 

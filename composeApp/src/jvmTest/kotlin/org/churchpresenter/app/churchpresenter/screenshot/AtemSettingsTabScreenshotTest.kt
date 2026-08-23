@@ -18,6 +18,8 @@ import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The ATEM tab of the settings dialog, in both themes.

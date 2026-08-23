@@ -156,6 +156,12 @@ jobs:
               - *shared
               - 'bible/**'
               - 'diagnostics/**'          # implementation(projects.diagnostics)
+            uicomponents:
+              - *shared
+              - 'ui-components/**'
+              - 'theme/**'            # implementation(projects.theme)
+              - 'resources/**'        # api(projects.resources)
+              - 'settings/**'         # testImplementation, for the alignment screenshots
             dictionary:
               - *shared
               - 'dictionary/**'           # depends on nothing else: the files and the lookups
@@ -204,6 +210,7 @@ jobs:
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
+          :ui-components:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -365,6 +372,10 @@ jobs:
         if: always() && steps.modules.outputs.engine == 'true'
         run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
 
+      - name: UI components tests
+        if: always() && steps.modules.outputs.uicomponents == 'true'
+        run: ./gradlew :ui-components:test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -504,6 +515,7 @@ jobs:
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
+            ui-components/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
@@ -677,6 +689,8 @@ jobs:
             bible-formats/build/test-results/
             song-chords/build/reports/tests/
             song-chords/build/test-results/
+            ui-components/build/reports/tests/
+            ui-components/build/test-results/
             bible/build/reports/tests/
             bible/build/test-results/
             dictionary/build/reports/tests/

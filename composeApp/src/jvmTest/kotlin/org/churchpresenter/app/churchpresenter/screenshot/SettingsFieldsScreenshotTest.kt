@@ -20,6 +20,7 @@ import org.churchpresenter.ui.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.ui.SlimSlider
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureComponent
 
 /**
  * The labelled settings fields the Announcements tab's bars are built from — a colour swatch, two

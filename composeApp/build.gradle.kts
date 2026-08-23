@@ -459,6 +459,8 @@ val resolvedJdk21Home: String? = run {
 // jvmTest configuration directly. Gives the app's keyboard tests the shared keyDown() builder that
 // now lives in :core-models.
 dependencies {
+    // ScreenshotSupport: the theme-stacking/trim/capture machinery every screenshot suite uses.
+    add("jvmTestImplementation", testFixtures(projects.uiComponents))
     add("jvmTestImplementation", testFixtures(projects.coreModels))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own

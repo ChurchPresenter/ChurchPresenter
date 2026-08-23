@@ -87,6 +87,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
 | `dictionary/`          | `:dictionary`          | The bundled Strong's dictionary and the interlinear index over it — 18 MB of data  | [AGENT.md](dictionary/AGENT.md)          |
 | `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
+| `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,

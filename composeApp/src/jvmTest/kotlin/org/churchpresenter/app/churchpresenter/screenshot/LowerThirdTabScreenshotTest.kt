@@ -25,6 +25,9 @@ import org.churchpresenter.app.churchpresenter.tabs.selectPreset
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * Every state of the Lower Third tab, in both themes.

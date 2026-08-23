@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.ui.screenshot
 
 import org.churchpresenter.ui.HorizontalAlignmentButtons
 import org.churchpresenter.ui.TextStyleButtons

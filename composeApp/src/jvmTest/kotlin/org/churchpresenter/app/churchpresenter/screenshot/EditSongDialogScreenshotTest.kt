@@ -16,6 +16,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.EditSongContent
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * The song editor, in both themes.

@@ -16,6 +16,8 @@ import org.churchpresenter.app.churchpresenter.tabs.announcementsTab
 import org.churchpresenter.app.churchpresenter.tabs.timerButton
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureTo
+import org.churchpresenter.ui.screenshot.stackedThemes
 
 /**
  * Every state of the Announcements tab, in both themes.

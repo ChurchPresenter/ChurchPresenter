@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
+    `java-test-fixtures`
     jacoco
 }
 
@@ -23,6 +25,16 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     testImplementation(kotlin("test"))
     testImplementation(compose.desktop.uiTestJUnit4)
+    testImplementation(libs.roborazzi.composeDesktop)
+    // Test-only: the alignment screenshots are shot with the app's own Constants.LEFT/CENTER/RIGHT
+    // rather than copies of their values, so a change to those shows up here.
+    testImplementation(projects.settings)
+    testImplementation(testFixtures(project(":ui-components")))
+    testFixturesImplementation(projects.theme)
+    testFixturesImplementation(compose.desktop.currentOs)
+    testFixturesImplementation(compose.desktop.uiTestJUnit4)
+    testFixturesImplementation(libs.compose.material3)
+    testFixturesImplementation(libs.roborazzi.composeDesktop)
 }
 
 detekt {
@@ -42,4 +54,11 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         txt.required.set(false)
         md.required.set(false)
     }
+}
+
+// The images are COMMITTED, under `ui-components/screenshots/`, exactly as :composeApp's are under
+// `composeApp/screenshots/`. See the root AGENT.md: they are the artifact a reviewer opens and
+// approves before a UI change merges, so they must never move under `build/`.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }

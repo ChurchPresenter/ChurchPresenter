@@ -14,6 +14,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.ui.screenshot.THEMES
+import org.churchpresenter.ui.screenshot.captureTo
 
 private const val ROOT = "$SCREENSHOT_ROOT/shareYourStory"
 

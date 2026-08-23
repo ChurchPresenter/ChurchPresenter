@@ -27,6 +27,7 @@ import org.churchpresenter.ui.FocusLostRescueState
 import org.churchpresenter.ui.GoLiveButton
 import org.churchpresenter.ui.TooltipIconButton
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.captureComponent
 
 class TabControlsScreenshotTest {
 

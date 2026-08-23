@@ -16,6 +16,9 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardContent
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.ui.screenshot.THEMES
+import org.churchpresenter.ui.screenshot.captureTo
 
 class AppPreviewSetupWizardScreenshotTest {
 

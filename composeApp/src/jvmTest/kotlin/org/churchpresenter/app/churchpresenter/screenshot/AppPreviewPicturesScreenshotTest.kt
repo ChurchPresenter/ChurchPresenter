@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import kotlin.test.Test
+import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
 
 class AppPreviewPicturesScreenshotTest {
 
