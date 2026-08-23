@@ -16,6 +16,7 @@
             }
         ],
         "blockHeightEm": 3.5,
+        "logoScale": "height",
         "centerSingleLine": false
     },
     "elements": [

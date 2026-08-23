@@ -17,6 +17,7 @@
             }
         ],
         "blockHeightEm": 4.05,
+        "logoScale": "height",
         "centerSingleLine": false
     },
     "elements": [
@@ -132,7 +133,7 @@
                     "center": { "offsetXEm": -2.2916666666666665 }
                 }
             },
-            "size": { "type": "em", "wEm": 4.3, "hEm": 4.3 },
+            "size": { "type": "logoPlate", "padEm": 0.8 },
             "paint": {
                 "fill": { "role": "ACCENT" },
                 "stroke": { "role": "BORDER", "width": { "type": "fromConfig" } }

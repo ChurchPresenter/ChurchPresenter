@@ -116,7 +116,14 @@ internal class SpecBuild(
 
         val (w, h) = layout.resolveSize(element)
         val logoSizeEm = element.sizeEm ?: cfg.logoSize.toDouble()
-        val baseScale = layout.em(logoSizeEm) / max(cfg.logoW, cfg.logoH).toDouble() * 100
+        // Which dimension logoSize measures — the same choice the slot reserves width from, so the
+        // logo and the room made for it cannot disagree. LONGEST_SIDE is the default and is what
+        // every spec style was written against.
+        val scaleBasis = when (spec.layout.logoScale) {
+            LogoScaleBasis.HEIGHT -> cfg.logoH.toDouble()
+            LogoScaleBasis.LONGEST_SIDE -> max(cfg.logoW, cfg.logoH).toDouble()
+        }
+        val baseScale = layout.em(logoSizeEm) / scaleBasis * 100
         val rest = layout.resolve(element.placement)
 
         builder.addImageLayer(
