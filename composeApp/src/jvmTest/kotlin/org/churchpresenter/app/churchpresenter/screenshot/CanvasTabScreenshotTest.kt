@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.app.churchpresenter.composables.OS_WITHOUT_ENUMERATOR
+import org.churchpresenter.app.churchpresenter.composables.withOsName
 import org.churchpresenter.app.churchpresenter.tabs.CanvasLabel
 import org.churchpresenter.app.churchpresenter.tabs.canvasButton
 import org.churchpresenter.app.churchpresenter.tabs.canvasButtonAt
@@ -214,11 +216,23 @@ class CanvasTabScreenshotTest {
         SceneSource.BrowserSource(id = "browser-1", name = "Browser", url = ""),
     )
 
+    /**
+     * Shot under an OS with no enumerator, so the device list is empty rather than the host's.
+     *
+     * `CameraProperties` calls `listCameraDevicesWithDeckLink` inside its own `remember`, so an
+     * unwrapped shot bakes whichever hardware the recording machine had into the golden — the
+     * committed image read `MacBook Pro Camera`, and a machine without one renders
+     * `Capture screen 0`. [withOsName] is the settled seam for this panel and spawns no process,
+     * so it also cannot raise the macOS camera-permission prompt. The dropdown's populated
+     * appearance is covered in `DropdownSelector`'s own component suite, not here.
+     */
     @Test
-    fun `a camera source with no device chosen`() = selected(
-        "source_camera",
-        SceneSource.CameraSource(id = "camera-1", name = "Camera"),
-    )
+    fun `a camera source with no device chosen`() = withOsName(OS_WITHOUT_ENUMERATOR) {
+        selected(
+            "source_camera",
+            SceneSource.CameraSource(id = "camera-1", name = "Camera"),
+        )
+    }
 
     @Test
     fun `a screen capture source`() = selected(
