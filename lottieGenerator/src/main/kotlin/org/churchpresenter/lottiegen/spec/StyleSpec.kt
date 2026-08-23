@@ -60,6 +60,13 @@ data class LayoutSpec(
     /** Nominal content-block height in em (drives baseY and content-derived heights). */
     val blockHeightEm: Double = 3.5,
     /**
+     * How the logo is scaled, which decides how wide it draws and so how much room it needs.
+     *
+     * Defaults to [LogoScaleBasis.LONGEST_SIDE] — what every spec style was written against — so
+     * omitting it leaves a style's output unchanged.
+     */
+    val logoScale: LogoScaleBasis = LogoScaleBasis.LONGEST_SIDE,
+    /**
      * When true and only one of name/info is visible, that line recenters vertically on
      * the block. False matches the classic styles (hiding a line leaves the other in place).
      */
@@ -82,6 +89,23 @@ data class SlotSpec(
     /** ANDed; empty = always visible. */
     val visibleWhen: List<VisibilityRule> = emptyList()
 )
+
+/**
+ * What a style's `logoSize` measures, and so how the logo's drawn width is derived.
+ *
+ * The compiled styles disagree on this, and the difference is exactly what decides how much
+ * horizontal room a logo needs — see the logo section of `lottieGenerator/AGENT.md`.
+ */
+@Serializable
+enum class LogoScaleBasis {
+    /** `logoSize` is the longest side: the logo fits inside a square box and never exceeds it. */
+    @SerialName("longestSide")
+    LONGEST_SIDE,
+
+    /** `logoSize` is the HEIGHT: a logo wider than it is tall draws wider than `logoSize`. */
+    @SerialName("height")
+    HEIGHT,
+}
 
 @Serializable
 enum class SlotKind {
@@ -141,6 +165,16 @@ data class Placement(
     val line: LineAnchor = LineAnchor.BLOCK_CENTER,
     /** Flow-signed horizontal offset in em. */
     val offsetXEm: Double = 0.0,
+    /**
+     * Flow-signed horizontal offset in multiples of the logo's drawn HALF-width, added to
+     * [offsetXEm].
+     *
+     * For an element positioned relative to the logo rather than to its slot — a centre-aligned
+     * badge hung off the text block, say — a static em offset has to bake the logo's half-width in,
+     * which is only right while the logo is square. This term tracks it instead: under
+     * [LogoScaleBasis.HEIGHT] the logo's drawn width follows its aspect, and so does this.
+     */
+    val offsetXLogoHalfWidths: Double = 0.0,
     /** Vertical offset in em, +down, never mirrored. */
     val offsetYEm: Double = 0.0,
     val mirror: MirrorMode = MirrorMode.FLIP_ON_RIGHT,
@@ -160,6 +194,7 @@ data class PlacementOverride(
     val anchorIn: AnchorIn? = null,
     val line: LineAnchor? = null,
     val offsetXEm: Double? = null,
+    val offsetXLogoHalfWidths: Double? = null,
     val offsetYEm: Double? = null,
     /** true = the element is not built at all for this alignment. */
     val hidden: Boolean? = null
@@ -209,6 +244,16 @@ sealed interface SizeSpec {
     @Serializable
     @SerialName("textWrap")
     data class TextWrap(val field: TextFieldRef, val padXEm: Double = 0.5, val padYEm: Double = 0.3) : SizeSpec
+
+    /**
+     * The logo's drawn size plus [padEm] on every side — the plate behind a logo.
+     *
+     * Unlike [Em] this tracks both `cfg.logoSize` and, under [LogoScaleBasis.HEIGHT], the logo's
+     * aspect, so the plate stays around the logo instead of being a square guess.
+     */
+    @Serializable
+    @SerialName("logoPlate")
+    data class LogoPlate(val padEm: Double = 0.0) : SizeSpec
 
     /** Full canvas width (banner/ticker bands); always horizontally centered on the canvas. */
     @Serializable

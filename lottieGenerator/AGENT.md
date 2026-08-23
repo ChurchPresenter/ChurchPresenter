@@ -157,11 +157,20 @@ agree exactly.
 Note the consequence for a *tall* logo: its plate is now narrower than it is high, hugging the
 logo with even padding, where before it was square with extra room at the sides.
 
-**The spec ports cannot follow this**, and that is a known gap rather than an oversight: `SizeSpec`
-has no logo-derived variant and the layout slot gaps are static em, so neither the plate nor the
-reserved width can track an aspect. Each affected `SpecPort*Test` therefore covers a wide logo for
-layer *structure* only, and says so at the call site. Closing it needs a logo-derived `SizeSpec`
-plus logo-aware slot gaps.
+**The spec ports follow it too.** Three additions made the aspect expressible in a spec, all
+opt-in so no existing spec style moves:
+
+- `LayoutSpec.logoScale` — `longestSide` (the default, and what every spec style was written
+  against) or `height`. It picks both the logo's own scale basis and the width its slot reserves,
+  so the logo and the room made for it cannot disagree.
+- `SizeSpec.LogoPlate(padEm)` — the logo's drawn size plus padding, replacing a static `Em` guess
+  that could not even reference `cfg.logoSize`.
+- `Placement.offsetXLogoHalfWidths` — for an element hung off the logo rather than its slot, whose
+  static em offset previously had to bake half the logo's width in.
+
+The five ports set `logoScale: height`, Style 5's plate is a `logoPlate`, and the `SpecPort*Test`
+matrices are back on a **non-square** 120x80 logo with geometry asserted exactly. Deviations 8 and
+9 in `SpecPort5Test` — the scale basis and the square plate — are closed rather than documented.
 
 ## Dependencies
 

@@ -72,23 +72,20 @@ import kotlin.test.assertEquals
  *    port's offsetXEm −2.2916666666666665 = −2.5 + (TEXT_CORE_PAD_PX/2)/24 em
  *    (maxTextW and logoSize cancel exactly) — the 5 px term is the layout
  *    engine's fixed text-core pad, exact only at baseSize 24.
- * 8. Logo scale basis (spec-model gap): compiled scales the logo HEIGHT to
- *    logoSize em, so its drawn width follows the aspect; the spec engine's
- *    buildLogo normalizes by max(logoW, logoH) (fit-longest-side). The two agree
- *    exactly for a SQUARE logo and disagree for any other, which is why the
- *    matrix below uses one — see deviation 9.
- * 9. Logo BG size and the gutter: compiled sizes the plate as the logo's drawn
- *    width × its height, plus 0.8 em, and reserves a gutter to match — so both
- *    track the logo's aspect. The spec cannot: SizeSpec has no logo-derived
- *    variant (it cannot even reference cfg.logoSize, hence the static
- *    Em(4.3, 4.3), exact at default logoSize) and the slot gaps 0.4/0.9 that
- *    encode the badge overhang + 0.5 em margin are static em too.
+ * 8. Logo scale basis: BOTH now scale the logo from its HEIGHT. The spec's
+ *    buildLogo used to normalize by max(logoW, logoH) (fit-longest-side), which
+ *    matched only for a square logo; the layout's `logoScale: height` now selects
+ *    the same basis the compiled style uses, so the rendered logo is identical
+ *    for any aspect. (`longestSide` stays the default, so no other spec style
+ *    moves.)
+ * 9. Logo BG size and the gutter: both track the logo's drawn width. The plate is
+ *    a `logoPlate` SizeSpec (the logo's drawn size + 0.8 em) rather than a static
+ *    Em, so it is exact for every logoSize AND every aspect; the LOGO slot's core
+ *    is the drawn width, so the gutter follows too. The 0.4/0.9 gaps still encode
+ *    the badge overhang + 0.5 em margin, which are aspect-independent.
  *
- *    So the matrix uses a square logo, where compiled and spec agree exactly, and
- *    `portMatchesCompiledStructureWithAWideLogo` covers the non-square case for
- *    layer structure only. Closing the gap properly needs two spec-engine
- *    features — a logo-derived SizeSpec and logo-aware slot gaps — which is its
- *    own piece of work, not a re-baselining.
+ *    This is why the matrix below uses a NON-square 120x80 logo: geometry is
+ *    asserted exactly for it, which is the case that used to be inexpressible.
  * 10. Spec-model gap: compiled gates Logo AND Logo BG on
  *     `logoEnabled && logoData != null`; a RectElement can only test
  *     LOGO_ENABLED, so with logoEnabled=true but logoData=null the port would
@@ -124,7 +121,7 @@ class SpecPort5Test {
                             align = align,
                             logoEnabled = logo,
                             logoData = if (logo) logoData else null,
-                            logoW = if (logo) 80 else 0,
+                            logoW = if (logo) 120 else 0,
                             logoH = if (logo) 80 else 0,
                             bgEnabled = bg,
                             borderThickness = 4f
@@ -174,47 +171,6 @@ class SpecPort5Test {
                     assertEquals(e, a, eps, "rest origin[$i] $layerLabel")
                 }
             }
-        }
-    }
-
-
-    /**
-     * A logo wider than it is tall: layer structure only, deliberately not geometry.
-     *
-     * The matrix above uses a square logo because that is where the two models agree exactly. The
-     * compiled style scales the logo by HEIGHT, so a wide logo draws wider than `logoSize` and the
-     * compiled geometry now widens the gutter (and, in Style 5, the plate) to match it. The spec
-     * engine cannot follow: `SizeSpec` has no logo-derived variant and the layout slots' gaps are
-     * static em, so neither the reserved width nor the plate can track the logo's aspect.
-     *
-     * Closing that needs two spec-engine features — a logo-derived `SizeSpec` and logo-aware slot
-     * gaps — which is its own piece of work. Until then this asserts what still holds for a wide
-     * logo, which is that both models build the same layers in the same order, and leaves the
-     * geometry to the square configs above rather than pretending the numbers agree.
-     */
-    @Test
-    fun portMatchesCompiledStructureWithAWideLogo() {
-        val cfg = LottieGenConfig(
-            logoEnabled = true,
-            logoData = "data:image/png;base64,iVBORw0KGgo=",
-            logoW = 120,
-            logoH = 80,
-            // Same shape as the matrix's logo configs above, so this isolates the aspect and
-            // nothing else — a bare default config reaches a combination the matrix never covers.
-            bgEnabled = true,
-            borderThickness = 4f,
-        )
-        val expected = LottieGenerator.generate(cfg, Style5GradientBar())
-        val actual = LottieGenerator.generate(cfg, port())
-
-        val expectedLayers = expected["layers"]!!.jsonArray.map { it.jsonObject }
-        val actualLayers = actual["layers"]!!.jsonArray.map { it.jsonObject }
-
-        assertEquals(expectedLayers.map { it.name() }, actualLayers.map { it.name() }, "layer names/order")
-        for ((exp, act) in expectedLayers.zip(actualLayers)) {
-            assertEquals(exp["ty"]!!.jsonPrimitive.int, act["ty"]!!.jsonPrimitive.int, "layer type ${exp.name()}")
-            assertEquals(exp["td"]?.jsonPrimitive?.int, act["td"]?.jsonPrimitive?.int, "td ${exp.name()}")
-            assertEquals(exp["tt"]?.jsonPrimitive?.int, act["tt"]?.jsonPrimitive?.int, "tt ${exp.name()}")
         }
     }
 

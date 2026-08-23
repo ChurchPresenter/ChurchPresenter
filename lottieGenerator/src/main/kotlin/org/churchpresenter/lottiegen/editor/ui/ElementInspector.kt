@@ -371,13 +371,15 @@ internal fun SizeEditor(size: SizeSpec, onChange: (SizeSpec) -> Unit) {
             label = Strings.editorSizeType,
             options = listOf(
                 Strings.editorSizeEm, Strings.editorSizeContent,
-                Strings.editorSizeTextWrap, Strings.editorSizeCanvasWidth
+                Strings.editorSizeTextWrap, Strings.editorSizeCanvasWidth,
+                Strings.editorSizeLogoPlate
             ),
             selected = when (size) {
                 is SizeSpec.Em -> Strings.editorSizeEm
                 is SizeSpec.ContentDerived -> Strings.editorSizeContent
                 is SizeSpec.TextWrap -> Strings.editorSizeTextWrap
                 is SizeSpec.CanvasWidth -> Strings.editorSizeCanvasWidth
+                is SizeSpec.LogoPlate -> Strings.editorSizeLogoPlate
             },
             display = { it },
             onSelect = { label ->
@@ -386,6 +388,7 @@ internal fun SizeEditor(size: SizeSpec, onChange: (SizeSpec) -> Unit) {
                         Strings.editorSizeContent -> SizeSpec.ContentDerived()
                         Strings.editorSizeTextWrap -> SizeSpec.TextWrap(TextFieldRef.NAME)
                         Strings.editorSizeCanvasWidth -> SizeSpec.CanvasWidth(NEW_CANVAS_WIDTH_PCT)
+                        Strings.editorSizeLogoPlate -> SizeSpec.LogoPlate()
                         else -> SizeSpec.Em(1.0, 1.0)
                     }
                 )
@@ -434,6 +437,10 @@ internal fun SizeEditor(size: SizeSpec, onChange: (SizeSpec) -> Unit) {
             is SizeSpec.CanvasWidth -> NumberField(
                 Strings.editorHeightEm, size.hEm,
                 onCommit = { onChange(size.copy(hEm = it)) }, modifier = Modifier.fillMaxWidth()
+            )
+            is SizeSpec.LogoPlate -> NumberField(
+                Strings.editorPadX, size.padEm,
+                onCommit = { onChange(size.copy(padEm = it)) }, modifier = Modifier.fillMaxWidth()
             )
         }
     }

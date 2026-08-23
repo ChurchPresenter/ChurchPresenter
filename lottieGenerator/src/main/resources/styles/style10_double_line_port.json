@@ -16,6 +16,7 @@
             }
         ],
         "blockHeightEm": 3.4666666666666667,
+        "logoScale": "height",
         "centerSingleLine": false
     },
     "elements": [
@@ -284,7 +285,7 @@
                 "line": "BLOCK_CENTER",
                 "offsetYEm": -0.65,
                 "alignOverrides": {
-                    "center": { "offsetXEm": -2.0416666666666667 }
+                    "center": { "offsetXEm": -0.2916666666666665, "offsetXLogoHalfWidths": -1.0 }
                 }
             },
             "tracks": [

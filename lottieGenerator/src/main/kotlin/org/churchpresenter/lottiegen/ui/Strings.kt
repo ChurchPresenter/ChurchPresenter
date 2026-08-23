@@ -190,6 +190,7 @@ object Strings {
     val editorSizeContent: String get() = bundle.getString("editor_size_content")
     val editorSizeTextWrap: String get() = bundle.getString("editor_size_text_wrap")
     val editorSizeCanvasWidth: String get() = bundle.getString("editor_size_canvas_width")
+    val editorSizeLogoPlate: String get() = bundle.getString("editor_size_logo_plate")
     val editorWidthEm: String get() = bundle.getString("editor_width_em")
     val editorHeightEm: String get() = bundle.getString("editor_height_em")
     val editorPadX: String get() = bundle.getString("editor_pad_x")
