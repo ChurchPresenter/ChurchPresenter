@@ -19,11 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.client_label_cancel
-import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
-import churchpresenter.composeapp.generated.resources.client_label_placeholder
-import churchpresenter.composeapp.generated.resources.client_label_save
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.client_label_cancel
+import org.churchpresenter.resources.generated.resources.client_label_edit_tooltip
+import org.churchpresenter.resources.generated.resources.client_label_placeholder
+import org.churchpresenter.resources.generated.resources.client_label_save
 import org.jetbrains.compose.resources.stringResource
 
 /**
