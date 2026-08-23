@@ -75,6 +75,8 @@ import churchpresenter.composeapp.generated.resources.web_engine_unavailable_bod
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_title
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_title
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
@@ -141,13 +143,14 @@ fun WebTab(
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
     /** Overridable so tests can reach both branches without touching the real JCEF singleton. */
     cefInitialized: Boolean = CefManager.initialized,
-    cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported
+    cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
+    cefWindowsUnsupported: Boolean = CefManager.windowsUnsupported
 ) {
     // JCEF's native engine can fail to load at startup (broken chrome_elf.dll, missing
     // VC++ runtime, etc.). CefManager.init() catches that and leaves the engine down for
     // the whole session, so show an actionable panel instead of dead browser chrome.
     if (!cefInitialized) {
-        WebEngineUnavailable(modifier, cefMacOsUnsupported)
+        WebEngineUnavailable(modifier, cefMacOsUnsupported, cefWindowsUnsupported)
         return
     }
 
@@ -877,7 +880,8 @@ fun WebTab(
 @Composable
 internal fun WebEngineUnavailable(
     modifier: Modifier = Modifier,
-    macOsUnsupported: Boolean = CefManager.macOsUnsupported
+    macOsUnsupported: Boolean = CefManager.macOsUnsupported,
+    windowsUnsupported: Boolean = CefManager.windowsUnsupported
 ) {
     Column(
         modifier = modifier
@@ -896,8 +900,11 @@ internal fun WebEngineUnavailable(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(
-                if (macOsUnsupported) Res.string.web_engine_unavailable_macos_title
-                else Res.string.web_engine_unavailable_title
+                when {
+                    macOsUnsupported -> Res.string.web_engine_unavailable_macos_title
+                    windowsUnsupported -> Res.string.web_engine_unavailable_windows_title
+                    else -> Res.string.web_engine_unavailable_title
+                }
             ),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -906,8 +913,11 @@ internal fun WebEngineUnavailable(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(
-                if (macOsUnsupported) Res.string.web_engine_unavailable_macos_body
-                else Res.string.web_engine_unavailable_body
+                when {
+                    macOsUnsupported -> Res.string.web_engine_unavailable_macos_body
+                    windowsUnsupported -> Res.string.web_engine_unavailable_windows_body
+                    else -> Res.string.web_engine_unavailable_body
+                }
             ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

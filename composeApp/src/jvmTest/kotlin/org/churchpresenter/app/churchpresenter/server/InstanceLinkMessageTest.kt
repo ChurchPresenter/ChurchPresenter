@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
 import java.net.ConnectException
@@ -221,6 +222,9 @@ class InstanceLinkMessageTest {
         assertEquals("refused", c.classifyConnectFailure(ConnectException("no")))
         assertEquals("dns", c.classifyConnectFailure(UnknownHostException("no")))
         assertEquals("timeout", c.classifyConnectFailure(SocketTimeoutException("no")))
+        // Ktor's connect timeout is a subclass of ConnectException, and was filed as "refused"
+        // until the when-branches were ordered the other way round.
+        assertEquals("timeout", c.classifyConnectFailure(ConnectTimeoutException("no", null)))
         assertEquals("tls", c.classifyConnectFailure(SSLException("no")))
     }
 

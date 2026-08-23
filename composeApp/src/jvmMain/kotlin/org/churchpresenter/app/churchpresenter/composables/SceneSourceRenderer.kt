@@ -35,6 +35,10 @@ import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_qr
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera_default
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_in_use
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_ffmpeg_missing
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_unsupported_device
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_unavailable
 import churchpresenter.composeapp.generated.resources.canvas_video_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.canvas_video_vlc_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
@@ -702,7 +706,8 @@ private fun CameraSourceContent(
     }
 
     val frame by cameraFlows.frame.collectAsState()
-    val error by cameraFlows.error.collectAsState()
+    val failure by cameraFlows.error.collectAsState()
+    val error = failure?.let { cameraFailureMessage(it) }
 
     if (frame != null) {
         Image(
@@ -727,6 +732,17 @@ private fun CameraSourceContent(
         }
     }
 }
+
+/** The wording for a [CameraFailure] — the cache reports a reason, the strings live here. */
+@Composable
+private fun cameraFailureMessage(failure: CameraFailure): String = stringResource(
+    when (failure) {
+        CameraFailure.DECKLINK_INPUT_IN_USE -> Res.string.canvas_camera_error_decklink_in_use
+        CameraFailure.FFMPEG_MISSING -> Res.string.canvas_camera_error_ffmpeg_missing
+        CameraFailure.UNSUPPORTED_DEVICE_PATH -> Res.string.canvas_camera_error_unsupported_device
+        CameraFailure.DEVICE_UNAVAILABLE -> Res.string.canvas_camera_error_unavailable
+    }
+)
 
 @Composable
 private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {

@@ -58,6 +58,33 @@ class CefManagerTest {
     }
 
     @Test
+    fun `isUnsupportedWindows is false on non-Windows operating systems`() {
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Mac OS X", osVersion = "11.7"))
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Linux", osVersion = "6.1"))
+    }
+
+    @Test
+    fun `isUnsupportedWindows is false on Windows 10 and newer`() {
+        // Windows 10 and 11 both report 10.0; only the major number is read.
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Windows 10", osVersion = "10.0"))
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Windows 11", osVersion = "10.0"))
+    }
+
+    @Test
+    fun `isUnsupportedWindows is true below Windows 10`() {
+        // 6.1 is Windows 7 and 6.3 is 8.1 — both below the Chromium 110 cut-off, and both
+        // fail natively with "chrome_elf.dll: The specified procedure could not be found".
+        assertTrue(CefManager.isUnsupportedWindows(osName = "Windows 7", osVersion = "6.1"))
+        assertTrue(CefManager.isUnsupportedWindows(osName = "Windows 8.1", osVersion = "6.3"))
+    }
+
+    @Test
+    fun `isUnsupportedWindows is false when the version cannot be parsed`() {
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Windows 7", osVersion = ""))
+        assertFalse(CefManager.isUnsupportedWindows(osName = "Windows 7", osVersion = "unknown"))
+    }
+
+    @Test
     fun `jcefRootDir on Windows uses a writable ProgramData path`() {
         val root = CefManager.jcefRootDir(
             osName = "Windows 11",
@@ -151,6 +178,14 @@ class CefManagerTest {
     }
 
     @Test
+    fun `isUnsupportedWindows with no arguments reads the real OS properties`() {
+        assertEquals(
+            CefManager.isUnsupportedWindows(System.getProperty("os.name", ""), System.getProperty("os.version", "")),
+            CefManager.isUnsupportedWindows(),
+        )
+    }
+
+    @Test
     fun `jcefRootDir with no arguments resolves to a churchpresenter directory`() {
         assertTrue(
             CefManager.jcefRootDir().name == ".churchpresenter" || CefManager.jcefRootDir().name == "ChurchPresenter",
@@ -166,6 +201,7 @@ class CefManagerTest {
     @Test
     fun `macOsUnsupported defaults to false since init is never called in tests`() {
         assertFalse(CefManager.macOsUnsupported)
+        assertFalse(CefManager.windowsUnsupported)
     }
 
     @Test

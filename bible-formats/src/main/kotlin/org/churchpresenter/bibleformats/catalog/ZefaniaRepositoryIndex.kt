@@ -230,10 +230,12 @@ object ZefaniaRepositoryIndex {
             return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.RateLimited(reset)
         }
         if (response.status.value !in HTTP_OK_RANGE) {
-            CrashReporter.reportWarning(
-                "Zefania index fetch returned HTTP ${response.status.value}",
-                tags = mapOf("subsystem" to "zefania_index")
-            )
+            if (!BibleInstallSupport.isTransientUpstreamStatus(response.status.value)) {
+                CrashReporter.reportWarning(
+                    "Zefania index fetch returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "zefania_index")
+                )
+            }
             return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
         }
         return null

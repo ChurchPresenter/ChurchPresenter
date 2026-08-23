@@ -95,10 +95,12 @@ object EBibleSource : BibleSource {
         try {
             val response = http.get(url) { header("User-Agent", "ChurchPresenter") }
             if (response.status.value !in 200..299) {
-                CrashReporter.reportWarning(
-                    "eBible catalogue returned HTTP ${response.status.value}",
-                    tags = mapOf("subsystem" to "ebible_catalog")
-                )
+                if (!BibleInstallSupport.isTransientUpstreamStatus(response.status.value)) {
+                    CrashReporter.reportWarning(
+                        "eBible catalogue returned HTTP ${response.status.value}",
+                        tags = mapOf("subsystem" to "ebible_catalog")
+                    )
+                }
                 return@withContext cached?.let { BibleCatalogOutcome.Success(it, stale = true) }
                     ?: BibleCatalogOutcome.Failure
             }
