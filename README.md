@@ -51,8 +51,13 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 >
 > **[`dictionary-tab/`](./dictionary-tab)** — the Dictionary tab itself: the Strong's browser with
 > its search, language filter and history, the "In Scripture" panel beside it, and the presenter
-> that puts an entry on the screen. The first tab to live outside `:composeApp`, which keeps the
-> wiring and the settings tab. `./gradlew :dictionary-tab:test`.
+> that puts an entry on the screen. The first tab to live outside `:composeApp`, which keeps only
+> the wiring. `./gradlew :dictionary-tab:test`.
+>
+> **[`dictionary-settings-tab/`](./dictionary-settings-tab)** — the page of the options dialog that
+> styles that output: the colour, font, size, style and shadow of the word, its definition, its
+> reference and its KJV usage, plus the card background and the fades. Depends on the settings
+> fields rather than on the dictionary. `./gradlew :dictionary-settings-tab:test`.
 >
 > **[`companion-server/`](./companion-server)** — the HTTP/WebSocket surface the desktop exposes:
 > the wire format, the routes, the pages it serves a browser, TLS and the tunnel, plus the client a

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.dictionary.settings
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsOff
@@ -15,6 +15,7 @@ import kotlin.test.assertTrue
 import org.churchpresenter.ui.SENTINEL_FONT
 import org.churchpresenter.ui.assertColorFieldShows
 import org.churchpresenter.ui.assertNumberFieldShows
+import org.churchpresenter.ui.mixedCaseInstalledFont
 import org.churchpresenter.ui.pickFont
 import org.churchpresenter.ui.pickFontFilterOnly
 import org.churchpresenter.ui.recolor

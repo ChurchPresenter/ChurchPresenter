@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.dictionary.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background

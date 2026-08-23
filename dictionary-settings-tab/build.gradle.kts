@@ -4,23 +4,10 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
-    `java-test-fixtures`
     jacoco
 }
-
-// Five of the six counters clear the root build's 0.85 default outright (measured 2026-08-23:
-// INSTRUCTION 0.981, LINE 0.981, CLASS 0.970, METHOD 0.963, BRANCH 0.861). COMPLEXITY measures
-// 0.8499 -- one unit of 1126 short -- and cannot be lifted further without contradicting a decision
-// this repo has already recorded: 31 of the 169 missed units are FocusLostRescueState's AWT
-// window-activation paths, which FocusLostRescueTest documents as deliberately untested (real
-// hardware timing, no injectable delay), and almost all of the rest are the Compose compiler's
-// $changed recomposition-skip branches emitted in each composable's own declaration.
-extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.84",
-)
 
 group = "org.churchpresenter"
 
@@ -33,24 +20,17 @@ compose.resources {
 }
 
 dependencies {
-    implementation(projects.theme)
+    api(projects.settings)
+    implementation(projects.uiComponents)
     api(projects.resources)
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.extended)
-    implementation(libs.kotlinx.serialization.json)
     testImplementation(kotlin("test"))
+    testImplementation(projects.theme)
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
-    testImplementation(projects.settings)
-    testImplementation(testFixtures(project(":ui-components")))
-    testFixturesImplementation(kotlin("test"))
-    testFixturesImplementation(projects.theme)
-    testFixturesImplementation(compose.desktop.currentOs)
-    testFixturesImplementation(compose.desktop.uiTestJUnit4)
-    testFixturesImplementation(libs.compose.material3)
-    testFixturesImplementation(libs.roborazzi.composeDesktop)
+    testImplementation(testFixtures(projects.uiComponents))
 }
 
 tasks.withType<Test>().configureEach {

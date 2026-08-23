@@ -46,7 +46,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
-| `dialogs/`       | All dialogs and settings dialog tabs                                |
+| `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary one, in `:dictionary-settings-tab` |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
 | `ui/theme/`      | `LanguageProvider` only — the theme itself is the `:theme` module   |
 
@@ -89,6 +89,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
+| `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 | `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
 
@@ -247,7 +248,8 @@ widening the threshold, along with `colour_picker`, `settings_companion_satellit
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
 **The suite is clean: `verifyRoborazziJvm` fails 0 of 832 images on `main`** — measured 2026-08-23 on
-macOS. Another 61 live in `ui-components/screenshots` and 31 in `dictionary-tab/screenshots`, each
+macOS. Another 61 live in `ui-components/screenshots`, 19 in `dictionary-tab/screenshots` and 12
+in `dictionary-settings-tab/screenshots`, each
 verified by its own module's task. It is therefore readable as pass/fail again, and **any** failure is a real difference.
 
 The 24 that used to be permanently red were three separate causes, all now fixed at source rather
