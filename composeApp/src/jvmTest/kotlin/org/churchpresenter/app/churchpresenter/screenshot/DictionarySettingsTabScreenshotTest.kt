@@ -16,9 +16,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -206,7 +206,7 @@ class DictionarySettingsTabScreenshotTest {
     }
 
     private companion object {
-        const val SECTION = "dictionaryTab"
+        const val SECTION = "dictionarySettingsTab"
 
         // One color per picker, none of them repeated anywhere else on the tab.
         const val WORD = "#FFD54F"

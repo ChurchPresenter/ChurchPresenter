@@ -444,6 +444,36 @@
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)</ID>
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error</ID>
     <ID>MaxLineLength:ConnectionStatusRow.kt$InstanceLinkStatus.DISCONNECTED -&gt; MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onColorChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowColor = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onOpacityChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowOpacity = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onOpacityChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowOpacity = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onSizeChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onSizeChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontType = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(transitionDuration = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontSize = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontType = it)) } }</ID>
+    <ID>MaxLineLength:DictionarySettingsTab.kt$trailingLabel = "${ds.transitionDuration.toInt()} ${stringResource(Res.string.milliseconds_suffix)}"</ID>
     <ID>MaxLineLength:DisplayGeometry.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:Constants.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:ContactUsDialog.kt$Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)</ID>

@@ -17,7 +17,6 @@ import org.churchpresenter.ui.assertStepperArrowsUsable
 import org.churchpresenter.ui.colorFields
 import org.churchpresenter.ui.fontFields
 import org.churchpresenter.ui.numberFields
-import org.churchpresenter.ui.unlabelledControls
 
 /**
  * Pins the shape of the tab and validates the ordinals the behaviour tests use.

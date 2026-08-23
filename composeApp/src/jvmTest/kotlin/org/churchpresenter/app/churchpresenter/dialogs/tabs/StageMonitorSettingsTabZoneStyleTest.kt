@@ -15,7 +15,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.ui.SENTINEL_FONT
 import org.churchpresenter.ui.assertColorFieldShows
-import org.churchpresenter.ui.mixedCaseInstalledFont
 import org.churchpresenter.ui.pickFont
 import org.churchpresenter.ui.recolor
 import org.churchpresenter.ui.retypeNumberField

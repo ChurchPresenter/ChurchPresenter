@@ -126,8 +126,7 @@ class DictionarySettingsTabReferenceTest {
 
     @Test
     fun `the reference shadow size stores a new percentage`() {
-        val initial = dictionarySettings { copy(referenceShadow = true, referenceShadowSize = 133) }
-        dictionaryTab(initial) { get ->
+        dictionaryTab(initial = dictionarySettings { copy(referenceShadow = true, referenceShadowSize = 133) }) { get ->
             retypeNumberField(showing = 133, to = 60)
             assertEquals(60, get().dictionarySettings.referenceShadowSize, "the typed size must be stored")
             assertEquals(90, get().dictionarySettings.referenceShadowOpacity, "the intensity must be untouched")

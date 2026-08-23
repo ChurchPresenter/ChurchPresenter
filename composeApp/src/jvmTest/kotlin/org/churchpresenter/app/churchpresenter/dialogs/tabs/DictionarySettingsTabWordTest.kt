@@ -15,7 +15,6 @@ import kotlin.test.assertTrue
 import org.churchpresenter.ui.SENTINEL_FONT
 import org.churchpresenter.ui.assertColorFieldShows
 import org.churchpresenter.ui.assertNumberFieldShows
-import org.churchpresenter.ui.mixedCaseInstalledFont
 import org.churchpresenter.ui.pickFont
 import org.churchpresenter.ui.pickFontFilterOnly
 import org.churchpresenter.ui.recolor
@@ -134,8 +133,7 @@ class DictionarySettingsTabWordTest {
 
     @Test
     fun `the word shadow colour stores the confirmed hex`() {
-        val initial = dictionarySettings { copy(wordShadow = true, wordShadowColor = "#123456") }
-        dictionaryTab(initial) { get ->
+        dictionaryTab(initial = dictionarySettings { copy(wordShadow = true, wordShadowColor = "#123456") }) { get ->
             recolor(fromHex = "#123456", toHex = "#654321")
             assertTrue(
                 get().dictionarySettings.wordShadowColor.equals("#654321", ignoreCase = true),
