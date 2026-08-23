@@ -240,19 +240,24 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**Two churn sources are NOT fixed, and they fail 24 of the 914 images on a clean `main`** — measured
-2026-08-22 on macOS, `main` and a feature branch producing byte-identical failure sets:
+**The suite is clean: `verifyRoborazziJvm` fails 0 of 914 images on `main`** — measured 2026-08-22 on
+macOS. It is therefore readable as pass/fail again, and **any** failure is a real difference.
 
-| suite | images | why it changes every run |
-|---|---|---|
-| `StageMonitorScreenshotTest` | 22 | The stage monitor draws a **live wall clock**. The diff is literally `06:47:19 PM` against `01:56:04 AM`. |
-| `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 1 | Same clock, inside the settings preview. |
-| `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerates the host's **real capture devices**. Committed as "MacBook Pro Camera"; a machine without one renders "Capture screen 0". |
+The 24 that used to be permanently red were three separate causes, all now fixed at source rather
+than by widening the threshold — every one of them the same shape as the `about_*` git-hash case, a
+value from outside the composition leaking into the picture:
 
-Both are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside the
-composition leaking into the picture — and both want the same remedy: take the value as a parameter
-and let the test pin it. Until then `verifyRoborazziJvm` cannot be read as pass/fail; check the
-failing names against this table first, and treat **anything else** as a real difference.
+| suite | images | cause | fix |
+|---|---|---|---|
+| `StageMonitorScreenshotTest` | 22 | Drew the **live wall clock**: `06:47:19 PM` against `01:56:04 AM`. Nondeterministic twice over — `LocalTime.now()`, and a 12h/24h pattern read from `Locale.getDefault()`. | `StageMonitorScreen`'s `pinnedClockText` parameter, pinned by the test. `stageSettings()` did route CLOCK to `NONE`, but `filling()` passed `zones` over the top and `zones` wins the merge. |
+| `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 2 | **A stale golden, not a clock** — that tab has no clock, only a static `ZoneLabelCell` label. Recorded at `c0d6f194`, redesigned at `201142bc` and never re-recorded. | Re-recorded, both themes. |
+| `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerated the host's **real capture devices**: "MacBook Pro Camera" committed, "Capture screen 0" elsewhere. | Shot inside `withOsName(OS_WITHOUT_ENUMERATOR)`, so the list is deterministically empty. |
+| `AppPreviewSetupWizardScreenshotTest` → `setup_1_language_*` | 2 | Another stale golden, found while verifying the above and **not** in the original count of 24. Deterministic — re-recorded, then verified green three consecutive times. | Re-recorded, both themes. |
+
+Two of those rows are stale goldens rather than nondeterminism, and both surfaced only in `_light`
+first: `stackedThemes` loops the themes inside one test, so the light capture throws before the dark
+one is ever compared. **When a `_light` image fails, expect its `_dark` twin to be equally stale** —
+re-record the pair.
 
 Every state is shot in **both themes and stacked into one image**, light above dark — go through
 `stackedThemes` (or `captureComponent`, which wraps it) and a state is written once, not twice. One

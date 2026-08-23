@@ -50,9 +50,14 @@ import kotlin.test.Test
  * One image per state, not a light/dark pair: this screen paints from `StageMonitorSettings`, not
  * from the operator's theme.
  *
- * **The clock is switched off in every shot.** Its zone draws the wall clock, so leaving it on would
- * rewrite every one of these images the moment the minute turned — the same rule the Announcements
- * timer modes and the canvas clock source are held to.
+ * **The clock is pinned in every shot**, via [PINNED_CLOCK]. Its zone draws the wall clock, so
+ * leaving it live would rewrite every one of these images the moment the second turned — the same
+ * rule the Announcements timer modes and the canvas clock source are held to.
+ *
+ * `stageSettings()` routes CLOCK to [StageMonitorZone.NONE], but `filling()` passes `zones` over
+ * the top of that and `zones` wins the merge, so every layout with four or more slots puts the
+ * clock back on screen. That is what made 22 of these images permanently red before the pin: the
+ * settings-level "off" was never reaching the shots that needed it.
  */
 class StageMonitorScreenshotTest {
 
@@ -100,6 +105,10 @@ class StageMonitorScreenshotTest {
                         displayedDictionaryEntry = entry,
                         qaSettings = QASettings(),
                         dictionarySettings = DictionarySettings(),
+                        // The clock zone would otherwise draw the real wall clock — and, on a
+                        // 24h-locale machine, in a different format as well — so every image wide
+                        // enough to show that zone would differ from its golden on every run.
+                        pinnedClockText = PINNED_CLOCK,
                     )
                 }
             }
@@ -1025,6 +1034,13 @@ class StageMonitorScreenshotTest {
 
     private companion object {
         const val SECTION = "stageMonitor"
+
+        /**
+         * The wall clock, frozen. Any layout with enough slots routes the CLOCK content type into a
+         * zone, so without this the goldens would disagree with every later run — and with every
+         * 24h-locale machine, which formats the same instant as `18:47:19`.
+         */
+        const val PINNED_CLOCK = "06:47:19 PM"
 
         val FIXTURES = java.io.File("build/screenshot-fixtures/stage-monitor")
 

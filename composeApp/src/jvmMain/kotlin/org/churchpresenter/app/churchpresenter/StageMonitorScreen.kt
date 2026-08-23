@@ -192,7 +192,20 @@ fun StageMonitorScreen(
     qaSettings: QASettings = QASettings(),
     displayedDictionaryEntry: StrongsEntry? = null,
     dictionarySettings: DictionarySettings = DictionarySettings(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /**
+     * The clock line, as a parameter only so the screenshots of this screen can pin it.
+     *
+     * The clock zone draws the wall clock and re-formats it every second, so a committed image of
+     * any layout wide enough to show that zone would fail `verifyRoborazziJvm` the moment the
+     * second turned. It is nondeterministic twice over: [formatClock] reads `LocalTime.now()`, and
+     * the 12h/24h pattern it picks comes from `Locale.getDefault()` — so a 24h machine renders
+     * `18:47:19` where a 12h one renders `06:47:19 PM`. Pinning the formatted string settles both.
+     *
+     * When non-null the ticking loop below is skipped entirely, or its first tick would overwrite
+     * the pin. Nothing but the screenshot test passes anything here.
+     */
+    pinnedClockText: String? = null
 ) {
     val currentText = stageCurrentText(presentingMode, currentLyricSection, displayedVerses)
     val nextText = stageNextText(presentingMode, allLyricSections, songDisplaySectionIndex, nextVerses)
@@ -203,9 +216,10 @@ fun StageMonitorScreen(
         currentImageBitmap = loadImageBitmapFromPath(displayedImagePath)
     }
 
-    // Clock state — ticks every second
-    var clockText by remember { mutableStateOf(formatClock()) }
-    LaunchedEffect(Unit) {
+    // Clock state — ticks every second, unless [pinnedClockText] holds it still for a screenshot.
+    var clockText by remember { mutableStateOf(pinnedClockText ?: formatClock()) }
+    LaunchedEffect(pinnedClockText) {
+        if (pinnedClockText != null) return@LaunchedEffect
         while (true) {
             clockText = formatClock()
             delay(CLOCK_TICK_MS)
