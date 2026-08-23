@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.settings.SettingsManager
@@ -183,6 +183,16 @@ internal fun csvQuote(s: String): String = "\"${s.replace("\"", "\"\"")}\""
 
 // ── Manager ───────────────────────────────────────────────────────────────────
 
+/**
+ * The two stores behind the statistics window, and every question asked of them.
+ *
+ * Twenty functions against a threshold of eleven, suppressed at the declaration rather than
+ * baselined: they are one pair of files read five ways — load and save, record, query, clear,
+ * export — and each has a production caller. The type cannot usefully be split because all of them
+ * share [lock]; handing the queries or the export their own object would either duplicate the lock
+ * or leave a reader running against a tally another thread is mid-write on.
+ */
+@Suppress("TooManyFunctions")
 class StatisticsManager {
     private val lock = Any()
     private val userHome = System.getProperty("user.home")
@@ -483,7 +493,18 @@ class StatisticsManager {
         sb.appendLine("Title,Author,Songbook,Song Number,CCLI Number,Times Used,First Used,Last Used")
         for (song in songs) {
             fun esc(s: String) = csvQuote(s)
-            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
+            sb.appendLine(
+                listOf(
+                    esc(song.title),
+                    esc(song.author),
+                    esc(song.songbook),
+                    song.songNumber.toString(),
+                    esc(song.ccliNumber),
+                    song.count.toString(),
+                    dateFmt.format(Date(song.firstUsed)),
+                    dateFmt.format(Date(song.lastUsed)),
+                ).joinToString(","),
+            )
         }
         file.writeText(sb.toString())
         true

@@ -88,3 +88,8 @@ include(":bible")
 // interlinear index that says where each number appears. Plain files on the classpath and the
 // lookups over them — depended on by :composeApp, which draws the tab and serves the REST routes.
 include(":dictionary")
+
+// Everything the app has ever put on the screen, counted: the song and verse tallies, the
+// timestamped play log behind them, the periods a report covers and the CSV/Excel export CCLI
+// licence reporting needs. The window that draws it stays in :composeApp.
+include(":statistics")

@@ -329,6 +329,9 @@ kotlin {
             implementation(projects.bible)
             // The bundled study data: the Strong's dictionary and the interlinear index over it.
             implementation(projects.dictionary)
+            // Everything the app has ever put on the screen, counted: the tallies, the play log
+            // behind them and the CSV/Excel export CCLI reporting needs. CCLIReportDialog draws it.
+            implementation(projects.statistics)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             implementation(projects.songChords)

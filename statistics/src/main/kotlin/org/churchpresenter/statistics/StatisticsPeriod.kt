@@ -1,11 +1,11 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
 /** The rolling windows offered alongside the calendar years, in months. */
-internal val ROLLING_MONTHS = listOf(3, 6, 12)
+val ROLLING_MONTHS = listOf(3, 6, 12)
 
 /**
  * A reporting period for the statistics views. Resolved against a caller-supplied `today` rather
@@ -52,7 +52,7 @@ internal fun LocalDate.endOfDayMs(): Long =
  * @param earliestMs the oldest recorded event, from [StatisticsManager.getEarliestEventTime]; the
  *   lower bound of [StatisticsPeriod.AllTime]
  */
-internal fun StatisticsPeriod.resolveDates(today: LocalDate, earliestMs: Long?): Pair<LocalDate, LocalDate> =
+fun StatisticsPeriod.resolveDates(today: LocalDate, earliestMs: Long?): Pair<LocalDate, LocalDate> =
     when (this) {
         is StatisticsPeriod.AllTime -> {
             val from = earliestMs
@@ -76,7 +76,7 @@ internal fun StatisticsPeriod.resolve(today: LocalDate, earliestMs: Long?): Date
  * The calendar years that can hold data, newest first: from the year of the oldest event through
  * the current year. An empty log yields just the current year.
  */
-internal fun availableYears(today: LocalDate, earliestMs: Long?): List<Int> {
+fun availableYears(today: LocalDate, earliestMs: Long?): List<Int> {
     val firstYear = earliestMs
         ?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).year }
         ?.coerceAtMost(today.year)

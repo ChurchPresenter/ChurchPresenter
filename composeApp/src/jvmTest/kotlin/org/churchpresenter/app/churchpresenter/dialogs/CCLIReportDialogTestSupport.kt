@@ -10,10 +10,10 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.ActivityPoint
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.SongSummary
-import org.churchpresenter.app.churchpresenter.data.VerseSummary
+import org.churchpresenter.statistics.ActivityPoint
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.statistics.SongSummary
+import org.churchpresenter.statistics.VerseSummary
 import java.io.File
 import java.nio.file.Files
 import java.text.SimpleDateFormat

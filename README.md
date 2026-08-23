@@ -49,6 +49,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > numbers occurs in scripture. Six JSON files and the lookups over them, and nothing else — no
 > Compose, no Ktor. `./gradlew :dictionary:test`.
 >
+> **[`statistics/`](./statistics)** — what was sung and read, counted: the all-time tallies, the
+> timestamped play log behind them, and the CSV/Excel exports a CCLI licence report is filed
+> from. The window that draws it stays in the app; this is the numbers.
+> `./gradlew :statistics:test`.
+>
 > **[`song-chords/`](./song-chords)** — the grammar songs are written in: what counts as a chord,
 > what counts as a section heading, transposition, and turning a pasted chord sheet into the inline
 > `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.

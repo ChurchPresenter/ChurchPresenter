@@ -5,6 +5,10 @@ import org.churchpresenter.bible.BibleSearch
 import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.core.models.songs.SongCache
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.statistics.SongDisplayEntry
+import org.churchpresenter.statistics.SongPlayEvent
+import org.churchpresenter.statistics.VerseDisplayEntry
+import org.churchpresenter.statistics.VersePlayEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

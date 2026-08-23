@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import java.io.File
 import java.nio.file.Files
@@ -375,6 +375,40 @@ class StatisticsManagerTest {
         assertEquals(0, points.sumOf { it.verseCount })
     }
 
+    @Test
+    fun `each weekly column counts only the events of its own week`() {
+        val now = System.currentTimeMillis()
+        seedLog(
+            songs = listOf(
+                SongPlayEvent(1, "Amazing Grace", "Hymnal", "", now - 21L * 86_400_000),
+                SongPlayEvent(2, "Be Thou My Vision", "Hymnal", "", now),
+            ),
+        )
+
+        val points = StatisticsManager().getActivityByPeriod(now - 30L * 86_400_000, now)
+
+        assertEquals(2, points.sumOf { it.songCount }, "both events are inside the range")
+        assertTrue(points.all { it.songCount <= 1 }, "no column may hold both: ${points.map { it.songCount }}")
+        assertEquals(2, points.count { it.songCount == 1 }, "three weeks apart is two columns")
+    }
+
+    @Test
+    fun `each yearly column counts only its own year`() {
+        seedLog(
+            songs = listOf(
+                SongPlayEvent(1, "Older Song", "Hymnal", "", stamp(LAST_YEAR, 5, 4)),
+                SongPlayEvent(2, "This Year Song", "Hymnal", "", stamp(THIS_YEAR, 2, 1)),
+            ),
+        )
+
+        val points = StatisticsManager()
+            .getActivityByPeriod(stamp(LAST_YEAR - 2, 1, 1), stamp(THIS_YEAR, 6, 1))
+
+        assertEquals(1, points.first { it.label == LAST_YEAR.toString() }.songCount)
+        assertEquals(1, points.first { it.label == THIS_YEAR.toString() }.songCount)
+        assertEquals(0, points.first { it.label == (LAST_YEAR - 1).toString() }.songCount, "a quiet year is zero")
+    }
+
     // ── The CCLI export ─────────────────────────────────────────────────────────
 
     private fun exportedCsv(stats: StatisticsManager): List<String> {
@@ -738,6 +772,70 @@ class StatisticsManagerTest {
         assertEquals(
             listOf("Be Thou My Vision"),
             stats.getTopSongsBySongbook().getValue("Hymnal").map { it.title },
+        )
+    }
+
+    // ── What the report window asks before it opens ─────────────────────────────
+
+    @Test
+    fun `a log holding only songs still offers a report`() {
+        seedLog(songs = listOf(SongPlayEvent(1, "Amazing Grace", "Hymnal", "", stamp(LAST_YEAR, 5, 4))))
+        val stats = StatisticsManager()
+
+        assertTrue(stats.hasEventLog(), "a song-only log is still a log")
+        assertEquals(stamp(LAST_YEAR, 5, 4), stats.getEarliestEventTime())
+    }
+
+    @Test
+    fun `a log holding only verses still offers a report`() {
+        seedLog(verses = listOf(VersePlayEvent("KJV", "John", 3, 16, stamp(LAST_YEAR, 5, 4))))
+        val stats = StatisticsManager()
+
+        assertTrue(stats.hasEventLog(), "a verse-only log is still a log")
+        assertEquals(stamp(LAST_YEAR, 5, 4), stats.getEarliestEventTime())
+    }
+
+    @Test
+    fun `the earliest event is the oldest of the two logs, whichever holds it`() {
+        seedLog(
+            songs = listOf(SongPlayEvent(1, "Amazing Grace", "Hymnal", "", stamp(THIS_YEAR, 2, 1))),
+            verses = listOf(VersePlayEvent("KJV", "John", 3, 16, stamp(LAST_YEAR, 5, 4))),
+        )
+
+        assertEquals(stamp(LAST_YEAR, 5, 4), StatisticsManager().getEarliestEventTime(), "the verse is older")
+
+        seedLog(
+            songs = listOf(SongPlayEvent(1, "Amazing Grace", "Hymnal", "", stamp(LAST_YEAR, 5, 4))),
+            verses = listOf(VersePlayEvent("KJV", "John", 3, 16, stamp(THIS_YEAR, 2, 1))),
+        )
+
+        assertEquals(stamp(LAST_YEAR, 5, 4), StatisticsManager().getEarliestEventTime(), "the song is older")
+    }
+
+    @Test
+    fun `clearing the whole history of a verse removes its row outright`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+
+        val removed = stats.clearVerse(VerseKey("KJV", "John", 3, 16))
+
+        assertEquals(4, removed)
+        assertEquals(
+            listOf("Psalms"),
+            restarted().getTopVersesByBible().getValue("KJV").map { it.bookName },
+            "a verse cleared outright must not come back after a restart",
+        )
+    }
+
+    /** The wall-clock stamp `seedTwoYears` writes its events with. */
+    private fun stamp(year: Int, month: Int, day: Int) =
+        LocalDate.of(year, month, day).atTime(10, 30).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+    /** Writes a play log directly, for the queries that read one without a tally beside it. */
+    private fun seedLog(songs: List<SongPlayEvent> = emptyList(), verses: List<VersePlayEvent> = emptyList()) {
+        logFile.parentFile.mkdirs()
+        logFile.writeText(
+            Json { encodeDefaults = true }.encodeToString(PlayEventLog.serializer(), PlayEventLog(songs, verses))
         )
     }
 

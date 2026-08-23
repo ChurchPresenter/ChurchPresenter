@@ -1398,7 +1398,6 @@
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$val noFullScreenTypes = setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)</ID>
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$val zonesWithoutFullScreen = StageMonitorZone.entries.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }</ID>
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$zoneByLabel[picked]?.let { zone -&gt; update { copy(contentZones = contentZones + (type to zone)) } }</ID>
-    <ID>MaxLineLength:StatisticsManager.kt$StatisticsManager$sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")</ID>
     <ID>MaxLineLength:StockMediaClient.kt$StockMediaClient$suspend</ID>
     <ID>MaxLineLength:StockMediaClient.kt$StockMediaClient$val file = video.videos.medium ?: video.videos.small ?: video.videos.large ?: video.videos.tiny</ID>
     <ID>MaxLineLength:SystemSettingsTab.kt$String.format(conversionCompleteErrorsFmt, result.songsConverted, result.errors.joinToString("\n"))</ID>
@@ -1532,7 +1531,6 @@
     <ID>TooManyFunctions:SongsViewModel.kt$SongsViewModel</ID>
     <ID>TooManyFunctions:SslCertificateManager.kt$SslCertificateManager</ID>
     <ID>TooManyFunctions:StageMonitorScreen.kt$org.churchpresenter.app.churchpresenter.StageMonitorScreen.kt</ID>
-    <ID>TooManyFunctions:StatisticsManager.kt$StatisticsManager</ID>
     <ID>TooManyFunctions:SwingFileChooser.kt$SwingFileChooser : FileChooser</ID>
     <ID>TooManyFunctions:TrainingDataLogger.kt$TrainingDataLogger</ID>
     <ID>TooManyFunctions:VideoPlayer.kt$org.churchpresenter.app.churchpresenter.composables.VideoPlayer.kt</ID>

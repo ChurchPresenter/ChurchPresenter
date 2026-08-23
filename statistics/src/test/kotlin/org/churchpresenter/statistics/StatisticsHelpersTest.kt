@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,6 +54,29 @@ class StatisticsHelpersTest {
     fun `csvQuote leaves commas and newlines to be protected by the surrounding quotes`() {
         assertEquals("\"Bach, J.S.\"", csvQuote("Bach, J.S."))
         assertEquals("\"line1\nline2\"", csvQuote("line1\nline2"))
+    }
+
+    // ── key() ───────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a song's play and its tally row derive the same key`() {
+        val key = SongPlayEvent(12, "Amazing Grace", "Hymnal", "Newton", 1_000L).key()
+
+        assertEquals(SongDisplayEntry(12, "Amazing Grace", "Hymnal", 4).key(), key, "clearing matches on this")
+        assertEquals("Hymnal", key.songbook)
+        assertEquals(12, key.songNumber)
+        assertEquals("Amazing Grace", key.title)
+    }
+
+    @Test
+    fun `a verse's play and its tally row derive the same key`() {
+        val key = VersePlayEvent("KJV", "John", 3, 16, 1_000L).key()
+
+        assertEquals(VerseDisplayEntry("KJV", "John", 3, 16, 4).key(), key, "clearing matches on this")
+        assertEquals("KJV", key.bibleName)
+        assertEquals("John", key.bookName)
+        assertEquals(3, key.chapter)
+        assertEquals(16, key.verseNumber)
     }
 
     // ── inRange ─────────────────────────────────────────────────────────────────

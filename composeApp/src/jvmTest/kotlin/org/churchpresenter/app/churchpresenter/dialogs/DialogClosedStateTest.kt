@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test

@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -19,7 +18,6 @@ class StatisticsActivityChartTest {
 
     @BeforeTest
     fun isolateHome() {
-        TestSingletons.latchToTestHome()
         realHome = System.getProperty("user.home")
         home = Files.createTempDirectory("cp-stats-activity").toFile()
         System.setProperty("user.home", home.absolutePath)
