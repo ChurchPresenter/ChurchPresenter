@@ -85,15 +85,77 @@ Both CI steps are gated on this directory or the shared build files changing.
   `coverageFloors`. `extra["coverageExcludes"]` drops `**/ui/**` and `**/MainKt*`, which need a
   display. The `spec/` and `lottie/` packages are where the coverage lives, and the `SpecPort*Test`
   suites exist so a spec style stays byte-comparable with the code style it replaced.
-- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin and **no baseline**,
-  and is at **one finding**, down from 382 -- every rule is clean except `LongParameterList` on
-  `LottieGenPalette`'s 51-role constructor (see **Theme** above for why those 51 exist).
-  `constructorThreshold` is 7, and satisfying it would need three levels of nesting, so that one
-  is open for a decision rather than fixed. **Do not add a baseline file, and do not add a
-  `@Suppress` without asking.** Until it is resolved the module is not in `test.yml`'s Detekt
-  step, because one finding there would fail every PR.
+
+  **What that 94% is a statement about.** It is the module's `spec/`, `lottie/`, `model/`,
+  `viewmodel/` and `persistence/` core -- not the module. `extra["coverageExcludes"]` drops
+  `**/ui/**` and `**/MainKt*`, and the root build filters `classDirectories`, so the excluded
+  classes leave both the numerator and the denominator. Measured 2026-08-22 by re-pointing the
+  report at all of `classes/kotlin/main`:
+
+  | counter | reported | with nothing excluded |
+  |---|---|---|
+  | INSTRUCTION | 94.4% | **47.3%** |
+  | BRANCH | 90.8% | 51.7% |
+  | LINE | 95.0% | 51.9% |
+  | COMPLEXITY | 87.0% | 48.0% |
+  | METHOD | 88.7% | 47.9% |
+  | CLASS | 96.8% | 73.3% |
+
+  The exclude hides **50.2% of the module's bytecode** -- 47,639 of 94,813 instructions, 62 of
+  247 classes by the CLASS counter. Quote that rather than the source-line figure (6,418 of
+  15,411 lines, 27 of 81 files = 41.6%), which understates it: the UI files are dense.
+
+  The excluded half is **0.5% covered** -- 248 instructions, all of them the `Strings` object in
+  `ui/`; `editor/ui` is 0 of 24,061 and `ui/components` 0 of 8,249. There are no Compose UI tests
+  in the module at all, so nothing is lost by the filter beyond the honesty of the headline.
+
+  This is milder than `:songlibrary`'s 94.5% -> 2.7%, because the non-excluded half genuinely is
+  tested at 94-98%. **It is still not a 94% module.** Both numbers are real; they answer different
+  questions, and only the second one answers "how much of this module is tested".
+
+  Worth knowing per package: `editor` is at **70.2%**, below the 0.85 floor, and passes only
+  because the floor is checked bundle-wide rather than per package. The root package
+  `org.churchpresenter.lottiegen` is at 0% over 8 classes.
+
+  **No exclude should be added or removed here on the strength of this note** -- it is a wording
+  fix, not a licence to change the gate.
+
+- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin, **no baseline** and
+  **zero findings**, down from 382, and is in `test.yml`'s Detekt step like every other module --
+  so those 381 fixes are protected from regression rather than merely done.
+  **Do not add a baseline file**, and do not reach for a second `@Suppress` without asking.
+
+  There is exactly one suppression: `LongParameterList` on `LottieGenPalette`'s 51-role
+  constructor, at the declaration with its reasoning (see **Theme** above for why those 51 roles
+  exist). `constructorThreshold` is 7 and no shallower grouping reaches it -- the nine natural
+  banner groups are 8-11 members each and would each be flagged in turn -- so satisfying the rule
+  needs three levels of nesting and turns `palette.appBg` into `palette.chrome.surfaces.appBg`.
+  The suppression was the deliberate call: one standing finding kept the whole module off the
+  gate, which cost far more than the rule bought.
 - Tests run with `java.awt.headless=true`; `TextMeasurer` and `FontRegistry` use AWT and must keep
   working headless.
+
+## Known limitation: the logo plate and gutter are square
+
+The logo *image* is never distorted -- every style scales it uniformly from its height
+(`scale = logoSizePx / cfg.logoH`). But the space reserved for it is sized from that height
+alone, so a logo wider than it is tall overhangs whatever sits behind it:
+
+- `Style5GradientBar` -- the accent plate is `makeRect(g.logoBgSize, g.logoBgSize, ...)`, square
+  by construction, and the gutter `logoSpace = logoBgSize + logoMargin` is square with it. A logo
+  of aspect > 1 overhangs the plate horizontally and can collide with the text bar.
+- `Style9DiagonalWipe` -- no plate, but `logoSpace = logoSizePx + logoMargin` and the centring
+  arithmetic uses `logoSizePx / 2`, so the reserved gutter has the same blind spot.
+
+The other styles that reserve space from `logoSizePx` share the shape. `cfg.logoW` is known --
+it is passed to the image asset and its anchor -- it is simply not consulted when the layout is
+computed. `Style5GradientBar` once computed `lW = lH * logoAspect`, which is the number this
+needs, and never plumbed it in; it was removed as an unused local in `d54ed3e4`.
+
+**This is a tracking note, not a bug being left in silently.** Fixing it changes the geometry and
+therefore the generated JSON, which the `SpecPort*Test` suites compare byte for byte -- so it is a
+deliberate change with its own review and its own re-baselining, not a cleanup to fold into
+something else.
 
 ## Dependencies
 

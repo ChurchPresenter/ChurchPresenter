@@ -411,15 +411,48 @@ class BibleViewModelBranchTest {
         assertNull(vm.moduleRefFor(43, 99, 1))
     }
 
+    /**
+     * A book id below the module's first is refused outright, and nothing is scheduled.
+     *
+     * This is the only half of the old `a book this module lacks changes nothing` test that was
+     * ever true. `getDisplayIndexForBookId` falls back to `bookId - 1` when no book carries the id,
+     * so a *negative* id degrades to a negative index and `selectVerseByBookId` returns before it
+     * launches anything — which is what makes it safe to assert on the state immediately.
+     */
     @Test
-    fun `selecting by book id for a book this module lacks changes nothing`() {
+    fun `selecting by a book id below the module's range is refused`() {
         openChapter(vm, 0, 1)
         val before = vm.verses.value
 
-        vm.selectVerseByBookId(35, 1, 1)
         vm.selectVerseByBookId(-5, 1, 1)
 
         assertEquals(before, vm.verses.value)
+    }
+
+    /**
+     * A book id the module lacks does **not** change nothing: it lands on the last book.
+     *
+     * `getDisplayIndexForBookId` returns `bookId - 1` for an id no book carries — the canonical
+     * ordering assumption — so id 35 becomes index 34, which `selectVerseByBookId` clamps to the
+     * last of this three-book fixture (John). John has only chapter 3 here, so chapter 1 reads
+     * empty and the verse list is replaced rather than left alone.
+     *
+     * The old test asserted the opposite, and passed only by racing: `selectVerseByBookId` does the
+     * read in a coroutine, and the assertion normally ran first. On a loaded CI runner the
+     * coroutine won and the suite failed with `expected:<[1. In the beginning...]> but was:<[]>`.
+     * Waiting for the selection token is the positive signal that the coroutine has landed, so what
+     * is asserted here is the settled state either way.
+     */
+    @Test
+    fun `selecting by a book id the module lacks falls back to the last book`() {
+        openChapter(vm, 0, 1)
+        val token = vm.verseSelectionToken.value
+
+        vm.selectVerseByBookId(35, 1, 1)
+
+        awaitUntil("the fallback selection to land") { vm.verseSelectionToken.value > token }
+        assertEquals(2, vm.selectedBookIndex.value, "clamped to the last book of the module")
+        assertEquals(emptyList(), vm.verses.value, "John has no chapter 1 in this fixture")
     }
 
     @Test
