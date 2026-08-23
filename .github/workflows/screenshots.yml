@@ -84,7 +84,7 @@ jobs:
         timeout-minutes: 35
         run: >-
           ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
-          :ui-components:recordRoborazzi --tests '*ScreenshotTest*'
+          :ui-components:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
