@@ -5,12 +5,14 @@ import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.file.Files
+import kotlinx.coroutines.runBlocking
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -342,5 +344,112 @@ class LottieRenderCacheTest {
 
         assertEquals(3, decoded.size)
         decoded.forEach { assertEquals(0xFF123456.toInt(), it) }
+    }
+
+    // ── Rendering into the cache ────────────────────────────────────────────────
+    //
+    // The renderer is a [FakeLottieFrameRenderer], so these exercise the cache's own work — writing
+    // the .lrcc, reporting progress, reusing an entry, and walking a folder — without Skia. What the
+    // real renderer draws is not the cache's business; that its output survives the round trip is.
+
+    @Test
+    fun `preparing a still writes a cache file the reader can open`() = runBlocking {
+        val variant = LottieRenderCache.Variant(clip = false, width = 8, height = 4, fps = 0.0, frameCount = 1)
+
+        val file = LottieRenderCache.prepare(clipJson, variant, FakeLottieFrameRenderer()).await()
+
+        assertTrue(file.exists(), "prepare has to leave a file behind, not just report success")
+        LottieRenderCache.Reader(file).use { reader ->
+            assertEquals(1, reader.frameCount)
+            assertEquals(8 * 4, reader.frameArgb(0).size, "a frame decodes to width times height pixels")
+        }
+    }
+
+    @Test
+    fun `a prepared clip holds one frame per step and they are not all the same`() = runBlocking {
+        val variant = LottieRenderCache.Variant(clip = true, width = 4, height = 2, fps = 10.0, frameCount = 5)
+        val renderer = FakeLottieFrameRenderer()
+
+        val file = LottieRenderCache.prepare(clipJson, variant, renderer).await()
+
+        assertEquals(listOf(0f, 0.2f, 0.4f, 0.6f, 0.8f), renderer.renderedProgress)
+        LottieRenderCache.Reader(file).use { reader ->
+            assertEquals(5, reader.frameCount)
+            assertFalse(
+                reader.frameArgb(0).contentEquals(reader.frameArgb(4)),
+                "frames that all came out identical would mean the progress was never applied",
+            )
+        }
+    }
+
+    @Test
+    fun `a second prepare of the same content renders nothing and returns the same file`() = runBlocking {
+        val variant = LottieRenderCache.Variant(clip = false, width = 4, height = 4, fps = 0.0, frameCount = 1)
+        val first = LottieRenderCache.prepare(clipJson, variant, FakeLottieFrameRenderer()).await()
+
+        val second = LottieRenderCache.prepare(clipJson, variant, FakeLottieFrameRenderer()).await()
+
+        assertEquals(first.absolutePath, second.absolutePath)
+        assertTrue(LottieRenderCache.isReady(clipJson, variant), "the entry is ready once it is on disk")
+    }
+
+    @Test
+    fun `progress runs to one and stays there for an entry already on disk`() = runBlocking {
+        val variant = LottieRenderCache.Variant(clip = true, width = 4, height = 2, fps = 10.0, frameCount = 4)
+        assertEquals(0f, LottieRenderCache.progressFlow(clipJson, variant).value, "nothing rendered yet")
+
+        LottieRenderCache.prepare(clipJson, variant, FakeLottieFrameRenderer()).await()
+
+        assertEquals(1f, LottieRenderCache.progressFlow(clipJson, variant).value)
+    }
+
+    @Test
+    fun `progress for an entry this run never touched is read off the disk`() = runBlocking {
+        val variant = LottieRenderCache.Variant(clip = false, width = 4, height = 4, fps = 0.0, frameCount = 1)
+        LottieRenderCache.prepare(clipJson, variant, FakeLottieFrameRenderer()).await()
+        val other = """{"w":100,"h":50,"fr":30,"ip":0,"op":30}"""
+
+        assertEquals(
+            0f, LottieRenderCache.progressFlow(other, variant).value,
+            "content with no cache file has not started",
+        )
+    }
+
+    @Test
+    fun `a folder of lottie files is warmed without opening the tab`() = runBlocking {
+        val folder = tempHome.resolve("lower-thirds").toFile().also { it.mkdirs() }
+        File(folder, "Welcome.json").writeText(LOTTIE_WITH_LAYERS)
+        File(folder, "notes.txt").writeText("not a lottie")
+        File(folder, "plain.json").writeText("""{"not":"a lottie"}""")
+
+        LottieRenderCache.ensureForFolder(folder.absolutePath, atem = null, renderer = FakeLottieFrameRenderer())
+
+        val variant = assertNotNull(LottieRenderCache.desktopVariant(LOTTIE_WITH_LAYERS, null))
+        waitFor("the folder scan to warm Welcome.json") { LottieRenderCache.isReady(LOTTIE_WITH_LAYERS, variant) }
+    }
+
+    @Test
+    fun `a folder path that is blank or missing is a no-op rather than a failure`() {
+        LottieRenderCache.ensureForFolder("", atem = null, renderer = FakeLottieFrameRenderer())
+        LottieRenderCache.ensureForFolder(
+            tempHome.resolve("no-such-folder").toString(), atem = null, renderer = FakeLottieFrameRenderer(),
+        )
+        // Nothing to assert but that neither threw — both are reached at startup with unset settings.
+    }
+
+    /** Polls [condition] to a deadline. Fails rather than returning false, so a timeout is a failure. */
+    private fun waitFor(what: String, timeoutMs: Long = 5_000, condition: () -> Boolean) {
+        val deadline = System.nanoTime() + timeoutMs * 1_000_000
+        while (System.nanoTime() < deadline) {
+            if (condition()) return
+            Thread.sleep(10)
+        }
+        throw AssertionError("timed out waiting for $what")
+    }
+
+    private companion object {
+        /** Passes [isLottieFile]'s "v" and "layers" check, so a folder scan picks it up. */
+        const val LOTTIE_WITH_LAYERS =
+            """{"v":"5.7.4","w":320,"h":180,"fr":30,"ip":0,"op":60,"assets":[],"layers":[]}"""
     }
 }

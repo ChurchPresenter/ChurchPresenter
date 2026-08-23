@@ -29,6 +29,178 @@ internal fun qaSubmissionPageHtml(): String = """
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ask a Question</title>
 <style>
+${qaSubmissionCss}
+</style>
+</head>
+<body>
+<main class="card">
+<h1 id="page-title">Ask a Question</h1>
+<p class="sub" id="page-sub">Your question will be reviewed before being displayed.</p>
+<div id="form-area">
+<label class="sr-only" for="name">Your name (optional)</label>
+<input type="text" id="name" class="name-input" placeholder="Your name">
+<label class="sr-only" for="q">Your question</label>
+<textarea id="q" maxlength="500" placeholder="Type your question here..."></textarea>
+<div id="charcount" aria-live="polite">0 / 500</div>
+<button id="btn" onclick="submit()">Submit Question</button>
+</div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
+<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;min-height:48px;padding:14px;background:var(--qa-success);color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
+</main>
+<script>
+${qaSubmissionJs}
+</script>
+</body>
+</html>
+""".trimIndent()
+
+internal fun qaVotingPageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote on Questions</title>
+<style>
+${qaVotingCss}
+</style>
+</head>
+<body>
+<main class="container">
+<h1 id="page-title">Vote on Questions</h1>
+<p class="sub" id="page-sub">Vote on the questions you'd like answered</p>
+<div id="questions"></div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
+<a class="back" href="/qa">&larr; Submit a question</a>
+</main>
+<script>
+${qaVotingJs}
+</script>
+</body>
+</html>
+""".trimIndent()
+
+internal fun qaAdminPageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&A Admin</title>
+<style>
+${qaAdminCss}
+</style>
+</head>
+<body>
+<div id="login-screen" class="login" style="display:none">
+<h1>Q&A Admin</h1>
+<p style="color:var(--qa-muted);margin-top:8px">Enter admin password to continue</p>
+<label class="sr-only" for="pw-input">Admin password</label>
+<input type="password" id="pw-input" aria-label="Admin password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+<button class="btn btn-live" id="login-btn" onclick="doLogin()">Login</button>
+<p id="connecting-msg" style="display:none;color:var(--qa-muted);margin-top:8px">Waiting for approval on the desktop…</p>
+<div class="err" id="pw-err" style="display:none"></div>
+</div>
+
+<div id="main-app" style="display:none">
+<div class="header">
+<h1>Q&A Admin</h1>
+<span id="status" role="status" aria-live="polite" style="font-size:13px;color:var(--qa-muted)">Connecting...</span>
+</div>
+
+<div id="display-bar" class="status-bar" style="display:none">
+<span id="display-text">Displaying question...</span>
+<button class="btn" onclick="clearDisplay()">Clear Display</button>
+</div>
+
+<div class="add-bar">
+<label class="sr-only" for="add-input">Add a question</label>
+<input type="text" id="add-input" aria-label="Add a question" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
+<button class="btn btn-approve" onclick="addQ()">Add</button>
+</div>
+
+<div class="tabs" style="flex-wrap:wrap;gap:4px">
+<button class="tab active" onclick="setFilter('ALL',this)">All <span class="count" id="cnt-all">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING',this)">Incoming <span class="count" id="cnt-incoming">0</span></button>
+<button class="tab" onclick="setFilter('APPROVED',this)">Approved <span class="count" id="cnt-approved">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING_APPROVED',this)">Incoming+Approved <span class="count" id="cnt-ia">0</span></button>
+<button class="tab" onclick="setFilter('DONE',this)">Done <span class="count" id="cnt-done">0</span></button>
+<button class="tab" onclick="setFilter('DENIED',this)">Denied <span class="count" id="cnt-denied">0</span></button>
+<button class="tab" id="sort-btn" onclick="toggleSort()" style="margin-left:auto">Sort: Time</button>
+</div>
+
+<div class="list" id="list"></div>
+</div>
+
+<script>
+${qaAdminJs}
+</script>
+</body>
+</html>
+""".trimIndent()
+
+internal fun presentationRemotePageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Presentation Remote</title>
+<style>
+${presentationRemoteCss}
+</style>
+</head>
+<body>
+<div id="login">
+  <h2>Presentation Remote</h2>
+  <div id="connecting-msg">Waiting for approval on the desktop…</div>
+  <input id="pw-input" type="password" placeholder="Password (if set)" autocomplete="current-password">
+  <button id="connect-btn" onclick="doLogin()">Connect</button>
+  <span id="err">Incorrect password</span>
+</div>
+<div id="app">
+  <div id="topbar">
+    <div id="counter">– / –</div>
+    <div id="blanked-badge">BLANKED</div>
+    <div id="btns">
+      <button class="icon-btn" id="hide-btn" onclick="toggleHideSlides()" title="Hide slides" aria-label="Hide slides"><span class="grid-icon"><i></i><i></i><i></i><i></i></span></button>
+      <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
+      <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
+      <button class="icon-btn" id="loop-btn" onclick="toggleLoop()">Loop</button>
+      <button class="icon-btn" id="notes-btn" onclick="toggleNotes()" title="Presenter notes" aria-label="Presenter notes">📝 Notes</button>
+      <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
+      <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
+    </div>
+  </div>
+  <div id="not-live-bar">⚠ Presentation not on screen — enable from the desktop app</div>
+  <div id="notes-panel" class="hidden"><div id="notes-text"></div></div>
+  <div id="slides-area">
+    <div id="cur-wrap">
+      <img id="cur-img" alt="" draggable="false">
+      <div id="blanked-overlay"><span>BLANKED</span></div>
+    </div>
+    <div id="next-wrap" onclick="goSlide(state.index+1)">
+      <div id="next-label">Next Slide</div>
+      <div id="next-img-wrap"><img id="next-img" alt="" draggable="false"></div>
+    </div>
+  </div>
+  <div id="upload-status"></div>
+  <div id="strip-handle"></div>
+  <div id="strip-wrap"></div>
+  <div id="botbar">
+    <button class="nav-btn" onclick="goSlide(state.index-1)"><span class="nav-chevron">‹</span><span class="nav-label">Backward</span></button>
+    <button class="nav-btn" onclick="goSlide(state.index+1)"><span class="nav-label">Forward</span><span class="nav-chevron">›</span></button>
+  </div>
+</div>
+<script>
+${presentationRemoteJs}
+</script>
+</body>
+</html>
+""".trimIndent()
+
+/** The stylesheet for [qaSubmissionPageHtml] — split out only so the page function reads as markup. */
+private val qaSubmissionCss = """
 ${qaSharedCss}
 :root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-border:#e0e0e0;--qa-muted:#616161}
 @media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-border:#3a3a4a;--qa-muted:#9a9aa6}}
@@ -52,24 +224,10 @@ button:disabled{background:#9aa0a6;cursor:not-allowed}
 .msg.off{background:#fff3e0;color:#e65100}
 #charcount{text-align:right;font-size:12px;color:var(--qa-muted);margin-top:4px}
 @media(prefers-color-scheme:dark){.msg.ok{background:#1b3a24;color:#a5d6a7}.msg.err{background:#3a1c1f;color:#ef9a9a}.msg.off{background:#3a2a12;color:#ffcc80}.card{box-shadow:0 2px 12px rgba(0,0,0,.4)}}
-</style>
-</head>
-<body>
-<main class="card">
-<h1 id="page-title">Ask a Question</h1>
-<p class="sub" id="page-sub">Your question will be reviewed before being displayed.</p>
-<div id="form-area">
-<label class="sr-only" for="name">Your name (optional)</label>
-<input type="text" id="name" class="name-input" placeholder="Your name">
-<label class="sr-only" for="q">Your question</label>
-<textarea id="q" maxlength="500" placeholder="Type your question here..."></textarea>
-<div id="charcount" aria-live="polite">0 / 500</div>
-<button id="btn" onclick="submit()">Submit Question</button>
-</div>
-<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
-<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;min-height:48px;padding:14px;background:var(--qa-success);color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
-</main>
-<script>
+""".trimIndent()
+
+/** The behaviour for [qaSubmissionPageHtml] — split out only so the page function reads as markup. */
+private val qaSubmissionJs = """
 const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
 let submitted=false,cooldown=30,votingOn=false;
 const submitTime=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
@@ -123,19 +281,10 @@ async function checkStatus(){
   }catch(e){}
 }
 checkStatus();setInterval(checkStatus,5000);
-</script>
-</body>
-</html>
 """.trimIndent()
 
-internal fun qaVotingPageHtml(): String = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vote on Questions</title>
-<style>
+/** The stylesheet for [qaVotingPageHtml] — split out only so the page function reads as markup. */
+private val qaVotingCss = """
 ${qaSharedCss}
 :root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-muted:#616161;--qa-up-bg:#e3f2fd;--qa-down-bg:#ffebee;--qa-score-pos:#2e7d32;--qa-score-neg:#c62828}
 @media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-muted:#9a9aa6;--qa-up-bg:#12314a;--qa-down-bg:#3a1c1f;--qa-score-pos:#81c784;--qa-score-neg:#ef9a9a}}
@@ -164,17 +313,10 @@ p.sub{color:var(--qa-sub);text-align:center;margin-bottom:24px;font-size:14px}
 a.back{display:block;text-align:center;margin-top:20px;text-decoration:none;padding:14px;min-height:48px;background:var(--qa-primary);color:#fff;border-radius:12px;font-size:16px;font-weight:600;transition:background .2s}
 a.back:hover{background:var(--qa-primary-hover)}
 @media(prefers-color-scheme:dark){.msg.off{background:#3a2a12;color:#ffcc80}}
-</style>
-</head>
-<body>
-<main class="container">
-<h1 id="page-title">Vote on Questions</h1>
-<p class="sub" id="page-sub">Vote on the questions you'd like answered</p>
-<div id="questions"></div>
-<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
-<a class="back" href="/qa">&larr; Submit a question</a>
-</main>
-<script>
+""".trimIndent()
+
+/** The behaviour for [qaVotingPageHtml] — split out only so the page function reads as markup. */
+private val qaVotingJs = """
 const questionsEl=document.getElementById('questions'),msgEl=document.getElementById('msg');
 const voted=JSON.parse(sessionStorage.getItem('qa_voted')||'{}'); // {id: "up"|"down"}
 let lastDataHash='';
@@ -273,19 +415,10 @@ function escHtml(s){const d=document.createElement('div');d.textContent=s;return
 
 loadQuestions();
 setInterval(loadQuestions,5000);
-</script>
-</body>
-</html>
 """.trimIndent()
 
-internal fun qaAdminPageHtml(): String = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Q&A Admin</title>
-<style>
+/** The stylesheet for [qaAdminPageHtml] — split out only so the page function reads as markup. */
+private val qaAdminCss = """
 ${qaSharedCss}
 :root{--qa-bg:#1e1e2e;--qa-surface:#2a2a3e;--qa-ink:#e0e0e0;--qa-muted:#a0a0ad;--qa-border:#3b3b5c}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -328,50 +461,10 @@ h1{font-size:22px}
 .login input:focus{outline:none;border-color:var(--qa-primary)}
 .login .btn{width:100%;padding:14px;font-size:16px}
 .login .err{color:#ef9a9a;margin-top:8px;font-size:14px}
-</style>
-</head>
-<body>
-<div id="login-screen" class="login" style="display:none">
-<h1>Q&A Admin</h1>
-<p style="color:var(--qa-muted);margin-top:8px">Enter admin password to continue</p>
-<label class="sr-only" for="pw-input">Admin password</label>
-<input type="password" id="pw-input" aria-label="Admin password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
-<button class="btn btn-live" id="login-btn" onclick="doLogin()">Login</button>
-<p id="connecting-msg" style="display:none;color:var(--qa-muted);margin-top:8px">Waiting for approval on the desktop…</p>
-<div class="err" id="pw-err" style="display:none"></div>
-</div>
+""".trimIndent()
 
-<div id="main-app" style="display:none">
-<div class="header">
-<h1>Q&A Admin</h1>
-<span id="status" role="status" aria-live="polite" style="font-size:13px;color:var(--qa-muted)">Connecting...</span>
-</div>
-
-<div id="display-bar" class="status-bar" style="display:none">
-<span id="display-text">Displaying question...</span>
-<button class="btn" onclick="clearDisplay()">Clear Display</button>
-</div>
-
-<div class="add-bar">
-<label class="sr-only" for="add-input">Add a question</label>
-<input type="text" id="add-input" aria-label="Add a question" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
-<button class="btn btn-approve" onclick="addQ()">Add</button>
-</div>
-
-<div class="tabs" style="flex-wrap:wrap;gap:4px">
-<button class="tab active" onclick="setFilter('ALL',this)">All <span class="count" id="cnt-all">0</span></button>
-<button class="tab" onclick="setFilter('INCOMING',this)">Incoming <span class="count" id="cnt-incoming">0</span></button>
-<button class="tab" onclick="setFilter('APPROVED',this)">Approved <span class="count" id="cnt-approved">0</span></button>
-<button class="tab" onclick="setFilter('INCOMING_APPROVED',this)">Incoming+Approved <span class="count" id="cnt-ia">0</span></button>
-<button class="tab" onclick="setFilter('DONE',this)">Done <span class="count" id="cnt-done">0</span></button>
-<button class="tab" onclick="setFilter('DENIED',this)">Denied <span class="count" id="cnt-denied">0</span></button>
-<button class="tab" id="sort-btn" onclick="toggleSort()" style="margin-left:auto">Sort: Time</button>
-</div>
-
-<div class="list" id="list"></div>
-</div>
-
-<script>
+/** The behaviour for [qaAdminPageHtml] — split out only so the page function reads as markup. */
+private val qaAdminJs = """
 let questions=[],filter='ALL',sortBy='time',displayedId=null,editingId=null,authed=false;
 let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
 if(password){localStorage.setItem('qa_admin_pw',password);document.getElementById('pw-input').value=password;}
@@ -567,19 +660,10 @@ async function checkStatus(){
 
 setInterval(()=>{if(authed)load()},3000);
 setInterval(()=>{if(authed)checkStatus()},3000);
-</script>
-</body>
-</html>
 """.trimIndent()
 
-internal fun presentationRemotePageHtml(): String = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Presentation Remote</title>
-<style>
+/** The stylesheet for [presentationRemotePageHtml] — split out only so the page function reads as markup. */
+private val presentationRemoteCss = """
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#111;color:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
 #login{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:24px;gap:12px}
@@ -632,51 +716,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #botbar.expanded{flex:1;align-items:stretch;padding:12px;gap:12px}
 #botbar.expanded .nav-btn{font-size:clamp(20px,8vw,44px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;overflow:hidden}
 #botbar.expanded .nav-chevron{font-size:1.3em;line-height:1}
-</style>
-</head>
-<body>
-<div id="login">
-  <h2>Presentation Remote</h2>
-  <div id="connecting-msg">Waiting for approval on the desktop…</div>
-  <input id="pw-input" type="password" placeholder="Password (if set)" autocomplete="current-password">
-  <button id="connect-btn" onclick="doLogin()">Connect</button>
-  <span id="err">Incorrect password</span>
-</div>
-<div id="app">
-  <div id="topbar">
-    <div id="counter">– / –</div>
-    <div id="blanked-badge">BLANKED</div>
-    <div id="btns">
-      <button class="icon-btn" id="hide-btn" onclick="toggleHideSlides()" title="Hide slides" aria-label="Hide slides"><span class="grid-icon"><i></i><i></i><i></i><i></i></span></button>
-      <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
-      <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
-      <button class="icon-btn" id="loop-btn" onclick="toggleLoop()">Loop</button>
-      <button class="icon-btn" id="notes-btn" onclick="toggleNotes()" title="Presenter notes" aria-label="Presenter notes">📝 Notes</button>
-      <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
-      <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
-    </div>
-  </div>
-  <div id="not-live-bar">⚠ Presentation not on screen — enable from the desktop app</div>
-  <div id="notes-panel" class="hidden"><div id="notes-text"></div></div>
-  <div id="slides-area">
-    <div id="cur-wrap">
-      <img id="cur-img" alt="" draggable="false">
-      <div id="blanked-overlay"><span>BLANKED</span></div>
-    </div>
-    <div id="next-wrap" onclick="goSlide(state.index+1)">
-      <div id="next-label">Next Slide</div>
-      <div id="next-img-wrap"><img id="next-img" alt="" draggable="false"></div>
-    </div>
-  </div>
-  <div id="upload-status"></div>
-  <div id="strip-handle"></div>
-  <div id="strip-wrap"></div>
-  <div id="botbar">
-    <button class="nav-btn" onclick="goSlide(state.index-1)"><span class="nav-chevron">‹</span><span class="nav-label">Backward</span></button>
-    <button class="nav-btn" onclick="goSlide(state.index+1)"><span class="nav-label">Forward</span><span class="nav-chevron">›</span></button>
-  </div>
-</div>
-<script>
+""".trimIndent()
+
+/** The behaviour for [presentationRemotePageHtml] — split out only so the page function reads as markup. */
+private val presentationRemoteJs = """
 let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5,looping:true,notes:''};
 let fetchFailCount=0;
 let offlineMode=false;
@@ -909,7 +952,4 @@ function startWs(){
     }
   }catch(_){}
 })();
-</script>
-</body>
-</html>
 """.trimIndent()

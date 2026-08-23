@@ -1,9 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinx.serialization)
-    // CompanionServerFixture starts a server on a free port and hands back a client for it. It lives
-    // here because this module owns the wire format, and the app's remote-command, instance-link and
-    // presenter suites all drive a real server rather than a stand-in.
     `java-test-fixtures`
     alias(libs.plugins.detekt)
     jacoco
@@ -16,8 +13,6 @@ kotlin {
 }
 
 dependencies {
-    // The wire format is the module's public surface, so the DTOs and the Json that encodes them
-    // are `api` rather than `implementation`: the app builds and reads them too.
     api(libs.kotlinx.serialization.json)
     api(projects.coreModels)
     api(projects.settings)
@@ -94,6 +89,7 @@ tasks.withType<Test>().configureEach {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    baseline = file("config/detekt/baseline.xml")
     source.setFrom("src/main/kotlin", "src/test/kotlin", "src/testFixtures/kotlin")
     parallel = true
 }

@@ -229,7 +229,17 @@ internal class AtemBridge(private val json: Json) {
      * `downstream|upstream`) overrides; otherwise the persisted [AtemSettings.useDownstreamKey].
      */
     internal fun resolveUseDsk(call: ApplicationCall, atem: AtemSettings): Boolean =
-        when (call.request.queryParameters["keytype"]?.lowercase()) {
+        resolveUseDsk(call.request.queryParameters["keytype"], atem)
+
+    /**
+     * The decision [resolveUseDsk] makes, without the request around it.
+     *
+     * Split out so the rule can be tested directly: building an `ApplicationCall` needs a running
+     * server, and what is worth pinning here is which spellings override the setting and which are
+     * ignored — not Ktor's query parsing.
+     */
+    internal fun resolveUseDsk(keyType: String?, atem: AtemSettings): Boolean =
+        when (keyType?.lowercase()) {
             "dsk", "downstream" -> true
             "usk", "upstream" -> false
             else -> atem.useDownstreamKey

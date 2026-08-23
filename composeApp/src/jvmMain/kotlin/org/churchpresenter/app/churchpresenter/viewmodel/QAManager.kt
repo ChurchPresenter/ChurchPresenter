@@ -241,7 +241,8 @@ class QAManager : QaModeration {
 
     // ── Voting ───────────────────────────────────────────────────────
 
-    override fun voteForQuestion(questionId: String, clientIp: String, direction: String): Boolean = synchronized(this) {
+    override fun voteForQuestion(questionId: String, clientIp: String, direction: String): Boolean =
+        synchronized(this) {
         val index = _questions.indexOfFirst { it.id == questionId }
         if (index < 0) return@synchronized false
         val question = _questions[index]

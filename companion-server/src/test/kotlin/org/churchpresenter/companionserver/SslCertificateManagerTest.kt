@@ -3,6 +3,20 @@ package org.churchpresenter.companionserver
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.nio.file.Files
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.asn1.x509.Extension
+import org.bouncycastle.asn1.x509.GeneralName
+import org.bouncycastle.asn1.x509.GeneralNames
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import java.math.BigInteger
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.spec.ECGenParameterSpec
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import kotlin.test.AfterTest
@@ -185,5 +199,115 @@ class SslCertificateManagerTest {
         val chain = SslCertificateManager.getOrCreateKeyStore("192.168.1.66").getCertificateChain(alias)
 
         (chain[0] as X509Certificate).verify((chain[1] as X509Certificate).publicKey)
+    }
+
+    // ── Migration away from what an older build left behind ─────────────────────
+    //
+    // These reach the two branches the tests above never do: a keystore that is readable, holds the
+    // right alias, and is still in date — but is RSA, or is about to expire. Both must be replaced,
+    // and the reasons are different. RSA is replaced because Apple's App Transport Security refuses
+    // an RSA-only chain, so a phone that trusted the old CA still cannot open the page. A cert
+    // inside its renewal margin is replaced so it never expires mid-service.
+
+    /** Writes a JKS at [file] holding a self-signed cert under [alias], with the given key and life. */
+    private fun writeSelfSignedKeyStore(
+        file: File,
+        alias: String,
+        algorithm: String,
+        validForDays: Long,
+        host: String? = null,
+    ) {
+        val gen = KeyPairGenerator.getInstance(algorithm)
+        if (algorithm == "RSA") gen.initialize(RSA_KEY_BITS) else gen.initialize(ECGenParameterSpec("secp256r1"))
+        val pair = gen.generateKeyPair()
+        val now = Instant.now()
+        val name = X500Name("CN=Stale ChurchPresenter, O=ChurchPresenter, C=US")
+        val builder = JcaX509v3CertificateBuilder(
+            name,
+            BigInteger.valueOf(1),
+            Date.from(now.minus(1, ChronoUnit.DAYS)),
+            Date.from(now.plus(validForDays, ChronoUnit.DAYS)),
+            name,
+            pair.public,
+        )
+        host?.let {
+            builder.addExtension(
+                Extension.subjectAlternativeName, false,
+                GeneralNames(GeneralName(GeneralName.iPAddress, it)),
+            )
+        }
+        val signerAlg = if (algorithm == "RSA") "SHA256withRSA" else "SHA256withECDSA"
+        val holder = builder.build(JcaContentSignerBuilder(signerAlg).build(pair.private))
+        val cert = JcaX509CertificateConverter().getCertificate(holder)
+        val ks = KeyStore.getInstance("JKS").apply { load(null, null) }
+        ks.setKeyEntry(alias, pair.private, password, arrayOf<java.security.cert.Certificate>(cert))
+        file.outputStream().use { ks.store(it, password) }
+    }
+
+    @Test
+    fun `an RSA CA left by an older build is replaced with an EC one`() {
+        SslCertificateManager.getOrCreateKeyStore("127.0.0.1")
+        writeSelfSignedKeyStore(File(baseDir, "ca.jks"), CA_ALIAS, "RSA", validForDays = 3650)
+
+        val chain = SslCertificateManager.getOrCreateKeyStore("127.0.0.1").getCertificateChain(alias)
+
+        assertEquals(
+            "EC", (chain[1] as X509Certificate).publicKey.algorithm,
+            "an RSA-only chain is refused by Apple ATS, so the CA has to be reissued even though it is readable",
+        )
+        (chain[0] as X509Certificate).verify((chain[1] as X509Certificate).publicKey)
+    }
+
+    @Test
+    fun `a CA about to expire is reissued rather than served until it dies`() {
+        SslCertificateManager.getOrCreateKeyStore("127.0.0.1")
+        writeSelfSignedKeyStore(File(baseDir, "ca.jks"), CA_ALIAS, "EC", validForDays = 5)
+        val stale = assertNotNull(SslCertificateManager.getCaCertFingerprint())
+
+        SslCertificateManager.getOrCreateKeyStore("127.0.0.1")
+
+        assertNotEquals(
+            stale, assertNotNull(SslCertificateManager.getCaCertFingerprint()),
+            "five days is inside the 30-day renewal margin, so it must not be reused",
+        )
+    }
+
+    @Test
+    fun `an RSA server keystore left by an older build is replaced with an EC one`() {
+        SslCertificateManager.getOrCreateKeyStore("10.0.0.9")
+        writeSelfSignedKeyStore(File(baseDir, "server.jks"), alias, "RSA", validForDays = 3650, host = "10.0.0.9")
+
+        val chain = SslCertificateManager.getOrCreateKeyStore("10.0.0.9").getCertificateChain(alias)
+
+        assertEquals("EC", (chain[0] as X509Certificate).publicKey.algorithm)
+        assertContains(sanNamesOf(chain[0] as X509Certificate), "10.0.0.9")
+    }
+
+    @Test
+    fun `a server certificate about to expire is reissued`() {
+        SslCertificateManager.getOrCreateKeyStore("10.0.0.10")
+        writeSelfSignedKeyStore(File(baseDir, "server.jks"), alias, "EC", validForDays = 5, host = "10.0.0.10")
+
+        val cert = serverCertFor("10.0.0.10")
+
+        assertTrue(
+            cert.notAfter.after(Date.from(Instant.now().plus(31, ChronoUnit.DAYS))),
+            "the reissued certificate has to outlive the renewal margin, or every call would reissue",
+        )
+    }
+
+    @Test
+    fun `a keystore holding the wrong alias is treated as unusable`() {
+        SslCertificateManager.getOrCreateKeyStore("10.0.0.11")
+        writeSelfSignedKeyStore(File(baseDir, "ca.jks"), "some-other-alias", "EC", validForDays = 3650)
+
+        val chain = SslCertificateManager.getOrCreateKeyStore("10.0.0.11").getCertificateChain(alias)
+
+        (chain[0] as X509Certificate).verify((chain[1] as X509Certificate).publicKey)
+    }
+
+    private companion object {
+        const val CA_ALIAS = "church-presenter-ca"
+        const val RSA_KEY_BITS = 2048
     }
 }

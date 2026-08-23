@@ -5,6 +5,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -312,5 +313,127 @@ class InstanceLinkClientFetchGuardTest {
             assertNull(client.fetchLowerThirdJson("Speaker Name"))
             assertNull(client.fetchPresentationSlideBytes("deck-1", 0))
         }
+    }
+
+    // ── The other half: what a follower gets when the primary DOES have the asset ────
+    //
+    // Everything above this line is a refusal or a miss. Those are the paths that matter most for
+    // resilience, but they are also the paths that pass when the fetch is broken outright — a client
+    // that always returned null would satisfy all of them. These pin the successful fetch.
+
+    /** A follower already connected to a primary on [port], with no API key in play. */
+    private fun connectedFollower(port: Int): InstanceLinkClient = client().also {
+        it.connect(host = "127.0.0.1", port = port, apiKey = "", deviceId = "follower", reconnectDelayMs = 60_000)
+    }
+
+    @Test
+    fun `a lower third the primary has is served whole, spaces in its name and all`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val lottie = """{"v":"5.7.4","fr":30,"ip":0,"op":60,"w":1920,"h":1080,"layers":[]}"""
+        // The space is the point: the client swaps URLEncoder's "+" for "%20" precisely because a
+        // path segment does not decode "+" back to a space, and this is the only test that would
+        // notice if that swap were removed.
+        File(dir, "Speaker Name.json").writeText(lottie)
+        requireNotNull(server).updateAtemConfig(org.churchpresenter.settings.AtemSettings(), dir.absolutePath)
+
+        val client = connectedFollower(primaryPort)
+
+        assertEquals(
+            lottie,
+            assertNotNull(runBlocking { client.fetchLowerThirdJson("Speaker Name") }).decodeToString(),
+            "the follower plays the primary's animation, so it has to arrive byte for byte",
+        )
+    }
+
+    @Test
+    fun `a lower third is found whatever case the follower asks in`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val lottie = """{"v":"5.7.4","fr":30,"ip":0,"op":60,"w":10,"h":10,"layers":[]}"""
+        File(dir, "Welcome.json").writeText(lottie)
+        requireNotNull(server).updateAtemConfig(org.churchpresenter.settings.AtemSettings(), dir.absolutePath)
+
+        val client = connectedFollower(primaryPort)
+
+        assertNotNull(runBlocking { client.fetchLowerThirdJson("welcome") })
+    }
+
+    @Test
+    fun `a rendered slide is served to the follower byte for byte`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val slide = File(dir, "slide0.jpg").apply { writeBytes(byteArrayOf(9, 8, 7)) }
+        val deck = File(dir, "deck.pptx").apply { writeText("deck") }
+        requireNotNull(server).updatePresentation("d1", deck.absolutePath, "Deck.pptx", "pptx", listOf(slide))
+
+        val client = connectedFollower(primaryPort)
+
+        awaitUntil("the slide to be rendered and cached") {
+            runBlocking { client.fetchPresentationSlideBytes("d1", 0) } != null
+        }
+        assertEquals(
+            listOf<Byte>(9, 8, 7),
+            assertNotNull(runBlocking { client.fetchPresentationSlideBytes("d1", 0) }).toList(),
+        )
+    }
+
+    @Test
+    fun `a slide index past the end of the deck is a clean miss rather than the wrong slide`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val slide = File(dir, "only.jpg").apply { writeBytes(byteArrayOf(1)) }
+        val deck = File(dir, "one.pptx").apply { writeText("deck") }
+        requireNotNull(server).updatePresentation("d2", deck.absolutePath, "One.pptx", "pptx", listOf(slide))
+
+        val client = connectedFollower(primaryPort)
+
+        awaitUntil("the deck to be cached") { runBlocking { client.fetchPresentationSlideBytes("d2", 0) } != null }
+        assertNull(runBlocking { client.fetchPresentationSlideBytes("d2", 9) })
+    }
+
+    @Test
+    fun `the secondary bible the primary has configured is served`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val secondary = SpbFixture.spbFile(dir, name = "secondary.spb")
+        requireNotNull(server).updateSecondaryBibleFilePath(secondary.absolutePath)
+
+        val client = connectedFollower(primaryPort)
+
+        assertEquals(
+            secondary.readBytes().size,
+            assertNotNull(runBlocking { client.fetchSecondaryBibleFile() }).size,
+            "a follower caching a truncated module would show wrong verses, not fail loudly",
+        )
+    }
+
+    @Test
+    fun `a configured background image is served to a follower mirroring backgrounds`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val image = File(dir, "bg.jpg").apply { writeBytes(byteArrayOf(4, 5, 6)) }
+        requireNotNull(server).updateBackgroundSettings(
+            BackgroundSettings(defaultBackgroundImage = image.absolutePath),
+        )
+
+        val client = connectedFollower(primaryPort)
+
+        assertEquals(
+            listOf<Byte>(4, 5, 6),
+            assertNotNull(
+                runBlocking { client.fetchBackgroundAsset(Constants.BACKGROUND_SLOT_DEFAULT, isVideo = false) },
+            ).toList(),
+        )
+    }
+
+    @Test
+    fun `the primary's background settings are readable by a follower`() {
+        val primaryPort = startPrimary(apiKey = "")
+        val image = File(dir, "bg2.jpg").apply { writeBytes(byteArrayOf(1)) }
+        requireNotNull(server).updateBackgroundSettings(
+            BackgroundSettings(defaultBackgroundImage = image.absolutePath),
+        )
+
+        val client = connectedFollower(primaryPort)
+
+        assertEquals(
+            image.absolutePath,
+            assertNotNull(runBlocking { client.fetchBackgroundSettings() }).defaultBackgroundImage,
+        )
     }
 }

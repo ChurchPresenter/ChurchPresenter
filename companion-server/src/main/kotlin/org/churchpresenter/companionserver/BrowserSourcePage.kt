@@ -68,6 +68,22 @@ html,body{width:100%;height:100%;background:$bodyBg;overflow:hidden}
 <div id="diag"></div>
 <script>
 const wsUrl=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'$wsPath';
+${BROWSER_SOURCE_OVERLAY_JS}
+</script>
+</body>
+</html>
+""".trimIndent()
+}
+
+/**
+ * The overlay page's behaviour: the WebSocket read loop, the delta compositor and the on-page
+ * diagnostics banner.
+ *
+ * Split out of [browserSourceOverlayPage] so that function reads as the markup it is. It is a `val`
+ * rather than a function because it interpolates nothing — the one value the script needs, the
+ * socket URL, is computed and assigned by the line above the splice.
+ */
+private val BROWSER_SOURCE_OVERLAY_JS = """
 const canvas=document.getElementById('frame');
 const ctx=canvas.getContext('2d');
 
@@ -203,8 +219,4 @@ setTimeout(connect,2000);
   };
 }
 connect();
-</script>
-</body>
-</html>
 """.trimIndent()
-}
