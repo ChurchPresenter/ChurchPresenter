@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import androidx.compose.ui.unit.dp
 import kotlin.test.assertNull
 
 /**
@@ -77,5 +78,56 @@ class AlignmentButtonsTest {
             waitForIdle()
         }
         assertNull(picked, "drawing an unmatched selection must not fire a change on its own")
+    }
+
+    @Test
+    fun `every horizontal value renders as the selected one`() {
+        listOf("L", "C", "R").forEach { selected ->
+            runComposeUiTest {
+                setContent {
+                    MaterialTheme { HorizontalAlignmentButtons(selected, {}, "L", "C", "R") }
+                }
+                waitForIdle()
+            }
+        }
+    }
+
+    @Test
+    fun `every vertical value renders as the selected one`() {
+        listOf("T", "M", "B").forEach { selected ->
+            runComposeUiTest {
+                setContent {
+                    MaterialTheme { VerticalAlignmentButtons(selected, {}, "T", "M", "B") }
+                }
+                waitForIdle()
+            }
+        }
+    }
+
+    @Test
+    fun `each position value renders as the selected one`() {
+        listOf("A", "B").forEach { selected ->
+            runComposeUiTest {
+                setContent { MaterialTheme { PositionButtons(selected, {}, "A", "B") } }
+                waitForIdle()
+            }
+        }
+    }
+
+    @Test
+    fun `a custom button size and corner radius still click through`() {
+        var picked: String? = null
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    HorizontalAlignmentButtons(
+                        "C", { picked = it }, "L", "C", "R",
+                        buttonSize = 40.dp, cornerRadius = 12.dp,
+                    )
+                }
+            }
+            onAllNodes(hasClickAction())[1].performClick()
+        }
+        assertEquals("C", picked, "sizing must not detach the buttons from their values")
     }
 }
