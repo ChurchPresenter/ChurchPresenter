@@ -49,6 +49,33 @@ curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
   -d '{"item":{"songNumber":42,"title":"Great Is Thy Faithfulness","songbook":"Hymns"}}'
 ```
 
+### Device Name (Optional)
+
+Pass `X-Device-Name` alongside `X-Device-Id` to say what the device is called. The desktop shows
+that name as the device's identity — in the approval dialog, the activity toast, the remote-client
+lists in Server settings and against Q&A submissions — with the id small beneath it. Omit the
+header when there is no name to send: the desktop then shows the id, as it did before any client
+sent this.
+
+```bash
+curl -H "X-Device-Id: 3f7c1a9e-..." -H "X-Device-Name: Sound%20desk%20iPad" \
+  http://192.168.1.10:8765/api/status
+```
+
+- **Encoding.** A header value that is not printable ASCII is refused outright by some HTTP clients
+  and read back as ISO-8859-1 by the desktop, and device names are user-typed — so percent-encode
+  the UTF-8 bytes of anything outside `0x20..0x7E` (and the `%` sign itself). A value with no `%`
+  is taken as-is, so a plain ASCII name needs nothing. Names are trimmed, stripped of control
+  characters and capped at 64 characters.
+- **WebSocket.** The handshake accepts a query parameter of the same name,
+  `?X-Device-Id=…&X-Device-Name=…`, because a browser cannot set headers there. Values are
+  percent-encoded as above, on top of the usual URL encoding.
+- **When it is read.** On the two connect handshakes (`/api/presentation-remote/auth`,
+  `/api/qa/auth`), on the WebSocket handshake, and on every action request that asks for approval.
+  A device that only ever issues plain GETs is never named.
+- **The operator has the last word.** A name typed on the desktop overrides the reported one and is
+  not overwritten when the device reconnects; clearing it falls back to the reported name.
+
 ---
 
 ## Read Endpoints (GET)

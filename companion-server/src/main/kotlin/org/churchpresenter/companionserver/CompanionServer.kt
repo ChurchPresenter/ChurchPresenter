@@ -17,6 +17,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -347,6 +348,28 @@ class CompanionServer(
     /** Blank ids are anonymous clients, which cannot be blocked (there is nothing to block). */
     internal fun isClientBlocked(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in blockedClientIds
+
+    /**
+     * Told what a device calls itself, so `RemoteClientManager` can offer that name as the label
+     * the operator sees instead of a UUID (mirroring [blockedClientIds], which goes the other way).
+     *
+     * A plain callback rather than a flow because the ordering matters: the name has to be stored
+     * before the approval request that will be labelled with it is emitted, and a flow collected on
+     * another coroutine would sometimes lose that race and prompt with the UUID.
+     */
+    @Volatile
+    var onDeviceNameReported: (clientId: String, name: String) -> Unit = { _, _ -> }
+
+    /**
+     * Registers the name on a request that carries one. Called from wherever the device id is read,
+     * so any request names the device, not only the handshakes that raise a prompt.
+     */
+    internal fun reportDeviceName(clientId: String, request: ApplicationRequest) {
+        if (clientId.isBlank()) return
+        val name = decodeDeviceName(request.reportedDeviceName())
+        if (name.isEmpty()) return
+        onDeviceNameReported(clientId, name)
+    }
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
     private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
@@ -607,6 +630,7 @@ class CompanionServer(
 
     internal suspend fun checkClientAllowed(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        reportDeviceName(clientId, call.request)
         if (clientId.isEmpty() || !isClientBlocked(clientId)) return true
         InstanceLinkLogger.log(
             InstanceLinkLogSide.PRIMARY, "rest_request_refused",
@@ -1055,6 +1079,7 @@ class CompanionServer(
                 allowHeader(HttpHeaders.ContentType)
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
+                allowHeader(Constants.HEADER_DEVICE_NAME)
                 allowHeader(Constants.HEADER_APP_VERSION)
                 allowHeader(Constants.HEADER_CLIENT_ROLE)
                 allowHeader("X-QA-Password")
@@ -1227,6 +1252,7 @@ class CompanionServer(
      */
     internal suspend fun checkPresentationRemoteConnect(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        reportDeviceName(clientId, call.request)
         val pending = PendingConnectionRequest(clientId)
         onPresentationRemoteConnect.emit(pending)
         val approved = pending.decision.await()
@@ -1337,6 +1363,7 @@ class CompanionServer(
      */
     internal suspend fun checkQaAdminConnect(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        reportDeviceName(clientId, call.request)
         val pending = PendingConnectionRequest(clientId)
         onQaAdminConnect.emit(pending)
         val approved = pending.decision.await()

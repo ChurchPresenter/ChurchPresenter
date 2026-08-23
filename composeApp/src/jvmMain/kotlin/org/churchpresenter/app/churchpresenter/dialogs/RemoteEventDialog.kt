@@ -91,6 +91,9 @@ import org.churchpresenter.resources.generated.resources.instance_link_follower_
 import org.churchpresenter.resources.generated.resources.remote_client_label
 import org.churchpresenter.resources.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.resources.generated.resources.remote_queue_waiting_one
+import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditButton
+import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditorRow
+import org.churchpresenter.app.churchpresenter.composables.rememberClientLabelEditor
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -236,12 +239,17 @@ fun RemoteEventDialog(
      *  than a regular mobile/browser companion — same badge already shown in ServerSettingsTab's
      *  Remote Clients list. */
     isInstanceLinkFollower: Boolean = false,
+    /** The device's name as stored right now — read live, so a rename below shows immediately.
+     *  Falls back to the name the event carried when it was queued. */
+    clientLabel: String = "",
     onAllow: () -> Unit,
     onAllowForSession: () -> Unit,
     onAllowPermanently: () -> Unit,
     onBlockForSession: () -> Unit,
     onBlockPermanently: () -> Unit,
-    onDeny: () -> Unit
+    onDeny: () -> Unit,
+    /** Names this device. The prompt is where an unfamiliar device is worth naming. */
+    onRename: (String) -> Unit = {}
 ) {
     if (event == null) return
 
@@ -271,12 +279,14 @@ fun RemoteEventDialog(
             isClientKnownAllowed = isClientKnownAllowed,
             isClientKnownBlocked = isClientKnownBlocked,
             isInstanceLinkFollower = isInstanceLinkFollower,
+            clientLabel = clientLabel.ifBlank { event.clientLabel },
             onAllow = onAllow,
             onAllowForSession = onAllowForSession,
             onAllowPermanently = onAllowPermanently,
             onBlockForSession = onBlockForSession,
             onBlockPermanently = onBlockPermanently,
             onDeny = onDeny,
+            onRename = onRename,
         )
     }
 }
@@ -294,12 +304,14 @@ internal fun RemoteEventDialogContent(
     isClientKnownAllowed: Boolean,
     isClientKnownBlocked: Boolean,
     isInstanceLinkFollower: Boolean,
+    clientLabel: String = "",
     onAllow: () -> Unit,
     onAllowForSession: () -> Unit,
     onAllowPermanently: () -> Unit,
     onBlockForSession: () -> Unit,
     onBlockPermanently: () -> Unit,
     onDeny: () -> Unit,
+    onRename: (String) -> Unit = {},
 ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -373,6 +385,10 @@ internal fun RemoteEventDialogContent(
                     }
                     // Show client identity if present
                     if (event.clientId.isNotBlank()) {
+                        // The event carried the name it was queued with; the parameter carries the
+                        // name as it stands now, which is what a rename here changes.
+                        val shownLabel = clientLabel.ifBlank { event.clientLabel }
+                        val labelEditor = rememberClientLabelEditor(shownLabel)
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(Res.string.remote_client_label),
@@ -381,9 +397,9 @@ internal fun RemoteEventDialogContent(
                             Spacer(Modifier.width(4.dp))
                             Column {
                                 // Label (if set) shown as primary identifier
-                                if (event.clientLabel.isNotBlank()) {
+                                if (shownLabel.isNotBlank()) {
                                     Text(
-                                        text = event.clientLabel,
+                                        text = shownLabel,
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.SemiBold,
                                         color = when {
@@ -422,7 +438,13 @@ internal fun RemoteEventDialogContent(
                                     style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.primary)
                             }
+                            Spacer(Modifier.width(4.dp))
+                            ClientLabelEditButton(labelEditor, shownLabel)
                         }
+                        ClientLabelEditorRow(
+                            labelEditor, shownLabel, onRename,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 

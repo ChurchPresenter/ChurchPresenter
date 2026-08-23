@@ -167,6 +167,9 @@ fun QATab(
     onStopTunnel: () -> Unit = {},
     qaDisplayUrl: String = "",
     onQaDisplayUrlChanged: (String) -> Unit = {},
+    /** A device id → the name the operator sees for it elsewhere, or "" when it has none.
+     *  A lambda rather than the manager itself, so the tab keeps no dependency on it. */
+    resolveDeviceName: (String) -> String = { "" },
 ) {
     val sessionActive = qaManager.sessionActive
     val questions = qaManager.questions
@@ -576,6 +579,7 @@ fun QATab(
                     items(filteredQuestions.distinctBy { it.id }, key = { it.id }) { question ->
                         QuestionRow(
                             question = question,
+                            deviceName = resolveDeviceName(question.submitterDeviceId),
                             isDisplayed = displayedQuestion?.id == question.id,
                             isHistory = selectedFilter == 6,
                             onApprove = { qaManager.approveQuestion(question.id) },
@@ -697,6 +701,8 @@ fun QATab(
 @Composable
 private fun QuestionRow(
     question: Question,
+    /** What this device is called, or "" — then the id stands on its own, as it always did. */
+    deviceName: String = "",
     isDisplayed: Boolean,
     isHistory: Boolean = false,
     onApprove: () -> Unit,
@@ -807,11 +813,23 @@ private fun QuestionRow(
                                         )
                                     }
                                     if (question.submitterDeviceId.isNotBlank()) {
+                                        // The name if the device has one — the same name the
+                                        // approval prompt and Server settings show it by.
                                         Text(
-                                            text = stringResource(Res.string.qa_submitter_device, question.submitterDeviceId),
+                                            text = stringResource(
+                                                Res.string.qa_submitter_device,
+                                                deviceName.ifBlank { question.submitterDeviceId },
+                                            ),
                                             color = MaterialTheme.colorScheme.inverseOnSurface,
                                             style = MaterialTheme.typography.bodySmall
                                         )
+                                        if (deviceName.isNotBlank()) {
+                                            Text(
+                                                text = question.submitterDeviceId,
+                                                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
                                     }
                                 }
                             }
