@@ -14,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.crash_feedback_comment_label
-import churchpresenter.composeapp.generated.resources.crash_feedback_dismiss
-import churchpresenter.composeapp.generated.resources.crash_feedback_email_label
-import churchpresenter.composeapp.generated.resources.crash_feedback_message
-import churchpresenter.composeapp.generated.resources.crash_feedback_send
-import churchpresenter.composeapp.generated.resources.crash_feedback_title
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.crash_feedback_comment_label
+import org.churchpresenter.resources.generated.resources.crash_feedback_dismiss
+import org.churchpresenter.resources.generated.resources.crash_feedback_email_label
+import org.churchpresenter.resources.generated.resources.crash_feedback_message
+import org.churchpresenter.resources.generated.resources.crash_feedback_send
+import org.churchpresenter.resources.generated.resources.crash_feedback_title
 import org.jetbrains.compose.resources.stringResource
 
 /**

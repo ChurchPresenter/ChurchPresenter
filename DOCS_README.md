@@ -48,7 +48,7 @@ Text("Save")
 
 ## File Locations
 
-- **String Resources:** `composeApp/src/jvmMain/composeResources/values/strings.xml`
+- **String Resources:** `resources/src/main/composeResources/values/strings.xml`
 - **Constants:** `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt`
 - **Cleanup Tasks:** See DEVELOPMENT_GUIDE.md § Cleanup TODO List
 

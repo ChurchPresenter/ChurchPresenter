@@ -19,11 +19,11 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.failed_to_load_image
-import churchpresenter.composeapp.generated.resources.no_images
-import churchpresenter.composeapp.generated.resources.presented_image
-import churchpresenter.composeapp.generated.resources.presented_slide
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.failed_to_load_image
+import org.churchpresenter.resources.generated.resources.no_images
+import org.churchpresenter.resources.generated.resources.presented_image
+import org.churchpresenter.resources.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File

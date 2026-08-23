@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.loading
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.app_name
+import org.churchpresenter.resources.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.loading
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource

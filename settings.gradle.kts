@@ -93,3 +93,8 @@ include(":dictionary")
 // TLS and the tunnel, plus the client a follower instance consumes it with. What a remote request
 // then *does* to the app stays in :composeApp, under `remote/`.
 include(":companion-server")
+
+// Every icon the app draws, in one place: the vector drawables the tabs, dialogs and widgets all
+// reach for. Assets and their generated accessor, no Kotlin of its own — so nothing has to
+// duplicate an icon to use it.
+include(":resources")

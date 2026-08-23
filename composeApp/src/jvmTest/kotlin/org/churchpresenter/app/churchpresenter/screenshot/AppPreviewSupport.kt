@@ -86,11 +86,11 @@ private val WELCOME_LOOP_SOURCE = File("src/jvmTest/resources/app-preview/welcom
 // One of the ~290 stock backgrounds the app ships with, so the scene is built from what a user
 // actually has on hand. Its lower half is near-black, which is why the text needs no scrim.
 private val SUNRISE_SOURCE =
-    File("src/jvmMain/composeResources/files/backgrounds/cross_10037772.jpg")
+    File("../resources/src/main/composeResources/files/backgrounds/cross_10037772.jpg")
 
 private val LOWER_THIRD_SOURCE = File("src/jvmTest/resources/app-preview/lower-thirds")
 
-private val KJV_SOURCE = File("src/jvmMain/composeResources/files/bible_samples/kjv1769.spb")
+private val KJV_SOURCE = File("../resources/src/main/composeResources/files/bible_samples/kjv1769.spb")
 
 /**
  * The pixel density every app-preview render is captured at. `1f` unless overridden.
@@ -585,7 +585,7 @@ private fun writeSongs(dir: File) {
     }
 }
 
-private val BACKGROUNDS_SOURCE = File("src/jvmMain/composeResources/files/backgrounds")
+private val BACKGROUNDS_SOURCE = File("../resources/src/main/composeResources/files/backgrounds")
 
 /**
  * The picture gallery, as display name to background category.

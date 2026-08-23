@@ -334,6 +334,10 @@ kotlin {
             // `remote/` here.
             implementation(projects.companionServer)
             // The song library: the grid of every song in the library, opened from the Help menu.
+            // Every asset the app draws or reads — icons, strings, fonts — see the :resources
+            // module. One `Res` class, so `Res.drawable.x` and `Res.string.y` read exactly as they
+            // did when the assets lived here.
+            api(projects.resources)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -1463,22 +1467,5 @@ tasks.register("signLinuxDeb") {
     }
 }
 
-// ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the :crossword module into composeResources so they are
-// bundled with the app. Edit the puzzles in that module's `encoded/` directory, then rebuild.
-val syncCrosswordFiles by tasks.registering(Copy::class) {
-    from(rootProject.file("crossword/encoded"))
-    include("*.xwp")
-    into(layout.projectDirectory.file("src/jvmMain/composeResources/files/crossword"))
-    doFirst {
-        destinationDir.mkdirs()
-    }
-}
-tasks.matching {
-    it.name.contains("ProcessResources", ignoreCase = true) ||
-    it.name.contains("ResourcesForJvmMain", ignoreCase = true)
-}.configureEach {
-    dependsOn(syncCrosswordFiles)
-}
 
 

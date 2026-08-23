@@ -41,7 +41,7 @@ native/decklink/build/
 
 
 # Crossword .xwp files — owned by the :crossword module, synced by Gradle at build time
-composeApp/src/jvmMain/composeResources/files/crossword/
+resources/src/main/composeResources/files/crossword/
 
 # Credential / config files
 firebase-config.json
