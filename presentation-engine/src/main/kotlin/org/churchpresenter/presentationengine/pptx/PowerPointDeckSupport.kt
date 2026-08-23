@@ -74,7 +74,10 @@ internal object PowerPointDeckSupport {
             open(file).use { show ->
                 val slides = show.slides
                 if (slides.isEmpty()) {
-                    return PowerPointMetadataResult.Failure(DeckLoadError.EMPTY_DOCUMENT, null)
+                    return PowerPointMetadataResult.Failure(
+                        DeckLoadError.EMPTY_DOCUMENT,
+                        emptyDocumentDetail(file, show)
+                    )
                 }
                 val pageSize = show.pageSize
                 val warnings = mutableListOf<String>()
@@ -95,6 +98,23 @@ internal object PowerPointDeckSupport {
         } catch (e: Exception) {
             PowerPointMetadataResult.Failure(DeckLoadError.PARSE_FAILED, e.message)
         }
+    }
+
+    /**
+     * What an empty deck looked like, for the diagnostic that reports it.
+     *
+     * POI opens a malformed legacy `.ppt` without complaint and simply hands back no slides, so
+     * this branch is reached with nothing else to go on — the reason tag alone can't tell a
+     * genuinely empty deck from a corrupt one. Naming the implementation (HSLF vs XSLF), the
+     * master count and the file size makes the next report classifiable without the file itself.
+     */
+    private fun emptyDocumentDetail(file: File, show: SlideShow<*, *>): String {
+        val masters = try {
+            show.slideMasters.size.toString()
+        } catch (_: Exception) {
+            "?"
+        }
+        return "impl=${show.javaClass.simpleName} masters=$masters bytes=${file.length()}"
     }
 
     private fun slideMeta(

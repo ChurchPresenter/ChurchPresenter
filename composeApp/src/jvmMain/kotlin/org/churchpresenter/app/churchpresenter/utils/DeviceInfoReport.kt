@@ -34,6 +34,7 @@ object DeviceInfoReport {
         val vlcReason: String,
         val jcefInitialized: Boolean,
         val jcefMacUnsupported: Boolean,
+        val jcefWindowsUnsupported: Boolean,
         val songFolderCount: Int,
         val totalSongs: Int,
         val bibleCount: Int,
@@ -84,6 +85,7 @@ object DeviceInfoReport {
             vlcReason = vlcUnavailableReason,
             jcefInitialized = CefManager.initialized,
             jcefMacUnsupported = CefManager.macOsUnsupported,
+            jcefWindowsUnsupported = CefManager.windowsUnsupported,
             songFolderCount = songFolders.size,
             totalSongs = songFolders.sumOf { it.second },
             bibleCount = bibleFiles.size,
@@ -127,7 +129,12 @@ object DeviceInfoReport {
 
         appendLine("-- Video / Web --")
         appendLine("VLC: ${if (facts.vlcAvailable) "available" else "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"}")
-        appendLine("Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}${if (facts.jcefMacUnsupported) " (macOS version too old)" else ""}")
+        val jcefReason = when {
+            facts.jcefMacUnsupported -> " (macOS version too old)"
+            facts.jcefWindowsUnsupported -> " (Windows version too old)"
+            else -> ""
+        }
+        appendLine("Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}$jcefReason")
         appendLine()
 
         appendLine("-- Libraries --")

@@ -57,6 +57,16 @@ internal class PresentationStore(
     internal val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
     internal val _renderingPresentations = ConcurrentHashMap<String, Unit>()
+    /**
+     * Absolute path → the file's last-modified stamp when loading it last failed.
+     *
+     * A deck the engine cannot parse produces no slides, so nothing lands in [_slideBytes] and
+     * `CompanionServer.registerScheduleItemResources` starts the render again on every schedule
+     * update — re-opening the file through POI and sending another warning each time. Remembering
+     * the failure stops both. The stamp is the invalidation: a user who repairs and re-saves the
+     * deck gets a fresh attempt without restarting the app.
+     */
+    internal val _failedPresentationLoads = ConcurrentHashMap<String, Long>()
     /** Cancels previous updatePresentation encode job when a new presentation is loaded */
     internal var _activeUpdateJob: Job? = null
     /** Shared slide disk cache — same directory PresentationViewModel renders into (one render, both consumers). */
@@ -134,20 +144,28 @@ internal class PresentationStore(
         // a second render here would take the entry away from it mid-deck, so leave it be:
         // the client's 404-retry path comes back once the tab's render has committed.
         if (slideDiskCache.isWriting(file)) return null
+        // This deck already failed to load and has not been touched since — don't parse it again,
+        // and don't report it again.
+        if (_failedPresentationLoads[file.path] == file.lastModified()) return null
         val deck = when (val result = PresentationLoader.load(file)) {
             is LoadResult.Failure -> {
+                _failedPresentationLoads[file.path] = file.lastModified()
                 CrashReporter.reportWarning(
                     "Presentation: No slides extracted from ${file.extension.lowercase()} file (server)",
                     tags = mapOf(
                         "subsystem" to "presentation",
                         "file.type" to file.extension.lowercase(),
                         "failure.reason" to result.error.name.lowercase()
-                    )
+                    ),
+                    // High-cardinality, so an extra rather than a tag: without it the reason alone
+                    // cannot tell a genuinely empty deck from one POI could not make sense of.
+                    extras = result.detail?.let { mapOf("failure.detail" to it) } ?: emptyMap()
                 )
                 return null
             }
             is LoadResult.Success -> result.deck
         }
+        _failedPresentationLoads.remove(file.path)
         val writer = slideDiskCache.beginWrite(file, deck.format, DeckRasterizer.DEFAULT_TARGET_WIDTH_PX)
         var committed = false
         return try {

@@ -72,6 +72,26 @@ class PresentationLoaderFormatTest {
 
         val result = assertIs<LoadResult.Failure>(PresentationLoader.load(file))
         assertEquals(DeckLoadError.EMPTY_DOCUMENT, result.error, "the file is fine, it just has nothing in it")
+        assertTrue(
+            result.detail?.contains("impl=XMLSlideShow") == true,
+            "the detail names the implementation that found nothing: ${result.detail}",
+        )
+    }
+
+    @Test
+    fun `an empty legacy ppt says what POI saw, because nothing else can`() {
+        // The production case this exists for: POI opens a legacy binary deck without complaint and
+        // hands back no slides, so the reason alone cannot separate a genuinely empty file from one
+        // it could not make sense of. The detail is the only evidence a report ever carries.
+        val file = File(temp, "empty.ppt")
+        HSLFSlideShow().use { ppt -> file.outputStream().use { ppt.write(it) } }
+
+        val result = assertIs<LoadResult.Failure>(PresentationLoader.load(file))
+        assertEquals(DeckLoadError.EMPTY_DOCUMENT, result.error)
+        val detail = result.detail ?: error("an empty document must carry its detail")
+        assertTrue(detail.contains("impl=HSLFSlideShow"), "the legacy reader is named: $detail")
+        assertTrue(Regex("masters=\\d+").containsMatchIn(detail), "the master count is there: $detail")
+        assertTrue(detail.contains("bytes=${file.length()}"), "and the file size: $detail")
     }
 
     @Test

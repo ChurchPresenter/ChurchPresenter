@@ -213,10 +213,12 @@ object BebliaCatalogIndex {
         }
 
         if (response.status.value !in 200..299) {
-            CrashReporter.reportWarning(
-                "Holy Bible XML catalogue fetch returned HTTP ${response.status.value}",
-                tags = mapOf("subsystem" to "beblia_catalog")
-            )
+            if (!BibleInstallSupport.isTransientUpstreamStatus(response.status.value)) {
+                CrashReporter.reportWarning(
+                    "Holy Bible XML catalogue fetch returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "beblia_catalog")
+                )
+            }
             return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
         }
 
