@@ -56,7 +56,8 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
                         ↘ StageMonitorScreen.kt
 ```
 - `MainDesktop.kt` is the root composable; `presenter/Presenting.kt` is the live-content enum.
-- New user-facing strings go in `composeApp/src/jvmMain/composeResources/values/strings.xml`.
+- New user-facing strings go in `resources/src/main/composeResources/values/strings.xml` (the
+  `:resources` module — every asset the app draws or reads now lives there).
 - Per-feature source locations are listed in `FEATURES.md`.
 
 ## Modules
@@ -85,6 +86,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
 | `dictionary/`          | `:dictionary`          | The bundled Strong's dictionary and the interlinear index over it — 18 MB of data  | [AGENT.md](dictionary/AGENT.md)          |
+| `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,

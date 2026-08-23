@@ -49,17 +49,17 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
-import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
-import churchpresenter.composeapp.generated.resources.file_filter_schedule
-import org.churchpresenter.icons.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.autosave_restore_confirm
-import churchpresenter.composeapp.generated.resources.autosave_restore_discard
-import churchpresenter.composeapp.generated.resources.autosave_restore_message
-import churchpresenter.composeapp.generated.resources.autosave_restore_title
-import churchpresenter.composeapp.generated.resources.schedule_drop_hint
-import churchpresenter.composeapp.generated.resources.schedule_drop_to_remove
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.file_chooser_open_schedule
+import org.churchpresenter.resources.generated.resources.file_chooser_save_schedule
+import org.churchpresenter.resources.generated.resources.file_filter_schedule
+import org.churchpresenter.resources.generated.resources.ic_delete
+import org.churchpresenter.resources.generated.resources.autosave_restore_confirm
+import org.churchpresenter.resources.generated.resources.autosave_restore_discard
+import org.churchpresenter.resources.generated.resources.autosave_restore_message
+import org.churchpresenter.resources.generated.resources.autosave_restore_title
+import org.churchpresenter.resources.generated.resources.schedule_drop_hint
+import org.churchpresenter.resources.generated.resources.schedule_drop_to_remove
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
@@ -88,7 +88,6 @@ import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val FALLBACK_DRAG_ITEM_HEIGHT = 50f
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -510,7 +509,7 @@ fun ScheduleTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(IconRes.drawable.ic_delete),
+                        painter = painterResource(Res.drawable.ic_delete),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onError
                     )

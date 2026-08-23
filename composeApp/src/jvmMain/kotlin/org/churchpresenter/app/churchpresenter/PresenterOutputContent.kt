@@ -26,8 +26,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.screen_number
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.screen_number
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment

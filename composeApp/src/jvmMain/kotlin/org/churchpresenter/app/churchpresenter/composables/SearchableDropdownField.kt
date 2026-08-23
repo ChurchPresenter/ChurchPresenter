@@ -48,14 +48,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.clear
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import org.churchpresenter.icons.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.no_results_found
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.clear
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.no_results_found
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain
@@ -217,7 +216,7 @@ fun SearchableDropdownField(
             Spacer(Modifier.width(4.dp))
             if (onClear != null) {
                 Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
+                    painter = painterResource(Res.drawable.ic_close),
                     contentDescription = stringResource(Res.string.clear),
                     modifier = Modifier
                         .size(14.dp)
@@ -233,7 +232,7 @@ fun SearchableDropdownField(
                 Spacer(Modifier.width(6.dp))
             }
             Icon(
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
+                painter = painterResource(Res.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier
                     .size(14.dp)

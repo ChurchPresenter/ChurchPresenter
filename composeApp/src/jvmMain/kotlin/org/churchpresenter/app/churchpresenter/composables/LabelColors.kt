@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.theme
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.recent
+import org.churchpresenter.resources.generated.resources.theme
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.theme.ThemeMode

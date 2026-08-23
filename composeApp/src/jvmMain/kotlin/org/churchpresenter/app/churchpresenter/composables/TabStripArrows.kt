@@ -11,18 +11,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_arrow_left
-import org.churchpresenter.icons.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.tab_strip_scroll_back
-import churchpresenter.composeapp.generated.resources.tab_strip_scroll_forward
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_arrow_left
+import org.churchpresenter.resources.generated.resources.ic_arrow_right
+import org.churchpresenter.resources.generated.resources.tab_strip_scroll_back
+import org.churchpresenter.resources.generated.resources.tab_strip_scroll_forward
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 internal const val TAB_STRIP_ARROW_BACK_TAG = "tabStripArrowBack"
 internal const val TAB_STRIP_ARROW_FORWARD_TAG = "tabStripArrowForward"
@@ -54,7 +53,7 @@ fun TabStripBackArrow(scrollState: ScrollState) {
     // cancelled at that moment — killing the animation that was still finishing the move.
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value > 0) {
-        TabStripArrow(IconRes.drawable.ic_arrow_left, Res.string.tab_strip_scroll_back, TAB_STRIP_ARROW_BACK_TAG, coroutineScope, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_left, Res.string.tab_strip_scroll_back, TAB_STRIP_ARROW_BACK_TAG, coroutineScope, scrollState) {
             (scrollState.value - TAB_SCROLL_STEP).coerceAtLeast(0)
         }
     }
@@ -65,7 +64,7 @@ fun TabStripBackArrow(scrollState: ScrollState) {
 fun TabStripForwardArrow(scrollState: ScrollState) {
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
-        TabStripArrow(IconRes.drawable.ic_arrow_right, Res.string.tab_strip_scroll_forward, TAB_STRIP_ARROW_FORWARD_TAG, coroutineScope, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_right, Res.string.tab_strip_scroll_forward, TAB_STRIP_ARROW_FORWARD_TAG, coroutineScope, scrollState) {
             (scrollState.value + TAB_SCROLL_STEP).coerceAtMost(scrollState.maxValue)
         }
     }

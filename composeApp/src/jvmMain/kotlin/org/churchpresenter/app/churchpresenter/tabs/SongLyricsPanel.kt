@@ -47,22 +47,22 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import churchpresenter.composeapp.generated.resources.songs_no_db_title
-import churchpresenter.composeapp.generated.resources.songs_no_db_hint
-import churchpresenter.composeapp.generated.resources.songs_no_db_step
+import org.churchpresenter.resources.generated.resources.songs_no_db_title
+import org.churchpresenter.resources.generated.resources.songs_no_db_hint
+import org.churchpresenter.resources.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.edit_song
-import churchpresenter.composeapp.generated.resources.go_live
-import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.icons.generated.resources.ic_note
-import org.churchpresenter.icons.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.no_lyrics_available
-import churchpresenter.composeapp.generated.resources.tab_focus_lost
-import churchpresenter.composeapp.generated.resources.number
-import churchpresenter.composeapp.generated.resources.song_title_slide
-import churchpresenter.composeapp.generated.resources.title
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.add_to_schedule
+import org.churchpresenter.resources.generated.resources.edit_song
+import org.churchpresenter.resources.generated.resources.go_live
+import org.churchpresenter.resources.generated.resources.ic_add
+import org.churchpresenter.resources.generated.resources.ic_note
+import org.churchpresenter.resources.generated.resources.ic_edit
+import org.churchpresenter.resources.generated.resources.no_lyrics_available
+import org.churchpresenter.resources.generated.resources.tab_focus_lost
+import org.churchpresenter.resources.generated.resources.number
+import org.churchpresenter.resources.generated.resources.song_title_slide
+import org.churchpresenter.resources.generated.resources.title
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
@@ -78,7 +78,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
 import androidx.compose.foundation.layout.RowScope
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The lyrics panel down the right of the Songs tab.
@@ -144,7 +143,7 @@ internal fun RowScope.SongLyricsPanel(
                 ActionIconButton(
                     onClick = { dialogs.edit(filteredSongs[selectedSongIndex]); tabFocusRequester.requestFocus() },
                     tooltipText = editSongStr,
-                    painter = painterResource(IconRes.drawable.ic_edit),
+                    painter = painterResource(Res.drawable.ic_edit),
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onTertiary
                 )
@@ -154,7 +153,7 @@ internal fun RowScope.SongLyricsPanel(
             ActionIconButton(
                 onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
                 tooltipText = newSongStr,
-                painter = painterResource(IconRes.drawable.ic_add),
+                painter = painterResource(Res.drawable.ic_add),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )
@@ -237,7 +236,7 @@ internal fun RowScope.SongLyricsPanel(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            painter = painterResource(IconRes.drawable.ic_note),
+                            painter = painterResource(Res.drawable.ic_note),
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)

@@ -68,7 +68,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.Res
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Lock
@@ -76,25 +76,25 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
-import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import org.churchpresenter.icons.generated.resources.ic_arrow_up
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_delete
-import org.churchpresenter.icons.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.canvas_create_scene
-import churchpresenter.composeapp.generated.resources.canvas_new_scene
-import churchpresenter.composeapp.generated.resources.canvas_no_scene_selected
-import churchpresenter.composeapp.generated.resources.canvas_scenes
-import churchpresenter.composeapp.generated.resources.canvas_select_source
-import churchpresenter.composeapp.generated.resources.canvas_source_browser
-import churchpresenter.composeapp.generated.resources.canvas_source_color
-import churchpresenter.composeapp.generated.resources.canvas_source_image
-import churchpresenter.composeapp.generated.resources.canvas_source_text
-import churchpresenter.composeapp.generated.resources.canvas_source_video
-import churchpresenter.composeapp.generated.resources.canvas_sources
-import churchpresenter.composeapp.generated.resources.go_live
+import org.churchpresenter.resources.generated.resources.ic_add
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.ic_arrow_up
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_delete
+import org.churchpresenter.resources.generated.resources.ic_edit
+import org.churchpresenter.resources.generated.resources.add_to_schedule
+import org.churchpresenter.resources.generated.resources.canvas_create_scene
+import org.churchpresenter.resources.generated.resources.canvas_new_scene
+import org.churchpresenter.resources.generated.resources.canvas_no_scene_selected
+import org.churchpresenter.resources.generated.resources.canvas_scenes
+import org.churchpresenter.resources.generated.resources.canvas_select_source
+import org.churchpresenter.resources.generated.resources.canvas_source_browser
+import org.churchpresenter.resources.generated.resources.canvas_source_color
+import org.churchpresenter.resources.generated.resources.canvas_source_image
+import org.churchpresenter.resources.generated.resources.canvas_source_text
+import org.churchpresenter.resources.generated.resources.canvas_source_video
+import org.churchpresenter.resources.generated.resources.canvas_sources
+import org.churchpresenter.resources.generated.resources.go_live
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
@@ -111,29 +111,28 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
-import churchpresenter.composeapp.generated.resources.canvas_source_clock
-import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
-import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
-import churchpresenter.composeapp.generated.resources.canvas_source_bible
-import churchpresenter.composeapp.generated.resources.canvas_tool_select
-import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
-import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
-import churchpresenter.composeapp.generated.resources.canvas_tool_line
-import churchpresenter.composeapp.generated.resources.canvas_tool_arrow
-import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
-import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
-import churchpresenter.composeapp.generated.resources.canvas_rename_scene
-import churchpresenter.composeapp.generated.resources.canvas_remove_scene
-import churchpresenter.composeapp.generated.resources.canvas_add_source
-import churchpresenter.composeapp.generated.resources.canvas_delete_source
-import churchpresenter.composeapp.generated.resources.canvas_source_move_forward
-import churchpresenter.composeapp.generated.resources.canvas_source_move_backward
-import churchpresenter.composeapp.generated.resources.canvas_toggle_visibility
-import churchpresenter.composeapp.generated.resources.canvas_toggle_lock
-import churchpresenter.composeapp.generated.resources.canvas_aspect_ratio_warning
-import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
-import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.resources.generated.resources.canvas_source_clock
+import org.churchpresenter.resources.generated.resources.canvas_source_qrcode
+import org.churchpresenter.resources.generated.resources.canvas_source_camera
+import org.churchpresenter.resources.generated.resources.canvas_source_screen_capture
+import org.churchpresenter.resources.generated.resources.canvas_source_bible
+import org.churchpresenter.resources.generated.resources.canvas_tool_select
+import org.churchpresenter.resources.generated.resources.canvas_tool_rectangle
+import org.churchpresenter.resources.generated.resources.canvas_tool_ellipse
+import org.churchpresenter.resources.generated.resources.canvas_tool_line
+import org.churchpresenter.resources.generated.resources.canvas_tool_arrow
+import org.churchpresenter.resources.generated.resources.canvas_tool_freehand
+import org.churchpresenter.resources.generated.resources.canvas_rename_confirm
+import org.churchpresenter.resources.generated.resources.canvas_rename_scene
+import org.churchpresenter.resources.generated.resources.canvas_remove_scene
+import org.churchpresenter.resources.generated.resources.canvas_add_source
+import org.churchpresenter.resources.generated.resources.canvas_delete_source
+import org.churchpresenter.resources.generated.resources.canvas_source_move_forward
+import org.churchpresenter.resources.generated.resources.canvas_source_move_backward
+import org.churchpresenter.resources.generated.resources.canvas_toggle_visibility
+import org.churchpresenter.resources.generated.resources.canvas_toggle_lock
+import org.churchpresenter.resources.generated.resources.canvas_aspect_ratio_warning
+import org.churchpresenter.resources.generated.resources.canvas_fix_aspect_ratio
 
 private const val SCENE_LIST_WEIGHT = 0.4f
 private const val SOURCE_LIST_WEIGHT = 0.6f
@@ -342,7 +341,7 @@ fun CanvasTab(
                                     modifier = Modifier.size(20.dp)
                                 ) {
                                     Icon(
-                                        painterResource(IconRes.drawable.ic_edit),
+                                        painterResource(Res.drawable.ic_edit),
                                         contentDescription = stringResource(Res.string.canvas_rename_scene),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -362,7 +361,7 @@ fun CanvasTab(
                                     modifier = Modifier.size(20.dp)
                                 ) {
                                     Icon(
-                                        painterResource(IconRes.drawable.ic_close),
+                                        painterResource(Res.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.canvas_remove_scene),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -381,7 +380,7 @@ fun CanvasTab(
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = ButtonDefaults.ContentPadding
                 ) {
-                    Icon(painterResource(IconRes.drawable.ic_add), null, modifier = Modifier.size(16.dp))
+                    Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(Res.string.canvas_new_scene), style = MaterialTheme.typography.labelSmall)
                 }
@@ -492,7 +491,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(IconRes.drawable.ic_add),
+                                    painterResource(Res.drawable.ic_add),
                                     contentDescription = stringResource(Res.string.canvas_add_source),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -664,7 +663,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(IconRes.drawable.ic_delete),
+                                    painterResource(Res.drawable.ic_delete),
                                     contentDescription = stringResource(Res.string.canvas_delete_source),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -684,7 +683,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(IconRes.drawable.ic_arrow_up),
+                                    painterResource(Res.drawable.ic_arrow_up),
                                     contentDescription = stringResource(Res.string.canvas_source_move_forward),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -704,7 +703,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(IconRes.drawable.ic_arrow_down),
+                                    painterResource(Res.drawable.ic_arrow_down),
                                     contentDescription = stringResource(Res.string.canvas_source_move_backward),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface

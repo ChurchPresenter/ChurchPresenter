@@ -55,16 +55,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_load_failed_detail
-import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_hint
-import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_title
-import churchpresenter.composeapp.generated.resources.bible_load_failed_report_hint
-import churchpresenter.composeapp.generated.resources.bible_load_failed_title
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_search
-import org.churchpresenter.icons.generated.resources.ic_warning
-import churchpresenter.composeapp.generated.resources.search_clear
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.bible_load_failed_detail
+import org.churchpresenter.resources.generated.resources.bible_load_failed_partial_hint
+import org.churchpresenter.resources.generated.resources.bible_load_failed_partial_title
+import org.churchpresenter.resources.generated.resources.bible_load_failed_report_hint
+import org.churchpresenter.resources.generated.resources.bible_load_failed_title
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_search
+import org.churchpresenter.resources.generated.resources.ic_warning
+import org.churchpresenter.resources.generated.resources.search_clear
 import org.churchpresenter.bible.BibleLoadError
 import org.churchpresenter.app.churchpresenter.viewmodel.indexOfFirstLiveVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
@@ -77,7 +77,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.foundation.layout.width
 import java.awt.Cursor
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 @Composable
 internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifier = Modifier) {
@@ -92,7 +91,7 @@ internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifi
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(
-                painter = painterResource(IconRes.drawable.ic_warning),
+                painter = painterResource(Res.drawable.ic_warning),
                 contentDescription = null,
                 modifier = Modifier.size(18.dp).padding(top = 1.dp),
             )
@@ -219,7 +218,7 @@ internal fun BibleSearchField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(IconRes.drawable.ic_search),
+            painter = painterResource(Res.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -260,7 +259,7 @@ internal fun BibleSearchField(
 
                 modifier = Modifier.size(30.dp).testTag("bible_searchClear")
             ) {
-                Icon(painter = painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Box(modifier = Modifier.padding(end = 6.dp)) {

@@ -82,67 +82,67 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import org.churchpresenter.icons.generated.resources.ic_folder
-import org.churchpresenter.icons.generated.resources.ic_stop
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
-import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.auto_scroll_interval
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.go_live
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_refresh
-import org.churchpresenter.icons.generated.resources.ic_pause
-import org.churchpresenter.icons.generated.resources.ic_play
-import org.churchpresenter.icons.generated.resources.ic_skip_next
-import org.churchpresenter.icons.generated.resources.ic_skip_previous
-import org.churchpresenter.icons.generated.resources.ic_star
-import org.churchpresenter.icons.generated.resources.ic_star_filled
-import churchpresenter.composeapp.generated.resources.loading_slides
-import churchpresenter.composeapp.generated.resources.loop_off
-import churchpresenter.composeapp.generated.resources.loop_on
-import churchpresenter.composeapp.generated.resources.next_image
-import churchpresenter.composeapp.generated.resources.no_file_selected_presentation
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.presentation_arrow_key_hint
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.presentation_clear
-import churchpresenter.composeapp.generated.resources.presentation_freeze_output
-import churchpresenter.composeapp.generated.resources.presentation_unfreeze_output
-import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.select_presentation_file
-import churchpresenter.composeapp.generated.resources.select_presentation_file_button
-import churchpresenter.composeapp.generated.resources.loading_slides_progress
-import churchpresenter.composeapp.generated.resources.presentation_builds_counter
-import churchpresenter.composeapp.generated.resources.presentation_focus_lost
-import churchpresenter.composeapp.generated.resources.media_vlc_required
-import churchpresenter.composeapp.generated.resources.media_vlc_install
-import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
-import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
-import churchpresenter.composeapp.generated.resources.slide_counter
-import churchpresenter.composeapp.generated.resources.slide_number
-import churchpresenter.composeapp.generated.resources.presentation_static_note
-import churchpresenter.composeapp.generated.resources.presentation_error_password_protected
-import churchpresenter.composeapp.generated.resources.presentation_error_empty_document
-import churchpresenter.composeapp.generated.resources.presentation_error_library_missing
-import churchpresenter.composeapp.generated.resources.presentation_error_render_failed
-import churchpresenter.composeapp.generated.resources.supported_formats
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.unit_ms
-import churchpresenter.composeapp.generated.resources.unit_s
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.add_to_schedule
+import org.churchpresenter.resources.generated.resources.ic_folder
+import org.churchpresenter.resources.generated.resources.ic_stop
+import org.churchpresenter.resources.generated.resources.recent_pin
+import org.churchpresenter.resources.generated.resources.recent_unpin
+import org.churchpresenter.resources.generated.resources.tooltip_presentation_remote
+import org.churchpresenter.resources.generated.resources.animation_crossfade
+import org.churchpresenter.resources.generated.resources.animation_fade
+import org.churchpresenter.resources.generated.resources.animation_none
+import org.churchpresenter.resources.generated.resources.animation_slide_left
+import org.churchpresenter.resources.generated.resources.animation_slide_right
+import org.churchpresenter.resources.generated.resources.animation_type
+import org.churchpresenter.resources.generated.resources.auto_scroll_interval
+import org.churchpresenter.resources.generated.resources.cancel
+import org.churchpresenter.resources.generated.resources.clear
+import org.churchpresenter.resources.generated.resources.clear_recents
+import org.churchpresenter.resources.generated.resources.go_live
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_refresh
+import org.churchpresenter.resources.generated.resources.ic_pause
+import org.churchpresenter.resources.generated.resources.ic_play
+import org.churchpresenter.resources.generated.resources.ic_skip_next
+import org.churchpresenter.resources.generated.resources.ic_skip_previous
+import org.churchpresenter.resources.generated.resources.ic_star
+import org.churchpresenter.resources.generated.resources.ic_star_filled
+import org.churchpresenter.resources.generated.resources.loading_slides
+import org.churchpresenter.resources.generated.resources.loop_off
+import org.churchpresenter.resources.generated.resources.loop_on
+import org.churchpresenter.resources.generated.resources.next_image
+import org.churchpresenter.resources.generated.resources.no_file_selected_presentation
+import org.churchpresenter.resources.generated.resources.ok
+import org.churchpresenter.resources.generated.resources.pause
+import org.churchpresenter.resources.generated.resources.presentation_arrow_key_hint
+import org.churchpresenter.resources.generated.resources.play
+import org.churchpresenter.resources.generated.resources.presentation_clear
+import org.churchpresenter.resources.generated.resources.presentation_freeze_output
+import org.churchpresenter.resources.generated.resources.presentation_unfreeze_output
+import org.churchpresenter.resources.generated.resources.previous_image
+import org.churchpresenter.resources.generated.resources.recent
+import org.churchpresenter.resources.generated.resources.remove
+import org.churchpresenter.resources.generated.resources.select_presentation_file
+import org.churchpresenter.resources.generated.resources.select_presentation_file_button
+import org.churchpresenter.resources.generated.resources.loading_slides_progress
+import org.churchpresenter.resources.generated.resources.presentation_builds_counter
+import org.churchpresenter.resources.generated.resources.presentation_focus_lost
+import org.churchpresenter.resources.generated.resources.media_vlc_required
+import org.churchpresenter.resources.generated.resources.media_vlc_install
+import org.churchpresenter.resources.generated.resources.media_vlc_arch_mismatch
+import org.churchpresenter.resources.generated.resources.media_vlc_load_failed
+import org.churchpresenter.resources.generated.resources.slide_counter
+import org.churchpresenter.resources.generated.resources.slide_number
+import org.churchpresenter.resources.generated.resources.presentation_static_note
+import org.churchpresenter.resources.generated.resources.presentation_error_password_protected
+import org.churchpresenter.resources.generated.resources.presentation_error_empty_document
+import org.churchpresenter.resources.generated.resources.presentation_error_library_missing
+import org.churchpresenter.resources.generated.resources.presentation_error_render_failed
+import org.churchpresenter.resources.generated.resources.supported_formats
+import org.churchpresenter.resources.generated.resources.transition_duration
+import org.churchpresenter.resources.generated.resources.unit_ms
+import org.churchpresenter.resources.generated.resources.unit_s
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Visibility
@@ -186,7 +186,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.companionserver.TunnelStatus
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MILLIS_PER_SECOND = 1000
 private const val MAX_AUTO_SCROLL_SECONDS = 30
@@ -483,7 +482,7 @@ fun PresentationTab(
                 ),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
             ) {
-                Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(7.dp))
                 Text(
                     stringResource(Res.string.select_presentation_file_button),
@@ -532,7 +531,7 @@ fun PresentationTab(
                 onClick = { viewModel.clearPresentations(); onClearPresentation() },
                 enabled = viewModel.slideFiles.isNotEmpty(),
                 tooltipText = stringResource(Res.string.presentation_clear),
-                painter = painterResource(IconRes.drawable.ic_stop),
+                painter = painterResource(Res.drawable.ic_stop),
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -617,7 +616,7 @@ fun PresentationTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     }
                 }
                 LazyRow(
@@ -656,7 +655,7 @@ fun PresentationTab(
                             }
                             IconButton(onClick = { RecentPresentationFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
                                 Icon(
-                                    painter = painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
+                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
                                     contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
                                     modifier = Modifier.size(12.dp),
                                     tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
@@ -703,7 +702,7 @@ fun PresentationTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(IconRes.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
                 TooltipArea(
@@ -720,7 +719,7 @@ fun PresentationTab(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
+                        Icon(painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
                     }
                 }
                 TooltipArea(
@@ -728,7 +727,7 @@ fun PresentationTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(IconRes.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -772,7 +771,7 @@ fun PresentationTab(
                     )
                 ) {
                     Icon(
-                        painterResource(IconRes.drawable.ic_refresh),
+                        painterResource(Res.drawable.ic_refresh),
                         contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
                         modifier = Modifier.size(16.dp),
                     )
@@ -1127,7 +1126,7 @@ fun PresentationTab(
                                     val inPinned = f.absolutePath in RecentPresentationFiles.pinned
                                     viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
                                 }, modifier = Modifier.size(16.dp)) {
-                                    Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.remove), modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                    Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.remove), modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                                 }
                             }
                         }
@@ -1177,7 +1176,7 @@ private fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Mo
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = onDismiss) {
-                Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
+                Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
             }
         }
     }

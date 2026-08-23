@@ -65,38 +65,38 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.icons.generated.resources.ic_delete
-import org.churchpresenter.icons.generated.resources.ic_folder
-import org.churchpresenter.icons.generated.resources.ic_label
-import org.churchpresenter.icons.generated.resources.ic_redo
-import org.churchpresenter.icons.generated.resources.ic_remove
-import org.churchpresenter.icons.generated.resources.ic_save
-import org.churchpresenter.icons.generated.resources.ic_undo
-import org.churchpresenter.icons.generated.resources.ic_zoom_in
-import churchpresenter.composeapp.generated.resources.planning_center_import_title
-import churchpresenter.composeapp.generated.resources.schedule
-import churchpresenter.composeapp.generated.resources.schedule_density_compact
-import churchpresenter.composeapp.generated.resources.schedule_density_detailed
-import churchpresenter.composeapp.generated.resources.schedule_density_normal
-import churchpresenter.composeapp.generated.resources.schedule_item_count
-import churchpresenter.composeapp.generated.resources.schedule_option_item_count
-import churchpresenter.composeapp.generated.resources.schedule_option_zoom
-import churchpresenter.composeapp.generated.resources.schedule_show_buttons_under_title
-import churchpresenter.composeapp.generated.resources.tooltip_schedule_options
-import churchpresenter.composeapp.generated.resources.tooltip_redo
-import churchpresenter.composeapp.generated.resources.tooltip_redo_unbound
-import churchpresenter.composeapp.generated.resources.tooltip_undo
-import churchpresenter.composeapp.generated.resources.tooltip_undo_unbound
-import churchpresenter.composeapp.generated.resources.schedule_add_files
-import churchpresenter.composeapp.generated.resources.tooltip_add_label
-import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_in
-import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_out
-import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_add
+import org.churchpresenter.resources.generated.resources.ic_delete
+import org.churchpresenter.resources.generated.resources.ic_folder
+import org.churchpresenter.resources.generated.resources.ic_label
+import org.churchpresenter.resources.generated.resources.ic_redo
+import org.churchpresenter.resources.generated.resources.ic_remove
+import org.churchpresenter.resources.generated.resources.ic_save
+import org.churchpresenter.resources.generated.resources.ic_undo
+import org.churchpresenter.resources.generated.resources.ic_zoom_in
+import org.churchpresenter.resources.generated.resources.planning_center_import_title
+import org.churchpresenter.resources.generated.resources.schedule
+import org.churchpresenter.resources.generated.resources.schedule_density_compact
+import org.churchpresenter.resources.generated.resources.schedule_density_detailed
+import org.churchpresenter.resources.generated.resources.schedule_density_normal
+import org.churchpresenter.resources.generated.resources.schedule_item_count
+import org.churchpresenter.resources.generated.resources.schedule_option_item_count
+import org.churchpresenter.resources.generated.resources.schedule_option_zoom
+import org.churchpresenter.resources.generated.resources.schedule_show_buttons_under_title
+import org.churchpresenter.resources.generated.resources.tooltip_schedule_options
+import org.churchpresenter.resources.generated.resources.tooltip_redo
+import org.churchpresenter.resources.generated.resources.tooltip_redo_unbound
+import org.churchpresenter.resources.generated.resources.tooltip_undo
+import org.churchpresenter.resources.generated.resources.tooltip_undo_unbound
+import org.churchpresenter.resources.generated.resources.schedule_add_files
+import org.churchpresenter.resources.generated.resources.tooltip_add_label
+import org.churchpresenter.resources.generated.resources.tooltip_clear_schedule
+import org.churchpresenter.resources.generated.resources.tooltip_schedule_zoom_in
+import org.churchpresenter.resources.generated.resources.tooltip_schedule_zoom_out
+import org.churchpresenter.resources.generated.resources.tooltip_new_schedule
+import org.churchpresenter.resources.generated.resources.tooltip_open_schedule
+import org.churchpresenter.resources.generated.resources.tooltip_save_schedule
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.utils.DroppedFileAction
@@ -107,7 +107,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f
@@ -173,7 +172,7 @@ internal fun ScheduleHeader(
             if (shown(ScheduleToolbarButton.ZOOM)) {
             PillGroup {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_remove),
+                    painter = painterResource(Res.drawable.ic_remove),
                     text = stringResource(Res.string.tooltip_schedule_zoom_out),
                     onClick = onZoomOut,
                     enabled = canZoomOut,
@@ -216,7 +215,7 @@ internal fun ScheduleHeader(
                     )
                 }
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_add),
+                    painter = painterResource(Res.drawable.ic_add),
                     text = stringResource(Res.string.tooltip_schedule_zoom_in),
                     onClick = onZoomIn,
                     enabled = canZoomIn,
@@ -247,7 +246,7 @@ internal fun ScheduleHeader(
 
                 if (shown(ScheduleToolbarButton.NEW)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_add),
+                    painter = painterResource(Res.drawable.ic_add),
                     text = stringResource(Res.string.tooltip_new_schedule),
                     onClick = onNewSchedule,
                     buttonSize = 26.dp,
@@ -257,7 +256,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.OPEN)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_folder),
+                    painter = painterResource(Res.drawable.ic_folder),
                     text = stringResource(Res.string.tooltip_open_schedule),
                     onClick = onOpenSchedule,
                     buttonSize = 26.dp,
@@ -267,7 +266,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.SAVE)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_save),
+                    painter = painterResource(Res.drawable.ic_save),
                     text = stringResource(Res.string.tooltip_save_schedule),
                     onClick = onSaveSchedule,
                     buttonSize = 26.dp,
@@ -278,7 +277,7 @@ internal fun ScheduleHeader(
 
                 if (shown(ScheduleToolbarButton.CLEAR)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_delete),
+                    painter = painterResource(Res.drawable.ic_delete),
                     text = stringResource(Res.string.tooltip_clear_schedule),
                     onClick = onClearSchedule,
                     buttonSize = 26.dp,
@@ -295,7 +294,7 @@ internal fun ScheduleHeader(
                 val redoKeys = shortcuts.label(ShortcutAction.REDO)
                 if (shown(ScheduleToolbarButton.UNDO)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_undo),
+                    painter = painterResource(Res.drawable.ic_undo),
                     text = if (undoKeys.isEmpty()) stringResource(Res.string.tooltip_undo_unbound)
                            else stringResource(Res.string.tooltip_undo, undoKeys),
                     onClick = onUndo,
@@ -309,7 +308,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.REDO)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_redo),
+                    painter = painterResource(Res.drawable.ic_redo),
                     text = if (redoKeys.isEmpty()) stringResource(Res.string.tooltip_redo_unbound)
                            else stringResource(Res.string.tooltip_redo, redoKeys),
                     onClick = onRedo,
@@ -325,7 +324,7 @@ internal fun ScheduleHeader(
                 if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
                 if (shown(ScheduleToolbarButton.ADD_LABEL)) {
                 TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_label),
+                    painter = painterResource(Res.drawable.ic_label),
                     text = stringResource(Res.string.tooltip_add_label),
                     onClick = onAddLabel,
                     buttonSize = 26.dp,
@@ -413,14 +412,14 @@ private fun ScheduleOptionsButton(
 @Composable
 private fun scheduleToolbarButtonPainter(button: ScheduleToolbarButton): Painter = when (button) {
     ScheduleToolbarButton.ITEM_COUNT -> rememberVectorPainter(Icons.AutoMirrored.Filled.List)
-    ScheduleToolbarButton.ZOOM -> painterResource(IconRes.drawable.ic_zoom_in)
-    ScheduleToolbarButton.NEW -> painterResource(IconRes.drawable.ic_add)
-    ScheduleToolbarButton.OPEN -> painterResource(IconRes.drawable.ic_folder)
-    ScheduleToolbarButton.SAVE -> painterResource(IconRes.drawable.ic_save)
-    ScheduleToolbarButton.CLEAR -> painterResource(IconRes.drawable.ic_delete)
-    ScheduleToolbarButton.UNDO -> painterResource(IconRes.drawable.ic_undo)
-    ScheduleToolbarButton.REDO -> painterResource(IconRes.drawable.ic_redo)
-    ScheduleToolbarButton.ADD_LABEL -> painterResource(IconRes.drawable.ic_label)
+    ScheduleToolbarButton.ZOOM -> painterResource(Res.drawable.ic_zoom_in)
+    ScheduleToolbarButton.NEW -> painterResource(Res.drawable.ic_add)
+    ScheduleToolbarButton.OPEN -> painterResource(Res.drawable.ic_folder)
+    ScheduleToolbarButton.SAVE -> painterResource(Res.drawable.ic_save)
+    ScheduleToolbarButton.CLEAR -> painterResource(Res.drawable.ic_delete)
+    ScheduleToolbarButton.UNDO -> painterResource(Res.drawable.ic_undo)
+    ScheduleToolbarButton.REDO -> painterResource(Res.drawable.ic_redo)
+    ScheduleToolbarButton.ADD_LABEL -> painterResource(Res.drawable.ic_label)
     ScheduleToolbarButton.PLANNING_CENTER -> rememberVectorPainter(Icons.Default.CloudDownload)
 }
 
@@ -544,7 +543,7 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(IconRes.drawable.ic_add),
+            painter = painterResource(Res.drawable.ic_add),
             contentDescription = null,
             tint = contentColor,
             modifier = Modifier.size(11.dp)

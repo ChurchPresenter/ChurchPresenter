@@ -97,4 +97,4 @@ include(":companion-server")
 // Every icon the app draws, in one place: the vector drawables the tabs, dialogs and widgets all
 // reach for. Assets and their generated accessor, no Kotlin of its own — so nothing has to
 // duplicate an icon to use it.
-include(":icons")
+include(":resources")

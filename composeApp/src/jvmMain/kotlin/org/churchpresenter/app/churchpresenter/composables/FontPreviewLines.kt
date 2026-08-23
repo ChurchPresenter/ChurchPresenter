@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.font_preview_sample
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.font_preview_sample
 import org.churchpresenter.bible.Bible
 import org.jetbrains.compose.resources.stringResource
 

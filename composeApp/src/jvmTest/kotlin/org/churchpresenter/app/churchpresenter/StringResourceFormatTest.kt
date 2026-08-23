@@ -21,7 +21,7 @@ import kotlin.test.assertTrue
  */
 class StringResourceFormatTest {
 
-    private val stringsFile = File("src/jvmMain/composeResources/values/strings.xml")
+    private val stringsFile = File("../resources/src/main/composeResources/values/strings.xml")
 
     /** `name="..."` and the element body, which is all this test needs from the XML. */
     private val entryPattern = Regex("""<string name="([^"]+)"[^>]*>(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)

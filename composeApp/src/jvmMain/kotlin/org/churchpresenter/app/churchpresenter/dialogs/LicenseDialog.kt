@@ -39,16 +39,15 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.license_accept_button
-import churchpresenter.composeapp.generated.resources.license_decline_button
-import churchpresenter.composeapp.generated.resources.license_prompt
-import churchpresenter.composeapp.generated.resources.license_title
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.license_accept_button
+import org.churchpresenter.resources.generated.resources.license_decline_button
+import org.churchpresenter.resources.generated.resources.license_prompt
+import org.churchpresenter.resources.generated.resources.license_title
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** The EULA text shown in [LicenseDialog], read from the bundled resource file. */
 internal suspend fun loadEulaText(): String = Res.readBytes("files/eula.txt").toString(Charsets.UTF_8)
@@ -98,7 +97,7 @@ fun LicenseDialog(
 
     windowHost(
         stringResource(Res.string.license_title),
-        painterResource(IconRes.drawable.ic_app_icon),
+        painterResource(Res.drawable.ic_app_icon),
         windowState,
         onDecline
     ) {

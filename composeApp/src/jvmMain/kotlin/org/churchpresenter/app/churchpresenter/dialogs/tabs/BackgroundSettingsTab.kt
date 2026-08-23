@@ -51,37 +51,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.background_color
-import churchpresenter.composeapp.generated.resources.background_color_option
-import churchpresenter.composeapp.generated.resources.background_default
-import churchpresenter.composeapp.generated.resources.background_image
-import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_transparent_option
-import churchpresenter.composeapp.generated.resources.background_type
-import churchpresenter.composeapp.generated.resources.background_video
-import churchpresenter.composeapp.generated.resources.background_video_option
-import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.default_background_color
-import churchpresenter.composeapp.generated.resources.default_background_color_help
-import churchpresenter.composeapp.generated.resources.default_lower_third_background
-import churchpresenter.composeapp.generated.resources.default_lower_third_background_help
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.gradient_bottom_color
-import churchpresenter.composeapp.generated.resources.background_opacity
-import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
-import churchpresenter.composeapp.generated.resources.gradient_enabled
-import churchpresenter.composeapp.generated.resources.gradient_position
-import churchpresenter.composeapp.generated.resources.gradient_top_color
-import churchpresenter.composeapp.generated.resources.gradient_top_opacity
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.songs
-import churchpresenter.composeapp.generated.resources.stock_library_tooltip
-import churchpresenter.composeapp.generated.resources.stock_photo_browse_tooltip
-import churchpresenter.composeapp.generated.resources.atem_upload_background_1_tooltip
-import churchpresenter.composeapp.generated.resources.atem_upload_background_2_tooltip
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.background_color
+import org.churchpresenter.resources.generated.resources.background_color_option
+import org.churchpresenter.resources.generated.resources.background_default
+import org.churchpresenter.resources.generated.resources.background_image
+import org.churchpresenter.resources.generated.resources.background_image_option
+import org.churchpresenter.resources.generated.resources.background_transparent_option
+import org.churchpresenter.resources.generated.resources.background_type
+import org.churchpresenter.resources.generated.resources.background_video
+import org.churchpresenter.resources.generated.resources.background_video_option
+import org.churchpresenter.resources.generated.resources.bible
+import org.churchpresenter.resources.generated.resources.color
+import org.churchpresenter.resources.generated.resources.default_background_color
+import org.churchpresenter.resources.generated.resources.default_background_color_help
+import org.churchpresenter.resources.generated.resources.default_lower_third_background
+import org.churchpresenter.resources.generated.resources.default_lower_third_background_help
+import org.churchpresenter.resources.generated.resources.display_lower_third
+import org.churchpresenter.resources.generated.resources.full_screen
+import org.churchpresenter.resources.generated.resources.gradient_bottom_color
+import org.churchpresenter.resources.generated.resources.background_opacity
+import org.churchpresenter.resources.generated.resources.gradient_bottom_opacity
+import org.churchpresenter.resources.generated.resources.gradient_enabled
+import org.churchpresenter.resources.generated.resources.gradient_position
+import org.churchpresenter.resources.generated.resources.gradient_top_color
+import org.churchpresenter.resources.generated.resources.gradient_top_opacity
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.songs
+import org.churchpresenter.resources.generated.resources.stock_library_tooltip
+import org.churchpresenter.resources.generated.resources.stock_photo_browse_tooltip
+import org.churchpresenter.resources.generated.resources.atem_upload_background_1_tooltip
+import org.churchpresenter.resources.generated.resources.atem_upload_background_2_tooltip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -114,7 +114,6 @@ import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PREVIEW_DEBOUNCE_MS = 800L
 
@@ -758,7 +757,7 @@ private fun BackgroundTypeDropdown(
             )
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
+                painter = painterResource(Res.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

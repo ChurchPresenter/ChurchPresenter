@@ -25,10 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.ic_arrow_right
 import org.jetbrains.compose.resources.painterResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 @Composable
 fun SettingsSection(
@@ -72,7 +72,7 @@ fun SettingsSection(
             )
             if (collapsible) {
                 Icon(
-                    painter = painterResource(if (expanded) IconRes.drawable.ic_arrow_down else IconRes.drawable.ic_arrow_right),
+                    painter = painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_right),
                     contentDescription = null,
                     modifier = Modifier.padding(start = 6.dp).size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,

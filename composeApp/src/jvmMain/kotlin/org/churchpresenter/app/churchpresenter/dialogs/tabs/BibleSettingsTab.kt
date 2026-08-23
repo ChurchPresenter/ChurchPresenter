@@ -29,50 +29,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bible_selection
-import churchpresenter.composeapp.generated.resources.bible_multi_layout
-import churchpresenter.composeapp.generated.resources.bible_translation_divider
-import churchpresenter.composeapp.generated.resources.bible_translation_spacing
-import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
-import churchpresenter.composeapp.generated.resources.bible_cross_references
-import churchpresenter.composeapp.generated.resources.bible_cross_references_enable
-import churchpresenter.composeapp.generated.resources.bible_transition_settings
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.font_size
-import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.lower_third_size
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
-import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.position
-import churchpresenter.composeapp.generated.resources.pixels_short
-import churchpresenter.composeapp.generated.resources.show_abbreviation
-import org.churchpresenter.icons.generated.resources.ic_delete
-import org.churchpresenter.icons.generated.resources.ic_arrow_up
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.add_bible_translation
-import churchpresenter.composeapp.generated.resources.bible_translation
-import churchpresenter.composeapp.generated.resources.move_translation_up
-import churchpresenter.composeapp.generated.resources.move_translation_down
-import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.vertical_alignment
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.fade_in
-import churchpresenter.composeapp.generated.resources.fade_out
-import churchpresenter.composeapp.generated.resources.bible_transition_settings
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.scanning_directory
-import churchpresenter.composeapp.generated.resources.screen
-import churchpresenter.composeapp.generated.resources.text_margins
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.vertical_alignment
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.animation_crossfade
+import org.churchpresenter.resources.generated.resources.bible_selection
+import org.churchpresenter.resources.generated.resources.bible_multi_layout
+import org.churchpresenter.resources.generated.resources.bible_translation_divider
+import org.churchpresenter.resources.generated.resources.bible_translation_spacing
+import org.churchpresenter.resources.generated.resources.bible_split_browse_mode
+import org.churchpresenter.resources.generated.resources.bible_cross_references
+import org.churchpresenter.resources.generated.resources.bible_cross_references_enable
+import org.churchpresenter.resources.generated.resources.bible_transition_settings
+import org.churchpresenter.resources.generated.resources.color
+import org.churchpresenter.resources.generated.resources.font_size
+import org.churchpresenter.resources.generated.resources.font_type
+import org.churchpresenter.resources.generated.resources.full_screen
+import org.churchpresenter.resources.generated.resources.horizontal_alignment
+import org.churchpresenter.resources.generated.resources.lower_third_size
+import org.churchpresenter.resources.generated.resources.milliseconds_suffix
+import org.churchpresenter.resources.generated.resources.none
+import org.churchpresenter.resources.generated.resources.position
+import org.churchpresenter.resources.generated.resources.pixels_short
+import org.churchpresenter.resources.generated.resources.show_abbreviation
+import org.churchpresenter.resources.generated.resources.ic_delete
+import org.churchpresenter.resources.generated.resources.ic_arrow_up
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.add_bible_translation
+import org.churchpresenter.resources.generated.resources.bible_translation
+import org.churchpresenter.resources.generated.resources.move_translation_up
+import org.churchpresenter.resources.generated.resources.move_translation_down
+import org.churchpresenter.resources.generated.resources.remove
+import org.churchpresenter.resources.generated.resources.vertical_alignment
+import org.churchpresenter.resources.generated.resources.animation_crossfade
+import org.churchpresenter.resources.generated.resources.fade_in
+import org.churchpresenter.resources.generated.resources.fade_out
+import org.churchpresenter.resources.generated.resources.bible_transition_settings
+import org.churchpresenter.resources.generated.resources.bottom
+import org.churchpresenter.resources.generated.resources.left
+import org.churchpresenter.resources.generated.resources.right
+import org.churchpresenter.resources.generated.resources.scanning_directory
+import org.churchpresenter.resources.generated.resources.screen
+import org.churchpresenter.resources.generated.resources.text_margins
+import org.churchpresenter.resources.generated.resources.top
+import org.churchpresenter.resources.generated.resources.milliseconds_suffix
+import org.churchpresenter.resources.generated.resources.transition_duration
+import org.churchpresenter.resources.generated.resources.vertical_alignment
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 
@@ -100,7 +100,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
-import churchpresenter.composeapp.generated.resources.auto_fit
+import org.churchpresenter.resources.generated.resources.auto_fit
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
@@ -115,7 +115,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val COLUMN_WEIGHT = 0.48f
 
@@ -289,7 +288,7 @@ private fun LeftColumn(
                                 app.moveBibleTranslation(index, -1)
                             } },
                             tooltipText = stringResource(Res.string.move_translation_up),
-                            painter = painterResource(IconRes.drawable.ic_arrow_up),
+                            painter = painterResource(Res.drawable.ic_arrow_up),
                         )
                     } else if (padsReorderButtons) {
                         Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -300,7 +299,7 @@ private fun LeftColumn(
                                 app.moveBibleTranslation(index, 1)
                             } },
                             tooltipText = stringResource(Res.string.move_translation_down),
-                            painter = painterResource(IconRes.drawable.ic_arrow_down),
+                            painter = painterResource(Res.drawable.ic_arrow_down),
                         )
                     } else if (padsReorderButtons) {
                         Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -310,7 +309,7 @@ private fun LeftColumn(
                             app.removeBibleTranslation(index)
                         } },
                         tooltipText = stringResource(Res.string.remove),
-                        painter = painterResource(IconRes.drawable.ic_delete),
+                        painter = painterResource(Res.drawable.ic_delete),
                     )
                 }
             }

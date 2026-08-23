@@ -89,51 +89,51 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_pause
-import org.churchpresenter.icons.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.atem_loading_slots
-import churchpresenter.composeapp.generated.resources.atem_slot_empty
-import churchpresenter.composeapp.generated.resources.atem_slot_in_use
-import churchpresenter.composeapp.generated.resources.atem_slot_named
-import churchpresenter.composeapp.generated.resources.atem_slot_unnamed
-import churchpresenter.composeapp.generated.resources.atem_mode_clip
-import churchpresenter.composeapp.generated.resources.atem_mode_still
-import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
-import churchpresenter.composeapp.generated.resources.atem_clip_capacity_info
-import churchpresenter.composeapp.generated.resources.atem_clip_too_long
-import churchpresenter.composeapp.generated.resources.atem_golive_key
-import churchpresenter.composeapp.generated.resources.atem_unreachable
-import churchpresenter.composeapp.generated.resources.atem_upscale_notice
-import churchpresenter.composeapp.generated.resources.atem_preparing
-import churchpresenter.composeapp.generated.resources.atem_quick_clip_tooltip
-import churchpresenter.composeapp.generated.resources.atem_quick_still_tooltip
-import churchpresenter.composeapp.generated.resources.atem_ready
-import churchpresenter.composeapp.generated.resources.atem_send_to_atem
-import churchpresenter.composeapp.generated.resources.atem_slot
-import churchpresenter.composeapp.generated.resources.atem_slots_error
-import churchpresenter.composeapp.generated.resources.atem_upload
-import churchpresenter.composeapp.generated.resources.atem_upload_error
-import churchpresenter.composeapp.generated.resources.atem_uploading_image
-import churchpresenter.composeapp.generated.resources.atem_uploading_video
-import churchpresenter.composeapp.generated.resources.atem_processing
-import churchpresenter.composeapp.generated.resources.atem_upload_mode
-import churchpresenter.composeapp.generated.resources.atem_uploading
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_pause
+import org.churchpresenter.resources.generated.resources.ic_play
+import org.churchpresenter.resources.generated.resources.add_to_schedule
+import org.churchpresenter.resources.generated.resources.atem_loading_slots
+import org.churchpresenter.resources.generated.resources.atem_slot_empty
+import org.churchpresenter.resources.generated.resources.atem_slot_in_use
+import org.churchpresenter.resources.generated.resources.atem_slot_named
+import org.churchpresenter.resources.generated.resources.atem_slot_unnamed
+import org.churchpresenter.resources.generated.resources.atem_mode_clip
+import org.churchpresenter.resources.generated.resources.atem_mode_still
+import org.churchpresenter.resources.generated.resources.atem_aspect_mismatch
+import org.churchpresenter.resources.generated.resources.atem_clip_capacity_info
+import org.churchpresenter.resources.generated.resources.atem_clip_too_long
+import org.churchpresenter.resources.generated.resources.atem_golive_key
+import org.churchpresenter.resources.generated.resources.atem_unreachable
+import org.churchpresenter.resources.generated.resources.atem_upscale_notice
+import org.churchpresenter.resources.generated.resources.atem_preparing
+import org.churchpresenter.resources.generated.resources.atem_quick_clip_tooltip
+import org.churchpresenter.resources.generated.resources.atem_quick_still_tooltip
+import org.churchpresenter.resources.generated.resources.atem_ready
+import org.churchpresenter.resources.generated.resources.atem_send_to_atem
+import org.churchpresenter.resources.generated.resources.atem_slot
+import org.churchpresenter.resources.generated.resources.atem_slots_error
+import org.churchpresenter.resources.generated.resources.atem_upload
+import org.churchpresenter.resources.generated.resources.atem_upload_error
+import org.churchpresenter.resources.generated.resources.atem_uploading_image
+import org.churchpresenter.resources.generated.resources.atem_uploading_video
+import org.churchpresenter.resources.generated.resources.atem_processing
+import org.churchpresenter.resources.generated.resources.atem_upload_mode
+import org.churchpresenter.resources.generated.resources.atem_uploading
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.confirm_delete_file
-import churchpresenter.composeapp.generated.resources.go_live
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_key
-import org.churchpresenter.icons.generated.resources.ic_upload
-import churchpresenter.composeapp.generated.resources.lottie_no_presets
-import churchpresenter.composeapp.generated.resources.lottie_select_preset
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.resources.generated.resources.cancel
+import org.churchpresenter.resources.generated.resources.confirm_delete
+import org.churchpresenter.resources.generated.resources.confirm_delete_file
+import org.churchpresenter.resources.generated.resources.go_live
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_key
+import org.churchpresenter.resources.generated.resources.ic_upload
+import org.churchpresenter.resources.generated.resources.lottie_no_presets
+import org.churchpresenter.resources.generated.resources.lottie_select_preset
+import org.churchpresenter.resources.generated.resources.pause
+import org.churchpresenter.resources.generated.resources.play
+import org.churchpresenter.resources.generated.resources.tooltip_remove
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
@@ -160,14 +160,13 @@ import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.generate_lower_third
-import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
+import org.churchpresenter.resources.generated.resources.generate_lower_third
+import org.churchpresenter.resources.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.companionserver.isLottieFile
 import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val ATEM_REACHABLE_POLL_MS = 30_000L
 private const val ATEM_UNREACHABLE_POLL_MS = 10_000L
@@ -803,7 +802,7 @@ fun LowerThirdTab(
                                         modifier = Modifier.weight(1f)
                                     )
                                     Icon(
-                                        painter = painterResource(IconRes.drawable.ic_close),
+                                        painter = painterResource(Res.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.tooltip_remove),
                                         modifier = Modifier.size(14.dp).initialPassClickable {
                                             SwingUtilities.invokeLater {
@@ -943,7 +942,7 @@ fun LowerThirdTab(
                                 contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Icon(painterResource(IconRes.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
+                            Icon(painterResource(Res.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
                         }
                     }
 
@@ -977,7 +976,7 @@ fun LowerThirdTab(
                                 colors = atemButtonColors
                             ) {
                                 Icon(
-                                    painterResource(IconRes.drawable.ic_upload),
+                                    painterResource(Res.drawable.ic_upload),
                                     contentDescription = stringResource(Res.string.atem_send_to_atem),
                                     modifier = Modifier.size(16.dp),
                                 )
@@ -1009,7 +1008,7 @@ fun LowerThirdTab(
                         )
                     ) {
                         Icon(
-                            painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
+                            painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
                             contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
                             modifier = Modifier.size(15.dp),
                         )

@@ -49,38 +49,38 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.apply
-import churchpresenter.composeapp.generated.resources.cancel
-import org.churchpresenter.icons.generated.resources.ic_warning
-import churchpresenter.composeapp.generated.resources.keyboard_shortcuts_title
-import churchpresenter.composeapp.generated.resources.no_results_found
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.shortcut_category_mouse
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_many
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_none
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_one
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_subtitle_many
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_subtitle_one
-import churchpresenter.composeapp.generated.resources.shortcut_conflicts_title
-import churchpresenter.composeapp.generated.resources.shortcut_description_context_menu
-import churchpresenter.composeapp.generated.resources.shortcut_description_go_live
-import churchpresenter.composeapp.generated.resources.shortcut_description_reorder_item
-import churchpresenter.composeapp.generated.resources.shortcut_key_double_click
-import churchpresenter.composeapp.generated.resources.shortcut_key_right_click
-import churchpresenter.composeapp.generated.resources.shortcut_key_shift_drag
-import churchpresenter.composeapp.generated.resources.shortcut_scope_mouse_hint
-import churchpresenter.composeapp.generated.resources.shortcut_search_by_key
-import churchpresenter.composeapp.generated.resources.shortcut_search_match_many
-import churchpresenter.composeapp.generated.resources.shortcut_search_match_one
-import churchpresenter.composeapp.generated.resources.shortcut_search_placeholder
-import churchpresenter.composeapp.generated.resources.shortcut_search_press_prompt
-import churchpresenter.composeapp.generated.resources.shortcut_search_results
-import churchpresenter.composeapp.generated.resources.shortcut_settings_reset_all
-import churchpresenter.composeapp.generated.resources.shortcut_unsaved_many
-import churchpresenter.composeapp.generated.resources.shortcut_unsaved_one
-import churchpresenter.composeapp.generated.resources.symbol_cancel
-import churchpresenter.composeapp.generated.resources.symbol_ok
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.apply
+import org.churchpresenter.resources.generated.resources.cancel
+import org.churchpresenter.resources.generated.resources.ic_warning
+import org.churchpresenter.resources.generated.resources.keyboard_shortcuts_title
+import org.churchpresenter.resources.generated.resources.no_results_found
+import org.churchpresenter.resources.generated.resources.ok
+import org.churchpresenter.resources.generated.resources.shortcut_category_mouse
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_many
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_none
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_one
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_subtitle_many
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_subtitle_one
+import org.churchpresenter.resources.generated.resources.shortcut_conflicts_title
+import org.churchpresenter.resources.generated.resources.shortcut_description_context_menu
+import org.churchpresenter.resources.generated.resources.shortcut_description_go_live
+import org.churchpresenter.resources.generated.resources.shortcut_description_reorder_item
+import org.churchpresenter.resources.generated.resources.shortcut_key_double_click
+import org.churchpresenter.resources.generated.resources.shortcut_key_right_click
+import org.churchpresenter.resources.generated.resources.shortcut_key_shift_drag
+import org.churchpresenter.resources.generated.resources.shortcut_scope_mouse_hint
+import org.churchpresenter.resources.generated.resources.shortcut_search_by_key
+import org.churchpresenter.resources.generated.resources.shortcut_search_match_many
+import org.churchpresenter.resources.generated.resources.shortcut_search_match_one
+import org.churchpresenter.resources.generated.resources.shortcut_search_placeholder
+import org.churchpresenter.resources.generated.resources.shortcut_search_press_prompt
+import org.churchpresenter.resources.generated.resources.shortcut_search_results
+import org.churchpresenter.resources.generated.resources.shortcut_settings_reset_all
+import org.churchpresenter.resources.generated.resources.shortcut_unsaved_many
+import org.churchpresenter.resources.generated.resources.shortcut_unsaved_one
+import org.churchpresenter.resources.generated.resources.symbol_cancel
+import org.churchpresenter.resources.generated.resources.symbol_ok
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SearchField
@@ -93,7 +93,6 @@ import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.searchText
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** Test tag for the reset-everything button, which several tests need to locate. */
 internal const val SHORTCUT_RESET_ALL_TAG = "shortcut_reset_all"
@@ -603,7 +602,7 @@ private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Un
         onClick = onClick,
         leadingIcon = {
             Icon(
-                painter = painterResource(IconRes.drawable.ic_warning),
+                painter = painterResource(Res.drawable.ic_warning),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = if (count > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

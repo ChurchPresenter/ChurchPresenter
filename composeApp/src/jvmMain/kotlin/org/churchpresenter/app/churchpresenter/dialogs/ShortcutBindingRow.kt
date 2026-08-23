@@ -41,17 +41,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_undo
-import org.churchpresenter.icons.generated.resources.ic_warning
-import churchpresenter.composeapp.generated.resources.shortcut_capture_conflict
-import churchpresenter.composeapp.generated.resources.shortcut_capture_title
-import churchpresenter.composeapp.generated.resources.shortcut_rebind_hint
-import churchpresenter.composeapp.generated.resources.shortcut_recording_stop
-import churchpresenter.composeapp.generated.resources.shortcut_settings_clear
-import churchpresenter.composeapp.generated.resources.shortcut_settings_reset
-import churchpresenter.composeapp.generated.resources.shortcut_unbound
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_undo
+import org.churchpresenter.resources.generated.resources.ic_warning
+import org.churchpresenter.resources.generated.resources.shortcut_capture_conflict
+import org.churchpresenter.resources.generated.resources.shortcut_capture_title
+import org.churchpresenter.resources.generated.resources.shortcut_rebind_hint
+import org.churchpresenter.resources.generated.resources.shortcut_recording_stop
+import org.churchpresenter.resources.generated.resources.shortcut_settings_clear
+import org.churchpresenter.resources.generated.resources.shortcut_settings_reset
+import org.churchpresenter.resources.generated.resources.shortcut_unbound
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.core.models.shortcuts.KeyChord
@@ -59,7 +59,6 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.keyCaps
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** Chords of a multi-key binding are drawn as two cap groups separated by this. */
 private const val CAP_GROUP_SEPARATOR = "/"
@@ -144,7 +143,7 @@ internal fun ShortcutBindingRow(
 
         if (recording) {
             TooltipIconButton(
-                painter = painterResource(IconRes.drawable.ic_close),
+                painter = painterResource(Res.drawable.ic_close),
                 text = stringResource(Res.string.shortcut_recording_stop),
                 onClick = onStopRecording,
                 iconSize = 11.dp,
@@ -156,7 +155,7 @@ internal fun ShortcutBindingRow(
             // be put back. Offering both at once would widen every row for a control most never
             // need.
             TooltipIconButton(
-                painter = painterResource(if (customized) IconRes.drawable.ic_undo else IconRes.drawable.ic_close),
+                painter = painterResource(if (customized) Res.drawable.ic_undo else Res.drawable.ic_close),
                 text = stringResource(
                     if (customized) Res.string.shortcut_settings_reset else Res.string.shortcut_settings_clear
                 ),
@@ -261,7 +260,7 @@ private fun ShortcutRowLabel(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    painter = painterResource(IconRes.drawable.ic_warning),
+                    painter = painterResource(Res.drawable.ic_warning),
                     contentDescription = null,
                     modifier = Modifier.size(11.dp),
                     tint = colors.error,

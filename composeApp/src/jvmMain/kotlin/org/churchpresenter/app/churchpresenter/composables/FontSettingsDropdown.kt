@@ -55,23 +55,22 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.font_group_all
-import churchpresenter.composeapp.generated.resources.font_group_matches
-import churchpresenter.composeapp.generated.resources.font_group_recent
-import churchpresenter.composeapp.generated.resources.font_group_recommended
-import churchpresenter.composeapp.generated.resources.font_hidden_note
-import churchpresenter.composeapp.generated.resources.font_picker_clear_search
-import churchpresenter.composeapp.generated.resources.font_shown_note
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.no_results_found
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.font_group_all
+import org.churchpresenter.resources.generated.resources.font_group_matches
+import org.churchpresenter.resources.generated.resources.font_group_recent
+import org.churchpresenter.resources.generated.resources.font_group_recommended
+import org.churchpresenter.resources.generated.resources.font_hidden_note
+import org.churchpresenter.resources.generated.resources.font_picker_clear_search
+import org.churchpresenter.resources.generated.resources.font_shown_note
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.no_results_found
 import org.churchpresenter.app.churchpresenter.utils.FontCatalogSnapshot
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.rememberFontCatalog
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** Room left around the panel so it never runs off the top or the bottom of the window. */
 private val PANEL_WINDOW_MARGIN = 32.dp
@@ -210,7 +209,7 @@ private fun FontPickerTrigger(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
+                painter = painterResource(Res.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp).rotate(caret),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

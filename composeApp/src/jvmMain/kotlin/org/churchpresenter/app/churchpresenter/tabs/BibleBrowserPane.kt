@@ -35,17 +35,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.copy_verse
-import churchpresenter.composeapp.generated.resources.go_live
-import org.churchpresenter.icons.generated.resources.ic_copy
-import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.add_to_schedule
+import org.churchpresenter.resources.generated.resources.copy_verse
+import org.churchpresenter.resources.generated.resources.go_live
+import org.churchpresenter.resources.generated.resources.ic_copy
+import org.churchpresenter.resources.generated.resources.ic_playlist_add
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The three-column browser: books, chapters, verses, and whatever is docked beside them.
@@ -215,12 +214,12 @@ internal fun ColumnScope.BibleBrowserPane(
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.copy_verse)) },
-                                    leadingIcon = { Icon(painter = painterResource(IconRes.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
+                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
                                     onClick = { onCopyVerse(); showVerseContextMenu = false }
                                 )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.add_to_schedule)) },
-                                    leadingIcon = { Icon(painter = painterResource(IconRes.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
+                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
                                     onClick = { onAddToSchedule(); showVerseContextMenu = false }
                                 )
                                 DropdownMenuItem(

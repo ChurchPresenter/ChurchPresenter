@@ -8,10 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.shadow_size
-import churchpresenter.composeapp.generated.resources.shadow_opacity
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.color
+import org.churchpresenter.resources.generated.resources.shadow_size
+import org.churchpresenter.resources.generated.resources.shadow_opacity
 import org.jetbrains.compose.resources.stringResource
 
 /**

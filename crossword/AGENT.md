@@ -15,7 +15,7 @@ does **not** depend on — there is no `implementation(projects.crossword)`. The
 build-time copy:
 
 ```
-crossword/encoded/*.xwp  ──[ syncCrosswordFiles ]──►  composeApp/src/jvmMain/composeResources/files/crossword/
+crossword/encoded/*.xwp  ──[ syncCrosswordFiles ]──►  resources/src/main/composeResources/files/crossword/
 ```
 
 `syncCrosswordFiles` is declared in `composeApp/build.gradle.kts` and every `*ProcessResources*`

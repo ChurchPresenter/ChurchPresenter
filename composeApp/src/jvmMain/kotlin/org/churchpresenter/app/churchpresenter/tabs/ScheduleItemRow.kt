@@ -53,25 +53,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import org.churchpresenter.icons.generated.resources.ic_arrow_up
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_drag_dots
-import org.churchpresenter.icons.generated.resources.ic_edit
-import org.churchpresenter.icons.generated.resources.ic_play
-import org.churchpresenter.icons.generated.resources.ic_check
-import org.churchpresenter.icons.generated.resources.ic_note
-import churchpresenter.composeapp.generated.resources.pause_duration_ms
-import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
-import churchpresenter.composeapp.generated.resources.tooltip_note
-import churchpresenter.composeapp.generated.resources.tooltip_note_clear
-import churchpresenter.composeapp.generated.resources.tooltip_note_done
-import churchpresenter.composeapp.generated.resources.tooltip_edit_label
-import churchpresenter.composeapp.generated.resources.tooltip_go_live
-import churchpresenter.composeapp.generated.resources.tooltip_move_down
-import churchpresenter.composeapp.generated.resources.tooltip_move_up
-import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.ic_arrow_up
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_drag_dots
+import org.churchpresenter.resources.generated.resources.ic_edit
+import org.churchpresenter.resources.generated.resources.ic_play
+import org.churchpresenter.resources.generated.resources.ic_check
+import org.churchpresenter.resources.generated.resources.ic_note
+import org.churchpresenter.resources.generated.resources.pause_duration_ms
+import org.churchpresenter.resources.generated.resources.schedule_note_placeholder
+import org.churchpresenter.resources.generated.resources.tooltip_note
+import org.churchpresenter.resources.generated.resources.tooltip_note_clear
+import org.churchpresenter.resources.generated.resources.tooltip_note_done
+import org.churchpresenter.resources.generated.resources.tooltip_edit_label
+import org.churchpresenter.resources.generated.resources.tooltip_go_live
+import org.churchpresenter.resources.generated.resources.tooltip_move_down
+import org.churchpresenter.resources.generated.resources.tooltip_move_up
+import org.churchpresenter.resources.generated.resources.tooltip_remove
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -85,7 +85,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemKindLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
@@ -160,7 +159,7 @@ private fun RowScope.ScheduleRowActionButtons(
     @Composable
     fun removeButton() {
         ScheduleRowActionButton(
-            painter = painterResource(IconRes.drawable.ic_close),
+            painter = painterResource(Res.drawable.ic_close),
             text = stringResource(Res.string.tooltip_remove),
             onClick = onRemove,
             buttonSize = actionSize,
@@ -174,7 +173,7 @@ private fun RowScope.ScheduleRowActionButtons(
         Spacer(modifier = Modifier.weight(1f))
     }
     ScheduleRowActionButton(
-        painter = painterResource(IconRes.drawable.ic_arrow_up),
+        painter = painterResource(Res.drawable.ic_arrow_up),
         text = stringResource(Res.string.tooltip_move_up),
         onClick = onMoveUp,
         buttonSize = actionSize,
@@ -182,7 +181,7 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = MaterialTheme.colorScheme.onSurfaceVariant
     )
     ScheduleRowActionButton(
-        painter = painterResource(IconRes.drawable.ic_arrow_down),
+        painter = painterResource(Res.drawable.ic_arrow_down),
         text = stringResource(Res.string.tooltip_move_down),
         onClick = onMoveDown,
         buttonSize = actionSize,
@@ -190,7 +189,7 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = MaterialTheme.colorScheme.onSurfaceVariant
     )
     ScheduleRowActionButton(
-        painter = painterResource(IconRes.drawable.ic_note),
+        painter = painterResource(Res.drawable.ic_note),
         text = stringResource(Res.string.tooltip_note),
         onClick = onToggleNote,
         buttonSize = actionSize,
@@ -202,7 +201,7 @@ private fun RowScope.ScheduleRowActionButtons(
 
     if (isSection) {
         ScheduleRowActionButton(
-            painter = painterResource(IconRes.drawable.ic_edit),
+            painter = painterResource(Res.drawable.ic_edit),
             text = stringResource(Res.string.tooltip_edit_label),
             onClick = onEditLabel,
             modifier = Modifier.padding(start = 2.dp),
@@ -212,7 +211,7 @@ private fun RowScope.ScheduleRowActionButtons(
         )
     } else {
         ScheduleRowActionButton(
-            painter = painterResource(IconRes.drawable.ic_play),
+            painter = painterResource(Res.drawable.ic_play),
             text = stringResource(Res.string.tooltip_go_live),
             onClick = onPresent,
             modifier = Modifier.padding(start = 2.dp),
@@ -309,7 +308,7 @@ internal fun ScheduleItemRow(
                         .then(dragHandleModifier)
                 ) {
                     Icon(
-                        painter = painterResource(IconRes.drawable.ic_drag_dots),
+                        painter = painterResource(Res.drawable.ic_drag_dots),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                         modifier = Modifier
@@ -446,7 +445,7 @@ internal fun ScheduleItemRow(
                         modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
                     )
                     ScheduleRowActionButton(
-                        painter = painterResource(IconRes.drawable.ic_edit),
+                        painter = painterResource(Res.drawable.ic_edit),
                         text = stringResource(Res.string.tooltip_note),
                         onClick = { noteExpanded = true },
                         iconSize = 11.dp,
@@ -497,7 +496,7 @@ internal fun ScheduleItemRow(
                         }
                     )
                     TooltipIconButton(
-                        painter = painterResource(IconRes.drawable.ic_check),
+                        painter = painterResource(Res.drawable.ic_check),
                         text = stringResource(Res.string.tooltip_note_done),
                         onClick = {
                             onNoteChanged(noteText)
@@ -508,7 +507,7 @@ internal fun ScheduleItemRow(
                         iconTint = MaterialTheme.colorScheme.primary
                     )
                     TooltipIconButton(
-                        painter = painterResource(IconRes.drawable.ic_close),
+                        painter = painterResource(Res.drawable.ic_close),
                         text = stringResource(Res.string.tooltip_note_clear),
                         onClick = {
                             noteText = ""

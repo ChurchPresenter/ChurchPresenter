@@ -36,9 +36,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** The style the field draws its current value in. Shared with [rememberDropdownWidthFor] so a width
  *  measured for a set of options matches the text that will actually be drawn in it. */
@@ -134,7 +134,7 @@ fun DropdownSettingsField(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
+                painter = painterResource(Res.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

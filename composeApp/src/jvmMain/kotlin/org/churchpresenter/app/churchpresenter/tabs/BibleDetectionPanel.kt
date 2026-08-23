@@ -62,47 +62,47 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_balanced
-import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_fast
-import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_label
-import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_tooltip_balanced
-import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_tooltip_fast
-import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
-import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
-import churchpresenter.composeapp.generated.resources.bible_stt_clear
-import churchpresenter.composeapp.generated.resources.bible_stt_detected_version_tooltip
-import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
-import churchpresenter.composeapp.generated.resources.bible_stt_engine_stt_down
-import churchpresenter.composeapp.generated.resources.bible_stt_engine_unavailable
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_missed
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_missed_hint
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_needs_live
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_premature
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_premature_hint
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong
-import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong_hint
-import churchpresenter.composeapp.generated.resources.bible_stt_level_aggressive
-import churchpresenter.composeapp.generated.resources.bible_stt_level_balanced
-import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
-import churchpresenter.composeapp.generated.resources.bible_stt_level_off
-import churchpresenter.composeapp.generated.resources.bible_stt_listening
-import churchpresenter.composeapp.generated.resources.bible_stt_match_label
-import churchpresenter.composeapp.generated.resources.bible_stt_no_bible
-import churchpresenter.composeapp.generated.resources.bible_stt_src_chapter_history
-import churchpresenter.composeapp.generated.resources.bible_stt_src_chapter_scan
-import churchpresenter.composeapp.generated.resources.bible_stt_src_continuation
-import churchpresenter.composeapp.generated.resources.bible_stt_src_explicit
-import churchpresenter.composeapp.generated.resources.bible_stt_src_reverse
-import churchpresenter.composeapp.generated.resources.bible_stt_text_match_hint
-import churchpresenter.composeapp.generated.resources.bible_stt_track_transcription
-import churchpresenter.composeapp.generated.resources.bible_stt_track_translation
-import churchpresenter.composeapp.generated.resources.bible_stt_waiting_for_stt
-import org.churchpresenter.icons.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.stt_status_connecting
-import churchpresenter.composeapp.generated.resources.stt_status_not_connected
-import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
-import churchpresenter.composeapp.generated.resources.stt_status_unreachable
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.bible_next_verse_speed_balanced
+import org.churchpresenter.resources.generated.resources.bible_next_verse_speed_fast
+import org.churchpresenter.resources.generated.resources.bible_next_verse_speed_label
+import org.churchpresenter.resources.generated.resources.bible_next_verse_speed_tooltip_balanced
+import org.churchpresenter.resources.generated.resources.bible_next_verse_speed_tooltip_fast
+import org.churchpresenter.resources.generated.resources.bible_stt_auto_follow
+import org.churchpresenter.resources.generated.resources.bible_stt_auto_follow_hint
+import org.churchpresenter.resources.generated.resources.bible_stt_clear
+import org.churchpresenter.resources.generated.resources.bible_stt_detected_version_tooltip
+import org.churchpresenter.resources.generated.resources.bible_stt_engine_connecting
+import org.churchpresenter.resources.generated.resources.bible_stt_engine_stt_down
+import org.churchpresenter.resources.generated.resources.bible_stt_engine_unavailable
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_missed
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_missed_hint
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_needs_live
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_premature
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_premature_hint
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_wrong
+import org.churchpresenter.resources.generated.resources.bible_stt_flag_wrong_hint
+import org.churchpresenter.resources.generated.resources.bible_stt_level_aggressive
+import org.churchpresenter.resources.generated.resources.bible_stt_level_balanced
+import org.churchpresenter.resources.generated.resources.bible_stt_level_conservative
+import org.churchpresenter.resources.generated.resources.bible_stt_level_off
+import org.churchpresenter.resources.generated.resources.bible_stt_listening
+import org.churchpresenter.resources.generated.resources.bible_stt_match_label
+import org.churchpresenter.resources.generated.resources.bible_stt_no_bible
+import org.churchpresenter.resources.generated.resources.bible_stt_src_chapter_history
+import org.churchpresenter.resources.generated.resources.bible_stt_src_chapter_scan
+import org.churchpresenter.resources.generated.resources.bible_stt_src_continuation
+import org.churchpresenter.resources.generated.resources.bible_stt_src_explicit
+import org.churchpresenter.resources.generated.resources.bible_stt_src_reverse
+import org.churchpresenter.resources.generated.resources.bible_stt_text_match_hint
+import org.churchpresenter.resources.generated.resources.bible_stt_track_transcription
+import org.churchpresenter.resources.generated.resources.bible_stt_track_translation
+import org.churchpresenter.resources.generated.resources.bible_stt_waiting_for_stt
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.stt_status_connecting
+import org.churchpresenter.resources.generated.resources.stt_status_not_connected
+import org.churchpresenter.resources.generated.resources.stt_status_reconnecting
+import org.churchpresenter.resources.generated.resources.stt_status_unreachable
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSttStatus
@@ -114,7 +114,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val SELECTION_BAR_WIDTH = 4f
 
@@ -397,7 +396,7 @@ internal fun BibleDetectionPanel(
                         modifier = Modifier.size(27.dp)
                     ) {
                         Icon(
-                            painter = painterResource(IconRes.drawable.ic_close),
+                            painter = painterResource(Res.drawable.ic_close),
                             contentDescription = stringResource(Res.string.bible_stt_clear),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)

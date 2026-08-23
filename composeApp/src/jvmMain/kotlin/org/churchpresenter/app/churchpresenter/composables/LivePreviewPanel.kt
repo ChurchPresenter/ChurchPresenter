@@ -51,22 +51,22 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_pause
-import org.churchpresenter.icons.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.fill_badge
-import churchpresenter.composeapp.generated.resources.browser_source_output_label
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
-import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
-import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
-import churchpresenter.composeapp.generated.resources.live_preview_nothing
-import churchpresenter.composeapp.generated.resources.live_preview_title
-import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
-import churchpresenter.composeapp.generated.resources.screen_locked_badge
-import churchpresenter.composeapp.generated.resources.screen_number
-import churchpresenter.composeapp.generated.resources.unlock_screen
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_pause
+import org.churchpresenter.resources.generated.resources.ic_play
+import org.churchpresenter.resources.generated.resources.fill_badge
+import org.churchpresenter.resources.generated.resources.browser_source_output_label
+import org.churchpresenter.resources.generated.resources.display_stage_monitor
+import org.churchpresenter.resources.generated.resources.display_lower_third_horizontal
+import org.churchpresenter.resources.generated.resources.display_lower_third_vertical
+import org.churchpresenter.resources.generated.resources.live_preview_nothing
+import org.churchpresenter.resources.generated.resources.live_preview_title
+import org.churchpresenter.resources.generated.resources.lock_screen_to_tab
+import org.churchpresenter.resources.generated.resources.screen_locked_badge
+import org.churchpresenter.resources.generated.resources.screen_number
+import org.churchpresenter.resources.generated.resources.unlock_screen
+import org.churchpresenter.resources.generated.resources.pause
+import org.churchpresenter.resources.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
@@ -96,7 +96,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PREVIEW_BACKGROUND = 0xFF121212
 private const val LIVE_BADGE_COLOR = 0xFF2196F3
@@ -639,7 +638,7 @@ private fun MediaPreviewControls(
         ) {
             Icon(
                 painter = painterResource(
-                    if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
+                    if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
                 ),
                 contentDescription = stringResource(
                     if (isPlaying) Res.string.pause else Res.string.play
