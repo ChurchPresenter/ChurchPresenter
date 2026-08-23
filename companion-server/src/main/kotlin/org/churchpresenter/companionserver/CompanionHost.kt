@@ -53,12 +53,12 @@ fun interface LottieFrameRenderer {
 }
 
 /**
- * The question list behind the Q&A routes, as the server sees it.
+ * The question list behind the **public** Q&A routes: what a phone that scanned the QR code can
+ * see and do — read the session, submit, vote.
  *
  * The app's `QAManager` implements it. The interface exists so the server does not hold a view
  * model — it used to hold `QAManager` itself, which both crossed the module boundary and broke the
- * repo's rule against passing a view model into another class. Everything here is called by
- * [qaRoutes]; nothing else about Q&A is the server's business.
+ * repo's rule against passing a view model into another class.
  */
 interface QaStore {
     /** Emits once per change so the server can tell connected clients to re-fetch. */
@@ -76,18 +76,29 @@ interface QaStore {
         timestamp: Long = System.currentTimeMillis(),
     ): Question?
 
-    fun addQuestion(text: String, timestamp: Long = System.currentTimeMillis()): Question?
     fun findQuestion(id: String): Question?
     fun getApprovedQuestions(): List<Question>
+    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean
+    fun getVoteDirection(questionId: String, clientIp: String): String?
+    fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean
+}
+
+/**
+ * The half only the operator reaches, behind the admin password: approving, editing, displaying and
+ * clearing questions.
+ *
+ * Split from [QaStore] along the line the routes are already grouped by — `qaPublicRoutes` and
+ * `qaVotingRoutes` need nothing from here, and `qaModerationRoutes` is the only caller of any of
+ * it. Nothing implements one without the other, so it extends rather than stands alone.
+ */
+interface QaModeration : QaStore {
+    fun addQuestion(text: String, timestamp: Long = System.currentTimeMillis()): Question?
     fun approveQuestion(id: String): Boolean
     fun denyQuestion(id: String): Boolean
     fun markDone(id: String): Boolean
     fun editQuestion(id: String, newText: String): Boolean
     fun deleteQuestion(id: String): Boolean
     fun displayQuestion(id: String): Boolean
-    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean
-    fun getVoteDirection(questionId: String, clientIp: String): String?
-    fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean
     fun clearDisplay()
     fun clearAll()
 }

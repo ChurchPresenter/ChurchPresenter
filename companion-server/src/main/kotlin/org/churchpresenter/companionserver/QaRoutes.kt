@@ -57,16 +57,19 @@ private fun Route.qaPublicRoutes(
 
                 // Public: session status
                 get("/api/qa/status") {
-                    val qa = server.qaStore
+                    val qa: QaStore? = server.qaStore
                     call.respondText(
-                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
+                        """{"sessionActive":${qa?.sessionActive ?: false},""" +
+                            """"cooldownSeconds":${server.qaCooldownSeconds},""" +
+                            """"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}",""" +
+                            """"votingEnabled":${server.qaVotingEnabled}}""",
                         ContentType.Application.Json
                     )
                 }
 
                 // Public: submit a question (no API key)
                 post("/api/qa/submit") {
-                    val qa = server.qaStore
+                    val qa: QaStore? = server.qaStore
                     if (qa == null || !qa.sessionActive) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
                         return@post
@@ -128,7 +131,7 @@ private fun Route.qaVotingRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
                         return@get
                     }
-                    val qa = server.qaStore
+                    val qa: QaStore? = server.qaStore
                     if (qa == null || !qa.sessionActive) {
                         call.respondText("[]", ContentType.Application.Json)
                         return@get
@@ -155,7 +158,7 @@ private fun Route.qaVotingRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
                         return@post
                     }
-                    val qa = server.qaStore
+                    val qa: QaStore? = server.qaStore
                     if (qa == null || !qa.sessionActive) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
                         return@post

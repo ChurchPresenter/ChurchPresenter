@@ -120,7 +120,9 @@ object LowerThirdSequencer {
         job = scope.launch {
             try {
                 delay(atem.keyPreRollMs.toLong())
-                onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs, name = name))
+                onShow.emit(
+            ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs, name = name)
+        )
                 if (autoEnd) delay(totalMs + atem.keyPostRollMs)
                 else delay(Long.MAX_VALUE)   // "show" mode: on air until stop()
             } finally {

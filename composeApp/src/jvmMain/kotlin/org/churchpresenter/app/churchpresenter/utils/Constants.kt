@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.songchords.ChordTransposer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

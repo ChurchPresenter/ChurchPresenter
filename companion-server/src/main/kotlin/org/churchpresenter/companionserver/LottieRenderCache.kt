@@ -440,7 +440,9 @@ object LottieRenderCache {
                 // A fully uniform frame RLE-encodes to a single 8-byte record — if every
                 // frame did, the off-screen capture almost certainly produced blanks
                 if (maxEncodedSize <= UNIFORM_FRAME_MAX_BYTES) {
-                    System.err.println("[LottieRenderCache] WARNING: all frames of $key are uniform — captures may be blank")
+                    System.err.println(
+                        "[LottieRenderCache] WARNING: all frames of $key are uniform — captures may be blank"
+                    )
                 }
             }
             dest.delete()

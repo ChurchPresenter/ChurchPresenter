@@ -100,7 +100,9 @@ data class ScheduleSongDto(
 @Serializable
 data class ScheduleItemDto(
     val id: String,
-    val type: String,           // "song", "bible", "label", "picture", "presentation", "media", "lower_third", "announcement", "website"
+    // "song", "bible", "label", "picture", "presentation", "media", "lower_third",
+    // "announcement", "website"
+    val type: String,
     val displayText: String,
     // song
     val songNumber: Int? = null,

@@ -77,12 +77,17 @@ class FakeLottieFrameRenderer : LottieFrameRenderer {
     }
 
     companion object {
+        private const val CHANNEL_MASK = 0xFF
+        private const val ALPHA_SHIFT = 24
+        private const val RED_SHIFT = 16
+        private const val GREEN_SHIFT = 8
+
         /** Opaque, and different from its neighbours, so a frame never compresses away to nothing. */
         fun pixelAt(x: Int, y: Int, shift: Int): Int {
-            val r = (x + shift) and 0xFF
-            val g = (y + shift) and 0xFF
-            val b = (x * y + shift) and 0xFF
-            return (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+            val r = (x + shift) and CHANNEL_MASK
+            val g = (y + shift) and CHANNEL_MASK
+            val b = (x * y + shift) and CHANNEL_MASK
+            return (CHANNEL_MASK shl ALPHA_SHIFT) or (r shl RED_SHIFT) or (g shl GREEN_SHIFT) or b
         }
     }
 }

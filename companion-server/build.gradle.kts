@@ -42,7 +42,6 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.websockets)
 
-    // Self-signed certificate generation for the HTTPS listener.
     implementation(libs.bouncycastle.pkix)
     implementation(libs.bouncycastle.prov)
 
@@ -53,36 +52,22 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
-    // The suites moved here from :composeApp and are JUnit 4 -- @BeforeClass, @get:Rule
-    // TemporaryFolder, Assume. junit-vintage runs them verbatim under the platform launcher; the
-    // capabilitiesResolution block below is what keeps kotlin-test on its JUnit 4 flavour, without
-    // which those annotations resolve to nothing and stop running SILENTLY.
-    // Naming the JUnit 4 flavour explicitly is what puts it in the running at all: with only
-    // `kotlin("test")` declared there is no capability conflict for the block below to resolve, and
-    // the variant-aware resolution picks junit5 unopposed.
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.junit)
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.junit.platform.launcher)
     testImplementation(libs.mockk)
-    // PresentationStore reads decks with POI, and its tests build one to read.
     testImplementation(libs.apache.poi)
     testImplementation(libs.apache.poi.ooxml)
     testImplementation(libs.pdfbox)
     testImplementation(libs.ktor.client.core)
     testImplementation(libs.ktor.client.cio)
     testImplementation(libs.ktor.client.websockets)
-    // SpbFixture: the .spb writer the Bible routes' tests build their fixtures with.
+
     testImplementation(testFixtures(projects.bible))
-    // CrashReportSweep: several routes report a warning on the failure path they are driven down,
-    // and CrashReporter resolves its directory once per JVM, so those tests put the developer's own
-    // ~/.churchpresenter/crash-reports back afterwards.
     testImplementation(testFixtures(projects.diagnostics))
-    // FakeAtemSwitcher: the loopback switcher the ATEM upload routes are driven against.
     testImplementation(testFixtures(projects.atem))
-    // DictionaryFixture: the four-entry corpus the dictionary routes answer from.
     testImplementation(testFixtures(projects.dictionary))
-    // pdfDeck(): Deck's constructor is internal to :presentation-engine.
     testImplementation(testFixtures(projects.presentationEngine))
 }
 

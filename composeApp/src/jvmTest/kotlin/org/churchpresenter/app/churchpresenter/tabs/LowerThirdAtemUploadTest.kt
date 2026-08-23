@@ -77,7 +77,9 @@ class LowerThirdAtemUploadTest {
             // front, and the tab hits this same cache entry rather than rendering again.
             val settings = AtemSettings(host = "127.0.0.1", renderWidth = RENDER_W, renderHeight = RENDER_H)
             val variant = LottieRenderCache.atemVariant(DETAILED_LOTTIE, settings, clip = false)
-            val cached = runBlocking { LottieRenderCache.prepare(DETAILED_LOTTIE, variant, SkiaLottieFrameRenderer).await() }
+            val cached = runBlocking {
+                LottieRenderCache.prepare(DETAILED_LOTTIE, variant, SkiaLottieFrameRenderer).await()
+            }
             payloadBytes = LottieRenderCache.Reader(cached).use {
                 it.nextAtemFrame(RENDER_W, RENDER_H).data.size
             }

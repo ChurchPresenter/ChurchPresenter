@@ -39,7 +39,10 @@ internal class BrowserSourceHub(
 
     internal fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "browser_source_outputs", "count" to outputs.size))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "state_updated",
+            mapOf("type" to "browser_source_outputs", "count" to outputs.size),
+        )
     }
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
@@ -66,7 +69,10 @@ internal class BrowserSourceHub(
         }
     }
 
-    /** Pure check for the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]) — no response side effects, usable from both HTTP and WebSocket routes. */
+    /**
+     * Pure check for the given output's independent Browser Source API-key requirement (separate
+     * from [_apiKeyEnabled]) — no response side effects, usable from both HTTP and WebSocket routes.
+     */
     internal fun browserSourceApiKeyValid(call: ApplicationCall, output: ScreenAssignment): Boolean {
         if (!output.browserSourceApiKeyRequired || _apiKey.value.isEmpty()) return true
         val provided = call.request.headers[Constants.HEADER_API_KEY]

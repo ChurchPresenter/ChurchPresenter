@@ -174,15 +174,18 @@ private fun Route.atemClipRoutes(
                         val secs = String.format(java.util.Locale.US, "%.1f", clipCapacity / fps)
                         call.respond(
                             HttpStatusCode.UnprocessableEntity,
-                            """{"error":${server.atem.jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""
+                            """{"error":${server.atem.jsonStr(
+                                "Clip is $frameCount frames but slot ${slot + 1} holds at most " +
+                                    "$clipCapacity frames (≈$secs s); use a shorter clip or lower fps"
+                            )}}"""
                         )
                         return@post
                     }
                     server.atem.trackUpload(
                         scope.launch {
                             uploadClipFrames(
-                                file, atem, slot, key, name, lottieJson, fps, frameCount,
-                                server.host.lottieRenderer,
+                                file, atem, AtemDestination(slot, key, name),
+                                AtemClipSpec(lottieJson, fps, frameCount), server.host.lottieRenderer,
                             )
                         }
                     )
@@ -240,7 +243,11 @@ private suspend fun handleAtemStillUpload(
                 }
                 // Tracked, not dropped: the transfer outlives this response, so something has to
                 // be able to stop it -- see AtemBridge.cancelUpload.
-                server.atem.trackUpload(scope.launch { uploadStillFrame(file, atem, slot, key, name, server.host.lottieRenderer) })
+                server.atem.trackUpload(
+                    scope.launch {
+                        uploadStillFrame(file, atem, AtemDestination(slot, key, name), server.host.lottieRenderer)
+                    }
+                )
                 val keyInfo = when {
                     !key.on -> ""
                     key.useDsk -> ""","dsk":${key.keyer + 1}"""
@@ -257,11 +264,10 @@ private suspend fun handleAtemStillUpload(
 private suspend fun uploadStillFrame(
     file: java.io.File,
     atem: AtemSettings,
-    slot: Int,
-    key: AtemKeyTarget,
-    name: String,
+    to: AtemDestination,
     renderer: LottieFrameRenderer,
 ) {
+    val (slot, key, name) = to
     val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = false, slot = slot + 1)
     try {
         val lottieJson = file.readText()
@@ -301,6 +307,15 @@ private suspend fun uploadStillFrame(
 /** Which keyer an upload should put on air afterwards, resolved from the query and settings. */
 private data class AtemKeyTarget(val on: Boolean, val useDsk: Boolean, val mixEffect: Int, val keyer: Int)
 
+/**
+ * Where one lower third is going: which media-pool [slot], what to name it there, and whether to
+ * cut a key over it once the transfer lands.
+ *
+ * The three always travel together — the route reads them from one request and both upload paths
+ * pass all three straight through — so they are one parameter rather than three.
+ */
+private data class AtemDestination(val slot: Int, val key: AtemKeyTarget, val name: String)
+
 private fun atemKeyTarget(call: ApplicationCall, server: CompanionServer, atem: AtemSettings): AtemKeyTarget {
     val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
     val meParam = call.request.queryParameters["me"]?.toIntOrNull()
@@ -314,18 +329,19 @@ private fun atemKeyTarget(call: ApplicationCall, server: CompanionServer, atem: 
     )
 }
 
+/** The animation being uploaded, at the frame rate and length the switcher slot was checked against. */
+private data class AtemClipSpec(val lottieJson: String, val fps: Double, val frameCount: Int)
+
 /** Renders the named lower third to an ATEM clip, uploads it, and keys it if asked. */
 private suspend fun uploadClipFrames(
     file: java.io.File,
     atem: AtemSettings,
-    slot: Int,
-    key: AtemKeyTarget,
-    name: String,
-    lottieJson: String,
-    fps: Double,
-    frameCount: Int,
+    to: AtemDestination,
+    clip: AtemClipSpec,
     renderer: LottieFrameRenderer,
 ) {
+    val (slot, key, name) = to
+    val (lottieJson, fps, frameCount) = clip
     val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
     try {
         val variant = LottieRenderCache.atemVariant(lottieJson, atem, clip = true, fps = fps)

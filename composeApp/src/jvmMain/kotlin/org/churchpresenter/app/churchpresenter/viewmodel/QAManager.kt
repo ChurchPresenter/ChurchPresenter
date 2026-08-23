@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.churchpresenter.companionserver.QaStore
+import org.churchpresenter.companionserver.QaModeration
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -28,7 +28,7 @@ private data class QAState(
     val votedIps: Map<String, Map<String, String>> = emptyMap()
 )
 
-class QAManager : QaStore {
+class QAManager : QaModeration {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
