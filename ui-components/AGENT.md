@@ -36,31 +36,40 @@ on view models, presenters or app utils. **A widget that needs one of those does
 
 ## Gates
 
-`BRANCH` and `COMPLEXITY` do not reach the default 85%, and **cannot**:
+Four counters run on the root build's default 85% and clear it with room. **BRANCH and COMPLEXITY
+carry lowered floors, because they cannot reach 85% here:**
 
-| counter | measured | ceiling if every reachable branch were covered |
-|---|---|---|
-| INSTRUCTION | 0.959 | — |
-| LINE | 0.961 | — |
-| METHOD | 0.889 | — |
-| CLASS | 0.913 | — |
-| BRANCH | 0.766 | ~0.87 |
-| COMPLEXITY | 0.720 | ~0.82 |
+| counter | measured | floor | ceiling if every reachable branch were covered |
+|---|---|---|---|
+| INSTRUCTION | 0.976 | 0.85 | — |
+| LINE | 0.977 | 0.85 | — |
+| CLASS | 0.955 | 0.85 | — |
+| METHOD | 0.950 | 0.85 | — |
+| BRANCH | 0.821 | **0.81** | ~0.87 |
+| COMPLEXITY | 0.796 | **0.78** | ~0.84 |
+
+Each floor sits about a point under what the module measures, not four: a floor well below reality
+stops being a gate. They catch a real regression while absorbing the drift a Compose or Kotlin
+version bump causes in generated branch counts.
 
 The gap is the Compose compiler's `$changed` recomposition-skip branches, emitted inside each
-composable and reachable by no test. Measured: `LabeledCheckbox`, `LabeledRadioButton` and
-`LabeledSwitch` each miss 7–8 complexity against **13 missed instructions** — the bodies run in
-full. Ten tests covering checked/unchecked/disabled/supporting/trailing-control moved the number by
-one. Moving four screenshot suites in moved BRANCH by 0.009.
+composable's own method and reachable by no test. Of the complexity still missed, **138 units sit in
+methods whose bodies run in full** (≤15 missed instructions) and only ~39 in methods with real
+uncovered code — 21 of those being `FocusLostRescueState`'s AWT window paths, unreachable since this
+suite runs headless.
 
-**So do not read a low BRANCH/COMPLEXITY here as untested code** — read INSTRUCTION and LINE, which
-are at 0.96. Whether to declare `coverageFloors` for those two counters is an open decision; there
-are **no `coverageExcludes` and there should never be any**, since the denominator is honest.
+Measured, not assumed: ten tests covering `LabeledCheckbox`/`RadioButton`/`Switch` in every state a
+caller can produce moved COMPLEXITY by **one unit** — those three each miss 7–8 complexity against
+13 missed instructions. Moving four screenshot suites into this module moved BRANCH by **0.009**.
+
+**There are no `coverageExcludes` and there must never be any.** Every class this module compiles is
+measured, so the denominator is honest. To judge whether this module is tested, read INSTRUCTION and
+LINE (both ~0.98); BRANCH and COMPLEXITY here measure Compose codegen as much as they measure code.
 
 ## Commands
 
 ```bash
-./gradlew :ui-components:test                 # 43 test classes
+./gradlew :ui-components:test                 # 49 test classes, 425 tests
 ./gradlew :ui-components:detekt               # six baselined LongMethod, nothing else
 ./gradlew :ui-components:verifyRoborazzi      # the committed widget screenshots — local, not CI
 ./gradlew :ui-components:recordRoborazzi      # re-record after a deliberate visual change

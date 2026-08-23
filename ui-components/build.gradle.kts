@@ -1,3 +1,5 @@
+import org.jetbrains.compose.resources.ResourcesExtension
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
@@ -9,10 +11,19 @@ plugins {
     jacoco
 }
 
+extra["coverageFloors"] = mapOf(
+    "BRANCH" to "0.81",
+    "COMPLEXITY" to "0.78",
+)
+
 group = "org.churchpresenter"
 
 kotlin {
     jvmToolchain(21)
+}
+
+compose.resources {
+    generateResClass = ResourcesExtension.ResourceClassGeneration.Never
 }
 
 dependencies {
@@ -26,8 +37,6 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
-    // Test-only: the alignment screenshots are shot with the app's own Constants.LEFT/CENTER/RIGHT
-    // rather than copies of their values, so a change to those shows up here.
     testImplementation(projects.settings)
     testImplementation(testFixtures(project(":ui-components")))
     testFixturesImplementation(projects.theme)
@@ -35,6 +44,10 @@ dependencies {
     testFixturesImplementation(compose.desktop.uiTestJUnit4)
     testFixturesImplementation(libs.compose.material3)
     testFixturesImplementation(libs.roborazzi.composeDesktop)
+}
+
+tasks.withType<Test>().configureEach {
+    systemProperty("java.awt.headless", "true")
 }
 
 detekt {
@@ -56,9 +69,6 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     }
 }
 
-// The images are COMMITTED, under `ui-components/screenshots/`, exactly as :composeApp's are under
-// `composeApp/screenshots/`. See the root AGENT.md: they are the artifact a reviewer opens and
-// approves before a UI change merges, so they must never move under `build/`.
 roborazzi {
     outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
