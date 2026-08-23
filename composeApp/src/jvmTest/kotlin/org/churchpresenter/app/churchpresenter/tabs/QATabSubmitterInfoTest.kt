@@ -47,6 +47,49 @@ class QATabSubmitterInfoTest {
     }
 
     @Test
+    fun `a named device is named on hover, with its id kept underneath`() {
+        // The same name the approval prompt and Server settings show it by: a moderator who has
+        // named the pew tablet should not have to recognise its UUID here.
+        qaTab(
+            seed = {
+                toggleSession()
+                submitQuestion(
+                    "Where is the nursery?",
+                    clientIp = "10.0.0.1",
+                    cooldownSeconds = 0,
+                    deviceId = "pew-tablet",
+                )
+            },
+            deviceNames = mapOf("pew-tablet" to "Back row tablet"),
+        ) { _, _, _ ->
+            hoverQuestionRow("Where is the nursery?")
+
+            assertTrue(showsContainingText("Device: Back row tablet"), renderedText().toString())
+            assertTrue(showsContainingText("pew-tablet"), renderedText().toString())
+        }
+    }
+
+    @Test
+    fun `an unnamed device still shows its raw id`() {
+        qaTab(
+            seed = {
+                toggleSession()
+                submitQuestion(
+                    "Where is the nursery?",
+                    clientIp = "10.0.0.1",
+                    cooldownSeconds = 0,
+                    deviceId = "pew-tablet",
+                )
+            },
+            deviceNames = mapOf("some-other-device" to "Sound desk iPad"),
+        ) { _, _, _ ->
+            hoverQuestionRow("Where is the nursery?")
+
+            assertTrue(showsContainingText("Device: pew-tablet"), renderedText().toString())
+        }
+    }
+
+    @Test
     fun `a question carrying both a name and a device shows the name on the row and both on hover`() {
         qaTab(
             seed = {

@@ -12,9 +12,12 @@ import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
@@ -31,6 +34,7 @@ class RemoteEventContentTest {
         var blockForSessionCalls = 0
         var blockPermanentlyCalls = 0
         var denyCalls = 0
+        val renamedTo = mutableListOf<String>()
     }
 
     private fun dialog(
@@ -40,6 +44,7 @@ class RemoteEventContentTest {
         isClientKnownAllowed: Boolean = false,
         isClientKnownBlocked: Boolean = false,
         isInstanceLinkFollower: Boolean = false,
+        clientLabel: String = "",
         block: ComposeUiTest.(Result) -> Unit,
     ) {
         val result = Result()
@@ -57,12 +62,14 @@ class RemoteEventContentTest {
                         isClientKnownAllowed = isClientKnownAllowed,
                         isClientKnownBlocked = isClientKnownBlocked,
                         isInstanceLinkFollower = isInstanceLinkFollower,
+                        clientLabel = clientLabel,
                         onAllow = { result.allowCalls++ },
                         onAllowForSession = { result.allowForSessionCalls++ },
                         onAllowPermanently = { result.allowPermanentlyCalls++ },
                         onBlockForSession = { result.blockForSessionCalls++ },
                         onBlockPermanently = { result.blockPermanentlyCalls++ },
                         onDeny = { result.denyCalls++ },
+                        onRename = { result.renamedTo += it },
                     )
                 }
             }
@@ -175,6 +182,60 @@ class RemoteEventContentTest {
     ) {
         onNodeWithText("Front Row iPad").assertExists()
         onNodeWithText("device-1").assertExists()
+    }
+
+    // ── Naming the device from the prompt itself ────────────────────────────────
+
+    private val namedEvent = RemoteEvent(
+        type = RemoteEventType.ADD_TO_SCHEDULE,
+        title = "x",
+        clientId = "device-1",
+        clientLabel = "Front Row iPad",
+    )
+
+    @Test
+    fun `the name as it stands now wins over the one the event was queued with`() = dialog(
+        event = namedEvent,
+        clientLabel = "Sound desk iPad",
+    ) {
+        onNodeWithText("Sound desk iPad").assertExists()
+        onNodeWithText("Front Row iPad").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the pencil opens an editor and the typed name is reported`() = dialog(
+        event = namedEvent,
+    ) { result ->
+        onNodeWithContentDescription("Set friendly name").performClick()
+        // The name is drawn twice while editing — as the identity line and in the field.
+        onNode(hasSetTextAction()).performTextReplacement("Sound desk iPad")
+        onNodeWithContentDescription("Save").performClick()
+
+        assertEquals(listOf("Sound desk iPad"), result.renamedTo)
+    }
+
+    @Test
+    fun `abandoning the editor renames nothing`() = dialog(
+        event = namedEvent,
+    ) { result ->
+        onNodeWithContentDescription("Set friendly name").performClick()
+        // The name is drawn twice while editing — as the identity line and in the field.
+        onNode(hasSetTextAction()).performTextReplacement("Sound desk iPad")
+        onNodeWithContentDescription("Cancel").performClick()
+
+        assertTrue(result.renamedTo.isEmpty())
+        onNodeWithText("Front Row iPad").assertExists()
+    }
+
+    @Test
+    fun `an unnamed device can be named from the prompt`() = dialog(
+        event = RemoteEvent(type = RemoteEventType.ADD_TO_SCHEDULE, title = "x", clientId = "device-1"),
+    ) { result ->
+        onNodeWithContentDescription("Set friendly name").performClick()
+        onNode(hasSetTextAction()).performTextInput("Booth iPad")
+        onNodeWithContentDescription("Save").performClick()
+
+        assertEquals(listOf("Booth iPad"), result.renamedTo)
     }
 
     @Test

@@ -299,6 +299,20 @@ object Constants {
     const val HEADER_PRESENTATION_PASSWORD = "X-Presentation-Password"
     const val HEADER_API_KEY        = "X-Api-Key"
     const val HEADER_DEVICE_ID      = "X-Device-Id"
+
+    /**
+     * What a client calls itself — "Sound desk iPad" rather than the UUID in [HEADER_DEVICE_ID].
+     *
+     * Optional: a client with no name to give omits the header entirely, and the desktop falls
+     * back to the id, as it did before any client sent this. Read as a header, then as a query
+     * parameter of the same name on the WebSocket handshake, because a browser cannot set headers
+     * there.
+     *
+     * The value is percent-encoded UTF-8 when it contains anything outside printable ASCII: a
+     * device name is user-typed and very often is not ASCII, and an HTTP header carrying raw
+     * Cyrillic or an emoji is rejected outright by some clients and mangled by others.
+     */
+    const val HEADER_DEVICE_NAME    = "X-Device-Name"
     const val HEADER_APP_VERSION    = "X-App-Version"
     const val HEADER_SERVER_VERSION = "X-Server-Version"
     /** Sent by InstanceLinkClient (value "instance_link") so the primary can tell a following
