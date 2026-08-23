@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

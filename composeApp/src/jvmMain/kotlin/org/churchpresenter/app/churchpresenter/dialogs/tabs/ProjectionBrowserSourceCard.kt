@@ -76,7 +76,7 @@ import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 

@@ -16,14 +16,14 @@ import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDetailDto
+import org.churchpresenter.companionserver.SongCatalogResponse
+import org.churchpresenter.companionserver.SongDetailDto
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.companionserver.InstanceLinkLogSide
+import org.churchpresenter.companionserver.InstanceLinkLogger
 import org.churchpresenter.songchords.ChordTransposer
-import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
-import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
+import org.churchpresenter.songchords.isChorusHeader
+import org.churchpresenter.songchords.isHeaderLine
 import java.io.File
 
 private const val SONG_NUMBER_DIGITS = 4

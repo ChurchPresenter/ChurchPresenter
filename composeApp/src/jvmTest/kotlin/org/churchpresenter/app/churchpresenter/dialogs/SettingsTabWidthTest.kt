@@ -10,7 +10,7 @@ import org.churchpresenter.app.churchpresenter.ViewportProbe
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.horizontalOverflow
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File

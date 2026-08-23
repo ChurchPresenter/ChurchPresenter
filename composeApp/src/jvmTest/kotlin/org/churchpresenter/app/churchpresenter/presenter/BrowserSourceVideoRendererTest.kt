@@ -12,6 +12,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.companionserver.BrowserSourceFrame
 
 class BrowserSourceVideoRendererTest {
 

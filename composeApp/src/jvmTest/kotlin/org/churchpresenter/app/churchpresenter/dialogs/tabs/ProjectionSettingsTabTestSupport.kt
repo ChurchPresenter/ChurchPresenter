@@ -26,7 +26,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import kotlin.test.assertEquals
 
 /**

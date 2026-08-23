@@ -13,8 +13,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.resolveRemoteEventPresentation
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.batchEventSummary
-import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
+import org.churchpresenter.app.churchpresenter.remote.batchEventSummary
+import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 

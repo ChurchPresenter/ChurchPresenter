@@ -11,12 +11,13 @@ build: `include(":atem")`, `implementation(projects.atem)`.
 **The package is `org.churchpresenter.atem`**, across all three source sets — `main`, `test` and
 the `testFixtures` that ship `FakeAtemSwitcher` to `:composeApp`'s suites.
 
-It held `…churchpresenter.server`, which `:composeApp` still owns (32 files: `CompanionServer`, the
-routes, the tunnel, `AtemBridge` itself). Sharing that name cost nothing at extraction time and one
-thing afterwards: `AtemBridge` and the ATEM routes resolved `AtemClient` with no import at all, so
-nothing in those files said they depended on this module. They say it now.
+It held `…churchpresenter.server`, which has since become `:companion-server` in its own right
+(`org.churchpresenter.companionserver` — `CompanionServer`, the routes, the tunnel, `AtemBridge`
+itself). Sharing that name cost nothing at extraction time and one thing afterwards: `AtemBridge`
+and the ATEM routes resolved `AtemClient` with no import at all, so nothing in those files said
+they depended on this module. They say it now.
 
-**Never rewrite `…churchpresenter.server.*` by prefix** — key on the ten types this module declares
+**Never rewrite a package by prefix** — key on the ten types this module declares
 (`AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemKey`, `AtemMediaSlot`,
 `AtemProtocolException`, `AtemState`, `AtemUploadStatus`, `EncodedFrame`, `FakeAtemSwitcher`), and
 match on a word boundary: `AtemKey` is a prefix of nothing here today, but `Constants` matching

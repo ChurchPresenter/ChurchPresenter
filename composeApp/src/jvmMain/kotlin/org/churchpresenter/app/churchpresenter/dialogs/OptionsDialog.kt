@@ -57,7 +57,7 @@ import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
