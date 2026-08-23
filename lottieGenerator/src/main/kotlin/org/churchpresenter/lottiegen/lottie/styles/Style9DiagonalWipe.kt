@@ -11,6 +11,7 @@ import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import org.churchpresenter.lottiegen.lottie.TextMeasurer
 import org.churchpresenter.lottiegen.lottie.buildKeyframes
 import org.churchpresenter.lottiegen.lottie.emToPx
+import org.churchpresenter.lottiegen.lottie.logoAspect
 import org.churchpresenter.lottiegen.lottie.hexToLottie
 import org.churchpresenter.lottiegen.lottie.jsonArrayOf
 import org.churchpresenter.lottiegen.lottie.kf
@@ -94,7 +95,16 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val logoSizePx = emToPx(cfg.logoSize.toDouble(), baseSize)
     val logoMargin = emToPx(LOGO_MARGIN_EM, baseSize)
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
-    private val logoSpace = if (hasLogo) logoSizePx + logoMargin else 0.0
+
+    /**
+     * The logo's drawn width. [logoSizePx] is its *height* — the scale in `addLogo` is
+     * `logoSizePx / cfg.logoH` — so a logo wider than it is tall draws wider than [logoSizePx]
+     * and needs the gutter beside the text to widen with it, or it overhangs into the text.
+     *
+     * Exactly [logoSizePx] for a square logo, so its generated JSON is unchanged.
+     */
+    val logoRenderW = logoSizePx * logoAspect(cfg.logoW, cfg.logoH)
+    private val logoSpace = if (hasLogo) logoRenderW + logoMargin else 0.0
 
     private val nameBlockH = if (cfg.hideName) 0.0 else nameSizePx
     private val infoBlockH = if (cfg.hideInfo) 0.0 else infoSizePx
@@ -346,10 +356,10 @@ private fun LottieBuilder.addLogo(g: WipeGeometry) {
                 if (cfg.hideName) 0.0 else g.nameM.width.toDouble(),
                 if (cfg.hideInfo) 0.0 else g.infoM.width.toDouble(),
             )
-            g.canvasW / 2 - maxW / 2 - g.logoMargin - g.logoSizePx / 2
+            g.canvasW / 2 - maxW / 2 - g.logoMargin - g.logoRenderW / 2
         }
-        g.isRight -> g.canvasW - g.marginHPx - g.logoSizePx / 2
-        else -> g.marginHPx + g.logoSizePx / 2
+        g.isRight -> g.canvasW - g.marginHPx - g.logoRenderW / 2
+        else -> g.marginHPx + g.logoRenderW / 2
     }
     val scaleKFs = g.keyframes(
         KeyframeInput(0.0, jsonArrayOf(0.0, 0.0, FULL_PERCENT_D)),

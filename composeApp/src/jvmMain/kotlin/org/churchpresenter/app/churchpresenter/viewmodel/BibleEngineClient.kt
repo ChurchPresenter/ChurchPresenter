@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import java.io.File
 import java.time.Instant
+import java.util.concurrent.atomic.AtomicInteger
 import org.churchpresenter.diagnostics.CrashReporter
 import org.json.JSONObject
 
@@ -132,6 +133,26 @@ class BibleEngineClient(
 
     private var engineHandle: EngineHandle? = null
     private var wsJob: Job? = null
+
+    /**
+     * Which link the observable state belongs to. Bumped by [stop], so every earlier link becomes
+     * stale the instant it is torn down.
+     *
+     * [stop] cancels [wsJob] but cannot wait for it — it is called from the UI thread, and a network
+     * teardown is not something to block a frame on. So the outgoing [connectLoop] is still running
+     * when [start] launches the next one, and it writes to [_connected], [session] and
+     * [_engineSttConnected] on its way out: cancellation reaches ktor's CIO engine as an ordinary
+     * I/O failure often enough that the loop takes its generic `catch` rather than the
+     * [CancellationException] one, runs the clearing block below the try, and only then notices it
+     * has been cancelled at the following `delay`. Land that after the new link has reported itself
+     * up and the app holds a **live** link it believes is down — and since nothing further will
+     * happen on a healthy socket, it stays that way until the engine drops it.
+     *
+     * That is the race `BibleEngineClientLinkTest.starting again drops the previous link…` timed out
+     * on. Guarding the writes by generation fixes it without a blocking join: a stale loop may still
+     * be unwinding, it just no longer speaks for the client.
+     */
+    private val generation = AtomicInteger()
     @Volatile private var session: DefaultClientWebSocketSession? = null
     @Volatile private var currentLevel: String = "off"
     @Volatile private var currentContinuationSpeed: String = "balanced"
@@ -153,6 +174,7 @@ class BibleEngineClient(
         continuationSpeed: String = "balanced",
     ) {
         stop()
+        val gen = generation.get()
         currentLevel = level
         currentContinuationSpeed = continuationSpeed
         _startFailed.value = false
@@ -169,7 +191,7 @@ class BibleEngineClient(
                         "Bible engine: in-process engine failed to start on port $port",
                         tags = mapOf("subsystem" to "bible-engine")
                     )
-                    _startFailed.value = true
+                    if (isCurrentLink(gen)) _startFailed.value = true
                     return@launch
                 }
                 val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
@@ -180,17 +202,27 @@ class BibleEngineClient(
             // collision). The configured host/port only apply to a remote engine.
             val connectHost = if (runLocal) "127.0.0.1" else host
             val connectPort = if (runLocal) engineHandle?.boundPort ?: port else port
-            connectLoop(connectHost, connectPort)
+            connectLoop(gen, connectHost, connectPort)
         }
     }
 
-    private suspend fun connectLoop(host: String, port: Int) {
+    /**
+     * The link the client's observable state currently speaks for. Read it before a restart and
+     * [isCurrentLink] answers false afterwards; that pair is the whole guard.
+     */
+    internal fun currentLinkGeneration(): Int = generation.get()
+
+    /** True while [gen] is still the link the client's observable state speaks for — see [generation]. */
+    internal fun isCurrentLink(gen: Int) = generation.get() == gen
+
+    private suspend fun connectLoop(gen: Int, host: String, port: Int) {
         // Exponential backoff (floor [retryFloorMs], cap 30s, ±20% jitter — same shape as
         // InstanceLinkClient) instead of a fixed hammer; reset on every successful connection.
         var attempt = 0
         while (scope.isActive) {
             try {
                 httpClient.webSocket(host = host, port = port, path = "/bible-engine") {
+                    if (!isCurrentLink(gen)) return@webSocket
                     session = this
                     _connected.value = true
                     attempt = 0
@@ -205,6 +237,9 @@ class BibleEngineClient(
                 System.err.println("bible-engine: connect to ws://$host:$port/bible-engine failed — ${e.message}")
                 logEngineError("connectLoop: connect to ws://$host:$port/bible-engine failed", e.toString())
             }
+            // Nothing below belongs to a link that has already been replaced: saying "down" for a
+            // socket the client no longer owns would overwrite the state of the one it does.
+            if (!isCurrentLink(gen)) return
             session = null
             _connected.value = false
             _engineSttConnected.value = null
@@ -287,6 +322,9 @@ class BibleEngineClient(
 
     /** Stops the WebSocket link and the in-process engine (if we started one). */
     fun stop() {
+        // Before the cancel, so the outgoing loop is stale from the moment it can next observe
+        // anything — it unwinds asynchronously and must not clear the next link's state on its way.
+        generation.incrementAndGet()
         wsJob?.cancel()
         wsJob = null
         session = null

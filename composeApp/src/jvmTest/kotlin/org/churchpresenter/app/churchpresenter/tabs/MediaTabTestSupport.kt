@@ -104,6 +104,7 @@ internal object MediaLabel {
     const val NETWORK_URL = "Network URL"
     const val SELECT_FILE = "Select File"
     const val URL_PLACEHOLDER = "Enter URL (http://, rtsp://, ...)"
+    const val LOAD = "Load"
     const val ADD_TO_SCHEDULE = "Add to Schedule"
     const val GO_LIVE = "Go Live"
     const val PLAY = "Play"

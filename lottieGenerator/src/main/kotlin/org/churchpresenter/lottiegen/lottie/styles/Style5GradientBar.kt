@@ -15,6 +15,7 @@ import org.churchpresenter.lottiegen.lottie.buildKeyframes
 import org.churchpresenter.lottiegen.lottie.emToPx
 import org.churchpresenter.lottiegen.lottie.hexToLottie
 import org.churchpresenter.lottiegen.lottie.jsonArrayOf
+import org.churchpresenter.lottiegen.lottie.logoAspect
 import org.churchpresenter.lottiegen.lottie.makeAnimatedRect
 import org.churchpresenter.lottiegen.lottie.makeFill
 import org.churchpresenter.lottiegen.lottie.makeGradientFill
@@ -122,8 +123,19 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val logoSizePx = emToPx(cfg.logoSize.toDouble(), baseSize)
     val logoMargin = emToPx(LOGO_MARGIN_EM, baseSize)
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
+
+    /**
+     * The logo's drawn width. [logoSizePx] is its *height* — the scale in `addLogo` is
+     * `logoSizePx / cfg.logoH` — so a logo wider than it is tall draws wider than [logoSizePx]
+     * and needs the plate and the gutter to widen with it, or it overhangs both.
+     *
+     * A square logo gives an aspect of exactly 1.0, so this is bit-for-bit [logoSizePx] and the
+     * generated JSON is unchanged for it.
+     */
+    val logoRenderW = logoSizePx * logoAspect(cfg.logoW, cfg.logoH)
     val logoBgSize = logoSizePx + emToPx(LOGO_PLATE_PAD_EM, baseSize)
-    val logoSpace = if (hasLogo) logoBgSize + logoMargin else 0.0
+    val logoBgW = logoRenderW + emToPx(LOGO_PLATE_PAD_EM, baseSize)
+    val logoSpace = if (hasLogo) logoBgW + logoMargin else 0.0
 
     /**
      * Written per branch, in the original term order: factoring the shared prefix out would
@@ -321,9 +333,9 @@ private fun LottieBuilder.addLogo(g: GradientGeometry) {
     val cx = when {
         g.isCenter ->
             g.canvasW / 2 + g.logoSpace / 2 - max(g.nameBarW, g.infoBarW) / 2 -
-                g.logoMargin - g.logoBgSize / 2
-        g.isRight -> g.canvasW - g.marginHPx - g.logoBgSize / 2
-        else -> g.marginHPx + g.logoBgSize / 2
+                g.logoMargin - g.logoBgW / 2
+        g.isRight -> g.canvasW - g.marginHPx - g.logoBgW / 2
+        else -> g.marginHPx + g.logoBgW / 2
     }
     val cy = (g.nameBgCY + g.infoBarCY) / 2
 
@@ -348,7 +360,7 @@ private fun LottieBuilder.addLogo(g: GradientGeometry) {
         KeyframeInput(END_PCT, jsonArrayOf(FULL_PERCENT_D, FULL_PERCENT_D, FULL_PERCENT_D)),
     )
     val items = mutableListOf(
-        makeRect(g.logoBgSize, g.logoBgSize, g.cornerPx),
+        makeRect(g.logoBgW, g.logoBgSize, g.cornerPx),
         makeFill(g.accentLottie, cfg.accentColorAlpha.toDouble()),
     )
     if (g.borderPx > 0) {

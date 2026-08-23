@@ -4,9 +4,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDPage
+import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -18,6 +24,32 @@ class PresentationStoreTest {
 
     @get:Rule
     val temp = TemporaryFolder()
+
+    companion object {
+        private lateinit var tempHome: File
+        private var realHome: String? = null
+
+        /**
+         * The slide disk cache lives under `user.home`, and the render tests below assert on
+         * whether a deck was parsed again — a cache entry left by an earlier run would make a skip
+         * indistinguishable from a hit.
+         */
+        @JvmStatic
+        @BeforeClass
+        fun isolateHome() {
+            TestSingletons.latchToTestHome()
+            realHome = System.getProperty("user.home")
+            tempHome = Files.createTempDirectory("cp-presentation-store-home").toFile()
+            System.setProperty("user.home", tempHome.absolutePath)
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun restoreHome() {
+            realHome?.let { System.setProperty("user.home", it) }
+            tempHome.deleteRecursively()
+        }
+    }
 
     private val broadcasts = mutableListOf<WebSocketMessage>()
 
@@ -142,5 +174,52 @@ class PresentationStoreTest {
         val notADeck = temp.newFile("notes.txt").apply { writeText("just notes") }
         s.renderPresentationForServer("txt", notADeck.absolutePath)
         assertNull(s._slideBytes["txt"])
+    }
+
+    /** A one-page PDF — a real deck the loader handles, in a few milliseconds and no fixture file. */
+    private fun writeRealDeck(file: File) {
+        PDDocument().use { doc ->
+            doc.addPage(PDPage())
+            doc.save(file)
+        }
+    }
+
+    @Test
+    fun `a deck that fails to load is not parsed again while it is unchanged`() {
+        // Nothing lands in _slideBytes when a load fails, so the caller's "have I got this one?"
+        // guard is false for ever after: every schedule update would re-open the file through POI
+        // and send another warning. The failure is remembered instead.
+        val s = store()
+        val deck = temp.newFile("bad.pdf").apply { writeText("not a deck at all") }
+        s.renderPresentationForServer("bad", deck.absolutePath)
+
+        assertEquals(deck.lastModified(), s._failedPresentationLoads[deck.path])
+        assertNull(s._slideBytes["bad"])
+
+        // Repair the file but leave its timestamp where it was: a second render must skip it
+        // entirely, which is only observable if the now-valid deck still produces no slides.
+        val stamp = deck.lastModified()
+        writeRealDeck(deck)
+        assertTrue(deck.setLastModified(stamp), "the test needs to control the timestamp")
+
+        s.renderPresentationForServer("bad", deck.absolutePath)
+        assertNull(s._slideBytes["bad"], "the remembered failure should have skipped the loader")
+    }
+
+    @Test
+    fun `a repaired deck is picked up once its timestamp moves`() {
+        // The other half of the same rule: remembering a failure must not strand a deck the user
+        // has since fixed and re-saved, without restarting the app.
+        val s = store()
+        val deck = temp.newFile("repaired.pdf").apply { writeText("not a deck at all") }
+        s.renderPresentationForServer("repaired", deck.absolutePath)
+        assertTrue(s._failedPresentationLoads.containsKey(deck.path))
+
+        writeRealDeck(deck)
+        assertTrue(deck.setLastModified(deck.lastModified() + 2_000))
+
+        s.renderPresentationForServer("repaired", deck.absolutePath)
+        assertEquals(1, s._slideBytes["repaired"]?.size)
+        assertFalse(s._failedPresentationLoads.containsKey(deck.path), "the failure is forgotten once it loads")
     }
 }

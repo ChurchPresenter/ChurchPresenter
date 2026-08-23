@@ -3,6 +3,7 @@ package org.churchpresenter.lottiegen.spec
 import org.churchpresenter.lottiegen.lottie.TextSize
 import org.churchpresenter.lottiegen.lottie.TextMeasurer
 import org.churchpresenter.lottiegen.lottie.emToPx
+import org.churchpresenter.lottiegen.lottie.logoAspect
 import org.churchpresenter.lottiegen.lottie.hexToLottie
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
@@ -47,6 +48,26 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     val canvasH = cfg.canvasH.toDouble()
 
     fun em(v: Double): Double = emToPx(v, baseSize)
+
+    /**
+     * The logo's drawn height — `logoSize` under either basis, since both fix it as the height or
+     * as the square box's side.
+     */
+    val logoDrawnH: Double get() = em(cfg.logoSize.toDouble())
+
+    /**
+     * The logo's drawn WIDTH, which is what any room reserved for it has to be measured against.
+     *
+     * Under [LogoScaleBasis.HEIGHT] the logo is scaled from its height, so a wide logo draws wider
+     * than `logoSize` and the slot has to grow with it. Under the default
+     * [LogoScaleBasis.LONGEST_SIDE] this stays `logoSize` exactly as it always was — a logo can
+     * never exceed the box, so no existing spec style moves.
+     */
+    val logoDrawnW: Double
+        get() = when (spec.layout.logoScale) {
+            LogoScaleBasis.HEIGHT -> logoDrawnH * logoAspect(cfg.logoW, cfg.logoH)
+            LogoScaleBasis.LONGEST_SIDE -> logoDrawnH
+        }
 
     val nameSizePx = em(cfg.nameSize.toDouble())
     val infoSizePx = em(cfg.infoSize.toDouble())
@@ -153,6 +174,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         val anchorIn = override?.anchorIn ?: placement.anchorIn
         val line = override?.line ?: placement.line
         val offsetXEm = override?.offsetXEm ?: placement.offsetXEm
+        val offsetXLogoHalfW = override?.offsetXLogoHalfWidths ?: placement.offsetXLogoHalfWidths
         val offsetYEm = override?.offsetYEm ?: placement.offsetYEm
 
         val slot = slotFor(placement.slot)
@@ -167,7 +189,8 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             LineAnchor.NAME_LINE -> nameLineY
             LineAnchor.INFO_LINE -> infoLineY
         }
-        return SpecPoint(x0 + flowSign * em(offsetXEm), y0 + em(offsetYEm))
+        val offsetX = em(offsetXEm) + offsetXLogoHalfW * (logoDrawnW / 2)
+        return SpecPoint(x0 + flowSign * offsetX, y0 + em(offsetYEm))
     }
 
     /** Flow sign an element's x offsets/vertices use (honors the mirror opt-out). */
@@ -215,6 +238,8 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             TextFieldRef.INFO ->
                 (infoMeasured.width + 2 * em(size.padXEm)) to (infoSizePx + 2 * em(size.padYEm))
         }
+        is SizeSpec.LogoPlate ->
+            (logoDrawnW + em(size.padEm)) to (logoDrawnH + em(size.padEm))
         is SizeSpec.CanvasWidth -> canvasW to em(size.hEm)
     }
 
@@ -239,7 +264,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     }
 
     private fun coreWidth(slot: SlotSpec): Double = when (slot.kind) {
-        SlotKind.LOGO -> em(cfg.logoSize.toDouble())
+        SlotKind.LOGO -> logoDrawnW
         SlotKind.FIXED -> em(slot.widthEm)
         SlotKind.TEXT -> max(nameMeasured.width, infoMeasured.width) + TEXT_CORE_PAD_PX
     }

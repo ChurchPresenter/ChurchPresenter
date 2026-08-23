@@ -72,15 +72,20 @@ import kotlin.test.assertEquals
  *    port's offsetXEm −2.2916666666666665 = −2.5 + (TEXT_CORE_PAD_PX/2)/24 em
  *    (maxTextW and logoSize cancel exactly) — the 5 px term is the layout
  *    engine's fixed text-core pad, exact only at baseSize 24.
- * 8. Logo scale basis (spec-model gap, not asserted — rest origin p−a is
- *    unaffected): compiled scales the logo HEIGHT to logoSize em (width follows
- *    aspect: scale = logoSizePx/logoH = 105% for 120×80); the spec engine's
- *    buildLogo normalizes by max(logoW, logoH) (fit-longest-side: 70%). The
- *    rendered logo is smaller than compiled whenever logoW > logoH.
- * 9. Logo BG size: compiled is (logoSize + 0.8) em square; SizeSpec cannot
- *    reference cfg.logoSize, so it is a static Em(4.3, 4.3) — exact at default
- *    logoSize. Slot gaps 0.4/0.9 encode the badge overhang (0.4 each side of the
- *    logo core) + 0.5 em logo margin, exact for ALL logoSize values.
+ * 8. Logo scale basis: BOTH now scale the logo from its HEIGHT. The spec's
+ *    buildLogo used to normalize by max(logoW, logoH) (fit-longest-side), which
+ *    matched only for a square logo; the layout's `logoScale: height` now selects
+ *    the same basis the compiled style uses, so the rendered logo is identical
+ *    for any aspect. (`longestSide` stays the default, so no other spec style
+ *    moves.)
+ * 9. Logo BG size and the gutter: both track the logo's drawn width. The plate is
+ *    a `logoPlate` SizeSpec (the logo's drawn size + 0.8 em) rather than a static
+ *    Em, so it is exact for every logoSize AND every aspect; the LOGO slot's core
+ *    is the drawn width, so the gutter follows too. The 0.4/0.9 gaps still encode
+ *    the badge overhang + 0.5 em margin, which are aspect-independent.
+ *
+ *    This is why the matrix below uses a NON-square 120x80 logo: geometry is
+ *    asserted exactly for it, which is the case that used to be inexpressible.
  * 10. Spec-model gap: compiled gates Logo AND Logo BG on
  *     `logoEnabled && logoData != null`; a RectElement can only test
  *     LOGO_ENABLED, so with logoEnabled=true but logoData=null the port would

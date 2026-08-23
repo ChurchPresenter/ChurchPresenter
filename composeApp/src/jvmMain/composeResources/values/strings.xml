@@ -1116,6 +1116,8 @@
     <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
+    <string name="web_engine_unavailable_windows_title">Web browser requires a newer Windows</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter's browser engine no longer supports this version of Windows. Update to Windows 10 or later to use the Web tab and browser sources.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Type to page</string>
     <string name="web_type_to_page_placeholder">Click an input on the live page first</string>
@@ -1290,6 +1292,10 @@
     <string name="canvas_capture_interval">Capture Interval</string>
     <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
+    <string name="canvas_camera_error_decklink_in_use">Cannot open input — device may already be in use for output</string>
+    <string name="canvas_camera_error_ffmpeg_missing">ffmpeg was not found. Install ffmpeg, then reopen this scene to use this camera.</string>
+    <string name="canvas_camera_error_unsupported_device">This camera cannot be opened on this system. Pick it again from the camera list.</string>
+    <string name="canvas_camera_error_unavailable">No picture from this camera. It may be unplugged, in use by another app, or set to an unsupported format.</string>
     <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
     <string name="canvas_transform_x">X</string>

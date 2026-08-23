@@ -31,6 +31,16 @@ class WebTabEngineUnavailableTest {
     }
 
     @Test
+    fun `WebTab on an unsupported Windows shows the Windows-specific message`() = webTab(
+        cefInitialized = false,
+        cefWindowsUnsupported = true,
+    ) { _, _ ->
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_WINDOWS_TITLE).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_WINDOWS_BODY).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertDoesNotExist()
+    }
+
+    @Test
     fun `WebEngineUnavailable defaults to the real CefManager state`() = runComposeUiTest {
         setContent { MaterialTheme { WebEngineUnavailable() } }
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertExists()

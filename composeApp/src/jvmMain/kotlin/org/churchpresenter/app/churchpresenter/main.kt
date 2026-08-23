@@ -291,6 +291,7 @@ fun main() {
     CefManager.init()
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
     if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
+    if (CefManager.windowsUnsupported) CrashReporter.setTag("jcef.windows_unsupported", "true")
 
     io.github.vinceglb.filekit.FileKit.init(appId = "ChurchPresenter")
 

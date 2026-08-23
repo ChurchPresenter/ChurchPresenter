@@ -35,6 +35,7 @@ internal fun webTab(
     settings: (AppSettings) -> AppSettings = { it },
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
+    cefWindowsUnsupported: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -68,6 +69,7 @@ internal fun webTab(
                         onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
+                        cefWindowsUnsupported = cefWindowsUnsupported,
                     )
                 }
             }
@@ -109,6 +111,7 @@ internal fun webTabWithoutPresenter(
                     onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
                     cefInitialized = true,
                     cefMacOsUnsupported = false,
+                    cefWindowsUnsupported = false,
                 )
             }
         }
@@ -150,6 +153,10 @@ internal object WebLabel {
     const val ENGINE_UNAVAILABLE_MACOS_BODY =
             "ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 " +
                 "(Monterey) or later to use the Web tab and browser sources."
+    const val ENGINE_UNAVAILABLE_WINDOWS_TITLE = "Web browser requires a newer Windows"
+    const val ENGINE_UNAVAILABLE_WINDOWS_BODY =
+            "ChurchPresenter's browser engine no longer supports this version of Windows. Update to Windows 10 " +
+                "or later to use the Web tab and browser sources."
     const val SNAPSHOT_WAITING = "Waiting for snapshot..."
     const val SNAPSHOT_SCREEN_RECORDING_HINT =
         "If this persists, grant Screen Recording permission\n" +

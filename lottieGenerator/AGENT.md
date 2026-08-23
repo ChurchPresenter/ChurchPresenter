@@ -135,27 +135,42 @@ Both CI steps are gated on this directory or the shared build files changing.
 - Tests run with `java.awt.headless=true`; `TextMeasurer` and `FontRegistry` use AWT and must keep
   working headless.
 
-## Known limitation: the logo plate and gutter are square
+## The logo plate and gutter follow the logo's aspect
 
-The logo *image* is never distorted -- every style scales it uniformly from its height
-(`scale = logoSizePx / cfg.logoH`). But the space reserved for it is sized from that height
-alone, so a logo wider than it is tall overhangs whatever sits behind it:
+Two different things are called "the logo size", and mixing them up is what made wide logos
+overhang their plate:
 
-- `Style5GradientBar` -- the accent plate is `makeRect(g.logoBgSize, g.logoBgSize, ...)`, square
-  by construction, and the gutter `logoSpace = logoBgSize + logoMargin` is square with it. A logo
-  of aspect > 1 overhangs the plate horizontally and can collide with the text bar.
-- `Style9DiagonalWipe` -- no plate, but `logoSpace = logoSizePx + logoMargin` and the centring
-  arithmetic uses `logoSizePx / 2`, so the reserved gutter has the same blind spot.
+- **`Style1Bar` fits the longest side** — `scale = logoSizePx / max(logoW, logoH)` — so the logo
+  always draws inside a `logoSizePx` square and a square gutter is exactly right for it.
+- **Styles 5, 6, 7, 9 and 10 scale by HEIGHT** — `scale = logoSizePx / cfg.logoH` — so `logoSize`
+  is the logo's *height* and its drawn width is `logoSizePx * aspect`. A logo wider than it is
+  tall draws wider than the space reserved for it.
 
-The other styles that reserve space from `logoSizePx` share the shape. `cfg.logoW` is known --
-it is passed to the image asset and its anchor -- it is simply not consulted when the layout is
-computed. `Style5GradientBar` once computed `lW = lH * logoAspect`, which is the number this
-needs, and never plumbed it in; it was removed as an unused local in `d54ed3e4`.
+Those five used to reserve a square gutter regardless (and Style 5 drew a square
+`makeRect(logoBgSize, logoBgSize)` plate), so a wide logo overhung the plate and could collide
+with the text bar. They now size both from `logoAspect(cfg.logoW, cfg.logoH)` (`ColorUtils.kt`),
+which returns exactly `1.0` for a square logo — so **the generated JSON is bit-for-bit unchanged
+for square logos**, and only non-square ones move. That invariant is what the `SpecPort*Test`
+matrices rely on: they were switched to a square logo, where the compiled style and the spec port
+agree exactly.
 
-**This is a tracking note, not a bug being left in silently.** Fixing it changes the geometry and
-therefore the generated JSON, which the `SpecPort*Test` suites compare byte for byte -- so it is a
-deliberate change with its own review and its own re-baselining, not a cleanup to fold into
-something else.
+Note the consequence for a *tall* logo: its plate is now narrower than it is high, hugging the
+logo with even padding, where before it was square with extra room at the sides.
+
+**The spec ports follow it too.** Three additions made the aspect expressible in a spec, all
+opt-in so no existing spec style moves:
+
+- `LayoutSpec.logoScale` — `longestSide` (the default, and what every spec style was written
+  against) or `height`. It picks both the logo's own scale basis and the width its slot reserves,
+  so the logo and the room made for it cannot disagree.
+- `SizeSpec.LogoPlate(padEm)` — the logo's drawn size plus padding, replacing a static `Em` guess
+  that could not even reference `cfg.logoSize`.
+- `Placement.offsetXLogoHalfWidths` — for an element hung off the logo rather than its slot, whose
+  static em offset previously had to bake half the logo's width in.
+
+The five ports set `logoScale: height`, Style 5's plate is a `logoPlate`, and the `SpecPort*Test`
+matrices are back on a **non-square** 120x80 logo with geometry asserted exactly. Deviations 8 and
+9 in `SpecPort5Test` — the scale basis and the square plate — are closed rather than documented.
 
 ## Dependencies
 
