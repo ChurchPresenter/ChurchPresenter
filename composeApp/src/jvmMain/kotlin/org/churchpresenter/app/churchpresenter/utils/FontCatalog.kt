@@ -154,24 +154,33 @@ object FontCatalog {
         }
     }
 
-    /** A family Skia cannot produce a typeface for is described as far as its name allows. */
+    /**
+     * A family Skia cannot produce a typeface for is described as far as its name allows.
+     *
+     * **Nothing here is closed.** `matchFamilyStyle` hands back a reference to a typeface Skia is
+     * caching and Compose is rendering the very same family with — the picker draws every name in
+     * its own face — so closing it would drop the refcount on a live object rather than free a
+     * private one. Skiko's cleaner releases these when they fall out of use; there are a few hundred
+     * of them, once per process.
+     */
     private fun measure(name: String): FontFace {
-        val typeface = FontMgr.default.matchFamilyStyle(name, FontStyle.NORMAL) ?: return unmeasured(name)
-        return typeface.use { face ->
-            val hasLatin = face.getUTF32Glyph(LATIN_NARROW[0].code) != NO_GLYPH &&
-                face.getUTF32Glyph(LATIN_WIDE[0].code) != NO_GLYPH
-            val monospaced = if (!hasLatin) null else org.jetbrains.skia.Font(face, PROBE_SIZE).use { font ->
-                font.measureTextWidth(LATIN_NARROW) == font.measureTextWidth(LATIN_WIDE)
-            }
-            FontFace(
-                name = name,
-                category = categoryOf(name, monospaced),
-                cyrillic = face.getUTF32Glyph(CYRILLIC_PROBE.code) != NO_GLYPH &&
-                    face.getUTF32Glyph(CYRILLIC_PROBE_LOWER.code) != NO_GLYPH,
-                hebrew = face.getUTF32Glyph(HEBREW_PROBE.code) != NO_GLYPH,
-                recommended = isRecommended(name),
-            )
+        val face = FontMgr.default.matchFamilyStyle(name, FontStyle.NORMAL) ?: return unmeasured(name)
+        val hasLatin = face.getUTF32Glyph(LATIN_NARROW[0].code) != NO_GLYPH &&
+            face.getUTF32Glyph(LATIN_WIDE[0].code) != NO_GLYPH
+        val monospaced = if (!hasLatin) {
+            null
+        } else {
+            val probe = org.jetbrains.skia.Font(face, PROBE_SIZE)
+            probe.measureTextWidth(LATIN_NARROW) == probe.measureTextWidth(LATIN_WIDE)
         }
+        return FontFace(
+            name = name,
+            category = categoryOf(name, monospaced),
+            cyrillic = face.getUTF32Glyph(CYRILLIC_PROBE.code) != NO_GLYPH &&
+                face.getUTF32Glyph(CYRILLIC_PROBE_LOWER.code) != NO_GLYPH,
+            hebrew = face.getUTF32Glyph(HEBREW_PROBE.code) != NO_GLYPH,
+            recommended = isRecommended(name),
+        )
     }
 
     /** Drops the scan so the next [snapshot] measures again. Tests only. */
