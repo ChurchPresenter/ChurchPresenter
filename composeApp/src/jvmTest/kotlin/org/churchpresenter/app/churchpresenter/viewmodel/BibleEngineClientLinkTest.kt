@@ -39,6 +39,30 @@ import kotlin.test.assertTrue
  * takes.
  *
  * Message parsing is covered separately by [BibleEngineClientMessageTest].
+ *
+ * **KNOWN FLAKE, NOT REPRODUCED — `starting again drops the previous link rather than stacking a
+ * second one`.** It failed once on `main` on 2026-08-23 (commit 24403e98, run 32612691663) with
+ * *"timed out after 15000ms waiting for the second link to come up"*, 1 of 9,625 tests. The commit
+ * it failed on touched only `lottieGenerator/`, so it was unrelated to that change.
+ *
+ * What was ruled out, so the next attempt does not repeat it:
+ *
+ * - **It is not slow on a quiet machine.** The whole class runs in ~1.5s, and this test is not among
+ *   the slowest in it.
+ * - **It does not reproduce in isolation under load** — three
+ *   `--tests '*BibleEngineClientLinkTest*' --rerun-tasks` runs at load average ~40 all passed. Note
+ *   `--tests` also drops `jvmTest` to a single fork, so that is not the shape that failed.
+ * - **A full 4-fork `jvmTest` under the same load did not reproduce it either** (a different
+ *   load-sensitive test lost that round instead — see `MediaTabPlaybackTest`).
+ *
+ * The untested hypothesis, for whoever picks it up: `BibleEngineClient.start()` calls `stop()`,
+ * which cancels `wsJob` **without awaiting the cancellation or closing the live session**, and both
+ * links share one `HttpClient(CIO)`. So link 2's handshake can race link 1's teardown, and a failed
+ * attempt sends `connectLoop` into a backoff that doubles from `retryFloorMs` — enough unlucky
+ * attempts eat the 15s budget. `AtemBridge.cancelUpload` is the in-repo precedent for a teardown
+ * that returns only once its coroutine has stopped.
+ *
+ * **Do not** widen the 15s timeout, add a retry, or loosen the assertion to make this go away.
  */
 class BibleEngineClientLinkTest {
 

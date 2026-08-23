@@ -22,6 +22,26 @@ import kotlin.test.assertTrue
  *
  * None of this needs VLC — it drives the view model directly, the same as `MediaTabTest`. See
  * `MediaTabTestSupport.kt` for the harness.
+ *
+ * **KNOWN FLAKE, diagnosed but NOT fixed — `play toggles to pause and back`.** It failed once on
+ * 2026-08-23 in a full `jvmTest` run (4 forks) on a deliberately loaded machine, at
+ * `assertTrue(vm.isPlaying)`, and the cause is in [loadUrl] rather than in playback:
+ *
+ * - `MediaViewModel.play()` is `if (_isLoaded.value) _isPlaying.value = true`, and `_isLoaded` is
+ *   set synchronously from `url.isNotBlank()`. Neither is async, so `isPlaying == false` after the
+ *   click can only mean **the URL was still blank** — the click landed on a disabled button and did
+ *   nothing.
+ * - [loadUrl] types into `onAllNodes(hasSetTextAction())[0]` — by INDEX. Which node is index 0
+ *   depends on what is composed at that instant, so under load the text can go somewhere other than
+ *   the network-URL field, leaving it blank.
+ *
+ * The fix, for whoever picks this up: address the field by a stable identifier (a test tag, or its
+ * label) and wait for it to exist before typing, instead of indexing a node list. **Do not** widen a
+ * timeout, add a retry, or loosen the assertion.
+ *
+ * It does NOT reproduce in isolation — three `--tests '*MediaTabPlaybackTest*' --rerun-tasks` runs
+ * under load average ~40 all passed. Note `--tests` also drops `jvmTest` to a single fork, so an
+ * isolated run is not the shape that fails.
  */
 class MediaTabPlaybackTest {
 
