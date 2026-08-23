@@ -53,9 +53,9 @@ import churchpresenter.composeapp.generated.resources.bible_translation_order_mo
 import churchpresenter.composeapp.generated.resources.bible_translation_order_panel_subtitle
 import churchpresenter.composeapp.generated.resources.bible_translation_order_panel_title
 import churchpresenter.composeapp.generated.resources.drag_to_reorder_translation
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_drag_dots
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_drag_dots
 import churchpresenter.composeapp.generated.resources.move_translation_down
 import churchpresenter.composeapp.generated.resources.move_translation_up
 import kotlin.math.roundToInt
@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val EXPANDED_ROTATION = 180f
 
@@ -133,7 +134,7 @@ internal fun TranslationOrderSelector(
                 }
             }
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp).rotate(if (expanded) EXPANDED_ROTATION else 0f),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -205,7 +206,7 @@ private fun TranslationOrderPanel(
                     horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_drag_dots),
+                        painter = painterResource(IconRes.drawable.ic_drag_dots),
                         contentDescription = stringResource(Res.string.drag_to_reorder_translation),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                         modifier = Modifier
@@ -280,13 +281,13 @@ private fun TranslationOrderPanel(
 
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         ReorderArrowButton(
-                            icon = painterResource(Res.drawable.ic_arrow_up),
+                            icon = painterResource(IconRes.drawable.ic_arrow_up),
                             contentDescription = stringResource(Res.string.move_translation_up),
                             enabled = index > 0,
                             onClick = { onMove(index, -1) },
                         )
                         ReorderArrowButton(
-                            icon = painterResource(Res.drawable.ic_arrow_down),
+                            icon = painterResource(IconRes.drawable.ic_arrow_down),
                             contentDescription = stringResource(Res.string.move_translation_down),
                             enabled = index < translations.lastIndex,
                             onClick = { onMove(index, 1) },

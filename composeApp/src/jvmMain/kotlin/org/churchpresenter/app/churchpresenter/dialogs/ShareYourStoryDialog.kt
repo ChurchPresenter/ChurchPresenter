@@ -48,10 +48,10 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cormorant_garamond_italic
-import churchpresenter.composeapp.generated.resources.ic_check
-import churchpresenter.composeapp.generated.resources.ic_mail
-import churchpresenter.composeapp.generated.resources.share_story_screenshot_dark
-import churchpresenter.composeapp.generated.resources.share_story_screenshot_light
+import org.churchpresenter.icons.generated.resources.ic_check
+import org.churchpresenter.icons.generated.resources.ic_mail
+import org.churchpresenter.icons.generated.resources.share_story_screenshot_dark
+import org.churchpresenter.icons.generated.resources.share_story_screenshot_light
 import churchpresenter.composeapp.generated.resources.story_prompt_badge
 import churchpresenter.composeapp.generated.resources.story_prompt_body_1
 import churchpresenter.composeapp.generated.resources.story_prompt_body_2
@@ -74,6 +74,7 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private val STORY_IMAGE_COLUMN_WIDTH = 250.dp
 private val STORY_BUTTON_HEIGHT = 42.dp
@@ -225,9 +226,9 @@ private fun StoryMonitor(palette: StoryPanelPalette) {
                 .padding(5.dp)
         ) {
             val screenshot = if (isDarkScheme(MaterialTheme.colorScheme)) {
-                Res.drawable.share_story_screenshot_dark
+                IconRes.drawable.share_story_screenshot_dark
             } else {
-                Res.drawable.share_story_screenshot_light
+                IconRes.drawable.share_story_screenshot_light
             }
             Image(
                 painter = painterResource(screenshot),
@@ -345,7 +346,7 @@ private fun StoryExamples() {
         examples.forEach { example ->
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_check),
+                    painter = painterResource(IconRes.drawable.ic_check),
                     contentDescription = null,
                     tint = MaterialTheme.semantic.success,
                     modifier = Modifier.size(14.dp).padding(top = 2.dp),
@@ -389,7 +390,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
             modifier = Modifier.height(STORY_BUTTON_HEIGHT),
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_mail),
+                painter = painterResource(IconRes.drawable.ic_mail),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )

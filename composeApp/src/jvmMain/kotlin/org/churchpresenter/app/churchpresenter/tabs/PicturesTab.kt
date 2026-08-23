@@ -85,7 +85,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -95,21 +95,21 @@ import churchpresenter.composeapp.generated.resources.animation_slide_right
 import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ok
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
 import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_skip_next
-import churchpresenter.composeapp.generated.resources.ic_skip_previous
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_skip_next
+import org.churchpresenter.icons.generated.resources.ic_skip_previous
 import churchpresenter.composeapp.generated.resources.image_counter
 import churchpresenter.composeapp.generated.resources.loading
 import churchpresenter.composeapp.generated.resources.picture_thumbnail_unreadable
@@ -149,6 +149,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MILLIS_PER_SECOND = 1000
 private const val CAPTION_FONT_SP = 12.5f
@@ -315,7 +316,7 @@ fun PicturesTab(
                 ),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
             ) {
-                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(7.dp))
                 Text(
                     stringResource(Res.string.select_folder),
@@ -373,7 +374,7 @@ fun PicturesTab(
                 ) {
                     IconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_close),
+                            painter = painterResource(IconRes.drawable.ic_close),
                             contentDescription = stringResource(Res.string.clear),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
@@ -427,7 +428,7 @@ fun PicturesTab(
                             }
                             IconButton(onClick = { RecentPictureFolders.togglePin(path) }, modifier = Modifier.size(20.dp)) {
                                 Icon(
-                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    painter = painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
                                     contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
                                     modifier = Modifier.size(12.dp),
                                     tint = if (isPinned) MaterialTheme.colorScheme.primary
@@ -464,7 +465,7 @@ fun PicturesTab(
                         modifier = Modifier.size(30.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_skip_previous),
+                            painter = painterResource(IconRes.drawable.ic_skip_previous),
                             contentDescription = stringResource(Res.string.previous_image),
                             modifier = Modifier.size(16.dp),
                             tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -487,7 +488,7 @@ fun PicturesTab(
                         )
                     ) {
                         Icon(
-                            painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            painter = painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                             contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                             modifier = Modifier.size(15.dp)
                         )
@@ -503,7 +504,7 @@ fun PicturesTab(
                         modifier = Modifier.size(30.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_skip_next),
+                            painter = painterResource(IconRes.drawable.ic_skip_next),
                             contentDescription = stringResource(Res.string.next_image),
                             modifier = Modifier.size(16.dp),
                             tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -544,7 +545,7 @@ fun PicturesTab(
                 ) {
                     // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
                     // semantics, so without this the button has no name at all.
-                    Icon(painterResource(Res.drawable.ic_refresh), contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), modifier = Modifier.size(16.dp))
+                    Icon(painterResource(IconRes.drawable.ic_refresh), contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), modifier = Modifier.size(16.dp))
                 }
             }
 

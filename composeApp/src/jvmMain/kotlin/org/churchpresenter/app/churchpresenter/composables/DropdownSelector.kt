@@ -33,9 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 @Composable
 fun DropdownSelector(
@@ -95,7 +95,7 @@ fun DropdownSelector(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -169,7 +169,7 @@ fun DropdownSelector(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

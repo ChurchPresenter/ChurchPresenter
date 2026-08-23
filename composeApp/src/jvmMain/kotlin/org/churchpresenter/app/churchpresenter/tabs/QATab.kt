@@ -70,7 +70,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
@@ -143,6 +143,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val SORT_BY_VOTES = 3
 private const val DISPLAY_PREVIEW_CHARS = 50
@@ -435,7 +436,7 @@ fun QATab(
                         }
                         if (addQuestionText.isNotEmpty()) {
                             FilledIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
+                                Icon(painter = painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
                             }
                         }
                     }

@@ -53,9 +53,9 @@ import churchpresenter.composeapp.generated.resources.bible_cross_references_tit
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.hold_live_modifier_hint
-import churchpresenter.composeapp.generated.resources.ic_link
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_swap
+import org.churchpresenter.icons.generated.resources.ic_link
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_swap
 import churchpresenter.composeapp.generated.resources.stt_connect
 import churchpresenter.composeapp.generated.resources.stt_disconnect
 import churchpresenter.composeapp.generated.resources.swap_bibles_hint
@@ -68,6 +68,7 @@ import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -178,7 +179,7 @@ internal fun BibleColumnHeaderRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_link),
+                                    painter = painterResource(IconRes.drawable.ic_link),
                                     contentDescription = stringResource(Res.string.bible_cross_references),
                                     modifier = Modifier.size(12.dp),
                                     tint = if (crossRefsDocked) MaterialTheme.colorScheme.primary
@@ -245,7 +246,7 @@ internal fun BibleColumnHeaderRow(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_pause),
+                                    painter = painterResource(IconRes.drawable.ic_pause),
                                     contentDescription = null,
                                     modifier = Modifier.size(10.dp),
                                     tint = when {
@@ -286,7 +287,7 @@ internal fun BibleColumnHeaderRow(
                                 onSwapTranslations()
                             },
                             tooltipText = swapBiblesStr,
-                            painter = painterResource(Res.drawable.ic_swap),
+                            painter = painterResource(IconRes.drawable.ic_swap),
                             containerColor = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary,
                             tooltipContent = {

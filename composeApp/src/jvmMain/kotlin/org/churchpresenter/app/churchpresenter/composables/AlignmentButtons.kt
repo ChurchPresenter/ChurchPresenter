@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_align_bottom
-import churchpresenter.composeapp.generated.resources.ic_align_center
-import churchpresenter.composeapp.generated.resources.ic_align_left
-import churchpresenter.composeapp.generated.resources.ic_align_middle
-import churchpresenter.composeapp.generated.resources.ic_align_right
-import churchpresenter.composeapp.generated.resources.ic_align_top
+import org.churchpresenter.icons.generated.resources.ic_align_bottom
+import org.churchpresenter.icons.generated.resources.ic_align_center
+import org.churchpresenter.icons.generated.resources.ic_align_left
+import org.churchpresenter.icons.generated.resources.ic_align_middle
+import org.churchpresenter.icons.generated.resources.ic_align_right
+import org.churchpresenter.icons.generated.resources.ic_align_top
 import churchpresenter.composeapp.generated.resources.align_left
 import churchpresenter.composeapp.generated.resources.align_center
 import churchpresenter.composeapp.generated.resources.align_right
@@ -39,6 +39,7 @@ import churchpresenter.composeapp.generated.resources.position_above_desc
 import churchpresenter.composeapp.generated.resources.position_below_desc
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * A group of icon buttons for horizontal alignment (Left, Center, Right)
@@ -69,7 +70,7 @@ fun HorizontalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_right), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_right), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
 
@@ -86,7 +87,7 @@ fun HorizontalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == centerValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_center), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == centerValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_center), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == centerValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
 
@@ -103,7 +104,7 @@ fun HorizontalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_left), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_left), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
     }
@@ -137,7 +138,7 @@ fun VerticalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.align_bottom), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.align_bottom), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
         TooltipArea(
@@ -152,7 +153,7 @@ fun VerticalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == middleValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_middle), contentDescription = stringResource(Res.string.align_middle), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == middleValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_middle), contentDescription = stringResource(Res.string.align_middle), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == middleValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
         TooltipArea(
@@ -167,7 +168,7 @@ fun VerticalAlignmentButtons(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == topValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_top), contentDescription = stringResource(Res.string.align_top), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(IconRes.drawable.ic_align_top), contentDescription = stringResource(Res.string.align_top), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
     }
@@ -195,7 +196,7 @@ fun PositionButtons(
             colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedPosition == aboveValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Image(painter = painterResource(Res.drawable.ic_align_top), contentDescription = stringResource(Res.string.position_above_desc), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedPosition == aboveValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+            Image(painter = painterResource(IconRes.drawable.ic_align_top), contentDescription = stringResource(Res.string.position_above_desc), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedPosition == aboveValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
         }
         OutlinedButton(
             onClick = { onPositionChange(belowValue) },
@@ -205,7 +206,7 @@ fun PositionButtons(
             colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedPosition == belowValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Image(painter = painterResource(Res.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.position_below_desc), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedPosition == belowValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+            Image(painter = painterResource(IconRes.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.position_below_desc), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedPosition == belowValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
         }
     }
 }

@@ -7,10 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -27,6 +26,7 @@ import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import kotlin.test.Test
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 class TabControlsScreenshotTest {
 
@@ -90,7 +90,7 @@ class TabControlsScreenshotTest {
         ActionIconButton(
             onClick = {},
             tooltipText = "Edit Song",
-            painter = painterResource(Res.drawable.ic_edit),
+            painter = painterResource(IconRes.drawable.ic_edit),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
         )
@@ -101,7 +101,7 @@ class TabControlsScreenshotTest {
         ActionIconButton(
             onClick = {},
             tooltipText = "New Song",
-            painter = painterResource(Res.drawable.ic_add),
+            painter = painterResource(IconRes.drawable.ic_add),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
         )
@@ -113,14 +113,14 @@ class TabControlsScreenshotTest {
             ActionIconButton(
                 onClick = {},
                 tooltipText = "Edit Song",
-                painter = painterResource(Res.drawable.ic_edit),
+                painter = painterResource(IconRes.drawable.ic_edit),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary,
             )
             ActionIconButton(
                 onClick = {},
                 tooltipText = "New Song",
-                painter = painterResource(Res.drawable.ic_add),
+                painter = painterResource(IconRes.drawable.ic_add),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary,
             )
@@ -136,13 +136,13 @@ class TabControlsScreenshotTest {
 
     @Test
     fun `tooltip icon button`() = captureComponent(SECTION, "tooltip_icon") {
-        TooltipIconButton(painter = painterResource(Res.drawable.ic_refresh), text = "Refresh", onClick = {})
+        TooltipIconButton(painter = painterResource(IconRes.drawable.ic_refresh), text = "Refresh", onClick = {})
     }
 
     @Test
     fun `tooltip icon button disabled`() = captureComponent(SECTION, "tooltip_icon_disabled") {
         TooltipIconButton(
-            painter = painterResource(Res.drawable.ic_refresh),
+            painter = painterResource(IconRes.drawable.ic_refresh),
             text = "Refresh",
             onClick = {},
             enabled = false,
@@ -152,7 +152,7 @@ class TabControlsScreenshotTest {
     @Test
     fun `tooltip icon button tinted`() = captureComponent(SECTION, "tooltip_icon_tinted") {
         TooltipIconButton(
-            painter = painterResource(Res.drawable.ic_refresh),
+            painter = painterResource(IconRes.drawable.ic_refresh),
             text = "Refresh",
             onClick = {},
             iconTint = MaterialTheme.colorScheme.primary,

@@ -71,7 +71,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_video
 import churchpresenter.composeapp.generated.resources.canvas_video_loop
 import churchpresenter.composeapp.generated.resources.canvas_video_volume
 import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
-import churchpresenter.composeapp.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
@@ -82,6 +82,7 @@ import org.jetbrains.compose.resources.painterResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MAX_ANGLE_DEGREES = 360f
 private const val PERCENT_SCALE = 100f
@@ -141,7 +142,7 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
             shape = RoundedCornerShape(8.dp)
         ) {
             Icon(
-                painterResource(Res.drawable.ic_folder),
+                painterResource(IconRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )
@@ -371,7 +372,7 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
             shape = RoundedCornerShape(8.dp)
         ) {
             Icon(
-                painterResource(Res.drawable.ic_folder),
+                painterResource(IconRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )

@@ -28,7 +28,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.key_output_title
 import churchpresenter.composeapp.generated.resources.presenter_view_title
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -51,6 +51,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val NANOS_PER_MILLI = 1_000_000
 
@@ -148,7 +149,7 @@ internal fun PresenterWindows(
                 Window(
                     visible = showPresenterWindow,
                     title = stringResource(Res.string.presenter_view_title, fallbackIndex + 1),
-                    icon = painterResource(Res.drawable.ic_app_icon),
+                    icon = painterResource(IconRes.drawable.ic_app_icon),
                     onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                     state = fallbackWindowState,
                     undecorated = false,
@@ -255,7 +256,7 @@ internal fun PresenterWindows(
                         Window(
                             visible = true,
                             title = "Key Output ${i + 1}",
-                            icon = painterResource(Res.drawable.ic_app_icon),
+                            icon = painterResource(IconRes.drawable.ic_app_icon),
                             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                             state = keyWindowState,
                             undecorated = true,
@@ -342,7 +343,7 @@ internal fun PresenterWindows(
             Window(
                 visible = showPresenterWindow,
                 title = presenterTitle,
-                icon = painterResource(Res.drawable.ic_app_icon),
+                icon = painterResource(IconRes.drawable.ic_app_icon),
                 onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                 state = windowState,
                 undecorated = true,
@@ -378,7 +379,7 @@ internal fun PresenterWindows(
                     Window(
                         visible = showPresenterWindow,
                         title = keyOutputTitle,
-                        icon = painterResource(Res.drawable.ic_app_icon),
+                        icon = painterResource(IconRes.drawable.ic_app_icon),
                         onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                         state = keyWindowState,
                         undecorated = true,

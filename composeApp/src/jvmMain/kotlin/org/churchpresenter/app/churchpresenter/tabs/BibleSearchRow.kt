@@ -35,7 +35,7 @@ import churchpresenter.composeapp.generated.resources.bible_search_mode_auto
 import churchpresenter.composeapp.generated.resources.bible_search_mode_reference
 import churchpresenter.composeapp.generated.resources.bible_search_mode_text
 import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
-import churchpresenter.composeapp.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
@@ -44,6 +44,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.ExperimentalFoundationApi
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -108,7 +109,7 @@ internal fun BibleSearchRow(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(painter = painterResource(IconRes.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
@@ -148,7 +149,7 @@ internal fun BibleSearchRow(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(painter = painterResource(IconRes.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }

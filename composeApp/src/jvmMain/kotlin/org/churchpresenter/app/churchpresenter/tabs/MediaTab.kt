@@ -84,17 +84,17 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_fast_forward
-import churchpresenter.composeapp.generated.resources.ic_fast_rewind
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
-import churchpresenter.composeapp.generated.resources.ic_stop
-import churchpresenter.composeapp.generated.resources.ic_volume_off
-import churchpresenter.composeapp.generated.resources.ic_volume_up
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_fast_forward
+import org.churchpresenter.icons.generated.resources.ic_fast_rewind
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_star_filled
+import org.churchpresenter.icons.generated.resources.ic_stop
+import org.churchpresenter.icons.generated.resources.ic_volume_off
+import org.churchpresenter.icons.generated.resources.ic_volume_up
 import churchpresenter.composeapp.generated.resources.media_audio_continues
 import churchpresenter.composeapp.generated.resources.media_files_filter
 import churchpresenter.composeapp.generated.resources.media_load
@@ -154,6 +154,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.extension
 import kotlinx.coroutines.launch
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The network-URL entry field.
@@ -343,7 +344,7 @@ fun MediaTab(
                         ),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                     ) {
-                        Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                        Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                         Spacer(Modifier.width(7.dp))
                         Text(stringResource(Res.string.media_select_file), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
                     }
@@ -467,7 +468,7 @@ fun MediaTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     }
                 }
                 LazyRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -498,7 +499,7 @@ fun MediaTab(
                                 Text(displayName, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f), maxLines = 1)
                             }
                             IconButton(onClick = { RecentMediaFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
+                                Icon(painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
                             }
                         }
                     }
@@ -533,7 +534,7 @@ fun MediaTab(
                 ) {
                     IconButton(onClick = { viewModel.seekBackward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
                         Icon(
-                            painterResource(Res.drawable.ic_fast_rewind),
+                            painterResource(IconRes.drawable.ic_fast_rewind),
                             contentDescription = stringResource(Res.string.media_seek_backward),
                             modifier = Modifier.size(16.dp),
                             tint = transportTint,
@@ -555,7 +556,7 @@ fun MediaTab(
                         )
                     ) {
                         Icon(
-                            painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                             contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                             modifier = Modifier.size(15.dp),
                         )
@@ -567,7 +568,7 @@ fun MediaTab(
                 ) {
                     IconButton(onClick = { viewModel.stop() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
                         Icon(
-                            painterResource(Res.drawable.ic_stop),
+                            painterResource(IconRes.drawable.ic_stop),
                             contentDescription = stringResource(Res.string.stop),
                             modifier = Modifier.size(16.dp),
                             tint = transportTint,
@@ -580,7 +581,7 @@ fun MediaTab(
                 ) {
                     IconButton(onClick = { viewModel.seekForward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
                         Icon(
-                            painterResource(Res.drawable.ic_fast_forward),
+                            painterResource(IconRes.drawable.ic_fast_forward),
                             contentDescription = stringResource(Res.string.media_seek_forward),
                             modifier = Modifier.size(16.dp),
                             tint = transportTint,
@@ -603,7 +604,7 @@ fun MediaTab(
                 ) {
                     IconButton(onClick = { volumeExpanded = !volumeExpanded }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
                         Icon(
-                            painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                            painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) IconRes.drawable.ic_volume_off else IconRes.drawable.ic_volume_up),
                             contentDescription = stringResource(Res.string.media_volume),
                             modifier = Modifier.size(16.dp),
                             tint = transportTint
@@ -621,7 +622,7 @@ fun MediaTab(
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                                 IconButton(onClick = { viewModel.toggleMute() }, modifier = Modifier.size(24.dp)) {
                                     Icon(
-                                        painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                                        painterResource(if (viewModel.isMuted || viewModel.volume == 0f) IconRes.drawable.ic_volume_off else IconRes.drawable.ic_volume_up),
                                         contentDescription = stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute),
                                         modifier = Modifier.size(18.dp),
                                     )

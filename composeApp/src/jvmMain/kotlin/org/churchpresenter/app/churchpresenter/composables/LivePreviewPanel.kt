@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
@@ -96,6 +96,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PREVIEW_BACKGROUND = 0xFF121212
 private const val LIVE_BADGE_COLOR = 0xFF2196F3
@@ -638,7 +639,7 @@ private fun MediaPreviewControls(
         ) {
             Icon(
                 painter = painterResource(
-                    if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                    if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
                 ),
                 contentDescription = stringResource(
                     if (isPlaying) Res.string.pause else Res.string.play

@@ -85,8 +85,8 @@ import churchpresenter.composeapp.generated.resources.dictionary_forward
 import churchpresenter.composeapp.generated.resources.dictionary_switch_language
 import churchpresenter.composeapp.generated.resources.dictionary_bible_primary
 import churchpresenter.composeapp.generated.resources.dictionary_bible_select
-import churchpresenter.composeapp.generated.resources.ic_redo
-import churchpresenter.composeapp.generated.resources.ic_undo
+import org.churchpresenter.icons.generated.resources.ic_redo
+import org.churchpresenter.icons.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_header
@@ -103,8 +103,8 @@ import churchpresenter.composeapp.generated.resources.dictionary_transliteration
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
@@ -121,6 +121,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val DEFINITION_PREVIEW_CHARS = 200
 
@@ -499,7 +500,7 @@ private fun DictionaryDetailPane(
                 onClick = onGoBack,
                 enabled = canGoBack,
                 tooltipText = backStr,
-                painter = painterResource(Res.drawable.ic_undo),
+                painter = painterResource(IconRes.drawable.ic_undo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -507,7 +508,7 @@ private fun DictionaryDetailPane(
                 onClick = onGoForward,
                 enabled = canGoForward,
                 tooltipText = forwardStr,
-                painter = painterResource(Res.drawable.ic_redo),
+                painter = painterResource(IconRes.drawable.ic_redo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -977,7 +978,7 @@ private fun DictionarySearchField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -1009,7 +1010,7 @@ private fun DictionarySearchField(
         if (value.isNotEmpty()) {
             IconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant

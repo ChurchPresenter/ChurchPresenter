@@ -55,9 +55,9 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_note
-import churchpresenter.composeapp.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_note
+import org.churchpresenter.icons.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.number
@@ -78,6 +78,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The lyrics panel down the right of the Songs tab.
@@ -143,7 +144,7 @@ internal fun RowScope.SongLyricsPanel(
                 ActionIconButton(
                     onClick = { dialogs.edit(filteredSongs[selectedSongIndex]); tabFocusRequester.requestFocus() },
                     tooltipText = editSongStr,
-                    painter = painterResource(Res.drawable.ic_edit),
+                    painter = painterResource(IconRes.drawable.ic_edit),
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onTertiary
                 )
@@ -153,7 +154,7 @@ internal fun RowScope.SongLyricsPanel(
             ActionIconButton(
                 onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
                 tooltipText = newSongStr,
-                painter = painterResource(Res.drawable.ic_add),
+                painter = painterResource(IconRes.drawable.ic_add),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )
@@ -236,7 +237,7 @@ internal fun RowScope.SongLyricsPanel(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_note),
+                            painter = painterResource(IconRes.drawable.ic_note),
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)

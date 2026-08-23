@@ -50,9 +50,9 @@ import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.show_abbreviation
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.add_bible_translation
 import churchpresenter.composeapp.generated.resources.bible_translation
 import churchpresenter.composeapp.generated.resources.move_translation_up
@@ -115,6 +115,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val COLUMN_WEIGHT = 0.48f
 
@@ -288,7 +289,7 @@ private fun LeftColumn(
                                 app.moveBibleTranslation(index, -1)
                             } },
                             tooltipText = stringResource(Res.string.move_translation_up),
-                            painter = painterResource(Res.drawable.ic_arrow_up),
+                            painter = painterResource(IconRes.drawable.ic_arrow_up),
                         )
                     } else if (padsReorderButtons) {
                         Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -299,7 +300,7 @@ private fun LeftColumn(
                                 app.moveBibleTranslation(index, 1)
                             } },
                             tooltipText = stringResource(Res.string.move_translation_down),
-                            painter = painterResource(Res.drawable.ic_arrow_down),
+                            painter = painterResource(IconRes.drawable.ic_arrow_down),
                         )
                     } else if (padsReorderButtons) {
                         Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -309,7 +310,7 @@ private fun LeftColumn(
                             app.removeBibleTranslation(index)
                         } },
                         tooltipText = stringResource(Res.string.remove),
-                        painter = painterResource(Res.drawable.ic_delete),
+                        painter = painterResource(IconRes.drawable.ic_delete),
                     )
                 }
             }

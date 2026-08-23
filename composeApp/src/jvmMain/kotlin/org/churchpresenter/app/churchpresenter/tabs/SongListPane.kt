@@ -92,18 +92,18 @@ import churchpresenter.composeapp.generated.resources.add_to_favorites
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import androidx.compose.material.icons.filled.Tv
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.filter
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
-import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_star_filled
+import org.churchpresenter.icons.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.remove_from_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites_clear
@@ -131,6 +131,7 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
@@ -279,7 +280,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_search),
+                    painter = painterResource(IconRes.drawable.ic_search),
                     contentDescription = null,
                     modifier = Modifier.padding(start = 11.dp).size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -311,7 +312,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 }
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { onSearchQueryChange("") }, modifier = Modifier.size(30.dp)) {
-                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(painter = painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -357,7 +358,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(painter = painterResource(IconRes.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
 
@@ -467,7 +468,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             // name is a semantics question for the whole table, not this icon.
                             Icon(
                                 painter = painterResource(
-                                    if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
+                                    if (colId == "favorites") IconRes.drawable.ic_star else IconRes.drawable.ic_playlist_add
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier.size(13.dp),
@@ -475,7 +476,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             )
                             if (isSorted) {
                                 Icon(
-                                    painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                    painter = painterResource(if (currentSortAscending) IconRes.drawable.ic_arrow_up else IconRes.drawable.ic_arrow_down),
                                     contentDescription = null,
                                     modifier = Modifier.size(8.dp),
                                     tint = cellColor
@@ -510,7 +511,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             )
                             if (isSorted) {
                                 Icon(
-                                    painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                    painter = painterResource(if (currentSortAscending) IconRes.drawable.ic_arrow_up else IconRes.drawable.ic_arrow_down),
                                     contentDescription = null,
                                     modifier = Modifier.size(10.dp),
                                     tint = cellColor
@@ -745,7 +746,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(Res.drawable.ic_playlist_add),
+                                            painter = painterResource(IconRes.drawable.ic_playlist_add),
                                             contentDescription = stringResource(Res.string.add_to_schedule),
                                             modifier = Modifier.size(16.dp),
                                             tint = MaterialTheme.colorScheme.secondary
@@ -761,7 +762,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                         ) {
                                             Icon(
                                                 painter = painterResource(
-                                                    if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star
+                                                    if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star
                                                 ),
                                                 contentDescription = if (isFav)
                                                     stringResource(Res.string.remove_from_favorites)
@@ -787,7 +788,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                 text = { Text(stringResource(Res.string.add_to_schedule)) },
                                 leadingIcon = {
                                     Icon(
-                                        painter = painterResource(Res.drawable.ic_playlist_add),
+                                        painter = painterResource(IconRes.drawable.ic_playlist_add),
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
                                         tint = MaterialTheme.colorScheme.secondary
@@ -807,7 +808,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             leadingIcon = {
                                 val isFav = song.songId in favorites
                                 Icon(
-                                    painter = painterResource(if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    painter = painterResource(if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
                                     tint = if (isFav) MaterialTheme.semantic.favorite else MaterialTheme.colorScheme.onSurfaceVariant
@@ -822,7 +823,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             text = { Text(stringResource(Res.string.edit_song)) },
                             leadingIcon = {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_edit),
+                                    painter = painterResource(IconRes.drawable.ic_edit),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.tertiary
@@ -839,7 +840,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             text = { Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error) },
                             leadingIcon = {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_delete),
+                                    painter = painterResource(IconRes.drawable.ic_delete),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.error
@@ -901,7 +902,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             ) {
                 Icon(
                     painter = painterResource(
-                        if (favoritesExpanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
+                        if (favoritesExpanded) IconRes.drawable.ic_arrow_down else IconRes.drawable.ic_arrow_up
                     ),
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
@@ -926,7 +927,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                         onClearFavorites()
                     }) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_delete),
+                            painter = painterResource(IconRes.drawable.ic_delete),
                             contentDescription = stringResource(Res.string.song_favorites_clear),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -997,7 +998,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                             modifier = Modifier.size(20.dp)
                                         ) {
                                             Icon(
-                                                painter = painterResource(Res.drawable.ic_playlist_add),
+                                                painter = painterResource(IconRes.drawable.ic_playlist_add),
                                                 contentDescription = stringResource(Res.string.add_to_schedule),
                                                 modifier = Modifier.size(14.dp),
                                                 tint = MaterialTheme.colorScheme.secondary

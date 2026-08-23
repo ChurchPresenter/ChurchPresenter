@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.image_files_filter
 import churchpresenter.composeapp.generated.resources.no_image_selected
 import kotlinx.coroutines.launch
@@ -28,6 +28,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 @Composable
 fun FileImagePicker(
@@ -85,7 +86,7 @@ fun FileImagePicker(
             modifier = Modifier.weight(1f)
         )
         Icon(
-            painter = painterResource(Res.drawable.ic_folder),
+            painter = painterResource(IconRes.drawable.ic_folder),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary
         )

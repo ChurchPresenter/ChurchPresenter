@@ -53,7 +53,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.autosave_restore_confirm
 import churchpresenter.composeapp.generated.resources.autosave_restore_discard
 import churchpresenter.composeapp.generated.resources.autosave_restore_message
@@ -88,6 +88,7 @@ import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val FALLBACK_DRAG_ITEM_HEIGHT = 50f
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -509,7 +510,7 @@ fun ScheduleTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_delete),
+                        painter = painterResource(IconRes.drawable.ic_delete),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onError
                     )

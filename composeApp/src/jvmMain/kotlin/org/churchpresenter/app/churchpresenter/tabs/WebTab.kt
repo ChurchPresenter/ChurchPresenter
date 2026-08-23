@@ -54,14 +54,14 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.desktop_view
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_clear_cache
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_web
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_clear_cache
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_web
 import churchpresenter.composeapp.generated.resources.interactive_mode
 import churchpresenter.composeapp.generated.resources.mirror_mode
 import churchpresenter.composeapp.generated.resources.mobile_view
@@ -83,7 +83,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Warning
-import churchpresenter.composeapp.generated.resources.ic_cast
+import org.churchpresenter.icons.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.web_go_live
 import churchpresenter.composeapp.generated.resources.web_focus_first_input
 import churchpresenter.composeapp.generated.resources.web_live_badge
@@ -117,6 +117,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import kotlinx.coroutines.delay
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MOUSE_MOVE_THROTTLE_MS = 50
 private const val SNAPSHOT_RETRY_DELAY_MS = 7000L
@@ -292,7 +293,7 @@ fun WebTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_web),
+                    painter = painterResource(IconRes.drawable.ic_web),
                     contentDescription = null,
                     modifier = Modifier.padding(start = 11.dp).size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -343,7 +344,7 @@ fun WebTab(
                         modifier = Modifier.size(30.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_close),
+                            painter = painterResource(IconRes.drawable.ic_close),
                             contentDescription = stringResource(Res.string.web_clear_url),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -604,12 +605,12 @@ fun WebTab(
                         }
                         if (typeBuffer.isNotEmpty()) {
                             IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painter = painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
                     TooltipIconButton(
-                        painter = painterResource(Res.drawable.ic_cast),
+                        painter = painterResource(IconRes.drawable.ic_cast),
                         text = stringResource(Res.string.web_focus_first_input),
                         onClick = {
                             presenterManager?.liveBrowser?.value
@@ -945,7 +946,7 @@ private fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
         tooltipText = stringResource(Res.string.web_back),
-        painter = painterResource(Res.drawable.ic_arrow_left),
+        painter = painterResource(IconRes.drawable.ic_arrow_left),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -956,7 +957,7 @@ private fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
         tooltipText = stringResource(Res.string.web_forward),
-        painter = painterResource(Res.drawable.ic_arrow_right),
+        painter = painterResource(IconRes.drawable.ic_arrow_right),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -967,7 +968,7 @@ private fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
         tooltipText = stringResource(Res.string.web_refresh),
-        painter = painterResource(Res.drawable.ic_refresh),
+        painter = painterResource(IconRes.drawable.ic_refresh),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -979,7 +980,7 @@ private fun RowScope.NavButtons(
             cacheDir.mkdirs()
         },
         tooltipText = stringResource(Res.string.web_clear_cache),
-        painter = painterResource(Res.drawable.ic_clear_cache),
+        painter = painterResource(IconRes.drawable.ic_clear_cache),
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
@@ -988,7 +989,7 @@ private fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel - ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_out),
-        painter = painterResource(Res.drawable.ic_arrow_down),
+        painter = painterResource(IconRes.drawable.ic_arrow_down),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -1002,7 +1003,7 @@ private fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel + ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_in),
-        painter = painterResource(Res.drawable.ic_arrow_up),
+        painter = painterResource(IconRes.drawable.ic_arrow_up),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )

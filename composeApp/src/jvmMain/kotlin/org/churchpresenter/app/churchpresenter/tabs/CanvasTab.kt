@@ -76,12 +76,12 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.canvas_create_scene
 import churchpresenter.composeapp.generated.resources.canvas_new_scene
@@ -133,6 +133,7 @@ import churchpresenter.composeapp.generated.resources.canvas_toggle_visibility
 import churchpresenter.composeapp.generated.resources.canvas_toggle_lock
 import churchpresenter.composeapp.generated.resources.canvas_aspect_ratio_warning
 import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val SCENE_LIST_WEIGHT = 0.4f
 private const val SOURCE_LIST_WEIGHT = 0.6f
@@ -341,7 +342,7 @@ fun CanvasTab(
                                     modifier = Modifier.size(20.dp)
                                 ) {
                                     Icon(
-                                        painterResource(Res.drawable.ic_edit),
+                                        painterResource(IconRes.drawable.ic_edit),
                                         contentDescription = stringResource(Res.string.canvas_rename_scene),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -361,7 +362,7 @@ fun CanvasTab(
                                     modifier = Modifier.size(20.dp)
                                 ) {
                                     Icon(
-                                        painterResource(Res.drawable.ic_close),
+                                        painterResource(IconRes.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.canvas_remove_scene),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -380,7 +381,7 @@ fun CanvasTab(
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = ButtonDefaults.ContentPadding
                 ) {
-                    Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
+                    Icon(painterResource(IconRes.drawable.ic_add), null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(Res.string.canvas_new_scene), style = MaterialTheme.typography.labelSmall)
                 }
@@ -491,7 +492,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_add),
+                                    painterResource(IconRes.drawable.ic_add),
                                     contentDescription = stringResource(Res.string.canvas_add_source),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -663,7 +664,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_delete),
+                                    painterResource(IconRes.drawable.ic_delete),
                                     contentDescription = stringResource(Res.string.canvas_delete_source),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -683,7 +684,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_arrow_up),
+                                    painterResource(IconRes.drawable.ic_arrow_up),
                                     contentDescription = stringResource(Res.string.canvas_source_move_forward),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
@@ -703,7 +704,7 @@ fun CanvasTab(
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_arrow_down),
+                                    painterResource(IconRes.drawable.ic_arrow_down),
                                     contentDescription = stringResource(Res.string.canvas_source_move_backward),
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface

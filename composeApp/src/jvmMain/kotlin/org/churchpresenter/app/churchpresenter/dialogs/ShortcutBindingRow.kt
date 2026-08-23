@@ -42,9 +42,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_undo
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_undo
+import org.churchpresenter.icons.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.shortcut_capture_conflict
 import churchpresenter.composeapp.generated.resources.shortcut_capture_title
 import churchpresenter.composeapp.generated.resources.shortcut_rebind_hint
@@ -59,6 +59,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.keyCaps
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** Chords of a multi-key binding are drawn as two cap groups separated by this. */
 private const val CAP_GROUP_SEPARATOR = "/"
@@ -143,7 +144,7 @@ internal fun ShortcutBindingRow(
 
         if (recording) {
             TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_close),
+                painter = painterResource(IconRes.drawable.ic_close),
                 text = stringResource(Res.string.shortcut_recording_stop),
                 onClick = onStopRecording,
                 iconSize = 11.dp,
@@ -155,7 +156,7 @@ internal fun ShortcutBindingRow(
             // be put back. Offering both at once would widen every row for a control most never
             // need.
             TooltipIconButton(
-                painter = painterResource(if (customized) Res.drawable.ic_undo else Res.drawable.ic_close),
+                painter = painterResource(if (customized) IconRes.drawable.ic_undo else IconRes.drawable.ic_close),
                 text = stringResource(
                     if (customized) Res.string.shortcut_settings_reset else Res.string.shortcut_settings_clear
                 ),
@@ -260,7 +261,7 @@ private fun ShortcutRowLabel(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_warning),
+                    painter = painterResource(IconRes.drawable.ic_warning),
                     contentDescription = null,
                     modifier = Modifier.size(11.dp),
                     tint = colors.error,

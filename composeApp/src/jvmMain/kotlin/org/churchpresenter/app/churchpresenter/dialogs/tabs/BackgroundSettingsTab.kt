@@ -76,7 +76,7 @@ import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.stock_library_tooltip
 import churchpresenter.composeapp.generated.resources.stock_photo_browse_tooltip
@@ -114,6 +114,7 @@ import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PREVIEW_DEBOUNCE_MS = 800L
 
@@ -757,7 +758,7 @@ private fun BackgroundTypeDropdown(
             )
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

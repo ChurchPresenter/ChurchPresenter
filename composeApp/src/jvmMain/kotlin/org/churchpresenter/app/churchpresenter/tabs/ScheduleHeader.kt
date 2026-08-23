@@ -66,15 +66,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.ic_label
-import churchpresenter.composeapp.generated.resources.ic_redo
-import churchpresenter.composeapp.generated.resources.ic_remove
-import churchpresenter.composeapp.generated.resources.ic_save
-import churchpresenter.composeapp.generated.resources.ic_undo
-import churchpresenter.composeapp.generated.resources.ic_zoom_in
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_label
+import org.churchpresenter.icons.generated.resources.ic_redo
+import org.churchpresenter.icons.generated.resources.ic_remove
+import org.churchpresenter.icons.generated.resources.ic_save
+import org.churchpresenter.icons.generated.resources.ic_undo
+import org.churchpresenter.icons.generated.resources.ic_zoom_in
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_density_compact
@@ -107,6 +107,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f
@@ -172,7 +173,7 @@ internal fun ScheduleHeader(
             if (shown(ScheduleToolbarButton.ZOOM)) {
             PillGroup {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_remove),
+                    painter = painterResource(IconRes.drawable.ic_remove),
                     text = stringResource(Res.string.tooltip_schedule_zoom_out),
                     onClick = onZoomOut,
                     enabled = canZoomOut,
@@ -215,7 +216,7 @@ internal fun ScheduleHeader(
                     )
                 }
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_add),
+                    painter = painterResource(IconRes.drawable.ic_add),
                     text = stringResource(Res.string.tooltip_schedule_zoom_in),
                     onClick = onZoomIn,
                     enabled = canZoomIn,
@@ -246,7 +247,7 @@ internal fun ScheduleHeader(
 
                 if (shown(ScheduleToolbarButton.NEW)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_add),
+                    painter = painterResource(IconRes.drawable.ic_add),
                     text = stringResource(Res.string.tooltip_new_schedule),
                     onClick = onNewSchedule,
                     buttonSize = 26.dp,
@@ -256,7 +257,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.OPEN)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_folder),
+                    painter = painterResource(IconRes.drawable.ic_folder),
                     text = stringResource(Res.string.tooltip_open_schedule),
                     onClick = onOpenSchedule,
                     buttonSize = 26.dp,
@@ -266,7 +267,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.SAVE)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_save),
+                    painter = painterResource(IconRes.drawable.ic_save),
                     text = stringResource(Res.string.tooltip_save_schedule),
                     onClick = onSaveSchedule,
                     buttonSize = 26.dp,
@@ -277,7 +278,7 @@ internal fun ScheduleHeader(
 
                 if (shown(ScheduleToolbarButton.CLEAR)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_delete),
+                    painter = painterResource(IconRes.drawable.ic_delete),
                     text = stringResource(Res.string.tooltip_clear_schedule),
                     onClick = onClearSchedule,
                     buttonSize = 26.dp,
@@ -294,7 +295,7 @@ internal fun ScheduleHeader(
                 val redoKeys = shortcuts.label(ShortcutAction.REDO)
                 if (shown(ScheduleToolbarButton.UNDO)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_undo),
+                    painter = painterResource(IconRes.drawable.ic_undo),
                     text = if (undoKeys.isEmpty()) stringResource(Res.string.tooltip_undo_unbound)
                            else stringResource(Res.string.tooltip_undo, undoKeys),
                     onClick = onUndo,
@@ -308,7 +309,7 @@ internal fun ScheduleHeader(
                 }
                 if (shown(ScheduleToolbarButton.REDO)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_redo),
+                    painter = painterResource(IconRes.drawable.ic_redo),
                     text = if (redoKeys.isEmpty()) stringResource(Res.string.tooltip_redo_unbound)
                            else stringResource(Res.string.tooltip_redo, redoKeys),
                     onClick = onRedo,
@@ -324,7 +325,7 @@ internal fun ScheduleHeader(
                 if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
                 if (shown(ScheduleToolbarButton.ADD_LABEL)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_label),
+                    painter = painterResource(IconRes.drawable.ic_label),
                     text = stringResource(Res.string.tooltip_add_label),
                     onClick = onAddLabel,
                     buttonSize = 26.dp,
@@ -412,14 +413,14 @@ private fun ScheduleOptionsButton(
 @Composable
 private fun scheduleToolbarButtonPainter(button: ScheduleToolbarButton): Painter = when (button) {
     ScheduleToolbarButton.ITEM_COUNT -> rememberVectorPainter(Icons.AutoMirrored.Filled.List)
-    ScheduleToolbarButton.ZOOM -> painterResource(Res.drawable.ic_zoom_in)
-    ScheduleToolbarButton.NEW -> painterResource(Res.drawable.ic_add)
-    ScheduleToolbarButton.OPEN -> painterResource(Res.drawable.ic_folder)
-    ScheduleToolbarButton.SAVE -> painterResource(Res.drawable.ic_save)
-    ScheduleToolbarButton.CLEAR -> painterResource(Res.drawable.ic_delete)
-    ScheduleToolbarButton.UNDO -> painterResource(Res.drawable.ic_undo)
-    ScheduleToolbarButton.REDO -> painterResource(Res.drawable.ic_redo)
-    ScheduleToolbarButton.ADD_LABEL -> painterResource(Res.drawable.ic_label)
+    ScheduleToolbarButton.ZOOM -> painterResource(IconRes.drawable.ic_zoom_in)
+    ScheduleToolbarButton.NEW -> painterResource(IconRes.drawable.ic_add)
+    ScheduleToolbarButton.OPEN -> painterResource(IconRes.drawable.ic_folder)
+    ScheduleToolbarButton.SAVE -> painterResource(IconRes.drawable.ic_save)
+    ScheduleToolbarButton.CLEAR -> painterResource(IconRes.drawable.ic_delete)
+    ScheduleToolbarButton.UNDO -> painterResource(IconRes.drawable.ic_undo)
+    ScheduleToolbarButton.REDO -> painterResource(IconRes.drawable.ic_redo)
+    ScheduleToolbarButton.ADD_LABEL -> painterResource(IconRes.drawable.ic_label)
     ScheduleToolbarButton.PLANNING_CENTER -> rememberVectorPainter(Icons.Default.CloudDownload)
 }
 
@@ -543,7 +544,7 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_add),
+            painter = painterResource(IconRes.drawable.ic_add),
             contentDescription = null,
             tint = contentColor,
             modifier = Modifier.size(11.dp)

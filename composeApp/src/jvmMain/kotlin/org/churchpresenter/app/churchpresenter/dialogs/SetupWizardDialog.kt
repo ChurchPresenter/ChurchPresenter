@@ -78,8 +78,8 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
@@ -171,6 +171,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val STEP_BIBLE = 3
 private const val STEP_SONGS = 4
@@ -201,7 +202,7 @@ fun SetupWizardDialog(
     Window(
         onCloseRequest = onDismiss,
         title = "Getting Started",
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = windowState,
         resizable = false,
         alwaysOnTop = alwaysOnTop
@@ -575,7 +576,7 @@ private fun WelcomeStep() {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(Res.drawable.ic_app_icon),
+                painter = painterResource(IconRes.drawable.ic_app_icon),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.size(44.dp)
@@ -632,7 +633,7 @@ private fun BibleStep(onOpenSettings: () -> Unit) {
                 )
                 OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                     Image(
-                        painter = painterResource(Res.drawable.ic_settings),
+                        painter = painterResource(IconRes.drawable.ic_settings),
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -714,7 +715,7 @@ private fun SongsStep(onOpenSettings: () -> Unit) {
             )
             OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_settings),
+                    painter = painterResource(IconRes.drawable.ic_settings),
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )
@@ -787,7 +788,7 @@ private fun ProjectionStep(onOpenSettings: () -> Unit) {
                 )
                 OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                     Image(
-                        painter = painterResource(Res.drawable.ic_settings),
+                        painter = painterResource(IconRes.drawable.ic_settings),
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)

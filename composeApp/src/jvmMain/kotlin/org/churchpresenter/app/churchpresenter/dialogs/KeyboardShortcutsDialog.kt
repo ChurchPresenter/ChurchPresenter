@@ -52,7 +52,7 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.keyboard_shortcuts_title
 import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.ok
@@ -93,6 +93,7 @@ import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.searchText
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /** Test tag for the reset-everything button, which several tests need to locate. */
 internal const val SHORTCUT_RESET_ALL_TAG = "shortcut_reset_all"
@@ -602,7 +603,7 @@ private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Un
         onClick = onClick,
         leadingIcon = {
             Icon(
-                painter = painterResource(Res.drawable.ic_warning),
+                painter = painterResource(IconRes.drawable.ic_warning),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = if (count > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

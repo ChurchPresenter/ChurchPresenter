@@ -126,9 +126,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Remove
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.position_on_screen
 import churchpresenter.composeapp.generated.resources.text_color
 import churchpresenter.composeapp.generated.resources.canvas_source_clock
@@ -177,6 +177,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val POSITION_GRID_COLUMNS = 3
 private const val POSITION_TILE_ASPECT_ABBREV = 1.5f
@@ -368,7 +369,7 @@ fun AnnouncementsTab(
                     },
                     enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
                     tooltipText = stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
-                    painter = painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
+                    painter = painterResource(if (announcementTextIsLive) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                     containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
                     contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
                 )
@@ -760,7 +761,7 @@ fun AnnouncementsTab(
                                 },
                                 enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
                                 tooltipText = if (isTimerRunning) pauseLabel else startLabel,
-                                painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
+                                painter = painterResource(if (isTimerRunning) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                                 containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -771,7 +772,7 @@ fun AnnouncementsTab(
                                 ActionIconButton(
                                     onClick = { viewModel.resetTimer(presenterManager) },
                                     tooltipText = resetLabel,
-                                    painter = painterResource(Res.drawable.ic_refresh),
+                                    painter = painterResource(IconRes.drawable.ic_refresh),
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

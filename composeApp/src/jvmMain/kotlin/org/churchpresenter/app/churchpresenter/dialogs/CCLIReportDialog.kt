@@ -105,7 +105,7 @@ import churchpresenter.composeapp.generated.resources.clear_statistics
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.em_dash
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ccli_report_title
 import churchpresenter.composeapp.generated.resources.stats_filter_all_bibles
 import churchpresenter.composeapp.generated.resources.stats_filter_all_songbooks
@@ -180,6 +180,7 @@ import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.semantic
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59
@@ -898,7 +899,7 @@ private fun LibraryPicker(
 @Composable
 private fun RowClearButton(label: String, alpha: Float, onClear: () -> Unit) {
     TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_delete),
+        painter = painterResource(IconRes.drawable.ic_delete),
         text = stringResource(Res.string.stats_clear_item),
         onClick = onClear,
         iconSize = 13.dp,

@@ -22,13 +22,14 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.loading
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The window shown while the app loads, before the real one can be built.
@@ -40,7 +41,7 @@ internal fun SplashWindow(theme: ThemeMode) {
     Window(
         onCloseRequest = {},
         title = stringResource(Res.string.app_name),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(
             width = 400.dp,
             height = 300.dp,
@@ -68,7 +69,7 @@ internal fun SplashContent(theme: ThemeMode) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(Res.drawable.ic_app_icon),
+                    painter = painterResource(IconRes.drawable.ic_app_icon),
                     contentDescription = null,
                     modifier = Modifier.size(96.dp)
                 )

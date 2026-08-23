@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.memory_monitor_committed
 import churchpresenter.composeapp.generated.resources.memory_monitor_force_gc
 import churchpresenter.composeapp.generated.resources.memory_monitor_gc
@@ -52,6 +52,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryMXBean
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val BYTES_PER_MB = 1024L * 1024L
 private const val REFRESH_INTERVAL_MS = 1000L
@@ -107,7 +108,7 @@ fun MemoryMonitorWindow(isVisible: Boolean, theme: ThemeMode, onClose: () -> Uni
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.memory_monitor_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         // Named rather than inline so `DialogViewportTest` measures against this exact value — see
         // `DialogSizes.kt`, which records why it is 500dp and not the 440dp that shipped clipped.
         state = rememberWindowState(width = MEMORY_MONITOR_WINDOW_WIDTH, height = MEMORY_MONITOR_WINDOW_HEIGHT)

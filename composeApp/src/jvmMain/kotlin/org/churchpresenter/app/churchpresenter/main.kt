@@ -47,7 +47,7 @@ import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -162,6 +162,7 @@ import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
@@ -768,7 +769,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 exitApplication()
             },
             title = stringResource(Res.string.app_name),
-            icon = painterResource(Res.drawable.ic_app_icon),
+            icon = painterResource(IconRes.drawable.ic_app_icon),
             state = state
         ) {
             LaunchedEffect(Unit) {

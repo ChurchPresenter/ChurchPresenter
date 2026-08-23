@@ -334,6 +334,9 @@ kotlin {
             // `remote/` here.
             implementation(projects.companionServer)
             // The song library: the grid of every song in the library, opened from the Help menu.
+            // Every icon the app draws — see the :icons module. Imported as `IconRes` at each
+            // call site, because a file that also uses a string resource has two `Res` classes.
+            implementation(projects.icons)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source

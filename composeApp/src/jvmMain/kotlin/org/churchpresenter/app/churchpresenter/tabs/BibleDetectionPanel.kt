@@ -98,7 +98,7 @@ import churchpresenter.composeapp.generated.resources.bible_stt_text_match_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_track_transcription
 import churchpresenter.composeapp.generated.resources.bible_stt_track_translation
 import churchpresenter.composeapp.generated.resources.bible_stt_waiting_for_stt
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.stt_status_connecting
 import churchpresenter.composeapp.generated.resources.stt_status_not_connected
 import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
@@ -114,6 +114,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val SELECTION_BAR_WIDTH = 4f
 
@@ -396,7 +397,7 @@ internal fun BibleDetectionPanel(
                         modifier = Modifier.size(27.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_close),
+                            painter = painterResource(IconRes.drawable.ic_close),
                             contentDescription = stringResource(Res.string.bible_stt_clear),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)

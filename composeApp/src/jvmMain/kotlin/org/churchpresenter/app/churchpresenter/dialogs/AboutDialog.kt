@@ -61,7 +61,7 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
@@ -76,6 +76,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val GRADIENT_DARKEN = 0.45f
 
@@ -143,7 +144,7 @@ internal fun AboutDialogContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(Res.drawable.ic_app_icon),
+                        painter = painterResource(IconRes.drawable.ic_app_icon),
                         contentDescription = null,
                         modifier = Modifier.size(44.dp)
                     )
@@ -268,7 +269,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.converter_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
         AppThemeWrapper(theme = theme) {
@@ -291,7 +292,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_song_library),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1420.dp, height = 880.dp)
     ) {
         AppThemeWrapper(theme = theme) {
@@ -321,7 +322,7 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1200.dp, height = 800.dp)
     ) {
         AppThemeWrapper(theme = theme) {
@@ -343,7 +344,7 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.style_editor_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1500.dp, height = 950.dp)
     ) {
         AppThemeWrapper(theme = theme) {

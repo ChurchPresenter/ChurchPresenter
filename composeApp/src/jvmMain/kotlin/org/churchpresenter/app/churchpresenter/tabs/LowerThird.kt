@@ -90,8 +90,8 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.atem_loading_slots
 import churchpresenter.composeapp.generated.resources.atem_slot_empty
@@ -126,9 +126,9 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_key
-import churchpresenter.composeapp.generated.resources.ic_upload
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_key
+import org.churchpresenter.icons.generated.resources.ic_upload
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
@@ -167,6 +167,7 @@ import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val ATEM_REACHABLE_POLL_MS = 30_000L
 private const val ATEM_UNREACHABLE_POLL_MS = 10_000L
@@ -802,7 +803,7 @@ fun LowerThirdTab(
                                         modifier = Modifier.weight(1f)
                                     )
                                     Icon(
-                                        painter = painterResource(Res.drawable.ic_close),
+                                        painter = painterResource(IconRes.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.tooltip_remove),
                                         modifier = Modifier.size(14.dp).initialPassClickable {
                                             SwingUtilities.invokeLater {
@@ -942,7 +943,7 @@ fun LowerThirdTab(
                                 contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Icon(painterResource(Res.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
+                            Icon(painterResource(IconRes.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
                         }
                     }
 
@@ -976,7 +977,7 @@ fun LowerThirdTab(
                                 colors = atemButtonColors
                             ) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_upload),
+                                    painterResource(IconRes.drawable.ic_upload),
                                     contentDescription = stringResource(Res.string.atem_send_to_atem),
                                     modifier = Modifier.size(16.dp),
                                 )
@@ -1008,7 +1009,7 @@ fun LowerThirdTab(
                         )
                     ) {
                         Icon(
-                            painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                             contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
                             modifier = Modifier.size(15.dp),
                         )

@@ -17,8 +17,7 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +39,7 @@ import java.awt.Container
 import java.awt.Dimension
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val OPEN_RETRY_ATTEMPTS = 3
 private const val OPEN_RETRY_DELAY_MS = 100L
@@ -68,7 +68,7 @@ fun DeckLinkComposeOutput(
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
 
     // Render the same vector icon used by all Compose Windows to a BufferedImage for the JFrame
-    val iconPainter = painterResource(Res.drawable.ic_app_icon)
+    val iconPainter = painterResource(IconRes.drawable.ic_app_icon)
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val appIconImage = remember(iconPainter) {

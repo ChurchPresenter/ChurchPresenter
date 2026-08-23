@@ -67,9 +67,9 @@ import churchpresenter.composeapp.generated.resources.instance_link_following_ho
 import churchpresenter.composeapp.generated.resources.instance_link_status_reconnecting_in
 import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
 import churchpresenter.composeapp.generated.resources.menu_disconnect
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
@@ -77,7 +77,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.tab_visibility
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.timer_expired
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -170,6 +170,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineVersion
 import org.churchpresenter.app.churchpresenter.viewmodel.setInstanceLinkSource
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 private const val PANEL_COLLAPSE_ANIM_MS = 220
 private const val CLOCK_TICK_MS = 1000L
@@ -1383,7 +1384,7 @@ fun MainDesktop(
                         }
                     },
                     icon = painterResource(
-                        if (scheduleCollapsed) Res.drawable.ic_arrow_right else Res.drawable.ic_arrow_left
+                        if (scheduleCollapsed) IconRes.drawable.ic_arrow_right else IconRes.drawable.ic_arrow_left
                     ),
                     contentDescription = stringResource(
                         if (scheduleCollapsed) Res.string.tooltip_expand_schedule
@@ -1448,7 +1449,7 @@ fun MainDesktop(
                             iconTint = MaterialTheme.colorScheme.onSurface
                         )
                         TooltipIconButton(
-                            painter = painterResource(Res.drawable.ic_settings),
+                            painter = painterResource(IconRes.drawable.ic_settings),
                             text = stringResource(Res.string.tooltip_settings),
                             onClick = onShowSettings,
                             buttonSize = 36.dp,
@@ -1754,7 +1755,7 @@ fun MainDesktop(
                         }
                     },
                     icon = painterResource(
-                        if (previewCollapsed) Res.drawable.ic_arrow_left else Res.drawable.ic_arrow_right
+                        if (previewCollapsed) IconRes.drawable.ic_arrow_left else IconRes.drawable.ic_arrow_right
                     ),
                     contentDescription = stringResource(
                         if (previewCollapsed) Res.string.tooltip_expand_schedule
@@ -1886,7 +1887,7 @@ private fun PreviewSidebar(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     text = stringResource(Res.string.tooltip_clear_display),
                     onClick = {
                         mediaViewModel?.pause()
