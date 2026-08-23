@@ -15,6 +15,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.recolor
 
 /**
  * Drives the Bible and Songs cards — four `BackgroundColumn`s, one per content type per output —

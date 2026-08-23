@@ -10,6 +10,7 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
+import org.churchpresenter.ui.numberFields
 
 /**
  * Pins the shape of the tab in both of the layouts it can render, and validates the ordinals the

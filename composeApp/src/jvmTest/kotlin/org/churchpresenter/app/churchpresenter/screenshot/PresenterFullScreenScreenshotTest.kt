@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Color as ComposeColor
 import org.churchpresenter.dictionary.StrongsEntry
+import org.churchpresenter.dictionary.ui.DictionaryPresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
@@ -35,7 +36,6 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter

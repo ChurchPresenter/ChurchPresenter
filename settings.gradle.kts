@@ -107,3 +107,7 @@ include(":statistics")
 // dropdowns, settings fields, segmented buttons, the colour picker, tooltips and the rest. Generic
 // by construction: it knows the theme and the resources, and nothing else about the app.
 include(":ui-components")
+// The Dictionary tab, whole: the Strong's browser and its "In Scripture" panel, the view model
+// behind them, the settings tab that styles the output, and the presenter that draws it. The data
+// it reads is :dictionary; this is everything the operator and the audience see of it.
+include(":dictionary-ui")

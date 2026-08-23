@@ -38,7 +38,7 @@ import org.churchpresenter.resources.generated.resources.enter_label_text
 import org.churchpresenter.resources.generated.resources.label_text
 import org.churchpresenter.resources.generated.resources.ok
 import org.churchpresenter.resources.generated.resources.text_color
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.LabelColorColumns
 import org.churchpresenter.app.churchpresenter.composables.LabelColors
 import org.churchpresenter.app.churchpresenter.composables.RecentLabelColors

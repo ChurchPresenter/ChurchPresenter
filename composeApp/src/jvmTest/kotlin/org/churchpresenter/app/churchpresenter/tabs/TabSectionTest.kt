@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
 
 /**
  * The tab bar itself — the row every other tab hangs off, and the one control in the app that is

@@ -24,6 +24,8 @@ import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.numberFields
+import org.churchpresenter.ui.retypeNumberField
 
 /**
  * Drives the assignment grid's dropdowns, the numeric fields below it, and the two buttons that

@@ -74,7 +74,7 @@ import org.churchpresenter.resources.generated.resources.tooltip_move_up
 import org.churchpresenter.resources.generated.resources.tooltip_remove
 import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.Utils
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.churchpresenter.app.churchpresenter.utils.scheduleShowDetailLine
 import org.churchpresenter.app.churchpresenter.utils.scheduleShowKindDetails

@@ -30,8 +30,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.colorSchemeFor
-import org.churchpresenter.app.churchpresenter.utils.Utils
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.ui.Utils
+import org.churchpresenter.ui.Utils.parseHexColor
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.ui.cpColorToHex

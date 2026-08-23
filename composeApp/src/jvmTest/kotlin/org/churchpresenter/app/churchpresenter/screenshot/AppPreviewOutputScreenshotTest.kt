@@ -21,6 +21,7 @@ import org.apache.pdfbox.rendering.PDFRenderer
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.dictionary.StrongsEntry
+import org.churchpresenter.dictionary.ui.DictionaryPresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
@@ -28,7 +29,6 @@ import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter

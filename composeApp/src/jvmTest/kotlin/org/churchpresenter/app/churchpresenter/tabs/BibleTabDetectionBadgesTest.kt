@@ -20,6 +20,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsExactly
 
 /**
  * Why a verse was detected, as the auto-follow panel shows it — and the Help Dev flags.

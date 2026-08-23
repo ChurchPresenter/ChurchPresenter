@@ -41,7 +41,7 @@ import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
-import org.churchpresenter.app.churchpresenter.utils.SystemFonts
+import org.churchpresenter.ui.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState

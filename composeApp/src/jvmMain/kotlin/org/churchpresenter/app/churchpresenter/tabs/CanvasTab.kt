@@ -95,7 +95,7 @@ import org.churchpresenter.resources.generated.resources.canvas_source_text
 import org.churchpresenter.resources.generated.resources.canvas_source_video
 import org.churchpresenter.resources.generated.resources.canvas_sources
 import org.churchpresenter.resources.generated.resources.go_live
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.settings.AppSettings

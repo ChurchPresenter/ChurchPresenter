@@ -13,6 +13,12 @@ import java.nio.file.Paths
  * out here because none of them touches a loaded module: they describe the file, not the Bible.
  */
 
+/**
+ * Folder depth searched for `.spb` files -- deep enough for language/publisher/edition nesting,
+ * and bounded so a symlink cycle or a stray deep tree cannot hang the caller that is scanning.
+ */
+const val MAX_BIBLE_SCAN_DEPTH = 6
+
 /** One word shortened: kept whole at three characters or fewer, else its first three or four. */
 internal fun shortenWord(word: String): String = when {
     word.length <= SHORT_WORD_MAX_LENGTH -> word

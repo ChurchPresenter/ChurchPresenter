@@ -21,6 +21,13 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.assertFontFieldShows
+import org.churchpresenter.ui.assertNumberFieldShows
+import org.churchpresenter.ui.colorFields
+import org.churchpresenter.ui.numberFields
+import org.churchpresenter.ui.styleButton
 
 /**
  * Drives the tab from its **input** rather than from its controls: the settings object is replaced

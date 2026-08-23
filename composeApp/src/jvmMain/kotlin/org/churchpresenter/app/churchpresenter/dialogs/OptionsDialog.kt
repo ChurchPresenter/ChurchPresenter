@@ -35,6 +35,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogSizeWithin
 import org.churchpresenter.app.churchpresenter.primaryScreenSizeDp
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.dictionary.ui.DictionarySettingsTab
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.appearance
 import org.churchpresenter.resources.generated.resources.background
@@ -71,7 +72,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.ui.TabStripBackArrow
 import org.churchpresenter.ui.TabStripForwardArrow

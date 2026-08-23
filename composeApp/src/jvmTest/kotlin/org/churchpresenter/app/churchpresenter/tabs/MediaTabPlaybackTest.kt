@@ -18,6 +18,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 /**
  * Playback: the transport controls, the volume popup, Go Live (including Instance Link), and what

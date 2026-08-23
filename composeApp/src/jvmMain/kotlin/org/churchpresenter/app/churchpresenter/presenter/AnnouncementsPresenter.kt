@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.Utils.parseHexColor
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 
 @Composable
 fun AnnouncementsPresenter(

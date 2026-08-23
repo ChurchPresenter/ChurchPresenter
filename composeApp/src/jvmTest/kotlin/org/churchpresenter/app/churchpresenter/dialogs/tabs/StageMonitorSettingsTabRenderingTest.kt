@@ -13,6 +13,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedPixels
+import org.churchpresenter.ui.styleButton
 
 /**
  * Asserts the style and alignment buttons **look** different when selected.

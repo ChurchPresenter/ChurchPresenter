@@ -11,6 +11,8 @@ import org.churchpresenter.atem.AtemState
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 /**
  * The rest of the ATEM upload dialog's content: the design-vs-switcher size warnings, the slot

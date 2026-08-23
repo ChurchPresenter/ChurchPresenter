@@ -22,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.ui.ColorPickerField
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.canvas_font_color
@@ -52,7 +54,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState

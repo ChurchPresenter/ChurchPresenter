@@ -20,6 +20,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 /**
  * What the Bible tab does with the optional collaborators the host hands it.

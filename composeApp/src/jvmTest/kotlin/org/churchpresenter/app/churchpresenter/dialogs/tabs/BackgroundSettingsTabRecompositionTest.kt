@@ -21,6 +21,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.colorFields
 
 /**
  * Covers what the tab does when its *surroundings* recompose rather than its controls being used.

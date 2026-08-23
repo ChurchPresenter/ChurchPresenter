@@ -25,6 +25,15 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.assertNumberFieldShows
+import org.churchpresenter.ui.openColorField
+import org.churchpresenter.ui.pickFont
+import org.churchpresenter.ui.pickFontFilterOnly
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
+import org.churchpresenter.ui.styleButton
+import org.churchpresenter.ui.uniquelyNamedFont
 
 /**
  * Drives every control in the tab's left-hand column — the title slide, song number, title,

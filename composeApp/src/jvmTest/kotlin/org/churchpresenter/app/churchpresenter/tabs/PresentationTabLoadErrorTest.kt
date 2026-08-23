@@ -11,6 +11,8 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 class PresentationTabLoadErrorTest {
 

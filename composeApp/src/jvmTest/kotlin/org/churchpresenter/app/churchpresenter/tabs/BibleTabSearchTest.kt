@@ -8,6 +8,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
+import org.churchpresenter.ui.showsExactly
 
 /**
  * The unified smart-search box in `BibleTab`: one field that both navigates to a reference and

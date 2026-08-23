@@ -29,16 +29,16 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.settings.STTSettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SENTINEL_FONT
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.retypeNumberField
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.uniquelyNamedFont
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.Utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.pickFont
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
+import org.churchpresenter.ui.uniquelyNamedFont
 
 class STTSettingsDialogContentTest {
 

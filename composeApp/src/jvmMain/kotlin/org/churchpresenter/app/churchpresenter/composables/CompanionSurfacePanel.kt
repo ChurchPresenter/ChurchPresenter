@@ -39,7 +39,7 @@ import org.churchpresenter.resources.generated.resources.companion_satellite_sta
 import org.churchpresenter.resources.generated.resources.companion_satellite_status_error
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement

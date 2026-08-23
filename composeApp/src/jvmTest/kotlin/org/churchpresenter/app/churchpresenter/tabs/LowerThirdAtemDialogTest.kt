@@ -10,6 +10,8 @@ import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 /**
  * The ATEM upload dialog — where a lower third is sent into a switcher's media pool before it can be

@@ -17,6 +17,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
 
 /**
  * The slide grid — the half of the Presentation tab that only exists once a deck is loaded.

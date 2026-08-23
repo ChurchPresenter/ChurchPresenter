@@ -10,6 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsExactly
 
 /** 3 frames at 30fps = 100ms — fast enough to play through to completion inside a test. */
 private const val QUICK_LOTTIE = """{"v":"5.7.4","fr":30,"ip":0,"op":3,"w":1920,"h":1080,"layers":[]}"""

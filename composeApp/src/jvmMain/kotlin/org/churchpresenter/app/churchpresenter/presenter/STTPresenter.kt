@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.Utils.parseHexColor
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 

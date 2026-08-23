@@ -13,6 +13,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 /**
  * The Presentation tab with no deck loaded — the empty state, and the playback settings that sit

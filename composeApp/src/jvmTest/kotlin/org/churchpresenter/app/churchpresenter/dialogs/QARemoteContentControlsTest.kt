@@ -26,12 +26,12 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.retypeNumberField
 import org.churchpresenter.companionserver.TunnelStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
 
 class QARemoteContentControlsTest {
 

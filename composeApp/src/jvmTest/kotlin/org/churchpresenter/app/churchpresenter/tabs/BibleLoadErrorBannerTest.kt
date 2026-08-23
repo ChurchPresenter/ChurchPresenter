@@ -9,6 +9,7 @@ import org.churchpresenter.bible.BibleLoadError
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
 
 class BibleLoadErrorBannerTest {
 

@@ -13,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.showsExactly
 
 class WebTabTest {
 

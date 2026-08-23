@@ -8,6 +8,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
+import org.churchpresenter.ui.showsExactly
 
 /**
  * What `ScheduleTab` draws for a service order, and what selecting a row does.

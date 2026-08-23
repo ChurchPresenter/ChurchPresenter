@@ -10,11 +10,11 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.recolor
 
 /**
  * The Clock source, which is two controls in one: a wall clock, and a countdown with its own timer.

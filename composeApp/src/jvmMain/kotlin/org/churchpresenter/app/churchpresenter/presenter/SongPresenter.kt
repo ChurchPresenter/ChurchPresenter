@@ -56,8 +56,8 @@ import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.Utils.parseHexColor
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f

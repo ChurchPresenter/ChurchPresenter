@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
@@ -220,8 +221,4 @@ class FileManager {
         )
     }
 
-    companion object {
-        /** Folder depth searched for Bible files — deep enough for language/publisher/edition nesting. */
-        const val MAX_BIBLE_SCAN_DEPTH = 6
-    }
 }
