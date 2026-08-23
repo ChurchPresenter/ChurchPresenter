@@ -25,6 +25,9 @@ import org.churchpresenter.atem.AtemKey
  * names are unchanged from where this code used to live, so the bodies moved verbatim -- these
  * handlers are full of raw-string JSON replies whose content depends on their own indentation.
  */
+/** The query parameter that overrides [AtemSettings.useDownstreamKey] for one request. */
+private const val QUERY_PARAM_KEY_TYPE = "keytype"
+
 internal class AtemBridge(private val json: Json) {
 
     @Volatile internal var _atemSettings: AtemSettings? = null
@@ -123,7 +126,7 @@ internal class AtemBridge(private val json: Json) {
 
         // Key target: USK (M/E + keyer) or DSK (?keytype / setting) from settings;
         // ?me=N&key=M (1-based) override; ?key=0 skips. For DSK ?key overrides the DSK index.
-        val useDsk = resolveUseDsk(call, atem)
+        val useDsk = resolveUseDsk(call.request.queryParameters[QUERY_PARAM_KEY_TYPE], atem)
         val meParam = call.request.queryParameters["me"]?.toIntOrNull()
         val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
         val mixEffect: Int?
@@ -175,7 +178,7 @@ internal class AtemBridge(private val json: Json) {
             call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
             return
         }
-        val useDsk = resolveUseDsk(call, atem)
+        val useDsk = resolveUseDsk(call.request.queryParameters[QUERY_PARAM_KEY_TYPE], atem)
         val meParam = call.request.queryParameters["me"]?.toIntOrNull()
         val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
         val mixEffect = if (useDsk) 0 else (if (meParam != null) meParam - 1 else atem.keyMixEffect)
@@ -228,15 +231,11 @@ internal class AtemBridge(private val json: Json) {
      * Resolves whether a request should drive a downstream key: `?keytype=dsk|usk` (or
      * `downstream|upstream`) overrides; otherwise the persisted [AtemSettings.useDownstreamKey].
      */
-    internal fun resolveUseDsk(call: ApplicationCall, atem: AtemSettings): Boolean =
-        resolveUseDsk(call.request.queryParameters["keytype"], atem)
-
     /**
-     * The decision [resolveUseDsk] makes, without the request around it.
-     *
-     * Split out so the rule can be tested directly: building an `ApplicationCall` needs a running
-     * server, and what is worth pinning here is which spellings override the setting and which are
-     * ignored — not Ktor's query parsing.
+     * Takes the `keytype` value rather than the request it came from, so the rule can be tested
+     * directly — building an `ApplicationCall` needs a running server, and what is worth pinning is
+     * which spellings override the setting and which are ignored, not Ktor's query parsing.
+     * Callers pass `call.request.queryParameters[QUERY_PARAM_KEY_TYPE]`.
      */
     internal fun resolveUseDsk(keyType: String?, atem: AtemSettings): Boolean =
         when (keyType?.lowercase()) {

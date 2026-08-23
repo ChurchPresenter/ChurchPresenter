@@ -37,6 +37,29 @@ private val TUNNEL_URL_REGEX = Regex("""https://[a-z0-9-]+\.trycloudflare\.com""
 
 internal fun extractTunnelUrl(line: String): String? = TUNNEL_URL_REGEX.find(line)?.value
 
+/**
+ * Whether `os.name` names Windows, and whether it names macOS.
+ *
+ * Split out of [TunnelManager]'s field initialisers so the mapping can be tested: those fields read
+ * the real system properties once per instance, so a JVM only ever exercises the platform it is
+ * running on, and the other two go untested on every machine. Getting either wrong downloads a
+ * binary that cannot run, and the first symptom is a tunnel that silently never comes up.
+ *
+ * Substring matches, not equality: a real `os.name` is "Windows Server 2022" or "Mac OS X", never
+ * the bare word.
+ */
+internal fun isWindowsOs(osName: String): Boolean = osName.lowercase().contains("win")
+
+/** @see isWindowsOs */
+internal fun isMacOs(osName: String): Boolean = osName.lowercase().contains("mac")
+
+/**
+ * Whether `os.arch` names a 64-bit ARM machine — Apple silicon reports "aarch64", ARM Linux boards
+ * report either that or "arm". Anything else is treated as x86-64.
+ */
+internal fun isArmArch(osArch: String): Boolean =
+    osArch.lowercase().let { it.contains("aarch64") || it.contains("arm") }
+
 internal fun cloudflaredDownloadUrl(isWin: Boolean, isMac: Boolean, isArm: Boolean): String = when {
     isWin -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
     isMac && isArm -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64.tgz"
@@ -80,12 +103,9 @@ class TunnelManager {
 
     private val dataDir = File(System.getProperty("user.home"), ".churchpresenter")
 
-    private val os = System.getProperty("os.name").lowercase()
-    private val arch = System.getProperty("os.arch").lowercase()
-
-    private val isMac = os.contains("mac")
-    private val isWin = os.contains("win")
-    private val isArm = arch.contains("aarch64") || arch.contains("arm")
+    private val isMac = isMacOs(System.getProperty("os.name"))
+    private val isWin = isWindowsOs(System.getProperty("os.name"))
+    private val isArm = isArmArch(System.getProperty("os.arch"))
 
     private val binaryName = if (isWin) "cloudflared.exe" else "cloudflared"
     private val binaryFile = File(dataDir, binaryName)

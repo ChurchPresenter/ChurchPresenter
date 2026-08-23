@@ -8,6 +8,11 @@ plugins {
 
 group = "org.churchpresenter"
 
+extra["coverageFloors"] = mapOf(
+    "BRANCH" to "0.80",
+    "COMPLEXITY" to "0.75",
+)
+
 kotlin {
     jvmToolchain(21)
 }
@@ -66,9 +71,6 @@ dependencies {
     testImplementation(testFixtures(projects.presentationEngine))
 }
 
-// Keeps `kotlin-test` on its JUnit 4 flavour. Both flavours offer the same
-// `kotlin-test-framework-impl` capability, so exactly one may be on the classpath, and the root
-// build's useJUnitPlatform() makes the Kotlin plugin pick junit5 unless told otherwise.
 configurations.configureEach {
     resolutionStrategy.capabilitiesResolution.withCapability(
         "org.jetbrains.kotlin:kotlin-test-framework-impl"

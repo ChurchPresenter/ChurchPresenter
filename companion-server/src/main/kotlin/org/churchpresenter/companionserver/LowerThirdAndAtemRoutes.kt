@@ -319,7 +319,7 @@ private data class AtemDestination(val slot: Int, val key: AtemKeyTarget, val na
 private fun atemKeyTarget(call: ApplicationCall, server: CompanionServer, atem: AtemSettings): AtemKeyTarget {
     val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
     val meParam = call.request.queryParameters["me"]?.toIntOrNull()
-    val useDsk = server.atem.resolveUseDsk(call, atem)
+    val useDsk = server.atem.resolveUseDsk(call.request.queryParameters["keytype"], atem)
     return AtemKeyTarget(
         on = keyParam != null && keyParam > 0,
         useDsk = useDsk,
