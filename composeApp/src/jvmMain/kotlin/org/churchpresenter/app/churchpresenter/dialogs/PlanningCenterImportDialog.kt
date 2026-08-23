@@ -90,9 +90,9 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.LabeledCheckbox
+import org.churchpresenter.ui.cpColorToHex
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.viewmodel.PlanningCenterImportViewModel

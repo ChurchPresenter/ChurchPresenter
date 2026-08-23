@@ -30,6 +30,8 @@ import java.nio.file.Paths
 import java.util.Locale
 import javax.swing.SwingUtilities
 import androidx.compose.foundation.Image
+import org.churchpresenter.ui.readCommandOutput
+import org.churchpresenter.ui.CommandRunner
 
 private const val POSITION_POLL_MS = 200
 private const val VOLUME_PERCENT_SCALE = 100

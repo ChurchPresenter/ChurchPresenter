@@ -13,6 +13,7 @@ import org.churchpresenter.resources.generated.resources.color
 import org.churchpresenter.resources.generated.resources.shadow_size
 import org.churchpresenter.resources.generated.resources.shadow_opacity
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.ui.NumberSettingsTextField
 
 /**
  * Shadow detail controls: color, size, and opacity — labels inside each field.

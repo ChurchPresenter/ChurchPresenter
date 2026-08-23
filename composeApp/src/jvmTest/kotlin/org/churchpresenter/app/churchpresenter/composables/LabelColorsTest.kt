@@ -16,6 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.cpColorToHex
 
 /**
  * The colours a schedule label can be started from: the theme's own pairs, and this user's history.

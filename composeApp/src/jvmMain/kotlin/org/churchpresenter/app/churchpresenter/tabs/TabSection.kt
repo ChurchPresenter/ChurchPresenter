@@ -27,8 +27,8 @@ import org.churchpresenter.resources.generated.resources.tab_stt
 import org.churchpresenter.resources.generated.resources.crossword_tab
 import org.churchpresenter.resources.generated.resources.tab_dictionary
 import org.churchpresenter.resources.generated.resources.tab_companion_surface
-import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
-import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
+import org.churchpresenter.ui.TabStripBackArrow
+import org.churchpresenter.ui.TabStripForwardArrow
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

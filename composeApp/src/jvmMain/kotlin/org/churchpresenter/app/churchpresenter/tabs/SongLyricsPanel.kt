@@ -39,10 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.app.churchpresenter.composables.SectionLabelRow
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.FocusLostBanner
+import org.churchpresenter.ui.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -63,8 +63,8 @@ import org.churchpresenter.resources.generated.resources.tab_focus_lost
 import org.churchpresenter.resources.generated.resources.number
 import org.churchpresenter.resources.generated.resources.song_title_slide
 import org.churchpresenter.resources.generated.resources.title
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
+import org.churchpresenter.ui.initialPassCombinedClickable
+import org.churchpresenter.ui.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
@@ -76,7 +76,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.songTitleLine
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
+import org.churchpresenter.ui.FocusLostRescueState
 import androidx.compose.foundation.layout.RowScope
 
 /**

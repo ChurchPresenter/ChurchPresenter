@@ -1,0 +1,76 @@
+package org.churchpresenter.ui
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+
+/**
+ * Reusable IconButton with tooltip that appears on hover, hidden when partially off-screen.
+ *
+ * [iconTint] defaults to `LocalContentColor`, which [IconButton] sets from [colors] — so an icon is
+ * drawn in the theme's content colour, and dimmed by the *disabled* one when `enabled` is false.
+ * Every drawable in `composeResources/drawable` bakes `android:fillColor="#FF000000"`, so an
+ * untinted `Image` painted a hard black glyph regardless of theme or state: invisible against the
+ * dark theme, and a disabled button that looked exactly as live as an enabled one.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TooltipIconButton(
+    painter: Painter,
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    iconSize: Dp = 20.dp,
+    buttonSize: Dp = 36.dp,
+    iconTint: Color? = null,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+) {
+    ConditionalTooltipArea(
+        tooltip = {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
+                Text(
+                    text = text,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+    ) {
+        IconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = modifier.size(buttonSize),
+            colors = colors
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = text,
+                modifier = Modifier.size(iconSize),
+                colorFilter = ColorFilter.tint(iconTint ?: LocalContentColor.current)
+            )
+        }
+    }
+}
+

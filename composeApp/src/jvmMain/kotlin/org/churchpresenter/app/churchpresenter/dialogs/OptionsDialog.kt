@@ -73,8 +73,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
-import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
-import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
+import org.churchpresenter.ui.TabStripBackArrow
+import org.churchpresenter.ui.TabStripForwardArrow
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager

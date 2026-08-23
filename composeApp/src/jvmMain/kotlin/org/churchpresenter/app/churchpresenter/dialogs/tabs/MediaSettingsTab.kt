@@ -39,8 +39,8 @@ import org.churchpresenter.resources.generated.resources.seconds_suffix
 import org.churchpresenter.resources.generated.resources.slideshow_settings
 import org.churchpresenter.resources.generated.resources.transition_duration
 import org.churchpresenter.resources.generated.resources.transition_settings
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants

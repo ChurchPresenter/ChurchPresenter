@@ -28,14 +28,14 @@ import org.churchpresenter.resources.generated.resources.show_song_number_before
 import org.churchpresenter.resources.generated.resources.title
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.ExperimentalFoundationApi
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.ui.LabeledCheckbox
 
 private const val COLUMN_WEIGHT = 0.48f
 

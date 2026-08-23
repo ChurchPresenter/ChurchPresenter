@@ -84,7 +84,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.ui.LabeledSwitch
 
 /**
  * The temp-file suffix for a downloaded installer, inferred from the release asset's URL so the

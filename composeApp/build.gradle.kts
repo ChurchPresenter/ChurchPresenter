@@ -338,6 +338,8 @@ kotlin {
             // module. One `Res` class, so `Res.drawable.x` and `Res.string.y` read exactly as they
             // did when the assets lived here.
             api(projects.resources)
+            // The custom composables the tabs and dialogs are built from.
+            implementation(projects.uiComponents)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source

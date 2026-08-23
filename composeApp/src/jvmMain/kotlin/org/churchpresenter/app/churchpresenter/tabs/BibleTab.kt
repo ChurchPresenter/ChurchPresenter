@@ -57,10 +57,10 @@ import org.churchpresenter.resources.generated.resources.verse
 import java.awt.Window as AwtWindow
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
-import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
+import org.churchpresenter.ui.FocusLostBanner
+import org.churchpresenter.ui.focusRescuePressHook
+import org.churchpresenter.ui.rememberFocusLostRescue
+import org.churchpresenter.ui.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel

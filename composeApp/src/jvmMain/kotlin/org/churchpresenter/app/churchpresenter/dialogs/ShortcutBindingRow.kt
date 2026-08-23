@@ -52,8 +52,8 @@ import org.churchpresenter.resources.generated.resources.shortcut_recording_stop
 import org.churchpresenter.resources.generated.resources.shortcut_settings_clear
 import org.churchpresenter.resources.generated.resources.shortcut_settings_reset
 import org.churchpresenter.resources.generated.resources.shortcut_unbound
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.ui.ConditionalTooltipArea
+import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.keyCaps

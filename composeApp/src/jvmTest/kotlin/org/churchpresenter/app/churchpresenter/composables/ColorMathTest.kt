@@ -7,6 +7,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.cpColorToHex
+import org.churchpresenter.ui.cpColorToHsv
+import org.churchpresenter.ui.cpHsvToColor
+import org.churchpresenter.ui.cpTryParseHex
 
 /**
  * The colour conversions behind ColorPickerDialog — hex parse/format and the HSV round-trip that the

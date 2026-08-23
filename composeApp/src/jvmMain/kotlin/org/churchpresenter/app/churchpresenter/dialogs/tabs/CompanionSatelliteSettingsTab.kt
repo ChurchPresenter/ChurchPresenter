@@ -63,11 +63,11 @@ import org.churchpresenter.resources.generated.resources.companion_satellite_sta
 import org.churchpresenter.resources.generated.resources.companion_satellite_status_disconnected
 import org.churchpresenter.resources.generated.resources.companion_satellite_status_error
 import org.churchpresenter.companionsatellite.CompanionConnectionStatus
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
+import org.churchpresenter.ui.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
@@ -75,7 +75,7 @@ import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.ui.LabeledSwitch
 import org.churchpresenter.theme.semantic
 
 private const val MIN_RECONNECT_DELAY_MS = 500

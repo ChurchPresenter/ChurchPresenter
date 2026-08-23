@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.StyledTextField
 
 /**
  * `StyledTextField`'s placeholder and disabled states.

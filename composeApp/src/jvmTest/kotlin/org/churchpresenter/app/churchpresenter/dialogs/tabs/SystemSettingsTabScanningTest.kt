@@ -5,7 +5,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.ui.ScanningRow
 import kotlin.test.Test
 
 /**

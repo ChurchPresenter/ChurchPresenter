@@ -2,8 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 

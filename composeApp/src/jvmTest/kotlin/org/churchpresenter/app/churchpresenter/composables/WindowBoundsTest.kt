@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.CommandResult
 
 /**
  * Finding the window a Screen Capture source is pointed at.

@@ -7,9 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
+import org.churchpresenter.ui.finalPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.ui.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,7 +72,7 @@ import org.churchpresenter.resources.generated.resources.tooltip_go_live
 import org.churchpresenter.resources.generated.resources.tooltip_move_down
 import org.churchpresenter.resources.generated.resources.tooltip_move_up
 import org.churchpresenter.resources.generated.resources.tooltip_remove
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity

@@ -91,9 +91,9 @@ import org.churchpresenter.resources.generated.resources.instance_link_follower_
 import org.churchpresenter.resources.generated.resources.remote_client_label
 import org.churchpresenter.resources.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.resources.generated.resources.remote_queue_waiting_one
-import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditButton
-import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditorRow
-import org.churchpresenter.app.churchpresenter.composables.rememberClientLabelEditor
+import org.churchpresenter.ui.ClientLabelEditButton
+import org.churchpresenter.ui.ClientLabelEditorRow
+import org.churchpresenter.ui.rememberClientLabelEditor
 import org.jetbrains.compose.resources.stringResource
 
 /**

@@ -60,21 +60,21 @@ import org.churchpresenter.resources.generated.resources.milliseconds_suffix
 import org.churchpresenter.resources.generated.resources.song_transition_settings
 import org.churchpresenter.resources.generated.resources.transition_duration
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
+import org.churchpresenter.ui.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.PositionButtons
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.HorizontalAlignmentButtons
+import org.churchpresenter.ui.NumberSettingsTextField
+import org.churchpresenter.ui.PositionButtons
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
+import org.churchpresenter.ui.SlimSlider
+import org.churchpresenter.ui.TextStyleButtons
+import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.ui.LabeledCheckbox
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

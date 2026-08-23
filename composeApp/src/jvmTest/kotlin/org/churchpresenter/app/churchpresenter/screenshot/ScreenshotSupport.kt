@@ -19,7 +19,7 @@ import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.RoborazziTaskType
 import com.github.takahirom.roborazzi.roborazziEnabled
 import io.github.takahirom.roborazzi.captureRoboImage
-import org.churchpresenter.app.churchpresenter.composables.RecentColors
+import org.churchpresenter.ui.RecentColors
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import java.awt.Color

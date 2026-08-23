@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.DropdownSelector
 import kotlin.test.Test
 
 class DropdownSelectorScreenshotTest {

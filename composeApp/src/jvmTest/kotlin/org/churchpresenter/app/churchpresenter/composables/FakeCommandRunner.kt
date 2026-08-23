@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.ui.CommandResult
+
 /**
  * A [CommandRunner] that answers from a script instead of the machine, and records what it was asked.
  *

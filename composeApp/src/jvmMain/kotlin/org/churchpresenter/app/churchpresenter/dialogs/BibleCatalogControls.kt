@@ -47,9 +47,9 @@ import org.churchpresenter.resources.generated.resources.bible_catalog_search_pl
 import org.churchpresenter.resources.generated.resources.bible_catalog_stale_notice
 import org.churchpresenter.resources.generated.resources.bible_catalog_subtitle
 import org.churchpresenter.resources.generated.resources.bible_catalog_title
-import org.churchpresenter.app.churchpresenter.composables.PaneTab
-import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
-import org.churchpresenter.app.churchpresenter.composables.SearchableDropdownField
+import org.churchpresenter.ui.PaneTab
+import org.churchpresenter.ui.PaneTabRow
+import org.churchpresenter.ui.SearchableDropdownField
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
 import org.jetbrains.compose.resources.stringResource

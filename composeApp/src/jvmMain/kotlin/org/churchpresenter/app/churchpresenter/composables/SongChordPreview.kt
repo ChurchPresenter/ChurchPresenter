@@ -53,6 +53,7 @@ import org.churchpresenter.songchords.SongSectionWordGroup
 import org.churchpresenter.songchords.SongSectionWords
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.ui.ConditionalTooltipArea
 
 private const val CHORD_SPACING_RATIO = 0.42f
 

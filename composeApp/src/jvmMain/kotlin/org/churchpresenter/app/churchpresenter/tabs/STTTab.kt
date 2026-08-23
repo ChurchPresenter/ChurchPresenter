@@ -59,9 +59,9 @@ import org.churchpresenter.resources.generated.resources.stt_transcription_label
 import org.churchpresenter.resources.generated.resources.stt_translation_label
 import org.churchpresenter.resources.generated.resources.stt_waiting_for_transcription
 import org.churchpresenter.resources.generated.resources.tooltip_stt_settings
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.StyledTextField
+import org.churchpresenter.ui.ActionIconButton
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.StyledTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

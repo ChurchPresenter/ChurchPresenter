@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.CommandResult
 
 /**
  * What the app concludes about VLC, and which of the three "no video" messages the operator gets.

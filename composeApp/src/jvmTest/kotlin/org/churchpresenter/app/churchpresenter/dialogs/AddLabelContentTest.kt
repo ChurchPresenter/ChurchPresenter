@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
+import org.churchpresenter.ui.cpColorToHex
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import androidx.compose.ui.test.ComposeUiTest

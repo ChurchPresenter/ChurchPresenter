@@ -75,7 +75,7 @@ import androidx.compose.ui.input.pointer.isSecondary
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.ui.TooltipIconButton
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
@@ -118,9 +118,9 @@ import org.churchpresenter.resources.generated.resources.title
 import org.churchpresenter.resources.generated.resources.tune
 import org.churchpresenter.resources.generated.resources.author
 import org.churchpresenter.resources.generated.resources.composer
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
+import org.churchpresenter.ui.DropdownSelector
+import org.churchpresenter.ui.initialPassClickable
+import org.churchpresenter.ui.finalPassClickable
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants

@@ -20,7 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.ui.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,10 +64,10 @@ import org.churchpresenter.resources.generated.resources.obs_status_connected
 import org.churchpresenter.resources.generated.resources.obs_status_connecting
 import org.churchpresenter.resources.generated.resources.obs_status_disconnected
 import org.churchpresenter.resources.generated.resources.obs_status_error
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.ui.SettingRow
+import org.churchpresenter.ui.SettingsScrollbar
+import org.churchpresenter.ui.SettingsScrollbarGutter
+import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

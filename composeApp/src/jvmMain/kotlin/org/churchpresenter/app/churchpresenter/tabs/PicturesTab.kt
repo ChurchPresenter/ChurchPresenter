@@ -14,12 +14,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
+import org.churchpresenter.ui.initialPassCombinedClickable
+import org.churchpresenter.ui.AddToScheduleButton
+import org.churchpresenter.ui.FocusLostBanner
+import org.churchpresenter.ui.GoLiveButton
+import org.churchpresenter.ui.focusRescuePressHook
+import org.churchpresenter.ui.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -131,7 +131,7 @@ import org.churchpresenter.resources.generated.resources.unit_s
 import org.churchpresenter.resources.generated.resources.unit_ms
 import org.churchpresenter.resources.generated.resources.pictures_arrow_key_hint
 import org.churchpresenter.resources.generated.resources.pictures_reorder_hint
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem

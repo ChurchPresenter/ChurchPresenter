@@ -30,7 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.found_results
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.ui.initialPassClickable
 import org.churchpresenter.app.churchpresenter.utils.highlightRanges
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.ColumnScope

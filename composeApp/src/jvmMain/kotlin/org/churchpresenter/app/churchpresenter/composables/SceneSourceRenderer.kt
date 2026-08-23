@@ -91,6 +91,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
+import org.churchpresenter.ui.readCommandOutput
+import org.churchpresenter.ui.CommandRunner
 
 private const val FRAME_INTERVAL_MS = 16L
 private const val PLAYER_SETTLE_MS = 100L

@@ -98,3 +98,8 @@ include(":companion-server")
 // reach for. Assets and their generated accessor, no Kotlin of its own — so nothing has to
 // duplicate an icon to use it.
 include(":resources")
+
+// The app's own widget library: the custom composables every tab and dialog is built from —
+// dropdowns, settings fields, segmented buttons, the colour picker, tooltips and the rest. Generic
+// by construction: it knows the theme and the resources, and nothing else about the app.
+include(":ui-components")

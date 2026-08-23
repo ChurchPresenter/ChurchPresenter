@@ -87,13 +87,13 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
-import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
+import org.churchpresenter.ui.PanelResizeHandle
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
-import org.churchpresenter.app.churchpresenter.composables.resizedPanelWidth
+import org.churchpresenter.ui.rememberTokenGate
+import org.churchpresenter.ui.resizedPanelWidth
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow

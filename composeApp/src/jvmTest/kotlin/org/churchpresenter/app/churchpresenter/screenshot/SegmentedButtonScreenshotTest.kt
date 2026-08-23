@@ -10,8 +10,8 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.ui.SegmentedButton
+import org.churchpresenter.ui.SegmentedButtonItem
 import kotlin.test.Test
 
 /**
