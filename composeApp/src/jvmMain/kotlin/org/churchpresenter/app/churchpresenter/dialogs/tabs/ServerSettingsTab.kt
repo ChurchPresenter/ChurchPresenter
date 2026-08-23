@@ -18,17 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditButton
+import org.churchpresenter.app.churchpresenter.composables.ClientLabelEditorRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.rememberClientLabelEditor
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -98,10 +95,6 @@ import churchpresenter.composeapp.generated.resources.max_media_upload_label
 import churchpresenter.composeapp.generated.resources.max_media_upload_description
 import churchpresenter.composeapp.generated.resources.blocked_clients
 import churchpresenter.composeapp.generated.resources.blocked_clients_description
-import churchpresenter.composeapp.generated.resources.client_label_cancel
-import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
-import churchpresenter.composeapp.generated.resources.client_label_placeholder
-import churchpresenter.composeapp.generated.resources.client_label_save
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
@@ -812,8 +805,7 @@ private fun ClientRow(
     onRemove: () -> Unit,
     isInstanceLinkFollower: Boolean = false
 ) {
-    var editing by remember { mutableStateOf(false) }
-    var editText by remember(label) { mutableStateOf(label) }
+    val labelEditor = rememberClientLabelEditor(label)
 
     Column(
         modifier = Modifier
@@ -865,18 +857,7 @@ private fun ClientRow(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            // Edit (pencil) button
-            IconButton(
-                onClick = { editing = !editing; editText = label },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = stringResource(Res.string.client_label_edit_tooltip),
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            ClientLabelEditButton(labelEditor, label)
             Spacer(Modifier.width(4.dp))
             Button(
                 shape = RoundedCornerShape(6.dp),
@@ -892,52 +873,9 @@ private fun ClientRow(
         }
 
         // ── Inline label editor (shown when editing) ──────────────────────────
-        if (editing) {
+        if (labelEditor.editing) {
             Spacer(Modifier.height(6.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                SettingsTextField(
-                    value = editText,
-                    onValueChange = { editText = it },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    placeholder = {
-                        Text(
-                            stringResource(Res.string.client_label_placeholder),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                )
-                // Confirm
-                IconButton(
-                    onClick = {
-                        onSetLabel(editText)
-                        editing = false
-                    },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = stringResource(Res.string.client_label_save),
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                // Cancel
-                IconButton(
-                    onClick = { editing = false; editText = label },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.client_label_cancel),
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            ClientLabelEditorRow(labelEditor, label, onSetLabel)
         }
     }
 }
