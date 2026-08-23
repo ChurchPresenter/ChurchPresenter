@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.no_video_selected
-import churchpresenter.composeapp.generated.resources.video_files_filter
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.no_video_selected
+import org.churchpresenter.resources.generated.resources.video_files_filter
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.jetbrains.compose.resources.stringResource

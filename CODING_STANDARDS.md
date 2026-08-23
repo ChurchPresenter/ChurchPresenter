@@ -36,8 +36,8 @@ fun myFunction(
 
 ### ✅ DO: Use string resources for user-facing text
 ```kotlin
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_tab
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.bible_tab
 
 Text(stringResource(Res.string.bible_tab))
 ```

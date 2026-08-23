@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.settings.SettingsManager
@@ -10,7 +10,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -18,102 +17,20 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
+import org.churchpresenter.core.models.statistics.ActivityPoint
+import org.churchpresenter.core.models.statistics.DisplayStatistics
+import org.churchpresenter.core.models.statistics.PlayEventLog
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongKey
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.SongSummary
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VerseKey
+import org.churchpresenter.core.models.statistics.VersePlayEvent
+import org.churchpresenter.core.models.statistics.VerseSummary
 
 
-// ── Aggregate statistics (existing, all-time) ─────────────────────────────────
-
-@Serializable
-data class DisplayStatistics(
-    val songDisplayCounts: Map<String, SongDisplayEntry> = emptyMap(),
-    val verseDisplayCounts: Map<String, VerseDisplayEntry> = emptyMap()
-)
-
-@Serializable
-data class SongDisplayEntry(
-    val songNumber: Int = 0,
-    val title: String = "",
-    val songbook: String = "",
-    val count: Int = 0
-)
-
-@Serializable
-data class VerseDisplayEntry(
-    val bibleName: String = "",
-    val bookName: String = "",
-    val chapter: Int = 0,
-    val verseNumber: Int = 0,
-    val count: Int = 0
-)
-
-// ── Timestamped event log ─────────────────────────────────────────────────────
-
-@Serializable
-data class SongPlayEvent(
-    val songNumber: Int = 0,
-    val title: String = "",
-    val songbook: String = "",
-    val author: String = "",
-    val timestamp: Long = 0L
-)
-
-@Serializable
-data class VersePlayEvent(
-    val bibleName: String = "",
-    val bookName: String = "",
-    val chapter: Int = 0,
-    val verseNumber: Int = 0,
-    val timestamp: Long = 0L
-)
-
-@Serializable
-data class PlayEventLog(
-    val songEvents: List<SongPlayEvent> = emptyList(),
-    val verseEvents: List<VersePlayEvent> = emptyList()
-)
-
-// ── Computed summaries (in-memory only) ───────────────────────────────────────
-
-data class SongSummary(
-    val songNumber: Int,
-    val title: String,
-    val songbook: String,
-    val author: String,
-    val ccliNumber: String,
-    val count: Int,
-    val firstUsed: Long,
-    val lastUsed: Long
-)
-
-data class VerseSummary(
-    val bibleName: String,
-    val bookName: String,
-    val chapter: Int,
-    val verseNumber: Int,
-    val count: Int,
-    val firstUsed: Long,
-    val lastUsed: Long
-)
-
-data class ActivityPoint(
-    val label: String,
-    val songCount: Int,
-    val verseCount: Int
-)
-
-// ── Item identity ─────────────────────────────────────────────────────────────
-
-/**
- * What identifies one song across both stores.
- *
- * The aggregate map is keyed by the catalog `songId`, which is not a field of [SongDisplayEntry] and
- * has no counterpart in the event log, so a song is matched on these three fields instead — the same
- * grouping [getAllSongsInRange] uses. A title edited between plays therefore splits into two rows,
- * exactly as it already does in the CCLI report.
- */
-data class SongKey(val songbook: String, val songNumber: Int, val title: String)
-
-/** What identifies one verse. Both stores agree on this composite. */
-data class VerseKey(val bibleName: String, val bookName: String, val chapter: Int, val verseNumber: Int)
+// ── Item identity, derived from either store ──────────────────────────────────
 
 internal fun SongPlayEvent.key() = SongKey(songbook, songNumber, title)
 internal fun SongDisplayEntry.key() = SongKey(songbook, songNumber, title)
@@ -183,6 +100,16 @@ internal fun csvQuote(s: String): String = "\"${s.replace("\"", "\"\"")}\""
 
 // ── Manager ───────────────────────────────────────────────────────────────────
 
+/**
+ * The two stores behind the statistics window, and every question asked of them.
+ *
+ * Twenty functions against a threshold of eleven, suppressed at the declaration rather than
+ * baselined: they are one pair of files read five ways — load and save, record, query, clear,
+ * export — and each has a production caller. The type cannot usefully be split because all of them
+ * share [lock]; handing the queries or the export their own object would either duplicate the lock
+ * or leave a reader running against a tally another thread is mid-write on.
+ */
+@Suppress("TooManyFunctions")
 class StatisticsManager {
     private val lock = Any()
     private val userHome = System.getProperty("user.home")
@@ -483,7 +410,18 @@ class StatisticsManager {
         sb.appendLine("Title,Author,Songbook,Song Number,CCLI Number,Times Used,First Used,Last Used")
         for (song in songs) {
             fun esc(s: String) = csvQuote(s)
-            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
+            sb.appendLine(
+                listOf(
+                    esc(song.title),
+                    esc(song.author),
+                    esc(song.songbook),
+                    song.songNumber.toString(),
+                    esc(song.ccliNumber),
+                    song.count.toString(),
+                    dateFmt.format(Date(song.firstUsed)),
+                    dateFmt.format(Date(song.lastUsed)),
+                ).joinToString(","),
+            )
         }
         file.writeText(sb.toString())
         true

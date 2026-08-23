@@ -1,29 +1,13 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import org.churchpresenter.core.models.statistics.DateRange
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
 
 /** The rolling windows offered alongside the calendar years, in months. */
-internal val ROLLING_MONTHS = listOf(3, 6, 12)
-
-/**
- * A reporting period for the statistics views. Resolved against a caller-supplied `today` rather
- * than the clock, so screenshots and tests are deterministic.
- */
-sealed interface StatisticsPeriod {
-    /** Everything ever recorded. */
-    data object AllTime : StatisticsPeriod
-
-    /** A rolling window ending today, e.g. the last 3 months. */
-    data class LastMonths(val months: Int) : StatisticsPeriod
-
-    /** A single calendar year, January 1 to December 31. */
-    data class Year(val year: Int) : StatisticsPeriod
-}
-
-/** An inclusive epoch-millis range, as the [StatisticsManager] range queries expect. */
-data class DateRange(val fromMs: Long, val toMs: Long)
+val ROLLING_MONTHS = listOf(3, 6, 12)
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59
@@ -52,7 +36,7 @@ internal fun LocalDate.endOfDayMs(): Long =
  * @param earliestMs the oldest recorded event, from [StatisticsManager.getEarliestEventTime]; the
  *   lower bound of [StatisticsPeriod.AllTime]
  */
-internal fun StatisticsPeriod.resolveDates(today: LocalDate, earliestMs: Long?): Pair<LocalDate, LocalDate> =
+fun StatisticsPeriod.resolveDates(today: LocalDate, earliestMs: Long?): Pair<LocalDate, LocalDate> =
     when (this) {
         is StatisticsPeriod.AllTime -> {
             val from = earliestMs
@@ -76,7 +60,7 @@ internal fun StatisticsPeriod.resolve(today: LocalDate, earliestMs: Long?): Date
  * The calendar years that can hold data, newest first: from the year of the oldest event through
  * the current year. An empty log yields just the current year.
  */
-internal fun availableYears(today: LocalDate, earliestMs: Long?): List<Int> {
+fun availableYears(today: LocalDate, earliestMs: Long?): List<Int> {
     val firstYear = earliestMs
         ?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).year }
         ?.coerceAtMost(today.year)

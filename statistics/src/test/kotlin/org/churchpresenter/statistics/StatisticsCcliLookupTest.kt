@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.statistics
 
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
@@ -10,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.statistics.SongPlayEvent
 
 /**
  * Where the CCLI number on the licence report comes from.

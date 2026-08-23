@@ -7,6 +7,10 @@ import org.churchpresenter.core.models.songs.SongCache
 import org.churchpresenter.core.models.songs.SongItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.core.models.statistics.SongDisplayEntry
+import org.churchpresenter.core.models.statistics.SongPlayEvent
+import org.churchpresenter.core.models.statistics.VerseDisplayEntry
+import org.churchpresenter.core.models.statistics.VersePlayEvent
 
 /**
  * Default values for the small `data class`es in this package that every call site so far has

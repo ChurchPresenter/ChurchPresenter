@@ -96,6 +96,12 @@ class ModelInvariantsTest {
                 val arg = type.arguments.firstOrNull()?.type ?: return emptyList<Any>()
                 listOf(valueOfType(arg, name, n, seed))
             }
+            // A one-entry map, so a swapped key/value type is still visible in the read-back.
+            cls == Map::class -> {
+                val keyType = type.arguments.getOrNull(0)?.type ?: return emptyMap<Any, Any>()
+                val valueType = type.arguments.getOrNull(1)?.type ?: return emptyMap<Any, Any>()
+                mapOf(valueOfType(keyType, name, n, seed) to valueOfType(valueType, name, n, seed))
+            }
             cls.java.isEnum -> {
                 val constants = cls.java.enumConstants
                 constants[((n + seed) % constants.size).toInt()]

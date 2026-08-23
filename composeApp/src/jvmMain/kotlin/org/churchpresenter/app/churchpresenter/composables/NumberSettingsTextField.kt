@@ -36,11 +36,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.arrow_down
-import churchpresenter.composeapp.generated.resources.arrow_up
-import churchpresenter.composeapp.generated.resources.decrement
-import churchpresenter.composeapp.generated.resources.increment
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.arrow_down
+import org.churchpresenter.resources.generated.resources.arrow_up
+import org.churchpresenter.resources.generated.resources.decrement
+import org.churchpresenter.resources.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

@@ -37,21 +37,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.about_copyright
-import churchpresenter.composeapp.generated.resources.about_title
-import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.action_ok
-import churchpresenter.composeapp.generated.resources.converter_window_title
-import churchpresenter.composeapp.generated.resources.open_song_library
-import churchpresenter.composeapp.generated.resources.diagnostic_info_save_failed
-import churchpresenter.composeapp.generated.resources.diagnostic_info_saved
-import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
-import churchpresenter.composeapp.generated.resources.open_crash_logs
-import churchpresenter.composeapp.generated.resources.report_bug
-import churchpresenter.composeapp.generated.resources.save_diagnostic_info
-import churchpresenter.composeapp.generated.resources.style_editor_window_title
-import churchpresenter.composeapp.generated.resources.submit_feature_request
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.about_copyright
+import org.churchpresenter.resources.generated.resources.about_title
+import org.churchpresenter.resources.generated.resources.app_name
+import org.churchpresenter.resources.generated.resources.action_ok
+import org.churchpresenter.resources.generated.resources.converter_window_title
+import org.churchpresenter.resources.generated.resources.open_song_library
+import org.churchpresenter.resources.generated.resources.diagnostic_info_save_failed
+import org.churchpresenter.resources.generated.resources.diagnostic_info_saved
+import org.churchpresenter.resources.generated.resources.lottie_gen_window_title
+import org.churchpresenter.resources.generated.resources.open_crash_logs
+import org.churchpresenter.resources.generated.resources.report_bug
+import org.churchpresenter.resources.generated.resources.save_diagnostic_info
+import org.churchpresenter.resources.generated.resources.style_editor_window_title
+import org.churchpresenter.resources.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -61,7 +61,7 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.ic_app_icon
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings

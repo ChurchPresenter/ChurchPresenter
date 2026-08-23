@@ -26,10 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.instance_link_command_failed
-import churchpresenter.composeapp.generated.resources.instance_link_command_no_ack
-import churchpresenter.composeapp.generated.resources.remote_activity_dismiss
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.instance_link_command_failed
+import org.churchpresenter.resources.generated.resources.instance_link_command_no_ack
+import org.churchpresenter.resources.generated.resources.remote_activity_dismiss
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.jetbrains.compose.resources.stringResource

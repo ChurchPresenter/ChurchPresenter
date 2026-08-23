@@ -13,11 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.instance_link_status_connected
-import churchpresenter.composeapp.generated.resources.instance_link_status_connecting
-import churchpresenter.composeapp.generated.resources.instance_link_status_disconnected
-import churchpresenter.composeapp.generated.resources.instance_link_status_error
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.instance_link_status_connected
+import org.churchpresenter.resources.generated.resources.instance_link_status_connecting
+import org.churchpresenter.resources.generated.resources.instance_link_status_disconnected
+import org.churchpresenter.resources.generated.resources.instance_link_status_error
 import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource

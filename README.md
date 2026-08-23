@@ -55,6 +55,16 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > Q&A page, the OBS Browser Source overlay, the presentation remote and Instance Link. What a remote
 > request then *does* to the app stays in `:composeApp`, under `remote/`.
 > `./gradlew :companion-server:test`.
+
+> **[`statistics/`](./statistics)** — what was sung and read, counted: the all-time tallies, the
+> timestamped play log behind them, and the CSV/Excel exports a CCLI licence report is filed
+> from. The window that draws it stays in the app; this is the numbers.
+> `./gradlew :statistics:test`.
+>
+> **[`resources/`](./resources)** — every asset the app draws or reads: the icons, the interface
+> strings in all 35 languages, the fonts, and the bundled sample songs, bibles, backgrounds and
+> licences. One `Res` accessor for the lot, so a call site reads `Res.drawable.ic_close` and
+> `Res.string.save` just as it always has. Assets only — no Kotlin, no suite.
 >
 > **[`song-chords/`](./song-chords)** — the grammar songs are written in: what counts as a chord,
 > what counts as a section heading, transposition, and turning a pasted chord sheet into the inline

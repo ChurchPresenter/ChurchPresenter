@@ -152,6 +152,11 @@ jobs:
             songchords:
               - *shared
               - 'song-chords/**'          # depends on nothing else: the grammar is pure text
+            statistics:
+              - *shared
+              - 'statistics/**'
+              - 'settings/**'             # implementation(projects.settings)
+              - 'core-models/**'          # implementation(projects.coreModels), and via :settings
             bible:
               - *shared
               - 'bible/**'
@@ -204,6 +209,7 @@ jobs:
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
+          :statistics:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -284,7 +290,7 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
-      # The 75% line-coverage floor, off the execution data the tests above just produced. Its
+      # The 70% floor on all six counters, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
       # regression is reported alongside test failures rather than hidden behind them.
@@ -448,6 +454,14 @@ jobs:
         if: always() && steps.modules.outputs.songchords == 'true'
         run: ./gradlew :song-chords:jacocoTestCoverageVerification -x test
 
+      - name: Statistics tests
+        if: always() && steps.modules.outputs.statistics == 'true'
+        run: ./gradlew :statistics:test
+
+      - name: Statistics coverage floor
+        if: always() && steps.modules.outputs.statistics == 'true'
+        run: ./gradlew :statistics:jacocoTestCoverageVerification -x test
+
       - name: Bible tests
         if: always() && steps.modules.outputs.bible == 'true'
         run: ./gradlew :bible:test
@@ -504,6 +518,7 @@ jobs:
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
+            statistics/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
@@ -677,6 +692,8 @@ jobs:
             bible-formats/build/test-results/
             song-chords/build/reports/tests/
             song-chords/build/test-results/
+            statistics/build/reports/tests/
+            statistics/build/test-results/
             bible/build/reports/tests/
             bible/build/test-results/
             dictionary/build/reports/tests/

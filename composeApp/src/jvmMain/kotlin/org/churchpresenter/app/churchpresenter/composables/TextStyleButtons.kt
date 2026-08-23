@@ -25,15 +25,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.text_style_bold
-import churchpresenter.composeapp.generated.resources.text_style_italic
-import churchpresenter.composeapp.generated.resources.text_style_shadow
-import churchpresenter.composeapp.generated.resources.text_style_underline
-import churchpresenter.composeapp.generated.resources.tooltip_bold
-import churchpresenter.composeapp.generated.resources.tooltip_italic
-import churchpresenter.composeapp.generated.resources.tooltip_shadow
-import churchpresenter.composeapp.generated.resources.tooltip_underline
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.text_style_bold
+import org.churchpresenter.resources.generated.resources.text_style_italic
+import org.churchpresenter.resources.generated.resources.text_style_shadow
+import org.churchpresenter.resources.generated.resources.text_style_underline
+import org.churchpresenter.resources.generated.resources.tooltip_bold
+import org.churchpresenter.resources.generated.resources.tooltip_italic
+import org.churchpresenter.resources.generated.resources.tooltip_shadow
+import org.churchpresenter.resources.generated.resources.tooltip_underline
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.clickable
 

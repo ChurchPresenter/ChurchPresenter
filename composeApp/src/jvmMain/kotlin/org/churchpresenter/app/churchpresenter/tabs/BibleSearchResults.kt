@@ -28,8 +28,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.found_results
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.found_results
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.utils.highlightRanges
 import org.jetbrains.compose.resources.stringResource

@@ -93,3 +93,13 @@ include(":dictionary")
 // TLS and the tunnel, plus the client a follower instance consumes it with. What a remote request
 // then *does* to the app stays in :composeApp, under `remote/`.
 include(":companion-server")
+
+// Every asset the app draws or reads, in one place: the icons, the interface strings in all 35
+// languages, the fonts and the bundled files. Assets and the one `Res` accessor generated from
+// them, no Kotlin of its own — so nothing has to duplicate a resource to use it.
+include(":resources")
+
+// Everything the app has ever put on the screen, counted: the song and verse tallies, the
+// timestamped play log behind them, the periods a report covers and the CSV/Excel export CCLI
+// licence reporting needs. The window that draws it stays in :composeApp.
+include(":statistics")
