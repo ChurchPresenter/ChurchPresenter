@@ -233,4 +233,34 @@ class InstanceLinkMessageTest {
 
         assertEquals("other", c.classifyConnectFailure(IllegalStateException("something else")))
     }
+
+    @Test
+    fun `the peer address is taken out of a reported failure, and the reason kept`() {
+        val c = clientWith(Recorder())
+
+        // Ktor writes the whole target into the message. The host is what identifies somebody's
+        // network; the rest is the only thing that says why an "other" failure happened.
+        val redacted = c.redactHost(
+            "Connect timeout has expired [url=ws://192.168.8.101:8765/ws, connect_timeout=5000 ms]",
+            "192.168.8.101"
+        )
+
+        assertEquals(
+            "Connect timeout has expired [url=ws://<peer>:8765/ws, connect_timeout=5000 ms]",
+            redacted
+        )
+    }
+
+    @Test
+    fun `redaction handles a hostname, a missing message and an unset host`() {
+        val c = clientWith(Recorder())
+
+        // A hostname is replaced the same way an address is — it is the literal string Ktor built
+        // the URL from, whatever shape it has.
+        assertEquals("no route to <peer>", c.redactHost("no route to primary.local", "primary.local"))
+        // An exception with no message must not become the string "null" in the report.
+        assertEquals("", c.redactHost(null, "192.168.8.101"))
+        // An empty host would otherwise match everywhere and shred the sentence.
+        assertEquals("Connection refused", c.redactHost("Connection refused", ""))
+    }
 }
