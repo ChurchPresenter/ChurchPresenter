@@ -2,11 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.companionserver.LottieRenderCache
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
 import org.churchpresenter.atem.FakeAtemSwitcher
@@ -76,7 +77,9 @@ class LowerThirdAtemUploadTest {
             // front, and the tab hits this same cache entry rather than rendering again.
             val settings = AtemSettings(host = "127.0.0.1", renderWidth = RENDER_W, renderHeight = RENDER_H)
             val variant = LottieRenderCache.atemVariant(DETAILED_LOTTIE, settings, clip = false)
-            val cached = runBlocking { LottieRenderCache.prepare(DETAILED_LOTTIE, variant).await() }
+            val cached = runBlocking {
+                LottieRenderCache.prepare(DETAILED_LOTTIE, variant, SkiaLottieFrameRenderer).await()
+            }
             payloadBytes = LottieRenderCache.Reader(cached).use {
                 it.nextAtemFrame(RENDER_W, RENDER_H).data.size
             }

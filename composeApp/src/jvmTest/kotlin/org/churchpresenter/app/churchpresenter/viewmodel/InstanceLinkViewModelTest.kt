@@ -13,11 +13,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkClient
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.LiveStateDto
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.companionserver.InstanceLinkClient
+import org.churchpresenter.companionserver.InstanceLinkStatus
+import org.churchpresenter.companionserver.LiveStateDto
+import org.churchpresenter.companionserver.ScheduleItemDto
+import org.churchpresenter.companionserver.SongCatalogResponse
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

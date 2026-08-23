@@ -185,7 +185,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.companionserver.TunnelStatus
 
 private const val MILLIS_PER_SECOND = 1000
 private const val MAX_AUTO_SCROLL_SECONDS = 30

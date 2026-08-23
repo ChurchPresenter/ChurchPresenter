@@ -329,6 +329,10 @@ kotlin {
             implementation(projects.bible)
             // The bundled study data: the Strong's dictionary and the interlinear index over it.
             implementation(projects.dictionary)
+            // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
+            // tunnel and the instance-link client. What a remote request then does to the app is
+            // `remote/` here.
+            implementation(projects.companionServer)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             implementation(projects.songChords)
@@ -468,6 +472,10 @@ dependencies {
     // was captured against, and the app's own ATEM tests (bridge, upload routes, lower third) borrow
     // it from there rather than keeping a second copy.
     add("jvmTestImplementation", testFixtures(projects.atem))
+    // CompanionServerFixture: starts a server on a free port and hands back a client for it. The
+    // app's remote-command and instance-link suites drive a real server, so they borrow the fixture
+    // from the module that owns the wire format rather than standing one up twice.
+    add("jvmTestImplementation", testFixtures(projects.companionServer))
 }
 
 compose.desktop {

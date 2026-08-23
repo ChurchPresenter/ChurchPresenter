@@ -13,9 +13,9 @@ import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ServerSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import java.io.File

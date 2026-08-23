@@ -88,3 +88,8 @@ include(":bible")
 // interlinear index that says where each number appears. Plain files on the classpath and the
 // lookups over them — depended on by :composeApp, which draws the tab and serves the REST routes.
 include(":dictionary")
+
+// The HTTP/WebSocket surface the desktop exposes: the wire format, the routes, the pages it serves,
+// TLS and the tunnel, plus the client a follower instance consumes it with. What a remote request
+// then *does* to the app stays in :composeApp, under `remote/`.
+include(":companion-server")

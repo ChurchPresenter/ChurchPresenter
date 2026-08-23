@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.songchords.isChorusHeader
+import org.churchpresenter.songchords.isHeaderLine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

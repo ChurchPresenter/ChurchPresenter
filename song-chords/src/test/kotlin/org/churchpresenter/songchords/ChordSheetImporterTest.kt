@@ -30,6 +30,23 @@ class ChordSheetImporterTest {
         assertTrue(ChordSheetImporter.isChordLine("Am"))
     }
 
+    // ── Bracketing a chord line on its own ──────────────────────────────────────
+
+    @Test
+    fun `every token on a chord line becomes its own marker`() {
+        assertEquals("[Bb] [Bb/D] [Eb]", ChordSheetImporter.bracket("Bb Bb/D Eb"))
+    }
+
+    @Test
+    fun `the spacing a chord line was written with is not kept`() {
+        assertEquals("[G] [C] [D]", ChordSheetImporter.bracket("   G      C          D   "))
+    }
+
+    @Test
+    fun `a line with nothing on it brackets to nothing`() {
+        assertEquals("", ChordSheetImporter.bracket("     "))
+    }
+
     // ── Merging a chord line into the words under it ────────────────────────────
 
     @Test

@@ -3,9 +3,9 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import kotlinx.coroutines.Dispatchers
 
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDto
-import org.churchpresenter.app.churchpresenter.server.SongbookEntry
+import org.churchpresenter.companionserver.SongCatalogResponse
+import org.churchpresenter.companionserver.SongDto
+import org.churchpresenter.companionserver.SongbookEntry
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.Test
