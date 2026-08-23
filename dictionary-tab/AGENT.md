@@ -56,37 +56,48 @@ sibling of `:dictionary`'s own `…dictionary`, and **not** `org.churchpresenter
 
 ## Gates
 
-Four counters run on the root build's default 85% and clear it. **BRANCH and COMPLEXITY carry
-lowered floors, because they cannot reach 85% here** — the same Compose `$changed`
-recomposition-skip codegen that caps `:ui-components`:
+**All six counters clear the root build's 0.85 default. This module has no `coverageFloors`
+override and must not gain one.** Measured 2026-08-23:
 
-| counter | measured | floor |
-|---|---|---|
-| INSTRUCTION | 0.928 | 0.85 |
-| LINE | 0.940 | 0.85 |
-| CLASS | 0.938 | 0.85 |
-| METHOD | 0.919 | 0.85 |
-| BRANCH | 0.824 | **0.81** |
-| COMPLEXITY | 0.793 | **0.78** |
+| counter | measured |
+|---|---|
+| INSTRUCTION | 0.948 |
+| LINE | 0.953 |
+| CLASS | 0.933 |
+| METHOD | 0.918 |
+| BRANCH | 0.886 |
+| COMPLEXITY | 0.858 |
 
-Measured 2026-08-23. Each floor sits about a point under what the module measures, not four: a floor
-well below reality stops being a gate.
+BRANCH and COMPLEXITY started at 0.824 and 0.793 — below the default, and the same Compose
+`$changed` codegen ceiling `:ui-components` runs into. Two things lifted them, and both are worth
+repeating in the next tab that moves out:
 
-**There are no `coverageExcludes` and there must never be any.** 825 of the 971 missed instructions
-are in `DictionaryTabKt` — the tab file, where Compose's own codegen and the states no test drives
-sit together. That is the honest number; do not hide it behind an exclude.
+1. **Dead defaults on private composables were deleted.** `DictionaryDetailPane` had twenty
+   parameters carrying a default value that `DictionaryTab` — its only caller — always passed. Each
+   one is a branch that nothing can reach and that JaCoCo counts against the module for ever.
+   Removing them is dead-code removal, not a coverage trick: **check `mb=1` on a defaulted parameter
+   of a `private` composable before assuming its branches are unreachable.**
+2. **The states no test drove were driven** — the tab composed with nothing but a view model
+   (`DictionaryTabDefaultsTest`), the presenter at preview and stage-monitor sizes rather than only
+   1920x1080, the chapter and verse filters that appear only once the one above them is narrowed,
+   and an entry with no KJV usage.
+
+**There are no `coverageExcludes` and there must never be any.** Most of what is still missed is in
+`DictionaryTabKt`, where Compose codegen and the states no test drives sit together. That is the
+honest number; do not hide it behind an exclude.
 
 **The detekt baseline holds five entries and nothing else** — three `LongMethod` and two
-`TooManyFunctions`, all of them carried across verbatim from `:composeApp`'s baseline when the files
-moved. Nothing was newly suppressed: the `MaxLineLength` findings the move surfaced were fixed at
-source. Never add a sixth.
+`TooManyFunctions`, all carried across verbatim from `:composeApp`'s baseline when the files moved.
+Nothing was newly suppressed: the `MaxLineLength` findings the move surfaced were fixed at source.
+Two of the five had to be re-keyed when the dead defaults went, because a detekt ID embeds the
+signature it was written against. Never add a sixth.
 
 ## Commands
 
 ```bash
-./gradlew :dictionary-tab:test                   # 21 test classes, 292 tests
+./gradlew :dictionary-tab:test                  # 17 test classes, 222 tests
 ./gradlew :dictionary-tab:detekt                 # six baselined entries, nothing else
 ./gradlew :dictionary-tab:jacocoTestCoverageVerification
-./gradlew :dictionary-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'   # 31 committed images
+./gradlew :dictionary-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'   # 19 committed images
 ./gradlew :dictionary-tab:recordRoborazziJvm --tests '*ScreenshotTest*'   # re-record after a visual change
 ```

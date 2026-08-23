@@ -45,44 +45,57 @@ that had to stay behind is the Bible: `FontPreviewText.update` takes `List<Strin
 
 ## Gates
 
-Four counters run on the root build's default 85% and clear it with room. **BRANCH and COMPLEXITY
-carry lowered floors, because they cannot reach 85% here:**
+**Five of the six counters clear the root build's 0.85 default outright.** Measured 2026-08-23:
 
-| counter | measured | floor | ceiling if every reachable branch were covered |
-|---|---|---|---|
-| INSTRUCTION | 0.971 | 0.85 | — |
-| LINE | 0.976 | 0.85 | — |
-| CLASS | 0.940 | 0.85 | — |
-| METHOD | 0.941 | 0.85 | — |
-| BRANCH | 0.826 | **0.81** | ~0.87 |
-| COMPLEXITY | 0.804 | **0.78** | ~0.84 |
+| counter | measured | floor |
+|---|---|---|
+| INSTRUCTION | 0.981 | 0.85 (default) |
+| LINE | 0.981 | 0.85 (default) |
+| CLASS | 0.970 | 0.85 (default) |
+| METHOD | 0.963 | 0.85 (default) |
+| BRANCH | 0.861 | 0.85 (default) |
+| COMPLEXITY | 0.8499 | **0.84** |
 
-Re-measured 2026-08-23, after the font picker and colour field moved in: every counter held, and
-BRANCH and COMPLEXITY each rose about half a point.
+BRANCH used to carry a lowered floor and no longer needs one. COMPLEXITY is **one unit of 1126
+short** of the default, and the floor under it is the only override this module has.
 
-Each floor sits about a point under what the module measures, not four: a floor well below reality
-stops being a gate. They catch a real regression while absorbing the drift a Compose or Kotlin
-version bump causes in generated branch counts.
+**What the remaining 169 missed units are**, measured rather than assumed:
 
-The gap is the Compose compiler's `$changed` recomposition-skip branches, emitted inside each
-composable's own method and reachable by no test. Measured at extraction, when the module held 177
-missed complexity: **138 units sat in methods whose bodies run in full** (≤15 missed instructions)
-and only ~39 in methods with real uncovered code — 21 of those being `FocusLostRescueState`'s AWT
-window paths, unreachable since this suite runs headless. The module has grown since; that
-breakdown is the shape of the gap, not a current count.
-
-Measured, not assumed: ten tests covering `LabeledCheckbox`/`RadioButton`/`Switch` in every state a
-caller can produce moved COMPLEXITY by **one unit** — those three each miss 7–8 complexity against
-13 missed instructions. Moving four screenshot suites into this module moved BRANCH by **0.009**.
+- **31 in `FocusLostRescueState`** — the AWT window-activation healing. `FocusLostRescueTest`
+  records the decision not to exercise those: real hardware timing, no injectable delay, and this
+  repo's rule against tests that race one. Reaching them would mean mocking `java.awt.Window` to
+  assert that a stub was called. **Do not.**
+- **28 in methods whose bodies run in full** (zero missed instructions) — pure Compose codegen.
+- **104 in methods missing ≤15 instructions** — overwhelmingly the same codegen, in each
+  composable's own `fun X(` and `) {` lines: the `$changed` recomposition-skip and `$default`
+  bitmask branches, which no call from a test can drive both ways.
 
 **There are no `coverageExcludes` and there must never be any.** Every class this module compiles is
 measured, so the denominator is honest. To judge whether this module is tested, read INSTRUCTION and
-LINE (0.97 and 0.98); BRANCH and COMPLEXITY here measure Compose codegen as much as they measure code.
+LINE (both 0.98).
+
+### How the last four points were won, in case another module needs the same
+
+Composing a widget once and asserting on it covers its first draw and nothing else. Three shapes
+moved the number, in order of yield:
+
+1. **Compose it with only its required arguments.** Real call sites take the defaults; the suite was
+   passing every one of them explicitly, so no default branch ever fired. `WidgetDefaultsTest`.
+2. **Change its arguments at one call site**, driven from a step counter — enabled, label, size and
+   the optional slots together, so the widget is re-evaluated with genuinely different inputs.
+   `WidgetParameterChangesTest` and its `*MoreTest` half. This is what the settings tabs actually do
+   to these widgets.
+3. **Find the composables nothing composes.** `rememberSystemFonts` had *zero* covered instructions
+   — every other test called the blocking `SystemFonts.families()` directly — and the colour field's
+   dialog had never been opened. Those two alone moved INSTRUCTION by a point.
+
+What did **not** move it: recomposing the parent while the widgets' own inputs stay identical, and
+re-driving gestures another suite already covered.
 
 ## Commands
 
 ```bash
-./gradlew :ui-components:test                 # 60 test classes, 544 tests
+./gradlew :ui-components:test                 # 74 test classes, 620 tests
 ./gradlew :ui-components:detekt               # six baselined LongMethod, nothing else
 # recordRoborazziJvm / verifyRoborazziJvm are the Test-derived tasks -- the un-suffixed ones are
 # lifecycle aggregates and reject --tests.

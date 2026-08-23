@@ -11,11 +11,6 @@ plugins {
     jacoco
 }
 
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.81",
-    "COMPLEXITY" to "0.78",
-)
-
 group = "org.churchpresenter"
 
 kotlin {

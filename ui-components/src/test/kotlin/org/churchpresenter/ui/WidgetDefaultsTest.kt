@@ -1,6 +1,8 @@
 package org.churchpresenter.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,7 +75,7 @@ class WidgetDefaultsTest {
     @Test
     fun `an action button at its default size and colours still clicks`() {
         var clicks = 0
-        shown({ ActionIconButton(onClick = { clicks++ }, tooltipText = "Add", icon = null, painter = null) }) {
+        shown({ ActionIconButton(onClick = { clicks++ }, tooltipText = "Add") }) {
             onNode(hasClickAction()).performClick()
         }
         assertEquals(1, clicks, "a button with neither an icon nor a painter is still a button")
@@ -86,6 +88,21 @@ class WidgetDefaultsTest {
             onNodeWithText("x").performClick()
         }
         assertEquals(1, clicks)
+    }
+
+    @Test
+    fun `an action button given only an icon keeps every other default`() {
+        var clicks = 0
+        shown({
+            ActionIconButton(
+                onClick = { clicks++ },
+                tooltipText = "Upload",
+                icon = Icons.Default.Tv,
+            )
+        }) {
+            onNode(hasClickAction()).performClick()
+        }
+        assertEquals(1, clicks, "the primary container, 34dp button and 16dp icon are the defaults")
     }
 
     // ── Fields ──────────────────────────────────────────────────────────────────
