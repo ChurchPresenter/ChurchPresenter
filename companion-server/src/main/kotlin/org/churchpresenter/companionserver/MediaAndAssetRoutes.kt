@@ -442,8 +442,7 @@ private fun Route.pictureSelectAndUploadRoutes(
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_PICTURES}/select") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     try {
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
                         // Resolve index by filename when provided — immune to sort-order mismatch
@@ -473,8 +472,7 @@ private fun Route.pictureSelectAndUploadRoutes(
                  * serve it, and returns { "ok": true, "folder-id": "…", "image-index": 0 }.
                  */
                 post("${Constants.ENDPOINT_PICTURES}/upload") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post

@@ -1620,11 +1620,22 @@ class CompanionServerRemoteControlTest {
         assertNotNull(runBlocking { withTimeoutOrNull(2_000) { cleared.await() } })
     }
 
-    // ── What the operator's toast says an instant action did ────────────────────
+    // ── What the operator is told a content action wants to do ──────────────────
+    //
+    // These used to read the toast raised *after* the action ran. Content actions now ask first, so
+    // the same description arrives on the approval request instead — same fields, same words, one
+    // step earlier. What they pin is unchanged and is the reason the wording matters: the operator
+    // decides from this text, so a prompt naming the wrong folder or the wrong verse is worse than
+    // no prompt at all.
 
-    private fun instantActionFrom(vararg frames: String): CompanionServer.RemoteInstantAction {
-        val seen = CompletableDeferred<CompanionServer.RemoteInstantAction>()
-        collecting(server.onInstantAction) { seen.complete(it) }
+    /** Drives [frames], approves whatever they ask for, and returns what the operator was shown. */
+    private fun instantActionFrom(vararg frames: String): PendingInstantRequest {
+        val seen = CompletableDeferred<PendingInstantRequest>()
+        collecting(server.onInstantApproval) { pending ->
+            seen.complete(pending)
+            // Approve, or the handler stays suspended and sendOverWebSocket never returns.
+            pending.decision.complete(true)
+        }
         sendOverWebSocket(*frames)
         return assertNotNull(runBlocking { withTimeoutOrNull(2_000) { seen.await() } })
     }

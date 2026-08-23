@@ -595,6 +595,16 @@ class CompanionServer(
      * working over HTTP while its socket was refused. Every route reads `X-Device-Id` already — it
      * was only ever used to label the toast.
      */
+    /**
+     * The whole door check for a REST request: the shared key, then the device.
+     *
+     * One call rather than two at ~15 call sites, so a route cannot accidentally ask half the
+     * question — which is exactly how the blocked list came to be enforced on the WebSocket and
+     * nowhere else.
+     */
+    internal suspend fun allowsRequest(call: ApplicationCall): Boolean =
+        checkApiKey(call) && checkClientAllowed(call)
+
     internal suspend fun checkClientAllowed(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
         if (clientId.isEmpty() || !isClientBlocked(clientId)) return true

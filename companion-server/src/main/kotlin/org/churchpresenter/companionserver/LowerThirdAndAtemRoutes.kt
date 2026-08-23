@@ -95,20 +95,17 @@ private fun Route.lowerThirdRoutes(
                 }
 
                 post("/api/lowerthirds/{name}/run") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     server.atem.handleLowerThirdTrigger(call, autoEnd = true)
                 }
 
                 post("/api/lowerthirds/{name}/show") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     server.atem.handleLowerThirdTrigger(call, autoEnd = false)
                 }
 
                 post("/api/lowerthirds/hide") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     LowerThirdSequencer.stop()
                     call.respondText("""{"status":"stopped"}""", ContentType.Application.Json)
                 }
@@ -143,8 +140,7 @@ private fun Route.atemClipRoutes(
     scope: CoroutineScope,
 ) {
                 post("/api/atem/clip/{name}") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     if (!server.checkClientAllowed(call)) return@post
                     val name = call.parameters["name"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"name required"}""")
@@ -214,15 +210,13 @@ private fun Route.atemKeyRoutes(
     server: CompanionServer,
 ) {
                 post("/api/atem/key/on") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     server.atem.handleKeyToggle(call, onAir = true)
                 }
 
                 // POST /api/atem/key/off?me=E&key=M  — turn upstream key M on M/E E off air (standalone)
                 post("/api/atem/key/off") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     server.atem.handleKeyToggle(call, onAir = false)
                 }
 

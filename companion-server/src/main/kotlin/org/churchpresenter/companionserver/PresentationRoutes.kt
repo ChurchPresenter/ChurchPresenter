@@ -163,18 +163,45 @@ private fun Route.presentationSlideRoutes(
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
                 }
 
+    presentationSelectRoutes(server, _presentationCatalogs, _scheduleItemToPresentationId, json, scope)
+
+                /**
+                 * POST /api/presentations/upload
+                 * Body: { "name": "slides.pdf", "data": "data:application/pdf;base64,…" }
+                 *
+                 * Decodes the base64 data-URI, saves the file to
+                 * ~/.churchpresenter/device_presentations/, and emits [server.onPresentationUploaded]
+                 * so the desktop can load it into PresentationViewModel.
+                 *
+                 * Response: { "ok": true, "id": "<hex-hash>", "name": "<fileName>" }
+                 */
+}
+
+/**
+ * Choosing which slide is live, as opposed to reading the slide images.
+ *
+ * Its own function because gating it pushed the combined route group past the complexity
+ * threshold — and because reading a deck and driving it are separate concerns anyway: the GET
+ * next door serves bytes to anyone with the key, this one changes what the congregation sees.
+ */
+private fun Route.presentationSelectRoutes(
+    server: CompanionServer,
+    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
+    _scheduleItemToPresentationId: ConcurrentHashMap<String, String>,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 /**
                  * POST /api/presentations/{id}/select
                  * Body: { "index": 2 }
                  *
-                 * Instantly navigates the live presentation to slide [index] (0-based).
-                 * No approval dialog — fires immediately like select_picture.
+                 * Navigates the live presentation to slide [index] (0-based).
+                 * Asks the operator first, like every other endpoint that puts content on screen.
                  * The {id} is the presentation file hash or schedule item UUID.
                  * Response: {"ok":true}
                  */
                 post("${Constants.ENDPOINT_PRESENTATIONS}/{id}/select") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     val id = call.parameters["id"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
@@ -200,17 +227,6 @@ private fun Route.presentationSlideRoutes(
                     scope.launch { server.onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
-
-                /**
-                 * POST /api/presentations/upload
-                 * Body: { "name": "slides.pdf", "data": "data:application/pdf;base64,…" }
-                 *
-                 * Decodes the base64 data-URI, saves the file to
-                 * ~/.churchpresenter/device_presentations/, and emits [server.onPresentationUploaded]
-                 * so the desktop can load it into PresentationViewModel.
-                 *
-                 * Response: { "ok": true, "id": "<hex-hash>", "name": "<fileName>" }
-                 */
 }
 
 
@@ -225,8 +241,7 @@ private fun Route.presentationUploadRoutes(
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
@@ -257,8 +272,7 @@ private fun Route.mediaUploadRoutes(
                  * Response: { "ok": true, "path": "<abs path>", "name": "<title>", "mediaType": "local|audio" }
                  */
                 post(Constants.ENDPOINT_MEDIA_UPLOAD) {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post

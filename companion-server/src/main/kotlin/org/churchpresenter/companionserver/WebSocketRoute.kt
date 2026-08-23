@@ -220,7 +220,21 @@ private class WsCommandContext(
     val schedule: MutableStateFlow<List<ScheduleItemDto>>,
     val json: Json,
     val scope: CoroutineScope,
-)
+) {
+    /**
+     * Tells the operator that a remote just drove the transport.
+     *
+     * These commands are not gated — halting a volume nudge on a dialog would make a live service
+     * unusable — but they used to be *silent*, which is worse than ungated: eleven of the
+     * twenty-two commands left no trace at all, so a phone stepping through slides or muting the
+     * music was invisible to the person at the desk. A toast is the least that lets them notice.
+     */
+    suspend fun reportTransport(label: String, wsClientId: String) {
+        server.onInstantAction.emit(
+            CompanionServer.RemoteInstantAction("present", label, "", wsClientId),
+        )
+    }
+}
 
 /**
  * The three lookups a command uses to turn an id into something the operator can read.
@@ -254,7 +268,34 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
     sendCommandAck(msg.commandId, ok = false, reason = "unknown_command", json = ctx.json)
 }
 
-/** Picks what is live: a song, a picture, a slide, a verse — or clears the screen. */
+/** What the operator is shown when a command asks to put something on screen. */
+private data class ApprovalPrompt(val actionType: String, val title: String, val detail: String = "")
+
+/**
+ * Asks the operator, and acks the refusal itself so the caller has nothing to do on that path.
+ *
+ * Answering `false` rather than returning early is what keeps the command handlers to two returns
+ * apiece: each arm wraps its work in `if (approvedByOperator(...)) { … }` instead of guarding with
+ * a return, so adding a gated command adds no control flow to the function around it.
+ */
+private suspend fun DefaultWebSocketServerSession.approvedByOperator(
+    msg: WebSocketMessage,
+    ctx: WsCommandContext,
+    prompt: ApprovalPrompt,
+    wsClientId: String,
+): Boolean {
+    if (ctx.server.requestApproval(prompt.actionType, prompt.title, prompt.detail, wsClientId)) return true
+    sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+    return false
+}
+
+/**
+ * Picks what content is live: a song, a picture, or a section within a song.
+ *
+ * Split from [handleScreenCommand] because seven arms that each ask the operator first is more
+ * branching than one function should carry — not an arbitrary line: these three name something in
+ * the library, the four next door act on what is already on the screen.
+ */
 private suspend fun DefaultWebSocketServerSession.handleSelectionCommand(
     msg: WebSocketMessage,
     wsClientId: String,
@@ -263,73 +304,68 @@ private suspend fun DefaultWebSocketServerSession.handleSelectionCommand(
     when (msg.type) {
                     Constants.WS_CMD_SELECT_SONG -> {
                         val song = ctx.json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
-                        if (!ctx.server.requestApproval("present", song.title, "", wsClientId)) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        if (approvedByOperator(msg, ctx, ApprovalPrompt("present", song.title), wsClientId)) {
+                            ctx.scope.launch { ctx.server.onSongSelected.emit(song) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onSongSelected.emit(song) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_PICTURE -> {
                         val req = ctx.json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
                         val folderName = ctx.catalogs.pictureCatalogs[req.folderId]?.folderName ?: req.folderId
                         val imageLabel = req.fileName ?: "Image ${req.index}"
-                        if (!ctx.server.requestApproval("present", folderName, imageLabel, wsClientId)) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        val prompt = ApprovalPrompt("present", folderName, imageLabel)
+                        if (approvedByOperator(msg, ctx, prompt, wsClientId)) {
+                            ctx.scope.launch { ctx.server.onSelectPicture.emit(req) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onSelectPicture.emit(req) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
                         val req = ctx.json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
-                        val allowed = ctx.server.requestApproval(
-                            "present", "Song ${req.number}", "Section ${req.section}", wsClientId,
-                        )
-                        if (!allowed) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        val prompt = ApprovalPrompt("present", "Song ${req.number}", "Section ${req.section}")
+                        if (approvedByOperator(msg, ctx, prompt, wsClientId)) {
+                            ctx.scope.launch { ctx.server.onSelectSongSection.emit(req) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onSelectSongSection.emit(req) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
+        else -> return handleScreenCommand(msg, wsClientId, ctx)
+    }
+    return true
+}
+
+/** Acts on what is already live: the slide, the verse, holding it, or clearing the screen. */
+private suspend fun DefaultWebSocketServerSession.handleScreenCommand(
+    msg: WebSocketMessage,
+    wsClientId: String,
+    ctx: WsCommandContext,
+): Boolean {
+    when (msg.type) {
                     Constants.WS_CMD_SELECT_SLIDE -> {
                         val req = ctx.json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
                         val presName =
                             ctx.catalogs.presentationCatalogs[
                                 ctx.catalogs.scheduleItemToPresentationId[req.id] ?: req.id
                             ]?.fileName ?: req.id
-                        val allowed = ctx.server.requestApproval(
-                            "present", presName, "Slide ${req.index + 1}", wsClientId,
-                        )
-                        if (!allowed) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        val prompt = ApprovalPrompt("present", presName, "Slide ${req.index + 1}")
+                        if (approvedByOperator(msg, ctx, prompt, wsClientId)) {
+                            ctx.scope.launch { ctx.server.onSelectSlide.emit(req) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onSelectSlide.emit(req) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
                         val req = ctx.json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
                         val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
-                        val allowed = ctx.server.requestApproval(
-                            "present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS), wsClientId,
-                        )
-                        if (!allowed) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        val prompt = ApprovalPrompt("present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS))
+                        if (approvedByOperator(msg, ctx, prompt, wsClientId)) {
+                            ctx.scope.launch { ctx.server.onSelectBibleVerse.emit(req) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onSelectBibleVerse.emit(req) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_CLEAR -> {
-                        if (!ctx.server.requestApproval("clear", "Clear Display", "", wsClientId)) {
-                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
-                            return true
+                        if (approvedByOperator(msg, ctx, ApprovalPrompt("clear", "Clear Display"), wsClientId)) {
+                            ctx.scope.launch { ctx.server.onClear.emit(Unit) }
+                            sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         }
-                        ctx.scope.launch { ctx.server.onClear.emit(Unit) }
-                        sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_BIBLE_HOLD -> {
                         val hold = try {
@@ -352,12 +388,6 @@ private suspend fun DefaultWebSocketServerSession.handleSelectionCommand(
  * commands left no trace at all, so a phone stepping through slides or muting the music was
  * invisible to the person at the desk. A toast is the least that lets them notice and block it.
  */
-private suspend fun WsCommandContext.reportTransport(label: String, wsClientId: String) {
-    server.onInstantAction.emit(
-        CompanionServer.RemoteInstantAction("present", label, "", wsClientId),
-    )
-}
-
 /** Steps through what is already live, and drives the media transport. */
 private suspend fun DefaultWebSocketServerSession.handleTransportCommand(
     msg: WebSocketMessage,

@@ -155,8 +155,7 @@ private fun Route.songSelectRoutes(
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_SONGS}/{number}/select") {
-                    if (!server.checkApiKey(call)) return@post
-                    if (!server.checkClientAllowed(call)) return@post
+                    if (!server.allowsRequest(call)) return@post
                     val number = call.parameters["number"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
                         return@post
