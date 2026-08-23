@@ -41,3 +41,25 @@ data class PendingConnectionRequest(
     val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
+
+/**
+ * One content action waiting on the operator: putting something on the screen, clearing it, or
+ * writing an uploaded file to disk.
+ *
+ * The other pending types above each carry the thing being asked about ([PendingRemoteRequest] a
+ * schedule item, [PendingRemoveRequest] an id). This one carries only what the operator needs to
+ * read on the prompt, because the *action* stays with the route that raised it — the route awaits
+ * [decision] and then does the work itself. That keeps one gate in front of a dozen endpoints
+ * instead of a dozen new flows the app would have to learn to apply.
+ *
+ * [actionType] is one of "present", "upload" or "clear", the same vocabulary
+ * `CompanionServer.RemoteInstantAction` already uses, so the UI maps both to `RemoteEventType`
+ * through one function.
+ */
+data class PendingInstantRequest(
+    val actionType: String,
+    val title: String,
+    val detail: String = "",
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)

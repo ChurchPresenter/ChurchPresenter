@@ -551,6 +551,61 @@ class CompanionServer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Content actions waiting on the operator — see [PendingInstantRequest] and [requestApproval].
+     *
+     * No `extraBufferCapacity`, deliberately, unlike [onInstantAction]: a dropped toast is a missed
+     * notification, but a dropped approval request is a route suspended on a decision that will
+     * never arrive. `emit` on a zero-capacity flow suspends until every subscriber has taken it.
+     */
+    val onInstantApproval = MutableSharedFlow<PendingInstantRequest>()
+
+    /**
+     * Asks the operator whether one content action may go ahead, and answers when they have decided.
+     *
+     * The caller does the work only if this returns true, so the gate sits in front of the action
+     * rather than around it. Suspends for as long as the operator takes — the same contract the
+     * schedule endpoints have always had, and `CompanionServerRemoteControlTest` pins it ("an
+     * unanswered request is left waiting rather than allowed").
+     *
+     * **With nobody collecting [onInstantApproval] it allows the action.** The app subscribes for the
+     * life of the window, so in a running desktop this is never the case; what it protects is
+     * everything that drives a server with no UI attached — this module's own suite, and the
+     * headless paths — which would otherwise hang on the first request instead of failing a test.
+     * The cost is a startup window, before the collector attaches, in which content actions are not
+     * gated. Closing that properly means the app telling the server it is ready, which is a bigger
+     * change than this one.
+     */
+    internal suspend fun requestApproval(
+        actionType: String,
+        title: String,
+        detail: String = "",
+        clientId: String = "",
+    ): Boolean {
+        if (onInstantApproval.subscriptionCount.value == 0) return true
+        val pending = PendingInstantRequest(actionType, title, detail, clientId)
+        onInstantApproval.emit(pending)
+        return pending.decision.await()
+    }
+
+    /**
+     * Refuses a device the operator has blocked.
+     *
+     * The WebSocket loop has always checked this; the REST routes never did, so a blocked phone kept
+     * working over HTTP while its socket was refused. Every route reads `X-Device-Id` already — it
+     * was only ever used to label the toast.
+     */
+    internal suspend fun checkClientAllowed(call: ApplicationCall): Boolean {
+        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        if (clientId.isEmpty() || !isClientBlocked(clientId)) return true
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "rest_request_refused",
+            mapOf("deviceId" to clientId, "reason" to "blocked"),
+        )
+        call.respond(HttpStatusCode.Forbidden, """{"error":"device is blocked"}""")
+        return false
+    }
+
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 

@@ -249,7 +249,7 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
     ctx: WsCommandContext,
 ) {
     if (handleSelectionCommand(msg, wsClientId, ctx)) return
-    if (handleTransportCommand(msg, ctx)) return
+    if (handleTransportCommand(msg, wsClientId, ctx)) return
     if (handleScheduleCommand(msg, wsClientId, ctx)) return
     sendCommandAck(msg.commandId, ok = false, reason = "unknown_command", json = ctx.json)
 }
@@ -263,64 +263,72 @@ private suspend fun DefaultWebSocketServerSession.handleSelectionCommand(
     when (msg.type) {
                     Constants.WS_CMD_SELECT_SONG -> {
                         val song = ctx.json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
+                        if (!ctx.server.requestApproval("present", song.title, "", wsClientId)) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
+                        }
                         ctx.scope.launch { ctx.server.onSongSelected.emit(song) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_PICTURE -> {
                         val req = ctx.json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
-                        ctx.scope.launch { ctx.server.onSelectPicture.emit(req) }
                         val folderName = ctx.catalogs.pictureCatalogs[req.folderId]?.folderName ?: req.folderId
                         val imageLabel = req.fileName ?: "Image ${req.index}"
-                        ctx.scope.launch {
-                            ctx.server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", folderName, imageLabel, wsClientId
-                            ))
+                        if (!ctx.server.requestApproval("present", folderName, imageLabel, wsClientId)) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
                         }
+                        ctx.scope.launch { ctx.server.onSelectPicture.emit(req) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
                         val req = ctx.json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
-                        ctx.scope.launch { ctx.server.onSelectSongSection.emit(req) }
-                        ctx.scope.launch {
-                            ctx.server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", "Song ${req.number}", "Section ${req.section}", wsClientId
-                            ))
+                        val allowed = ctx.server.requestApproval(
+                            "present", "Song ${req.number}", "Section ${req.section}", wsClientId,
+                        )
+                        if (!allowed) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
                         }
+                        ctx.scope.launch { ctx.server.onSelectSongSection.emit(req) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_SLIDE -> {
                         val req = ctx.json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
-                        ctx.scope.launch { ctx.server.onSelectSlide.emit(req) }
                         val presName =
                             ctx.catalogs.presentationCatalogs[
                                 ctx.catalogs.scheduleItemToPresentationId[req.id] ?: req.id
                             ]?.fileName ?: req.id
-                        ctx.scope.launch {
-                            ctx.server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", presName, "Slide ${req.index + 1}", wsClientId
-                            ))
+                        val allowed = ctx.server.requestApproval(
+                            "present", presName, "Slide ${req.index + 1}", wsClientId,
+                        )
+                        if (!allowed) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
                         }
+                        ctx.scope.launch { ctx.server.onSelectSlide.emit(req) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
                         val req = ctx.json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
-                        ctx.scope.launch { ctx.server.onSelectBibleVerse.emit(req) }
                         val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
-                        ctx.scope.launch {
-                            ctx.server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS), wsClientId
-                            ))
+                        val allowed = ctx.server.requestApproval(
+                            "present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS), wsClientId,
+                        )
+                        if (!allowed) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
                         }
+                        ctx.scope.launch { ctx.server.onSelectBibleVerse.emit(req) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_CLEAR -> {
-                        ctx.scope.launch { ctx.server.onClear.emit(Unit) }
-                        ctx.scope.launch {
-                            ctx.server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "clear", "Clear Display", clientId = wsClientId
-                            ))
+                        if (!ctx.server.requestApproval("clear", "Clear Display", "", wsClientId)) {
+                            sendCommandAck(msg.commandId, ok = false, reason = "denied", json = ctx.json)
+                            return true
                         }
+                        ctx.scope.launch { ctx.server.onClear.emit(Unit) }
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_BIBLE_HOLD -> {
@@ -336,48 +344,72 @@ private suspend fun DefaultWebSocketServerSession.handleSelectionCommand(
     return true
 }
 
+/**
+ * Tells the operator that a remote just drove the transport.
+ *
+ * These commands are not gated — halting a volume nudge on a dialog would make a live service
+ * unusable — but they used to be *silent*, which is worse than ungated: eleven of the twenty-two
+ * commands left no trace at all, so a phone stepping through slides or muting the music was
+ * invisible to the person at the desk. A toast is the least that lets them notice and block it.
+ */
+private suspend fun WsCommandContext.reportTransport(label: String, wsClientId: String) {
+    server.onInstantAction.emit(
+        CompanionServer.RemoteInstantAction("present", label, "", wsClientId),
+    )
+}
+
 /** Steps through what is already live, and drives the media transport. */
 private suspend fun DefaultWebSocketServerSession.handleTransportCommand(
     msg: WebSocketMessage,
+    wsClientId: String,
     ctx: WsCommandContext,
 ): Boolean {
     when (msg.type) {
                     Constants.WS_CMD_NEXT_PICTURE -> {
                         ctx.scope.launch { ctx.server.onNextPicture.emit(Unit) }
+                        ctx.reportTransport("Next picture", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_PREVIOUS_PICTURE -> {
                         ctx.scope.launch { ctx.server.onPreviousPicture.emit(Unit) }
+                        ctx.reportTransport("Previous picture", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_NEXT_SLIDE -> {
                         ctx.scope.launch { ctx.server.onNextSlide.emit(Unit) }
+                        ctx.reportTransport("Next slide", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_PREVIOUS_SLIDE -> {
                         ctx.scope.launch { ctx.server.onPreviousSlide.emit(Unit) }
+                        ctx.reportTransport("Previous slide", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_PLAY_PAUSE -> {
                         ctx.scope.launch { ctx.server.onMediaPlayPause.emit(Unit) }
+                        ctx.reportTransport("Play/pause media", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_STOP -> {
                         ctx.scope.launch { ctx.server.onMediaStop.emit(Unit) }
+                        ctx.reportTransport("Stop media", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_SEEK_FORWARD -> {
                         ctx.scope.launch { ctx.server.onMediaSeekForward.emit(Unit) }
+                        ctx.reportTransport("Seek forward", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_SEEK_BACKWARD -> {
                         ctx.scope.launch { ctx.server.onMediaSeekBackward.emit(Unit) }
+                        ctx.reportTransport("Seek backward", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_SEEK_TO -> {
                         val ms = msg.payload.trim().toLongOrNull()
                         if (ms != null) {
                             ctx.scope.launch { ctx.server.onMediaSeekTo.emit(ms) }
+                            ctx.reportTransport("Seek to", wsClientId)
                             sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         } else sendCommandAck(msg.commandId, ok = false, reason = "invalid_payload", json = ctx.json)
                     }
@@ -385,11 +417,13 @@ private suspend fun DefaultWebSocketServerSession.handleTransportCommand(
                         val v = msg.payload.trim().toFloatOrNull()
                         if (v != null) {
                             ctx.scope.launch { ctx.server.onMediaSetVolume.emit(v) }
+                            ctx.reportTransport("Set volume", wsClientId)
                             sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                         } else sendCommandAck(msg.commandId, ok = false, reason = "invalid_payload", json = ctx.json)
                     }
                     Constants.WS_CMD_MEDIA_MUTE_TOGGLE -> {
                         ctx.scope.launch { ctx.server.onMediaMuteToggle.emit(Unit) }
+                        ctx.reportTransport("Mute/unmute media", wsClientId)
                         sendCommandAck(msg.commandId, ok = true, json = ctx.json)
                     }
         else -> return false

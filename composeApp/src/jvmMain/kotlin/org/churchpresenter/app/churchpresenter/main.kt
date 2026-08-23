@@ -1115,6 +1115,41 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     }
                             }
 
+                            // Content actions — putting something on the screen, clearing it, or
+                            // writing an uploaded file to disk — now ask before they happen, on the
+                            // same allow/block rules the schedule endpoints have always used. The
+                            // route suspends on `pending.decision` until this resolves it, so a
+                            // denial means the action never runs rather than being undone after.
+                            LaunchedEffect(Unit) {
+                                companionServer.onInstantApproval.collect { pending ->
+                                    val clientId = pending.clientId
+                                    val access = remoteAccessDecision(
+                                        clientId,
+                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
+                                        sessionAllowedClients, sessionBlockedClients,
+                                    )
+                                    when (val outcome = remoteApproval(
+                                        access,
+                                        type = remoteActionType(pending.actionType),
+                                        title = pending.title,
+                                        detail = pending.detail,
+                                        clientId = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId),
+                                    )) {
+                                        RemoteApproval.Reject -> pending.decision.complete(false)
+                                        is RemoteApproval.Approve -> {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(outcome.notification)
+                                        }
+                                        is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
+                                            outcome.event,
+                                            { pending.decision.complete(true); Unit },
+                                            { pending.decision.complete(false); Unit },
+                                        ))
+                                    }
+                                }
+                            }
+
                             LaunchedEffect(Unit) {
                                 companionServer.onInstantAction.collect { action ->
                                     val type = remoteActionType(action.actionType)

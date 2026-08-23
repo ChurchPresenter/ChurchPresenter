@@ -240,6 +240,7 @@ private fun Route.bibleSelectRoutes(
 ) {
                 post(Constants.ENDPOINT_BIBLE_SELECT) {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     val body = call.receiveText()
                     val req = try {
                         json.decodeFromString(SelectBibleVerseRequest.serializer(), body)
@@ -248,15 +249,16 @@ private fun Route.bibleSelectRoutes(
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    scope.launch { server.onSelectBibleVerse.emit(req) }
                     val verseRef = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                    else "${req.bookName} ${req.chapter}:${req.verseNumber}"
-                    scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                        actionType = "present",
-                        title = verseRef,
-                        detail = req.verseText.take(SUMMARY_PREVIEW_CHARS),
-                        clientId = clientId
-                    )) }
+                    val allowed = server.requestApproval(
+                        "present", verseRef, req.verseText.take(SUMMARY_PREVIEW_CHARS), clientId,
+                    )
+                    if (!allowed) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
+                    scope.launch { server.onSelectBibleVerse.emit(req) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 

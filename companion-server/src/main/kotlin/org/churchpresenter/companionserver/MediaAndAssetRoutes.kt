@@ -443,6 +443,7 @@ private fun Route.pictureSelectAndUploadRoutes(
 ) {
                 post("${Constants.ENDPOINT_PICTURES}/select") {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     try {
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
                         // Resolve index by filename when provided — immune to sort-order mismatch
@@ -450,15 +451,13 @@ private fun Route.pictureSelectAndUploadRoutes(
                             _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 }
                         } ?: req.index
                         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                        scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
                         val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
                         val imageLabel = req.fileName ?: "Image $resolvedIndex"
-                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                            actionType = "present",
-                            title = folderName,
-                            detail = imageLabel,
-                            clientId = clientId
-                        )) }
+                        if (!server.requestApproval("present", folderName, imageLabel, clientId)) {
+                            call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                            return@post
+                        }
+                        scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
@@ -475,6 +474,7 @@ private fun Route.pictureSelectAndUploadRoutes(
                  */
                 post("${Constants.ENDPOINT_PICTURES}/upload") {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
@@ -495,6 +495,11 @@ private fun Route.pictureSelectAndUploadRoutes(
                             return@post
                         }
                         val imageBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+                        val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                        if (!server.requestApproval("upload", safeName, "", uploadClientId)) {
+                            call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                            return@post
+                        }
                         // Save to ~/.churchpresenter/device_uploads/yyyy-MM-dd/
                         // Each calendar day gets its own subfolder; the folderId includes the
                         // date so uploads from different days are catalogued separately.

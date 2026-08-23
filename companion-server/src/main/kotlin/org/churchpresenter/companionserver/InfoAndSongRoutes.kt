@@ -156,6 +156,7 @@ private fun Route.songSelectRoutes(
 ) {
                 post("${Constants.ENDPOINT_SONGS}/{number}/select") {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     val number = call.parameters["number"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
                         return@post
@@ -170,13 +171,14 @@ private fun Route.songSelectRoutes(
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val allowed = server.requestApproval(
+                        "present", "Song $number", "Section $sectionIndex", clientId,
+                    )
+                    if (!allowed) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     scope.launch { server.onSelectSongSection.emit(SelectSongSectionRequest(number, sectionIndex)) }
-                    scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                        actionType = "present",
-                        title = "Song $number",
-                        detail = "Section $sectionIndex",
-                        clientId = clientId
-                    )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 }

@@ -174,6 +174,7 @@ private fun Route.presentationSlideRoutes(
                  */
                 post("${Constants.ENDPOINT_PRESENTATIONS}/{id}/select") {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     val id = call.parameters["id"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
@@ -187,15 +188,16 @@ private fun Route.presentationSlideRoutes(
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    scope.launch { server.onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
                     val presentationName =
                         _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
-                    scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                        actionType = "present",
-                        title = presentationName,
-                        detail = "Slide ${index + 1}",
-                        clientId = clientId
-                    )) }
+                    val allowed = server.requestApproval(
+                        "present", presentationName, "Slide ${index + 1}", clientId,
+                    )
+                    if (!allowed) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
+                    scope.launch { server.onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -224,6 +226,7 @@ private fun Route.presentationUploadRoutes(
 ) {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
@@ -255,6 +258,7 @@ private fun Route.mediaUploadRoutes(
                  */
                 post(Constants.ENDPOINT_MEDIA_UPLOAD) {
                     if (!server.checkApiKey(call)) return@post
+                    if (!server.checkClientAllowed(call)) return@post
                     if (!_fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
@@ -282,6 +286,13 @@ private fun Route.mediaUploadRoutes(
                                 HttpStatusCode.UnsupportedMediaType,
                                 """{"error":"unsupported file type: $ext"}"""
                             )
+                            return@post
+                        }
+                        val mediaClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                        // Before the stream, not after: the body is written straight to disk with a
+                        // fixed buffer, so asking afterwards would mean the file already exists.
+                        if (!server.requestApproval("upload", safeName, "", mediaClientId)) {
+                            call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                             return@post
                         }
                         val uploadDir = File(
@@ -341,6 +352,11 @@ private suspend fun storeUploadedPresentation(
 ) {
     try {
         val (safeName, fileBytes) = receiveUploadedDeck(call, json) ?: return
+        val deckClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        if (!server.requestApproval("upload", safeName, "${fileBytes.size / BYTES_PER_KB} KB", deckClientId)) {
+            call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+            return
+        }
         val ext = safeName.substringAfterLast('.', "").lowercase()
         val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations")
             .also { it.mkdirs() }
