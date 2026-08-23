@@ -102,20 +102,16 @@ class SettingsFieldsScreenshotTest {
     }
 
     /**
-     * The field doubles as a search box, and it opens with the current pick still in it — which
-     * filters the menu down to that one row. Clearing it is what a user's first keystroke does, and
-     * it is the only way to see the list this component exists for.
+     * The panel the field opens: every installed family, grouped, each drawn in itself, with the
+     * verse preview underneath. Its states are shot one by one in `FontPickerScreenshotTest`; this
+     * is the pair — a field on a settings row with its panel over it, which is what an operator sees.
      */
     @Test
-    fun `a font picker open, each name in its own font`() = captureComponent(
+    fun `a font picker open`() = captureComponent(
         SECTION,
         "font_picker_open",
         rootIndex = 1,
-        drive = {
-            openByText("Font".uppercase())
-            onAllNodes(hasSetTextAction())[0].performTextReplacement("")
-            waitForIdle()
-        },
+        drive = { openByText("Georgia") },
     ) {
         Box(Modifier.width(220.dp)) {
             FontSettingsDropdown(label = "Font", value = "Georgia", fonts = FONTS, onValueChange = {})

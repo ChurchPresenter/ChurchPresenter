@@ -25,6 +25,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.FontCatalog
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.settings.DictionarySettings
 import kotlin.test.assertEquals
@@ -122,17 +123,14 @@ internal fun ComposeUiTest.switches(): SemanticsNodeInteractionCollection =
 internal fun ComposeUiTest.switch(ordinal: Int): SemanticsNodeInteraction = switches()[ordinal]
 
 /**
- * The expand arrow of the [group]-th `FontSettingsDropdown`.
+ * Every control on the tab with no accessible name at all: no text, no description, no role.
  *
- * `FontSettingsDropdown` draws it as a 14dp `Icon` with a bare `Modifier.clickable` — no role, no
- * text and `contentDescription = null` — so there is nothing to match on but the shape of the node
- * itself: clickable, focusable, and carrying none of the three labels. That makes it the only
- * control on the tab with no accessible name, which is a defect in the shared composable rather than
- * here; it is addressed this way rather than left untested because it is the affordance a mouse user
- * reaches for, and it opens a menu whose items write the setting by a different path than the
- * keyboard commit.
+ * A sweep rather than a lookup — the tab's other completeness guards check text and descriptions
+ * separately, and a control carrying neither is invisible to both. It used to find the expand arrow
+ * inside each font dropdown, which was a bare clickable `Icon`; the font field is one labelled
+ * control now, and this is what keeps the next one from going in unnamed.
  */
-internal fun ComposeUiTest.fontDropdownArrows(): SemanticsNodeInteractionCollection =
+internal fun ComposeUiTest.unlabelledControls(): SemanticsNodeInteractionCollection =
     onAllNodes(
         hasClickAction() and
             SemanticsMatcher.keyNotDefined(SemanticsProperties.Text) and
@@ -140,9 +138,6 @@ internal fun ComposeUiTest.fontDropdownArrows(): SemanticsNodeInteractionCollect
             SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription) and
             SemanticsMatcher.keyNotDefined(SemanticsProperties.Role),
     )
-
-internal fun ComposeUiTest.fontDropdownArrow(group: Int): SemanticsNodeInteraction =
-    fontDropdownArrows()[group]
 
 // ── Sliders ─────────────────────────────────────────────────────────────────────────────────────
 
@@ -260,4 +255,6 @@ internal fun ComposeUiTest.assertDurationReads(stored: Float) {
  * properly-cased family — a value the field does not already hold, on any machine's font list.
  */
 internal fun mixedCaseInstalledFont(): String =
-    Utils.getAvailableSystemFonts().first { it != it.lowercase() }
+    // Offerable, not merely installed: ".AppleSystemUIFont" is the first mixed-case family on a Mac
+    // and is one of the system-internal faces the picker hides.
+    Utils.getAvailableSystemFonts().first { it != it.lowercase() && !FontCatalog.isHidden(it) }

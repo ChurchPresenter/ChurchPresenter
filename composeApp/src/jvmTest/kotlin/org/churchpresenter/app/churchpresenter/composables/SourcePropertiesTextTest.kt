@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
+import org.churchpresenter.app.churchpresenter.utils.FontCatalog
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -128,12 +130,13 @@ class SourcePropertiesTextTest {
     fun `the font dropdown offers the system's own families and stores the one chosen`() =
         sourcePanel(Fixture.text()) { get ->
             // Which families exist is the machine's business, so the family to pick is taken from the
-            // same list the panel builds its menu from rather than hard-coded here.
-            val families = Utils.getAvailableSystemFonts()
+            // same list the panel builds its list from rather than hard-coded here — minus the
+            // system-internal faces, which the picker does not offer.
+            val families = Utils.getAvailableSystemFonts().filterNot { FontCatalog.isHidden(it) }
             assertTrue(families.size > 1, "the machine must report more than one font family")
             val chosen = families.first { it != Fixture.text().fontFamily }
 
-            chooseFromDropdown(showing = Fixture.text().fontFamily, option = chosen)
+            pickFont(showing = Fixture.text().fontFamily, to = chosen)
 
             assertEquals(chosen, (get() as SceneSource.TextSource).fontFamily, "the menu writes the family")
             assertEquals(

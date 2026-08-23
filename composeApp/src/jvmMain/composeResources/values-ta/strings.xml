@@ -2367,4 +2367,22 @@
     <string name="story_prompt_later">பின்னர் பார்க்கலாம்</string>
     <string name="story_prompt_reassurance">உங்கள் ஒப்புதல் இல்லாமல் எதுவும் வெளியிடப்படாது.</string>
     <string name="menu_developer_story_prompt">உங்கள் கதையைப் பகிரும் உரையாடல்</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">எழுத்துருக்களைத் தேடு…</string>
+    <string name="font_picker_clear_search">தேடலை அழி</string>
+    <string name="font_group_recent">சமீபத்தில் பயன்படுத்தியவை</string>
+    <string name="font_group_recommended">திரையிடலுக்கு ஏற்றவை</string>
+    <string name="font_group_all">அனைத்து எழுத்துருக்கள்</string>
+    <string name="font_group_matches">பொருத்தங்கள்</string>
+    <string name="font_category_sans">சான்ஸ்</string>
+    <string name="font_category_serif">செரிஃப்</string>
+    <string name="font_category_mono">மோனோ</string>
+    <string name="font_category_display">டிஸ்பிளே</string>
+    <string name="font_preview">முன்னோட்டம்</string>
+    <string name="font_preview_sample">தேர்ந்தெடுத்த எழுத்துருவில் மாதிரி உரை</string>
+    <string name="font_warning_no_cyrillic">%1$s இல் சிரிலிக் எழுத்துகள் இல்லை — சிரிலிக் வசனங்கள் திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
+    <string name="font_warning_no_hebrew">%1$s இல் ஹீப்ரு எழுத்துகள் இல்லை — ஹீப்ரு உரை திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
+    <string name="font_hidden_note">%1$d சின்னம் மற்றும் கணினி எழுத்துருக்கள் மறைக்கப்பட்டன · %3$d இல் %2$d காட்டப்படுகிறது</string>
+    <string name="font_shown_note">%2$d இல் %1$d காட்டப்படுகிறது</string>
+    <string name="font_picker_keys">↑↓ நகர் · ⏎ தேர்வு · esc மூடு</string>
 </resources>

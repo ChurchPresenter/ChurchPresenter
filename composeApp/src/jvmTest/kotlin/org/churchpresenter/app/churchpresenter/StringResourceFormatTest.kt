@@ -80,6 +80,10 @@ class StringResourceFormatTest {
         // Escape dismisses a focusable Compose Popup. That is the toolkit's own behaviour, not an
         // entry in ShortcutMap, so there is no binding to render it from and none to go stale.
         "bible_cross_references_dismiss_hint",
+        // The font panel's own keys, handled by the panel while it is open — arrows to walk the
+        // list, enter to take a family, escape to close. None of them is bindable, so there is no
+        // binding to render them from either.
+        "font_picker_keys",
     )
 
     /**

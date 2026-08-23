@@ -2384,4 +2384,22 @@
     <string name="tab_strip_scroll_forward">Derulare file înainte</string>
     <string name="stock_photo_show_key">Afișare cheie API</string>
     <string name="stock_photo_hide_key">Ascundere cheie API</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Caută fonturi…</string>
+    <string name="font_picker_clear_search">Golește căutarea</string>
+    <string name="font_group_recent">Folosite recent</string>
+    <string name="font_group_recommended">Bune pentru proiecție</string>
+    <string name="font_group_all">Toate fonturile</string>
+    <string name="font_group_matches">Potriviri</string>
+    <string name="font_category_sans">Fără serife</string>
+    <string name="font_category_serif">Cu serife</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Decorativ</string>
+    <string name="font_preview">Previzualizare</string>
+    <string name="font_preview_sample">Text de exemplu cu fontul ales</string>
+    <string name="font_warning_no_cyrillic">%1$s nu are glife chirilice – versetele în chirilic vor apărea pe ecran cu alt font.</string>
+    <string name="font_warning_no_hebrew">%1$s nu are glife ebraice – textul ebraic va apărea pe ecran cu alt font.</string>
+    <string name="font_hidden_note">%1$d fonturi de simboluri și de sistem ascunse · se afișează %2$d din %3$d</string>
+    <string name="font_shown_note">Se afișează %1$d din %2$d</string>
+    <string name="font_picker_keys">↑↓ navigare · ⏎ alege · esc închide</string>
 </resources>

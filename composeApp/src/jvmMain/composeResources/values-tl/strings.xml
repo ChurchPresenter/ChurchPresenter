@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Baka mamaya</string>
     <string name="story_prompt_reassurance">Walang ilalathala nang wala kayong pahintulot.</string>
     <string name="menu_developer_story_prompt">Dialog na "Ibahagi ang iyong kuwento"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Maghanap ng font…</string>
+    <string name="font_picker_clear_search">I-clear ang paghahanap</string>
+    <string name="font_group_recent">Kamakailang ginamit</string>
+    <string name="font_group_recommended">Mabuti para sa projection</string>
+    <string name="font_group_all">Lahat ng font</string>
+    <string name="font_group_matches">Mga tugma</string>
+    <string name="font_category_sans">Sans</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Preview</string>
+    <string name="font_preview_sample">Halimbawang teksto sa piniling font</string>
+    <string name="font_warning_no_cyrillic">%1$s ay walang mga titik na Cyrillic — ang mga talatang Cyrillic ay lalabas sa screen sa ibang font.</string>
+    <string name="font_warning_no_hebrew">%1$s ay walang mga titik na Hebreo — ang tekstong Hebreo ay lalabas sa screen sa ibang font.</string>
+    <string name="font_hidden_note">%1$d na simbolo at system font ang itinago · ipinapakita ang %2$d sa %3$d</string>
+    <string name="font_shown_note">Ipinapakita ang %1$d sa %2$d</string>
+    <string name="font_picker_keys">↑↓ galaw · ⏎ pumili · esc isara</string>
 </resources>
