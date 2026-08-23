@@ -10,10 +10,11 @@ kotlin {
     jvmToolchain(21)
 }
 
-// Every consumer reaches these through `org.churchpresenter.resources.generated.resources.Res`,
-// conventionally imported `as IconRes` because a file that also uses a string resource would
-// otherwise have two classes called `Res`. `publicResClass` is what makes the accessor visible
-// outside this module at all.
+// Every consumer reaches these through `org.churchpresenter.resources.generated.resources.Res` —
+// ONE accessor for icons, strings, fonts and files alike, which is the reason they share a module.
+// Split into two, a file using both `Res.drawable` and `Res.string` would see two classes called
+// `Res` and need an import alias; 46 files do exactly that. `publicResClass` is what makes the
+// accessor visible outside this module at all.
 compose.resources {
     packageOfResClass = "org.churchpresenter.resources.generated.resources"
     publicResClass = true
