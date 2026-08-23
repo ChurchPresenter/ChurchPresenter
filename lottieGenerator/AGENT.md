@@ -85,13 +85,18 @@ Both CI steps are gated on this directory or the shared build files changing.
   `coverageFloors`. `extra["coverageExcludes"]` drops `**/ui/**` and `**/MainKt*`, which need a
   display. The `spec/` and `lottie/` packages are where the coverage lives, and the `SpecPort*Test`
   suites exist so a spec style stays byte-comparable with the code style it replaced.
-- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin and **no baseline**,
-  and is at **one finding**, down from 382 -- every rule is clean except `LongParameterList` on
-  `LottieGenPalette`'s 51-role constructor (see **Theme** above for why those 51 exist).
-  `constructorThreshold` is 7, and satisfying it would need three levels of nesting, so that one
-  is open for a decision rather than fixed. **Do not add a baseline file, and do not add a
-  `@Suppress` without asking.** Until it is resolved the module is not in `test.yml`'s Detekt
-  step, because one finding there would fail every PR.
+- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin, **no baseline** and
+  **zero findings**, down from 382, and is in `test.yml`'s Detekt step like every other module --
+  so those 381 fixes are protected from regression rather than merely done.
+  **Do not add a baseline file**, and do not reach for a second `@Suppress` without asking.
+
+  There is exactly one suppression: `LongParameterList` on `LottieGenPalette`'s 51-role
+  constructor, at the declaration with its reasoning (see **Theme** above for why those 51 roles
+  exist). `constructorThreshold` is 7 and no shallower grouping reaches it -- the nine natural
+  banner groups are 8-11 members each and would each be flagged in turn -- so satisfying the rule
+  needs three levels of nesting and turns `palette.appBg` into `palette.chrome.surfaces.appBg`.
+  The suppression was the deliberate call: one standing finding kept the whole module off the
+  gate, which cost far more than the rule bought.
 - Tests run with `java.awt.headless=true`; `TextMeasurer` and `FontRegistry` use AWT and must keep
   working headless.
 
