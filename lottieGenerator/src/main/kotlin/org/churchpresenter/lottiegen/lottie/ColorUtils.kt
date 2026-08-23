@@ -51,3 +51,19 @@ fun emToPx(em: Double, baseSizePx: Double): Double = em * baseSizePx
 
 /** Convert rem to px (same as em for our purposes) */
 fun remToPx(rem: Double, baseSizePx: Double): Double = rem * baseSizePx
+
+/**
+ * The logo's width-to-height ratio, for the styles that scale it by **height**.
+ *
+ * Those styles set `scale = logoSizePx / cfg.logoH`, so `logoSize` is the logo's height and its
+ * drawn width is `logoSizePx * logoAspect`. Anything reserving room for it — a plate behind it, a
+ * gutter beside the text — has to use that width, or a logo wider than it is tall overhangs.
+ *
+ * Returns exactly `1.0` for a square logo, so the arithmetic downstream is bit-for-bit unchanged
+ * for one; and for a missing or degenerate size, where there is nothing to scale from.
+ *
+ * Not for the fit-longest-side styles (`Style1Bar`), which normalise by `max(logoW, logoH)` and so
+ * already draw inside a square box.
+ */
+fun logoAspect(logoW: Int, logoH: Int): Double =
+    if (logoW <= 0 || logoH <= 0 || logoW == logoH) 1.0 else logoW.toDouble() / logoH.toDouble()
