@@ -11,17 +11,6 @@ plugins {
     jacoco
 }
 
-// Five of the six counters clear the root build's 0.85 default outright (measured 2026-08-23:
-// INSTRUCTION 0.981, LINE 0.981, CLASS 0.970, METHOD 0.963, BRANCH 0.861). COMPLEXITY measures
-// 0.8499 -- one unit of 1126 short -- and cannot be lifted further without contradicting a decision
-// this repo has already recorded: 31 of the 169 missed units are FocusLostRescueState's AWT
-// window-activation paths, which FocusLostRescueTest documents as deliberately untested (real
-// hardware timing, no injectable delay), and almost all of the rest are the Compose compiler's
-// $changed recomposition-skip branches emitted in each composable's own declaration.
-extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.84",
-)
-
 group = "org.churchpresenter"
 
 kotlin {

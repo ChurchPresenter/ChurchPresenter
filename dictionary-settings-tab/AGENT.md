@@ -52,21 +52,18 @@ One production file, `DictionarySettingsTab.kt`, and eight test classes beside i
 | CLASS | 1.000 |
 | METHOD | 1.000 |
 | COMPLEXITY | 1.000 |
-| BRANCH | *no counter emitted* |
+| BRANCH | 1.000 |
 
-**Read that honestly before quoting it.** JaCoCo emits no BRANCH counter here because, after its
-Kotlin filters, the compiled class has no branch to measure — and the reason is real: the source
-file contains **zero** `if`, `when`, `&&`, `||` or elvis. It is a flat declarative tree of sections,
-rows and fields. The 159 conditional jumps in the bytecode are all Kotlin/Compose codegen (default
-bitmasks, `$changed` skip checks, null checks), which JaCoCo discards.
+**Read that honestly before quoting it.** The source file contains **zero** `if`, `when`, `&&`,
+`||` or elvis of its own — it is a flat declarative tree of sections, rows and fields. So 100% here
+means "every line of a branchless file is executed", not "this is the best-tested module in the
+build". It is a fair result for what the file is; do not read more into it.
 
-So 100% here means "every line of a branchless file is executed", not "this is the best-tested
-module in the build". It is a fair result for what the file is; do not read more into it.
-
-> **Unreconciled:** the same file measured 29 missed / 61 covered branches while it was compiled
-> inside `:dictionary-tab`, and none at all here, with identical plugins and no `coverageExcludes`
-> in either. That was not explained. It does not affect either module's gate — both pass — but do
-> not build an argument on the branch numbers of a file that has no branches in its source.
+> Before the `updateDict` refactor below, JaCoCo emitted **no BRANCH counter at all** for this
+> module: after its Kotlin filters there was nothing branch-shaped left to measure. The one lambda
+> that refactor introduced is what put the counter back. Whether a counter appears here is a
+> property of the codegen, not of how well the module is tested — do not read a missing counter as
+> a gap, or a restored one as progress.
 
 ## Commands
 
@@ -78,9 +75,21 @@ module in the build". It is a fair result for what the file is; do not read more
 ./gradlew :dictionary-settings-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
 ```
 
-**The detekt baseline holds 31 entries** — one `LongMethod` and 30 `MaxLineLength` — every one
-carried across verbatim from `:composeApp`'s baseline as the file moved. **Nothing was newly
-suppressed.** All 30 are this file restating
-`onSettingsChange { s -> s.copy(dictionarySettings = …) }` at thirty call sites; a single local
-updater lambda deletes all thirty, and that is worth doing, but it is a change to production code
-and has not been asked for. Never add a 32nd.
+**The detekt baseline holds one entry** — the `LongMethod` on `DictionarySettingsTab` itself,
+carried across verbatim from `:composeApp`'s baseline as the file moved.
+
+The 30 `MaxLineLength` entries that came with it are **gone, fixed at source rather than
+suppressed**. All thirty were this file restating
+`onSettingsChange { s -> s.copy(dictionarySettings = …) }` at thirty call sites; one local
+`updateDict` lambda at the top of the composable made every one of them short:
+
+```kotlin
+val updateDict: (DictionarySettings.() -> DictionarySettings) -> Unit = { change ->
+    onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.change()) }
+}
+// then, at each control:
+onColorChange = { updateDict { copy(wordColor = it) } }
+```
+
+**Keep using it.** A new control that spells the two nested copies out again is both a
+`MaxLineLength` finding and the thing that made thirty of them. Never add a second baseline entry.
