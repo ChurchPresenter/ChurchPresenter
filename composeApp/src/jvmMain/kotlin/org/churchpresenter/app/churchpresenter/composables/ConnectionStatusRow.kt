@@ -18,7 +18,7 @@ import churchpresenter.composeapp.generated.resources.instance_link_status_conne
 import churchpresenter.composeapp.generated.resources.instance_link_status_connecting
 import churchpresenter.composeapp.generated.resources.instance_link_status_disconnected
 import churchpresenter.composeapp.generated.resources.instance_link_status_error
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 

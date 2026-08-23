@@ -14,10 +14,10 @@ stock media client. **One-way pull only** — nothing is ever written back to Pl
 
 **The package is `org.churchpresenter.planningcenter`** — one package, flat. It held two of the
 app's own (`…churchpresenter.data` for the client and formatter, `…churchpresenter.server` for the
-callback listener), which `:composeApp` still owns and fills with 34 and 32 files respectively.
-Splitting this module's three files across two shared package names bought nothing: they are one
-integration, and the `data`/`server` divide was an artifact of where they happened to sit in the
-app.
+callback listener). `:composeApp` still owns the first; the second has since become
+`:companion-server`. Splitting this module's three files across two shared package names bought
+nothing: they are one integration, and the `data`/`server` divide was an artifact of where they
+happened to sit in the app.
 
 ## What lives here
 

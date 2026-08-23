@@ -49,6 +49,13 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > numbers occurs in scripture. Six JSON files and the lookups over them, and nothing else — no
 > Compose, no Ktor. `./gradlew :dictionary:test`.
 >
+> **[`companion-server/`](./companion-server)** — the HTTP/WebSocket surface the desktop exposes:
+> the wire format, the routes, the pages it serves a browser, TLS and the tunnel, plus the client a
+> follower instance consumes the same surface with. One server behind the phone companion app, the
+> Q&A page, the OBS Browser Source overlay, the presentation remote and Instance Link. What a remote
+> request then *does* to the app stays in `:composeApp`, under `remote/`.
+> `./gradlew :companion-server:test`.
+
 > **[`statistics/`](./statistics)** — what was sung and read, counted: the all-time tallies, the
 > timestamped play log behind them, and the CSV/Excel exports a CCLI licence report is filed
 > from. The window that draws it stays in the app; this is the numbers.

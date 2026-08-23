@@ -35,7 +35,7 @@ import kotlin.test.assertTrue
  * the moment it connects, push every later tuning change, and — the part that matters mid-service —
  * climb back on its own when the engine restarts, without the operator touching anything. None of
  * that is observable without a server on the other end, so a throwaway Ktor server stands in for
- * the engine here, the same approach [org.churchpresenter.app.churchpresenter.server.CompanionServerTest]
+ * the engine here, the same approach [org.churchpresenter.companionserver.CompanionServerTest]
  * takes.
  *
  * Message parsing is covered separately by [BibleEngineClientMessageTest].

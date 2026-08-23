@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import kotlin.test.Test

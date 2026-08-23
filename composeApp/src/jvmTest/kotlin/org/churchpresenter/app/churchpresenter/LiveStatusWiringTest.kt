@@ -5,7 +5,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -24,7 +24,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.PRESENTATION) }
         waitForIdle()
-        assertTrue(server._presentationIsLive)
+        assertTrue(server.presentationIsLive)
     }
 
     @Test
@@ -32,7 +32,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.BIBLE) }
         waitForIdle()
-        assertFalse(server._presentationIsLive)
+        assertFalse(server.presentationIsLive)
     }
 
     @Test
@@ -40,7 +40,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.NONE) }
         waitForIdle()
-        assertFalse(server._presentationIsLive)
+        assertFalse(server.presentationIsLive)
     }
 
     @Test

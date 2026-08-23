@@ -89,6 +89,11 @@ include(":bible")
 // lookups over them — depended on by :composeApp, which draws the tab and serves the REST routes.
 include(":dictionary")
 
+// The HTTP/WebSocket surface the desktop exposes: the wire format, the routes, the pages it serves,
+// TLS and the tunnel, plus the client a follower instance consumes it with. What a remote request
+// then *does* to the app stays in :composeApp, under `remote/`.
+include(":companion-server")
+
 // Everything the app has ever put on the screen, counted: the song and verse tallies, the
 // timestamped play log behind them, the periods a report covers and the CSV/Excel export CCLI
 // licence reporting needs. The window that draws it stays in :composeApp.

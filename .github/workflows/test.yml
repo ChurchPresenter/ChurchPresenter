@@ -164,6 +164,17 @@ jobs:
             dictionary:
               - *shared
               - 'dictionary/**'           # depends on nothing else: the files and the lookups
+            companionserver:
+              - *shared
+              - 'companion-server/**'
+              - 'core-models/**'          # api(projects.coreModels)
+              - 'settings/**'             # api(projects.settings)
+              - 'bible/**'                # api(projects.bible)
+              - 'dictionary/**'           # api(projects.dictionary)
+              - 'atem/**'                 # api(projects.atem)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'song-chords/**'          # implementation(projects.songChords)
+              - 'presentation-engine/**'  # implementation(projects.presentationEngine)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -197,7 +208,8 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :dictionary:detekt :lottieGenerator:detekt :statistics:detekt
+          :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
+          :statistics:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -466,6 +478,14 @@ jobs:
         if: always() && steps.modules.outputs.dictionary == 'true'
         run: ./gradlew :dictionary:jacocoTestCoverageVerification -x test
 
+      - name: Companion Server tests
+        if: always() && steps.modules.outputs.companionserver == 'true'
+        run: ./gradlew :companion-server:test
+
+      - name: Companion Server coverage floor
+        if: always() && steps.modules.outputs.companionserver == 'true'
+        run: ./gradlew :companion-server:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -501,6 +521,7 @@ jobs:
             statistics/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
+            companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -524,6 +545,7 @@ jobs:
             Song chords
             Bible
             Dictionary
+            Companion Server
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -676,3 +698,5 @@ jobs:
             bible/build/test-results/
             dictionary/build/reports/tests/
             dictionary/build/test-results/
+            companion-server/build/reports/tests/
+            companion-server/build/test-results/

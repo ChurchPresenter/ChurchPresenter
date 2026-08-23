@@ -58,7 +58,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.companionserver.TunnelStatus
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

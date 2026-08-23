@@ -161,6 +161,21 @@ class ChordTransposerTest {
     }
 
     @Test
+    fun `a line naming no chord is one chordless run`() {
+        assertEquals(
+            listOf(ChordSegment("", "Amazing grace how sweet")),
+            ChordTransposer.parseLine("Amazing grace how sweet"),
+        )
+    }
+
+    @Test
+    fun `a bracket that is not a chord stays in the words`() {
+        val segments = ChordTransposer.parseLine("[G]Amazing [x2]grace [C]how sweet")
+        assertEquals(listOf("G", "C"), segments.map { it.chord })
+        assertEquals("Amazing [x2]grace ", segments.first().text)
+    }
+
+    @Test
     fun `splitting with chords off gives back the plain line`() {
         val segments = ChordTransposer.parseLine("[G]Amazing [C]grace", showChords = false)
         assertEquals(listOf(ChordSegment("", "Amazing grace")), segments)
@@ -202,5 +217,36 @@ class ChordTransposerTest {
     @Test
     fun `a palette is only offered for a real key`() {
         assertEquals(emptyList(), ChordTransposer.diatonicChords("Verse"))
+    }
+
+    // ── The header helpers everything that reads a song file goes through ───────
+
+    @Test
+    fun `either kind of bracket opens a section`() {
+        assertTrue(isHeaderLine("[Verse 1]"))
+        assertTrue(isHeaderLine("{Chorus}"))
+        assertTrue(isHeaderLine("   [Bridge]   "))
+    }
+
+    @Test
+    fun `words and chord lines are not headers`() {
+        assertFalse(isHeaderLine("Amazing grace how sweet the sound"))
+        assertFalse(isHeaderLine("[Am]"))
+        assertFalse(isHeaderLine("[Cm] [Bb] [Ab] [G]"))
+        assertFalse(isHeaderLine("[Verse}"))
+    }
+
+    @Test
+    fun `braces mean chorus and brackets do not`() {
+        assertTrue(isChorusHeader("{Chorus}"))
+        assertTrue(isChorusHeader("  {Chorus}  "))
+        assertFalse(isChorusHeader("[Chorus]"))
+    }
+
+    @Test
+    fun `a brace has to be closed to mean anything`() {
+        assertFalse(isChorusHeader("{Chorus"))
+        assertFalse(isChorusHeader("Chorus}"))
+        assertFalse(isChorusHeader(""))
     }
 }

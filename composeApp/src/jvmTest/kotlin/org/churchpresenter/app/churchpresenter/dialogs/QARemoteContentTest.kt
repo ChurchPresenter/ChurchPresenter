@@ -25,7 +25,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openColorField
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals

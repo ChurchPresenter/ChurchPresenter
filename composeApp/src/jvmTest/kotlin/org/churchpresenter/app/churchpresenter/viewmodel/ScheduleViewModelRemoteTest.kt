@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.companionserver.ScheduleItemDto
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.companionserver.LottieRenderCache
 import org.churchpresenter.diagnostics.CrashReporter
 import org.jetbrains.skia.Bitmap
 import java.io.File

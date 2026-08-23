@@ -13,8 +13,8 @@ import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.companionserver.InstanceLinkLogSide
+import org.churchpresenter.companionserver.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.bible.BibleLoadError
 import java.io.File

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.churchpresenter.companionserver.QaModeration
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -27,7 +28,7 @@ private data class QAState(
     val votedIps: Map<String, Map<String, String>> = emptyMap()
 )
 
-class QAManager {
+class QAManager : QaModeration {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
@@ -35,7 +36,7 @@ class QAManager {
 
     // ── Questions ────────────────────────────────────────────────────
     private val _questions = mutableStateListOf<Question>()
-    val questions: List<Question> get() = _questions
+    override val questions: List<Question> get() = _questions
 
     // ── History (previous sessions) ─────────────────────────────────
     private val _history = mutableStateListOf<Question>()
@@ -43,11 +44,11 @@ class QAManager {
 
     // ── Session state ────────────────────────────────────────────────
     private val _sessionActive = mutableStateOf(false)
-    val sessionActive: Boolean get() = _sessionActive.value
+    override val sessionActive: Boolean get() = _sessionActive.value
 
     // ── Display state ────────────────────────────────────────────────
     private val _displayedQuestion = mutableStateOf<Question?>(null)
-    val displayedQuestion: Question? get() = _displayedQuestion.value
+    override val displayedQuestion: Question? get() = _displayedQuestion.value
 
     private val _showQRCodeOnDisplay = mutableStateOf(false)
     val showQRCodeOnDisplay: Boolean get() = _showQRCodeOnDisplay.value
@@ -61,7 +62,7 @@ class QAManager {
 
     // ── Change events (for WebSocket broadcasts) ─────────────────────
     private val _events = MutableSharedFlow<QAEvent>(extraBufferCapacity = 64)
-    val events: SharedFlow<QAEvent> = _events
+    override val events: SharedFlow<QAEvent> = _events
 
     init {
         loadState()
@@ -76,13 +77,13 @@ class QAManager {
      * one — the screenshot suite, whose images would otherwise differ every minute because each row
      * prints its own `HH:mm`. Every real caller leaves it alone.
      */
-    fun submitQuestion(
+    override fun submitQuestion(
         text: String,
-        name: String = "",
-        clientIp: String = "",
-        cooldownSeconds: Int = 30,
-        deviceId: String = "",
-        timestamp: Long = System.currentTimeMillis(),
+        name: String,
+        clientIp: String,
+        cooldownSeconds: Int,
+        deviceId: String,
+        timestamp: Long,
     ): Question? = synchronized(this) {
         if (!_sessionActive.value || text.isBlank()) return@synchronized null
 
@@ -107,7 +108,7 @@ class QAManager {
         question
     }
 
-    fun addQuestion(text: String, timestamp: Long = System.currentTimeMillis()): Question? = synchronized(this) {
+    override fun addQuestion(text: String, timestamp: Long): Question? = synchronized(this) {
         if (text.isBlank()) return@synchronized null
         val question = Question(
             id = UUID.randomUUID().toString(),
@@ -120,7 +121,7 @@ class QAManager {
         question
     }
 
-    fun approveQuestion(id: String): Boolean = synchronized(this) {
+    override fun approveQuestion(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
         if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.APPROVED)
@@ -129,7 +130,7 @@ class QAManager {
         true
     }
 
-    fun denyQuestion(id: String): Boolean = synchronized(this) {
+    override fun denyQuestion(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
         if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.DENIED)
@@ -139,7 +140,7 @@ class QAManager {
         true
     }
 
-    fun markDone(id: String): Boolean = synchronized(this) {
+    override fun markDone(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
         if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.DONE)
@@ -149,7 +150,7 @@ class QAManager {
         true
     }
 
-    fun editQuestion(id: String, newText: String): Boolean = synchronized(this) {
+    override fun editQuestion(id: String, newText: String): Boolean = synchronized(this) {
         if (newText.isBlank()) return@synchronized false
         val index = _questions.indexOfFirst { it.id == id }
         if (index < 0) return@synchronized false
@@ -160,7 +161,7 @@ class QAManager {
         true
     }
 
-    fun deleteQuestion(id: String): Boolean = synchronized(this) {
+    override fun deleteQuestion(id: String): Boolean = synchronized(this) {
         val question = _questions.firstOrNull { it.id == id } ?: return@synchronized false
         if (_displayedQuestion.value?.id == id) clearDisplay()
         _questions.removeAll { it.id == id }
@@ -169,7 +170,7 @@ class QAManager {
         true
     }
 
-    fun displayQuestion(id: String): Boolean = synchronized(this) {
+    override fun displayQuestion(id: String): Boolean = synchronized(this) {
         val question = _questions.firstOrNull { it.id == id && it.status == QuestionStatus.APPROVED }
             ?: return@synchronized false
         // Auto-mark previous displayed question as done
@@ -183,7 +184,7 @@ class QAManager {
         true
     }
 
-    fun clearDisplay(): Unit = synchronized(this) {
+    override fun clearDisplay(): Unit = synchronized(this) {
         _displayedQuestion.value = null
         _showQRCodeOnDisplay.value = false
         emitEvent(QAEvent.DisplayChanged(null))
@@ -216,7 +217,7 @@ class QAManager {
         saveState()
     }
 
-    fun clearAll(): Unit = synchronized(this) {
+    override fun clearAll(): Unit = synchronized(this) {
         clearDisplay()
         _questions.clear()
         _votedIps.clear()
@@ -236,11 +237,12 @@ class QAManager {
         saveState()
     }
 
-    fun findQuestion(id: String): Question? = _questions.firstOrNull { it.id == id }
+    override fun findQuestion(id: String): Question? = _questions.firstOrNull { it.id == id }
 
     // ── Voting ───────────────────────────────────────────────────────
 
-    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean = synchronized(this) {
+    override fun voteForQuestion(questionId: String, clientIp: String, direction: String): Boolean =
+        synchronized(this) {
         val index = _questions.indexOfFirst { it.id == questionId }
         if (index < 0) return@synchronized false
         val question = _questions[index]
@@ -272,17 +274,17 @@ class QAManager {
         true
     }
 
-    fun getVoteDirection(questionId: String, clientIp: String): String? {
+    override fun getVoteDirection(questionId: String, clientIp: String): String? {
         return _votedIps[questionId]?.get(clientIp)
     }
 
-    fun getApprovedQuestions(): List<Question> {
+    override fun getApprovedQuestions(): List<Question> {
         return _questions
             .filter { it.status == QuestionStatus.APPROVED }
             .sortedByDescending { it.voteCount }
     }
 
-    fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean {
+    override fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean {
         if (clientIp.isEmpty() || cooldownSeconds <= 0) return false
         val now = System.currentTimeMillis()
         val lastTime = _lastSubmission[clientIp] ?: return false

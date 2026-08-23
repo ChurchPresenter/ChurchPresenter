@@ -140,7 +140,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.server.followerMediaUrl
+import org.churchpresenter.app.churchpresenter.remote.followerMediaUrl
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts

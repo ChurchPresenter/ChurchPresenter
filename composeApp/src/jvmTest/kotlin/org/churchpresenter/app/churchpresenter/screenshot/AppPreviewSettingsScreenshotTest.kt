@@ -11,7 +11,7 @@ import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
 import kotlin.test.Test

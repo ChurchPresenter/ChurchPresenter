@@ -18,7 +18,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test

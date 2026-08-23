@@ -482,6 +482,7 @@ execution order, so it can appear on one machine and not another.
 ./gradlew :diagnostics:test            # the crash-reporting module's suite
 ./gradlew :atem:test                   # the ATEM protocol client's suite
 ./gradlew :planning-center:test        # the Planning Center client's suite
+./gradlew :companion-server:test       # the companion server's suite
 ```
 
 `:composeApp:check` does **not** reach any of them — each has its own suite, run through the root

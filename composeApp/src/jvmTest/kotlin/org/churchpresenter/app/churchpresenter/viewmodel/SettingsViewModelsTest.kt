@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.companionserver.isLottieFile
 
 /**
  * The small library-picker view models behind the Songs and Lower Third settings panes.

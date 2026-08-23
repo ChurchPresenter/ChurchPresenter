@@ -78,7 +78,7 @@
 - `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
-- `server/CompanionServer.kt` — slide API for mobile (background rendering)
+- `companion-server/` (the `:companion-server` Gradle module) — `PresentationRoutes.kt`, the slide API for mobile (background rendering)
 
 ## Images & Media
 - **Image slideshows** — point to a folder and present photos with crossfade, fade and slide transitions, auto-advance and looping.
@@ -106,7 +106,7 @@
 - `viewmodel/LowerThirdSettingsViewModel.kt`
 - `data/settings/LottiePreset.kt`, `data/settings/LottieSearchReplacePair.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
-- `server/LowerThirdSequencer.kt`
+- `companion-server/` — `LowerThirdSequencer.kt`, `LottieRenderCache.kt` (the pre-rendered `.lrcc` clip cache)
 - `dialogs/tabs/LowerThirdSettingsTab.kt`
 
 ## Announcements & Timers
@@ -206,8 +206,9 @@
 - **Real-time sync** — connected devices update instantly as the schedule and content change.
 
 **Source locations:**
-- `server/CompanionServer.kt` — Ktor REST + WebSocket server
-- `server/SslCertificateManager.kt`, `server/TunnelManager.kt`
+- `companion-server/` (the `:companion-server` Gradle module) — the Ktor REST + WebSocket server itself: `CompanionServer.kt`, the `*Routes.kt` groups, `CompanionApiDtos.kt`, and `CompanionWebPages.kt`
+- `remote/RemoteApply.kt`, `remote/RemoteApproval.kt` — what an approved remote request then does to the app
+- `companion-server/` — `SslCertificateManager.kt`, `TunnelManager.kt`
 - `data/RemoteClientManager.kt`
 - `data/settings/ServerSettings.kt`
 - `dialogs/tabs/ServerSettingsTab.kt`
@@ -218,7 +219,7 @@
 - **Resilient by design** — automatic reconnect with backoff, a heartbeat that surfaces a dead link within seconds instead of freezing on stale content, and command acknowledgement so remote actions never silently fail.
 
 **Source locations:**
-- `server/InstanceLinkClient.kt`
+- `companion-server/` — `InstanceLinkClient.kt`, `InstanceLinkLogger.kt`
 - `viewmodel/InstanceLinkViewModel.kt`
 - `data/settings/InstanceLinkSettings.kt`
 - `dialogs/InstanceLinkDialog.kt`, `dialogs/InstanceLinkToast.kt`
@@ -231,7 +232,7 @@
 
 **Source locations:**
 - `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
-- `server/AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
+- `companion-server/` — `AtemBridge.kt`, the wiring between that client, `AtemSettings` and the lower third
 - `viewmodel/OBSWebSocketManager.kt`
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
 - `companion-satellite/` (repository root) — native Companion Satellite protocol client

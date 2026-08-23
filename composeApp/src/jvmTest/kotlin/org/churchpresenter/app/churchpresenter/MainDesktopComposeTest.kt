@@ -29,9 +29,9 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.companionserver.InstanceLinkStatus
+import org.churchpresenter.companionserver.ScheduleItemDto
+import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.settings.utils.Constants
