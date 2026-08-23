@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

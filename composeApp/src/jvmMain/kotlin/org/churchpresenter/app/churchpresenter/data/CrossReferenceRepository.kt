@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

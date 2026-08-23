@@ -11,11 +11,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.tab_strip_scroll_back
-import churchpresenter.composeapp.generated.resources.tab_strip_scroll_forward
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_arrow_left
+import org.churchpresenter.resources.generated.resources.ic_arrow_right
+import org.churchpresenter.resources.generated.resources.tab_strip_scroll_back
+import org.churchpresenter.resources.generated.resources.tab_strip_scroll_forward
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource

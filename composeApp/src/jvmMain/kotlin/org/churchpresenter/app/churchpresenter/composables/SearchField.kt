@@ -20,10 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
-import churchpresenter.composeapp.generated.resources.search_clear
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.ic_search
+import org.churchpresenter.resources.generated.resources.search_clear
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

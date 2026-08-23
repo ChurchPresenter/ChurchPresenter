@@ -47,12 +47,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.dialog_choose_color
-import churchpresenter.composeapp.generated.resources.label_hex
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.recent
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.cancel
+import org.churchpresenter.resources.generated.resources.dialog_choose_color
+import org.churchpresenter.resources.generated.resources.label_hex
+import org.churchpresenter.resources.generated.resources.ok
+import org.churchpresenter.resources.generated.resources.recent
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 

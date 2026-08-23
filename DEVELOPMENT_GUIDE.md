@@ -123,8 +123,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
 // Group 4: Resources
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.save
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.save
 
 // Group 5: App Classes
 import org.churchpresenter.core.models.schedule.*
@@ -137,7 +137,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.*
 
 ### User-Facing Strings
 
-**Location:** `composeApp/src/jvmMain/composeResources/values/strings.xml`
+**Location:** `resources/src/main/composeResources/values/strings.xml` (the `:resources` module)
 
 **Pattern:**
 ```kotlin

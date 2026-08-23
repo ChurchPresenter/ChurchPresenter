@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import java.io.File

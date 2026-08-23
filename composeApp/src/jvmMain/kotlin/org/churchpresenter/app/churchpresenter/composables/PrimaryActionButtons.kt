@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_playlist_add
 import org.jetbrains.compose.resources.painterResource
 
 private const val DIMMED_ALPHA = 0.5f

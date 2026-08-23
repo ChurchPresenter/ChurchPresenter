@@ -29,15 +29,15 @@ import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.website_disclaimer
-import churchpresenter.composeapp.generated.resources.website_dialog_title
-import churchpresenter.composeapp.generated.resources.website_title_hint
-import churchpresenter.composeapp.generated.resources.website_title_label
-import churchpresenter.composeapp.generated.resources.website_url_hint
-import churchpresenter.composeapp.generated.resources.website_url_label
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.cancel
+import org.churchpresenter.resources.generated.resources.ok
+import org.churchpresenter.resources.generated.resources.website_disclaimer
+import org.churchpresenter.resources.generated.resources.website_dialog_title
+import org.churchpresenter.resources.generated.resources.website_title_hint
+import org.churchpresenter.resources.generated.resources.website_title_label
+import org.churchpresenter.resources.generated.resources.website_url_hint
+import org.churchpresenter.resources.generated.resources.website_url_label
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

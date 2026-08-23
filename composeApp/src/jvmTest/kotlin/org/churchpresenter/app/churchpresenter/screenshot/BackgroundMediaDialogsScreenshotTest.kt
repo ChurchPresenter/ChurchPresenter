@@ -15,9 +15,9 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.stock_photo_browse_photos_title
-import churchpresenter.composeapp.generated.resources.stock_photo_search_placeholder_photo
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.stock_photo_browse_photos_title
+import org.churchpresenter.resources.generated.resources.stock_photo_search_placeholder_photo
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialogContent

@@ -45,9 +45,9 @@ import org.churchpresenter.app.churchpresenter.utils.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.app_name
+import org.churchpresenter.resources.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

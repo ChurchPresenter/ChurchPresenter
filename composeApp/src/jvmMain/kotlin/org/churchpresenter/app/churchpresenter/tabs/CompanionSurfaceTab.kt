@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.companion_satellite_no_host
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.companion_satellite_no_host
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
 import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.settings.AppSettings

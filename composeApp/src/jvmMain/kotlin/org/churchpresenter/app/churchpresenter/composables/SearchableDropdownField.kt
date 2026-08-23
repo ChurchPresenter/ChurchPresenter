@@ -48,11 +48,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.no_results_found
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.clear
+import org.churchpresenter.resources.generated.resources.ic_arrow_down
+import org.churchpresenter.resources.generated.resources.ic_close
+import org.churchpresenter.resources.generated.resources.no_results_found
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

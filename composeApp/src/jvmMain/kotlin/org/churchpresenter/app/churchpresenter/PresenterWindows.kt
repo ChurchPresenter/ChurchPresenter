@@ -27,10 +27,10 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.key_output_title
-import churchpresenter.composeapp.generated.resources.presenter_view_title
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_app_icon
+import org.churchpresenter.resources.generated.resources.key_output_title
+import org.churchpresenter.resources.generated.resources.presenter_view_title
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import java.awt.GraphicsDevice

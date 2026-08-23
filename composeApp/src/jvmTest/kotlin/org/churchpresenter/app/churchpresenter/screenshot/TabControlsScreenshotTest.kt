@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.ic_refresh
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.ic_add
+import org.churchpresenter.resources.generated.resources.ic_edit
+import org.churchpresenter.resources.generated.resources.ic_refresh
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
