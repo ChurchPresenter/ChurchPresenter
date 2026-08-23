@@ -111,3 +111,7 @@ include(":ui-components")
 // behind them, the settings tab that styles the output, and the presenter that draws it. The data
 // it reads is :dictionary; this is everything the operator and the audience see of it.
 include(":dictionary-tab")
+// The Dictionary tab's settings tab: the one page of the options dialog that styles what the
+// audience sees of a Strong's entry — the word, its definition, its reference and its KJV usage.
+// Depends on the settings-field widgets rather than on the dictionary, so it stands alone.
+include(":dictionary-settings-tab")

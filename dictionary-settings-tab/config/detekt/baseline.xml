@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+  <ID>LongMethod:DictionarySettingsTab.kt$@Composable fun DictionarySettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

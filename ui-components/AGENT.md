@@ -31,8 +31,9 @@ that had to stay behind is the Bible: `FontPreviewText.update` takes `List<Strin
   `testFixtures(projects.uiComponents)`; it is the lower module, so this is the one copy of the
   theme-stacking, trimming and capture machinery. Do not fork a second copy up in `:composeApp`.
 - **So does every helper that drives one of these widgets.** `ColorPickerFieldTestSupport`,
-  `SettingsFieldTestSupport` (the font, number and style-button helpers, plus `unlabelledControls`
-  and `renderedPixels`), `StepperArrowsTestSupport` and `RenderedTextTestSupport` are all fixtures,
+  `SettingsFieldTestSupport` (the font, number and style-button helpers, plus `unlabelledControls`,
+  `mixedCaseInstalledFont` and `renderedPixels`), `StepperArrowsTestSupport` and
+  `RenderedTextTestSupport` are all fixtures,
   because a settings tab in `:composeApp` and one in a feature module of its own both drive the same
   widgets. **A helper that names a tab is not one of these** — `songTab`, the `*Group` ordinals and
   `chooseShowOption` stayed in `SongSettingsTabTestSupport`.

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.dictionary.settings.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,9 +16,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.dictionary.settings.DictionarySettingsTab
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

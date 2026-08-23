@@ -330,6 +330,7 @@ kotlin {
             // The bundled study data: the Strong's dictionary and the interlinear index over it.
             implementation(projects.dictionary)
             implementation(projects.dictionaryTab)
+            implementation(projects.dictionarySettingsTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is
             // `remote/` here.

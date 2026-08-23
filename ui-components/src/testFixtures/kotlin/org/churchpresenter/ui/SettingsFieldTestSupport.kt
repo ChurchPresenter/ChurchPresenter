@@ -143,6 +143,35 @@ const val SENTINEL_FONT = "ZzUnusedTestFont"
 /** The font panel's search box announces itself with its own placeholder. */
 const val FONT_SEARCH_LABEL = "Search fonts…"
 
+/**
+ * Every control on screen with no accessible name at all: no text, no description, no role.
+ *
+ * A sweep rather than a lookup — the tab's other completeness guards check text and descriptions
+ * separately, and a control carrying neither is invisible to both. It used to find the expand arrow
+ * inside each font dropdown, which was a bare clickable `Icon`; the font field is one labelled
+ * control now, and this is what keeps the next one from going in unnamed.
+ */
+fun ComposeUiTest.unlabelledControls(): SemanticsNodeInteractionCollection =
+    onAllNodes(
+        hasClickAction() and
+            SemanticsMatcher.keyNotDefined(SemanticsProperties.Text) and
+            SemanticsMatcher.keyNotDefined(SemanticsProperties.EditableText) and
+            SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription) and
+            SemanticsMatcher.keyNotDefined(SemanticsProperties.Role),
+    )
+
+/**
+ * An installed font family whose name is not already all-lowercase.
+ *
+ * `FontSettingsDropdown` seeds its filter with the value it is currently showing and matches
+ * `ignoreCase = true`, so parking a field on the lowercased spelling makes the menu offer the
+ * properly-cased family — a value the field does not already hold, on any machine's font list.
+ */
+fun mixedCaseInstalledFont(): String =
+    // Offerable, not merely installed: ".AppleSystemUIFont" is the first mixed-case family on a Mac
+    // and is one of the system-internal faces the picker hides.
+    Utils.getAvailableSystemFonts().first { it != it.lowercase() && !FontCatalog.isHidden(it) }
+
 /** The first node of a collection, with a message naming what was being looked for when there is none. */
 internal fun SemanticsNodeInteractionCollection.onFirstNode(message: String): SemanticsNodeInteraction {
     val count = fetchSemanticsNodes(atLeastOneRootRequired = false).size

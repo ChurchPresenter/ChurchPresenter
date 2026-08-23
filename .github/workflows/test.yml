@@ -170,6 +170,13 @@ jobs:
             dictionary:
               - *shared
               - 'dictionary/**'           # depends on nothing else: the files and the lookups
+            dictionarysettingstab:
+              - *shared
+              - 'dictionary-settings-tab/**'
+              - 'settings/**'         # api(projects.settings)
+              - 'ui-components/**'    # implementation(projects.uiComponents)
+              - 'theme/**'            # testImplementation, for the themed screenshots
+              - 'resources/**'        # api(projects.resources)
             dictionarytab:
               - *shared
               - 'dictionary-tab/**'
@@ -225,7 +232,7 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
-          :ui-components:detekt :dictionary-tab:detekt
+          :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -403,6 +410,14 @@ jobs:
         if: always() && steps.modules.outputs.dictionarytab == 'true'
         run: ./gradlew :dictionary-tab:jacocoTestCoverageVerification -x test
 
+      - name: Dictionary settings tab tests
+        if: always() && steps.modules.outputs.dictionarysettingstab == 'true'
+        run: ./gradlew :dictionary-settings-tab:test
+
+      - name: Dictionary settings tab coverage floor
+        if: always() && steps.modules.outputs.dictionarysettingstab == 'true'
+        run: ./gradlew :dictionary-settings-tab:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -555,6 +570,7 @@ jobs:
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             dictionary-tab/build/test-results/**/TEST-*.xml
+            dictionary-settings-tab/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -582,6 +598,7 @@ jobs:
             Bible
             Dictionary
             Dictionary tab
+            Dictionary settings tab
             Companion Server
           detailed_summary: true
           include_passed: false
@@ -739,5 +756,7 @@ jobs:
             dictionary/build/test-results/
             dictionary-tab/build/reports/tests/
             dictionary-tab/build/test-results/
+            dictionary-settings-tab/build/reports/tests/
+            dictionary-settings-tab/build/test-results/
             companion-server/build/reports/tests/
             companion-server/build/test-results/

@@ -8,15 +8,23 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 search, language filter and history, the "In Scripture" panel beside it, the view model holding all
 of that state, and the presenter that draws an entry on the screen.
 
-`DictionarySettingsTab` is **deliberately still in `:composeApp`**, with the other settings tabs the
-options dialog is built from. Do not move it here without asking.
+The page of the options dialog that *styles* that output is its own module, `:dictionary-settings-tab`
+— it reads `DictionarySettings` and draws it with the `:ui-components` fields, and knows nothing
+about a Strong's number, so it needs neither `:dictionary` nor a view model.
 
 The data underneath is `:dictionary` (14,197 entries and the interlinear index over them, 18 MB of
 JSON). **This module is the picture; that one is the numbers.** `include(":dictionary-tab")`,
 `implementation(projects.dictionaryTab)`.
 
 It is the first tab extracted from `:composeApp`, and it is the shape the others should follow: tab
-+ view model + presenter in one module, with the app left holding only the wiring.
++ view model + presenter in one module, with the app left holding only the wiring, and the settings
+page beside it in a module of its own.
+
+**The settings tab moved in two steps**, and the second one is the lesson: it came here first,
+because that is where the Dictionary lives, and then straight back out into
+`:dictionary-settings-tab` because it shares nothing with the tab but a name. A settings page reads
+a settings class and draws widgets; it does not need the feature's data or its view model. Check
+that before assuming the next tab's settings page belongs with its tab.
 
 ## What `:composeApp` uses from it
 
@@ -61,12 +69,16 @@ override and must not gain one.** Measured 2026-08-23:
 
 | counter | measured |
 |---|---|
-| INSTRUCTION | 0.948 |
+| INSTRUCTION | 0.947 |
 | LINE | 0.953 |
 | CLASS | 0.933 |
 | METHOD | 0.918 |
-| BRANCH | 0.886 |
-| COMPLEXITY | 0.858 |
+| BRANCH | 0.930 |
+| COMPLEXITY | 0.887 |
+
+Re-measured 2026-08-23, after the settings tab left for `:dictionary-settings-tab`. BRANCH and
+COMPLEXITY both sit higher than when this module was extracted (0.886 and 0.858) — the work that
+lifted them is below, and the split did not undo it.
 
 BRANCH and COMPLEXITY started at 0.824 and 0.793 — below the default, and the same Compose
 `$changed` codegen ceiling `:ui-components` runs into. Two things lifted them, and both are worth
@@ -88,9 +100,8 @@ honest number; do not hide it behind an exclude.
 
 **The detekt baseline holds five entries and nothing else** — three `LongMethod` and two
 `TooManyFunctions`, all carried across verbatim from `:composeApp`'s baseline when the files moved.
-Nothing was newly suppressed: the `MaxLineLength` findings the move surfaced were fixed at source.
-Two of the five had to be re-keyed when the dead defaults went, because a detekt ID embeds the
-signature it was written against. Never add a sixth.
+**Nothing here was newly suppressed.** Two of them had to be re-keyed when the dead default values
+went, because a detekt ID embeds the signature it was written against. Never add a sixth.
 
 ## Commands
 
