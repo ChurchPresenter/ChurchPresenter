@@ -61,6 +61,8 @@ internal fun qaTab(
     serverUrl: String = "http://192.0.2.1:8080",
     settings: AppSettings = AppSettings(),
     seed: QAManager.() -> Unit = {},
+    /** Device names as the operator has them elsewhere — see [QATab]'s parameter. */
+    deviceNames: Map<String, String> = emptyMap(),
     width: Dp? = null,
     themeMode: ThemeMode? = null,
     block: ComposeUiTest.(qa: QAManager, presenter: PresenterManager, reports: QAReports) -> Unit,
@@ -92,6 +94,7 @@ internal fun qaTab(
                             reports.settingsChanges++
                             reports.settingsAfterChange = transform(settings)
                         },
+                        resolveDeviceName = { deviceNames[it] ?: "" },
                     )
                     }
                     }

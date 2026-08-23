@@ -6,6 +6,9 @@ import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
@@ -42,6 +45,7 @@ class RemoteEventDialogScreenshotTest {
         isClientKnownAllowed: Boolean = false,
         isClientKnownBlocked: Boolean = false,
         isInstanceLinkFollower: Boolean = false,
+        drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
@@ -74,6 +78,8 @@ class RemoteEventDialogScreenshotTest {
                     }
                 }
             }
+            waitForIdle()
+            drive()
             waitForIdle()
             captureTo(file)
         }
@@ -178,6 +184,14 @@ class RemoteEventDialogScreenshotTest {
     fun `a device with no saved name`() = shoot(
         "unnamed_client",
         event(RemoteEventType.PROJECT, "Psalms 23:1-3").copy(clientLabel = ""),
+    )
+
+    /** Naming the device from the prompt — the one moment the operator knows which phone this is. */
+    @Test
+    fun `naming the device`() = shoot(
+        "client_naming",
+        event(RemoteEventType.PROJECT, "Psalms 23:1-3"),
+        drive = { onNodeWithContentDescription("Set friendly name").performClick() },
     )
 
     /** Already on the allow list: the badge says so, and Allow Permanently is no longer offered. */

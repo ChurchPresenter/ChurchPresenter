@@ -239,6 +239,100 @@ class RemoteClientManagerTest {
         assertEquals("Sound desk iPad", clients.getLabel("phone-1"))
     }
 
+    // ── Names the devices gave themselves ───────────────────────────────────────
+
+    @Test
+    fun `a device that says what it is called is shown by that name`() {
+        val clients = RemoteClientManager()
+
+        clients.setReportedName("phone-1", "Pixel 7 Pro")
+
+        assertEquals("Pixel 7 Pro", clients.getLabel("phone-1"))
+    }
+
+    @Test
+    fun `a name the operator typed wins over the one the device reports`() {
+        val clients = RemoteClientManager()
+        clients.setReportedName("phone-1", "iPhone")
+
+        clients.setLabel("phone-1", "Sound desk")
+
+        assertEquals("Sound desk", clients.getLabel("phone-1"))
+    }
+
+    @Test
+    fun `reconnecting does not overwrite the name the operator typed`() {
+        // The whole point of typing one: the reported name was "iPhone", and there are three.
+        val clients = RemoteClientManager()
+        clients.setLabel("phone-1", "Sound desk")
+
+        clients.setReportedName("phone-1", "iPhone")
+
+        assertEquals("Sound desk", clients.getLabel("phone-1"))
+    }
+
+    @Test
+    fun `clearing the typed name falls back to the reported one, not to the id`() {
+        val clients = RemoteClientManager()
+        clients.setReportedName("phone-1", "Pixel 7 Pro")
+        clients.setLabel("phone-1", "Sound desk")
+
+        clients.setLabel("phone-1", "")
+
+        assertEquals("Pixel 7 Pro", clients.getLabel("phone-1"))
+    }
+
+    @Test
+    fun `a reported name is trimmed, and a blank one is not stored`() {
+        val clients = RemoteClientManager()
+
+        clients.setReportedName("phone-1", "  Pixel 7 Pro  ")
+        clients.setReportedName("phone-2", "   ")
+
+        assertEquals("Pixel 7 Pro", clients.getLabel("phone-1"))
+        assertEquals("", clients.getLabel("phone-2"))
+    }
+
+    @Test
+    fun `an anonymous device cannot be named`() {
+        val clients = RemoteClientManager()
+
+        clients.setReportedName("", "Pixel 7 Pro")
+
+        assertTrue(clients.reportedNames.isEmpty())
+    }
+
+    @Test
+    fun `a reported name survives a restart`() {
+        RemoteClientManager().setReportedName("phone-1", "Pixel 7 Pro")
+
+        assertEquals("Pixel 7 Pro", restarted().getLabel("phone-1"))
+    }
+
+    @Test
+    fun `reporting the same name again does not rewrite the file`() {
+        // This runs on nearly every request a device makes; an unguarded write would be one disk
+        // write per request for the whole service.
+        val clients = RemoteClientManager()
+        clients.setReportedName("phone-1", "Pixel 7 Pro")
+        val writtenAt = clientsFile.lastModified()
+        clientsFile.setLastModified(writtenAt - 5_000)
+
+        clients.setReportedName("phone-1", "Pixel 7 Pro")
+
+        assertEquals(writtenAt - 5_000, clientsFile.lastModified(), "the file was rewritten for an unchanged name")
+    }
+
+    @Test
+    fun `a device that renames itself is shown by its new name`() {
+        val clients = RemoteClientManager()
+        clients.setReportedName("phone-1", "iPhone")
+
+        clients.setReportedName("phone-1", "Sound desk iPhone")
+
+        assertEquals("Sound desk iPhone", clients.getLabel("phone-1"))
+    }
+
     // ── Persistence ─────────────────────────────────────────────────────────────
 
     @Test

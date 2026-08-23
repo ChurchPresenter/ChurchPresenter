@@ -12,7 +12,12 @@ import java.io.File
 data class RemoteClientLists(
     val allowedClients: Set<String> = emptySet(),
     val blockedClients: Set<String> = emptySet(),
-    val clientLabels: Map<String, String> = emptyMap()
+    val clientLabels: Map<String, String> = emptyMap(),
+    /**
+     * What each device said it was called, kept apart from [clientLabels] so the operator's own
+     * name is never overwritten by a device reconnecting. See [RemoteClientManager.getLabel].
+     */
+    val reportedNames: Map<String, String> = emptyMap()
 )
 
 /**
@@ -33,6 +38,7 @@ class RemoteClientManager {
     val allowedClients: Set<String> get() = _lists.allowedClients
     val blockedClients: Set<String> get() = _lists.blockedClients
     val clientLabels: Map<String, String> get() = _lists.clientLabels
+    val reportedNames: Map<String, String> get() = _lists.reportedNames
 
     private fun load(): RemoteClientLists = try {
         if (clientsFile.exists()) jsonFormat.decodeFromString(clientsFile.readText())
@@ -85,8 +91,17 @@ class RemoteClientManager {
         save()
     }
 
-    /** Returns the human-readable label for the given device ID, or empty string if none set. */
-    fun getLabel(clientId: String): String = _lists.clientLabels[clientId] ?: ""
+    /**
+     * The name to show for a device: what the operator called it, else what the device called
+     * itself, else empty — and the caller then shows the raw id.
+     *
+     * The order is the point. A name typed here was typed because the reported one was blank,
+     * unhelpful ("iPhone") or the wrong thing to call that device in this building, so a later
+     * connect must not undo it; and clearing the typed name falls back to the reported one rather
+     * than all the way to a UUID.
+     */
+    fun getLabel(clientId: String): String =
+        _lists.clientLabels[clientId] ?: _lists.reportedNames[clientId] ?: ""
 
     /** Saves (or clears when blank) the human-readable label for a device ID. */
     fun setLabel(clientId: String, label: String) {
@@ -96,6 +111,21 @@ class RemoteClientManager {
             clientLabels = if (trimmed.isEmpty()) _lists.clientLabels - clientId
                            else _lists.clientLabels + (clientId to trimmed)
         )
+        save()
+    }
+
+    /**
+     * Records what a device says it is called — never touching the operator's own label.
+     *
+     * Called from the server on any request that carries a name, which is nearly every request, so
+     * an unchanged name returns before [save] rewrites the file: otherwise browsing the song list
+     * would be one disk write per request.
+     */
+    fun setReportedName(clientId: String, name: String) {
+        if (clientId.isBlank()) return
+        val trimmed = name.trim()
+        if (trimmed.isEmpty() || _lists.reportedNames[clientId] == trimmed) return
+        _lists = _lists.copy(reportedNames = _lists.reportedNames + (clientId to trimmed))
         save()
     }
 

@@ -311,6 +311,8 @@ fun MainDesktop(
     onStopTunnel: () -> Unit = {},
     qaDisplayUrl: String = "",
     onQaDisplayUrlChanged: (String) -> Unit = {},
+    /** Names a remote device for the Q&A tab — see [QATab]'s parameter of the same name. */
+    resolveDeviceName: (String) -> String = { "" },
     presentationDisplayUrl: String = "",
     onPresentationDisplayUrlChanged: (String) -> Unit = {},
     presentationFrozen: Boolean = false,
@@ -1672,6 +1674,7 @@ fun MainDesktop(
                                     onStopTunnel = onStopTunnel,
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = onQaDisplayUrlChanged,
+                                    resolveDeviceName = resolveDeviceName,
                                 )
                             }
 

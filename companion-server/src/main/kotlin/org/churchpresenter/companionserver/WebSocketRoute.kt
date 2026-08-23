@@ -63,6 +63,9 @@ internal fun Route.webSocketRoute(
                     val wsClientId = call.request.headers[Constants.HEADER_DEVICE_ID]
                         ?: call.request.queryParameters[Constants.HEADER_DEVICE_ID]
                         ?: ""
+                    // Named before the block check below: a device the operator later unblocks is
+                    // then already carrying its own name rather than showing as a bare UUID.
+                    server.reportDeviceName(wsClientId, call.request)
                     // A blocked device gets no session at all: no live feed to watch, and no socket
                     // to send commands down. Checked before the follower registration below so a
                     // blocked instance never appears in the connected-followers count either.

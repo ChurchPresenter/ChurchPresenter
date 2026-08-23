@@ -802,6 +802,15 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     remoteClientManager.blockedClients + sessionBlockedClients
                             }
 
+                            // Set once, and synchronously: the name has to be stored before the
+                            // approval request it labels reaches the collectors below, which all
+                            // read remoteClientManager.getLabel(clientId).
+                            LaunchedEffect(Unit) {
+                                companionServer.onDeviceNameReported = { clientId, name ->
+                                    remoteClientManager.setReportedName(clientId, name)
+                                }
+                            }
+
                             LaunchedEffect(Unit) {
                                 companionServer.onAddToSchedule.collect { pending ->
                                     val clientId = pending.clientId
@@ -1472,6 +1481,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onStopTunnel = { companionServer.tunnelManager.stop() },
                                 qaDisplayUrl = qaDisplayUrl,
                                 onQaDisplayUrlChanged = { qaDisplayUrl = it },
+                                resolveDeviceName = { remoteClientManager.getLabel(it) },
                                 presentationDisplayUrl = presentationDisplayUrl,
                                 onPresentationDisplayUrlChanged = { presentationDisplayUrl = it },
                                 onSlideChanged = { id, index, total, isPlaying ->
@@ -1697,6 +1707,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             RemoteEventDialog(
                                 event = currentRemote?.first,
                                 queueSize = remoteEventQueue.size,
+                                // Read live rather than from the queued event, whose label was
+                                // resolved when it was created: renaming below must show at once.
+                                clientLabel = remoteClientManager.getLabel(currentClientId),
+                                onRename = { remoteClientManager.setLabel(currentClientId, it) },
                                 isClientKnownAllowed = remoteClientManager.isAllowed(currentClientId),
                                 isClientKnownBlocked = remoteClientManager.isBlocked(currentClientId),
                                 isInstanceLinkFollower = isInstanceLinkFollowerClient(

@@ -457,7 +457,7 @@ private fun Route.qaAdminActionRoutes(
                 // Admin: clear display
                 post("/api/qa/clear-display") {
                     if (!server.checkQaAdmin(call)) return@post
-                    val clientId = call.request.headers["X-Device-Id"] ?: ""
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     val pending = CompanionServer.PendingQAAdminRequest(action = "clear-display", clientId = clientId)
                     server.onQAAdminRequest.emit(pending)
                     if (!pending.decision.await()) {
