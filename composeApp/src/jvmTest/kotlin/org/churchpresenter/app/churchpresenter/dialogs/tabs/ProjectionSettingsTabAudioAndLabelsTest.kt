@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import org.churchpresenter.ui.assertStepperArrowsUsable
 import org.junit.Assume
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.settings.AppSettings

@@ -12,6 +12,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
 
 /**
  * The Media tab's source bar — choosing between a local file and a network URL, loading one, and

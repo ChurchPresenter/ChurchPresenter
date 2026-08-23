@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.bible.SpbFixture
+import org.churchpresenter.ui.FontPreviewText
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import kotlin.test.AfterTest
@@ -34,9 +35,11 @@ class FontPreviewTextTest {
     @Test
     fun `each loaded translation contributes its own first verse`() {
         FontPreviewText.update(
-            listOf(
-                bible("In the beginning God created the heaven and the earth.", "KJV"),
-                bible("В начале сотворил Бог небо и землю.", "RST"),
+            previewLinesFrom(
+                listOf(
+                    bible("In the beginning God created the heaven and the earth.", "KJV"),
+                    bible("В начале сотворил Бог небо и землю.", "RST"),
+                ),
             ),
         )
 
@@ -51,7 +54,7 @@ class FontPreviewTextTest {
         // Two English translations often carry Genesis 1:1 word for word, and a preview showing the
         // same line twice has spent half its height saying nothing.
         val same = "In the beginning God created the heaven and the earth."
-        FontPreviewText.update(listOf(bible(same, "KJV"), bible(same, "AKJV")))
+        FontPreviewText.update(previewLinesFrom(listOf(bible(same, "KJV"), bible(same, "AKJV"))))
 
         assertEquals(listOf(same), FontPreviewText.lines)
     }
@@ -67,16 +70,16 @@ class FontPreviewTextTest {
             ),
         )
 
-        FontPreviewText.update(listOf(psalmsOnly))
+        FontPreviewText.update(previewLinesFrom(listOf(psalmsOnly)))
 
         assertTrue(FontPreviewText.lines.isEmpty())
     }
 
     @Test
     fun `unloading every translation empties the preview again`() {
-        FontPreviewText.update(listOf(bible("In the beginning.", "KJV")))
+        FontPreviewText.update(previewLinesFrom(listOf(bible("In the beginning.", "KJV"))))
 
-        FontPreviewText.update(emptyList())
+        FontPreviewText.update(previewLinesFrom(emptyList()))
 
         assertTrue(FontPreviewText.lines.isEmpty())
     }

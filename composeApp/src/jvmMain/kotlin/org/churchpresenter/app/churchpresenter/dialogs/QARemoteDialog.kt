@@ -96,10 +96,10 @@ import org.churchpresenter.resources.generated.resources.qa_text_color
 import org.churchpresenter.resources.generated.resources.qa_transparent
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.ui.ColorPickerField
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AppSettings
@@ -107,7 +107,7 @@ import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
 private const val POSITION_GRID_COLUMNS = 3

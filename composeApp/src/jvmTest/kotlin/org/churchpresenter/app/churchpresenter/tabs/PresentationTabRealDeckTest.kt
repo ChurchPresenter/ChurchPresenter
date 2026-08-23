@@ -22,6 +22,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.showsContainingText
 
 class PresentationTabRealDeckTest {
 

@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performScrollTo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.recolor
 
 /**
  * Drives the Card Background and Transitions sections — the tab's two sliders and its two transition

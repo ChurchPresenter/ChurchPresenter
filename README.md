@@ -49,6 +49,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > numbers occurs in scripture. Six JSON files and the lookups over them, and nothing else — no
 > Compose, no Ktor. `./gradlew :dictionary:test`.
 >
+> **[`dictionary-tab/`](./dictionary-tab)** — the Dictionary tab itself: the Strong's browser with
+> its search, language filter and history, the "In Scripture" panel beside it, and the presenter
+> that puts an entry on the screen. The first tab to live outside `:composeApp`, which keeps the
+> wiring and the settings tab. `./gradlew :dictionary-tab:test`.
+>
 > **[`companion-server/`](./companion-server)** — the HTTP/WebSocket surface the desktop exposes:
 > the wire format, the routes, the pages it serves a browser, TLS and the tunnel, plus the client a
 > follower instance consumes the same surface with. One server behind the phone companion app, the

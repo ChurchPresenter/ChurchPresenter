@@ -53,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.churchpresenter.dictionary.StrongsEntry
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.StageMonitorContentType
@@ -66,13 +67,12 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.Utils.parseHexColor
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.resources.generated.resources.song_key

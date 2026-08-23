@@ -12,6 +12,15 @@ import androidx.compose.ui.test.onNodeWithText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.assertNumberFieldShows
+import org.churchpresenter.ui.pickFont
+import org.churchpresenter.ui.pickFontFilterOnly
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
+import org.churchpresenter.ui.styleButton
+import org.churchpresenter.ui.uniquelyNamedFont
 
 /**
  * Drives every control in the Word (Original) section — the largest of the six, and the only one

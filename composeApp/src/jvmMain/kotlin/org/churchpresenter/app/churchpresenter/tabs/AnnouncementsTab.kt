@@ -155,13 +155,13 @@ import org.churchpresenter.resources.generated.resources.timer_target_time
 import org.churchpresenter.resources.generated.resources.top_center
 import org.churchpresenter.resources.generated.resources.top_left
 import org.churchpresenter.resources.generated.resources.top_right
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.DropdownSettingsField
 import org.churchpresenter.ui.SegmentedButton
 import org.churchpresenter.ui.SegmentedButtonItem
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.HorizontalAlignmentButtons
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AnnouncementsSettings
@@ -170,8 +170,8 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.rememberSystemFonts
+import org.churchpresenter.ui.Utils
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

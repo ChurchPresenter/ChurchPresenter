@@ -16,6 +16,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
+import org.churchpresenter.ui.showsExactly
 
 /**
  * The header controls (QR toggle, voting toggle, sort), the filters beyond approved/denied, the

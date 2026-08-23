@@ -1,0 +1,368 @@
+package org.churchpresenter.dictionary.tab
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.churchpresenter.bible.Bible
+import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
+import org.churchpresenter.dictionary.InterlinearRepository
+import org.churchpresenter.dictionary.InterlinearVerse
+import org.churchpresenter.dictionary.StrongsCatalog
+import org.churchpresenter.dictionary.StrongsEntry
+import java.io.File
+import org.churchpresenter.bible.readTranslationTitle
+
+enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
+
+/**
+ * @param strongs the bundled dictionary. Defaulted to the packaged files and replaced in tests with
+ * a fixture catalogue, so a test drives the real loading path over a handful of entries.
+ */
+class DictionaryViewModel(private val strongs: StrongsCatalog = StrongsCatalog()) {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    var dictLanguage by mutableStateOf("en")
+        private set
+    var dictBibleFile by mutableStateOf("")
+        private set
+    var dictBible by mutableStateOf<Bible?>(null)
+        private set
+    var isDictBibleLoading by mutableStateOf(false)
+        private set
+    var availableDictBibles by mutableStateOf<List<Pair<String, String>>>(emptyList())
+        private set
+    var isLoading by mutableStateOf(false)
+        private set
+    var entries: List<StrongsEntry> by mutableStateOf(emptyList())
+        private set
+    var searchQuery by mutableStateOf("")
+    var filterLanguage by mutableStateOf(DictionaryLanguageFilter.ALL)
+        private set
+    var selectedEntry by mutableStateOf<StrongsEntry?>(null)
+        private set
+
+    // Back/Forward navigation history (stores Strong's numbers)
+    private val history = mutableListOf<String>()
+    private var historyIdx by mutableStateOf(-1)
+    val canGoBack: Boolean get() = historyIdx > 0
+    val canGoForward: Boolean get() = historyIdx < history.lastIndex
+    var entryBookFilter by mutableStateOf<Int?>(null)
+    var entryChapterFilter by mutableStateOf<Int?>(null)
+    var entryVerseFilter by mutableStateOf<Int?>(null)
+    var isInterlinearDataLoaded by mutableStateOf(false)
+        private set
+    private var pendingSelectionNumber: String? = null
+
+    // Interlinear state
+    private val interlinearRepository = InterlinearRepository()
+    private var interlinearJob: Job? = null
+
+    var interlinearVerses by mutableStateOf<List<InterlinearVerse>>(emptyList())
+        private set
+    var isInterlinearLoading by mutableStateOf(false)
+        private set
+    var interlinearDisplayLimit by mutableStateOf(INTERLINEAR_PAGE_SIZE)
+        private set
+    var scrollRequestToken by mutableStateOf(0)
+        private set
+
+    // Card filter: book/chapter filter for the detail-pane verse cards (resets on entry switch)
+    var cardBookFilter by mutableStateOf<Int?>(null)
+        private set
+    var cardChapterFilter by mutableStateOf<Int?>(null)
+        private set
+
+    val cardAvailableBooks: List<Int>
+        get() = interlinearVerses.map { it.bookId }.distinct().sorted()
+
+    val cardAvailableChapters: List<Int>
+        get() {
+            val bookId = cardBookFilter ?: return emptyList()
+            return interlinearVerses.filter { it.bookId == bookId }.map { it.chapter }.distinct().sorted()
+        }
+
+    // Verses sorted so entries matching the current left-pane filter appear first
+    val sortedInterlinearVerses: List<InterlinearVerse>
+        get() {
+            val bookId = entryBookFilter ?: return interlinearVerses
+            val chapter = entryChapterFilter
+            val verse = entryVerseFilter
+            val (matching, rest) = interlinearVerses.partition { v ->
+                v.bookId == bookId &&
+                (chapter == null || v.chapter == chapter) &&
+                (verse == null || v.verseNumber == verse)
+            }
+            return matching + rest
+        }
+
+    // Sorted verses additionally filtered by the detail-pane card filter
+    val filteredSortedInterlinearVerses: List<InterlinearVerse>
+        get() {
+            val sorted = sortedInterlinearVerses
+            val book = cardBookFilter ?: return sorted
+            val chapter = cardChapterFilter
+            return sorted.filter { v ->
+                v.bookId == book && (chapter == null || v.chapter == chapter)
+            }
+        }
+
+    // Entry-list passage filter (filters the left-pane list)
+    val entryAvailableBooks: List<Int>
+        get() {
+            if (!isInterlinearDataLoaded) return emptyList()
+            return when (filterLanguage) {
+                DictionaryLanguageFilter.HEBREW -> interlinearRepository.getBooksWithHebrewData()
+                DictionaryLanguageFilter.GREEK  -> interlinearRepository.getBooksWithGreekData()
+                DictionaryLanguageFilter.ALL    ->
+                    (
+                        interlinearRepository.getBooksWithHebrewData() +
+                            interlinearRepository.getBooksWithGreekData()
+                        ).sorted()
+            }
+        }
+
+    val entryAvailableChapters: List<Int>
+        get() {
+            val bookId = entryBookFilter ?: return emptyList()
+            return interlinearRepository.getChaptersForBook(bookId)
+        }
+
+    val entryAvailableVerses: List<Int>
+        get() {
+            val bookId = entryBookFilter ?: return emptyList()
+            val chapter = entryChapterFilter ?: return emptyList()
+            return interlinearRepository.getVersesInChapter(bookId, chapter)
+        }
+
+    companion object {
+        const val INTERLINEAR_PAGE_SIZE = 50
+    }
+
+    val searchResults: List<StrongsEntry>
+        get() {
+            val pool = when (filterLanguage) {
+                DictionaryLanguageFilter.HEBREW -> entries.filter { it.isHebrew }
+                DictionaryLanguageFilter.GREEK  -> entries.filter { it.isGreek }
+                DictionaryLanguageFilter.ALL    -> entries
+            }
+            val passageFiltered = if (entryBookFilter != null) {
+                val validNumbers = interlinearRepository.getStrongsForBookChapter(
+                    entryBookFilter!!, entryChapterFilter, entryVerseFilter
+                )
+                pool.filter { it.number in validNumbers }
+            } else pool
+            val q = searchQuery.trim()
+            if (q.isEmpty()) return passageFiltered
+            val lower = q.lowercase()
+            return passageFiltered.filter { entry ->
+                entry.number.lowercase().contains(lower) ||
+                entry.word.contains(q) ||
+                entry.transliteration.lowercase().contains(lower) ||
+                entry.pronunciation.lowercase().contains(lower) ||
+                entry.definition.lowercase().contains(lower)
+            }
+        }
+
+    fun load() {
+        if (entries.isNotEmpty() || isLoading) return
+        isLoading = true
+        viewModelScope.launch {
+            try {
+                val loaded = strongs.load(dictLanguage)
+                entries = loaded.hebrew.sortedBy { it.numericValue } +
+                    loaded.greek.sortedBy { it.numericValue }
+                pendingSelectionNumber?.let { num ->
+                    onEntrySelected(entries.find { it.number == num }, addToHistory = false)
+                    pendingSelectionNumber = null
+                }
+            } catch (_: Exception) {
+            } finally {
+                isLoading = false
+            }
+        }
+        // Pre-load interlinear data in background so passage filtering is available (once only)
+        if (!isInterlinearDataLoaded) {
+            viewModelScope.launch {
+                try {
+                    interlinearRepository.ensureGreekLoaded()
+                    interlinearRepository.ensureHebrewLoaded()
+                    isInterlinearDataLoaded = true
+                } catch (_: Exception) { }
+            }
+        }
+    }
+
+    fun loadAvailableBibles(directory: String) {
+        if (directory.isEmpty()) { availableDictBibles = emptyList(); return }
+        viewModelScope.launch {
+            val dir = File(directory)
+            if (!dir.exists() || !dir.isDirectory) { availableDictBibles = emptyList(); return@launch }
+            availableDictBibles = withContext(Dispatchers.IO) {
+                // Subfolders included: collections nest a folder per language and translation, so a
+                // flat listing sees only whatever happens to sit at the top level. This one keys on
+                // absolute paths already, so nesting needs no other change.
+                dir.walkTopDown().maxDepth(MAX_BIBLE_SCAN_DEPTH)
+                    .filter { it.isFile && it.extension.lowercase() == "spb" }
+                    .sortedBy { it.absolutePath }
+                    .map { f -> f.absolutePath to readTranslationTitle(f) }
+                    .toList()
+            }
+        }
+    }
+
+    fun setDictBible(filePath: String) {
+        if (filePath == dictBibleFile) return
+        dictBibleFile = filePath
+        if (filePath.isEmpty()) { dictBible = null; return }
+        isDictBibleLoading = true
+        viewModelScope.launch {
+            try {
+                dictBible = withContext(Dispatchers.IO) { Bible().apply { loadFromSpb(filePath) } }
+            } catch (_: Exception) {
+                dictBible = null
+            } finally {
+                isDictBibleLoading = false
+            }
+        }
+    }
+
+    fun toggleDictLanguage() {
+        dictLanguage = if (dictLanguage == "en") "ru" else "en"
+        reload()
+    }
+
+    fun reload() {
+        // Preserve the current selection across a language swap so the user keeps
+        // viewing the same word — load() re-selects it with the new-language text.
+        val preserve = selectedEntry?.number
+        entries = emptyList()
+        if (preserve == null) onEntrySelected(null, addToHistory = false)
+        pendingSelectionNumber = preserve
+        load()
+    }
+
+    fun goBack() {
+        if (!canGoBack) return
+        historyIdx--
+        val number = history[historyIdx]
+        val entry = entries.find { it.number == number }
+        onEntrySelected(entry, addToHistory = false)
+    }
+
+    fun goForward() {
+        if (!canGoForward) return
+        historyIdx++
+        val number = history[historyIdx]
+        val entry = entries.find { it.number == number }
+        onEntrySelected(entry, addToHistory = false)
+    }
+
+    fun setLanguageFilter(filter: DictionaryLanguageFilter) {
+        filterLanguage = filter
+        clearPassageFilter()
+        onEntrySelected(null, addToHistory = false)
+    }
+
+    fun filterCardsByBook(bookId: Int?) {
+        cardBookFilter = bookId
+        cardChapterFilter = null
+    }
+
+    fun filterCardsByChapter(chapter: Int?) {
+        cardChapterFilter = chapter
+    }
+
+    fun filterEntryListByBook(bookId: Int?) {
+        entryBookFilter = bookId
+        entryChapterFilter = null
+        entryVerseFilter = null
+        if (bookId != null) reselectIfNeeded()
+    }
+
+    fun filterEntryListByChapter(chapter: Int?) {
+        entryChapterFilter = chapter
+        entryVerseFilter = null
+        if (chapter != null) reselectIfNeeded()
+    }
+
+    fun filterEntryListByVerse(verse: Int?) {
+        entryVerseFilter = verse
+        if (verse != null) reselectIfNeeded()
+    }
+
+    // If the current selection is no longer in the filtered list, pick the first visible entry.
+    private fun reselectIfNeeded() {
+        val results = searchResults
+        val current = selectedEntry
+        if (current != null && results.any { it.number == current.number }) return
+        val first = results.firstOrNull()
+        if (first != null) onEntrySelected(first, addToHistory = false)
+    }
+
+    private fun clearPassageFilter() {
+        entryBookFilter = null
+        entryChapterFilter = null
+        entryVerseFilter = null
+    }
+
+    fun onEntrySelected(entry: StrongsEntry?, addToHistory: Boolean = true, scrollToEntry: Boolean = true) {
+        selectedEntry = entry
+        if (scrollToEntry && entry != null) scrollRequestToken++
+        interlinearJob?.cancel()
+        interlinearVerses = emptyList()
+        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+        cardBookFilter = null
+        cardChapterFilter = null
+        if (entry == null) return
+        if (addToHistory) {
+            // Truncate any forward history before pushing the new entry
+            if (historyIdx < history.lastIndex) {
+                history.subList(historyIdx + 1, history.size).clear()
+            }
+            history.add(entry.number)
+            historyIdx = history.lastIndex
+        }
+        interlinearJob = viewModelScope.launch {
+            isInterlinearLoading = true
+            try {
+                if (entry.isGreek) interlinearRepository.ensureGreekLoaded()
+                else interlinearRepository.ensureHebrewLoaded()
+                interlinearVerses = interlinearRepository.getVersesForEntry(entry.number)
+            } finally {
+                isInterlinearLoading = false
+            }
+        }
+    }
+
+    fun showMoreInterlinear() {
+        interlinearDisplayLimit += INTERLINEAR_PAGE_SIZE
+    }
+
+    fun selectByNumber(number: String) {
+        val normalized = number.uppercase()
+        val found = entries.find { it.number == normalized }
+        if (found != null) {
+            // If navigating to an entry not visible under the current passage filter, clear it
+            if (entryBookFilter != null) {
+                val visible = interlinearRepository.getStrongsForBookChapter(
+                    entryBookFilter!!, entryChapterFilter, entryVerseFilter
+                )
+                if (found.number !in visible) clearPassageFilter()
+            }
+            onEntrySelected(found, scrollToEntry = false)
+        } else if (normalized.isNotEmpty()) {
+            pendingSelectionNumber = normalized
+        }
+    }
+
+    fun dispose() {
+        viewModelScope.cancel()
+    }
+}

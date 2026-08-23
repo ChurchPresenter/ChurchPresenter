@@ -38,7 +38,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 | Package          | Owns                                                                |
 |------------------|---------------------------------------------------------------------|
-| `tabs/`          | UI only — one file per tab, no logic                                |
+| `tabs/`          | UI only — one file per tab, no logic. The Dictionary tab has moved out, to `:dictionary-tab` |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
@@ -88,6 +88,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary/`          | `:dictionary`          | The bundled Strong's dictionary and the interlinear index over it — 18 MB of data  | [AGENT.md](dictionary/AGENT.md)          |
 | `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
+| `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 | `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
 
@@ -195,7 +196,7 @@ are debt, not absolution: the modules are parsers, but a parser is not exempt fr
 
 `config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
 (`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on — 1,590 of them, suppressed so those rules gate new
+`TooGenericExceptionCaught`) were switched on — 1,489 of them today, suppressed so those rules gate new
 code only. **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** The test suite
 was brought to zero findings instead: 616 lines were wrapped, and the 27 that cannot be wrapped
 carry `@Suppress` at the declaration — one-line raw-string JSON fixtures (wrapping changes the
@@ -245,8 +246,9 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**The suite is clean: `verifyRoborazziJvm` fails 0 of 914 images on `main`** — measured 2026-08-22 on
-macOS. It is therefore readable as pass/fail again, and **any** failure is a real difference.
+**The suite is clean: `verifyRoborazziJvm` fails 0 of 832 images on `main`** — measured 2026-08-23 on
+macOS. Another 61 live in `ui-components/screenshots` and 31 in `dictionary-tab/screenshots`, each
+verified by its own module's task. It is therefore readable as pass/fail again, and **any** failure is a real difference.
 
 The 24 that used to be permanently red were three separate causes, all now fixed at source rather
 than by widening the threshold — every one of them the same shape as the `about_*` git-hash case, a

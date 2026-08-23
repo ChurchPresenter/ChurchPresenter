@@ -22,15 +22,15 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.openColorField
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.confirmColorDialogWith
+import org.churchpresenter.ui.openColorField
+import org.churchpresenter.ui.pickFont
 
 /**
  * The Q&A remote window, and the two addresses it works out for the room.

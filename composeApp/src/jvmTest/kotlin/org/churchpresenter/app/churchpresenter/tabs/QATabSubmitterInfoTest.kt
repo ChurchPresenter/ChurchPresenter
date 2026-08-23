@@ -7,6 +7,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
 
 class QATabSubmitterInfoTest {
 

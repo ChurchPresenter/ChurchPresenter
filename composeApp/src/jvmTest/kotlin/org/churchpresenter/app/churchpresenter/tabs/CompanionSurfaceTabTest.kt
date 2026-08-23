@@ -27,6 +27,9 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedText
+import org.churchpresenter.ui.showsContainingText
+import org.churchpresenter.ui.showsExactly
 
 /**
  * Which Companion surface the tab shows, and what happens to that choice when the surfaces change

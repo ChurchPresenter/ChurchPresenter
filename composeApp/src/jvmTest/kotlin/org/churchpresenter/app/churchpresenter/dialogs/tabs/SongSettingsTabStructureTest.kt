@@ -20,6 +20,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
+import org.churchpresenter.ui.colorFields
+import org.churchpresenter.ui.fontFields
+import org.churchpresenter.ui.numberFields
 
 /**
  * Pins the shape of the tab: how many of each repeated widget it renders, and that everything a

@@ -86,7 +86,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.ui.SettingsScrollbar

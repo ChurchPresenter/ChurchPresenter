@@ -34,18 +34,18 @@ import org.churchpresenter.resources.generated.resources.font_size
 import org.churchpresenter.resources.generated.resources.font_type
 import org.churchpresenter.resources.generated.resources.milliseconds_suffix
 import org.churchpresenter.resources.generated.resources.transition_duration
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.ui.ColorPickerField
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.NumberSettingsTextField
 import org.churchpresenter.ui.SettingRow
 import org.churchpresenter.ui.SettingsScrollbar
 import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
 private const val COLUMN_WEIGHT = 0.48f

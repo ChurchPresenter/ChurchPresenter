@@ -60,6 +60,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
+import org.churchpresenter.app.churchpresenter.composables.previewLinesFrom
+import org.churchpresenter.dictionary.tab.DictionaryTab
+import org.churchpresenter.dictionary.tab.DictionaryViewModel
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.connect
 import org.churchpresenter.resources.generated.resources.instance_link_controlling_host
@@ -84,9 +87,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.ui.FontPreviewText
 import org.churchpresenter.ui.PanelResizeHandle
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.ui.TooltipIconButton
@@ -119,7 +122,6 @@ import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
-import org.churchpresenter.app.churchpresenter.tabs.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
@@ -137,7 +139,6 @@ import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
@@ -511,7 +512,7 @@ fun MainDesktop(
     // may be handed the ViewModel.
     val loadedTranslations = bibleViewModel.loadedTranslations.value
     LaunchedEffect(loadedTranslations) {
-        FontPreviewText.update(loadedTranslations.map { it.bible })
+        FontPreviewText.update(previewLinesFrom(loadedTranslations.map { it.bible }))
     }
 
     // Mirrors the primary's bible while connected via Instance Link — see

@@ -24,6 +24,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.colorFields
+import org.churchpresenter.ui.numberFields
 
 /**
  * Covers how the tab behaves when its *surroundings* recompose rather than its controls being used.

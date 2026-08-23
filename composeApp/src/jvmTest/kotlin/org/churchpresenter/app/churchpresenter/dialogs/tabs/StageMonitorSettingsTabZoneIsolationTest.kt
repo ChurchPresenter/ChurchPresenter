@@ -12,6 +12,9 @@ import org.churchpresenter.settings.StageMonitorZoneStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
+import org.churchpresenter.ui.styleButton
 
 /**
  * Sweeps **all six** zone editors, checking each writes only into its own entry.

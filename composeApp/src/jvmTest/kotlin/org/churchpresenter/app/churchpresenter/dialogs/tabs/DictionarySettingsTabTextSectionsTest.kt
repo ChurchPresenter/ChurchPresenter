@@ -9,6 +9,9 @@ import androidx.compose.ui.test.performScrollTo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
 
 /**
  * Drives the Definition and KJV Usage sections — the two plain ones, each a Show switch, a colour

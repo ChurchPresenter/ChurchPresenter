@@ -12,6 +12,8 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.renderedPixels
+import org.churchpresenter.ui.styleButton
 
 /**
  * Proves the icon buttons *look* different depending on what is stored, for the controls that

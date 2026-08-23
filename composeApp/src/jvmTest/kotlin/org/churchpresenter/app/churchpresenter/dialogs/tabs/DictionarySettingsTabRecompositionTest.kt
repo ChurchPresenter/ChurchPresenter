@@ -19,6 +19,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import kotlin.test.assertEquals
 import kotlin.test.Test
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.assertFontFieldShows
+import org.churchpresenter.ui.assertNumberFieldShows
+import org.churchpresenter.ui.colorFields
 
 /**
  * Drives the tab from its **input** rather than from its controls: the settings object is replaced

@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.companionserver.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants

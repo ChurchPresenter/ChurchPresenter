@@ -65,7 +65,7 @@ import org.churchpresenter.ui.StyledTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

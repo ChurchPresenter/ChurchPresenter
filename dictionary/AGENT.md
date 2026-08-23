@@ -9,9 +9,10 @@ across Hebrew and Greek, in English and Russian — and the interlinear index th
 one of those numbers occurs in scripture. Six JSON files totalling **18 MB**, the loading of them,
 and the lookups over them.
 
-It is data and queries only. The tab that draws it, the view model that holds its UI state and the
-REST routes that serve it all stay in `:composeApp` — they need Compose and Ktor, and this module
-has neither.
+It is data and queries only. The tab that draws it and the view model that holds its UI state are
+`:dictionary-tab`; the REST routes that serve it are `:companion-server`. This module has neither
+Compose nor Ktor, and must not gain either — `:companion-server` depends on it, so a Compose
+dependency here would drag Compose into the server.
 
 Not to be confused with the Bible modules it sits beside:
 
@@ -21,13 +22,15 @@ Not to be confused with the Bible modules it sits beside:
 | `:bible` | a loaded `.spb` translation, its books, verses and search |
 | `:bible-engine` | speech-to-reference detection (the auto-follow feature) |
 | `:bible-formats` | the download catalogues, and converting USFX/Zefania **into** `.spb` |
+| `:dictionary-tab` | the Dictionary tab itself — the browser, the view model, the presenter |
 
 A real Gradle module of this build: `include(":dictionary")`, `implementation(projects.dictionary)`.
 
-## What `:composeApp` uses from it
+## What the rest of the build uses from it
 
-- `StrongsEntry` — the entry itself, held by `DictionaryViewModel`, `PresenterManager`,
-  `DictionaryPresenter`, `StageMonitorScreen`, `CompanionServer` and `RemoteApply`.
+- `StrongsEntry` — the entry itself, held by `DictionaryViewModel` and `DictionaryPresenter` in
+  `:dictionary-tab`, and by `PresenterManager`, `StageMonitorScreen` and `RemoteApply` in
+  `:composeApp`.
 - `StrongsCatalog` — `DictionaryViewModel` takes one as a constructor parameter and calls `load`.
 - `InterlinearRepository` — `DictionaryViewModel` holds one for the "In Scripture" panel.
 - `InterlinearVerse` / `InterlinearWord` — what that panel renders.

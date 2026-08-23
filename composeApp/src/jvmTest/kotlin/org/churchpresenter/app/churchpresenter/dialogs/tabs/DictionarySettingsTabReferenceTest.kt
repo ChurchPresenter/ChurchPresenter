@@ -11,6 +11,13 @@ import androidx.compose.ui.test.performScrollTo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.SENTINEL_FONT
+import org.churchpresenter.ui.assertColorFieldShows
+import org.churchpresenter.ui.pickFont
+import org.churchpresenter.ui.recolor
+import org.churchpresenter.ui.retypeNumberField
+import org.churchpresenter.ui.styleButton
+import org.churchpresenter.ui.uniquelyNamedFont
 
 /**
  * Drives every control in the Reference & Transliteration section.

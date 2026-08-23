@@ -73,10 +73,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 
 import org.churchpresenter.ui.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.DropdownSettingsField
 import org.churchpresenter.ui.rememberDropdownWidthFor
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.HorizontalAlignmentButtons
 import org.churchpresenter.ui.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderListing
@@ -86,7 +86,7 @@ import org.churchpresenter.ui.SettingRow
 import org.churchpresenter.ui.SettingsScrollbar
 import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.ui.TvScreenBox
@@ -103,10 +103,10 @@ import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.removeBibleTranslation
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

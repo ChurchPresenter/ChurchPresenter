@@ -32,7 +32,7 @@ import org.churchpresenter.ui.SettingsScrollbar
 import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.ui.LabeledCheckbox

@@ -22,6 +22,8 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.colorFields
+import org.churchpresenter.ui.recolor
 
 /**
  * Drives the tab's two "default" cards — the full-screen default background and the lower-third

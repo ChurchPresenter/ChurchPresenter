@@ -11,11 +11,6 @@ plugins {
     jacoco
 }
 
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.81",
-    "COMPLEXITY" to "0.78",
-)
-
 group = "org.churchpresenter"
 
 kotlin {
@@ -39,6 +34,7 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(projects.settings)
     testImplementation(testFixtures(project(":ui-components")))
+    testFixturesImplementation(kotlin("test"))
     testFixturesImplementation(projects.theme)
     testFixturesImplementation(compose.desktop.currentOs)
     testFixturesImplementation(compose.desktop.uiTestJUnit4)

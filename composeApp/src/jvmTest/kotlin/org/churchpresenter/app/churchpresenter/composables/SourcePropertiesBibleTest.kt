@@ -14,7 +14,6 @@ import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
 import java.io.File
 import java.nio.file.Files
@@ -22,6 +21,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.recolor
 
 /**
  * The Bible source — the one panel that reads from outside the source it is editing.

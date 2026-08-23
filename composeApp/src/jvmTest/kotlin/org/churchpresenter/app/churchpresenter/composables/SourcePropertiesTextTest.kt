@@ -9,14 +9,14 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
-import org.churchpresenter.app.churchpresenter.utils.FontCatalog
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.ui.FontCatalog
+import org.churchpresenter.ui.Utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.ui.pickFont
+import org.churchpresenter.ui.recolor
 
 /**
  * The Text source: the text itself, its font, size, colour, alignment, line spacing and background.

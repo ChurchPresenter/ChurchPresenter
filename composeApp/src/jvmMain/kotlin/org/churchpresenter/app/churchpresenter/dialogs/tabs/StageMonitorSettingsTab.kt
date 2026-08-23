@@ -48,9 +48,9 @@ import org.churchpresenter.resources.generated.resources.stage_monitor_layout_se
 import org.churchpresenter.resources.generated.resources.stage_monitor_text_color
 import org.churchpresenter.resources.generated.resources.transition_duration
 import org.churchpresenter.resources.generated.resources.transition_settings
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.HorizontalAlignmentButtons
 import org.churchpresenter.ui.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
@@ -60,7 +60,7 @@ import org.churchpresenter.ui.SettingsScrollbar
 import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.ui.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.ui.ShadowDetailRow
 import org.churchpresenter.ui.TextStyleButtons
 import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.ui.VerticalAlignmentButtons
@@ -75,7 +75,7 @@ import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.settings.toZone
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.ui.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_FRACTION = 0.9f

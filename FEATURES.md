@@ -46,8 +46,9 @@
 
 **Source locations:**
 - `tabs/BibleTab.kt` — main UI
-- `tabs/DictionaryTab.kt` — Strong's dictionary UI
-- `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
+- `dictionary-tab/` (the `:dictionary-tab` Gradle module) — the Dictionary tab itself: `DictionaryTab.kt`, `DictionaryViewModel.kt` and `DictionaryPresenter.kt`
+- `dialogs/tabs/DictionarySettingsTab.kt` — stays in the app, with the other settings tabs
+- `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`

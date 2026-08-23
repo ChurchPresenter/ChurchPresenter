@@ -7,10 +7,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.recolor
 
 /**
  * The QR Code source: seven kinds of payload, two of which change the shape of the panel.

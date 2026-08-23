@@ -16,6 +16,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.ui.colorFields
 
 /**
  * Pins the shape of the tab — how many of each repeated widget it renders and what it says — and
