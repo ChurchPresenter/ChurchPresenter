@@ -94,7 +94,7 @@ class SpecPort9Test {
                             align = align,
                             logoEnabled = logo,
                             logoData = if (logo) logoData else null,
-                            logoW = if (logo) 120 else 0,
+                            logoW = if (logo) 80 else 0,
                             logoH = if (logo) 80 else 0,
                             bgEnabled = bg,
                             borderThickness = 4f
@@ -242,6 +242,52 @@ class SpecPort9Test {
                 "$label: reveal mask must cover its text at rest " +
                     "(mask [$maskMin, $maskMax] vs text [$textMin, $textMax])"
             )
+        }
+    }
+
+
+    /**
+     * A logo wider than it is tall: layer structure only, deliberately not geometry.
+     *
+     * The matrix above uses a square logo because that is where the two models agree exactly. The
+     * compiled style scales the logo by HEIGHT, so a wide logo draws wider than `logoSize` and the
+     * compiled geometry now widens the gutter (and, in Style 5, the plate) to match it. The spec
+     * engine cannot follow: `SizeSpec` has no logo-derived variant and the layout slots' gaps are
+     * static em, so neither the reserved width nor the plate can track the logo's aspect.
+     *
+     * Closing that needs two spec-engine features — a logo-derived `SizeSpec` and logo-aware slot
+     * gaps — which is its own piece of work. Until then this asserts what still holds for a wide
+     * logo, which is that both models build the same layers in the same order, and leaves the
+     * geometry to the square configs above rather than pretending the numbers agree.
+     */
+    @Test
+    fun portMatchesCompiledStructureWithAWideLogo() {
+        val cfg = LottieGenConfig(
+            logoEnabled = true,
+            logoData = "data:image/png;base64,iVBORw0KGgo=",
+            logoW = 120,
+            logoH = 80,
+            // Same shape as the matrix's logo configs above, so this isolates the aspect and
+            // nothing else — a bare default config reaches a combination the matrix never covers.
+            bgEnabled = true,
+            borderThickness = 4f,
+        )
+        val expected = LottieGenerator.generate(cfg, Style9DiagonalWipe())
+        val actual = LottieGenerator.generate(cfg, port())
+
+        val expectedLayers = expected["layers"]!!.jsonArray.map { it.jsonObject }
+        val actualLayers = actual["layers"]!!.jsonArray.map { it.jsonObject }
+
+        // Through mappedName, as the matrix above does: this port names two layers differently
+        // from the compiled style by design, which is unrelated to the logo.
+        assertEquals(
+            expectedLayers.map { mappedName(it.name()) }, actualLayers.map { it.name() },
+            "layer names/order",
+        )
+        for ((exp, act) in expectedLayers.zip(actualLayers)) {
+            assertEquals(exp["ty"]!!.jsonPrimitive.int, act["ty"]!!.jsonPrimitive.int, "layer type ${exp.name()}")
+            assertEquals(exp["td"]?.jsonPrimitive?.int, act["td"]?.jsonPrimitive?.int, "td ${exp.name()}")
+            assertEquals(exp["tt"]?.jsonPrimitive?.int, act["tt"]?.jsonPrimitive?.int, "tt ${exp.name()}")
         }
     }
 
