@@ -1157,20 +1157,31 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
-        // All six counters are temporarily at 75%. They were 85/80/85/75/85/85 until 2026-08-18,
-        // when CLASS fell to 84.77% and the gate began blocking every merge; the floors were dropped
-        // in one step rather than tuned per counter. Re-measured 2026-08-18 on the report scope:
+        // All six counters are at 70%. History: 85/80/85/75/85/85 until 2026-08-18, when CLASS
+        // fell to 84.77% and the gate began blocking every merge and all six were dropped to 75%
+        // in one step; lowered again to 70% on 2026-08-23 by request. Measured 2026-08-23 on the
+        // gated scope, after :companion-server and :statistics were extracted out of this module:
         //
         //   counter      measured   floor   margin
-        //   INSTRUCTION    88.16%    75%     +13.2
-        //   BRANCH         80.04%    75%      +5.0
-        //   LINE           88.69%    75%     +13.7
-        //   COMPLEXITY     76.85%    75%      +1.9
-        //   METHOD         85.44%    75%     +10.4
-        //   CLASS          84.77%    75%      +9.8
+        //   INSTRUCTION      0.89    0.70     +19
+        //   BRANCH           0.79    0.70      +9
+        //   LINE             0.89    0.70     +19
+        //   COMPLEXITY       0.76    0.70      +6
+        //   METHOD           0.85    0.70     +15
+        //   CLASS            0.85    0.70     +15
         //
-        // Raising them back is the open question, not whether the notes below still hold -- those
-        // describe why the numbers sit where they do and are unchanged.
+        // **Every counter now sits well clear of its floor, so this gate no longer catches a
+        // regression** -- coverage could fall by six points on the tightest counter and nineteen on
+        // the loosest before it says anything. It is a backstop against collapse, not a ratchet.
+        // The measured column above is the real state of the module; read that, not the floor, when
+        // judging whether this module is well tested. Raising the floors back toward the measured
+        // values is what would make the gate mean something again.
+        //
+        // Note the two extractions did NOT move these numbers much (88.16/80.04/88.69/76.85/85.44/
+        // 84.77 before them, above): the code that left took its own tests with it, so the ratios
+        // held even though the denominator shrank.
+        //
+        // The notes below describe why the numbers sit where they do and are unchanged.
         //
         // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
         // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
@@ -1201,32 +1212,32 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "COMPLEXITY"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "METHOD"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "CLASS"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.70".toBigDecimal()
             }
         }
     }

@@ -290,7 +290,7 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
-      # The 75% line-coverage floor, off the execution data the tests above just produced. Its
+      # The 70% floor on all six counters, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
       # regression is reported alongside test failures rather than hidden behind them.
