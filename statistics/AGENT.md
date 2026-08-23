@@ -13,10 +13,14 @@ CCLI licence report is filed from. A real Gradle module of this build: `include(
 The window that *draws* all this — `dialogs/CCLIReportDialog.kt` — stays in `:composeApp`. This
 module is the numbers; that is the screen.
 
+**The models are not here.** Every data class this module reads and returns lives in
+`:core-models`, under `models/statistics/`, one type per file — the records on disk, the computed
+report rows, the identity keys and the reporting period. This module is the behaviour over them.
+
 | File | Owns |
 |---|---|
-| `StatisticsManager.kt` | The two stores and every question asked of them: `DisplayStatistics` and `PlayEventLog` on disk, `recordSongDisplay`/`recordVerseDisplay`, the range and top-N queries, `getActivityByPeriod`, `clearSong`/`clearVerse`/`clearStatistics`, and `exportCcliCsv`/`exportFilteredXls`. Also `SongKey`/`VerseKey` and the pure helpers around them. |
-| `StatisticsPeriod.kt` | Which span a report covers: the `StatisticsPeriod` presets, `ROLLING_MONTHS`, and `resolveDates`/`resolve`/`availableYears` that turn one into a `DateRange`. |
+| `StatisticsManager.kt` | Every question asked of the two stores: `recordSongDisplay`/`recordVerseDisplay`, the range and top-N queries, `getActivityByPeriod`, `clearSong`/`clearVerse`/`clearStatistics`, and `exportCcliCsv`/`exportFilteredXls` — plus the `key()` extensions that derive a `SongKey`/`VerseKey` from either store, and the pure helpers around them. |
+| `StatisticsPeriod.kt` | Turning a period into dates: `ROLLING_MONTHS` and `resolveDates`/`resolve`/`availableYears`, which need a caller-supplied `today` and the earliest event on record — which is why they are here and the `StatisticsPeriod` type is not. |
 
 ## Rules
 
@@ -39,6 +43,9 @@ module is the numbers; that is the screen.
   duplicate that lock or let a reader run against a tally another thread is mid-write on.
   Documented at the site rather than in a baseline; this module has no baseline and must not
   acquire one.
+- **No data class belongs in this module.** They live in `:core-models`; `ModelInvariantsTest`
+  there discovers them from the compiled output and exercises construction, `copy`, `equals`,
+  `hashCode` and destructuring on each, so a model added there is covered without a new test.
 - **Only three members are public that would rather not be.** `ROLLING_MONTHS`, `resolveDates` and
   `availableYears` were `internal` while this lived in `:composeApp` and are public purely because
   `CCLIReportDialog` reads them from outside the module. Everything else that was `internal` still
