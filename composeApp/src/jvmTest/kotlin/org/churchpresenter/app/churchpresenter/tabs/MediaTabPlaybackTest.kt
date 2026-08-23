@@ -4,10 +4,13 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.waitUntilExactlyOneExists
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -23,34 +26,32 @@ import kotlin.test.assertTrue
  * None of this needs VLC — it drives the view model directly, the same as `MediaTabTest`. See
  * `MediaTabTestSupport.kt` for the harness.
  *
- * **KNOWN FLAKE, diagnosed but NOT fixed — `play toggles to pause and back`.** It failed once on
- * 2026-08-23 in a full `jvmTest` run (4 forks) on a deliberately loaded machine, at
- * `assertTrue(vm.isPlaying)`, and the cause is in [loadUrl] rather than in playback:
+ * **[loadUrl] addresses the URL field by tag, and that is load-bearing.** `play toggles to pause
+ * and back` failed once on 2026-08-23 in a full 4-fork `jvmTest` run on a loaded machine, at
+ * `assertTrue(vm.isPlaying)`. Nothing on that path is async — `play()` is
+ * `if (_isLoaded.value) _isPlaying.value = true` and `_isLoaded` is set synchronously from
+ * `url.isNotBlank()` — so `isPlaying == false` could only mean the URL was still blank and the
+ * click landed on a disabled button. The helper typed into `onAllNodes(hasSetTextAction())[0]`, by
+ * INDEX, and which node is index 0 depends on what is composed at that instant.
  *
- * - `MediaViewModel.play()` is `if (_isLoaded.value) _isPlaying.value = true`, and `_isLoaded` is
- *   set synchronously from `url.isNotBlank()`. Neither is async, so `isPlaying == false` after the
- *   click can only mean **the URL was still blank** — the click landed on a disabled button and did
- *   nothing.
- * - [loadUrl] types into `onAllNodes(hasSetTextAction())[0]` — by INDEX. Which node is index 0
- *   depends on what is composed at that instant, so under load the text can go somewhere other than
- *   the network-URL field, leaving it blank.
- *
- * The fix, for whoever picks this up: address the field by a stable identifier (a test tag, or its
- * label) and wait for it to exist before typing, instead of indexing a node list. **Do not** widen a
- * timeout, add a retry, or loosen the assertion.
- *
- * It does NOT reproduce in isolation — three `--tests '*MediaTabPlaybackTest*' --rerun-tasks` runs
- * under load average ~40 all passed. Note `--tests` also drops `jvmTest` to a single fork, so an
- * isolated run is not the shape that fails.
+ * It now types into `MEDIA_URL_FIELD_TAG` and asserts the text landed there before pressing Load,
+ * so the URL cannot silently go elsewhere, and a fixture that does break says so where the fault is
+ * instead of in an unrelated playback assertion. **Do not** replace that with an index, a wider
+ * timeout, or a retry.
  */
 class MediaTabPlaybackTest {
 
     private fun ComposeUiTest.loadUrl(url: String = "https://example.org/clip.mp4") {
         onNodeWithText(MediaLabel.NETWORK_URL).performClick()
+        // Wait for the field itself to be composed, rather than for the tab to look idle: idleness
+        // says nothing about which node is where.
+        waitUntilExactlyOneExists(hasTestTag(MEDIA_URL_FIELD_TAG))
+        onNodeWithTag(MEDIA_URL_FIELD_TAG).performTextReplacement(url)
         waitForIdle()
-        onAllNodes(hasSetTextAction())[0].performTextReplacement(url)
-        waitForIdle()
-        onNodeWithText("Load").performClick()
+        // The positive signal that the text landed where it was aimed. Without it a misdirected URL
+        // shows up much later as a disabled transport control, blaming playback for a typing fault.
+        onNodeWithTag(MEDIA_URL_FIELD_TAG).assertTextEquals(url)
+        onNodeWithText(MediaLabel.LOAD).performClick()
         waitForIdle()
     }
 

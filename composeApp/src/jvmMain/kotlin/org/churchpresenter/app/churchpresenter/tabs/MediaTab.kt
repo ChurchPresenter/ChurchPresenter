@@ -66,6 +66,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -153,6 +154,16 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.extension
 import kotlinx.coroutines.launch
+
+/**
+ * The network-URL entry field.
+ *
+ * Named rather than left to be found by position: the tab composes several text fields depending on
+ * what is loaded, so `onAllNodes(hasSetTextAction())[0]` addressed whichever one happened to be
+ * first and, under load, typed the URL somewhere else — leaving this one blank and every transport
+ * control disabled. See `MediaTabPlaybackTest`.
+ */
+internal const val MEDIA_URL_FIELD_TAG = "media_urlField"
 
 private const val MENU_OFFSET_X = 100
 private const val MENU_OFFSET_Y = 60
@@ -361,7 +372,7 @@ fun MediaTab(
                             BasicTextField(
                                 value = urlInput,
                                 onValueChange = { urlInput = it },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().testTag(MEDIA_URL_FIELD_TAG),
                                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                                 singleLine = true,
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),

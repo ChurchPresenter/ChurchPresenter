@@ -40,29 +40,29 @@ import kotlin.test.assertTrue
  *
  * Message parsing is covered separately by [BibleEngineClientMessageTest].
  *
- * **KNOWN FLAKE, NOT REPRODUCED — `starting again drops the previous link rather than stacking a
- * second one`.** It failed once on `main` on 2026-08-23 (commit 24403e98, run 32612691663) with
- * *"timed out after 15000ms waiting for the second link to come up"*, 1 of 9,625 tests. The commit
- * it failed on touched only `lottieGenerator/`, so it was unrelated to that change.
+ * **`starting again drops the previous link rather than stacking a second one` is a regression test
+ * for a real race, and it caught it as a flake first.** It timed out on `main` on 2026-08-23
+ * (`24403e98`, run 32612691663) waiting 15s for the second link — 1 of 9,625 tests, on a commit that
+ * touched only `lottieGenerator/`. It never reproduced in isolation, and it never would have:
+ * `--tests` drops `jvmTest` to a single fork, and the race needs the outgoing link's teardown to be
+ * slow enough to overtake the new link's handshake.
  *
- * What was ruled out, so the next attempt does not repeat it:
+ * The fault was in [BibleEngineClient], not in the fixture. `start()` calls `stop()`, which cancels
+ * the connect job **without waiting for it** — it cannot, being called from the UI thread. The
+ * outgoing `connectLoop` then unwound through its generic `catch` (ktor's CIO engine surfaces the
+ * cancellation as an I/O failure, not always as a `CancellationException`), cleared `_connected`,
+ * `session` and `_engineSttConnected`, and only noticed it was cancelled at the next `delay`. When
+ * that landed after the new link had reported itself up, the client held a live socket it believed
+ * was down — permanently, since a healthy socket produces no further event to correct it. Hence the
+ * timeout on `connected.value`.
  *
- * - **It is not slow on a quiet machine.** The whole class runs in ~1.5s, and this test is not among
- *   the slowest in it.
- * - **It does not reproduce in isolation under load** — three
- *   `--tests '*BibleEngineClientLinkTest*' --rerun-tasks` runs at load average ~40 all passed. Note
- *   `--tests` also drops `jvmTest` to a single fork, so that is not the shape that failed.
- * - **A full 4-fork `jvmTest` under the same load did not reproduce it either** (a different
- *   load-sensitive test lost that round instead — see `MediaTabPlaybackTest`).
+ * The fix is a generation counter bumped by `stop()`: a replaced link's writes are ignored, and it
+ * returns instead of retrying. No join, no blocked frame. `BibleEngineClientRestartTest` pins the
+ * guard directly, without a server.
  *
- * The untested hypothesis, for whoever picks it up: `BibleEngineClient.start()` calls `stop()`,
- * which cancels `wsJob` **without awaiting the cancellation or closing the live session**, and both
- * links share one `HttpClient(CIO)`. So link 2's handshake can race link 1's teardown, and a failed
- * attempt sends `connectLoop` into a backoff that doubles from `retryFloorMs` — enough unlucky
- * attempts eat the 15s budget. `AtemBridge.cancelUpload` is the in-repo precedent for a teardown
- * that returns only once its coroutine has stopped.
- *
- * **Do not** widen the 15s timeout, add a retry, or loosen the assertion to make this go away.
+ * The wait below is 15s and stays 15s: it is a deadline for a loopback handshake that takes
+ * milliseconds, not a budget anything is expected to use. **Do not** widen it, retry, or loosen an
+ * assertion here.
  */
 class BibleEngineClientLinkTest {
 
