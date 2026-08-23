@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants

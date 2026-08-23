@@ -43,7 +43,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.ui.focusRescuePressHook
 import org.churchpresenter.ui.rememberFocusLostRescue
 import androidx.compose.ui.input.pointer.pointerHoverIcon

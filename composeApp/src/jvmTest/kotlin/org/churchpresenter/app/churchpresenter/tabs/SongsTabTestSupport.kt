@@ -142,7 +142,7 @@ internal fun songsTab(
      * each step out, and while not presenting left/right move between songs instead.
      */
     isPresenting: Boolean = false,
-    statistics: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null,
+    statistics: org.churchpresenter.statistics.StatisticsManager? = null,
     /** Whether the tab is given somewhere to add a song to the schedule — off to test that the
      *  add-to-schedule actions are hidden rather than merely disabled when there is nowhere to send it. */
     withOnAddToSchedule: Boolean = true,

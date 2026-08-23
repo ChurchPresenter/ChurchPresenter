@@ -16,7 +16,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.ThemeMode
 import java.io.File

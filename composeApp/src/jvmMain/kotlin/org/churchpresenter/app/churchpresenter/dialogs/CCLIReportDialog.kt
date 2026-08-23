@@ -158,16 +158,10 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.ui.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.data.ActivityPoint
-import org.churchpresenter.app.churchpresenter.data.ROLLING_MONTHS
-import org.churchpresenter.app.churchpresenter.data.SongKey
-import org.churchpresenter.app.churchpresenter.data.SongSummary
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.StatisticsPeriod
-import org.churchpresenter.app.churchpresenter.data.VerseKey
-import org.churchpresenter.app.churchpresenter.data.VerseSummary
-import org.churchpresenter.app.churchpresenter.data.availableYears
-import org.churchpresenter.app.churchpresenter.data.resolveDates
+import org.churchpresenter.statistics.ROLLING_MONTHS
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.statistics.availableYears
+import org.churchpresenter.statistics.resolveDates
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
@@ -180,6 +174,12 @@ import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.semantic
+import org.churchpresenter.core.models.statistics.ActivityPoint
+import org.churchpresenter.core.models.statistics.SongKey
+import org.churchpresenter.core.models.statistics.SongSummary
+import org.churchpresenter.core.models.statistics.StatisticsPeriod
+import org.churchpresenter.core.models.statistics.VerseKey
+import org.churchpresenter.core.models.statistics.VerseSummary
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59

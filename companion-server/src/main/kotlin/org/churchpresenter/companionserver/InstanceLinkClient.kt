@@ -203,11 +203,15 @@ class InstanceLinkClient(
                 )
                 if (consecutiveFailures == 1 || consecutiveFailures % FAILURE_LOG_INTERVAL == 0) {
                     CrashReporter.reportWarning(
-                        "InstanceLink: connection failed — ${e.message}",
+                        "InstanceLink: connection failed",
                         tags = mapOf(
                             "subsystem" to "instance_link",
-                            "consecutive_failures" to consecutiveFailures.toString(),
                             "failure_kind" to classifyConnectFailure(e)
+                        ),
+                        extras = mapOf(
+                            "consecutive_failures" to consecutiveFailures.toString(),
+                            "error.type" to (e::class.simpleName ?: "Exception"),
+                            "error.message" to redactHost(e.message, host)
                         )
                     )
                 }
@@ -231,6 +235,23 @@ class InstanceLinkClient(
             onReconnectScheduled(delayMs)
             delay(delayMs)
         }
+    }
+
+    /**
+     * [message] with the peer's address taken out.
+     *
+     * Ktor writes the whole target into a connect failure — `Connect timeout has expired
+     * [url=ws://192.168.8.101:8765/ws, connect_timeout=5000 ms]` — and the host half of that is
+     * the one part identifying somebody's network. [CrashReporter]'s scrubber rewrites home paths
+     * and the OS username, not addresses, so it is taken out here. The rest of the sentence is
+     * kept: it is what says why a failure classified as `other` happened.
+     *
+     * The configured [host] is replaced literally rather than by matching address shapes, because
+     * it is the exact string Ktor built the URL from — a hostname, an IPv4 or an IPv6 alike.
+     */
+    internal fun redactHost(message: String?, host: String): String {
+        val text = message.orEmpty()
+        return if (host.isEmpty()) text else text.replace(host, "<peer>")
     }
 
     /**
