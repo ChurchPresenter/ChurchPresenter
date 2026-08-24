@@ -5,6 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import org.churchpresenter.announcements.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -72,7 +73,6 @@ import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter

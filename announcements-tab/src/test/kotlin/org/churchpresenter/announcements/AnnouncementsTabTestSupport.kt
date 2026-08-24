@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -26,7 +26,6 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 /**
  * Harness and fixtures shared by the `AnnouncementsTab` test classes.
@@ -34,7 +33,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
  * This tab owns its view model outright (`remember { AnnouncementsViewModel() }`), so unlike the
  * other tabs there is no instance to reach in from a test. That turns out to suit it: everything
  * the tab does is observable from outside anyway — what it draws, the `AnnouncementsSettings` it
- * hands back for persisting, and what it puts on the [PresenterManager] — and asserting through
+ * hands back for persisting, and what it puts on the [FakeAnnouncementsOutput] — and asserting through
  * those keeps the tests pinned to behaviour rather than to the view model's internals.
  *
  * The settings the tab reports are fed back into it, as the app does, so a control's effect is
@@ -53,7 +52,7 @@ internal class AnnouncementReports {
 }
 
 /**
- * Composes `AnnouncementsTab` with a real [PresenterManager] and runs [block].
+ * Composes `AnnouncementsTab` with a real [FakeAnnouncementsOutput] and runs [block].
  *
  * The tab is given its settings back on every change, so the state it renders from is the state it
  * just asked for — the same loop `MainDesktop` runs.
@@ -67,9 +66,9 @@ internal fun announcementsTab(
     settings: (AppSettings) -> AppSettings = { it },
     width: Dp? = null,
     themeMode: ThemeMode? = null,
-    block: ComposeUiTest.(presenter: PresenterManager, reports: AnnouncementReports) -> Unit,
+    block: ComposeUiTest.(presenter: FakeAnnouncementsOutput, reports: AnnouncementReports) -> Unit,
 ) {
-    val presenter = PresenterManager()
+    val presenter = FakeAnnouncementsOutput()
     val reports = AnnouncementReports()
     runComposeUiTest {
         setContent {
@@ -87,7 +86,7 @@ internal fun announcementsTab(
                             reports.settingsChanges++
                             reports.settings = appSettings.announcementsSettings
                         },
-                        presenterManager = presenter.takeIf { withPresenter },
+                        output = presenter.takeIf { withPresenter },
                         onAddToSchedule =
                             if (withOnAddToSchedule) {
                                 { s: AnnouncementsSettings -> reports.scheduled += s }

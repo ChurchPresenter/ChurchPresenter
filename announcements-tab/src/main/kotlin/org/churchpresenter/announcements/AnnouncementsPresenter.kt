@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.announcements
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -38,10 +38,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.ui.calculateAutoFitFontSize
 
 @Composable
 fun AnnouncementsPresenter(
@@ -132,7 +132,14 @@ fun AnnouncementsPresenter(
 
         val effectiveFontSize = if (!isDirectional) {
             // Static/fade: fit to both width and height
-            remember(text, settings.fontSize, availableWidthPx, availableHeightPx, textStyle.fontFamily, textStyle.fontWeight) {
+            remember(
+                text,
+                settings.fontSize,
+                availableWidthPx,
+                availableHeightPx,
+                textStyle.fontFamily,
+                textStyle.fontWeight,
+            ){
                 calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, availableHeightPx)
                     .coerceAtMost(settings.fontSize)
             }

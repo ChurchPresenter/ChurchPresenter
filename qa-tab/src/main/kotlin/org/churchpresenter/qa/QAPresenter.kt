@@ -35,12 +35,13 @@ import org.churchpresenter.resources.generated.resources.qa_qr_message_default
 import org.churchpresenter.resources.generated.resources.qr_code
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.ui.generateQRCodeBitmap
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.ui.calculateAutoFitFontSize
+import java.awt.image.BufferedImage
 
 @Composable
 fun QAPresenter(

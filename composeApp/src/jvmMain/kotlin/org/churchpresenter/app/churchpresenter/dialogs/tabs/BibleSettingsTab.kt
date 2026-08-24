@@ -75,6 +75,7 @@ import androidx.compose.foundation.layout.size
 import org.churchpresenter.ui.ActionIconButton
 import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.DropdownSettingsField
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.ui.rememberDropdownWidthFor
 import org.churchpresenter.ui.FontSettingsDropdown
 import org.churchpresenter.ui.HorizontalAlignmentButtons
@@ -105,7 +106,6 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.ui.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource

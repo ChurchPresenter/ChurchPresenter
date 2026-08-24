@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
+import org.churchpresenter.announcements.AnnouncementsPresenter
 import org.churchpresenter.companionserver.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen

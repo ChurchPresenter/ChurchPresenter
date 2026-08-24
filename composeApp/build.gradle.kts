@@ -329,6 +329,7 @@ kotlin {
             implementation(projects.bible)
             // The bundled study data: the Strong's dictionary and the interlinear index over it.
             implementation(projects.dictionary)
+            implementation(projects.announcementsTab)
             implementation(projects.dictionaryTab)
             implementation(projects.dictionarySettingsTab)
             implementation(projects.qaTab)

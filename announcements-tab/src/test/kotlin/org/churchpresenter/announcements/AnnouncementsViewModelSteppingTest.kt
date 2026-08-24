@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
  * Seconds step in fives and roll a full turn into the next minute (and minutes into the next hour);
  * the "specific time" target hour wraps around midnight rather than clamping. These are pure,
  * synchronous field mutations (no timer is actually running here), so they're driven directly and
- * read back through the public getters — no PresenterManager, no coroutines.
+ * read back through the public getters — no FakeAnnouncementsOutput, no coroutines.
  */
 class AnnouncementsViewModelSteppingTest {
 
