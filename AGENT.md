@@ -128,7 +128,8 @@ they must be set **above everything else** in the file:
   each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
-  `:dictionary-tab`, `:announcements-tab`, `:companion-server` and `:statistics` name none.
+  `:dictionary-tab`, `:dictionary-settings-tab`, `:announcements-tab`, `:qa-tab`,
+  `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -253,8 +254,9 @@ widening the threshold, along with `colour_picker`, `settings_companion_satellit
 
 **The suite is clean: `verifyRoborazziJvm` fails 0 of 747 images on `main`** — measured 2026-08-24 on
 macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`, 12 in
-`dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots` and 34 in
-`qa-tab/screenshots`, each verified by its own module's task. It is therefore readable as pass/fail
+`dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots`, 34 in
+`qa-tab/screenshots` and 24 in `lower-third-tab/screenshots`, each verified by its own module's
+task. It is therefore readable as pass/fail
 again, and **any** failure is a real difference.
 
 **A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`
