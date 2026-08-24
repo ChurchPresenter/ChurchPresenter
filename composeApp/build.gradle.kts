@@ -333,6 +333,7 @@ kotlin {
             implementation(projects.dictionaryTab)
             implementation(projects.dictionarySettingsTab)
             implementation(projects.lowerThirdTab)
+            implementation(projects.qaTab)
             implementation(projects.lowerThirdSettingsTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is
@@ -402,8 +403,8 @@ kotlin {
             implementation("uk.co.caprica:vlcj:4.8.3")
             implementation("net.java.dev.jna:jna:5.18.1")
             implementation("net.java.dev.jna:jna-platform:5.18.1")
-            implementation("com.google.zxing:core:3.5.3")
-            implementation("com.google.zxing:javase:3.5.3")
+            implementation(libs.zxing.core)
+            implementation(libs.zxing.javase)
             // Socket.IO client for STT integration
             implementation(libs.socket.io.client)
             // JCEF — embedded Chromium browser for web presenter

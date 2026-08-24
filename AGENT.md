@@ -38,7 +38,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 | Package          | Owns                                                                |
 |------------------|---------------------------------------------------------------------|
-| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements and Lower Third have moved out, to `:dictionary-tab`, `:announcements-tab` and `:lower-third-tab` |
+| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements, Q&A and Lower Third have moved out, to `:dictionary-tab`, `:announcements-tab`, `:qa-tab` and `:lower-third-tab` |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
@@ -92,6 +92,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
 | `lower-third-settings-tab/` | `:lower-third-settings-tab` | The options-dialog page that picks a Lottie preset and places the band        | [AGENT.md](lower-third-settings-tab/AGENT.md) |
 | `announcements-tab/`   | `:announcements-tab`   | The Announcements tab — its notices, its four timers, its view model and presenter | [AGENT.md](announcements-tab/AGENT.md)   |
+| `qa-tab/`              | `:qa-tab`              | The Audience Q&A tab — the moderation queue, the join QR, its dialog and presenter | [AGENT.md](qa-tab/AGENT.md)              |
 | `lower-third-tab/`     | `:lower-third-tab`     | The Lower Third tab — its presets, its Lottie rendering and the ATEM upload        | [AGENT.md](lower-third-tab/AGENT.md)     |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 | `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
@@ -129,7 +130,7 @@ they must be set **above everything else** in the file:
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
   `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
-  `:announcements-tab`, `:companion-server` and `:statistics` name none.
+  `:announcements-tab`, `:qa-tab`, `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -252,17 +253,19 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**The suite is clean: `verifyRoborazziJvm` fails 0 of 781 images on `main`** — measured 2026-08-24 on
-macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`,
-12 in `dictionary-settings-tab/screenshots` and 49 in
-`announcements-tab/screenshots`, each verified by its own module's task. It is therefore readable as
-pass/fail again, and **any** failure is a real difference.
+**The suite is clean: `verifyRoborazziJvm` fails 0 of 747 images on `main`** — measured 2026-08-24 on
+macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`, 12 in
+`dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots`, 34 in
+`qa-tab/screenshots`, 24 in `lower-third-tab/screenshots` and 7 in
+`lower-third-settings-tab/screenshots`, each verified by its own module's task. It is therefore readable as pass/fail
+again, and **any** failure is a real difference.
 
 **A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`
-shoots only the presenters `:composeApp` still owns; the announcements and Strong's-entry shots moved
-to `AnnouncementsPresenterScreenshotTest` and `DictionaryPresenterScreenshotTest`, under those
-modules' own `screenshots/` roots. The `AppPreview*` suites stay in `:composeApp` either way — they
-shoot the whole app window, so they need the app.
+shoots only the presenters `:composeApp` still owns; the announcements, Strong's-entry and
+audience-question shots moved to `AnnouncementsPresenterScreenshotTest`,
+`DictionaryPresenterScreenshotTest` and `QAPresenterScreenshotTest`, under those modules' own
+`screenshots/` roots. The `AppPreview*` suites stay in `:composeApp` either way — they shoot the
+whole app window, so they need the app.
 
 The 24 that used to be permanently red were three separate causes, all now fixed at source rather
 than by widening the threshold — every one of them the same shape as the `about_*` git-hash case, a

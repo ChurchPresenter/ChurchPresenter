@@ -56,7 +56,7 @@ import org.churchpresenter.resources.generated.resources.tab_focus_lost
 import org.churchpresenter.resources.generated.resources.verse
 import java.awt.Window as AwtWindow
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.ui.LocalMainWindowState
 import org.churchpresenter.ui.FocusLostBanner
 import org.churchpresenter.ui.focusRescuePressHook
 import org.churchpresenter.ui.rememberFocusLostRescue

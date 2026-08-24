@@ -68,7 +68,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.qa.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.ui.Utils.parseHexColor

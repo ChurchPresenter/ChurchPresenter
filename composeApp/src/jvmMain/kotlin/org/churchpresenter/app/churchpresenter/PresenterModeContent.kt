@@ -15,8 +15,8 @@ import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
+import org.churchpresenter.qa.QAPresenter
+import org.churchpresenter.qa.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter

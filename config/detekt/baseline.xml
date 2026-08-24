@@ -62,9 +62,6 @@
     <ID>LongMethod:ProjectionContentOutputs.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun ContentOutputsDialog( title: String, screenLabel: String, assignment: ScreenAssignment, contentGroup: List&lt;ContentCol&gt;, backgroundGroup: List&lt;ContentCol&gt;, bibleLabel: String, songsLabel: String, translationNames: List&lt;String&gt;, translationDisplays: List&lt;BibleTranslationDisplay&gt;, songLangModes: List&lt;Pair&lt;String, String&gt;&gt;, webDeckLinkTooltip: String, webSnapshotTooltip: String, isBrowserSource: Boolean, onApply: (ScreenAssignment) -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
     <ID>LongMethod:ProjectionScreenAssignmentCard.kt$@Composable internal fun ScreenAssignmentCard( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onIdentifyScreen: () -&gt; Unit, scenes: List&lt;Scene&gt;, screenDevicesAll: List&lt;DetectedScreen&gt;, detectedScreens: Int, devWindowCount: Int, devWindowedFallback: Boolean, presenterWindowCount: Int, numScreens: Int, screenAssignments: List&lt;ScreenAssignment&gt;, displayOptions: List&lt;DisplayOption&gt;, noneLabel: String, contentGroup: List&lt;ContentCol&gt;, backgroundGroup: List&lt;ContentCol&gt;, displayModes: List&lt;Pair&lt;String, String&gt;&gt;, songLangModes: List&lt;Pair&lt;String, String&gt;&gt;, translationDisplays: List&lt;BibleTranslationDisplay&gt;, translationNames: List&lt;String&gt;, )</ID>
     <ID>LongMethod:ProjectionSettingsTab.kt$@Composable fun ProjectionSettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, companionServer: CompanionServer, onIdentifyScreen: () -&gt; Unit = {}, onIdentifyBrowserSource: (Int) -&gt; Unit = {}, scenes: List&lt;Scene&gt; = emptyList(), detectScreens: () -&gt; List&lt;DetectedScreen&gt; = ::detectScreensFromAwt )</ID>
-    <ID>LongMethod:QARemoteDialog.kt$@Composable internal fun QARemoteContent( serverUrl: String, qaDisplayUrl: String, onQaDisplayUrlChanged: (String) -&gt; Unit, apiKeyEnabled: Boolean, apiKey: String, tunnelStatus: TunnelStatus, tunnelUrl: String, onStartTunnel: () -&gt; Unit, onStopTunnel: () -&gt; Unit, qaSettings: QASettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, availableFonts: List&lt;String&gt;, scrollState: ScrollState = rememberScrollState(), copyText: (String) -&gt; Unit = {}, onDismiss: () -&gt; Unit )</ID>
-    <ID>LongMethod:QATab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun QATab( modifier: Modifier = Modifier, qaManager: QAManager, presenterManager: PresenterManager, serverUrl: String, presenting: (Presenting) -&gt; Unit, appSettings: AppSettings = AppSettings(), onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit = {}, tunnelStatus: TunnelStatus = TunnelStatus.Idle, tunnelUrl: String = "", onStartTunnel: () -&gt; Unit = {}, onStopTunnel: () -&gt; Unit = {}, qaDisplayUrl: String = "", onQaDisplayUrlChanged: (String) -&gt; Unit = {}, /** A device id → the name the operator sees for it elsewhere, or "" when it has none. * A lambda rather than the manager itself, so the tab keeps no dependency on it. */ resolveDeviceName: (String) -&gt; String = { "" }, )</ID>
-    <ID>LongMethod:QATab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun QuestionRow( question: Question, /** What this device is called, or "" — then the id stands on its own, as it always did. */ deviceName: String = "", isDisplayed: Boolean, isHistory: Boolean = false, onApprove: () -&gt; Unit, onDeny: () -&gt; Unit, onMarkDone: () -&gt; Unit = {}, onEdit: (String) -&gt; Unit, onDisplay: () -&gt; Unit, onDelete: () -&gt; Unit, )</ID>
     <ID>LongMethod:RemoteActivityToast.kt$@Composable private fun RemoteActivityToast( notification: RemoteActivityNotification, remaining: Int, isInstanceLinkFollower: Boolean = false, onDismiss: () -&gt; Unit, onDismissAll: () -&gt; Unit, onBlockForSession: () -&gt; Unit, )</ID>
     <ID>LongMethod:RemoteApply.kt$internal fun executeProjectItem( item: ScheduleItem, scheduleActions: ScheduleActions, presenterManager: PresenterManager, statisticsManager: StatisticsManager? = null )</ID>
     <ID>LongMethod:RemoteCommandEffects.kt$@Composable internal fun RemoteCommandEffects( appSettings: AppSettings, picturesViewModel: PicturesViewModel, presentationViewModel: PresentationViewModel, bibleViewModel: BibleViewModel, presenterManager: PresenterManager, onSongItemVersionBump: () -&gt; Unit, resolveImageFile: ((folderId: String, index: Int) -&gt; File?)?, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onSongItemSelected: (ScheduleItem.SongItem) -&gt; Unit, onPictureItemSelected: (ScheduleItem.PictureItem) -&gt; Unit, onPresentationItemSelected: (ScheduleItem.PresentationItem) -&gt; Unit, onSelectTab: (Tabs) -&gt; Unit, pushCurrentSlideIfLive: suspend () -&gt; Unit, remotePresentationPlayPauseFlow: Flow&lt;Unit&gt;? = null, remotePresentationLoopToggleFlow: Flow&lt;Unit&gt;? = null, remotePresentationGotoFlow: Flow&lt;Int&gt;? = null, selectPictureImageFlow: Flow&lt;Pair&lt;String, Int&gt;&gt;? = null, nextPictureFlow: Flow&lt;Unit&gt;? = null, previousPictureFlow: Flow&lt;Unit&gt;? = null, nextSlideFlow: Flow&lt;Unit&gt;? = null, previousSlideFlow: Flow&lt;Unit&gt;? = null, selectSlideFlow: Flow&lt;Pair&lt;String, Int&gt;&gt;? = null, selectBibleVerseFlow: Flow&lt;SelectBibleVerseRequest&gt;? = null, remoteSelectSongFlow: Flow&lt;ScheduleItem.SongItem&gt;? = null, remoteSelectPictureFlow: Flow&lt;ScheduleItem.PictureItem&gt;? = null, remoteSelectPresentationFlow: Flow&lt;ScheduleItem.PresentationItem&gt;? = null, uploadPresentationFlow: Flow&lt;File&gt;? = null, )</ID>
@@ -721,95 +718,6 @@
     <ID>MaxLineLength:ProjectionSettingsTab.kt$text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install)</ID>
     <ID>MaxLineLength:ProjectionSettingsTab.kt$val path = if (storageDirectory.isNotEmpty()) File(storageDirectory, t.fileName).absolutePath else t.fileName</ID>
     <ID>MaxLineLength:ProjectionSettingsTab.kt$val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)</ID>
-    <ID>MaxLineLength:QAPresenter.kt$else</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$.</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(150.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(150.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Row</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_styling_qr_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_styling_text_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$bold = qaSettings.bold</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$if</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(bold = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onColorChange = { c -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(italic = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onOpacityChange = { v -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onSizeChange = { v -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onUnderlineChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(underline = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$shadowColor = qaSettings.shadowColor</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$"[${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(q.timestamp))}] [${q.status}] ${q.text}"</ID>
-    <ID>MaxLineLength:QATab.kt$0 -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$1 -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$3 -&gt; sorted(questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED })</ID>
-    <ID>MaxLineLength:QATab.kt$FILTER_QUEUED -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$FilledIconButton</ID>
-    <ID>MaxLineLength:QATab.kt$GoLiveButton(onClick = { confirmGoLive = false; onApprove(); onDisplay() }, tooltipText = strConfirmGoLive)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(Icons.Default.Refresh, strBackToIncoming, tint = MaterialTheme.colorScheme.tertiary)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$QAIconButton</ID>
-    <ID>MaxLineLength:QATab.kt$StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, MaterialTheme.colorScheme.secondary)</ID>
-    <ID>MaxLineLength:QATab.kt$Surface</ID>
-    <ID>MaxLineLength:QATab.kt$Text("${stringResource(Res.string.qa_history)} ($historyCount)", style = MaterialTheme.typography.labelMedium)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(strConfirmDelete, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_add_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_edit_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QATab.kt$TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }</ID>
-    <ID>MaxLineLength:QATab.kt$colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)</ID>
-    <ID>MaxLineLength:QATab.kt$containerColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$containerColor = if (showQROnDisplay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$contentColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$contentColor = if (showQROnDisplay) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$filters = listOf(javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt"))</ID>
-    <ID>MaxLineLength:QATab.kt$if</ID>
-    <ID>MaxLineLength:QATab.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } }</ID>
-    <ID>MaxLineLength:QATab.kt$selected = if (selectedFilter &lt; 6) filterItemsWithCount[selectedFilter] else filterItemsWithCount[0]</ID>
-    <ID>MaxLineLength:QATab.kt$text = stringResource(Res.string.qa_submitter_device, question.submitterDeviceId)</ID>
-    <ID>MaxLineLength:QATab.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$tint = if (editing) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.tertiary</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomStart, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipText = stringResource(if (qaSettings.votingEnabled) Res.string.qa_voting_enabled else Res.string.qa_voting_disabled)</ID>
-    <ID>MaxLineLength:QATab.kt$val incomingApprovedCount = questions.count { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }</ID>
     <ID>MaxLineLength:QaRoutes.kt$"""{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}"""</ID>
     <ID>MaxLineLength:QaRoutes.kt$call.respond(HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")</ID>
     <ID>MaxLineLength:QaRoutes.kt$if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }</ID>
@@ -1239,7 +1147,6 @@
     <ID>TooGenericExceptionCaught:PresentationViewModel.kt$PresentationViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PresenterManager.kt$PresenterManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PresenterWindows.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:QATab.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:SceneSourceRenderer.kt$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:ScheduleViewModel.kt$ScheduleViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$e: Exception</ID>
@@ -1291,7 +1198,6 @@
     <ID>TooManyFunctions:PresentationPlayer.kt$PresentationPlayer</ID>
     <ID>TooManyFunctions:PresentationViewModel.kt$PresentationViewModel</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
-    <ID>TooManyFunctions:QAManager.kt$QAManager</ID>
     <ID>TooManyFunctions:RemoteApply.kt$org.churchpresenter.app.churchpresenter.remote.RemoteApply.kt</ID>
     <ID>TooManyFunctions:RemoteClientManager.kt$RemoteClientManager</ID>
     <ID>TooManyFunctions:STTManager.kt$STTManager</ID>

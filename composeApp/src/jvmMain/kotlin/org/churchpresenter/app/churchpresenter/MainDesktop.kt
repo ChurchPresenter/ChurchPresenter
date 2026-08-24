@@ -129,7 +129,6 @@ import org.churchpresenter.lowerthird.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
-import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.tabs.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
@@ -147,7 +146,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
@@ -174,6 +173,11 @@ import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineVersion
 import org.churchpresenter.app.churchpresenter.viewmodel.setInstanceLinkSource
+import org.churchpresenter.ui.LocalMainWindowState
+import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterQaOutput
+import org.churchpresenter.qa.QATab
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 
 private const val PANEL_COLLAPSE_ANIM_MS = 220
 private const val CLOCK_TICK_MS = 1000L
@@ -1671,9 +1675,10 @@ fun MainDesktop(
                                 QATab(
                                     modifier = Modifier.fillMaxSize(),
                                     qaManager = qaManager,
-                                    presenterManager = presenterManager,
+                                    output = remember(presenterManager, presenting) {
+                                        PresenterQaOutput(presenterManager, presenting)
+                                    },
                                     serverUrl = serverUrl,
-                                    presenting = presenting,
                                     appSettings = appSettings,
                                     onSettingsChange = onSettingsChange,
                                     tunnelStatus = tunnelStatus,
@@ -1683,6 +1688,22 @@ fun MainDesktop(
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = onQaDisplayUrlChanged,
                                     resolveDeviceName = resolveDeviceName,
+                                    chooseExportFile = { suggestedName, title ->
+                                        FileChooser.platformInstance.save(
+                                            location = null,
+                                            suggestedName = suggestedName,
+                                            filters = listOf(FileNameExtensionFilter("Text files", "txt")),
+                                            title = title,
+                                        )
+                                    },
+                                    chooseImportFile = { title ->
+                                        FileChooser.platformInstance.chooseSingle(
+                                            path = null,
+                                            filters = listOf(FileNameExtensionFilter("Text files", "txt")),
+                                            title = title,
+                                            selectDirectory = false,
+                                        )
+                                    },
                                 )
                             }
 

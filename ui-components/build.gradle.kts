@@ -27,6 +27,9 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(libs.compose.material3)
+    // QR codes — the Q&A join code, the presentation remote's code and the canvas QR source all
+    // draw one, so the encoder lives beside the other widgets rather than in any one of them.
+    implementation(libs.zxing.core)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(kotlin("test"))

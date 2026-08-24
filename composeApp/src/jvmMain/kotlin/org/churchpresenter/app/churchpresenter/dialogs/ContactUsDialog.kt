@@ -62,8 +62,8 @@ import org.churchpresenter.resources.generated.resources.contact_type_testimonia
 import org.churchpresenter.resources.generated.resources.contact_us_title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource

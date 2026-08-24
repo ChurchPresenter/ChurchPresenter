@@ -44,7 +44,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewM
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage

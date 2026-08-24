@@ -58,8 +58,8 @@ import org.churchpresenter.resources.generated.resources.bible_catalog_source_ze
 import org.churchpresenter.resources.generated.resources.bible_catalog_title
 import org.churchpresenter.resources.generated.resources.bible_catalog_source_beblia
 import org.churchpresenter.resources.generated.resources.ok
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.bibleformats.catalog.BebliaSource
 import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
