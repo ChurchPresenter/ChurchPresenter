@@ -34,14 +34,14 @@ class SceneViewModelSourceTypesTest {
 
     @BeforeTest
     fun stubScreenBoundsAndClearState() {
-        mockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        mockkStatic("org.churchpresenter.ui.ScreenGeometryKt")
         every { presenterScreenBounds() } returns Rectangle(0, 0, 1920, 1080)
         scenesFile.delete()
     }
 
     @AfterTest
     fun unstub() {
-        unmockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        unmockkStatic("org.churchpresenter.ui.ScreenGeometryKt")
         scenesFile.delete()
     }
 

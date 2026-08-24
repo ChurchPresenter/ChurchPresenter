@@ -176,6 +176,16 @@ private const val MAX_FIT_SCALE = 1.01f
 private const val SELECTION_BAR_WIDTH = 4f
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+// Both pre-existing, and both baselined in `:composeApp` before this file moved.
+//
+// LongMethod: the tab is one long Compose tree — the preset list, the preview, the ATEM dialog and
+// the quick-upload bar. Splitting it would move the length rather than remove it.
+//
+// TooGenericExceptionCaught: the two catches inside guard *injected* calls — `queryAtemState` is a
+// parameter, and the upload path runs whatever the caller supplied. Narrowing to `IOException`
+// would let a caller's other failure escape into the composition and take the tab down, which is
+// the opposite of what these are for. See the comment at each site.
+@Suppress("LongMethod", "TooGenericExceptionCaught")
 @Composable
 fun LowerThirdTab(
     modifier: Modifier = Modifier,
@@ -195,8 +205,19 @@ fun LowerThirdTab(
      */
     selectedLowerThirdItemVersion: Int = 0,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String) -> Unit = { _, _, _, _, _ -> },
+    onAddToSchedule: (
+        presetId: String,
+        presetLabel: String,
+        pauseAtFrame: Boolean,
+        pauseDurationMs: Long,
+    ) -> Unit = { _, _, _, _ -> },
+    onGoLive: (
+        jsonContent: String,
+        pauseAtFrame: Boolean,
+        pauseFrame: Float,
+        pauseDurationMs: Long,
+        presetName: String,
+    ) -> Unit = { _, _, _, _, _ -> },
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     /**
      * Reads the ATEM's media-pool state — what the upload dialog is built from.
@@ -380,7 +401,12 @@ fun LowerThirdTab(
     // True while composition is loading — prevents flashing warning triangle during async load
     var isCompositionLoading by remember(jsonContent) { mutableStateOf(jsonContent.isNotBlank()) }
     LaunchedEffect(composition) { if (composition != null) isCompositionLoading = false }
-    LaunchedEffect(jsonContent) { if (jsonContent.isNotBlank()) { delay(COMPOSITION_LOAD_SETTLE_MS); isCompositionLoading = false } }
+    LaunchedEffect(jsonContent) {
+        if (jsonContent.isNotBlank()) {
+            delay(COMPOSITION_LOAD_SETTLE_MS)
+            isCompositionLoading = false
+        }
+    }
 
     // Reset when file changes
     LaunchedEffect(selectedFile) {
@@ -441,7 +467,11 @@ fun LowerThirdTab(
                             val rasterW = atemSettings.renderWidth
                             val rasterH = atemSettings.renderHeight
                             if (!variant.clip) {
-                                client.uploadStillEncoded(slot, reader.nextAtemFrame(rasterW, rasterH), presetName) { p ->
+                                client.uploadStillEncoded(
+                                    slot,
+                                    reader.nextAtemFrame(rasterW, rasterH),
+                                    presetName,
+                                ) { p ->
                                     atemProgress = p
                                     AtemUploadStatus.progress(id, p)
                                 }
@@ -527,7 +557,10 @@ fun LowerThirdTab(
                     )
                 }
             },
-            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+            tooltipPlacement = TooltipPlacement.ComponentRect(
+                anchor = Alignment.BottomCenter,
+                offset = DpOffset(0.dp, 4.dp),
+            ),
             content = content
         )
     }
@@ -608,9 +641,15 @@ fun LowerThirdTab(
                         Text(stringResource(Res.string.atem_slot), style = MaterialTheme.typography.labelMedium)
                         when {
                             atemSlotsLoading -> {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
                                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                                    Text(stringResource(Res.string.atem_loading_slots), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        stringResource(Res.string.atem_loading_slots),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
                                 }
                             }
                             atemSlots.isNotEmpty() -> {
@@ -625,7 +664,9 @@ fun LowerThirdTab(
                                         readOnly = true,
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(slotExpanded) },
                                         singleLine = true,
-                                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                                        modifier = Modifier
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth()
                                     )
                                     ExposedDropdownMenu(
                                         expanded = slotExpanded,
@@ -644,7 +685,9 @@ fun LowerThirdTab(
                                 // Manual entry fallback — displayed 1-based like ATEM Software Control
                                 OutlinedTextField(
                                     value = (atemSlot + 1).toString(),
-                                    onValueChange = { it.toIntOrNull()?.let { v -> atemSlot = (v - 1).coerceAtLeast(0) } },
+                                    onValueChange = { typed ->
+                                    typed.toIntOrNull()?.let { v -> atemSlot = (v - 1).coerceAtLeast(0) }
+                                },
                                     singleLine = true,
                                     modifier = Modifier.width(100.dp)
                                 )
@@ -705,7 +748,10 @@ fun LowerThirdTab(
                         }
                         atemPrepareProgress < 1f -> {
                             Text(stringResource(Res.string.atem_preparing), style = MaterialTheme.typography.labelSmall)
-                            LinearProgressIndicator(progress = { atemPrepareProgress }, modifier = Modifier.fillMaxWidth())
+                            LinearProgressIndicator(
+                                progress = { atemPrepareProgress },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                         else -> {
                             Text(
@@ -786,9 +832,17 @@ fun LowerThirdTab(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(36.dp)
-                                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                                        else Color.Transparent
+                                    )
                                     .drawBehind {
-                                        if (isSelected) drawRect(color = accentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
+                                        if (isSelected) {
+                                            drawRect(
+                                                color = accentColor,
+                                                size = Size(SELECTION_BAR_WIDTH, size.height),
+                                            )
+                                        }
                                     }
                                     .finalPassClickable { selectedFile = file; isPlaying = false }
                                     .padding(start = 12.dp, end = 4.dp),
@@ -798,7 +852,8 @@ fun LowerThirdTab(
                                     Text(
                                         text = file.nameWithoutExtension,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier.weight(1f)
@@ -815,7 +870,9 @@ fun LowerThirdTab(
                                                 )
                                                 if (result == JOptionPane.YES_OPTION) {
                                                     file.delete()
-                                                    if (selectedFile?.absolutePath == file.absolutePath) selectedFile = null
+                                                    if (selectedFile?.absolutePath == file.absolutePath) {
+                                                selectedFile = null
+                                            }
                                                     refreshKey++
                                                 }
                                             }
@@ -868,7 +925,9 @@ fun LowerThirdTab(
                     onDragStopped = {
                         val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
                         onSettingsChangeState.value { s ->
-                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                            if (isMaximized) {
+                                s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                            }
                             else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
                         }
                     }
@@ -886,7 +945,15 @@ fun LowerThirdTab(
                 val screenBounds = presenterScreenBounds()
                 val screenAR = screenBounds.width.toFloat() / screenBounds.height.toFloat()
                 if (kotlin.math.abs(comp.width / comp.height - screenAR) > 0.05f)
-                    stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()), screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height))
+                    stringResource(
+                        Res.string.aspect_ratio_mismatch,
+                        comp.width.toInt(),
+                        comp.height.toInt(),
+                        formatAspectRatio(comp.width.toInt(), comp.height.toInt()),
+                        screenBounds.width,
+                        screenBounds.height,
+                        formatAspectRatio(screenBounds.width, screenBounds.height),
+                    )
                 else null
             } else null
             // One bar: the preset name, then ATEM, then the Play · Add to Schedule · Go Live tail.
@@ -907,8 +974,12 @@ fun LowerThirdTab(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = selectedFile?.nameWithoutExtension ?: stringResource(Res.string.lottie_select_preset),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (selectedFile != null) FontWeight.Medium else FontWeight.Normal),
-                        color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight =
+                                        if (selectedFile != null) FontWeight.Medium else FontWeight.Normal,
+                                ),
+                        color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -936,15 +1007,25 @@ fun LowerThirdTab(
                     val goLiveKeyLabel = stringResource(Res.string.atem_golive_key)
                     Tooltip(goLiveKeyLabel) {
                         FilledIconButton(
-                            onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
+                            onClick = {
+                                onSettingsChangeState.value { s ->
+                                    s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey))
+                                }
+                            },
                             modifier = Modifier.size(34.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary
+                                    else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Icon(painterResource(Res.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
+                            Icon(
+                                painterResource(Res.drawable.ic_key),
+                                contentDescription = goLiveKeyLabel,
+                                modifier = Modifier.size(16.dp),
+                            )
                         }
                     }
 
@@ -952,26 +1033,84 @@ fun LowerThirdTab(
                         val stillSlot = appSettings.atemSettings.defaultStillSlot
                         val clipSlot = appSettings.atemSettings.defaultClipSlot
                         val quickEnabled = canPlay && !atemBusy && atemReachable
-                        val quickClipVariant = if (jsonContent.isNotBlank()) atemVariant(isClip = true, useDetectedFps = false) else null
+                        val quickClipVariant =
+                            if (jsonContent.isNotBlank()) atemVariant(isClip = true, useDetectedFps = false)
+                            else null
                         val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
-                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
+                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null &&
+                            quickClipVariant.frameCount > quickClipCapacity
 
-                        val quickStillLabel = if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
+                        val quickStillLabel = if (!atemReachable) unreachableTooltip
+                            else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
                         Tooltip(quickStillLabel) {
-                            FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
+                            FilledIconButton(
+                            onClick = {
+                                startAtemUpload(
+                                    atemVariant(isClip = false, useDetectedFps = false),
+                                    stillSlot,
+                                    closeDialogOnSuccess = false,
+                                )
+                            },
+                                enabled = quickEnabled,
+                                modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = atemButtonColors,
+                            ) {
+                                Icon(
+                                    Icons.Filled.Image,
+                                    contentDescription = quickStillLabel,
+                                    modifier = Modifier.size(16.dp),
+                                )
                             }
                         }
-                        val quickClipLabel = when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }
+                        val quickClipLabel = when {
+                            !atemReachable -> unreachableTooltip
+                            quickClipTooLong -> {
+                                val secs = String.format(
+                                    java.util.Locale.US,
+                                    "%.1f",
+                                    quickClipCapacity / quickClipVariant.fps,
+                                )
+                                stringResource(
+                                    Res.string.atem_clip_too_long,
+                                    quickClipVariant.frameCount,
+                                    clipSlot + 1,
+                                    quickClipCapacity,
+                                    secs,
+                                )
+                            }
+                            else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1)
+                        }
                         Tooltip(quickClipLabel) {
-                            FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
+                            FilledIconButton(
+                                onClick = {
+                                quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) }
+                            },
+                                enabled = quickEnabled && !quickClipTooLong,
+                                modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = atemButtonColors,
+                            ) {
+                                Icon(
+                                    Icons.Filled.Movie,
+                                    contentDescription = quickClipLabel,
+                                    modifier = Modifier.size(16.dp),
+                                )
                             }
                         }
                     } else {
-                        Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
+                        val sendTooltip =
+                            if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip
+                        Tooltip(sendTooltip) {
                             FilledIconButton(
-                                onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
+                                onClick = {
+                                    atemSlot =
+                                        if (atemIsClip) appSettings.atemSettings.defaultClipSlot
+                                        else appSettings.atemSettings.defaultStillSlot
+                                    atemError = null
+                                    atemProgress = null
+                                    showAtemDialog = true
+                                },
                                 enabled = canPlay && !atemBusy && atemReachable,
                                 modifier = Modifier.size(34.dp),
                                 shape = RoundedCornerShape(8.dp),
@@ -1061,15 +1200,30 @@ fun LowerThirdTab(
                 val uploadingMsg = if (upload.processing) stringResource(Res.string.atem_processing, upload.name)
                     else if (upload.clip) stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
                     else stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(uploadingMsg, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        uploadingMsg,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    )
                     LinearProgressIndicator(progress = { upload.progress }, modifier = Modifier.fillMaxWidth())
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             val err = upload?.error
             if (err != null) {
-                Text(stringResource(Res.string.atem_upload_error, err), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp))
+                Text(
+                    stringResource(Res.string.atem_upload_error, err),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
@@ -1084,11 +1238,25 @@ fun LowerThirdTab(
                     contentAlignment = Alignment.Center
                 ) {
                     if (canPlay) {
-                        Image(painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }, fontManager = LottieFonts), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
+                        Image(
+                            painter = rememberLottiePainter(
+                                composition = composition,
+                                progress = { animatedProgress.value },
+                                fontManager = LottieFonts,
+                            ),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     } else if (selectedFile != null && isCompositionLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(36.dp))
                     } else if (selectedFile != null) {
-                        Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                        Icon(
+                            Icons.Filled.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f),
+                        )
                     }
                 }
             }

@@ -2,7 +2,6 @@
 
 package org.churchpresenter.lowerthird
 
-import org.churchpresenter.lowerthird.SkiaLottieFrameRenderer
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import kotlinx.coroutines.runBlocking

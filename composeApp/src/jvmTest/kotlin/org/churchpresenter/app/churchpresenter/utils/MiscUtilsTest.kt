@@ -1,11 +1,5 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import io.github.alexzhirkevich.compottie.assets.LottieFontSpec
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -18,7 +12,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**

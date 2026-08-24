@@ -45,6 +45,10 @@ class LottieFrame(
  * so nothing can still be drawing a bitmap that far superseded. On [close], the last frames
  * linger [CLOSE_LINGER_MS] so compositions triggered by the state clearing finish first.
  */
+// Pre-existing, and baselined in `:composeApp` before this file moved. The catch below is a
+// per-frame boundary: a single decode or allocation failure must leave the previously published
+// frame on screen rather than end playback, so it deliberately catches everything.
+@Suppress("TooGenericExceptionCaught")
 class LottieFrameStream(
     private val file: File,
     private val scope: CoroutineScope,

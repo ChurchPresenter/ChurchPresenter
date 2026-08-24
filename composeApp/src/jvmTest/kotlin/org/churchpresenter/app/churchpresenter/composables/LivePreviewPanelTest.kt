@@ -26,8 +26,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.ui.rememberScreenDevices
-import org.churchpresenter.ui.presenterScreenBounds
 
 /**
  * The sidebar's scaled-down live preview, one box per configured display. This test class covers

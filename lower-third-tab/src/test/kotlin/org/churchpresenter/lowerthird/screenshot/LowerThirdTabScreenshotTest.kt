@@ -195,12 +195,25 @@ class LowerThirdTabScreenshotTest {
 
     // ── The upload bar, fed by the shared status object ──────────────────────────────────────────
 
+    /**
+     * Material 3's `LinearProgressIndicator` animates towards the value it is given, so a capture
+     * taken the instant after `progress(…)` catches the bar part-way there — and *how* far depends
+     * on how many frames the clock had already run, which differs between a cold JVM and a warm one.
+     * That is why these two images agreed in `:composeApp`'s big suite and disagreed here on the
+     * first clean run. Settling the animation before the capture pins the bar to the value asked
+     * for, rather than to whatever the frame clock happened to be doing.
+     */
+    private fun ComposeUiTest.settleProgressBar() {
+        mainClock.advanceTimeBy(PROGRESS_ANIMATION_SETTLE_MS)
+        waitForIdle()
+    }
+
     @Test
     fun `a still uploading`() = shoot("upload_still", atemReachable = true) {
         selectPreset("Welcome")
         val id = AtemUploadStatus.begin("Welcome", clip = false, slot = 1)
         AtemUploadStatus.progress(id, 0.45f)
-        waitForIdle()
+        settleProgressBar()
     }
 
     @Test
@@ -209,7 +222,7 @@ class LowerThirdTabScreenshotTest {
         val id = AtemUploadStatus.begin("Opening Titles", clip = true, slot = 2)
         AtemUploadStatus.startProcessing(id)
         AtemUploadStatus.progress(id, 0.7f)
-        waitForIdle()
+        settleProgressBar()
     }
 
     /**
@@ -302,6 +315,9 @@ class LowerThirdTabScreenshotTest {
     }
 
     private companion object {
+        /** Comfortably past Material 3's progress animation, which is well under a second. */
+        const val PROGRESS_ANIMATION_SETTLE_MS = 2_000L
+
         const val SECTION = "lowerThirdTab"
 
         /** `atem_mode_clip`, as the dialog's radio row renders it. */
