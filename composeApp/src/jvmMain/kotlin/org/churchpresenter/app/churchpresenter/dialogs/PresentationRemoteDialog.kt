@@ -54,10 +54,10 @@ import org.churchpresenter.resources.generated.resources.presentation_remote_use
 import org.churchpresenter.resources.generated.resources.qa_qr_code_shows
 import org.churchpresenter.resources.generated.resources.qa_retry
 import org.churchpresenter.resources.generated.resources.qa_starting_tunnel
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
+import org.churchpresenter.ui.generateQRCodeBitmap
 import org.churchpresenter.companionserver.TunnelStatus
 import org.jetbrains.compose.resources.stringResource
 

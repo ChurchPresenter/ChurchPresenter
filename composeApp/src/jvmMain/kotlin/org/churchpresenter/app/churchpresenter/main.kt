@@ -107,7 +107,7 @@ import org.churchpresenter.companionserver.LottieRenderCache
 import org.churchpresenter.companionserver.CompanionServer
 import org.churchpresenter.companionserver.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
@@ -162,6 +162,7 @@ import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
+import org.churchpresenter.ui.LocalMainWindowState
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L

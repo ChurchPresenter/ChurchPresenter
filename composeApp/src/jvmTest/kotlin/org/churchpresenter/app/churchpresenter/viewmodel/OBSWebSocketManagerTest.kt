@@ -408,7 +408,14 @@ class OBSWebSocketManagerTest {
 
         awaitUntil("the second link to be established") { second.sessions.size == 1 }
         awaitUntil("the first link to be dropped") { first.sessions.isEmpty() }
-        assertEquals(OBSWebSocketManager.ConnectionStatus.CONNECTED, obs.status.value)
+        // Waited for, not read: `sessions` fills when the socket is *accepted*, which is before the
+        // identify handshake that flips the status back to CONNECTED. Reading it here asserted on
+        // whichever side of that the scheduler happened to be, which is how this failed on CI and
+        // never locally. The earlier waits are what make this one meaningful — by now the manager
+        // has provably left the first link, so a status still CONNECTED is the new one.
+        awaitUntil("the manager to report the replacement link") {
+            obs.status.value == OBSWebSocketManager.ConnectionStatus.CONNECTED
+        }
     }
 
     @Test

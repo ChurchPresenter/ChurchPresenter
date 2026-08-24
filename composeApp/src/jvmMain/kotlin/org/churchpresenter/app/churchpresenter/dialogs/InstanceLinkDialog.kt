@@ -69,8 +69,8 @@ import org.churchpresenter.resources.generated.resources.obs_mode_website
 import org.churchpresenter.resources.generated.resources.save
 import org.churchpresenter.resources.generated.resources.tab_dictionary
 import org.churchpresenter.resources.generated.resources.unit_ms
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.ui.SettingRow

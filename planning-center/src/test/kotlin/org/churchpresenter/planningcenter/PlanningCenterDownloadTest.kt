@@ -18,6 +18,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -157,8 +158,8 @@ class PlanningCenterDownloadTest {
 
         val outcome = download("/attachment.pdf", target)
 
-        assertTrue(outcome is PlanningCenterClient.FileDownloadOutcome.Success, "got $outcome")
-        assertEquals(target, (outcome as PlanningCenterClient.FileDownloadOutcome.Success).file)
+        val success = assertIs<PlanningCenterClient.FileDownloadOutcome.Success>(outcome, "got $outcome")
+        assertEquals(target, success.file)
         assertTrue(target.exists())
     }
 

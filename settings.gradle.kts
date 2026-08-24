@@ -119,3 +119,8 @@ include(":dictionary-settings-tab")
 // timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
 // touching PresenterManager, so it knows nothing about the rest of the app.
 include(":announcements-tab")
+// The Audience Q&A tab: the moderation queue people submit to from their phones, the QR code they
+// scan to find it, the remote/display settings dialog beside it and the presenter that puts a
+// question on the screen. It reaches the outputs through its own QaOutput port, so `Presenting` and
+// `PresenterManager` stay in the app.
+include(":qa-tab")

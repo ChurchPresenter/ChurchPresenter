@@ -89,17 +89,41 @@ class PlanningCenterAuthServerTest {
         error("server on port ${Constants.PLANNING_CENTER_OAUTH_PORT} never started")
     }
 
+    /**
+     * Sends the callback and returns the page, ending on an **HTTP response** rather than on a TCP
+     * connect.
+     *
+     * [isListening] proves only that something accepted a socket; between `start(wait = false)`
+     * returning and Netty being ready to answer there is a window, and on a loaded CI runner the
+     * request landed in it and came back `ConnectException`. That failure is what did the damage:
+     * the callback never arrived, so `awaitAuthorizationCode` sat in its five-minute timeout still
+     * holding the port, and the next two tests failed to bind at all. One flake became three.
+     *
+     * Re-sending is safe: the route completes a `CompletableDeferred`, and a second `complete` is a
+     * no-op. The loop ends on the response, never on the deadline — the deadline only fails it.
+     */
+    private suspend fun callback(query: String): String {
+        val deadline = System.currentTimeMillis() + 10_000
+        var last: Exception? = null
+        HttpClient(CIO).use { client ->
+            while (System.currentTimeMillis() < deadline) {
+                try {
+                    return client.get(url(query)).bodyAsText()
+                } catch (e: IOException) {
+                    last = e
+                    delay(20)
+                }
+            }
+        }
+        throw AssertionError("the callback never reached the server; last failure: ${last?.message}")
+    }
+
     @Test
     fun `a callback carrying a code resolves to Success`() = runBlocking {
         val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
         awaitServerReady(resultDeferred)
 
-        val client = HttpClient(CIO)
-        try {
-            client.get(url("?code=abc123"))
-        } finally {
-            client.close()
-        }
+        callback("?code=abc123")
 
         val result = withTimeout(10_000) { resultDeferred.await() }
         val success = assertIs<PlanningCenterAuthServer.CallbackResult.Success>(result)
@@ -111,12 +135,7 @@ class PlanningCenterAuthServerTest {
         val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
         awaitServerReady(resultDeferred)
 
-        val client = HttpClient(CIO)
-        try {
-            client.get(url("?error=access_denied"))
-        } finally {
-            client.close()
-        }
+        callback("?error=access_denied")
 
         val result = withTimeout(10_000) { resultDeferred.await() }
         val error = assertIs<PlanningCenterAuthServer.CallbackResult.Error>(result)
@@ -128,12 +147,7 @@ class PlanningCenterAuthServerTest {
         val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
         awaitServerReady(resultDeferred)
 
-        val client = HttpClient(CIO)
-        try {
-            client.get(url(""))
-        } finally {
-            client.close()
-        }
+        callback("")
 
         val result = withTimeout(10_000) { resultDeferred.await() }
         val error = assertIs<PlanningCenterAuthServer.CallbackResult.Error>(result)
@@ -145,12 +159,7 @@ class PlanningCenterAuthServerTest {
         val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
         awaitServerReady(resultDeferred)
 
-        val client = HttpClient(CIO)
-        val body = try {
-            client.get(url("?code=xyz")).bodyAsText()
-        } finally {
-            client.close()
-        }
+        val body = callback("?code=xyz")
         assertTrue(body.contains("close this window"), body)
 
         val finalResult = withTimeout(10_000) { resultDeferred.await() }

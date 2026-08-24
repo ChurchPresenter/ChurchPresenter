@@ -154,10 +154,10 @@
 - **Voting & history** — let the room upvote approved questions, and export the session afterward.
 
 **Source locations:**
-- `tabs/QATab.kt` — main UI
-- `viewmodel/QAManager.kt`
+- `qa-tab/` (the `:qa-tab` Gradle module) — the whole feature: `QATab.kt`, `QAManager.kt`,
+  `QAPresenter.kt`, `QARemoteDialog.kt` and the `QaOutput` port it drives the screens through
+- `viewmodel/PresenterQaOutput.kt` — the app's implementation of that port, over `PresenterManager`
 - `data/settings/QASettings.kt`
-- `presenter/QAPresenter.kt`
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
 
 ## Service Planning

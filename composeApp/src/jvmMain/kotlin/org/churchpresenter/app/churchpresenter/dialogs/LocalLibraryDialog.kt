@@ -57,8 +57,8 @@ import org.churchpresenter.resources.generated.resources.stock_library_title_vid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.jetbrains.compose.resources.stringResource
