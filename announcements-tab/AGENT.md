@@ -80,31 +80,50 @@ The baseline now holds **two** entries: `LongMethod` on `AnnouncementsPresenter`
 `TooManyFunctions` on `AnnouncementsViewModel`. `AnnouncementsTab` carries `@Suppress("LongMethod")`
 at the declaration instead, which was asked for explicitly.
 
-**Coverage does not clear the 0.85 default yet, and there is no override.** Measured 2026-08-24:
+**All six counters clear the root build's 0.85 default. This module has no `coverageFloors`
+override and no `coverageExcludes`, and must not gain either.** Measured 2026-08-24:
 
 | counter | measured |
 |---|---|
-| LINE | 0.967 |
-| INSTRUCTION | 0.917 |
+| LINE | 0.985 |
+| INSTRUCTION | 0.961 |
+| METHOD | 0.942 |
+| COMPLEXITY | 0.884 |
+| BRANCH | 0.863 |
 | CLASS | 0.882 |
-| BRANCH | 0.860 |
-| COMPLEXITY | 0.749 |
-| METHOD | 0.705 |
 
-The gap is the private composables `AnnouncementsTab` is built from: the timer steppers render
-`Icon(Icons.Default.Add, contentDescription = null)`, so a test cannot find them to click. That is
-an accessibility gap as much as a coverage one, and closing it — content descriptions, then tests —
-is the fix. **An `extra["coverageFloors"]` override or a `coverageExcludes` entry is not**, and
-neither may be added without asking. Because of this the module has **no coverage-floor step in
-`.github/workflows/test.yml`**; the test step is there and gates. Add the floor step in the same
-change that closes the gap.
+COMPLEXITY started at 0.749 and METHOD at 0.705 — the two worst figures of any extracted module so
+far. **The cause was not untested logic; LINE was already 0.967.** It was 71 methods with *zero*
+covered instructions: JaCoCo scores every Compose lambda as its own method, and whole subtrees of
+`AnnouncementsTabKt` had no test that could reach them. Two things closed it, and both are worth
+repeating in the next tab that moves out:
+
+1. **The timer steppers were unlabelled.** `TimerColumn` drew `Icon(Icons.Default.Add,
+   contentDescription = null)`, six times over, so no test could tell one column's arrow from
+   another's — and a screen reader read six identical unlabelled buttons. They now carry
+   `"$label Increment"`/`"$label Decrement"` ("hr Increment"), which is an accessibility fix first
+   and a testability one second. `AnnouncementsTabStepperTest` drives all six columns through them.
+2. **The controls nothing drove were driven** — text and background colour, the alignment row, font
+   size in and out of range, the shadow's colour/size/opacity, Reset, the AM/PM toggle and the speed
+   slider (`AnnouncementsTabControlsTest`).
+
+Two things that test found and are worth knowing before touching the layout:
+
+- **The AM/PM toggle is measured to zero at the shipped panel width.** Three 68dp digit columns plus
+  a 52dp toggle do not fit 300dp, and a `Row` gives its last child nothing rather than shrinking the
+  rest. The test widens `announcementsLeftPanelWidthDp` to reach it. That is a real layout bug, left
+  alone here rather than fixed unasked.
+- **`SlimSlider` and the panel drag handle publish no semantics.** The slider is reached through the
+  readout beside it (10.dp off its right edge) and clicked by coordinate; the drag handle has no
+  handle at all and stays uncovered. Do not add a `testTag` to reach it — that is refactoring
+  production code for testability.
 
 ## Commands
 
 ```bash
-./gradlew :announcements-tab:test                 # 12 test classes, 201 tests
+./gradlew :announcements-tab:test                 # 14 test classes, 218 tests
 ./gradlew :announcements-tab:detekt               # two baselined entries, nothing else
-./gradlew :announcements-tab:jacocoTestCoverageVerification   # fails today; see Gates
+./gradlew :announcements-tab:jacocoTestCoverageVerification   # all six counters over 0.85
 ./gradlew :announcements-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'   # 49 committed images
 ./gradlew :announcements-tab:recordRoborazziJvm --tests '*ScreenshotTest*'   # re-record after a visual change
 ```

@@ -414,11 +414,9 @@ jobs:
         if: always() && steps.modules.outputs.announcementstab == 'true'
         run: ./gradlew :announcements-tab:test
 
-      # No coverage-floor step yet, deliberately. The suite is 197 tests and 49 screenshots, and the
-      # bundle reads INSTRUCTION 0.92 / LINE 0.97 -- but COMPLEXITY 0.75 and METHOD 0.71, both under
-      # the 0.85 default. The gap is the private composables the tab is built from, and neither an
-      # `extra["coverageFloors"]` override nor an exclude is something to add unasked, so the step
-      # goes in when the tests that close it do.
+      - name: Announcements tab coverage floor
+        if: always() && steps.modules.outputs.announcementstab == 'true'
+        run: ./gradlew :announcements-tab:jacocoTestCoverageVerification -x test
 
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'

@@ -144,6 +144,8 @@ import org.churchpresenter.resources.generated.resources.timer_minutes
 import org.churchpresenter.resources.generated.resources.timer_pause
 import org.churchpresenter.resources.generated.resources.timer_reset
 import org.churchpresenter.resources.generated.resources.timer_hours
+import org.churchpresenter.resources.generated.resources.increment
+import org.churchpresenter.resources.generated.resources.decrement
 import org.churchpresenter.resources.generated.resources.timer_seconds
 import org.churchpresenter.resources.generated.resources.timer_start
 import org.churchpresenter.resources.generated.resources.timer_title
@@ -1371,6 +1373,11 @@ private fun TimerColumn(
 ) {
     val buttonColor = MaterialTheme.colorScheme.surfaceVariant
     val buttonShape = RoundedCornerShape(10.dp)
+    // Six of these columns are on screen at once and every one of them draws the same two arrows,
+    // so the description names the field as well as the direction — "Hours Increment", not
+    // "Increment". Without it a screen reader reads six identical unlabelled buttons.
+    val incrementLabel = "$label ${stringResource(Res.string.increment)}"
+    val decrementLabel = "$label ${stringResource(Res.string.decrement)}"
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -1385,7 +1392,7 @@ private fun TimerColumn(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            Icon(Icons.Default.Add, contentDescription = null)
+            Icon(Icons.Default.Add, contentDescription = incrementLabel)
         }
         BasicTextField(
             value = value,
@@ -1414,7 +1421,7 @@ private fun TimerColumn(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            Icon(Icons.Default.Remove, contentDescription = null)
+            Icon(Icons.Default.Remove, contentDescription = decrementLabel)
         }
         Text(
             label,
