@@ -197,6 +197,17 @@ fun LowerThirdTab(
      * boolean is also something a test can set.
      */
     isWindowMaximized: Boolean = true,
+    /**
+     * Asks the operator to confirm removing a preset, and runs `onConfirmed` if they say yes.
+     *
+     * A parameter because the default is a **modal AWT dialog**: `JOptionPane` blocks the event
+     * thread until someone clicks it, which no headless test can do — and everything that matters
+     * here is on the other side of that click (deleting the file, dropping the selection if it was
+     * the one showing, refreshing the list). Injecting the ask leaves the modal as the only
+     * uncovered step and puts the consequences under test.
+     */
+    confirmRemoval: (message: String, title: String, onConfirmed: () -> Unit) -> Unit =
+        ::confirmRemovalWithSwing,
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -862,19 +873,12 @@ fun LowerThirdTab(
                                         painter = painterResource(Res.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.tooltip_remove),
                                         modifier = Modifier.size(14.dp).initialPassClickable {
-                                            SwingUtilities.invokeLater {
-                                                val result = JOptionPane.showConfirmDialog(
-                                                    Window.getWindows().firstOrNull { it.isActive },
-                                                    confirmMsg, confirmTitle,
-                                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-                                                )
-                                                if (result == JOptionPane.YES_OPTION) {
-                                                    file.delete()
-                                                    if (selectedFile?.absolutePath == file.absolutePath) {
-                                                selectedFile = null
-                                            }
-                                                    refreshKey++
+                                            confirmRemoval(confirmMsg, confirmTitle) {
+                                                file.delete()
+                                                if (selectedFile?.absolutePath == file.absolutePath) {
+                                                    selectedFile = null
                                                 }
+                                                refreshKey++
                                             }
                                         },
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
@@ -1261,6 +1265,23 @@ fun LowerThirdTab(
                 }
             }
         }
+    }
+}
+
+/**
+ * The shipped [LowerThirdTab.confirmRemoval]: a modal Swing confirm over the active window.
+ *
+ * Deliberately the whole of the unreachable part — one call and the branch on its answer — so the
+ * work it guards lives in the composable, where a test can drive it.
+ */
+private fun confirmRemovalWithSwing(message: String, title: String, onConfirmed: () -> Unit) {
+    SwingUtilities.invokeLater {
+        val result = JOptionPane.showConfirmDialog(
+            Window.getWindows().firstOrNull { it.isActive },
+            message, title,
+            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
+        )
+        if (result == JOptionPane.YES_OPTION) onConfirmed()
     }
 }
 

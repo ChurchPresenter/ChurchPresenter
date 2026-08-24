@@ -39,4 +39,23 @@ class LowerThirdOffscreenRendererTest {
 
         assertNotSame(frames[0], frames[1])
     }
+
+    @Test
+    fun `renderStill with no progress given renders the midpoint`() = runBlocking {
+        // The default exists so a caller wanting "a representative frame" — the ATEM still upload,
+        // the preview thumbnail — does not have to pick a number. Nothing else omits it.
+        val pixels = LowerThirdOffscreenRenderer(16, 9).renderStill(lottieJson)
+
+        assertEquals(16 * 9, pixels.size)
+    }
+
+    @Test
+    fun `withSession with no initial progress starts at the beginning`() = runBlocking {
+        val first = LowerThirdOffscreenRenderer(16, 9).withSession(lottieJson) { renderFrame ->
+            renderFrame(0f).copyOf()
+        }
+
+        assertEquals(16 * 9, first.size)
+    }
+
 }

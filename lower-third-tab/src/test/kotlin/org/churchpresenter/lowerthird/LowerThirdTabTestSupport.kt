@@ -79,6 +79,12 @@ internal class LowerThirdReports {
     /** The json handed to the output for the most recent go-live. */
     var liveJson: String? = null
     var settingsChanges = 0
+    /** Each time the generator was asked for, with the folder it was pointed at. */
+    val generatorOpenedFor = mutableListOf<String>()
+    /** The `onFileSaved` callback the tab handed the generator, so a test can fire it. */
+    var generatorOnFileSaved: (() -> Unit)? = null
+    /** How many times the operator was asked to confirm removing a preset. */
+    var removalsAsked = 0
 }
 
 /**
@@ -109,6 +115,18 @@ internal fun lowerThirdTab(
      */
     atemReachable: Boolean = false,
     /**
+     * Overrides the reachability probe the tab polls on a loop.
+     *
+     * [atemReachable] is a constant answer, which is what almost every test wants. This is for the
+     * ones about the *transition* — a switcher that answers and then stops.
+     */
+    probeAtemReachable: (suspend (String, Int) -> Boolean)? = null,
+    /**
+     * How the removal confirm is answered. The shipped default is a modal Swing dialog that no
+     * headless test can click, so the harness stands in for the operator: `true` says yes.
+     */
+    confirmRemoval: Boolean = true,
+    /**
      * Where the in-app ATEM upload actually connects. The default is unroutable on purpose — most
      * tests only need the dialog, and reaching a real switcher would cost a 5s socket timeout.
      * `LowerThirdAtemUploadTest` points these at a `FakeAtemSwitcher` on loopback.
@@ -135,6 +153,11 @@ internal fun lowerThirdTab(
     width: Dp? = null,
     /** Non-null renders through the real app theme, which is what the screenshot suite shoots. */
     themeMode: ThemeMode? = null,
+    /**
+     * Whether the main window is maximised, which picks *which* saved panel width the tab reads —
+     * `maximizedLayout` or `windowedLayout`. The app's own default is `true`.
+     */
+    isWindowMaximized: Boolean = true,
     block: ComposeUiTest.(reports: LowerThirdReports) -> Unit,
 ) {
     val reports = LowerThirdReports()
@@ -179,8 +202,17 @@ internal fun lowerThirdTab(
                                 reports.liveJson = json
                             },
                             selectedLowerThirdItem = selectedLowerThirdItem,
+                            isWindowMaximized = isWindowMaximized,
+                            onOpenLottieGen = { outputDir, onSaved ->
+                                reports.generatorOpenedFor += outputDir
+                                reports.generatorOnFileSaved = onSaved
+                            },
                             queryAtemState = queryAtemState,
-                            probeAtemReachable = { _, _ -> atemReachable },
+                            probeAtemReachable = probeAtemReachable ?: { _, _ -> atemReachable },
+                            confirmRemoval = { _, _, onConfirmed ->
+                                reports.removalsAsked++
+                                if (confirmRemoval) onConfirmed()
+                            },
                         )
                     }
                 }
@@ -203,6 +235,10 @@ internal object LowerThirdLabel {
     const val PAUSE = "Pause"
     const val REMOVE = "Remove"
     const val GENERATE = "Generate"
+    const val GO_LIVE_KEY = "Go Live drives ATEM key"
+    /** The quick-upload pair name the slot they target, which is 1-based on screen. */
+    const val QUICK_STILL = "Upload image to ATEM slot 1"
+    const val QUICK_CLIP = "Upload video to ATEM slot 1"
 }
 
 // ── Reading and driving what was rendered ───────────────────────────────────────────────────────

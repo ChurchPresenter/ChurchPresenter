@@ -120,4 +120,43 @@ class LowerThirdPresenterRenderTest {
         assertEquals(0f, pixel.green)
         assertEquals(0f, pixel.blue)
     }
+
+    // ── The live painter, as opposed to a pre-decoded frame ─────────────────────
+
+    @Test
+    fun `a key output draws the live composition through the key filter too`() {
+        // The frame path and the painter path each carry their own `if (isKey)`; a test that only
+        // ever passes a frame leaves the painter's copy unexercised, and a key output would then
+        // silently ship colour to the fill/key pair.
+        renderAndSample(
+            composition = emptyComposition,
+            frame = null,
+            outputRole = Constants.OUTPUT_ROLE_KEY,
+        )
+    }
+
+    @Test
+    fun `a normal output draws the live composition unfiltered`() {
+        renderAndSample(composition = emptyComposition, frame = null)
+    }
+
+    @Test
+    fun `the output role defaults to normal when the caller does not say`() {
+        var drawn = false
+        runComposeUiTest {
+            setContent {
+                Box(Modifier.testTag("lt").size(40.dp).background(Color.Black)) {
+                    // Neither `outputRole` nor `frame` given — the shape the stage monitor uses.
+                    LowerThirdPresenter(
+                        composition = emptyComposition,
+                        progress = { 0f },
+                        appSettings = AppSettings(),
+                    )
+                }
+            }
+            onNodeWithTag("lt").captureToImage()
+            drawn = true
+        }
+        assertEquals(true, drawn, "the presenter has to draw with only its three required inputs")
+    }
 }
