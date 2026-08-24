@@ -89,6 +89,7 @@ jobs:
           :dictionary-settings-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :announcements-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :lower-third-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :lower-third-settings-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -107,6 +108,7 @@ jobs:
             dictionary-settings-tab/screenshots
             announcements-tab/screenshots
             lower-third-tab/screenshots
+            lower-third-settings-tab/screenshots
           retention-days: 30
           if-no-files-found: error
 

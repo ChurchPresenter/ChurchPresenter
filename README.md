@@ -65,6 +65,13 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > reference and its KJV usage, plus the card background and the fades. Depends on the settings
 > fields rather than on the dictionary. `./gradlew :dictionary-settings-tab:test`.
 >
+> **[`lower-third-settings-tab/`](./lower-third-settings-tab)** — the page of the options dialog
+> that configures the Lower Third tab: the Lottie library on the left, a live preview of the
+> selected animation on the right, and the window insets the band is placed with beneath it.
+> Unlike the dictionary pair it does depend on its tab module — the preview is the same
+> compottie render, with the same bundled fonts, as the thing the audience sees.
+> `./gradlew :lower-third-settings-tab:test`.
+>
 > **[`announcements-tab/`](./announcements-tab)** — the Announcements tab: on-screen notices and the
 > four timers beside them — a duration, a count-up, a countdown to a time of day and a live clock —
 > with the presenter that draws whichever is live. It reaches the output through its own

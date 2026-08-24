@@ -46,7 +46,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
-| `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary one, in `:dictionary-settings-tab` |
+| `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary and Lower Third ones, in `:dictionary-settings-tab` and `:lower-third-settings-tab` |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
 | `ui/theme/`      | `LanguageProvider` only — the theme itself is the `:theme` module   |
 
@@ -90,6 +90,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
+| `lower-third-settings-tab/` | `:lower-third-settings-tab` | The options-dialog page that picks a Lottie preset and places the band        | [AGENT.md](lower-third-settings-tab/AGENT.md) |
 | `announcements-tab/`   | `:announcements-tab`   | The Announcements tab — its notices, its four timers, its view model and presenter | [AGENT.md](announcements-tab/AGENT.md)   |
 | `lower-third-tab/`     | `:lower-third-tab`     | The Lower Third tab — its presets, its Lottie rendering and the ATEM upload        | [AGENT.md](lower-third-tab/AGENT.md)     |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
@@ -127,7 +128,8 @@ they must be set **above everything else** in the file:
   each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
-  `:dictionary-tab`, `:announcements-tab`, `:companion-server` and `:statistics` name none.
+  `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
+  `:announcements-tab`, `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

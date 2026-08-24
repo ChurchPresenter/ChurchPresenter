@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.lowerthird.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,7 +69,6 @@ import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.lowerthird.LottieFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -195,7 +194,12 @@ fun LowerThirdSettingsTab(
                                     else MaterialTheme.colorScheme.surface
                                 )
                                 .drawBehind {
-                                    if (isSelected) drawRect(color = listAccentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
+                                    if (isSelected) {
+                                        drawRect(
+                                            color = listAccentColor,
+                                            size = Size(SELECTION_BAR_WIDTH, size.height),
+                                        )
+                                    }
                                 }
                                 .clickable { viewModel.selectFile(fileName) }
                                 .padding(vertical = 8.dp, horizontal = 12.dp),
@@ -309,7 +313,11 @@ fun LowerThirdSettingsTab(
                         modifier = Modifier.width(100.dp).offset(y = 42.dp),
                         label = stringResource(Res.string.left),
                         initialText = streaming.windowLeft,
-                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v)) } },
+                        onValueChange = { v ->
+                            onSettingsChange { s ->
+                                s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v))
+                            }
+                        },
                         range = 0..10000
                     )
                     TvScreenBox(
@@ -342,7 +350,11 @@ fun LowerThirdSettingsTab(
                                     .width(100.dp),
                                 label = stringResource(Res.string.top),
                                 initialText = streaming.windowTop,
-                                onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
+                                onValueChange = { v ->
+                                    onSettingsChange { s ->
+                                        s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v))
+                                    }
+                                },
                                 range = 0..10000
                             )
                         }
@@ -351,7 +363,11 @@ fun LowerThirdSettingsTab(
                         modifier = Modifier.width(100.dp).offset(y = 42.dp),
                         label = stringResource(Res.string.right),
                         initialText = streaming.windowRight,
-                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v)) } },
+                        onValueChange = { v ->
+                            onSettingsChange { s ->
+                                s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v))
+                            }
+                        },
                         range = 0..10000
                     )
                 }
@@ -360,7 +376,11 @@ fun LowerThirdSettingsTab(
                     modifier = Modifier.width(100.dp),
                     label = stringResource(Res.string.bottom),
                     initialText = streaming.windowBottom,
-                    onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v)) } },
+                    onValueChange = { v ->
+                        onSettingsChange { s ->
+                            s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v))
+                        }
+                    },
                     range = 0..10000
                 )
             }
