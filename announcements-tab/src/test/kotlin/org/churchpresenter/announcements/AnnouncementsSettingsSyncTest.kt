@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.utils.Constants

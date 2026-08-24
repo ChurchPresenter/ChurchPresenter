@@ -1,12 +1,11 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,7 +18,7 @@ import org.churchpresenter.ui.showsExactly
  * reaches the screen.
  *
  * Everything here is asserted from outside the tab — what it draws, the settings it hands back to be
- * persisted, and what it puts on the `PresenterManager` — because the tab owns its view model
+ * persisted, and what it puts on the `FakeAnnouncementsOutput` — because the tab owns its view model
  * privately. See `AnnouncementsTabTestSupport.kt` for the harness.
  */
 class AnnouncementsTabTest {
@@ -71,8 +70,8 @@ class AnnouncementsTabTest {
         annButton(AnnouncementLabel.GO_LIVE).performClick()
         waitForIdle()
 
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
-        assertEquals("Service starts in ten minutes", presenter.announcementText.value)
+        assertTrue(presenter.announcementLive)
+        assertEquals("Service starts in ten minutes", presenter.announcementText)
     }
 
     @Test
@@ -83,7 +82,7 @@ class AnnouncementsTabTest {
         annButton(AnnouncementLabel.SHOW).performClick()
         waitForIdle()
 
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertTrue(presenter.announcementLive)
         assertTrue(hasAnnButton(AnnouncementLabel.HIDE), "the same button now offers to hide")
         assertFalse(hasAnnButton(AnnouncementLabel.SHOW))
     }
@@ -93,14 +92,14 @@ class AnnouncementsTabTest {
         typeAnnouncement("Notices")
         annButton(AnnouncementLabel.SHOW).performClick()
         waitForIdle()
-        assertFalse(presenter.clearDisplayRequested.value, "nothing asked for yet")
+        assertFalse(presenter.clearDisplayRequested, "nothing asked for yet")
 
         annButton(AnnouncementLabel.HIDE).performClick()
         waitForIdle()
 
         // The tab raises the request; MainDesktop is what watches it and takes the content down,
         // so the mode is still ANNOUNCEMENTS here — the request is the whole of the tab's part.
-        assertTrue(presenter.clearDisplayRequested.value, "the display was asked to clear")
+        assertTrue(presenter.clearDisplayRequested, "the display was asked to clear")
     }
 
     // ── Adding to the schedule ──────────────────────────────────────────────────

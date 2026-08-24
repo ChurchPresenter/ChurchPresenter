@@ -1,17 +1,15 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -51,9 +49,9 @@ class AnnouncementsTabStageMonitorTest {
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.screenLocks.value[1])
-            assertNull(presenter.screenLocks.value[0], "the main screen must stay free")
-            assertEquals("Notices", presenter.announcementText.value)
+            assertTrue(presenter.isScreenLockedToAnnouncements(1))
+            assertFalse(presenter.isScreenLockedToAnnouncements(0), "the main screen must stay free")
+            assertEquals("Notices", presenter.announcementText)
             assertTrue(hasAnnButton(AnnouncementLabel.HIDE_FROM_STAGE_MONITOR), "the button now offers to undo it")
         }
 
@@ -67,7 +65,7 @@ class AnnouncementsTabStageMonitorTest {
             annButton(AnnouncementLabel.HIDE_FROM_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertNull(presenter.screenLocks.value[1])
+            assertFalse(presenter.isScreenLockedToAnnouncements(1))
             assertTrue(hasAnnButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR), "back to offering to send")
         }
 
@@ -79,10 +77,10 @@ class AnnouncementsTabStageMonitorTest {
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
-            assertEquals("Notices", presenter.announcementText.value)
+            assertTrue(presenter.announcementLive)
+            assertEquals("Notices", presenter.announcementText)
             assertTrue(
-                presenter.screenLocks.value.isEmpty(),
+                presenter.lockedScreens.isEmpty(),
                 "there is nothing else to protect, so no per-screen lock is needed",
             )
         }
@@ -97,7 +95,7 @@ class AnnouncementsTabStageMonitorTest {
             annButton(AnnouncementLabel.HIDE_FROM_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertTrue(presenter.clearDisplayRequested.value)
+            assertTrue(presenter.clearDisplayRequested)
         }
 
     @Test
@@ -108,8 +106,8 @@ class AnnouncementsTabStageMonitorTest {
             timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.screenLocks.value[1])
-            assertTrue(presenter.announcementTickerLive.value, "Specific Time must start ticking, not just preview")
+            assertTrue(presenter.isScreenLockedToAnnouncements(1))
+            assertTrue(presenter.announcementTickerLive, "Specific Time must start ticking, not just preview")
         }
 
     @Test
@@ -121,8 +119,8 @@ class AnnouncementsTabStageMonitorTest {
             timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.screenLocks.value[1])
-            assertTrue(presenter.announcementTickerLive.value)
-            assertEquals("05:00", presenter.announcementText.value)
+            assertTrue(presenter.isScreenLockedToAnnouncements(1))
+            assertTrue(presenter.announcementTickerLive)
+            assertEquals("05:00", presenter.announcementText)
         }
 }

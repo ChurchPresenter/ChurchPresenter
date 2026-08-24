@@ -111,3 +111,7 @@ include(":ui-components")
 // behind them, the settings tab that styles the output, and the presenter that draws it. The data
 // it reads is :dictionary; this is everything the operator and the audience see of it.
 include(":dictionary-tab")
+// The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
+// timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
+// touching PresenterManager, so it knows nothing about the rest of the app.
+include(":announcements-tab")

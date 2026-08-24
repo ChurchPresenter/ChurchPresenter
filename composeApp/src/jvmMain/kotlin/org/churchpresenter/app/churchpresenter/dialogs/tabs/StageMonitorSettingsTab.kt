@@ -74,7 +74,7 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.settings.toZone
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.ui.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
