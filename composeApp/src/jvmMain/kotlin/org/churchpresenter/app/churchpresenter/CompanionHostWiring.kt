@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import java.io.File
 import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
+import org.churchpresenter.lowerthird.SkiaLottieFrameRenderer
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents

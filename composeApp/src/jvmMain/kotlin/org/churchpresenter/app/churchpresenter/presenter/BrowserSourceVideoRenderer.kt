@@ -53,6 +53,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
+import org.churchpresenter.lowerthird.LowerThirdPresenter
 
 private const val ALPHA_SHIFT = 24
 private const val OPAQUE_ALPHA = 0xFF

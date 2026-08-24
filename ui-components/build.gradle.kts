@@ -33,6 +33,9 @@ dependencies {
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(projects.settings)
+    // GraphicsDevice is abstract and the test JVM is headless, so the screen topology the geometry
+    // helpers choose from has to be faked. One of the few places a mock is the only way in.
+    testImplementation(libs.mockk)
     testImplementation(testFixtures(project(":ui-components")))
     testFixturesImplementation(kotlin("test"))
     testFixturesImplementation(projects.theme)

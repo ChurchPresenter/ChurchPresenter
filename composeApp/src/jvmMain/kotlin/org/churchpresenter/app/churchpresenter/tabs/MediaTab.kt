@@ -144,7 +144,7 @@ import org.churchpresenter.app.churchpresenter.remote.followerMediaUrl
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.ui.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
