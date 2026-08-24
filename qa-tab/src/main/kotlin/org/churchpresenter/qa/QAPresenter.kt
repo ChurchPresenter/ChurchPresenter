@@ -41,7 +41,6 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.ui.generateQRCodeBitmap
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
-import java.awt.image.BufferedImage
 
 @Composable
 fun QAPresenter(

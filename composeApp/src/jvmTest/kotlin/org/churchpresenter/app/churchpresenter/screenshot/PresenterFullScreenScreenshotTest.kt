@@ -816,10 +816,6 @@ class PresenterFullScreenScreenshotTest {
         PresentationPresenter(frame = null, slide = slideBitmap(), frozen = true)
     }
 
-            ),
-        )
-    }
-
     // ── Canvas scenes ───────────────────────────────────────────────────────────────────────────
 
     @Test
