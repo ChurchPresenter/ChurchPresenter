@@ -11,6 +11,10 @@ plugins {
 
 group = "org.churchpresenter"
 
+extra["coverageFloors"] = mapOf(
+    "COMPLEXITY" to "0.82",
+)
+
 kotlin {
     jvmToolchain(21)
 }
@@ -21,16 +25,10 @@ compose.resources {
 
 dependencies {
     api(projects.settings)
-    // ScheduleItem.LowerThirdItem — what a saved lower third looks like in a service plan.
     api(projects.coreModels)
-    // LowerThirdSequencer and LottieRenderCache drive playback; isLottieFile and
-    // LottieFrameRenderer are the wire the Browser Source overlay renders through.
     api(projects.companionServer)
-    // The switcher: querying the media pool, uploading a clip, and reading its frame rate.
     api(projects.atem)
-    // SlideFontRegistry — the fonts a Lottie design names have to resolve somewhere.
     implementation(projects.presentationEngine)
-    // A frame that fails to rasterise is reported, not swallowed.
     implementation(projects.diagnostics)
     implementation(projects.uiComponents)
     implementation(projects.theme)
@@ -46,12 +44,7 @@ dependencies {
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(testFixtures(projects.uiComponents))
-    // LottieFontSpec has an `internal constructor`, so the compottie library is the only thing that
-    // can build one — the two `font(spec)` tests have no other way in. Everything else in
-    // LottieFontsTest calls the internal helpers directly.
     testImplementation(libs.mockk)
-    // The ATEM upload tests drive a loopback fake switcher built from a capture of real hardware,
-    // so the media-pool upload is exercised without a device.
     testImplementation(testFixtures(projects.atem))
 }
 

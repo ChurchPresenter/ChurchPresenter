@@ -54,6 +54,12 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > that puts an entry on the screen. The first tab to live outside `:composeApp`, which keeps only
 > the wiring. `./gradlew :dictionary-tab:test`.
 >
+> **[`lower-third-tab/`](./lower-third-tab)** — the Lower Third tab: the animated Lottie band the
+> audience sees over the picture, its presets and playback, the offscreen renderer the Browser Source
+> overlay and the ATEM upload both rasterise through, and the media-pool upload itself. It was
+> already callback-driven before it moved, so it needs no port — `PresenterManager` never reached it.
+> `./gradlew :lower-third-tab:test`.
+>
 > **[`dictionary-settings-tab/`](./dictionary-settings-tab)** — the page of the options dialog that
 > styles that output: the colour, font, size, style and shadow of the word, its definition, its
 > reference and its KJV usage, plus the card background and the fades. Depends on the settings
