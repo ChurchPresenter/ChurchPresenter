@@ -86,6 +86,7 @@ jobs:
           ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
           :ui-components:recordRoborazziJvm --tests '*ScreenshotTest*'
           :dictionary-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :dictionary-settings-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :announcements-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
@@ -102,6 +103,7 @@ jobs:
             composeApp/screenshots
             ui-components/screenshots
             dictionary-tab/screenshots
+            dictionary-settings-tab/screenshots
             announcements-tab/screenshots
           retention-days: 30
           if-no-files-found: error
@@ -115,8 +117,8 @@ jobs:
           # also updates what is in git.
           # NOTE: reg-actions takes ONE directory, so this comparison still covers only
           # :composeApp's images. The images a feature module owns — ui-components/screenshots,
-          # dictionary-tab/screenshots and announcements-tab/screenshots — are recorded and uploaded
-          # above, but not diffed in the PR
+          # dictionary-tab/screenshots, dictionary-settings-tab/screenshots and
+          # announcements-tab/screenshots — are recorded and uploaded above, but not diffed in the PR
           # comment; verify those locally with `./gradlew :<module>:verifyRoborazziJvm`.
           image-directory-path: ./composeApp/screenshots
           # Every changed image is shown in the comment; with a handful of surfaces there is no

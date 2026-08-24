@@ -47,7 +47,7 @@
 **Source locations:**
 - `tabs/BibleTab.kt` — main UI
 - `dictionary-tab/` (the `:dictionary-tab` Gradle module) — the Dictionary tab itself: `DictionaryTab.kt`, `DictionaryViewModel.kt` and `DictionaryPresenter.kt`
-- `dialogs/tabs/DictionarySettingsTab.kt` — stays in the app, with the other settings tabs
+- `dictionary-settings-tab/` (the `:dictionary-settings-tab` Gradle module) — `DictionarySettingsTab.kt`, the options-dialog page that styles the output
 - `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
