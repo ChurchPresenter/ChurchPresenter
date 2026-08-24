@@ -63,8 +63,14 @@ object PlanningCenterAuthServer {
             return CallbackResult.Error(e.message ?: "Failed to start local callback server")
         }
 
-        val result = withTimeoutOrNull(CALLBACK_TIMEOUT_MS) { deferred.await() } ?: CallbackResult.Timeout
-        server.stop(gracePeriodMillis = 100, timeoutMillis = 1000)
-        return result
+        // `finally`, not a plain sequence: the caller is a dialog, and closing it cancels this
+        // coroutine mid-await. Without this the `stop` is skipped, Netty keeps 127.0.0.1:47850, and
+        // every later connect attempt in the same run fails to bind — for the life of the app,
+        // because nothing ever hands the port back.
+        return try {
+            withTimeoutOrNull(CALLBACK_TIMEOUT_MS) { deferred.await() } ?: CallbackResult.Timeout
+        } finally {
+            server.stop(gracePeriodMillis = 100, timeoutMillis = 1000)
+        }
     }
 }
