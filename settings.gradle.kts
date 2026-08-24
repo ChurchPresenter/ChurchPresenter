@@ -115,3 +115,8 @@ include(":dictionary-tab")
 // audience sees of a Strong's entry — the word, its definition, its reference and its KJV usage.
 // Depends on the settings-field widgets rather than on the dictionary, so it stands alone.
 include(":dictionary-settings-tab")
+// The Audience Q&A tab: the moderation queue people submit to from their phones, the QR code they
+// scan to find it, the remote/display settings dialog beside it and the presenter that puts a
+// question on the screen. It reaches the outputs through its own QaOutput port, so `Presenting` and
+// `PresenterManager` stay in the app.
+include(":qa-tab")

@@ -88,8 +88,8 @@ import org.churchpresenter.resources.generated.resources.planning_center_status_
 import java.awt.Desktop
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.ui.LabeledCheckbox
 import org.churchpresenter.ui.cpColorToHex

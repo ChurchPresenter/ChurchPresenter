@@ -77,8 +77,8 @@ import org.churchpresenter.resources.generated.resources.stt_text_color
 import org.churchpresenter.resources.generated.resources.stt_translation_color
 import org.churchpresenter.resources.generated.resources.stt_translation_in_progress
 import org.churchpresenter.resources.generated.resources.stt_word_highlighting
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.ui.FontSettingsDropdown

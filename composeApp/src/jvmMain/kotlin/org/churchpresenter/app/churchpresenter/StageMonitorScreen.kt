@@ -68,7 +68,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.qa.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.ui.Utils.parseHexColor
@@ -81,7 +81,7 @@ import org.churchpresenter.resources.generated.resources.song_play
 import org.churchpresenter.resources.generated.resources.unit_bpm
 import org.churchpresenter.resources.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.songInfoOf

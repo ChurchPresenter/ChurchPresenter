@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.ui.dialogSizeWithin
 
 /**
  * The size each fixed-size dialog opens at, named once so the window and the test that measures it

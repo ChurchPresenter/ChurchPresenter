@@ -21,7 +21,6 @@ import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
-import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
@@ -29,8 +28,6 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.core.models.qa.Question
-import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -38,7 +35,6 @@ import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -63,6 +59,10 @@ import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
  * here more than elsewhere, because auto-fit sizes the text against the space it is given.
  *
  * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half.
+ *
+ * Only the presenters `:composeApp` still owns are shot here. A presenter that has moved into a
+ * module is shot by that module, against that module's own `screenshots/` directory — the
+ * audience question by `QAPresenterScreenshotTest` in `:qa-tab`.
  */
 class PresenterFullScreenScreenshotTest {
 
@@ -855,30 +855,6 @@ class PresenterFullScreenScreenshotTest {
         PresentationPresenter(frame = null, slide = slideBitmap(), frozen = true)
     }
 
-    // ── Questions ───────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a question`() = shoot("qa_question") { QAPresenter(question = question()) }
-
-    @Test
-    fun `a styled question`() = shoot("qa_question_styled") {
-        QAPresenter(
-            question = question(),
-            qaSettings = QASettings(
-                textColor = "#FFD54F",
-                backgroundColor = "#1B2A5B",
-                fontSize = 72,
-                bold = true,
-                position = Constants.CENTER,
-            ),
-        )
-    }
-
-    @Test
-    fun `a long question`() = shoot("qa_question_long") {
-        QAPresenter(question = question(LONG_QUESTION))
-    }
-
     // ── Dictionary ──────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -1114,9 +1090,6 @@ class PresenterFullScreenScreenshotTest {
         ),
     )
 
-    private fun question(text: String = "How do I join a small group?") =
-        Question(id = "q1", text = text, timestamp = 0L, status = QuestionStatus.APPROVED)
-
     private fun strongs() = StrongsEntry(
         number = "G26",
         word = "ἀγάπη",
@@ -1227,10 +1200,6 @@ class PresenterFullScreenScreenshotTest {
         const val LONG_TITLE = "Amazing Grace, How Sweet the Sound That Saved a Wretch Like Me"
 
         const val NOTICE = "Prayer meeting Wednesday at 7pm in the hall"
-
-        const val LONG_QUESTION =
-            "How should a small group decide what to study together, and how often should the " +
-                "group change what it is reading?"
 
         const val LONG_PASSAGE =
             "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +

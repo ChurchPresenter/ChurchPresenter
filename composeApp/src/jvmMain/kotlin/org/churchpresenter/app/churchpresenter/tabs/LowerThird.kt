@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.ui.LocalMainWindowState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi

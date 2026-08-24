@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault

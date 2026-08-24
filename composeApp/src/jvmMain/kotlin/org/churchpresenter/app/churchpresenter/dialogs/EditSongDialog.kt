@@ -108,8 +108,8 @@ import org.churchpresenter.resources.generated.resources.song_tempo
 import org.churchpresenter.resources.generated.resources.song_title
 import org.churchpresenter.resources.generated.resources.tune
 import org.churchpresenter.resources.generated.resources.unit_bpm
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.ConditionalTooltipArea
 import org.churchpresenter.ui.PaneTab
 import org.churchpresenter.ui.PaneTabRow

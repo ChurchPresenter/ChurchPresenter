@@ -35,8 +35,8 @@ import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.about_copyright
 import org.churchpresenter.resources.generated.resources.about_title

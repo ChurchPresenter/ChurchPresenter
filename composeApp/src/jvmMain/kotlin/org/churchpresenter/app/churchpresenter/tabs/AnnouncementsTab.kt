@@ -14,7 +14,7 @@ import java.awt.Cursor
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.ui.LocalMainWindowState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
