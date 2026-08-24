@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
  * a 5-second grid, and editing a field while paused nudges the live remaining time by the *delta*
  * rather than resetting it -- all of which is easy to break and invisible until a service.
  *
- * No PresenterManager is needed: the start/pause/reset entry points take a nullable one, and the
+ * No FakeAnnouncementsOutput is needed: the start/pause/reset entry points take a nullable one, and the
  * field arithmetic tested here runs entirely locally.
  */
 class AnnouncementsViewModelTest {

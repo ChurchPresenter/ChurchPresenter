@@ -115,10 +115,11 @@
 - **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
 
 **Source locations:**
-- `tabs/AnnouncementsTab.kt` — main UI
-- `viewmodel/AnnouncementsViewModel.kt`
+- `announcements-tab/` (the `:announcements-tab` Gradle module) — the tab itself: `AnnouncementsTab.kt`,
+  `AnnouncementsViewModel.kt`, `AnnouncementsPresenter.kt` and the `AnnouncementsOutput` port it
+  drives the output through
+- `viewmodel/PresenterAnnouncementsOutput.kt` — the app's implementation of that port, over `PresenterManager`
 - `data/settings/AnnouncementsSettings.kt`
-- `presenter/AnnouncementsPresenter.kt`
 - `utils/TimerStateManager.kt`
 
 ## Web & Canvas

@@ -1,7 +1,6 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -12,7 +11,7 @@ import kotlin.test.assertTrue
 /**
  * The play/pause/reset buttons under the countdown, and what they do to the live output.
  *
- * The timer itself ticks on [PresenterManager] rather than here, so that a countdown survives the
+ * The timer itself ticks on [FakeAnnouncementsOutput] rather than here, so that a countdown survives the
  * operator switching away from the Announcements tab. That split is the subtle part: this view
  * model only decides *which* of the manager's four tickers to start, and whether a click means
  * start, resume or pause — and the running-state flag to check differs by mode (Duration and
@@ -41,7 +40,7 @@ class AnnouncementsTimerControlTest {
         setTimerMinutes(minutes)
     }
 
-    private fun pm() = PresenterManager()
+    private fun pm() = FakeAnnouncementsOutput()
 
     // ── Duration countdown ──────────────────────────────────────────────────────
 
@@ -52,14 +51,14 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertTrue(pm.timerRunning.value)
-        assertTrue(pm.announcementTickerActive.value)
+        assertTrue(pm.timerRunning)
+        assertTrue(pm.tickerActive)
         assertTrue(
-            pm.timerRemainingSeconds.value in 299..300,
+            pm.timerRemainingSeconds in 299..300,
             // The ticker recomputes from the wall clock, so its first tick reads 299 if the epoch
             // second rolls over between the start call and that tick. Pinning 300 exactly would be
             // asserting on timing.
-            "expected roughly the configured 5 minutes, got ${pm.timerRemainingSeconds.value}"
+            "expected roughly the configured 5 minutes, got ${pm.timerRemainingSeconds}"
         )
     }
 
@@ -71,11 +70,11 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertFalse(pm.timerRunning.value)
-        assertFalse(pm.announcementTickerActive.value)
+        assertFalse(pm.timerRunning)
+        assertFalse(pm.tickerActive)
         assertTrue(
-            pm.timerRemainingSeconds.value in 299..300,
-            "pausing must keep the remaining time, not clear it; got ${pm.timerRemainingSeconds.value}"
+            pm.timerRemainingSeconds in 299..300,
+            "pausing must keep the remaining time, not clear it; got ${pm.timerRemainingSeconds}"
         )
     }
 
@@ -87,15 +86,15 @@ class AnnouncementsTimerControlTest {
         // pausing it would race: pauseAnnouncementTimer cancels the ticker and then pins the value,
         // but cancellation only takes effect at the ticker's next suspension point, so its first
         // iteration can write the full duration back afterwards.
-        pm.pauseAnnouncementTimer(42)
+        pm.pauseTimer(42)
 
         vm.startPauseTimer(pm)
 
         assertTrue(
-            pm.timerRemainingSeconds.value in 41..42,
-            "resume must not restart the countdown from the top; got ${pm.timerRemainingSeconds.value}"
+            pm.timerRemainingSeconds in 41..42,
+            "resume must not restart the countdown from the top; got ${pm.timerRemainingSeconds}"
         )
-        assertTrue(pm.timerRunning.value)
+        assertTrue(pm.timerRunning)
     }
 
     @Test
@@ -105,8 +104,8 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertFalse(pm.timerRunning.value, "an empty timer would go straight to the expired message")
-        assertFalse(pm.announcementTickerActive.value)
+        assertFalse(pm.timerRunning, "an empty timer would go straight to the expired message")
+        assertFalse(pm.tickerActive)
     }
 
     // ── Count-up stopwatch ──────────────────────────────────────────────────────
@@ -115,15 +114,15 @@ class AnnouncementsTimerControlTest {
     fun `starting the stopwatch runs it from where it was left`() {
         val vm = vm(Constants.TIMER_MODE_COUNT_UP)
         val pm = pm()
-        pm.pauseAnnouncementTimer(75) // 1:15 already elapsed
+        pm.pauseTimer(75) // 1:15 already elapsed
 
         vm.startPauseTimer(pm)
 
-        assertTrue(pm.timerRunning.value)
-        assertTrue(pm.announcementTickerActive.value)
+        assertTrue(pm.timerRunning)
+        assertTrue(pm.tickerActive)
         assertTrue(
-            pm.timerRemainingSeconds.value in 75..76,
-            "expected the stopwatch to resume near 1:15, got ${pm.timerRemainingSeconds.value}"
+            pm.timerRemainingSeconds in 75..76,
+            "expected the stopwatch to resume near 1:15, got ${pm.timerRemainingSeconds}"
         )
     }
 
@@ -135,8 +134,8 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertFalse(pm.timerRunning.value)
-        assertFalse(pm.announcementTickerActive.value)
+        assertFalse(pm.timerRunning)
+        assertFalse(pm.tickerActive)
     }
 
     @Test
@@ -147,8 +146,8 @@ class AnnouncementsTimerControlTest {
         vm.startPauseTimer(pm)
 
         assertTrue(
-            pm.timerRemainingSeconds.value in 0..1,
-            "the H/M/S fields belong to the countdown, not the stopwatch; got ${pm.timerRemainingSeconds.value}"
+            pm.timerRemainingSeconds in 0..1,
+            "the H/M/S fields belong to the countdown, not the stopwatch; got ${pm.timerRemainingSeconds}"
         )
     }
 
@@ -161,9 +160,9 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertTrue(pm.announcementTickerActive.value)
+        assertTrue(pm.tickerActive)
         assertFalse(
-            pm.timerRunning.value,
+            pm.timerRunning,
             "specific time recomputes from the wall clock, so timerRunning stays false — the button must not read it"
         )
     }
@@ -176,7 +175,7 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertFalse(pm.announcementTickerActive.value, "judged by the ticker flag, since timerRunning is never set")
+        assertFalse(pm.tickerActive, "judged by the ticker flag, since timerRunning is never set")
     }
 
     // ── Clock display ───────────────────────────────────────────────────────────
@@ -188,8 +187,8 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertTrue(pm.announcementTickerActive.value)
-        assertFalse(pm.timerRunning.value)
+        assertTrue(pm.tickerActive)
+        assertFalse(pm.timerRunning)
     }
 
     @Test
@@ -200,7 +199,7 @@ class AnnouncementsTimerControlTest {
 
         vm.startPauseTimer(pm)
 
-        assertFalse(pm.announcementTickerActive.value)
+        assertFalse(pm.tickerActive)
     }
 
     // ── No presenter ────────────────────────────────────────────────────────────
@@ -224,7 +223,7 @@ class AnnouncementsTimerControlTest {
         vm.pauseTimer(pm)
 
         assertFalse(
-            pm.announcementTickerActive.value,
+            pm.tickerActive,
             "a live clock left ticking would overwrite plain announcement text within a second"
         )
     }
@@ -234,12 +233,12 @@ class AnnouncementsTimerControlTest {
         val vm = vm(Constants.TIMER_MODE_DURATION)
         val pm = pm()
         vm.startPauseTimer(pm)
-        pm.setAnnouncementTickerLive(true)
+        pm.tickerLive = true
 
         vm.pauseTimer(pm)
 
         assertFalse(
-            pm.announcementTickerLive.value,
+            pm.announcementTickerLive,
             "otherwise a later Resume click silently pushes the timer back over the text that took the slot"
         )
     }
@@ -250,24 +249,24 @@ class AnnouncementsTimerControlTest {
     fun `resetting a countdown puts the configured duration back`() {
         val vm = vm(Constants.TIMER_MODE_DURATION)
         val pm = pm()
-        pm.pauseAnnouncementTimer(42) // paused with 42s left, no ticker running
+        pm.pauseTimer(42) // paused with 42s left, no ticker running
 
         vm.resetTimer(pm)
 
-        assertEquals(300, pm.timerRemainingSeconds.value)
-        assertFalse(pm.timerRunning.value)
+        assertEquals(300, pm.timerRemainingSeconds)
+        assertFalse(pm.timerRunning)
     }
 
     @Test
     fun `resetting the stopwatch puts it back to zero`() {
         val vm = vm(Constants.TIMER_MODE_COUNT_UP)
         val pm = pm()
-        pm.pauseAnnouncementTimer(75) // paused at 1:15 elapsed, no ticker running
+        pm.pauseTimer(75) // paused at 1:15 elapsed, no ticker running
 
         vm.resetTimer(pm)
 
-        assertEquals(0, pm.timerRemainingSeconds.value)
-        assertFalse(pm.timerRunning.value)
+        assertEquals(0, pm.timerRemainingSeconds)
+        assertFalse(pm.timerRunning)
     }
 
     @Test
@@ -279,7 +278,7 @@ class AnnouncementsTimerControlTest {
         vm.resetTimer(pm)
 
         assertTrue(
-            pm.announcementTickerActive.value,
+            pm.tickerActive,
             "a target time always tracks the wall clock — there is nothing to reset it back to"
         )
     }
@@ -294,8 +293,8 @@ class AnnouncementsTimerControlTest {
 
         vm.goLive(pm) { }
 
-        assertEquals("Welcome to the 10am service", pm.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, pm.presentingMode.value)
+        assertEquals("Welcome to the 10am service", pm.announcementText)
+        assertTrue(pm.announcementLive)
     }
 
     @Test
@@ -304,13 +303,13 @@ class AnnouncementsTimerControlTest {
         vm.setText("Welcome")
         val pm = pm()
         vm.startPauseTimer(pm)
-        pm.setAnnouncementTickerLive(true)
+        pm.tickerLive = true
 
         vm.goLive(pm) { }
 
-        assertFalse(pm.announcementTickerActive.value, "the clock would replace the text on its next tick")
-        assertFalse(pm.announcementTickerLive.value)
-        assertEquals("Welcome", pm.announcementText.value)
+        assertFalse(pm.tickerActive, "the clock would replace the text on its next tick")
+        assertFalse(pm.announcementTickerLive)
+        assertEquals("Welcome", pm.announcementText)
     }
 
     @Test
@@ -336,7 +335,7 @@ class AnnouncementsTimerControlTest {
         vm.saveToSettings { transform -> saved = transform(saved) }
 
         assertEquals("Draft", saved.announcementsSettings.text)
-        assertEquals(Presenting.NONE, pm.presentingMode.value)
+        assertFalse(pm.announcementLive)
     }
 
     // ── Timer formatting ────────────────────────────────────────────────────────

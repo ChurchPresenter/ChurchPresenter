@@ -60,7 +60,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
+import org.churchpresenter.announcements.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.composables.previewLinesFrom
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterAnnouncementsOutput
 import org.churchpresenter.dictionary.tab.DictionaryTab
 import org.churchpresenter.dictionary.tab.DictionaryViewModel
 import org.churchpresenter.resources.generated.resources.Res
@@ -117,7 +121,6 @@ import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.companionserver.SongCatalogResponse
 import org.churchpresenter.companionserver.SongDetailDto
 import org.churchpresenter.companionserver.TunnelStatus
-import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
@@ -1596,7 +1599,10 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
-                                presenterManager = presenterManager,
+                                output = remember(presenterManager) { PresenterAnnouncementsOutput(presenterManager) },
+                                isWindowMaximized = isMaximized,
+                                presenterAspect = presenterAspectRatio(),
+                                presenterWidthPx = presenterScreenBounds().width,
                                 onAddToSchedule = { settings ->
                                     val isTimer = settings.timerMode != Constants.TIMER_MODE_DURATION ||
                                         settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0

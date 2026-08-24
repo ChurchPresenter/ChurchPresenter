@@ -1,19 +1,23 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.announcements.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.announcements.AnnouncementLabel
+import org.churchpresenter.announcements.annButton
+import org.churchpresenter.announcements.announcementsTab
+import org.churchpresenter.announcements.timerButton
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.tabs.AnnouncementLabel
-import org.churchpresenter.app.churchpresenter.tabs.annButton
-import org.churchpresenter.app.churchpresenter.tabs.announcementsTab
-import org.churchpresenter.app.churchpresenter.tabs.timerButton
+
+
+
+
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.ui.screenshot.captureTo

@@ -80,8 +80,8 @@ import org.churchpresenter.resources.generated.resources.song_capo
 import org.churchpresenter.resources.generated.resources.song_play
 import org.churchpresenter.resources.generated.resources.unit_bpm
 import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.ui.calculateAutoFitFontSize
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.songInfoOf

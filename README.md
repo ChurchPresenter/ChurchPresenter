@@ -59,6 +59,12 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > reference and its KJV usage, plus the card background and the fades. Depends on the settings
 > fields rather than on the dictionary. `./gradlew :dictionary-settings-tab:test`.
 >
+> **[`announcements-tab/`](./announcements-tab)** — the Announcements tab: on-screen notices and the
+> four timers beside them — a duration, a count-up, a countdown to a time of day and a live clock —
+> with the presenter that draws whichever is live. It reaches the output through its own
+> `AnnouncementsOutput` port, so `PresenterManager` stays in the app.
+> `./gradlew :announcements-tab:test`.
+>
 > **[`companion-server/`](./companion-server)** — the HTTP/WebSocket surface the desktop exposes:
 > the wire format, the routes, the pages it serves a browser, TLS and the tunnel, plus the client a
 > follower instance consumes the same surface with. One server behind the phone companion app, the

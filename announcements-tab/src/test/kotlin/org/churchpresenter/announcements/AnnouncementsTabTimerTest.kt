@@ -1,12 +1,11 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +25,7 @@ import org.churchpresenter.ui.showsExactly
  * Nothing here waits for a tick. The tab renders the timer from state the view model already holds,
  * so the starting value, the mode switches and the buttons are all assertable on the frame after
  * the click; a test that waited for a second to pass would be asserting on the clock rather than on
- * the tab. What a running ticker does over time belongs to `PresenterManagerAnnouncementTimerTest`.
+ * the tab. What a running ticker does over time belongs to `FakeAnnouncementsOutputAnnouncementTimerTest`.
  *
  * See `AnnouncementsTabTestSupport.kt` for the harness.
  */
@@ -119,8 +118,8 @@ class AnnouncementsTabTimerTest {
             annButton(AnnouncementLabel.START).performClick()
             waitForIdle()
 
-            assertFalse(presenter.announcementTickerLive.value, "still preview-only")
-            assertFalse(presenter.presentingMode.value == Presenting.ANNOUNCEMENTS)
+            assertFalse(presenter.announcementTickerLive, "still preview-only")
+            assertFalse(presenter.announcementLive)
         }
 
     @Test
@@ -140,11 +139,11 @@ class AnnouncementsTabTimerTest {
             timerButton(AnnouncementLabel.GO_LIVE).performClick()
             waitForIdle()
 
-            assertTrue(presenter.announcementTickerLive.value, "the ticker is live now")
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertTrue(presenter.announcementTickerLive, "the ticker is live now")
+            assertTrue(presenter.announcementLive)
             assertEquals(
                 "05:00",
-                presenter.announcementText.value,
+                presenter.announcementText,
                 "and what went on screen is the timer, not the announcement text",
             )
         }
@@ -160,7 +159,7 @@ class AnnouncementsTabTimerTest {
 
             // A ticker left running would be counting for a mode that is no longer selected.
             assertTrue(hasAnnButton(AnnouncementLabel.START), "it was stopped")
-            assertFalse(presenter.announcementTickerLive.value)
+            assertFalse(presenter.announcementTickerLive)
         }
 
     // ── Scheduling a timer ──────────────────────────────────────────────────────

@@ -115,3 +115,7 @@ include(":dictionary-tab")
 // audience sees of a Strong's entry — the word, its definition, its reference and its KJV usage.
 // Depends on the settings-field widgets rather than on the dictionary, so it stands alone.
 include(":dictionary-settings-tab")
+// The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
+// timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
+// touching PresenterManager, so it knows nothing about the rest of the app.
+include(":announcements-tab")

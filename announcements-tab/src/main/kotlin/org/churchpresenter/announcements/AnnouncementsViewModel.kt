@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
@@ -10,7 +10,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 
@@ -75,7 +74,7 @@ class AnnouncementsViewModel {
     val timerSeconds: Int get() = _timerSeconds.value
 
     /** Configured/local-preview remaining time — the live value while actually running lives on
-     *  PresenterManager instead (see startPauseTimer), since it must survive this ViewModel being
+     *  AnnouncementsOutput instead (see startPauseTimer), since it must survive this ViewModel being
      *  recreated when the Announcements tab is switched away from and back. */
     private val _timerRemaining = mutableStateOf(0)
     val timerRemaining: Int get() = _timerRemaining.value
@@ -152,7 +151,8 @@ class AnnouncementsViewModel {
         _targetSecond.value = settings.targetSecond
         _liveClockFormat.value = settings.liveClockFormat
         _countUpElapsed.value = 0
-        _timerRemaining.value = if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+        _timerRemaining.value =
+            if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
         if (settings.timerMode == Constants.TIMER_MODE_CLOCK) startClockPreview()
         if (settings.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) startLiveClockPreview()
     }
@@ -181,7 +181,7 @@ class AnnouncementsViewModel {
      * the live remaining time, instead of recomputing remaining from the raw fields. That way,
      * editing hours/minutes/seconds while paused extends or shortens the countdown instead of
      * snapping it back to the full configured duration. (Duration now actually ticks on
-     * PresenterManager once started — see startPauseTimer — so this only affects the local,
+     * AnnouncementsOutput once started — see startPauseTimer — so this only affects the local,
      * not-yet-live preview; editing the fields while a countdown is already live doesn't nudge it.)
      */
     private inline fun applyDurationDelta(mutate: () -> Unit) {
@@ -195,7 +195,9 @@ class AnnouncementsViewModel {
 
     fun setTimerHours(value: Int) = applyDurationDelta { _timerHours.value = value.coerceAtLeast(0) }
 
-    fun stepTimerHours(delta: Int) = applyDurationDelta { _timerHours.value = (_timerHours.value + delta).coerceAtLeast(0) }
+    fun stepTimerHours(delta: Int) = applyDurationDelta {
+        _timerHours.value = (_timerHours.value + delta).coerceAtLeast(0)
+    }
 
     fun setTimerMinutes(value: Int) = applyDurationDelta { _timerMinutes.value = value.coerceIn(0, MAX_MINUTE) }
 
@@ -229,7 +231,12 @@ class AnnouncementsViewModel {
             if (next == 0) {
                 _timerSeconds.value = 0
                 val curMin = _timerMinutes.value
-                if (curMin >= MAX_MINUTE) { _timerMinutes.value = 0; _timerHours.value += 1 } else { _timerMinutes.value = curMin + 1 }
+                if (curMin >= MAX_MINUTE) {
+                    _timerMinutes.value = 0
+                    _timerHours.value += 1
+                } else {
+                    _timerMinutes.value = curMin + 1
+                }
             } else {
                 _timerSeconds.value = next
             }
@@ -239,7 +246,12 @@ class AnnouncementsViewModel {
                 if (_timerHours.value > 0 || _timerMinutes.value > 0) {
                     _timerSeconds.value = LAST_SECOND_STEP
                     val curMin = _timerMinutes.value
-                    if (curMin <= 0) { _timerMinutes.value = MAX_MINUTE; _timerHours.value -= 1 } else { _timerMinutes.value = curMin - 1 }
+                    if (curMin <= 0) {
+                        _timerMinutes.value = MAX_MINUTE
+                        _timerHours.value -= 1
+                    } else {
+                        _timerMinutes.value = curMin - 1
+                    }
                 }
             } else {
                 _timerSeconds.value = next
@@ -326,7 +338,8 @@ class AnnouncementsViewModel {
     private fun secondsUntilTarget(): Int {
         val now = java.time.LocalTime.now()
         val nowSec = now.toSecondOfDay()
-        val targetSec = _targetHour.value * SECONDS_PER_HOUR + _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value
+        val targetSec = _targetHour.value * SECONDS_PER_HOUR +
+            _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value
         val diff = targetSec - nowSec
         return if (diff > 0) diff else diff + SECONDS_PER_DAY
     }
@@ -377,46 +390,46 @@ class AnnouncementsViewModel {
     }
 
     // ── Timer control ────────────────────────────────────────────────
-    // Duration/Count-up/Specific-Time actually tick on [presenterManager] now (not here), so the
-    // countdown survives switching away from the Announcements tab — see PresenterManager's
+    // Duration/Count-up/Specific-Time actually tick on [output] now (not here), so the
+    // countdown survives switching away from the Announcements tab — see AnnouncementsOutput's
     // startAnnouncementCountdown/startAnnouncementCountUp/startAnnouncementSpecificTime. This
     // ViewModel just tells it what to do and reads its state back for the UI.
 
     /** Starts, pauses, or resumes the live timer/clock for the current [timerMode]. */
-    fun startPauseTimer(presenterManager: PresenterManager?) {
-        if (presenterManager == null) return
+    fun startPauseTimer(output: AnnouncementsOutput?) {
+        if (output == null) return
         when (_timerMode.value) {
             // Specific Time and Clock Display recompute from the wall clock, so pausing/resuming
             // just stops/restarts their ticker — announcementTickerActive (not timerRunning, which
             // never applies to these two modes) is the correct running-state check for both.
             Constants.TIMER_MODE_CLOCK_DISPLAY -> {
-                if (presenterManager.announcementTickerActive.value) {
-                    presenterManager.pauseAnnouncementTimer()
+                if (output.tickerActive) {
+                    output.pauseTimer()
                 } else {
-                    presenterManager.startAnnouncementClockDisplay(_liveClockFormat.value)
+                    output.startClockDisplay(_liveClockFormat.value)
                 }
             }
             Constants.TIMER_MODE_CLOCK -> {
-                if (presenterManager.announcementTickerActive.value) {
-                    presenterManager.pauseAnnouncementTimer()
+                if (output.tickerActive) {
+                    output.pauseTimer()
                 } else {
-                    presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)
+                    output.startSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)
                 }
             }
             Constants.TIMER_MODE_COUNT_UP -> {
-                if (presenterManager.timerRunning.value) {
-                    presenterManager.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
+                if (output.timerRunning) {
+                    output.pauseTimer(output.timerRemainingSeconds)
                 } else {
-                    presenterManager.startAnnouncementCountUp(presenterManager.timerRemainingSeconds.value)
+                    output.startCountUp(output.timerRemainingSeconds)
                 }
             }
             else -> { // TIMER_MODE_DURATION
-                if (presenterManager.timerRunning.value) {
-                    presenterManager.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
+                if (output.timerRunning) {
+                    output.pauseTimer(output.timerRemainingSeconds)
                 } else {
-                    val remaining = presenterManager.timerRemainingSeconds.value.takeIf { it > 0 } ?: totalSeconds()
+                    val remaining = output.timerRemainingSeconds.takeIf { it > 0 } ?: totalSeconds()
                     if (remaining <= 0) return
-                    presenterManager.startAnnouncementCountdown(remaining, _timerExpiredText.value)
+                    output.startCountdown(remaining, _timerExpiredText.value)
                 }
             }
         }
@@ -427,17 +440,17 @@ class AnnouncementsViewModel {
     // plain announcement text is pushed live or it silently overwrites the text within a second.
     // Also releases announcementTickerLive — text is taking over the live slot from the timer, so
     // a later plain Resume click on the timer's play/pause button must not silently go live again.
-    fun pauseTimer(presenterManager: PresenterManager?) {
-        presenterManager?.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
-        presenterManager?.setAnnouncementTickerLive(false)
+    fun pauseTimer(output: AnnouncementsOutput?) {
+        output?.pauseTimer(output.timerRemainingSeconds)
+        output?.tickerLive = false
     }
 
-    fun resetTimer(presenterManager: PresenterManager?) {
+    fun resetTimer(output: AnnouncementsOutput?) {
         when (_timerMode.value) {
-            Constants.TIMER_MODE_COUNT_UP -> presenterManager?.pauseAnnouncementTimer(0)
+            Constants.TIMER_MODE_COUNT_UP -> output?.pauseTimer(0)
             // Specific Time always auto-tracks the wall clock — nothing to reset back to.
             Constants.TIMER_MODE_CLOCK -> {}
-            else -> presenterManager?.pauseAnnouncementTimer(totalSeconds())
+            else -> output?.pauseTimer(totalSeconds())
         }
     }
 
@@ -504,10 +517,10 @@ class AnnouncementsViewModel {
     }
 
     // ── Go Live ──────────────────────────────────────────────────────
-    fun goLive(presenterManager: PresenterManager, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
+    fun goLive(output: AnnouncementsOutput, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
         saveToSettings(onSettingsChange)
-        pauseTimer(presenterManager)
-        presenterManager.setAnnouncementText(_text.value)
-        presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        pauseTimer(output)
+        output.setText(_text.value)
+        output.goLive()
     }
 }
