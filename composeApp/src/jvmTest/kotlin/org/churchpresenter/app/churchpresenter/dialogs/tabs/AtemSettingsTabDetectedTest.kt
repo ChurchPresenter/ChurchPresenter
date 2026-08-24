@@ -5,6 +5,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.onNodeWithText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.atem.formatAtemFps
 
 /**
  * The two read-only lines under the lower-third card: how much clip the switcher can hold, and what

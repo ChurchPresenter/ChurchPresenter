@@ -40,7 +40,7 @@ import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
+import org.churchpresenter.ui.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

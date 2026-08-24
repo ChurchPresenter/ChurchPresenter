@@ -203,6 +203,18 @@ jobs:
               - 'theme/**'              # implementation(projects.theme)
               - 'diagnostics/**'        # implementation(projects.diagnostics)
               - 'resources/**'          # api(projects.resources)
+            lowerthirdtab:
+              - *shared
+              - 'lower-third-tab/**'
+              - 'atem/**'               # api(projects.atem) — the switcher and its media pool
+              - 'companion-server/**'   # api(projects.companionServer) — the render cache, the sequencer
+              - 'core-models/**'        # api(projects.coreModels) — ScheduleItem.LowerThirdItem
+              - 'settings/**'           # api(projects.settings)
+              - 'presentation-engine/**'  # implementation — SlideFontRegistry, for the Lottie fonts
+              - 'ui-components/**'      # implementation(projects.uiComponents)
+              - 'theme/**'              # implementation(projects.theme)
+              - 'diagnostics/**'        # implementation(projects.diagnostics)
+              - 'resources/**'          # api(projects.resources) — and the bundled TTFs live there
             companionserver:
               - *shared
               - 'companion-server/**'
@@ -250,7 +262,7 @@ jobs:
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
           :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
-          :announcements-tab:detekt :qa-tab:detekt
+          :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -443,6 +455,7 @@ jobs:
       - name: Announcements tab coverage floor
         if: always() && steps.modules.outputs.announcementstab == 'true'
         run: ./gradlew :announcements-tab:jacocoTestCoverageVerification -x test
+
       - name: Q and A tab tests
         if: always() && steps.modules.outputs.qatab == 'true'
         run: ./gradlew :qa-tab:test
@@ -450,6 +463,14 @@ jobs:
       - name: Q and A tab coverage floor
         if: always() && steps.modules.outputs.qatab == 'true'
         run: ./gradlew :qa-tab:jacocoTestCoverageVerification -x test
+
+      - name: Lower Third tab tests
+        if: always() && steps.modules.outputs.lowerthirdtab == 'true'
+        run: ./gradlew :lower-third-tab:test
+
+      - name: Lower Third tab coverage floor
+        if: always() && steps.modules.outputs.lowerthirdtab == 'true'
+        run: ./gradlew :lower-third-tab:jacocoTestCoverageVerification -x test
 
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
@@ -606,6 +627,7 @@ jobs:
             dictionary-settings-tab/build/test-results/**/TEST-*.xml
             announcements-tab/build/test-results/**/TEST-*.xml
             qa-tab/build/test-results/**/TEST-*.xml
+            lower-third-tab/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -636,6 +658,7 @@ jobs:
             Dictionary settings tab
             Announcements tab
             Q and A tab
+            Lower Third tab
             Companion Server
           detailed_summary: true
           include_passed: false
@@ -799,5 +822,7 @@ jobs:
             announcements-tab/build/test-results/
             qa-tab/build/reports/tests/
             qa-tab/build/test-results/
+            lower-third-tab/build/reports/tests/
+            lower-third-tab/build/test-results/
             companion-server/build/reports/tests/
             companion-server/build/test-results/

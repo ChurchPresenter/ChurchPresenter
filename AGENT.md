@@ -38,7 +38,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 | Package          | Owns                                                                |
 |------------------|---------------------------------------------------------------------|
-| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements and Q&A have moved out, to `:dictionary-tab`, `:announcements-tab` and `:qa-tab` |
+| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements, Q&A and Lower Third have moved out, to `:dictionary-tab`, `:announcements-tab`, `:qa-tab` and `:lower-third-tab` |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
@@ -92,6 +92,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
 | `announcements-tab/`   | `:announcements-tab`   | The Announcements tab — its notices, its four timers, its view model and presenter | [AGENT.md](announcements-tab/AGENT.md)   |
 | `qa-tab/`              | `:qa-tab`              | The Audience Q&A tab — the moderation queue, the join QR, its dialog and presenter | [AGENT.md](qa-tab/AGENT.md)              |
+| `lower-third-tab/`     | `:lower-third-tab`     | The Lower Third tab — its presets, its Lottie rendering and the ATEM upload        | [AGENT.md](lower-third-tab/AGENT.md)     |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 | `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
 
@@ -124,9 +125,11 @@ they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
-  `:diagnostics`, `:atem`, `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`,
-  `:dictionary`, `:companion-server` and `:statistics` name none.
+  each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
+  `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
+  `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
+  `:dictionary-tab`, `:dictionary-settings-tab`, `:announcements-tab`, `:qa-tab`,
+  `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -251,8 +254,9 @@ widening the threshold, along with `colour_picker`, `settings_companion_satellit
 
 **The suite is clean: `verifyRoborazziJvm` fails 0 of 747 images on `main`** — measured 2026-08-24 on
 macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`, 12 in
-`dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots` and 34 in
-`qa-tab/screenshots`, each verified by its own module's task. It is therefore readable as pass/fail
+`dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots`, 34 in
+`qa-tab/screenshots` and 24 in `lower-third-tab/screenshots`, each verified by its own module's
+task. It is therefore readable as pass/fail
 again, and **any** failure is a real difference.
 
 **A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`

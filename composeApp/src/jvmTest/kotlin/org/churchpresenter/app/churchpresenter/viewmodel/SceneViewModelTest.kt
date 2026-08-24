@@ -5,7 +5,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.ui.presenterScreenBounds
 import java.awt.Rectangle
 import java.io.File
 import kotlin.test.AfterTest
@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
  *
  * `addScene()` sizes the canvas from `presenterScreenBounds()`, which throws `HeadlessException`
  * in a test JVM — that top-level function is stubbed with `mockkStatic` on its file class
- * (`ConstantsKt`), which is what makes this ViewModel testable at all.
+ * (`ScreenGeometryKt`, now in `:ui-components`), which is what makes this ViewModel testable at all.
  *
  * The ViewModel also persists to `~/.churchpresenter/scenes.json` and reloads it in `init`, so
  * that file is deleted before each test to stop scenes leaking between them (and between runs —
@@ -34,14 +34,14 @@ class SceneViewModelTest {
 
     @BeforeTest
     fun stubScreenBoundsAndClearState() {
-        mockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        mockkStatic("org.churchpresenter.ui.ScreenGeometryKt")
         every { presenterScreenBounds() } returns Rectangle(0, 0, 1920, 1080)
         scenesFile.delete()
     }
 
     @AfterTest
     fun unstub() {
-        unmockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        unmockkStatic("org.churchpresenter.ui.ScreenGeometryKt")
         scenesFile.delete()
     }
 

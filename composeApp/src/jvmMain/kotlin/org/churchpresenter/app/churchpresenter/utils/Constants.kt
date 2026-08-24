@@ -1,61 +1,22 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.ui.HEADLESS_PRESENTER_BOUNDS
+import org.churchpresenter.ui.safeScreenDevices
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
 import java.awt.Rectangle
-import java.util.Locale
 
-private const val SCREEN_POLL_INTERVAL_MS = 2000L
-private const val MAX_SIMPLE_RATIO_SIDE = 64
-
-/** Empty on a headless JVM (CI, or a genuinely displayless deployment) instead of throwing. */
-private fun safeScreenDevices(): Array<GraphicsDevice> = try {
-    GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-} catch (_: HeadlessException) {
-    emptyArray()
-}
-
-/** Polls for screen devices every 2 seconds so hot-plugged displays trigger recomposition. */
-@Composable
-fun rememberScreenDevices(): Array<GraphicsDevice> {
-    var devices by remember { mutableStateOf(safeScreenDevices()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(SCREEN_POLL_INTERVAL_MS)
-            val current = safeScreenDevices()
-            if (current.size != devices.size) {
-                devices = current
-            }
-        }
-    }
-    return devices
-}
-
-/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */
-private val HEADLESS_PRESENTER_BOUNDS = Rectangle(0, 0, 1920, 1080)
-
-/** Returns the presenter screen bounds (first non-primary screen if available, else primary). */
-fun presenterScreenBounds(): Rectangle {
-    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-    return try {
-        presenterBoundsOf(ge.screenDevices, ge.defaultScreenDevice)
-    } catch (_: HeadlessException) {
-        HEADLESS_PRESENTER_BOUNDS
-    }
-}
-
-internal fun presenterBoundsOf(screens: Array<GraphicsDevice>, primary: GraphicsDevice): Rectangle =
-    (screens.firstOrNull { it != primary } ?: primary).defaultConfiguration.bounds
+/**
+ * The display questions that need a [ScreenAssignment] to answer.
+ *
+ * The rest — `presenterScreenBounds`, `presenterAspectRatio`, `formatAspectRatio`,
+ * `rememberScreenDevices`, `findScreenIndexByBounds` — moved to `:ui-components`
+ * (`ScreenGeometry.kt`), because five tabs ask them and none of them needs a settings type. These
+ * two stayed because they do, and `:ui-components` must not gain a production dependency on
+ * `:settings`.
+ */
 
 /**
  * Bounds of the display [assignment] targets, or 1080p when there is no display to ask (headless).
@@ -99,32 +60,3 @@ internal fun assignedBoundsOf(
         ?: primary
     return device.defaultConfiguration.bounds
 }
-
-/** Find a screen index by stored bounds. Returns null if no match. */
-fun findScreenIndexByBounds(screens: Array<GraphicsDevice>, x: Int, y: Int, w: Int, h: Int): Int? {
-    if (x == Int.MIN_VALUE) return null  // bounds not set
-    return screens.indexOfFirst { device ->
-        val b = device.defaultConfiguration.bounds
-        b.x == x && b.y == y && b.width == w && b.height == h
-    }.takeIf { it >= 0 }
-}
-
-/** Returns the aspect ratio of the presenter screen. */
-fun presenterAspectRatio(): Float = aspectRatioOf(presenterScreenBounds())
-
-internal fun aspectRatioOf(bounds: Rectangle): Float =
-    bounds.width.toFloat() / bounds.height.toFloat()
-
-/** Formats an aspect ratio as a common name (e.g. "16:9") or decimal fallback (e.g. "1.78:1"). */
-fun formatAspectRatio(width: Int, height: Int): String {
-    val gcd = gcd(width, height)
-    val w = width / gcd
-    val h = height / gcd
-    // Accept simplified ratios where both sides are reasonable (≤64)
-    return if (w <= MAX_SIMPLE_RATIO_SIDE && h <= MAX_SIMPLE_RATIO_SIDE) "$w:$h"
-    else String.format(Locale.US, "%.2f:1", width.toFloat() / height.toFloat())
-}
-
-private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
-
-

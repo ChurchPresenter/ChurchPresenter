@@ -17,8 +17,8 @@ import org.cef.browser.CefBrowser
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
+import org.churchpresenter.lowerthird.LottieFrame
+import org.churchpresenter.lowerthird.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
@@ -28,7 +28,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.companionserver.LottieRenderCache
-import org.churchpresenter.app.churchpresenter.presenter.SkiaLottieFrameRenderer
+import org.churchpresenter.lowerthird.SkiaLottieFrameRenderer
 import org.churchpresenter.settings.utils.Constants
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L

@@ -279,8 +279,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.sqlite.jdbc)
             implementation(libs.kotlinx.serialization.json)
-            implementation("io.github.alexzhirkevich:compottie:2.0.0-rc01")
-            implementation("io.github.alexzhirkevich:compottie-dot:2.0.0-rc01")
+            implementation(libs.compottie)
+            implementation(libs.compottie.dot)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -332,6 +332,7 @@ kotlin {
             implementation(projects.announcementsTab)
             implementation(projects.dictionaryTab)
             implementation(projects.dictionarySettingsTab)
+            implementation(projects.lowerThirdTab)
             implementation(projects.qaTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is

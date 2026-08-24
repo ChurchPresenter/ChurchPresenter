@@ -68,7 +68,7 @@ import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+import org.churchpresenter.lowerthird.LottieFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers

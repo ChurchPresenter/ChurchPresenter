@@ -6,7 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import org.churchpresenter.announcements.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import org.churchpresenter.ui.rememberScreenDevices
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -74,7 +74,7 @@ import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -87,8 +87,8 @@ import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.ui.presenterAspectRatio
+import org.churchpresenter.ui.presenterScreenBounds
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel

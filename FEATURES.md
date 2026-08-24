@@ -103,8 +103,9 @@
 - **Fine timing control** — pause on a frame, hold, and play through with smooth fade in/out.
 
 **Source locations:**
-- `tabs/LowerThird.kt` — main UI
-- `viewmodel/LowerThirdSettingsViewModel.kt`
+- `lower-third-tab/` (the `:lower-third-tab` Gradle module) — the tab itself: `LowerThirdTab.kt`,
+  `LowerThirdPresenter.kt`, `LowerThirdOffscreenRenderer.kt`, `LottieFrameStream.kt` and `LottieFonts.kt`
+- `viewmodel/LowerThirdSettingsViewModel.kt` — stays in the app, with its settings tab
 - `data/settings/LottiePreset.kt`, `data/settings/LottieSearchReplacePair.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `companion-server/` — `LowerThirdSequencer.kt`, `LottieRenderCache.kt` (the pre-rendered `.lrcc` clip cache)

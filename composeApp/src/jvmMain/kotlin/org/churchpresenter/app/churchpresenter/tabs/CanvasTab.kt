@@ -102,7 +102,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
-import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.ui.formatAspectRatio
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

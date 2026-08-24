@@ -81,6 +81,7 @@ import org.churchpresenter.settings.AtemSettings
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.ui.LabeledSwitch
 import org.churchpresenter.theme.semantic
+import org.churchpresenter.atem.formatAtemFps
 
 @Composable
 fun AtemSettingsTab(
@@ -569,9 +570,3 @@ fun AtemSettingsTab(
         SettingsScrollbar(scrollState)
     }
 }
-
-/** "25", "59.94" — exact fps without truncation, locale-independent decimal point. */
-internal fun formatAtemFps(fps: Double): String =
-    if (fps == kotlin.math.floor(fps)) fps.toInt().toString()
-    else String.format(java.util.Locale.US, "%.2f", fps).trimEnd('0').trimEnd('.')
-

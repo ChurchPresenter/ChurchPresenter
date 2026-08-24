@@ -100,10 +100,10 @@ import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import org.churchpresenter.ui.rememberScreenDevices
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.ui.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.ui.ActionIconButton

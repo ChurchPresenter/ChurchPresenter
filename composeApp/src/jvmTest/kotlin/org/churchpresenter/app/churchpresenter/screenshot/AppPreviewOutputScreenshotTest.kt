@@ -29,9 +29,9 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.LottieFrame
+import org.churchpresenter.lowerthird.LowerThirdOffscreenRenderer
+import org.churchpresenter.lowerthird.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.qa.QAPresenter

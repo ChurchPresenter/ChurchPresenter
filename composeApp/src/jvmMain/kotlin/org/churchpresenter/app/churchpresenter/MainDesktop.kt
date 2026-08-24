@@ -62,8 +62,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import org.churchpresenter.announcements.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.composables.previewLinesFrom
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.ui.presenterAspectRatio
+import org.churchpresenter.ui.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterAnnouncementsOutput
 import org.churchpresenter.dictionary.tab.DictionaryTab
 import org.churchpresenter.dictionary.tab.DictionaryViewModel
@@ -125,7 +125,7 @@ import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
-import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
+import org.churchpresenter.lowerthird.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
@@ -1587,6 +1587,7 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
                                 selectedLowerThirdItemVersion = selectedLowerThirdItemVersion,
+                                isWindowMaximized = isMaximized,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
