@@ -20,15 +20,20 @@ import kotlin.test.assertEquals
 class PresenterPositioningTest {
 
     private fun mapper(fileClass: String, method: String): (String) -> Alignment {
-        val m = Class.forName("org.churchpresenter.app.churchpresenter.presenter.$fileClass")
+        val m = Class.forName(fileClass)
             .getDeclaredMethod(method, String::class.java)
             .apply { isAccessible = true }
         return { position -> m.invoke(null, position) as Alignment }
     }
 
-    private val announcements = mapper("AnnouncementsPresenterKt", "positionToAlignment")
-    private val questions = mapper("QAPresenterKt", "positionToAlignment")
-    private val captions = mapper("STTPresenterKt", "sttPositionToAlignment")
+    /** The two that still live in the app; the announcements one has moved to `:announcements-tab`. */
+    private fun appPresenter(fileClass: String, method: String) =
+        mapper("org.churchpresenter.app.churchpresenter.presenter.$fileClass", method)
+
+    private val announcements =
+        mapper("org.churchpresenter.announcements.AnnouncementsPresenterKt", "positionToAlignment")
+    private val questions = appPresenter("QAPresenterKt", "positionToAlignment")
+    private val captions = appPresenter("STTPresenterKt", "sttPositionToAlignment")
 
     private val allThree = mapOf(
         "announcements" to announcements,

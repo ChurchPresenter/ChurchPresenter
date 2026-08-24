@@ -16,11 +16,7 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Color as ComposeColor
-import org.churchpresenter.dictionary.StrongsEntry
-import org.churchpresenter.dictionary.tab.DictionaryPresenter
-import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -62,6 +58,11 @@ import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
  * here more than elsewhere, because auto-fit sizes the text against the space it is given.
  *
  * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half.
+ *
+ * Only the presenters `:composeApp` still owns are shot here. A presenter that has moved into a
+ * module is shot by that module, against that module's own `screenshots/` directory —
+ * `AnnouncementsPresenterScreenshotTest` in `:announcements-tab` and
+ * `DictionaryPresenterScreenshotTest` in `:dictionary-tab`.
  */
 class PresenterFullScreenScreenshotTest {
 
@@ -772,42 +773,6 @@ class PresenterFullScreenScreenshotTest {
         BiblePresenter(selectedVerses = listOf(verse()), appSettings = bibleSettings(), transitionAlpha = 0.4f)
     }
 
-    // ── Announcements ───────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `an announcement`() = shoot("announcement") {
-        AnnouncementsPresenter(text = NOTICE, appSettings = announcementSettings())
-    }
-
-    @Test
-    fun `an announcement in a corner`() = shoot("announcement_corner") {
-        AnnouncementsPresenter(
-            text = NOTICE,
-            appSettings = announcementSettings(position = Constants.TOP_LEFT),
-        )
-    }
-
-    @Test
-    fun `a styled announcement on a plate`() = shoot("announcement_styled") {
-        AnnouncementsPresenter(
-            text = NOTICE,
-            appSettings = announcementSettings(
-                textColor = "#FFD54F",
-                backgroundColor = "#1B2A5B",
-                fontSize = 96,
-                bold = true,
-            ),
-        )
-    }
-
-    @Test
-    fun `a countdown on screen`() = shoot("announcement_timer") {
-        AnnouncementsPresenter(text = "05:00", appSettings = announcementSettings(fontSize = 200))
-    }
-
-    // Not shot: an announcement with the background suppressed. The announcement's own plate is
-    // drawn either way and its ground is transparent by default, so it renders as `announcement` does.
-
     // ── Pictures ────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -876,27 +841,6 @@ class PresenterFullScreenScreenshotTest {
     @Test
     fun `a long question`() = shoot("qa_question_long") {
         QAPresenter(question = question(LONG_QUESTION))
-    }
-
-    // ── Dictionary ──────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a Strong's entry`() = shoot("dictionary_entry") {
-        DictionaryPresenter(entry = strongs(), dictionarySettings = DictionarySettings())
-    }
-
-    @Test
-    fun `a styled Strong's entry`() = shoot("dictionary_entry_styled") {
-        DictionaryPresenter(
-            entry = strongs(),
-            dictionarySettings = DictionarySettings(
-                wordColor = "#FFD54F",
-                wordFontSize = 140,
-                wordBold = true,
-                referenceColor = "#90CAF9",
-                definitionColor = "#FFFFFF",
-            ),
-        )
     }
 
     // ── Canvas scenes ───────────────────────────────────────────────────────────────────────────
@@ -1093,37 +1037,8 @@ class PresenterFullScreenScreenshotTest {
         abbreviation = "RVR",
     )
 
-    private fun announcementSettings(
-        textColor: String = AnnouncementsSettings().textColor,
-        backgroundColor: String = AnnouncementsSettings().backgroundColor,
-        fontSize: Int = AnnouncementsSettings().fontSize,
-        bold: Boolean = false,
-        position: String = AnnouncementsSettings().position,
-    ) = AppSettings(
-        announcementsSettings = AnnouncementsSettings(
-            text = NOTICE,
-            textColor = textColor,
-            backgroundColor = backgroundColor,
-            fontSize = fontSize,
-            bold = bold,
-            position = position,
-            // The shipped default slides the text in over twelve seconds, so a capture of it is an
-            // empty frame — the same reason the Announcements *tab* shots pin this off.
-            animationType = Constants.ANIMATION_NONE,
-        ),
-    )
-
     private fun question(text: String = "How do I join a small group?") =
         Question(id = "q1", text = text, timestamp = 0L, status = QuestionStatus.APPROVED)
-
-    private fun strongs() = StrongsEntry(
-        number = "G26",
-        word = "ἀγάπη",
-        transliteration = "agape",
-        pronunciation = "ag-ah'-pay",
-        definition = "brotherly love, affection, benevolence",
-        kjvUsage = "love, charity",
-    )
 
     private fun scene() = Scene(
         name = "Welcome",
@@ -1224,8 +1139,6 @@ class PresenterFullScreenScreenshotTest {
         )
 
         const val LONG_TITLE = "Amazing Grace, How Sweet the Sound That Saved a Wretch Like Me"
-
-        const val NOTICE = "Prayer meeting Wednesday at 7pm in the hall"
 
         const val LONG_QUESTION =
             "How should a small group decide what to study together, and how often should the " +

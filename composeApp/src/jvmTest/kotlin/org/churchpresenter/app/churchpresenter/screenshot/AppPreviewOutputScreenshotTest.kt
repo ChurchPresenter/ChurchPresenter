@@ -20,6 +20,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.announcements.AnnouncementsPresenter
 import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AppSettings
