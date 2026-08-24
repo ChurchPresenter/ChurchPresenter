@@ -34,7 +34,7 @@ import org.churchpresenter.lowerthird.LowerThirdOffscreenRenderer
 import org.churchpresenter.lowerthird.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.qa.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants

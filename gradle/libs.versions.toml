@@ -80,6 +80,10 @@ pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 aircompressor = { module = "io.airlift:aircompressor", version.ref = "aircompressor" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
 socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
+# QR codes: the Q&A join code, the presentation-remote code and the canvas QR source. `core` is the
+# encoder; `javase` is the AWT bridge the app renders through.
+zxing-core = { module = "com.google.zxing:core", version = "3.5.3" }
+zxing-javase = { module = "com.google.zxing:javase", version = "3.5.3" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 roborazzi-composeDesktop = { module = "io.github.takahirom.roborazzi:roborazzi-compose-desktop", version.ref = "roborazzi" }
 

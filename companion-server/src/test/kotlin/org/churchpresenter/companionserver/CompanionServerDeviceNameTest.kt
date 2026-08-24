@@ -9,6 +9,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -102,7 +103,7 @@ class CompanionServerDeviceNameTest {
         // subscription is registered — a subscriber *count* also counts the previous test's
         // collector on its way out, and then never rises.
         val attached = CompletableDeferred<Unit>()
-        scope.launch {
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
             server.onPresentationRemoteConnect
                 .onSubscription { attached.complete(Unit) }
                 .collect { pending ->
@@ -111,9 +112,11 @@ class CompanionServerDeviceNameTest {
                     pending.decision.complete(true)
                 }
         }
-        runBlocking {
-            withTimeoutOrNull(2_000) { attached.await() } ?: error("the operator collector never attached")
-        }
+        // UNDISPATCHED above runs the body on this thread up to its first suspension, and
+        // `onSubscription` fires once the subscription is registered — so this is already complete.
+        // It used to be a two-second `withTimeoutOrNull`, which depends on the IO dispatcher handing
+        // out a thread in time and fails under CI load. Do not put the wait back.
+        check(attached.isCompleted) { "the operator collector must attach synchronously" }
     }
 
     private fun connect(deviceId: String, name: String?) = runBlocking {

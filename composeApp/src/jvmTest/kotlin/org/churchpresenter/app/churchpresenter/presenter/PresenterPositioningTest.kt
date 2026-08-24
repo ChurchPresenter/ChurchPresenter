@@ -26,13 +26,15 @@ class PresenterPositioningTest {
         return { position -> m.invoke(null, position) as Alignment }
     }
 
-    /** The two that still live in the app; the announcements one has moved to `:announcements-tab`. */
+    /** The one of the three that still lives in the app. */
     private fun appPresenter(fileClass: String, method: String) =
         mapper("org.churchpresenter.app.churchpresenter.presenter.$fileClass", method)
 
+    // Two of the three have moved into modules of their own; each still carries its own copy of the
+    // table, which is exactly why they have to be checked against each other.
     private val announcements =
         mapper("org.churchpresenter.announcements.AnnouncementsPresenterKt", "positionToAlignment")
-    private val questions = appPresenter("QAPresenterKt", "positionToAlignment")
+    private val questions = mapper("org.churchpresenter.qa.QAPresenterKt", "positionToAlignment")
     private val captions = appPresenter("STTPresenterKt", "sttPositionToAlignment")
 
     private val allThree = mapOf(

@@ -81,8 +81,8 @@ import org.churchpresenter.resources.generated.resources.shortcut_unsaved_many
 import org.churchpresenter.resources.generated.resources.shortcut_unsaved_one
 import org.churchpresenter.resources.generated.resources.symbol_cancel
 import org.churchpresenter.resources.generated.resources.symbol_ok
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.SearchField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord

@@ -1,0 +1,204 @@
+package org.churchpresenter.qa
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.resources.generated.resources.Res
+import org.churchpresenter.resources.generated.resources.qa_qr_message_default
+import org.churchpresenter.resources.generated.resources.qr_code
+import org.churchpresenter.settings.QASettings
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.ui.calculateAutoFitFontSize
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.ui.generateQRCodeBitmap
+import org.churchpresenter.ui.Utils.parseHexColor
+import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
+
+@Composable
+fun QAPresenter(
+    modifier: Modifier = Modifier,
+    question: Question?,
+    qaSettings: QASettings = QASettings(),
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
+) {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
+    val bgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
+    val cardBg = if (isKey) Color.White
+                 else parseHexColor(qaSettings.backgroundColor.orDefaultCard()).copy(alpha = bgOpacity)
+    val fontFamily = systemFontFamilyOrDefault(qaSettings.fontType)
+
+    val shadowColorBase = parseHexColor(qaSettings.shadowColor)
+    val shadowSizeMul = qaSettings.shadowSize / 100f
+    val shadowAlpha = (qaSettings.shadowOpacity / 100f).coerceIn(0f, 1f)
+    val qaShadow = Shadow(
+        color = shadowColorBase.copy(alpha = shadowAlpha),
+        offset = Offset(6f * shadowSizeMul, 6f * shadowSizeMul),
+        blurRadius = 12f * shadowSizeMul
+    )
+
+    val textStyle = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = if (qaSettings.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (qaSettings.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (qaSettings.underline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (qaSettings.shadow) qaShadow else null,
+        textAlign = when (qaSettings.horizontalAlignment) {
+            Constants.LEFT -> TextAlign.Left
+            Constants.RIGHT -> TextAlign.Right
+            else -> TextAlign.Center
+        },
+        color = textColor
+    )
+
+    val boxAlignment = positionToAlignment(qaSettings.position)
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = transitionAlpha },
+        contentAlignment = boxAlignment
+    ) {
+        if (question != null) {
+            val textMeasurer = rememberTextMeasurer()
+            val density = LocalDensity.current
+            val cardPaddingPx = with(density) { (64.dp * 2).roundToPx() }
+            val innerPaddingPx = with(density) { (48.dp * 2).roundToPx() }
+            val availableWidthPx = constraints.maxWidth - cardPaddingPx - innerPaddingPx
+            val availableHeightPx = (constraints.maxHeight * 0.6f).toInt()
+
+            val fontSize = remember(question.text, availableWidthPx, availableHeightPx, qaSettings.fontSize) {
+                calculateAutoFitFontSize(textMeasurer, question.text, textStyle, availableWidthPx, availableHeightPx)
+                    .coerceAtMost(qaSettings.fontSize)
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(64.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(cardBg)
+                    .padding(48.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = question.text,
+                    style = textStyle,
+                    fontSize = fontSize.sp,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun QAQRCodePresenter(
+    modifier: Modifier = Modifier,
+    url: String,
+    qaSettings: QASettings = QASettings(),
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
+) {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
+    val qrBgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
+    val bgColor = if (isKey) Color.Transparent
+                  else parseHexColor(qaSettings.backgroundColor.orDefaultCard()).copy(alpha = qrBgOpacity)
+
+    val qrFgArgb = remember(qaSettings.qrForegroundColor) { parseHexColor(qaSettings.qrForegroundColor).toArgb() }
+    val qrBgArgb = remember(qaSettings.qrBackgroundColor, qaSettings.qrBackgroundOpacity) {
+        parseHexColor(qaSettings.qrBackgroundColor).copy(alpha = qaSettings.qrBackgroundOpacity / 100f).toArgb()
+    }
+    val qrBitmap = remember(url, qrFgArgb, qrBgArgb) { generateQRCodeBitmap(url, 512, qrFgArgb, qrBgArgb) }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = transitionAlpha },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .background(bgColor)
+                .padding(48.dp)
+        ) {
+            if (qrBitmap != null) {
+                if (isKey) {
+                    Box(
+                        modifier = Modifier
+                            .width(qrBitmap.width.dp)
+                            .height(qrBitmap.height.dp)
+                            .padding(bottom = 24.dp)
+                            .background(Color.White)
+                    )
+                } else {
+                    Image(
+                        bitmap = qrBitmap,
+                        contentDescription = stringResource(Res.string.qr_code),
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                }
+            }
+            Text(
+                text = qaSettings.qrCodeMessage.ifEmpty { stringResource(Res.string.qa_qr_message_default) },
+                color = textColor,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+private fun positionToAlignment(position: String): Alignment = when (position) {
+    Constants.TOP_LEFT -> Alignment.TopStart
+    Constants.TOP_CENTER -> Alignment.TopCenter
+    Constants.TOP_RIGHT -> Alignment.TopEnd
+    Constants.CENTER_LEFT -> Alignment.CenterStart
+    Constants.CENTER -> Alignment.Center
+    Constants.CENTER_RIGHT -> Alignment.CenterEnd
+    Constants.BOTTOM_LEFT -> Alignment.BottomStart
+    Constants.BOTTOM_CENTER -> Alignment.BottomCenter
+    Constants.BOTTOM_RIGHT -> Alignment.BottomEnd
+    else -> Alignment.Center
+}
+
+/**
+ * The card colour to draw, resolving the sentinel `"transparent"` to the dark plate the audience
+ * screen falls back to. The two presenters share it rather than repeating the check.
+ */
+private fun String.orDefaultCard(): String =
+    if (this == "transparent") DEFAULT_CARD_BACKGROUND else this
+
+/** What a `"transparent"` card is actually drawn in — a near-black plate, not nothing. */
+private const val DEFAULT_CARD_BACKGROUND = "#1E1E2E"

@@ -7,6 +7,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -147,13 +148,17 @@ class WsCommandTest {
         // Read the count BEFORE subscribing: the server keeps collectors of its own on some of these
         // flows, so "count is zero" is not the same question as "our collector attached".
         val before = flow.subscriptionCount.value
-        scope.launch { flow.collect { if (!seen.isCompleted) seen.complete(it) } }
+        // These flows have no replay, so sending before our collector attaches would miss the
+        // emission and fail for the wrong reason. UNDISPATCHED runs the body on this thread up to
+        // its first suspension, and `collect` registers the subscriber before it suspends — so the
+        // subscription is live by the time `launch` returns, with nothing to wait for. This used to
+        // poll the count against a two-second deadline, which depends on the IO dispatcher handing
+        // out a thread in time and fails under CI load. Do not put the poll back.
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            flow.collect { if (!seen.isCompleted) seen.complete(it) }
+        }
+        check(flow.subscriptionCount.value > before) { "the $what collector must attach synchronously" }
         try {
-            // These flows have no replay, so sending before our collector attaches would miss the
-            // emission and fail for the wrong reason. Ends on the count rising, never on the deadline.
-            withTimeoutOrNull(2_000) {
-                while (flow.subscriptionCount.value <= before) kotlinx.coroutines.delay(5)
-            }
             act()
             withTimeoutOrNull(5_000) { seen.await() } ?: throw AssertionError("no $what event reached the desktop")
         } finally {

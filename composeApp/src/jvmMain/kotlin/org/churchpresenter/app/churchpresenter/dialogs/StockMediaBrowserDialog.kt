@@ -84,8 +84,8 @@ import org.churchpresenter.resources.generated.resources.stock_photo_search_plac
 import org.churchpresenter.resources.generated.resources.stock_photo_show_key
 import org.churchpresenter.resources.generated.resources.stock_photo_source_pexels
 import org.churchpresenter.resources.generated.resources.stock_photo_source_pixabay
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.ui.LocalMainWindowState
+import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.viewmodel.StockDownloadError
