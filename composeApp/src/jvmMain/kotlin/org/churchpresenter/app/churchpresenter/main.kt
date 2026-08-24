@@ -111,7 +111,8 @@ import org.churchpresenter.qa.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
@@ -391,7 +392,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var theme by remember { mutableStateOf(themeFromSettings(appSettings.theme)) }
     val companionServer = remember { CompanionServer(appCompanionHost()) }
     val qaManager = remember { QAManager() }
-    val sttManager = remember { STTManager() }
+    // The .db snapshots STTManager captures land in the Bible training log's folder and share
+    // its 30-day retention. That log stays in this module, so the sweep is handed across.
+    val sttManager = remember { STTManager(cleanupSharedLogs = TrainingDataLogger::cleanupOldLogsOnce) }
     LaunchedEffect(appSettings.bibleEngineSettings.helpDevMode) {
         sttManager.helpDevModeEnabled = appSettings.bibleEngineSettings.helpDevMode
     }

@@ -67,9 +67,6 @@
     <ID>LongMethod:RemoteApply.kt$internal fun executeProjectItem( item: ScheduleItem, scheduleActions: ScheduleActions, presenterManager: PresenterManager, statisticsManager: StatisticsManager? = null )</ID>
     <ID>LongMethod:RemoteCommandEffects.kt$@Composable internal fun RemoteCommandEffects( appSettings: AppSettings, picturesViewModel: PicturesViewModel, presentationViewModel: PresentationViewModel, bibleViewModel: BibleViewModel, presenterManager: PresenterManager, onSongItemVersionBump: () -&gt; Unit, resolveImageFile: ((folderId: String, index: Int) -&gt; File?)?, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onSongItemSelected: (ScheduleItem.SongItem) -&gt; Unit, onPictureItemSelected: (ScheduleItem.PictureItem) -&gt; Unit, onPresentationItemSelected: (ScheduleItem.PresentationItem) -&gt; Unit, onSelectTab: (Tabs) -&gt; Unit, pushCurrentSlideIfLive: suspend () -&gt; Unit, remotePresentationPlayPauseFlow: Flow&lt;Unit&gt;? = null, remotePresentationLoopToggleFlow: Flow&lt;Unit&gt;? = null, remotePresentationGotoFlow: Flow&lt;Int&gt;? = null, selectPictureImageFlow: Flow&lt;Pair&lt;String, Int&gt;&gt;? = null, nextPictureFlow: Flow&lt;Unit&gt;? = null, previousPictureFlow: Flow&lt;Unit&gt;? = null, nextSlideFlow: Flow&lt;Unit&gt;? = null, previousSlideFlow: Flow&lt;Unit&gt;? = null, selectSlideFlow: Flow&lt;Pair&lt;String, Int&gt;&gt;? = null, selectBibleVerseFlow: Flow&lt;SelectBibleVerseRequest&gt;? = null, remoteSelectSongFlow: Flow&lt;ScheduleItem.SongItem&gt;? = null, remoteSelectPictureFlow: Flow&lt;ScheduleItem.PictureItem&gt;? = null, remoteSelectPresentationFlow: Flow&lt;ScheduleItem.PresentationItem&gt;? = null, uploadPresentationFlow: Flow&lt;File&gt;? = null, )</ID>
     <ID>LongMethod:RemoteEventDialog.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun RemoteEventDialogContent( event: RemoteEvent, actionLabel: String, typeIcon: ImageVector, typeAccent: Color, bodyTitle: String, remaining: Int, showAllowPermanently: Boolean, isClientKnownAllowed: Boolean, isClientKnownBlocked: Boolean, isInstanceLinkFollower: Boolean, clientLabel: String = "", onAllow: () -&gt; Unit, onAllowForSession: () -&gt; Unit, onAllowPermanently: () -&gt; Unit, onBlockForSession: () -&gt; Unit, onBlockPermanently: () -&gt; Unit, onDeny: () -&gt; Unit, onRename: (String) -&gt; Unit = {}, )</ID>
-    <ID>LongMethod:STTPresenter.kt$@Composable fun STTPresenter( modifier: Modifier = Modifier, segments: List&lt;STTSegment&gt;, inProgressText: String, translationSegments: List&lt;STTSegment&gt;, inProgressTranslation: String, highlightedWords: List&lt;HighlightedWord&gt;, sttSettings: STTSettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, )</ID>
-    <ID>LongMethod:STTSettingsDialog.kt$@Composable internal fun STTSettingsDialogContent( appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onDismiss: () -&gt; Unit, availableFonts: List&lt;String&gt;, )</ID>
-    <ID>LongMethod:STTTab.kt$@Composable fun STTTab( modifier: Modifier = Modifier, sttManager: STTManager, presenterManager: PresenterManager, presenting: (Presenting) -&gt; Unit, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
     <ID>LongMethod:SceneCanvas.kt$@Composable fun SceneCanvas( modifier: Modifier = Modifier, scene: Scene, selectedSourceId: String?, onSourceSelected: (String?) -&gt; Unit, onTransformChanged: (sourceId: String, SourceTransform) -&gt; Unit, isInteractive: Boolean = true, activeTool: String = "select", drawingStrokeColor: String = "#FFFFFF", drawingFillColor: String = "#00000000", drawingStrokeWidth: Float = 3f, onShapeDrawn: ((SceneSource.ShapeSource) -&gt; Unit)? = null )</ID>
     <ID>LongMethod:SceneDeviceEditors.kt$@Composable internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -&gt; Unit)</ID>
     <ID>LongMethod:SceneGraphicEditors.kt$@Composable internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSource) -&gt; Unit)</ID>
@@ -742,49 +739,6 @@
     <ID>MaxLineLength:RemoteCommandEffects.kt$onSettingsChange { s -&gt; s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping)) }</ID>
     <ID>MaxLineLength:RemoteEventDialog.kt$RemoteEventPresentation$*</ID>
     <ID>MaxLineLength:RemoteEventDialog.kt$style = MaterialTheme.typography.labelSmall</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$.</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_background_color), color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_text_color), color = sttSettings.textColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_translation_color), color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$FontSettingsDropdown(label = stringResource(Res.string.stt_font), value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$NumberSettingsTextField(label = stringResource(Res.string.stt_size), initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Row</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_display_styling), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$bold = sttSettings.bold</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(bold = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(dripFeedEnabled = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onColorChange = { c -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowColor = c)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(italic = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onOpacityChange = { v -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowOpacity = v)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadow = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onSizeChange = { v -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowSize = v)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onUnderlineChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(underline = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(layout = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { v -&gt; v.toIntOrNull()?.let { p -&gt; onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$shadowColor = sttSettings.shadowColor</ID>
-    <ID>MaxLineLength:STTTab.kt$IconButton</ID>
-    <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_translation_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)</ID>
-    <ID>MaxLineLength:STTTab.kt$text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTTab.kt$text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary)</ID>
-    <ID>MaxLineLength:STTTab.kt$val url = if (urlInput.isNotBlank() &amp;&amp; !urlInput.startsWith("http://") &amp;&amp; !urlInput.startsWith("https://")) "http://$urlInput" else urlInput</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$val fontScale = if (scene.canvasWidth &gt; 0 &amp;&amp; cw &gt; 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f</ID>
@@ -1206,7 +1160,6 @@
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
     <ID>TooManyFunctions:RemoteApply.kt$org.churchpresenter.app.churchpresenter.remote.RemoteApply.kt</ID>
     <ID>TooManyFunctions:RemoteClientManager.kt$RemoteClientManager</ID>
-    <ID>TooManyFunctions:STTManager.kt$STTManager</ID>
     <ID>TooManyFunctions:SceneSourceRenderer.kt$org.churchpresenter.app.churchpresenter.composables.SceneSourceRenderer.kt</ID>
     <ID>TooManyFunctions:SceneViewModel.kt$SceneViewModel</ID>
     <ID>TooManyFunctions:ScheduleViewModel.kt$ScheduleViewModel</ID>
@@ -1256,7 +1209,6 @@
     <ID>LongParameterList:PresentationRoutes.kt$( server: CompanionServer, _presentationCatalog: MutableStateFlow&lt;PresentationCatalogResponse&gt;, _presentationCatalogs: ConcurrentHashMap&lt;String, PresentationDto&gt;, _scheduleItemToPresentationId: ConcurrentHashMap&lt;String, String&gt;, _slideBytes: ConcurrentHashMap&lt;String, List&lt;ByteArray&gt;&gt;, json: Json, scope: CoroutineScope, )</ID>
     <ID>LongParameterList:PresentationRoutes.kt$( server: CompanionServer, _presentationCatalogs: ConcurrentHashMap&lt;String, PresentationDto&gt;, _scheduleItemToPresentationId: ConcurrentHashMap&lt;String, String&gt;, _slideBytes: ConcurrentHashMap&lt;String, List&lt;ByteArray&gt;&gt;, json: Json, scope: CoroutineScope, )</ID>
     <ID>LongParameterList:PresenterManager.kt$PresenterManager$( timerMode: String, timerHours: Int, timerMinutes: Int, timerSeconds: Int, targetHour: Int, targetMinute: Int, targetSecond: Int, liveClockFormat: String, timerExpiredText: String )</ID>
-    <ID>LongParameterList:STTPresenter.kt$( segments: List&lt;STTSegment&gt;, inProgressText: String, showInProgress: Boolean, highlightedWords: List&lt;HighlightedWord&gt;, showWordHighlighting: Boolean, baseColor: Color )</ID>
     <ID>LongParameterList:SceneCanvas.kt$( x: Float, y: Float, w: Float, h: Float, sources: List&lt;SceneSource&gt;, excludeId: String, canvasWidth: Float, canvasHeight: Float )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( cdp: CdpConnection, url: String, renderWidth: Int, renderHeight: Int, customCss: String, forceTransparent: Boolean, )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( entry: CacheEntry, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>

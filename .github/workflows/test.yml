@@ -226,6 +226,13 @@ jobs:
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'song-chords/**'          # implementation(projects.songChords)
               - 'presentation-engine/**'  # implementation(projects.presentationEngine)
+            stttab:
+              - *shared
+              - 'stt-tab/**'
+              - 'settings/**'           # api(projects.settings)
+              - 'resources/**'          # api(projects.resources)
+              - 'ui-components/**'      # implementation(projects.uiComponents)
+              - 'theme/**'              # implementation(projects.theme)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -472,6 +479,14 @@ jobs:
         if: always() && steps.modules.outputs.lowerthirdtab == 'true'
         run: ./gradlew :lower-third-tab:jacocoTestCoverageVerification -x test
 
+      - name: Live Captions tab tests
+        if: always() && steps.modules.outputs.stttab == 'true'
+        run: ./gradlew :stt-tab:test
+
+      - name: Live Captions tab coverage floor
+        if: always() && steps.modules.outputs.stttab == 'true'
+        run: ./gradlew :stt-tab:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -628,6 +643,7 @@ jobs:
             announcements-tab/build/test-results/**/TEST-*.xml
             qa-tab/build/test-results/**/TEST-*.xml
             lower-third-tab/build/test-results/**/TEST-*.xml
+            stt-tab/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -659,6 +675,7 @@ jobs:
             Announcements tab
             Q and A tab
             Lower Third tab
+            Live Captions tab
             Companion Server
           detailed_summary: true
           include_passed: false
@@ -824,5 +841,7 @@ jobs:
             qa-tab/build/test-results/
             lower-third-tab/build/reports/tests/
             lower-third-tab/build/test-results/
+            stt-tab/build/reports/tests/
+            stt-tab/build/test-results/
             companion-server/build/reports/tests/
             companion-server/build/test-results/

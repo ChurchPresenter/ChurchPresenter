@@ -129,7 +129,8 @@ import org.churchpresenter.lowerthird.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
-import org.churchpresenter.app.churchpresenter.tabs.STTTab
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterSttOutput
+import org.churchpresenter.stt.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
@@ -147,7 +148,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.qa.QAManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -1711,8 +1712,9 @@ fun MainDesktop(
                                 STTTab(
                                     modifier = Modifier.fillMaxSize(),
                                     sttManager = sttManager,
-                                    presenterManager = presenterManager,
-                                    presenting = presenting,
+                                    output = remember(presenterManager, presenting) {
+                                        PresenterSttOutput(presenterManager, presenting)
+                                    },
                                     appSettings = appSettings,
                                     onSettingsChange = onSettingsChange
                                 )

@@ -333,6 +333,7 @@ kotlin {
             implementation(projects.dictionaryTab)
             implementation(projects.dictionarySettingsTab)
             implementation(projects.lowerThirdTab)
+            implementation(projects.sttTab)
             implementation(projects.qaTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is
@@ -493,6 +494,10 @@ dependencies {
     // app's remote-command and instance-link suites drive a real server, so they borrow the fixture
     // from the module that owns the wire format rather than standing one up twice.
     add("jvmTestImplementation", testFixtures(projects.companionServer))
+    // SILENT_STT_URL: a loopback port that accepts and then says nothing. The Bible tab's
+    // auto-follow tests need an STT server that never answers, and getting that wrong once
+    // pushed jvmTest past CI's step budget -- so there is one definition, in the STT module.
+    add("jvmTestImplementation", testFixtures(projects.sttTab))
 }
 
 compose.desktop {
