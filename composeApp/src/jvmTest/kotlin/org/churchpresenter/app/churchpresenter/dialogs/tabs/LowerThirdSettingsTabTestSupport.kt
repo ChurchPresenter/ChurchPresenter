@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.lowerthird
+package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -26,7 +26,7 @@ import java.io.File
  * [NOT_LOTTIE_JSON] the smallest thing that does not.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun lowerThirdSettingsTab(
+internal fun lowerThirdTab(
     initial: AppSettings = AppSettings(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,

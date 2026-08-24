@@ -1,4 +1,4 @@
-package org.churchpresenter.lowerthird
+package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -68,6 +68,8 @@ import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
 import org.churchpresenter.ui.TvScreenBox
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.lowerthird.LottieFonts
+import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

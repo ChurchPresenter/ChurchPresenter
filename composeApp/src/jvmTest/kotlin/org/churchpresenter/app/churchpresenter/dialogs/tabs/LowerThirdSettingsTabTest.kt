@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.lowerthird
+package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
@@ -42,7 +42,7 @@ class LowerThirdSettingsTabTest {
     // ── Structure ───────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the tab shows both panels`() = lowerThirdSettingsTab { _ ->
+    fun `the tab shows both panels`() = lowerThirdTab { _ ->
         onNodeWithText("Lottie Files").assertExists("the library panel must render")
         onNodeWithText("To trigger lower thirds via API visit the Server tab.")
             .assertExists("with the hint about the Server tab")
@@ -50,19 +50,19 @@ class LowerThirdSettingsTabTest {
     }
 
     @Test
-    fun `the tab offers its two library buttons`() = lowerThirdSettingsTab { _ ->
+    fun `the tab offers its two library buttons`() = lowerThirdTab { _ ->
         onNodeWithText("Remove File").assertHasClickAction()
         onNodeWithText("Generate").assertHasClickAction()
     }
 
     @Test
-    fun `the preview panel shows a placeholder until a preset is chosen`() = lowerThirdSettingsTab { _ ->
+    fun `the preview panel shows a placeholder until a preset is chosen`() = lowerThirdTab { _ ->
         // Once as the panel's caption, once inside the empty preview box.
         onAllNodesWithText("Select a preset to preview").assertCountEquals(2)
     }
 
     @Test
-    fun `the window position diagram labels the lower third band`() = lowerThirdSettingsTab { _ ->
+    fun `the window position diagram labels the lower third band`() = lowerThirdTab { _ ->
         onNodeWithText("Lower Third").assertExists("the band in the screen diagram must be labelled")
         for (edge in listOf("LEFT", "TOP", "RIGHT", "BOTTOM")) {
             onNodeWithText(edge).assertExists("the $edge margin field must be captioned")
@@ -72,7 +72,7 @@ class LowerThirdSettingsTabTest {
     // ── The library, empty ──────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `with no folder configured the list says so`() = lowerThirdSettingsTab { _ ->
+    fun `with no folder configured the list says so`() = lowerThirdTab { _ ->
         onNodeWithText("No directory selected")
             .assertExists("an unconfigured library must say there is no directory, not that it is empty")
         onAllNodesWithText("No JSON files found").assertCountEquals(0)
@@ -81,7 +81,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `an empty folder reads as having no files rather than no directory`() {
         withLottieFolder { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("No JSON files found").assertExists()
                 onAllNodesWithText("No directory selected").assertCountEquals(0)
             }
@@ -92,7 +92,7 @@ class LowerThirdSettingsTabTest {
     fun `a folder that no longer exists reads as having no files`() {
         val gone = File(System.getProperty("java.io.tmpdir"), "churchpresenter-no-such-lottie-folder")
         gone.deleteRecursively()
-        lowerThirdSettingsTab(initial = settingsForFolder(gone)) { _ ->
+        lowerThirdTab(initial = settingsForFolder(gone)) { _ ->
             onNodeWithText("No JSON files found").assertExists("a missing folder must not crash the tab")
         }
     }
@@ -106,7 +106,7 @@ class LowerThirdSettingsTabTest {
             "alpha.json" to lottieJson("alpha"),
             "middle.json" to lottieJson("middle"),
         ) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 for (name in listOf("alpha.json", "middle.json", "zebra.json")) {
                     onNodeWithText(name).assertExists("$name must be listed")
                 }
@@ -122,7 +122,7 @@ class LowerThirdSettingsTabTest {
             "plain.json" to NOT_LOTTIE_JSON,
             "notes.txt" to lottieJson("wrong extension"),
         ) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("real.json").assertExists("a genuine animation is listed")
                 onAllNodesWithText("plain.json").assertCountEquals(0)
                 onAllNodesWithText("notes.txt").assertCountEquals(0)
@@ -133,7 +133,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `every listed file can be selected`() {
         withLottieFolder("one.json" to lottieJson("one"), "two.json" to lottieJson("two")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("one.json").assertHasClickAction()
                 onNodeWithText("two.json").assertHasClickAction()
             }
@@ -145,7 +145,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `choosing a file names it in the preview panel`() {
         withLottieFolder("chosen.json" to lottieJson("chosen")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onAllNodesWithText("chosen.json").assertCountEquals(1) // just the list row
                 onAllNodesWithText("Select a preset to preview").assertCountEquals(2)
 
@@ -162,7 +162,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `choosing another file moves the preview to it`() {
         withLottieFolder("first.json" to lottieJson("first"), "second.json" to lottieJson("second")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("first.json").performClick()
                 waitForIdle()
                 onAllNodesWithText("first.json").assertCountEquals(2)
@@ -181,7 +181,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `Remove deletes the chosen animation from the folder and the list`() {
         withLottieFolder("doomed.json" to lottieJson("doomed"), "keeper.json" to lottieJson("keeper")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("doomed.json").performClick()
                 waitForIdle()
 
@@ -199,7 +199,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `Remove with nothing chosen deletes nothing`() {
         withLottieFolder("safe.json" to lottieJson("safe")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("Remove File").performScrollTo().performClick()
                 waitForIdle()
 
@@ -212,7 +212,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `removing the last animation returns the list to its empty state`() {
         withLottieFolder("only.json" to lottieJson("only")) { folder ->
-            lowerThirdSettingsTab(initial = settingsForFolder(folder)) { _ ->
+            lowerThirdTab(initial = settingsForFolder(folder)) { _ ->
                 onNodeWithText("only.json").performClick()
                 waitForIdle()
                 onNodeWithText("Remove File").performScrollTo().performClick()
@@ -234,7 +234,7 @@ class LowerThirdSettingsTabTest {
     fun `Generate opens the generator against the configured folder`() {
         withLottieFolder { folder ->
             var openedWith: String? = null
-            lowerThirdSettingsTab(
+            lowerThirdTab(
                 initial = settingsForFolder(folder),
                 onOpenLottieGen = { outputDir, _ -> openedWith = outputDir },
             ) { _ ->
@@ -257,7 +257,7 @@ class LowerThirdSettingsTabTest {
     fun `a file saved by the generator appears once it reports back`() {
         withLottieFolder("existing.json" to lottieJson("existing")) { folder ->
             var reportSaved: (() -> Unit)? = null
-            lowerThirdSettingsTab(
+            lowerThirdTab(
                 initial = settingsForFolder(folder),
                 onOpenLottieGen = { _, onFileSaved -> reportSaved = onFileSaved },
             ) { _ ->
@@ -288,7 +288,7 @@ class LowerThirdSettingsTabTest {
         // The four share a default, so give each one a value only it holds.
         val distinct = settingsWith { copy(windowLeft = 41, windowTop = 42, windowRight = 43, windowBottom = 44) }
         var saved = AppSettings()
-        lowerThirdSettingsTab(initial = distinct) { get ->
+        lowerThirdTab(initial = distinct) { get ->
             retype(showing = 41, to = 11)
             assertEquals(11, get().streamingSettings.windowLeft, "the left margin must be stored")
 
@@ -306,7 +306,7 @@ class LowerThirdSettingsTabTest {
             saved = get()
         }
         // Re-rendered from the saved settings alone: each field can only show what was stored.
-        lowerThirdSettingsTab(initial = saved) { _ ->
+        lowerThirdTab(initial = saved) { _ ->
             for (value in listOf(11, 22, 33, 55)) {
                 onNode(hasSetTextAction() and hasText(value.toString()))
                     .assertExists("a fresh render must show the stored margin $value")
@@ -317,7 +317,7 @@ class LowerThirdSettingsTabTest {
     @Test
     fun `a margin outside the allowed range is not stored`() {
         var saved = AppSettings()
-        lowerThirdSettingsTab(initial = settingsWith { copy(windowLeft = 41) }) { get ->
+        lowerThirdTab(initial = settingsWith { copy(windowLeft = 41) }) { get ->
             retype(showing = 41, to = 99999)
             assertEquals(41, get().streamingSettings.windowLeft, "99999 is outside 0..10000")
             // The field itself echoes the rejected entry — that is the widget's own state, not
@@ -325,7 +325,7 @@ class LowerThirdSettingsTabTest {
             onNode(hasSetTextAction() and hasText("99999")).assertExists()
             saved = get()
         }
-        lowerThirdSettingsTab(initial = saved) { _ ->
+        lowerThirdTab(initial = saved) { _ ->
             onAllNodes(hasSetTextAction() and hasText("99999"))
                 .assertCountEquals(0)
             onNode(hasSetTextAction() and hasText("41"))
@@ -341,7 +341,7 @@ class LowerThirdSettingsTabTest {
             val settings = AppSettings().let {
                 it.copy(projectionSettings = it.projectionSettings.copy(lowerThirdHeightPercent = percent))
             }
-            lowerThirdSettingsTab(initial = settings) { _ ->
+            lowerThirdTab(initial = settings) { _ ->
                 onNodeWithText("Lower Third")
                     .assertExists("the band must be drawn and labelled at $percent%")
             }

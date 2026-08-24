@@ -72,7 +72,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.lowerthird.LowerThirdSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.ui.TabStripBackArrow
 import org.churchpresenter.ui.TabStripForwardArrow

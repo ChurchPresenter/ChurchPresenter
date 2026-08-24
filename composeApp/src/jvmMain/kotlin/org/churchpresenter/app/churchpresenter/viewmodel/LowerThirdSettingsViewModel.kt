@@ -1,4 +1,4 @@
-package org.churchpresenter.lowerthird
+package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import java.io.File

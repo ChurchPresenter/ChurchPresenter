@@ -1,8 +1,8 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.lowerthird.screenshot
+package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.lowerthird.awaitFolderScan
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.awaitFolderScan
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,13 +20,12 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.StreamingSettings
-import org.churchpresenter.lowerthird.LowerThirdSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
 import org.churchpresenter.ui.screenshot.captureTo
 import org.churchpresenter.ui.screenshot.stackedThemes
-import org.churchpresenter.lowerthird.lowerThirdSettingsTab
 
 /**
  * The Lower Third tab of the settings dialog, in both themes.
