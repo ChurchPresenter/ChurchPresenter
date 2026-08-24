@@ -151,7 +151,8 @@ class AnnouncementsViewModel {
         _targetSecond.value = settings.targetSecond
         _liveClockFormat.value = settings.liveClockFormat
         _countUpElapsed.value = 0
-        _timerRemaining.value = if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+        _timerRemaining.value =
+            if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
         if (settings.timerMode == Constants.TIMER_MODE_CLOCK) startClockPreview()
         if (settings.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) startLiveClockPreview()
     }
@@ -194,7 +195,9 @@ class AnnouncementsViewModel {
 
     fun setTimerHours(value: Int) = applyDurationDelta { _timerHours.value = value.coerceAtLeast(0) }
 
-    fun stepTimerHours(delta: Int) = applyDurationDelta { _timerHours.value = (_timerHours.value + delta).coerceAtLeast(0) }
+    fun stepTimerHours(delta: Int) = applyDurationDelta {
+        _timerHours.value = (_timerHours.value + delta).coerceAtLeast(0)
+    }
 
     fun setTimerMinutes(value: Int) = applyDurationDelta { _timerMinutes.value = value.coerceIn(0, MAX_MINUTE) }
 
@@ -228,7 +231,12 @@ class AnnouncementsViewModel {
             if (next == 0) {
                 _timerSeconds.value = 0
                 val curMin = _timerMinutes.value
-                if (curMin >= MAX_MINUTE) { _timerMinutes.value = 0; _timerHours.value += 1 } else { _timerMinutes.value = curMin + 1 }
+                if (curMin >= MAX_MINUTE) {
+                    _timerMinutes.value = 0
+                    _timerHours.value += 1
+                } else {
+                    _timerMinutes.value = curMin + 1
+                }
             } else {
                 _timerSeconds.value = next
             }
@@ -238,7 +246,12 @@ class AnnouncementsViewModel {
                 if (_timerHours.value > 0 || _timerMinutes.value > 0) {
                     _timerSeconds.value = LAST_SECOND_STEP
                     val curMin = _timerMinutes.value
-                    if (curMin <= 0) { _timerMinutes.value = MAX_MINUTE; _timerHours.value -= 1 } else { _timerMinutes.value = curMin - 1 }
+                    if (curMin <= 0) {
+                        _timerMinutes.value = MAX_MINUTE
+                        _timerHours.value -= 1
+                    } else {
+                        _timerMinutes.value = curMin - 1
+                    }
                 }
             } else {
                 _timerSeconds.value = next
@@ -325,7 +338,8 @@ class AnnouncementsViewModel {
     private fun secondsUntilTarget(): Int {
         val now = java.time.LocalTime.now()
         val nowSec = now.toSecondOfDay()
-        val targetSec = _targetHour.value * SECONDS_PER_HOUR + _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value
+        val targetSec = _targetHour.value * SECONDS_PER_HOUR +
+            _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value
         val diff = targetSec - nowSec
         return if (diff > 0) diff else diff + SECONDS_PER_DAY
     }

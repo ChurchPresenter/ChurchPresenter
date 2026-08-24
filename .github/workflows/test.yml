@@ -179,6 +179,13 @@ jobs:
               - 'ui-components/**'    # implementation(projects.uiComponents)
               - 'theme/**'            # implementation(projects.theme)
               - 'resources/**'        # api(projects.resources)
+            announcementstab:
+              - *shared
+              - 'announcements-tab/**'
+              - 'settings/**'         # api(projects.settings)
+              - 'ui-components/**'    # implementation(projects.uiComponents)
+              - 'theme/**'            # implementation(projects.theme)
+              - 'resources/**'        # api(projects.resources)
             companionserver:
               - *shared
               - 'companion-server/**'
@@ -225,7 +232,7 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
-          :ui-components:detekt :dictionary-tab:detekt
+          :ui-components:detekt :dictionary-tab:detekt :announcements-tab:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -403,6 +410,16 @@ jobs:
         if: always() && steps.modules.outputs.dictionarytab == 'true'
         run: ./gradlew :dictionary-tab:jacocoTestCoverageVerification -x test
 
+      - name: Announcements tab tests
+        if: always() && steps.modules.outputs.announcementstab == 'true'
+        run: ./gradlew :announcements-tab:test
+
+      # No coverage-floor step yet, deliberately. The suite is 197 tests and 49 screenshots, and the
+      # bundle reads INSTRUCTION 0.92 / LINE 0.97 -- but COMPLEXITY 0.75 and METHOD 0.71, both under
+      # the 0.85 default. The gap is the private composables the tab is built from, and neither an
+      # `extra["coverageFloors"]` override nor an exclude is something to add unasked, so the step
+      # goes in when the tests that close it do.
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -555,6 +572,7 @@ jobs:
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             dictionary-tab/build/test-results/**/TEST-*.xml
+            announcements-tab/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -582,6 +600,7 @@ jobs:
             Bible
             Dictionary
             Dictionary tab
+            Announcements tab
             Companion Server
           detailed_summary: true
           include_passed: false
@@ -739,5 +758,7 @@ jobs:
             dictionary/build/test-results/
             dictionary-tab/build/reports/tests/
             dictionary-tab/build/test-results/
+            announcements-tab/build/reports/tests/
+            announcements-tab/build/test-results/
             companion-server/build/reports/tests/
             companion-server/build/test-results/

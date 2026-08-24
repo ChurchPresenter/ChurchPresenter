@@ -36,7 +36,7 @@ in and there is no way to depend on it.
 
 ## Layout
 
-`src/main/kotlin/org/churchpresenter/dictionary/ui/` — note the package is `…dictionary.ui`, a
+`src/main/kotlin/org/churchpresenter/dictionary/tab/` — note the package is `…dictionary.tab`, a
 sibling of `:dictionary`'s own `…dictionary`, and **not** `org.churchpresenter.app.churchpresenter.*`.
 
 | file | owns |
@@ -53,6 +53,9 @@ sibling of `:dictionary`'s own `…dictionary`, and **not** `org.churchpresenter
   are. The root `AGENT.md` rule applies here in full: never move them under `build/`.
 - **`AppPreviewDictionaryScreenshotTest` stayed in `:composeApp`** and must stay there — it shoots
   the whole app window with the Dictionary tab selected, so it needs the app, not this module.
+- **The presenter is shot here too.** `DictionaryPresenterScreenshotTest` writes
+  `screenshots/dictionaryPresenter/`; those two images used to live in `:composeApp`'s
+  `presenterFullScreen` set. A presenter that moves into a module takes its screenshots with it.
 
 ## Gates
 
@@ -98,6 +101,6 @@ signature it was written against. Never add a sixth.
 ./gradlew :dictionary-tab:test                  # 17 test classes, 222 tests
 ./gradlew :dictionary-tab:detekt                 # six baselined entries, nothing else
 ./gradlew :dictionary-tab:jacocoTestCoverageVerification
-./gradlew :dictionary-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'   # 19 committed images
+./gradlew :dictionary-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'   # 21 committed images
 ./gradlew :dictionary-tab:recordRoborazziJvm --tests '*ScreenshotTest*'   # re-record after a visual change
 ```
