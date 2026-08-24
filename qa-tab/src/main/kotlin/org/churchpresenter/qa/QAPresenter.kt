@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
@@ -42,7 +41,6 @@ import org.churchpresenter.ui.generateQRCodeBitmap
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.ui.calculateAutoFitFontSize
-import java.awt.image.BufferedImage
 
 @Composable
 fun QAPresenter(
@@ -56,7 +54,7 @@ fun QAPresenter(
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
     val bgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
-                 else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = bgOpacity)
+                 else parseHexColor(qaSettings.backgroundColor.orDefaultCard()).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(qaSettings.fontType)
 
     val shadowColorBase = parseHexColor(qaSettings.shadowColor)
@@ -133,7 +131,7 @@ fun QAQRCodePresenter(
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
     val qrBgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val bgColor = if (isKey) Color.Transparent
-                  else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = qrBgOpacity)
+                  else parseHexColor(qaSettings.backgroundColor.orDefaultCard()).copy(alpha = qrBgOpacity)
 
     val qrFgArgb = remember(qaSettings.qrForegroundColor) { parseHexColor(qaSettings.qrForegroundColor).toArgb() }
     val qrBgArgb = remember(qaSettings.qrBackgroundColor, qaSettings.qrBackgroundOpacity) {
@@ -194,3 +192,13 @@ private fun positionToAlignment(position: String): Alignment = when (position) {
     Constants.BOTTOM_RIGHT -> Alignment.BottomEnd
     else -> Alignment.Center
 }
+
+/**
+ * The card colour to draw, resolving the sentinel `"transparent"` to the dark plate the audience
+ * screen falls back to. The two presenters share it rather than repeating the check.
+ */
+private fun String.orDefaultCard(): String =
+    if (this == "transparent") DEFAULT_CARD_BACKGROUND else this
+
+/** What a `"transparent"` card is actually drawn in — a near-black plate, not nothing. */
+private const val DEFAULT_CARD_BACKGROUND = "#1E1E2E"

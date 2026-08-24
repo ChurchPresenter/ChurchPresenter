@@ -38,7 +38,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 | Package          | Owns                                                                |
 |------------------|---------------------------------------------------------------------|
-| `tabs/`          | UI only — one file per tab, no logic. The Dictionary tab has moved out, to `:dictionary-tab` |
+| `tabs/`          | UI only — one file per tab, no logic. Dictionary and Q&A have moved out, to `:dictionary-tab` and `:qa-tab` |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
@@ -90,6 +90,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
+| `qa-tab/`              | `:qa-tab`              | The Audience Q&A tab — the moderation queue, the join QR, its dialog and presenter | [AGENT.md](qa-tab/AGENT.md)              |
 | `companion-server/`    | `:companion-server`    | The HTTP/WebSocket surface: wire format, routes, served pages, TLS, tunnel, link  | [AGENT.md](companion-server/AGENT.md)    |
 | `statistics/`          | `:statistics`          | What was sung and read, counted — the tallies, the play log and the CCLI export    | [AGENT.md](statistics/AGENT.md)          |
 
@@ -247,10 +248,15 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**The suite is clean: `verifyRoborazziJvm` fails 0 of 832 images on `main`** — measured 2026-08-23 on
-macOS. Another 61 live in `ui-components/screenshots`, 19 in `dictionary-tab/screenshots` and 12
-in `dictionary-settings-tab/screenshots`, each
-verified by its own module's task. It is therefore readable as pass/fail again, and **any** failure is a real difference.
+**The suite is clean: `verifyRoborazziJvm` fails 0 of 798 images on `main`** — measured 2026-08-24 on
+macOS. Another 61 live in `ui-components/screenshots`, 19 in `dictionary-tab/screenshots`, 12 in
+`dictionary-settings-tab/screenshots` and 34 in `qa-tab/screenshots`, each verified by its own
+module's task. It is therefore readable as pass/fail again, and **any** failure is a real difference.
+
+**A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`
+shoots only the presenters `:composeApp` still owns; the audience-question shots moved to
+`QAPresenterScreenshotTest` under `:qa-tab`'s own `screenshots/` root. The `AppPreview*` suites stay
+in `:composeApp` either way — they shoot the whole app window, so they need the app.
 
 The 24 that used to be permanently red were three separate causes, all now fixed at source rather
 than by widening the threshold — every one of them the same shape as the `about_*` git-hash case, a

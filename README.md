@@ -54,6 +54,12 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > that puts an entry on the screen. The first tab to live outside `:composeApp`, which keeps only
 > the wiring. `./gradlew :dictionary-tab:test`.
 >
+> **[`qa-tab/`](./qa-tab)** — the Audience Q&A tab: the moderation queue people post to from their
+> phones, the QR code they scan to find it, the sharing dialog that works out the two addresses, and
+> the presenter that puts a question on the screen. It drives the outputs through its own `QaOutput`
+> port, so `PresenterManager` stays in the app; its `QAManager` is what `:companion-server` moderates
+> through. `./gradlew :qa-tab:test`.
+>
 > **[`dictionary-settings-tab/`](./dictionary-settings-tab)** — the page of the options dialog that
 > styles that output: the colour, font, size, style and shadow of the word, its definition, its
 > reference and its KJV usage, plus the card background and the fades. Depends on the settings
