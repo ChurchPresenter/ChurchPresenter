@@ -8,12 +8,13 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.settings.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -98,24 +99,28 @@ class RemoteApprovalGateTest {
     /**
      * Stands an operator behind the server who answers [allow] to everything.
      *
-     * Returns once the collector is actually attached — `requestApproval` allows outright when the
-     * subscription count is zero, so sending before that would test nothing and pass.
+     * The collector is attached by the time this returns, which every test depends on:
+     * `requestApproval` allows outright when the subscription count is zero, so a request sent
+     * before the collector exists would sail through and the test would pass having proved nothing.
+     *
+     * [CoroutineStart.UNDISPATCHED] is what makes that certain. The body runs on the calling thread
+     * up to its first suspension, and `SharedFlow.collect` registers the subscriber *before* it
+     * suspends — so the subscription is live the moment `launch` returns. This used to poll
+     * `subscriptionCount` against a two-second deadline instead, which is a race dressed up as a
+     * wait: it depends on the IO dispatcher handing out a thread in time, and on a loaded CI runner
+     * it did not. Do not put the poll back.
      */
     private fun operatorAnswering(allow: Boolean) {
         val scope = CoroutineScope(Dispatchers.IO + Job()).also { operatorScope = it }
         val before = server.onInstantApproval.subscriptionCount.value
-        scope.launch {
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
             server.onInstantApproval.collect { pending ->
                 asked += pending
                 pending.decision.complete(allow)
             }
         }
-        runBlocking {
-            withTimeoutOrNull(2_000) {
-                while (server.onInstantApproval.subscriptionCount.value <= before) {
-                    kotlinx.coroutines.delay(5)
-                }
-            } ?: error("the operator collector never attached")
+        check(server.onInstantApproval.subscriptionCount.value > before) {
+            "the operator collector must be attached before launch returns"
         }
     }
 
