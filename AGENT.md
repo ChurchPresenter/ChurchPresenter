@@ -46,7 +46,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
-| `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary one, in `:dictionary-settings-tab` |
+| `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary and Lower Third ones, in `:dictionary-settings-tab` and `:lower-third-settings-tab` |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
 | `ui/theme/`      | `LanguageProvider` only — the theme itself is the `:theme` module   |
 
@@ -90,6 +90,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
+| `lower-third-settings-tab/` | `:lower-third-settings-tab` | The options-dialog page that picks a Lottie preset and places the band        | [AGENT.md](lower-third-settings-tab/AGENT.md) |
 | `announcements-tab/`   | `:announcements-tab`   | The Announcements tab — its notices, its four timers, its view model and presenter | [AGENT.md](announcements-tab/AGENT.md)   |
 | `qa-tab/`              | `:qa-tab`              | The Audience Q&A tab — the moderation queue, the join QR, its dialog and presenter | [AGENT.md](qa-tab/AGENT.md)              |
 | `lower-third-tab/`     | `:lower-third-tab`     | The Lower Third tab — its presets, its Lottie rendering and the ATEM upload        | [AGENT.md](lower-third-tab/AGENT.md)     |
@@ -128,8 +129,8 @@ they must be set **above everything else** in the file:
   each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
-  `:dictionary-tab`, `:dictionary-settings-tab`, `:announcements-tab`, `:qa-tab`,
-  `:companion-server` and `:statistics` name none.
+  `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
+  `:announcements-tab`, `:qa-tab`, `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -255,8 +256,8 @@ widening the threshold, along with `colour_picker`, `settings_companion_satellit
 **The suite is clean: `verifyRoborazziJvm` fails 0 of 747 images on `main`** — measured 2026-08-24 on
 macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`, 12 in
 `dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots`, 34 in
-`qa-tab/screenshots` and 24 in `lower-third-tab/screenshots`, each verified by its own module's
-task. It is therefore readable as pass/fail
+`qa-tab/screenshots`, 24 in `lower-third-tab/screenshots` and 7 in
+`lower-third-settings-tab/screenshots`, each verified by its own module's task. It is therefore readable as pass/fail
 again, and **any** failure is a real difference.
 
 **A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`

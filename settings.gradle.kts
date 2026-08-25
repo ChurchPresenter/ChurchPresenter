@@ -118,9 +118,14 @@ include(":dictionary-settings-tab")
 // The Lower Third tab: the animated Lottie band the audience sees over the picture, its presets,
 // the offscreen renderer behind the Browser Source overlay, and the ATEM media-pool upload beside
 // it. Already callback-driven before it moved, so it needs no port — `PresenterManager` never
-// reached it in the first place. `LowerThirdSettingsTab` deliberately stays in :composeApp, with
-// the other pages of the options dialog.
+// reached it in the first place.
 include(":lower-third-tab")
+// The page of the options dialog that configures that tab: the Lottie library on the left, a live
+// preview of the selected animation on the right, and the window insets the band is placed with
+// beneath it. Split from :lower-third-tab the way :dictionary-settings-tab is split from
+// :dictionary-tab — but unlike that pair it does depend on the tab module, because the preview is
+// the same compottie render with the same bundled fonts.
+include(":lower-third-settings-tab")
 // The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
 // timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
 // touching PresenterManager, so it knows nothing about the rest of the app.

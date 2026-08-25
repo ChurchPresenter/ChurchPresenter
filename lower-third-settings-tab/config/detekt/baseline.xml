@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:LowerThirdSettingsTab.kt$@Composable fun LowerThirdSettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onOpenLottieGen: (outputDir: String, onFileSaved: (() -&gt; Unit)?) -&gt; Unit = { _, _ -&gt; } )</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.lowerthird.settings
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
@@ -12,6 +12,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import org.churchpresenter.lowerthird.NOT_LOTTIE_JSON
+import org.churchpresenter.lowerthird.lottieJson
+import org.churchpresenter.lowerthird.withLottieFolder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.StreamingSettings
 import java.io.File
