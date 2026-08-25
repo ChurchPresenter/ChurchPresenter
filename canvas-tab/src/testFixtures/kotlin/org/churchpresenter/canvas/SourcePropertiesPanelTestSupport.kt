@@ -6,6 +6,9 @@ import org.churchpresenter.ui.screenshot.latchSkikoNativeLibrary
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -145,6 +148,45 @@ fun redrawablePanel(
         }
     }
     block({ current }, { bump?.invoke(); waitForIdle() })
+}
+
+/**
+ * Like [redrawablePanel], but the redraw is a **theme change** rather than a new modifier.
+ *
+ * The difference matters, and it is the difference between recomposing the panel and recomposing the
+ * editors inside it. A fresh modifier invalidates `SourcePropertiesPanel` alone: the per-kind editor
+ * it delegates to is handed the same source and the same callback as last time, so Compose skips it
+ * outright and none of its body runs again. Every editor reads `MaterialTheme.colorScheme` directly
+ * in its own body, though, so changing the scheme invalidates each of them *individually* — the body
+ * re-runs with the source unchanged, which is the one path a new modifier can never produce.
+ *
+ * That is the path the app takes whenever the operator switches theme with the properties panel
+ * open, and the state each editor holds outside the source has to survive it.
+ */
+@OptIn(ExperimentalTestApi::class)
+fun rethemedPanel(
+    initial: SceneSource,
+    appSettings: AppSettings? = null,
+    deckLink: CanvasDeckLink = CanvasDeckLink.None,
+    block: ComposeUiTest.(get: () -> SceneSource, retheme: () -> Unit) -> Unit,
+) = runComposeUiTest {
+    var current = initial
+    var flip: (() -> Unit)? = null
+    setContent {
+        var state by remember { mutableStateOf(initial) }
+        var dark by remember { mutableStateOf(false) }
+        flip = { dark = !dark }
+        MaterialTheme(colorScheme = if (dark) darkColorScheme() else lightColorScheme()) {
+            CompositionLocalProvider(LocalCanvasDeckLink provides deckLink) {
+                SourcePropertiesPanel(
+                    source = state,
+                    appSettings = appSettings,
+                    onSourceUpdate = { updated -> state = updated; current = updated },
+                )
+            }
+        }
+    }
+    block({ current }, { flip?.invoke(); waitForIdle() })
 }
 
 /**

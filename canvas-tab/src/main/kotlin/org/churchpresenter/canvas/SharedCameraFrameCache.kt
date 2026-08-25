@@ -351,7 +351,25 @@ object SharedCameraFrameCache {
             false
         }
 
-    private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
+    /**
+     * Keeps an ffmpeg capture of [source] running, restarting it when it stops, until it is
+     * cancelled or has failed [MAX_CONSECUTIVE_FAILURES] times in a row.
+     *
+     * `internal`, with the process start and the pacing as parameters, for the reason the root
+     * `AGENT.md` gives: the one step that genuinely needs a machine is starting the binary, and
+     * everything around it — how many failures are tolerated, what resets the count, which failure
+     * the operator is finally shown, what the diagnostic says — is ordinary logic that a camera
+     * would only make slower to reach. Production passes neither parameter.
+     *
+     * [pacing] is a parameter for the same reason a retry delay always is: without it the give-up
+     * path costs [MAX_CONSECUTIVE_FAILURES] times [FfmpegPacing.retryMs] of real time to reach.
+     */
+    internal suspend fun runFfmpegCapture(
+        source: SceneSource.CameraSource,
+        entry: CacheEntry,
+        pacing: FfmpegPacing = FfmpegPacing(),
+        startProcess: (List<String>) -> Process? = ::startFfmpeg,
+    ) {
         val path = source.devicePath
         System.err.println(
             "[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
@@ -374,20 +392,13 @@ object SharedCameraFrameCache {
             if (old != null) {
                 withContext(Dispatchers.IO) { killFfmpegProcess(old) }
                 entry.ffmpegProcess = null
-                delay(DEVICE_RELEASE_DELAY_MS)
+                delay(pacing.deviceReleaseMs)
             }
 
             System.err.println(
                 "[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}"
             )
-            val process = withContext(Dispatchers.IO) {
-                try {
-                    ProcessBuilder(command).redirectErrorStream(false).start()
-                } catch (e: Throwable) {
-                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
-                    null
-                }
-            }
+            val process = withContext(Dispatchers.IO) { startProcess(command) }
             if (process == null) {
                 // The binary isn't there — ffmpeg ships with the OS on nobody's machine, and the
                 // camera picker already tells people to install it. Five more attempts two seconds
@@ -410,10 +421,10 @@ object SharedCameraFrameCache {
             if (outcome == CaptureOutcome.FRAMES) {
                 consecutiveFailures = 0
                 entry.error.value = null
-                delay(RESTART_DELAY_MS)
+                delay(pacing.restartMs)
             } else {
                 consecutiveFailures++
-                delay(RETRY_DELAY_MS)
+                delay(pacing.retryMs)
             }
         }
 
@@ -425,6 +436,21 @@ object SharedCameraFrameCache {
             entry.error.value = CameraFailure.DEVICE_UNAVAILABLE
         }
     }
+}
+
+/** How long the ffmpeg capture loop waits between its attempts. Production uses the defaults. */
+internal data class FfmpegPacing(
+    val deviceReleaseMs: Long = DEVICE_RELEASE_DELAY_MS,
+    val retryMs: Long = RETRY_DELAY_MS,
+    val restartMs: Long = RESTART_DELAY_MS,
+)
+
+/** Starts ffmpeg, or `null` when the binary is not on the machine. The one step that needs one. */
+private fun startFfmpeg(command: List<String>): Process? = try {
+    ProcessBuilder(command).redirectErrorStream(false).start()
+} catch (e: Throwable) {
+    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+    null
 }
 
 /**
@@ -441,21 +467,43 @@ private fun reportGaveUp(
     exitCode: Int?,
     missing: Boolean,
 ) {
-    val reason = if (missing) "ffmpeg_missing" else outcome.name.lowercase()
-    CrashReporter.reportWarning(
-        if (missing) "Camera: ffmpeg could not be started"
-        else "Camera: Giving up on device after $MAX_CONSECUTIVE_FAILURES consecutive ffmpeg failures",
-        tags = mapOf(
-            "subsystem" to "camera",
-            "camera.scheme" to source.devicePath.substringBefore("://", "unknown"),
-            "failure.reason" to reason
-        ),
-        extras = buildMap {
-            put("camera.format", source.videoFormat.ifEmpty { "auto" })
-            exitCode?.let { put("ffmpeg.exit_code", it.toString()) }
-        }
-    )
+    val report = cameraGiveUpReport(source, outcome, exitCode, missing)
+    CrashReporter.reportWarning(report.message, tags = report.tags, extras = report.extras)
 }
+
+/** What [reportGaveUp] sends: everything about the failure, and nothing about the operator. */
+internal data class CameraGiveUpReport(
+    val message: String,
+    val tags: Map<String, String>,
+    val extras: Map<String, String>,
+)
+
+/**
+ * Works out what to say about a camera that never opened.
+ *
+ * Separate from the sending so it can be read back: what leaves the machine here is decided by a
+ * handful of `if`s, and the one that matters is a negative — the device *name* is never included.
+ * That is the only field of a capture command that identifies a person's hardware, and none of the
+ * causes this collapses together needs it to be told apart.
+ */
+internal fun cameraGiveUpReport(
+    source: SceneSource.CameraSource,
+    outcome: CaptureOutcome,
+    exitCode: Int?,
+    missing: Boolean,
+): CameraGiveUpReport = CameraGiveUpReport(
+    message = if (missing) "Camera: ffmpeg could not be started"
+    else "Camera: Giving up on device after $MAX_CONSECUTIVE_FAILURES consecutive ffmpeg failures",
+    tags = mapOf(
+        "subsystem" to "camera",
+        "camera.scheme" to source.devicePath.substringBefore("://", "unknown"),
+        "failure.reason" to if (missing) "ffmpeg_missing" else outcome.name.lowercase(),
+    ),
+    extras = buildMap {
+        put("camera.format", source.videoFormat.ifEmpty { "auto" })
+        exitCode?.let { put("ffmpeg.exit_code", it.toString()) }
+    },
+)
 
 /**
  * Builds the ffmpeg command line for capturing [source]'s device as raw BGRA video, or `null` when

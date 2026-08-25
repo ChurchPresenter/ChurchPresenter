@@ -230,4 +230,86 @@ class SharedCameraFrameCacheCaptureTest {
         awaitUntil("a frame") { a.frame.value != null }
         assertNull(b.frame.value?.let { null }, "both see the same flow")
     }
+
+    @Test
+    fun `a frame with no height is ignored as surely as one with no width`() {
+        // `w <= 0 || h <= 0` short-circuits, so a zero width never asks about the height. A frame
+        // that is wide but flat is the only way the second half of that test is ever evaluated, and
+        // it must be rejected too — setRGB on a zero-height raster throws.
+        val deck = StubDeckLink(frames = listOf(intArrayOf(4, 0, 0), intArrayOf(-1, 4, 0)) + List(50) { frame(4, 4) })
+        val source = deckLinkSource()
+
+        val flows = acquire(source, deck)
+
+        awaitUntil("a good frame after the flat and the negative one") { flows.frame.value != null }
+        assertEquals(4, assertNotNull(flows.frame.value).height)
+    }
+
+    @Test
+    fun `a card that stalls for long enough finally blanks the picture`() {
+        // Holding the last frame indefinitely would leave a dead camera showing a still image that
+        // looks live. Past the drop allowance the source goes black, which is honest.
+        val deck = StubDeckLink(frames = listOf(frame(4, 4)) + List(400) { null })
+        val source = deckLinkSource()
+
+        val flows = acquire(source, deck)
+        awaitUntil("the first frame") { flows.frame.value != null }
+
+        awaitUntil("the picture to be cleared") { flows.frame.value == null }
+    }
+
+    // ── Sources that are not a capture card at all ──────────────────────────────
+
+    @Test
+    fun `a webcam source never touches the card, even with one attached`() {
+        val deck = StubDeckLink(frames = List(50) { frame(4, 4) })
+        val webcam = SceneSource.CameraSource(
+            id = "cam", name = "Camera", devicePath = "/dev/video0", deviceName = "USB Cam",
+        )
+
+        acquire(webcam, deck)
+
+        // isDeckLink is false, so the branch is never entered whatever the card says.
+        Thread.sleep(100)
+        assertTrue(deck.opened.isEmpty())
+        SharedCameraFrameCache.release(webcam, deck)
+        assertTrue(deck.closed.isEmpty())
+    }
+
+    @Test
+    fun `a card source with no device index is not a card`() {
+        // `isDeckLink` set without an index is a half-configured source — the app writes it that way
+        // before a device has been picked. It must go down the ffmpeg path, not open device -1.
+        val deck = StubDeckLink(frames = List(50) { frame(4, 4) })
+        val unassigned = SceneSource.CameraSource(
+            id = "cam", name = "Camera", devicePath = "", deviceName = "",
+            isDeckLink = true, deckLinkIndex = -1,
+        )
+
+        acquire(unassigned, deck)
+
+        Thread.sleep(100)
+        assertTrue(deck.opened.isEmpty(), "device -1 must never be opened")
+        SharedCameraFrameCache.release(unassigned, deck)
+        assertTrue(deck.closed.isEmpty())
+    }
+
+    @Test
+    fun `one card feeding two different modes stays open until both go`() {
+        // Two scenes on the same card at different formats are two cache entries, not one — the key
+        // carries the format. Closing the device on the first release would blank the other scene.
+        val deck = StubDeckLink(frames = List(200) { frame(4, 4) })
+        val hd = deckLinkSource(index = 7, format = "1080p30")
+        val uhd = deckLinkSource(index = 7, format = "2160p30")
+        SharedCameraFrameCache.acquire(hd, deck)
+        SharedCameraFrameCache.acquire(uhd, deck)
+        awaitUntil("both to open") { deck.opened.size == 2 }
+
+        SharedCameraFrameCache.release(hd, deck)
+
+        assertTrue(deck.closed.isEmpty(), "the other mode is still capturing off device 7")
+
+        SharedCameraFrameCache.release(uhd, deck)
+        assertEquals(listOf(7), deck.closed)
+    }
 }

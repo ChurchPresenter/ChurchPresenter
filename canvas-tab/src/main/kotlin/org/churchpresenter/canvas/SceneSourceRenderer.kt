@@ -755,21 +755,15 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
             while (isActive) {
                 val capture: BufferedImage? = if (source.captureMode == "window" && source.windowId.isNotBlank()) {
                     withContext(Dispatchers.IO) {
-                        val wid = source.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
+                        val wid = windowIdOf(source)
                         // Try platform-specific occluded capture, fall back to Robot + bounds
                         WindowsWindowCapture.captureWindow(wid)
                             ?: X11WindowCapture.captureWindow(wid)
-                            ?: run {
-                                val rect = findWindowBounds(source.windowTitle)
-                                if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
-                            }
+                            ?: captureAreaFor(source, ::findWindowBounds)?.let { robot.createScreenCapture(it) }
                     }
-                } else if (source.captureMode == "window" && source.windowTitle.isNotBlank()) {
-                    val rect = withContext(Dispatchers.IO) { findWindowBounds(source.windowTitle) }
-                    if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
                 } else {
-                    val rect = Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
-                    if (rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
+                    withContext(Dispatchers.IO) { captureAreaFor(source, ::findWindowBounds) }
+                        ?.let { robot.createScreenCapture(it) }
                 }
                 if (capture != null) {
                     frame = capture.toComposeImageBitmap()
@@ -797,6 +791,40 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
             Text(stringResource(Res.string.canvas_placeholder_screen_capture), color = Color.White, fontSize = 14.sp)
         }
     }
+}
+
+/**
+ * The window handle [source] names, as a number — `0` when it names none the platform grabbers
+ * would accept.
+ */
+internal fun windowIdOf(source: SceneSource.ScreenCaptureSource): Long =
+    source.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
+
+/**
+ * The rectangle a screen-capture tick should grab with `Robot`, or `null` when there is nothing to
+ * grab this tick.
+ *
+ * Every decision the capture loop makes is here, and none of it needs a screen: whether the source
+ * is following a window or a fixed area, where that window currently is, and whether what came back
+ * has any pixels in it. `Robot.createScreenCapture` is the only step left in the loop that does, and
+ * it throws in a headless JVM — which is why this is a function of its own rather than three
+ * branches inside it. [boundsOf] is the window lookup, passed in so a test need not have a desktop.
+ *
+ * A source set to follow a window but naming none falls through to the fixed area, which is what the
+ * app writes before a window has been picked.
+ */
+internal fun captureAreaFor(
+    source: SceneSource.ScreenCaptureSource,
+    boundsOf: (String) -> Rectangle?,
+): Rectangle? {
+    val followingWindow = source.captureMode == "window" &&
+        (source.windowId.isNotBlank() || source.windowTitle.isNotBlank())
+    val rect = if (followingWindow) {
+        boundsOf(source.windowTitle)
+    } else {
+        Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
+    }
+    return rect?.takeIf { it.width > 0 && it.height > 0 }
 }
 
 private fun findWindowBounds(windowTitle: String): Rectangle? =

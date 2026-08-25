@@ -221,8 +221,14 @@ object SharedBrowserFrameCache {
 
     // ── Browser Discovery ──────────────────────────────────────────
 
-    /** The executable `which`/`where` reports for [name], when it exists on disk. */
-    private fun browserOnPath(whichCmd: String, name: String): String? = try {
+    /**
+     * The executable `which`/`where` reports for [name], when it exists on disk.
+     *
+     * `internal` so the three ways this comes back empty can be told apart in a test: the lookup
+     * command failing, it succeeding but naming nothing, and it naming a file that is not there. All
+     * three have to end as `null` rather than a path the launcher would then fail to execute.
+     */
+    internal fun browserOnPath(whichCmd: String, name: String): String? = try {
         val proc = ProcessBuilder(whichCmd, name).redirectErrorStream(true).start()
         val output = proc.inputStream.bufferedReader().readText().trim()
         val path = output.lines().firstOrNull()?.trim()
@@ -554,7 +560,14 @@ object SharedBrowserFrameCache {
         }
     }
 
-    private suspend fun waitForCdpReady(port: Int, timeoutMs: Long): Boolean {
+    /**
+     * Polls the browser's DevTools endpoint until it answers, or [timeoutMs] passes.
+     *
+     * `internal` because the giving-up path is the one that matters and the one nothing else can
+     * produce: Chrome is started before this runs, so in production the loop almost always ends on
+     * the first or second poll. A test points it at a port with nothing behind it.
+     */
+    internal suspend fun waitForCdpReady(port: Int, timeoutMs: Long): Boolean {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             try {
