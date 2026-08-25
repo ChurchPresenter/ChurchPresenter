@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.absolutePathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -143,14 +144,17 @@ class SourcePropertiesVideoTest {
     }
 
     @Test
-    fun `with no stored path, Browse falls back to the user's home directory`() {
+    fun `with no stored path, Browse asks with no start directory`() {
         val chooser = FakeFileChooser(answer = null)
         sourcePanel(Fixture.video().copy(filePath = ""), fileChooser = chooser) { _ ->
             onNodeWithContentDescription("Browse").performClick()
             waitForIdle()
 
-            // FileChooser.choose() itself falls back to user.home for a null/nonexistent start path.
-            assertEquals(Path.of(System.getProperty("user.home")), chooser.lastPath)
+            // Null, not the home directory. The tab has nowhere to start from and says so; where a
+            // null start path lands is the picker's decision, and the app's real one falls back to
+            // user.home exactly as it did before. Asserting the home path here would be asserting
+            // the implementation's behaviour through a stand-in that does not implement it.
+            assertNull(chooser.lastPath)
         }
     }
 
