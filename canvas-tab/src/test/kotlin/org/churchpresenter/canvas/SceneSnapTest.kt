@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform

@@ -2,6 +2,23 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.canvas.Fixture
+import org.churchpresenter.canvas.Gap
+import org.churchpresenter.canvas.Label
+import org.churchpresenter.canvas.assertFieldShows
+import org.churchpresenter.canvas.button
+import org.churchpresenter.canvas.checkboxes
+import org.churchpresenter.canvas.chooseFromDropdown
+import org.churchpresenter.canvas.countOf
+import org.churchpresenter.canvas.openDropdown
+import org.churchpresenter.canvas.roleButtons
+import org.churchpresenter.canvas.sourcePanel
+import org.churchpresenter.canvas.tapSliderUnder
+import org.churchpresenter.canvas.textFields
+import org.churchpresenter.canvas.toggleCheckbox
+import org.churchpresenter.canvas.typeField
+
+
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed

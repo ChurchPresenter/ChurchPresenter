@@ -1,4 +1,6 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
+
+import org.churchpresenter.ui.FakeCommandRunner
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

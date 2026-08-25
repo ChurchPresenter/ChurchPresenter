@@ -498,6 +498,10 @@ dependencies {
     // app's remote-command and instance-link suites drive a real server, so they borrow the fixture
     // from the module that owns the wire format rather than standing one up twice.
     add("jvmTestImplementation", testFixtures(projects.companionServer))
+    // The scene source-properties panel harness. The Bible source editor stays in the app (it
+    // builds a BibleViewModel) and reaches the panel through its bibleProperties slot, so its
+    // test drives the real panel from the module that owns it.
+    add("jvmTestImplementation", testFixtures(projects.canvasTab))
     // The Lottie-folder fixtures -- what counts as an animation on disk, and the wait for the
     // scan that decides. The server tab's lower-third triggers are driven from a real folder
     // here, and the options page that lists the same folder now lives in

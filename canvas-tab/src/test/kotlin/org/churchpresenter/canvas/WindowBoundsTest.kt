@@ -1,4 +1,6 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
+
+import org.churchpresenter.ui.FakeCommandRunner
 
 import java.awt.Rectangle
 import kotlin.test.Test

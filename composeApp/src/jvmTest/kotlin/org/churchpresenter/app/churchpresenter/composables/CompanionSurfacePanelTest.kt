@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.ui.renderedText
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -293,7 +295,7 @@ class CompanionSurfacePanelTest {
 
         panel(vm) {
             // The status label is all that is left — the cell itself draws no text node.
-            assertEquals(setOf(DISCONNECTED), renderedText())
+            assertEquals(setOf(DISCONNECTED), renderedText().toSet())
         }
     }
 

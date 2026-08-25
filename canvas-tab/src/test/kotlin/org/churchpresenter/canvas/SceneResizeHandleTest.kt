@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.ui.geometry.Offset
 import org.churchpresenter.core.models.scene.SourceTransform

@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
+import org.churchpresenter.ui.HeicDecoder
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File

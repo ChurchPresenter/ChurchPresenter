@@ -86,7 +86,7 @@ import kotlin.test.assertTrue
  * The panel is re-fed its own output, so an interaction is followed through to the text it changes.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun sourcePanel(
+fun sourcePanel(
     initial: SceneSource,
     appSettings: AppSettings? = null,
     fileChooser: CanvasFilePicker = CanvasFilePicker.None,
@@ -118,7 +118,7 @@ internal fun sourcePanel(
  * leaving the source alone.
  */
 @OptIn(ExperimentalTestApi::class)
-internal fun redrawablePanel(
+fun redrawablePanel(
     initial: SceneSource,
     appSettings: AppSettings? = null,
     block: ComposeUiTest.(get: () -> SceneSource, redraw: () -> Unit) -> Unit,
@@ -157,7 +157,7 @@ internal fun redrawablePanel(
  * latch below has to happen before the swap — see [TestSingletons.latchSkikoHostOs] for what breaks
  * without it, and why it breaks only on some machines.
  */
-internal fun <T> withOsName(name: String, block: () -> T): T {
+fun <T> withOsName(name: String, block: () -> T): T {
     // :composeApp latched skiko's host OS here before faking os.name. This module fakes it
     // too, so the same latch is needed — it lives in :ui-components' test fixtures.
     latchSkikoNativeLibrary()
@@ -171,7 +171,7 @@ internal fun <T> withOsName(name: String, block: () -> T): T {
 }
 
 /** An OS no branch of the panel claims to enumerate, so every listing returns empty immediately. */
-internal const val OS_WITHOUT_ENUMERATOR = "TestOS"
+const val OS_WITHOUT_ENUMERATOR = "TestOS"
 
 // ── Fixtures ────────────────────────────────────────────────────────────────────────────────────
 
@@ -181,7 +181,7 @@ internal const val OS_WITHOUT_ENUMERATOR = "TestOS"
  * Ids are distinct because `TimerStateManager` keys countdown state by source id in a process-wide
  * singleton — sharing one id across tests would leak a running timer between them.
  */
-internal object Fixture {
+object Fixture {
     fun image(id: String = "img-1", filePath: String = "/tmp/logo.png") =
         SceneSource.ImageSource(id = id, name = "Logo", filePath = filePath)
     fun text(id: String = "txt-1") = SceneSource.TextSource(id = id, name = "Title")
@@ -213,7 +213,7 @@ internal object Fixture {
  * headings and checkbox captions are rendered as written. Both forms are spelled out here so a test
  * never has to remember which control a caption belongs to.
  */
-internal object Label {
+object Label {
     // Panel chrome, shared by every source type.
     const val PROPERTIES = "Properties"
     const val NAME = "NAME"
@@ -242,14 +242,14 @@ internal object Label {
 // ── Locators ────────────────────────────────────────────────────────────────────────────────────
 
 /** Every editable field on the panel, in composition order. */
-internal fun ComposeUiTest.textFields(): SemanticsNodeInteractionCollection = onAllNodes(hasSetTextAction())
+fun ComposeUiTest.textFields(): SemanticsNodeInteractionCollection = onAllNodes(hasSetTextAction())
 
 /** The field currently displaying [value]. */
-internal fun ComposeUiTest.fieldShowing(value: String): SemanticsNodeInteraction =
+fun ComposeUiTest.fieldShowing(value: String): SemanticsNodeInteraction =
     onNode(hasSetTextAction() and hasText(value))
 
 /** Every checkbox on the panel, in composition order. */
-internal fun ComposeUiTest.checkboxes(): SemanticsNodeInteractionCollection = onAllNodes(isToggleable())
+fun ComposeUiTest.checkboxes(): SemanticsNodeInteractionCollection = onAllNodes(isToggleable())
 
 /**
  * Every Material button on the panel, in composition order.
@@ -259,19 +259,19 @@ internal fun ComposeUiTest.checkboxes(): SemanticsNodeInteractionCollection = on
  * modifiers, which publish a click action but no role. The alignment buttons carry no text and no
  * content description of their own, so this is the only handle on them.
  */
-internal fun ComposeUiTest.roleButtons(): SemanticsNodeInteractionCollection =
+fun ComposeUiTest.roleButtons(): SemanticsNodeInteractionCollection =
     onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
 
 /** A labelled button, e.g. `button("Insert Verse")`. */
-internal fun ComposeUiTest.button(label: String): SemanticsNodeInteraction =
+fun ComposeUiTest.button(label: String): SemanticsNodeInteraction =
     onNode(hasClickAction() and hasText(label))
 
 /** How many times [text] is rendered anywhere on the panel. */
-internal fun ComposeUiTest.countOf(text: String): Int =
+fun ComposeUiTest.countOf(text: String): Int =
     onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 
 /** Every distinct non-blank string the panel currently renders, editable or not. */
-internal fun ComposeUiTest.renderedText(): Set<String> {
+fun ComposeUiTest.renderedText(): Set<String> {
     val out = mutableSetOf<String>()
     onAllNodesWithText("", substring = true).fetchSemanticsNodes(atLeastOneRootRequired = false)
         .forEach { node ->
@@ -290,20 +290,20 @@ internal fun ComposeUiTest.renderedText(): Set<String> {
  * is typed in local state and only push it to the model on Done or on focus loss, so a bare
  * [performTextReplacement] would assert nothing. Done is the half a test can drive deterministically.
  */
-internal fun ComposeUiTest.commitField(ordinal: Int, to: String) {
+fun ComposeUiTest.commitField(ordinal: Int, to: String) {
     textFields()[ordinal].performScrollTo().performTextReplacement(to)
     textFields()[ordinal].performImeAction()
     waitForIdle()
 }
 
 /** Types [to] into the field at [ordinal] without confirming it — for the fields that update live. */
-internal fun ComposeUiTest.typeField(ordinal: Int, to: String) {
+fun ComposeUiTest.typeField(ordinal: Int, to: String) {
     textFields()[ordinal].performScrollTo().performTextReplacement(to)
     waitForIdle()
 }
 
 /** Clicks the checkbox at [ordinal], scrolling it into view first. */
-internal fun ComposeUiTest.toggleCheckbox(ordinal: Int) {
+fun ComposeUiTest.toggleCheckbox(ordinal: Int) {
     checkboxes()[ordinal].performScrollTo().performClick()
     waitForIdle()
 }
@@ -314,7 +314,7 @@ internal fun ComposeUiTest.toggleCheckbox(ordinal: Int) {
  * The selector is the *last* node showing that text: an open menu puts its entries below the closed
  * selector, but nothing is open yet, and every other match would be a caption above it.
  */
-internal fun ComposeUiTest.openDropdown(showing: String) {
+fun ComposeUiTest.openDropdown(showing: String) {
     onAllNodesWithText(showing).onLast().performScrollTo().performClick()
     waitForIdle()
 }
@@ -325,7 +325,7 @@ internal fun ComposeUiTest.openDropdown(showing: String) {
  * With the menu open the wanted entry is the *last* match — the closed selector above it still reads
  * as the previous choice, and for a menu that offers the current value the label appears twice.
  */
-internal fun ComposeUiTest.chooseFromDropdown(showing: String, option: String) {
+fun ComposeUiTest.chooseFromDropdown(showing: String, option: String) {
     onAllNodesWithText(showing).onLast().performScrollTo().performClick()
     waitForIdle()
     onAllNodesWithText(option).onLast().performClick()
@@ -344,7 +344,7 @@ internal fun ComposeUiTest.chooseFromDropdown(showing: String, option: String) {
  *
  * [gapDp] is the distance from the end of the track to the left edge of that anchor — see [Gap].
  */
-internal fun ComposeUiTest.tapSliderUnder(caption: String, fraction: Float, gapDp: Float) =
+fun ComposeUiTest.tapSliderUnder(caption: String, fraction: Float, gapDp: Float) =
     tapSliderRow(caption, fraction, gapDp, besideCaption = false)
 
 /**
@@ -353,7 +353,7 @@ internal fun ComposeUiTest.tapSliderUnder(caption: String, fraction: Float, gapD
  * The line-spacing rows are laid out that way, so the track starts after the caption plus the row's
  * [captionGapDp] spacing. Everything else matches [tapSliderUnder].
  */
-internal fun ComposeUiTest.tapSliderBeside(
+fun ComposeUiTest.tapSliderBeside(
     caption: String,
     fraction: Float,
     gapDp: Float,
@@ -412,7 +412,7 @@ private fun ComposeUiTest.tapSliderRow(
 }
 
 /** The gap between the end of a slider's track and the node the tap helpers anchor on. */
-internal object Gap {
+object Gap {
     /** `PropertySlider`: `SlimSlider`'s own read-out, 10dp after the track. */
     const val READOUT = 10f
 
@@ -426,7 +426,7 @@ internal object Gap {
 // ── Assertions ──────────────────────────────────────────────────────────────────────────────────
 
 /** Asserts some field on the panel is displaying [value]. */
-internal fun ComposeUiTest.assertFieldShows(value: String, what: String) {
+fun ComposeUiTest.assertFieldShows(value: String, what: String) {
     val shown = onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText))
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
         .mapNotNull { it.config.getOrNull(SemanticsProperties.EditableText)?.text }

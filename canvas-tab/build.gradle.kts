@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
+    `java-test-fixtures`
     jacoco
 }
 
@@ -40,13 +41,18 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(testFixtures(projects.uiComponents))
     testImplementation(testFixtures(projects.coreModels))
-    // GraphicsDevice is abstract and the suite is headless, so the screen-geometry tests mock it.
     testImplementation(libs.mockk)
-    // SharedBrowserFrameCache discovers pages over the DevTools HTTP endpoint, so its tests
-    // stand up a real little server rather than mocking a protocol.
     testImplementation(libs.ktor.server.core)
     testImplementation(libs.ktor.server.netty)
     testImplementation(libs.ktor.server.websockets)
+    testFixturesImplementation(compose.desktop.currentOs)
+    testFixturesImplementation(compose.desktop.uiTestJUnit4)
+    testFixturesImplementation(libs.compose.material3)
+    testFixturesImplementation(projects.settings)
+    testFixturesImplementation(projects.coreModels)
+    testFixturesImplementation(projects.theme)
+    testFixturesImplementation(testFixtures(projects.uiComponents))
+    testFixturesImplementation(kotlin("test"))
 }
 
 tasks.withType<Test>().configureEach {

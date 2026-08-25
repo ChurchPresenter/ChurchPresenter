@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.ui
 
-import org.churchpresenter.ui.CommandResult
 
 /**
  * A [CommandRunner] that answers from a script instead of the machine, and records what it was asked.
@@ -15,7 +14,7 @@ import org.churchpresenter.ui.CommandResult
  * Anything unmatched comes back as exit 0 with no output, which is what a tool that ran and found
  * nothing looks like.
  */
-internal class FakeCommandRunner(private val answer: (List<String>) -> CommandResult?) {
+class FakeCommandRunner(private val answer: (List<String>) -> CommandResult?) {
 
     /** Every command line passed to [run], in order. */
     val calls = mutableListOf<List<String>>()
