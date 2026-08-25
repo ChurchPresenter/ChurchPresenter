@@ -45,6 +45,21 @@ internal class CanvasReports {
     /** sceneId to sceneName, exactly as the schedule would be given them. */
     val scheduled = mutableListOf<Pair<String, String>>()
     var settingsChanges = 0
+
+    /**
+     * The settings as the tab's own edits have left them.
+     *
+     * The tab hands back a transform rather than a value, so counting the calls says a change was
+     * asked for but not what it was. Applying each one in turn is what the app does with them, and
+     * it is the only way to check that a panel width actually landed where the drag put it.
+     */
+    var settings: AppSettings = AppSettings()
+        private set
+
+    internal fun apply(change: (AppSettings) -> AppSettings) {
+        settingsChanges++
+        settings = change(settings)
+    }
 }
 
 /**
@@ -75,7 +90,7 @@ internal fun canvasTab(
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                         CanvasTab(
                             appSettings = settings(AppSettings()),
-                            onSettingsChange = { reports.settingsChanges++ },
+                            onSettingsChange = { change -> reports.apply(change) },
                             output = output,
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },

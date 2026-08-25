@@ -184,6 +184,29 @@ class WindowBoundsTest {
         assertEquals(Rectangle(0, 2, 800, 600), parseXwininfoBounds(garbled))
     }
 
+    @Test
+    fun `an unreadable Y falls back to zero the same way`() {
+        val garbled = xwininfo(1, 2, 800, 600).replace("Absolute upper-left Y:  2", "Absolute upper-left Y:  ?")
+
+        assertEquals(Rectangle(1, 0, 800, 600), parseXwininfoBounds(garbled))
+    }
+
+    @Test
+    fun `an unreadable width is no window at all`() {
+        // Zero is not a fallback for a size the way it is for a position — capturing a rectangle of
+        // no width throws, so the walk has to move on to the next candidate instead.
+        val garbled = xwininfo(1, 2, 800, 600).replace("Width: 800", "Width: ?")
+
+        assertEquals(null, parseXwininfoBounds(garbled))
+    }
+
+    @Test
+    fun `an unreadable height is no window either`() {
+        val garbled = xwininfo(1, 2, 800, 600).replace("Height: 600", "Height: ?")
+
+        assertEquals(null, parseXwininfoBounds(garbled))
+    }
+
     // ── macOS ─────────────────────────────────────────────────────────────────────────────────
 
     @Test

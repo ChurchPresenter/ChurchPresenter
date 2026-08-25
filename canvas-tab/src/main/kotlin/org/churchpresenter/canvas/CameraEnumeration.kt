@@ -88,7 +88,11 @@ internal fun listCameraDevicesWithDeckLink(
     return devices
 }
 
-internal data class CameraFormat(
+/**
+ * One capture format a camera offers. Public because [CanvasDeviceListing] hands these out and a
+ * test fixture has to be able to build one.
+ */
+data class CameraFormat(
     val width: Int,
     val height: Int,
     val fps: Int,

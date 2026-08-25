@@ -95,13 +95,21 @@ fun sourcePanel(
     fileChooser: CanvasFilePicker = CanvasFilePicker.None,
     /** The capture card the editor should see. Defaults to none, as a test machine has. */
     deckLink: CanvasDeckLink = CanvasDeckLink.None,
+    /**
+     * What the editor is told about the machine's windows and camera formats. Defaults to a machine
+     * with none, so no test spawns `xprop`, `osascript` or `ffmpeg` by accident.
+     */
+    listing: CanvasDeviceListing = CanvasDeviceListing.None,
     block: ComposeUiTest.(get: () -> SceneSource) -> Unit,
 ) = runComposeUiTest {
     var current = initial
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(initial) }
-            androidx.compose.runtime.CompositionLocalProvider(LocalCanvasDeckLink provides deckLink) {
+            CompositionLocalProvider(
+                LocalCanvasDeckLink provides deckLink,
+                LocalCanvasDeviceListing provides listing,
+            ) {
             SourcePropertiesPanel(
                 source = state,
                 appSettings = appSettings,
@@ -177,7 +185,10 @@ fun rethemedPanel(
         var dark by remember { mutableStateOf(false) }
         flip = { dark = !dark }
         MaterialTheme(colorScheme = if (dark) darkColorScheme() else lightColorScheme()) {
-            CompositionLocalProvider(LocalCanvasDeckLink provides deckLink) {
+            CompositionLocalProvider(
+                LocalCanvasDeckLink provides deckLink,
+                LocalCanvasDeviceListing provides CanvasDeviceListing.None,
+            ) {
                 SourcePropertiesPanel(
                     source = state,
                     appSettings = appSettings,

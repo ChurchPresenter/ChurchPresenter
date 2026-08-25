@@ -122,6 +122,8 @@ import org.churchpresenter.companionserver.SongCatalogResponse
 import org.churchpresenter.companionserver.SongDetailDto
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
+import org.churchpresenter.app.churchpresenter.composables.BibleProperties
+import org.churchpresenter.app.churchpresenter.viewmodel.FileChooserCanvasFilePicker
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterCanvasOutput
 import org.churchpresenter.canvas.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
@@ -1679,6 +1681,10 @@ fun MainDesktop(
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)
+                                },
+                                fileChooser = remember { FileChooserCanvasFilePicker() },
+                                bibleProperties = { bibleSource, onUpdate ->
+                                    BibleProperties(bibleSource, onUpdate, appSettings)
                                 },
                                 dialogDismissSignal = dialogDismissSignal
                             )

@@ -56,6 +56,7 @@ private const val MAX_CAPTURE_INTERVAL_MS = 1000f
 @Composable
 internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
     val deckLink = LocalCanvasDeckLink.current
+    val listing = LocalCanvasDeviceListing.current
     Text(
         stringResource(Res.string.canvas_source_camera),
         style = MaterialTheme.typography.labelMedium,
@@ -155,7 +156,7 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
             var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
             LaunchedEffect(source.devicePath) {
                 formats = withContext(Dispatchers.IO) {
-                    listCameraFormats(source.devicePath, source.deviceName)
+                    listing.cameraFormats(source.devicePath, source.deviceName)
                 }
             }
 
@@ -209,6 +210,7 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
 @Composable
 internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onUpdate: (SceneSource) -> Unit) {
     val deckLink = LocalCanvasDeckLink.current
+    val listing = LocalCanvasDeviceListing.current
     Text(
         stringResource(Res.string.canvas_source_screen_capture),
         style = MaterialTheme.typography.labelMedium,
@@ -227,11 +229,11 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
         modifier = Modifier.fillMaxWidth()
     )
     if (source.captureMode == "window") {
-        var windows by remember { mutableStateOf(listOpenWindows()) }
+        var windows by remember { mutableStateOf(listing.openWindows()) }
         val windowTitles = windows.map { it.title }
 
         Button(
-            onClick = { windows = listOpenWindows() },
+            onClick = { windows = listing.openWindows() },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)
         ) {

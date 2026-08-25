@@ -80,4 +80,45 @@ class SceneSnapTest {
         val r = snap(x = 0.203f, y = 0.4f, sources = listOf(source("other", x = 0.2f, visible = false)))
         assertTrue(approx(0.203f, r.x), "a hidden source offers no edge to snap to, was ${r.x}")
     }
+
+    // ── One guide at a time ─────────────────────────────────────────────────────
+
+    @Test
+    fun `a closer vertical guide replaces the one already found, rather than joining it`() {
+        // The source's left edge is inside the threshold of the canvas edge, and its right edge is
+        // closer still to a neighbour. Two lines would draw two guides at once and tell the operator
+        // the source had snapped to both, when it can only have snapped to one.
+        val neighbour = SceneSource.ImageSource(
+            id = "other", name = "other", filePath = "",
+            transform = SourceTransform(x = 0.2045f, y = 0.5f, width = 0.1f, height = 0.1f),
+        )
+
+        val r = snap(x = 0.004f, y = 0.4f, sources = listOf(neighbour))
+
+        val vertical = r.snapLines.filter { it.orientation == SnapOrientation.VERTICAL }
+        assertEquals(1, vertical.size, "one vertical guide, not one per candidate: $vertical")
+        assertTrue(approx(0.2045f, vertical.single().position), "the closer guide is the one kept")
+    }
+
+    @Test
+    fun `a closer horizontal guide replaces the one already found`() {
+        val neighbour = SceneSource.ImageSource(
+            id = "other", name = "other", filePath = "",
+            transform = SourceTransform(x = 0.5f, y = 0.2045f, width = 0.1f, height = 0.1f),
+        )
+
+        val r = snap(x = 0.4f, y = 0.004f, sources = listOf(neighbour))
+
+        val horizontal = r.snapLines.filter { it.orientation == SnapOrientation.HORIZONTAL }
+        assertEquals(1, horizontal.size, "one horizontal guide, not one per candidate: $horizontal")
+        assertTrue(approx(0.2045f, horizontal.single().position))
+    }
+
+    @Test
+    fun `snapping on both axes at once draws one guide on each`() {
+        val r = snap(x = 0.003f, y = 0.003f)
+
+        assertEquals(1, r.snapLines.count { it.orientation == SnapOrientation.VERTICAL })
+        assertEquals(1, r.snapLines.count { it.orientation == SnapOrientation.HORIZONTAL })
+    }
 }

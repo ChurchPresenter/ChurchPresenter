@@ -276,6 +276,7 @@ fun SceneCanvas(
             val hasArea = cw > 0 && ch > 0
             if (resizable && hasArea && activeTool == "select") {
                 ResizeHandles(
+                    sourceId = source.id,
                     transform = t,
                     canvasWidth = cw,
                     canvasHeight = ch,
@@ -284,6 +285,7 @@ fun SceneCanvas(
                     }
                 )
                 RotateHandle(
+                    sourceId = source.id,
                     transform = t,
                     canvasWidth = cw,
                     canvasHeight = ch,
@@ -512,6 +514,8 @@ internal fun resizeHandles(canvasWidth: Float, canvasHeight: Float): List<Resize
 
 @Composable
 private fun ResizeHandles(
+    /** Which source these handles belong to — the key their gestures are rebuilt on. */
+    sourceId: String,
     transform: SourceTransform,
     canvasWidth: Float,
     canvasHeight: Float,
@@ -520,6 +524,11 @@ private fun ResizeHandles(
     val handleSize = 8.dp
     val density = LocalDensity.current
     val currentTransform by rememberUpdatedState(transform)
+    // The callback too, not just the transform: it carries the id of the source it was built for,
+    // and a gesture that is not rebuilt goes on editing that one. [sourceId] keys the `pointerInput`
+    // below so it is rebuilt when the handles move to another source — the same keying the body drag
+    // already uses — and this covers the callback being replaced for the source that is still there.
+    val latestOnTransformChanged by rememberUpdatedState(onTransformChanged)
 
     val handles = resizeHandles(canvasWidth, canvasHeight)
 
@@ -549,13 +558,13 @@ private fun ResizeHandles(
                 .background(Color.White)
                 .border(1.dp, Color.Cyan)
                 .pointerHoverIcon(PointerIcon(Cursor(handle.cursor)))
-                .pointerInput(index) {
+                .pointerInput(sourceId, index) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
                         val scaledDrag = Offset(dragAmount.x, dragAmount.y)
                         val newTransform = handle.onDrag(currentTransform, scaledDrag)
                         val minSize = 0.01f
-                        onTransformChanged(
+                        latestOnTransformChanged(
                             newTransform.copy(
                                 width = newTransform.width.coerceAtLeast(minSize),
                                 height = newTransform.height.coerceAtLeast(minSize)
@@ -569,6 +578,8 @@ private fun ResizeHandles(
 
 @Composable
 private fun RotateHandle(
+    /** Which source this handle belongs to — the key its gesture is rebuilt on. */
+    sourceId: String,
     transform: SourceTransform,
     canvasWidth: Float,
     canvasHeight: Float,
@@ -578,6 +589,9 @@ private fun RotateHandle(
     val handleOffset = 25.dp
     val density = LocalDensity.current
     val currentTransform by rememberUpdatedState(transform)
+    // See [ResizeHandles]: keyed on [sourceId] below, plus this, so neither a handle moving to
+    // another source nor the callback being replaced can leave it turning the previous one.
+    val latestOnTransformChanged by rememberUpdatedState(onTransformChanged)
 
     val centerPx = Offset(
         (transform.x + transform.width / 2f) * canvasWidth,
@@ -598,6 +612,13 @@ private fun RotateHandle(
     val hxDp = with(density) { rotX.toInt().toDp() } - handleSize / 2
     val hyDp = with(density) { rotY.toInt().toDp() } - handleSize / 2
 
+    // Where the handle is drawn right now. It orbits the source as the rotation changes, and the
+    // drag maths is relative to it, so a value captured once would drift further from the pointer
+    // the further the source was turned.
+    val handleTopLeftPx by rememberUpdatedState(
+        with(density) { Offset(hxDp.toPx(), hyDp.toPx()) }
+    )
+
     var startAngle by remember { mutableStateOf(0f) }
     var startRotation by remember { mutableStateOf(0f) }
 
@@ -608,7 +629,7 @@ private fun RotateHandle(
             .background(Color.Cyan, CircleShape)
             .border(1.dp, Color.White, CircleShape)
             .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
-            .pointerInput(Unit) {
+            .pointerInput(sourceId) {
                 detectDragGestures(
                     onDragStart = { startOffset ->
                         val ct = currentTransform
@@ -634,15 +655,14 @@ private fun RotateHandle(
                         val cx = (ct.x + ct.width / 2f) * canvasWidth
                         val cy = (ct.y + ct.height / 2f) * canvasHeight
                         val handleSizePx = with(density) { handleSize.toPx() }
-                        val hxPx = with(density) { hxDp.toPx() }
-                        val hyPx = with(density) { hyDp.toPx() }
-                        val pointerX = hxPx + change.position.x + handleSizePx / 2f
-                        val pointerY = hyPx + change.position.y + handleSizePx / 2f
+                        val handleTopLeft = handleTopLeftPx
+                        val pointerX = handleTopLeft.x + change.position.x + handleSizePx / 2f
+                        val pointerY = handleTopLeft.y + change.position.y + handleSizePx / 2f
                         val currentAngle = Math.toDegrees(
                             atan2((pointerY - cy).toDouble(), (pointerX - cx).toDouble())
                         ).toFloat()
                         val delta = currentAngle - startAngle
-                        onTransformChanged(ct.copy(rotation = startRotation + delta))
+                        latestOnTransformChanged(ct.copy(rotation = startRotation + delta))
                     }
                 )
             }

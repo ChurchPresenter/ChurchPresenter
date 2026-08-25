@@ -156,6 +156,14 @@ fun CanvasTab(
     output: CanvasOutput,
     sceneViewModel: SceneViewModel,
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
+    /** How the image and video editors open a file dialog. The app passes its real chooser. */
+    fileChooser: CanvasFilePicker = CanvasFilePicker.None,
+    /**
+     * The editor for a Bible source, which stays in `:composeApp`: it reads the operator's Bible
+     * folder, loads a translation and drives a `BibleViewModel`, none of which this module can see.
+     * Left out, a Bible source has no verse picker at all.
+     */
+    bibleProperties: @Composable (SceneSource.BibleSource, (SceneSource) -> Unit) -> Unit = { _, _ -> },
     dialogDismissSignal: Int = 0,
 ) {
     val density = LocalDensity.current
@@ -953,6 +961,8 @@ fun CanvasTab(
                     source = selectedSource,
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
+                    fileChooser = fileChooser,
+                    bibleProperties = bibleProperties,
                     onSourceUpdate = { updatedSource ->
                         sceneViewModel.updateSource(updatedSource.id) { updatedSource }
                     }

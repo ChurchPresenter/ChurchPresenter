@@ -503,8 +503,14 @@ object SharedBrowserFrameCache {
 
     }
 
-    /** Screenshots the page at [fps] into the entry until the coroutine is cancelled. */
-    private suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
+    /**
+     * Screenshots the page at [fps] into the entry until the coroutine is cancelled.
+     *
+     * `internal` for the same reason as [captureFrame], which it is the loop around: the pacing, the
+     * clamp on a nonsense frame rate and the decision to keep going after a failed grab are all
+     * ordinary logic, and a browser that has stopped answering is the case that matters most.
+     */
+    internal suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
         entry.captureIntervalMs = (
             MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)
         ).coerceAtLeast(MIN_STARTUP_CAPTURE_INTERVAL_MS)
@@ -604,7 +610,14 @@ object SharedBrowserFrameCache {
         }
     }
 
-    private fun stopBrowser(entry: CacheEntry) {
+    /**
+     * Shuts one browser down and gives back everything it held.
+     *
+     * `internal` because every step here leaks something if it is skipped — a Chromium left running,
+     * a temp profile directory left on disk, a stale frame left on the output — and none of them is
+     * visible from the outside afterwards.
+     */
+    internal fun stopBrowser(entry: CacheEntry) {
         entry.captureJob?.cancel()
         entry.captureJob = null
 
