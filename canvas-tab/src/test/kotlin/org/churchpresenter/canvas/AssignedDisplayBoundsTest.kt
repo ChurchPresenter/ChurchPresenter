@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.canvas
 
 import io.mockk.every
 import io.mockk.mockk

@@ -89,7 +89,15 @@ object SharedCameraFrameCache {
      * First subscriber starts the capture; subsequent subscribers share it.
      */
     @Synchronized
-    fun acquire(source: SceneSource.CameraSource): CameraFlows {
+    /**
+     * Start (or join) capture for [source], pulling DeckLink frames through [deckLink].
+     *
+     * The device is a parameter rather than a property on this object: it is a singleton, and a
+     * mutable field on a singleton is the seam the root `AGENT.md` bans — it leaks between tests and
+     * nothing restores it. Passing it in also means the caller decides, which is what lets a test
+     * hand over `CanvasDeckLink.None` and get the ffmpeg path deterministically.
+     */
+    fun acquire(source: SceneSource.CameraSource, deckLink: CanvasDeckLink = CanvasDeckLink.None): CameraFlows {
         val key = keyFor(source)
         val entry = entries.getOrPut(key) { CacheEntry() }
         entry.refCount++
@@ -98,8 +106,8 @@ object SharedCameraFrameCache {
             // First subscriber — start capture
             entry.captureJob = scope.launch {
                 try {
-                    if (source.isDeckLink && source.deckLinkIndex >= 0 && DeckLinkManager.isAvailable()) {
-                        runDeckLinkCapture(source, entry)
+                    if (source.isDeckLink && source.deckLinkIndex >= 0 && deckLink.isAvailable()) {
+                        runDeckLinkCapture(source, entry, deckLink)
                     } else {
                         runFfmpegCapture(source, entry)
                     }
@@ -118,7 +126,7 @@ object SharedCameraFrameCache {
      * capture is stopped and resources are cleaned up.
      */
     @Synchronized
-    fun release(source: SceneSource.CameraSource) {
+    fun release(source: SceneSource.CameraSource, deckLink: CanvasDeckLink = CanvasDeckLink.None) {
         val key = keyFor(source)
         val entry = entries[key] ?: return
         entry.refCount--
@@ -131,12 +139,12 @@ object SharedCameraFrameCache {
             // Only close the device if no other cache entry is using the same device.
             // When switching connections, the new acquire's openInput() already closed
             // the old input — calling closeInput here would kill the new one.
-            if (source.isDeckLink && source.deckLinkIndex >= 0 && DeckLinkManager.isAvailable()) {
+            if (source.isDeckLink && source.deckLinkIndex >= 0 && deckLink.isAvailable()) {
                 val deviceStillActive = entries.keys.any {
                     it.startsWith("decklink:${source.deckLinkIndex}:")
                 }
                 if (!deviceStillActive) {
-                    DeckLinkManager.closeInput(source.deckLinkIndex)
+                    deckLink.closeInput(source.deckLinkIndex)
                 }
             }
 
@@ -173,12 +181,16 @@ object SharedCameraFrameCache {
         return true
     }
 
-    private suspend fun runDeckLinkCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
+    private suspend fun runDeckLinkCapture(
+        source: SceneSource.CameraSource,
+        entry: CacheEntry,
+        deckLink: CanvasDeckLink,
+    ) {
         System.err.println("[DeckLink Input] Opening device ${source.deckLinkIndex}, " +
             "format: ${source.videoFormat.ifEmpty { "auto" }}, connection: ${source.videoConnection}")
 
         val opened = withContext(Dispatchers.IO) {
-            DeckLinkManager.openInput(source.deckLinkIndex, source.videoFormat, source.videoConnection)
+            deckLink.openInput(source.deckLinkIndex, source.videoFormat, source.videoConnection)
         }
         if (!opened) {
             System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
@@ -197,7 +209,7 @@ object SharedCameraFrameCache {
 
         while (currentCoroutineContext().isActive) {
             val frameData = withContext(Dispatchers.IO) {
-                DeckLinkManager.getInputFrame(source.deckLinkIndex)
+                deckLink.getInputFrame(source.deckLinkIndex)
             }
 
             if (showDeckLinkFrame(frameData, entry, first = frameCount == 0)) {

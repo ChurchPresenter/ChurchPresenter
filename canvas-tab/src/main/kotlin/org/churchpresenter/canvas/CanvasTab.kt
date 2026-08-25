@@ -99,12 +99,9 @@ import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.shortcuts.ShortcutAction
 import org.churchpresenter.shortcuts.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
 import org.churchpresenter.ui.formatAspectRatio
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
@@ -156,7 +153,7 @@ fun CanvasTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    presenterManager: PresenterManager,
+    output: CanvasOutput,
     sceneViewModel: SceneViewModel,
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     dialogDismissSignal: Int = 0,
@@ -832,11 +829,7 @@ fun CanvasTab(
 
                         // Go Live
                         GoLiveButton(
-                            onClick = {
-                                presenterManager.setActiveScene(currentScene)
-                                presenterManager.setPresentingMode(Presenting.CANVAS)
-                                presenterManager.setShowPresenterWindow(true)
-                            },
+                            onClick = { output.goLive(currentScene) },
                             tooltipText = stringResource(Res.string.go_live)
                         )
                     }

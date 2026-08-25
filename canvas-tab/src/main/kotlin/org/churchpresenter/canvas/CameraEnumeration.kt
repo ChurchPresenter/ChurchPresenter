@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -32,12 +32,12 @@ internal fun cameraSourceOn(
 )
 
 internal fun selectedConnectionName(
-    connections: List<DeckLinkManager.VideoConnection>,
+    connections: List<CanvasDeckLink.VideoConnection>,
     videoConnection: Int
 ): String = connections.find { it.value == videoConnection }?.name ?: connections.first().name
 
 internal fun selectedModeName(
-    modes: List<DeckLinkManager.InputMode>,
+    modes: List<CanvasDeckLink.InputMode>,
     videoFormat: String,
     autoLabel: String
 ): String =

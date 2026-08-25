@@ -19,28 +19,3 @@ import java.awt.Rectangle
  */
 
 
-/**
- * Which of [screens] an assignment resolves to, most specific first: the screen whose top-left
- * corner matches the stored bounds, else the stored index, else any screen that is not [primary],
- * else [primary] itself.
- *
- * Stored bounds win over the index because a display's index shifts when another is plugged in or
- * removed, while its position on the desktop usually does not.
- */
-internal fun assignedBoundsOf(
-    screens: Array<GraphicsDevice>,
-    primary: GraphicsDevice,
-    assignment: ScreenAssignment,
-): Rectangle {
-    val matched = if (assignment.targetBoundsX != Int.MIN_VALUE) {
-        screens.firstOrNull { device ->
-            val bounds = device.defaultConfiguration.bounds
-            bounds.x == assignment.targetBoundsX && bounds.y == assignment.targetBoundsY
-        }
-    } else null
-    val device = matched
-        ?: screens.getOrNull(assignment.targetDisplay)
-        ?: screens.firstOrNull { it != primary }
-        ?: primary
-    return device.defaultConfiguration.bounds
-}

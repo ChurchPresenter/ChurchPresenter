@@ -1,10 +1,9 @@
 package org.churchpresenter.canvas
 
-import androidx.compose.runtime.Composable
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.ui.HEADLESS_PRESENTER_BOUNDS
-import org.churchpresenter.ui.assignedBoundsOf
 import org.churchpresenter.ui.safeScreenDevices
+import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
 import java.awt.Rectangle
@@ -24,4 +23,30 @@ fun assignedDisplayBounds(assignment: ScreenAssignment): Rectangle {
     } catch (_: HeadlessException) {
         HEADLESS_PRESENTER_BOUNDS
     }
+}
+
+/**
+ * Which of [screens] an assignment resolves to, most specific first: the screen whose top-left
+ * corner matches the stored bounds, else the stored index, else any screen that is not [primary],
+ * else [primary] itself.
+ *
+ * Stored bounds win over the index because a display's index shifts when another is plugged in or
+ * removed, while its position on the desktop usually does not.
+ */
+internal fun assignedBoundsOf(
+    screens: Array<GraphicsDevice>,
+    primary: GraphicsDevice,
+    assignment: ScreenAssignment,
+): Rectangle {
+    val matched = if (assignment.targetBoundsX != Int.MIN_VALUE) {
+        screens.firstOrNull { device ->
+            val bounds = device.defaultConfiguration.bounds
+            bounds.x == assignment.targetBoundsX && bounds.y == assignment.targetBoundsY
+        }
+    } else null
+    val device = matched
+        ?: screens.getOrNull(assignment.targetDisplay)
+        ?: screens.firstOrNull { it != primary }
+        ?: primary
+    return device.defaultConfiguration.bounds
 }

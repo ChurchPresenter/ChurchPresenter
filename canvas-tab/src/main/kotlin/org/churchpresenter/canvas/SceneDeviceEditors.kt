@@ -90,7 +90,7 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
 
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
 
-            if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
+            if (deckLink.isOutputActive(source.deckLinkIndex)) {
                 Text(
                     text = stringResource(Res.string.canvas_decklink_io_warning),
                     color = MaterialTheme.colorScheme.error,
@@ -99,13 +99,13 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
                 )
             }
 
-            var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
-            var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
+            var connections by remember { mutableStateOf<List<CanvasDeckLink.VideoConnection>>(emptyList()) }
+            var modes by remember { mutableStateOf<List<CanvasDeckLink.InputMode>>(emptyList()) }
 
             LaunchedEffect(source.deckLinkIndex) {
                 withContext(Dispatchers.IO) {
-                    connections = DeckLinkManager.listVideoConnections(source.deckLinkIndex)
-                    modes = DeckLinkManager.listInputModes(source.deckLinkIndex)
+                    connections = deckLink.listVideoConnections(source.deckLinkIndex)
+                    modes = deckLink.listInputModes(source.deckLinkIndex)
                 }
             }
 

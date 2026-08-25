@@ -696,11 +696,11 @@ private fun CameraSourceContent(
 
     // Use shared cache so canvas preview and presenter output share one capture process
     val cameraFlows = remember(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
-        SharedCameraFrameCache.acquire(source)
+        SharedCameraFrameCache.acquire(source, deckLink)
     }
     DisposableEffect(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
         onDispose {
-            SharedCameraFrameCache.release(source)
+            SharedCameraFrameCache.release(source, deckLink)
         }
     }
 
