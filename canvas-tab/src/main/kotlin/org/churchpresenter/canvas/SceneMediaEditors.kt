@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,7 +74,6 @@ import org.churchpresenter.resources.generated.resources.canvas_video_volume
 import org.churchpresenter.resources.generated.resources.canvas_transparent_bg
 import org.churchpresenter.resources.generated.resources.ic_folder
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.ui.rememberSystemFonts
 import androidx.compose.ui.window.DialogWindow
@@ -104,7 +103,7 @@ private const val MAX_FPS = 60
  */
 
 @Composable
-internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSource) -> Unit, fileChooser: FileChooser) {
+internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSource) -> Unit, fileChooser: CanvasFilePicker) {
     val scope = rememberCoroutineScope()
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectImage = stringResource(Res.string.canvas_select_image_title)
@@ -137,7 +136,6 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
                         path = startPath,
                         filters = listOf(imageFilter),
                         title = strSelectImage,
-                        selectDirectory = false
                     )
                     if (file != null) {
                         onUpdate(source.copy(filePath = file.absolutePathString()))
@@ -338,7 +336,7 @@ internal fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSo
 }
 
 @Composable
-internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSource) -> Unit, fileChooser: FileChooser) {
+internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSource) -> Unit, fileChooser: CanvasFilePicker) {
     val scope = rememberCoroutineScope()
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectVideo = stringResource(Res.string.canvas_select_video_title)
@@ -367,7 +365,6 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
                         path = startPath,
                         filters = listOf(videoFilter),
                         title = strSelectVideo,
-                        selectDirectory = false
                     )
                     if (file != null) {
                         onUpdate(source.copy(filePath = file.absolutePathString()))

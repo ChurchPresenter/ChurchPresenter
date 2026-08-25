@@ -51,7 +51,7 @@ import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections

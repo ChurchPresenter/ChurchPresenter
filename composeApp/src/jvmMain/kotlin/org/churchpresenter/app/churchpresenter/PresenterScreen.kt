@@ -17,7 +17,7 @@ import org.churchpresenter.ui.keySignal
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import org.churchpresenter.ui.Utils.parseHexColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File

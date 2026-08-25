@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,6 @@ import org.churchpresenter.resources.generated.resources.canvas_transform_x
 import org.churchpresenter.resources.generated.resources.canvas_transform_y
 import org.churchpresenter.resources.generated.resources.canvas_transform_w
 import org.churchpresenter.resources.generated.resources.canvas_transform_h
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 
@@ -39,7 +38,7 @@ fun SourcePropertiesPanel(
     source: SceneSource,
     modifier: Modifier = Modifier,
     appSettings: AppSettings? = null,
-    fileChooser: FileChooser = FileChooser.platformInstance,
+    fileChooser: CanvasFilePicker = CanvasFilePicker.None,
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(

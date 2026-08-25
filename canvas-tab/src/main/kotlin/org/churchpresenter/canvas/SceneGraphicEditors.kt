@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import org.churchpresenter.ui.ColorPickerField
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.resources.generated.resources.Res

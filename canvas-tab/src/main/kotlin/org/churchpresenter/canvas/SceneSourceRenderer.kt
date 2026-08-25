@@ -1,9 +1,9 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -47,8 +47,6 @@ import org.churchpresenter.resources.generated.resources.canvas_video_loading
 import org.churchpresenter.resources.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.ui.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
-import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -85,7 +83,6 @@ import kotlin.math.sin
 import org.jetbrains.skia.Image as SkiaImage
 import java.io.File
 import androidx.compose.foundation.Canvas
-import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin

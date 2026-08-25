@@ -4,10 +4,8 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
-    `java-test-fixtures`
     jacoco
 }
 
@@ -22,32 +20,29 @@ compose.resources {
 }
 
 dependencies {
-    implementation(projects.theme)
+    api(projects.settings)
+    // SceneSource and the rest of the scene model the tab edits.
+    api(projects.coreModels)
     api(projects.resources)
-    // HeicDecoder reports a decode it could not do; nothing else here needs it.
+    implementation(projects.uiComponents)
+    implementation(projects.theme)
     implementation(projects.diagnostics)
+    // LocalShortcuts: the canvas has its own scoped bindings.
+    implementation(projects.shortcuts)
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(libs.compose.material3)
-    // QR codes — the Q&A join code, the presentation remote's code and the canvas QR source all
-    // draw one, so the encoder lives beside the other widgets rather than in any one of them.
-    implementation(libs.zxing.core)
     implementation(libs.compose.material.icons.extended)
-    implementation(libs.kotlinx.serialization.json)
+    // A video source is played straight into a pixel buffer by SceneSourceRenderer, so the tab
+    // needs VLC itself rather than the app's VideoPlayer composable.
+    implementation("uk.co.caprica:vlcj:4.8.3")
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.javase)
     testImplementation(kotlin("test"))
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
-    testImplementation(projects.settings)
-    // GraphicsDevice is abstract and the test JVM is headless, so the screen topology the geometry
-    // helpers choose from has to be faked. One of the few places a mock is the only way in.
-    testImplementation(libs.mockk)
-    testImplementation(testFixtures(project(":ui-components")))
-    testFixturesImplementation(kotlin("test"))
-    testFixturesImplementation(projects.theme)
-    testFixturesImplementation(compose.desktop.currentOs)
-    testFixturesImplementation(compose.desktop.uiTestJUnit4)
-    testFixturesImplementation(libs.compose.material3)
-    testFixturesImplementation(libs.roborazzi.composeDesktop)
+    testImplementation(testFixtures(projects.uiComponents))
+    testImplementation(testFixtures(projects.coreModels))
 }
 
 tasks.withType<Test>().configureEach {

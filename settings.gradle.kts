@@ -112,6 +112,10 @@ include(":ui-components")
 // them still in :composeApp, and each one that moves out would otherwise have to reach back in.
 // Not part of :ui-components, which is deliberately kept free of a production :settings dependency.
 include(":shortcuts")
+// The Canvas tab: the scene compositor — layered images, text, video, shapes, cameras, screen
+// capture, web pages and clocks — its editors, the renderer that draws a source, and the presenter
+// that puts a scene on the screen. It reaches the outputs through its own CanvasOutput port.
+include(":canvas-tab")
 // The Dictionary tab, whole: the Strong's browser and its "In Scripture" panel, the view model
 // behind them, the settings tab that styles the output, and the presenter that draws it. The data
 // it reads is :dictionary; this is everything the operator and the audience see of it.

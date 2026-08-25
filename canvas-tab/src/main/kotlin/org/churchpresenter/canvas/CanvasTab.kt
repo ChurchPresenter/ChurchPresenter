@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
@@ -96,8 +96,6 @@ import org.churchpresenter.resources.generated.resources.canvas_source_video
 import org.churchpresenter.resources.generated.resources.canvas_sources
 import org.churchpresenter.resources.generated.resources.go_live
 import org.churchpresenter.ui.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
-import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.shortcuts.ShortcutAction
 import org.churchpresenter.shortcuts.LocalShortcuts
@@ -107,7 +105,6 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID

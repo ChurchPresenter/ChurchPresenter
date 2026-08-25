@@ -17,7 +17,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.CrashReporter

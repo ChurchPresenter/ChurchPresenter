@@ -29,7 +29,7 @@ import org.jetbrains.skia.Image
 import java.io.File
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import org.churchpresenter.diagnostics.CrashReporter
 
 /** The white key-output's alpha for [PicturePresenter]/[SlidePresenter] — a slide's own translation

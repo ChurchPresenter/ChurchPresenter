@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.canvas
 
 import androidx.compose.runtime.mutableStateMapOf
 

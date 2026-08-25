@@ -1,9 +1,8 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.core.models.scene.Scene
 
 @Composable

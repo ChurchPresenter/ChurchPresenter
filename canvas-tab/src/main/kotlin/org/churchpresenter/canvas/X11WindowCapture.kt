@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.canvas
 
 import com.sun.jna.Library
 import com.sun.jna.Native

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.ui
 
 import java.io.ByteArrayOutputStream
 import java.io.File

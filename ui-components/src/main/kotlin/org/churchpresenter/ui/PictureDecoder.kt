@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.ui
 
 import org.jetbrains.skia.Image
 import java.awt.image.BufferedImage

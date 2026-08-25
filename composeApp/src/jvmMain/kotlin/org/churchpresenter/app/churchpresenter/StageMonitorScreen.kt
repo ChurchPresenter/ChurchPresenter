@@ -74,7 +74,7 @@ import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.ui.Utils.parseHexColor
 import org.churchpresenter.ui.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.ui.PictureDecoder
 import org.churchpresenter.resources.generated.resources.song_key
 import org.churchpresenter.resources.generated.resources.song_capo
 import org.churchpresenter.resources.generated.resources.song_play
