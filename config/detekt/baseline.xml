@@ -95,7 +95,6 @@
     <ID>LongMethod:SystemSettingsTab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun DirectoryPicker( label: String, currentPath: String, noDirectoryText: String, browseText: String, setAllText: String, fileManager: FileManager, onDirectorySelected: (String) -&gt; Unit, onSetAll: (String) -&gt; Unit )</ID>
     <ID>LongMethod:UpdateAvailableDialog.kt$@Composable internal fun UpdateAvailableContent( result: UpdateCheckResult, isManualCheck: Boolean, participateInPrereleases: Boolean, onParticipateInPrereleasesChange: (Boolean) -&gt; Unit, updateCheckInterval: UpdateCheckInterval, onUpdateCheckIntervalChange: (UpdateCheckInterval) -&gt; Unit, downloadState: DownloadState, onDownload: () -&gt; Unit, onInstall: (File) -&gt; Unit, onOpenReleasePage: (String) -&gt; Unit, onDismiss: () -&gt; Unit )</ID>
     <ID>LongMethod:VideoPlayer.kt$@Composable fun SoftwareVideoPlayer( viewModel: MediaViewModel, modifier: Modifier = Modifier, audioEnabled: Boolean = true, audioDeviceId: String = "" )</ID>
-    <ID>LongMethod:WebTab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun WebTab( modifier: Modifier = Modifier, presenterManager: PresenterManager? = null, selectedWebsiteItem: ScheduleItem.WebsiteItem? = null, /** * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second * click does nothing. */ selectedWebsiteItemVersion: Int = 0, appSettings: AppSettings = AppSettings(), onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit = {}, onAddToSchedule: ((url: String, title: String) -&gt; Unit)? = null, onUpdateScheduleTitle: ((url: String, title: String) -&gt; Unit)? = null, /** Overridable so tests can reach both branches without touching the real JCEF singleton. */ cefInitialized: Boolean = CefManager.initialized, cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported, cefWindowsUnsupported: Boolean = CefManager.windowsUnsupported )</ID>
     <ID>LongMethod:ZefaniaSource.kt$ZefaniaSource$internal suspend fun installZefania( module: BibleModule, targetDir: File, http: HttpClient, retryFloorMs: Long = BibleInstallSupport.DEFAULT_DOWNLOAD_RETRY_FLOOR_MS, onProgress: (InstallProgress) -&gt; Unit, ): BibleInstallOutcome</ID>
     <ID>MaxLineLength:AboutDialog.kt$Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))</ID>
     <ID>MaxLineLength:AboutDialog.kt$Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))</ID>
@@ -1106,13 +1105,6 @@
     <ID>MaxLineLength:VideoPlayer.kt$&lt;no name provided&gt;$override</ID>
     <ID>MaxLineLength:VideoPlayer.kt$JfxInit$Thread.currentThread().uncaughtExceptionHandler</ID>
     <ID>MaxLineLength:VideoPlayer.kt$val</ID>
-    <ID>MaxLineLength:WebTab.kt$Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:WebTab.kt$containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant</ID>
-    <ID>MaxLineLength:WebTab.kt$contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant</ID>
-    <ID>MaxLineLength:WebTab.kt$text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode)</ID>
-    <ID>MaxLineLength:WebTab.kt$tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add)</ID>
-    <ID>MaxLineLength:WebTab.kt$val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)</ID>
-    <ID>MaxLineLength:WebsitePresenter.kt$&lt;no name provided&gt;.&lt;no name provided&gt;$override</ID>
     <ID>MaxLineLength:XdgFileChooser.kt$XdgFileChooser$openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)</ID>
     <ID>MaxLineLength:ZefaniaRepositoryIndex.kt$ZefaniaRepositoryIndex$.</ID>
     <ID>TooGenericExceptionCaught:AtemBridge.kt$AtemBridge$e: Exception</ID>
@@ -1165,7 +1157,6 @@
     <ID>TooGenericExceptionCaught:VideoPlayer.kt$e: Throwable</ID>
     <ID>TooGenericExceptionCaught:VideoPlayer.kt$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:WebSocketRoute.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:WebsitePresenter.kt$CefManager$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:ZefaniaRepositoryIndex.kt$ZefaniaRepositoryIndex$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ZefaniaSource.kt$ZefaniaSource$e: Exception</ID>
     <ID>TooGenericExceptionCaught:main.kt$e: Exception</ID>

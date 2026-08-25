@@ -129,13 +129,16 @@
 - **QR codes made easy** — generate QR codes for URLs, WiFi, contact cards, email, SMS and more, right on the slide.
 
 **Source locations:**
-- `tabs/WebTab.kt` — web browser UI
+- `web-tab/` (the `:web-tab` Gradle module) — the tab itself: `WebTab.kt` and
+  `WebsitePresenter.kt` (which also holds `CefManager`, `EmbeddedWebView` and
+  `WebNavController`), plus the `WebOutput` port it drives the screens through
+- `viewmodel/PresenterWebOutput.kt` — the app's implementation of that port
 - `tabs/CanvasTab.kt` — scene compositor UI
 - `viewmodel/SceneViewModel.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module)
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
-- `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
+- `presenter/ScenePresenter.kt`
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation

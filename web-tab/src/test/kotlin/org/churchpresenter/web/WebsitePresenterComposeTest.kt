@@ -1,6 +1,8 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web
+
+import org.churchpresenter.ui.assertColorAt
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

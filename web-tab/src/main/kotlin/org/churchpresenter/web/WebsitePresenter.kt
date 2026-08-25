@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -418,7 +418,11 @@ fun EmbeddedWebView(
                 disableDefaultHandling: BoolRef?
             ): CefResourceRequestHandler {
                 return object : CefResourceRequestHandlerAdapter() {
-                    override fun onBeforeResourceLoad(browser: CefBrowser?, frame: CefFrame?, request: CefRequest?): Boolean {
+                    override fun onBeforeResourceLoad(
+                        browser: CefBrowser?,
+                        frame: CefFrame?,
+                        request: CefRequest?,
+                    ): Boolean {
                         applyMobileUserAgent(navController?.mobileMode == true, request)
                         return false
                     }

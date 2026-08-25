@@ -126,6 +126,11 @@ include(":lower-third-tab")
 // :dictionary-tab — but unlike that pair it does depend on the tab module, because the preview is
 // the same compottie render with the same bundled fonts.
 include(":lower-third-settings-tab")
+// The Web tab: the embedded Chromium browser, its bookmarks and navigation, and the presenter that
+// puts a live page on the screen. It reaches the outputs through its own WebOutput port, so
+// PresenterManager stays in the app; its CefManager is what main.kt initialises JCEF through and
+// what the diagnostics report reads its availability from.
+include(":web-tab")
 // The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
 // timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
 // touching PresenterManager, so it knows nothing about the rest of the app.

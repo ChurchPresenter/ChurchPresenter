@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.input.key.Key
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -60,8 +59,8 @@ class WebTabMirrorPreviewTest {
     }
 
     @Test
-    fun `going live with no snapshot yet shows the waiting spinner`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
+    fun `going live with no snapshot yet shows the waiting spinner`() = webTab { output, _ ->
+        goLive { output.live = true }
 
         onNode(spinner).assertExists()
         // The hint is deliberately not up yet — it only earns the operator's attention once the wait
@@ -70,8 +69,8 @@ class WebTabMirrorPreviewTest {
     }
 
     @Test
-    fun `the hint appears only once the wait has gone on long enough`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
+    fun `the hint appears only once the wait has gone on long enough`() = webTab { output, _ ->
+        goLive { output.live = true }
 
         // Virtual time: the production delay is 7s, which the test clock advances instantly. Nothing
         // here waits on a real clock.
@@ -83,11 +82,11 @@ class WebTabMirrorPreviewTest {
     }
 
     @Test
-    fun `a snapshot replaces the placeholder with the mirrored image`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
+    fun `a snapshot replaces the placeholder with the mirrored image`() = webTab { output, _ ->
+        goLive { output.live = true }
         onNode(spinner).assertExists()
 
-        presenter.setWebSnapshot(ImageBitmap(8, 8))
+        output.setSnapshot(ImageBitmap(8, 8))
         waitForIdle()
 
         // The image itself carries no contentDescription, so it contributes no semantics node to
@@ -98,13 +97,13 @@ class WebTabMirrorPreviewTest {
     }
 
     @Test
-    fun `clearing the snapshot puts the operator back on the placeholder`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
-        presenter.setWebSnapshot(ImageBitmap(8, 8))
+    fun `clearing the snapshot puts the operator back on the placeholder`() = webTab { output, _ ->
+        goLive { output.live = true }
+        output.setSnapshot(ImageBitmap(8, 8))
         waitForIdle()
         onNode(spinner).assertDoesNotExist()
 
-        presenter.setWebSnapshot(null)
+        output.setSnapshot(null)
         waitForIdle()
 
         // A snapshot stream that dies mid-service has to show the wait state again rather than leave
@@ -113,9 +112,9 @@ class WebTabMirrorPreviewTest {
     }
 
     @Test
-    fun `input over the mirrored image is inert with no browser attached`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
-        presenter.setWebSnapshot(ImageBitmap(8, 8))
+    fun `input over the mirrored image is inert with no browser attached`() = webTab { output, _ ->
+        goLive { output.live = true }
+        output.setSnapshot(ImageBitmap(8, 8))
         waitForIdle()
 
         // Each forwarding path guards on liveBrowser being null before it reflects anything. Driving
@@ -129,14 +128,14 @@ class WebTabMirrorPreviewTest {
         onRoot().performKeyInput { pressKey(Key.A) }
         waitForIdle()
 
-        assertEquals(null, presenter.liveBrowser.value, "no browser was ever attached")
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value, "and nothing was torn down")
+        assertEquals(null, output.liveBrowser, "no browser was ever attached")
+        assertTrue(output.isLive, "and nothing was torn down")
         onNode(spinner).assertDoesNotExist()
     }
 
     @Test
-    fun `switching to interactive mode drops the mirror entirely`() = webTab { presenter, _ ->
-        goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
+    fun `switching to interactive mode drops the mirror entirely`() = webTab { output, _ ->
+        goLive { output.live = true }
         onNode(spinner).assertExists()
 
         onNodeWithText(WebLabel.MIRROR).performClick()

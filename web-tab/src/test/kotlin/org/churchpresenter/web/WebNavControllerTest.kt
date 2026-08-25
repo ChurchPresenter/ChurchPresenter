@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web
 
 import io.mockk.every
 import io.mockk.mockk

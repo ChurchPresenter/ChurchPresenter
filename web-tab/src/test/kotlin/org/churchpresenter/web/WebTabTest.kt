@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -9,7 +9,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -148,12 +147,12 @@ class WebTabTest {
     @Test
     fun `selecting a website schedule item loads it and goes live`() {
         val item = ScheduleItem.WebsiteItem(id = "w1", url = "https://scheduled.example", title = "Scheduled Page")
-        webTab(selectedWebsiteItem = item) { presenter, _ ->
+        webTab(selectedWebsiteItem = item) { output, _ ->
             waitForIdle()
 
             onNodeWithText("https://scheduled.example").assertExists()
-            assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
-            assertEquals("https://scheduled.example", presenter.websiteUrl.value)
+            assertTrue(output.isLive)
+            assertEquals("https://scheduled.example", output.url)
         }
     }
 }

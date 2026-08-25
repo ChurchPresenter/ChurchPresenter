@@ -1,16 +1,14 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PixelMap
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.presentationengine.model.LayerState
 import org.churchpresenter.presentationengine.model.RectPt
-import kotlin.math.abs
-import kotlin.test.assertTrue
 
 internal fun solidColorBitmap(width: Int, height: Int, color: Color): ImageBitmap =
     ImageBitmap(width, height).also { bitmap ->
@@ -36,16 +34,6 @@ internal fun placedLayer(
     offsetYPx = offsetYPx,
     state = state,
 )
-
-internal fun assertColorAt(pixelMap: PixelMap, x: Int, y: Int, expected: Color, tolerance: Float = 0.02f) {
-    val actual = pixelMap[x, y]
-    assertTrue(
-        abs(actual.red - expected.red) < tolerance &&
-            abs(actual.green - expected.green) < tolerance &&
-            abs(actual.blue - expected.blue) < tolerance,
-        "expected $expected at ($x, $y) but was $actual",
-    )
-}
 
 internal fun presentationFrame(
     layers: List<PlacedLayer>,

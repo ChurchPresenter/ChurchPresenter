@@ -235,6 +235,15 @@ jobs:
               - 'ui-components/**'        # implementation(projects.uiComponents)
               - 'theme/**'                # testImplementation(projects.theme)
               - 'resources/**'            # api(projects.resources)
+            webtab:
+              - *shared
+              - 'web-tab/**'
+              - 'settings/**'           # api(projects.settings)
+              - 'core-models/**'        # api(projects.coreModels) — ScheduleItem.WebsiteItem
+              - 'resources/**'          # api(projects.resources)
+              - 'ui-components/**'      # implementation(projects.uiComponents)
+              - 'theme/**'              # implementation(projects.theme)
+              - 'diagnostics/**'        # implementation(projects.diagnostics)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -272,7 +281,7 @@ jobs:
           :statistics:detekt
           :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
           :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt
-          :lower-third-settings-tab:detekt
+          :lower-third-settings-tab:detekt :web-tab:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -490,6 +499,14 @@ jobs:
         if: always() && steps.modules.outputs.lowerthirdsettingstab == 'true'
         run: ./gradlew :lower-third-settings-tab:jacocoTestCoverageVerification -x test
 
+      - name: Web tab tests
+        if: always() && steps.modules.outputs.webtab == 'true'
+        run: ./gradlew :web-tab:test
+
+      - name: Web tab coverage floor
+        if: always() && steps.modules.outputs.webtab == 'true'
+        run: ./gradlew :web-tab:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -647,6 +664,7 @@ jobs:
             qa-tab/build/test-results/**/TEST-*.xml
             lower-third-tab/build/test-results/**/TEST-*.xml
             lower-third-settings-tab/build/test-results/**/TEST-*.xml
+            web-tab/build/test-results/**/TEST-*.xml
             companion-server/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -679,6 +697,7 @@ jobs:
             Q and A tab
             Lower Third tab
             Lower Third settings tab
+            Web tab
             Companion Server
           detailed_summary: true
           include_passed: false
@@ -846,5 +865,7 @@ jobs:
             lower-third-tab/build/test-results/
             lower-third-settings-tab/build/reports/tests/
             lower-third-settings-tab/build/test-results/
+            web-tab/build/reports/tests/
+            web-tab/build/test-results/
             companion-server/build/reports/tests/
             companion-server/build/test-results/

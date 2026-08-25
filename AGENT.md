@@ -38,7 +38,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 | Package          | Owns                                                                |
 |------------------|---------------------------------------------------------------------|
-| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements, Q&A and Lower Third have moved out, to `:dictionary-tab`, `:announcements-tab`, `:qa-tab` and `:lower-third-tab` |
+| `tabs/`          | UI only — one file per tab, no logic. Dictionary, Announcements, Q&A, Lower Third and Web have moved out, to `:dictionary-tab`, `:announcements-tab`, `:qa-tab`, `:lower-third-tab` and `:web-tab` |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
@@ -91,6 +91,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
 | `lower-third-settings-tab/` | `:lower-third-settings-tab` | The options-dialog page that picks a Lottie preset and places the band        | [AGENT.md](lower-third-settings-tab/AGENT.md) |
+| `web-tab/`             | `:web-tab`             | The Web tab — the embedded Chromium, its bookmarks and the website presenter        | [AGENT.md](web-tab/AGENT.md)             |
 | `announcements-tab/`   | `:announcements-tab`   | The Announcements tab — its notices, its four timers, its view model and presenter | [AGENT.md](announcements-tab/AGENT.md)   |
 | `qa-tab/`              | `:qa-tab`              | The Audience Q&A tab — the moderation queue, the join QR, its dialog and presenter | [AGENT.md](qa-tab/AGENT.md)              |
 | `lower-third-tab/`     | `:lower-third-tab`     | The Lower Third tab — its presets, its Lottie rendering and the ATEM upload        | [AGENT.md](lower-third-tab/AGENT.md)     |
@@ -126,7 +127,8 @@ they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
+  each; `:web-tab` names all six (it embeds Chromium — see its own `AGENT.md`);
+  `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
   `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
@@ -257,7 +259,8 @@ widening the threshold, along with `colour_picker`, `settings_companion_satellit
 macOS. Another 61 live in `ui-components/screenshots`, 21 in `dictionary-tab/screenshots`, 12 in
 `dictionary-settings-tab/screenshots`, 49 in `announcements-tab/screenshots`, 34 in
 `qa-tab/screenshots`, 24 in `lower-third-tab/screenshots` and 7 in
-`lower-third-settings-tab/screenshots`, each verified by its own module's task. It is therefore readable as pass/fail
+`lower-third-settings-tab/screenshots` and 20 in `web-tab/screenshots`, each verified by its own
+module's task. It is therefore readable as pass/fail
 again, and **any** failure is a real difference.
 
 **A presenter that moves into a module takes its screenshots with it.** `PresenterFullScreenScreenshotTest`

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -97,14 +97,8 @@ import org.churchpresenter.resources.generated.resources.web_snapshot_screen_rec
 import org.churchpresenter.resources.generated.resources.web_snapshot_waiting
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.WebBookmark
-import org.churchpresenter.app.churchpresenter.presenter.CefManager
-import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.ui.rememberScreenDevices
-import org.churchpresenter.app.churchpresenter.presenter.WebNavController
-import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.ui.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.ui.ActionIconButton
 import org.churchpresenter.ui.AddToScheduleButton
@@ -125,23 +119,29 @@ private const val ZOOM_FACTOR = 1.2
 private const val PERCENT_SCALE = 100
 private const val FIRST_PRINTABLE_CHAR = 0x20
 
+/**
+ * The Web tab: the embedded browser the operator drives, its bookmarks and navigation, and the
+ * controls that put a live page on the screen.
+ *
+ * @param output what the screens are showing, and how to reach them. Null in previews and the setup
+ *   wizard, where the whole toolbar still has to work with nothing behind it.
+ * @param selectedWebsiteItemVersion bumped by the caller on every schedule click, so clicking the
+ *   *same* item twice re-runs the effect below. Keyed on the item alone, an unchanged item is an
+ *   unchanged key and the second click does nothing.
+ * @param cefInitialized overridable, with [cefMacOsUnsupported] and [cefWindowsUnsupported], so
+ *   tests can reach both branches without touching the real JCEF singleton.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WebTab(
     modifier: Modifier = Modifier,
-    presenterManager: PresenterManager? = null,
+    output: WebOutput? = null,
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
-    /**
-     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
-     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
-     * click does nothing.
-     */
     selectedWebsiteItemVersion: Int = 0,
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
-    /** Overridable so tests can reach both branches without touching the real JCEF singleton. */
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefWindowsUnsupported: Boolean = CefManager.windowsUnsupported
@@ -157,8 +157,8 @@ fun WebTab(
     val previewAspectRatio = remember { presenterAspectRatio() }
 
     // Restore URL / title from PresenterManager so state survives tab switches
-    val savedUrl = presenterManager?.websiteUrl?.value ?: ""
-    val savedTitle = presenterManager?.webPageTitle?.value ?: ""
+    val savedUrl = output?.url ?: ""
+    val savedTitle = output?.title ?: ""
 
     // Current URL typed by the user
     var urlInput by remember { mutableStateOf(savedUrl.ifBlank { "https://" }) }
@@ -167,8 +167,7 @@ fun WebTab(
     var pageTitle by remember { mutableStateOf(savedTitle) }
 
     // Derive isLive from the presenter mode — clears automatically on "Clear Display"
-    val presentingMode = presenterManager?.presentingMode?.value ?: Presenting.NONE
-    val isLive = presentingMode == Presenting.WEBSITE
+    val isLive = output?.isLive == true
 
     // Toggle between screenshot mirror (matched layout) and interactive local browser
     var useInteractivePreview by remember { mutableStateOf(false) }
@@ -190,7 +189,7 @@ fun WebTab(
 
     // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
-        if (!isLive) presenterManager?.setWebSnapshot(null)
+        if (!isLive) output?.setSnapshot(null)
     }
 
     // When a schedule item selects this tab, restore its URL and go live
@@ -199,15 +198,15 @@ fun WebTab(
             urlInput = item.url
             liveUrl = item.url
             pageTitle = item.title
-            presenterManager?.setWebsiteUrl(item.url)
-            presenterManager?.setWebPageTitle(item.title)
-            presenterManager?.setPresentingMode(Presenting.WEBSITE)
+            output?.setUrl(item.url)
+            output?.setTitle(item.title)
+            output?.goLive()
         }
     }
 
     // Sync URL bar from presenter when the presenter navigates (Mirror mode clicks)
-    val presenterUrl = presenterManager?.websiteUrl?.value ?: ""
-    val presenterTitle = presenterManager?.webPageTitle?.value ?: ""
+    val presenterUrl = output?.url ?: ""
+    val presenterTitle = output?.title ?: ""
     LaunchedEffect(presenterUrl) {
         if (isLive && !useInteractivePreview && presenterUrl.isNotBlank()) {
             urlInput = presenterUrl
@@ -222,7 +221,7 @@ fun WebTab(
     }
 
     // Apply zoom level when presenter browser becomes available
-    val liveBrowserRef = presenterManager?.liveBrowser?.value
+    val liveBrowserRef = output?.liveBrowser
     LaunchedEffect(liveBrowserRef) {
         if (liveBrowserRef != null && isLive) {
             liveBrowserRef.setZoomLevel(zoomLevel)
@@ -233,16 +232,16 @@ fun WebTab(
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
         liveUrl = newUrl
-        presenterManager?.setWebsiteUrl(newUrl)
+        output?.setUrl(newUrl)
         // Directly navigate the presenter browser so it updates immediately
         if (isLive) {
-            presenterManager?.liveBrowser?.value?.loadURL(newUrl)
+            output?.liveBrowser?.loadURL(newUrl)
         }
     }
 
     fun onTitleChanged(title: String) {
         pageTitle = title
-        presenterManager?.setWebPageTitle(title)
+        output?.setTitle(title)
         // Update the schedule item title if it was added before the page finished loading
         if (liveUrl.isNotBlank()) onUpdateScheduleTitle?.invoke(liveUrl, title)
     }
@@ -252,7 +251,7 @@ fun WebTab(
     fun applyZoom(level: Double) {
         zoomLevel = level
         val browser = if (isLive && !useInteractivePreview)
-            presenterManager?.liveBrowser?.value else navController.browser
+            output?.liveBrowser else navController.browser
         browser?.setZoomLevel(level)
     }
 
@@ -312,9 +311,9 @@ fun WebTab(
                                     val url = normaliseUrl(urlInput)
                                     urlInput = url
                                     liveUrl = url
-                                    presenterManager?.setWebsiteUrl(url)
+                                    output?.setUrl(url)
                                     if (isLive) {
-                                        presenterManager?.liveBrowser?.value?.loadURL(url)
+                                        output?.liveBrowser?.loadURL(url)
                                     }
                                     true
                                 } else false
@@ -370,10 +369,16 @@ fun WebTab(
                     }
                 },
                 enabled = urlInput.isNotBlank() && urlInput != "https://",
-                tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
+                tooltipText = stringResource(
+                    if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add,
+                ),
                 icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                containerColor =
+                    if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor =
+                    if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             // Add to Schedule
@@ -396,8 +401,8 @@ fun WebTab(
                     val url = normaliseUrl(urlInput)
                     urlInput = url
                     liveUrl = url
-                    presenterManager?.setWebsiteUrl(url)
-                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                    output?.setUrl(url)
+                    output?.goLive()
                 },
                 enabled = goLiveEnabled,
                 tooltipText = stringResource(Res.string.web_go_live)
@@ -409,7 +414,7 @@ fun WebTab(
             navController.setMobileEmulation(mobile)
             // Also toggle on the live browser if presenting
             if (isLive) {
-                presenterManager?.liveBrowser?.value?.let { liveBrowser ->
+                output?.liveBrowser?.let { liveBrowser ->
                     // The live browser uses a separate NavController, so override UA + reload directly
                     liveBrowser.reload()
                 }
@@ -426,7 +431,7 @@ fun WebTab(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                    NavButtons(navController, output, isLive, useInteractivePreview,
                         zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
                     urlBar()
                     actionButtons()
@@ -439,7 +444,7 @@ fun WebTab(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                        NavButtons(navController, output, isLive, useInteractivePreview,
                             zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
                         Spacer(Modifier.weight(1f))
                         actionButtons()
@@ -475,9 +480,9 @@ fun WebTab(
                             urlInput = bookmark.url
                             liveUrl = bookmark.url
                             pageTitle = bookmark.title
-                            presenterManager?.setWebsiteUrl(bookmark.url)
+                            output?.setUrl(bookmark.url)
                             if (isLive) {
-                                presenterManager?.liveBrowser?.value?.loadURL(bookmark.url)
+                                output?.liveBrowser?.loadURL(bookmark.url)
                             }
                         }
                     ) {
@@ -538,7 +543,9 @@ fun WebTab(
                     modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
                 ) {
                     Text(
-                        text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
+                        text = stringResource(
+                            if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode,
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -564,7 +571,7 @@ fun WebTab(
                             BasicTextField(
                                 value = typeBuffer,
                                 onValueChange = { next ->
-                                    val browser = presenterManager?.liveBrowser?.value
+                                    val browser = output?.liveBrowser
                                     if (browser == null) { typeBuffer = next; return@BasicTextField }
                                     val old = typeBuffer
                                     val common = commonPrefixLength(old, next)
@@ -578,7 +585,7 @@ fun WebTab(
                                     .fillMaxWidth()
                                     .onKeyEvent { event ->
                                         if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-                                            presenterManager?.liveBrowser?.value
+                                            output?.liveBrowser
                                                 ?.executeJavaScript(JS_ENTER, "", 0)
                                             typeBuffer = ""
                                             true
@@ -604,7 +611,12 @@ fun WebTab(
                         }
                         if (typeBuffer.isNotEmpty()) {
                             IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_close),
+                                    contentDescription = stringResource(Res.string.web_clear_typed_text),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }
@@ -612,7 +624,7 @@ fun WebTab(
                         painter = painterResource(Res.drawable.ic_cast),
                         text = stringResource(Res.string.web_focus_first_input),
                         onClick = {
-                            presenterManager?.liveBrowser?.value
+                            output?.liveBrowser
                                 ?.executeJavaScript(JS_FOCUS_FIRST_INPUT, "", 0)
                         }
                     )
@@ -648,8 +660,8 @@ fun WebTab(
         ) {
             if (isLive && !useInteractivePreview) {
                 // Mirror mode: show presenter screenshot with input forwarding
-                val webSnapshot = presenterManager?.webSnapshot?.value
-                val liveBrowser = presenterManager?.liveBrowser?.value
+                val webSnapshot = output?.snapshot
+                val liveBrowser = output?.liveBrowser
                 if (webSnapshot != null) {
                     var imageSize by remember { mutableStateOf(IntSize.Zero) }
                     Image(
@@ -739,7 +751,8 @@ fun WebTab(
                             .pointerInput(liveBrowser) {
                                 // Forward scroll via CefBrowser_N.sendMouseWheelEvent (reflection)
                                 if (liveBrowser == null) return@pointerInput
-                                val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)
+                                val sendWheel =
+                                    findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
@@ -930,7 +943,7 @@ internal fun WebEngineUnavailable(
 @Composable
 private fun RowScope.NavButtons(
     navController: WebNavController,
-    presenterManager: PresenterManager?,
+    output: WebOutput?,
     isLive: Boolean,
     useInteractivePreview: Boolean,
     zoomLevel: Double,
@@ -941,7 +954,7 @@ private fun RowScope.NavButtons(
     // Back
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
         tooltipText = stringResource(Res.string.web_back),
@@ -952,7 +965,7 @@ private fun RowScope.NavButtons(
     // Forward
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
         tooltipText = stringResource(Res.string.web_forward),
@@ -963,7 +976,7 @@ private fun RowScope.NavButtons(
     // Refresh
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
         tooltipText = stringResource(Res.string.web_refresh),
@@ -1022,7 +1035,7 @@ private fun RowScope.NavButtons(
 }
 
 /** Walk up the class hierarchy to find a declared method and make it accessible. */
-private fun findMethod(obj: Any, name: String, vararg paramTypes: Class<*>): java.lang.reflect.Method? {
+internal fun findMethod(obj: Any, name: String, vararg paramTypes: Class<*>): java.lang.reflect.Method? {
     var c: Class<*>? = obj.javaClass
     while (c != null) {
         try {
@@ -1068,7 +1081,7 @@ internal fun commonPrefixLength(a: String, b: String): Int {
 }
 
 /** Encode a Kotlin [Char] as a JSON string literal, safe to splice into JS. */
-private fun jsEncode(ch: Char): String = buildString {
+internal fun jsEncode(ch: Char): String = buildString {
     append('"')
     when (ch) {
         '\\' -> append("\\\\")
