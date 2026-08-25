@@ -230,15 +230,16 @@ private fun VideoSourceContent(
     source: SceneSource.VideoSource,
     modifier: Modifier,
 ) {
+    val videoSupport = LocalCanvasVideoSupport.current
     val file = remember(source.filePath) { if (source.filePath.isNotBlank()) File(source.filePath) else null }
-    if (file == null || !file.exists() || !isVlcAvailable) {
+    if (file == null || !file.exists() || !videoSupport.available) {
         Box(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (isVlcLoadFailed) stringResource(Res.string.canvas_video_vlc_load_failed)
-                       else if (!isVlcAvailable) stringResource(Res.string.canvas_video_vlc_not_found)
+                text = if (videoSupport.loadFailed) stringResource(Res.string.canvas_video_vlc_load_failed)
+                       else if (!videoSupport.available) stringResource(Res.string.canvas_video_vlc_not_found)
                        else if (file == null) stringResource(Res.string.canvas_video_no_selection)
                        else stringResource(Res.string.canvas_video_file_not_found, source.filePath),
                 color = Color.White,
@@ -679,6 +680,7 @@ private fun CameraSourceContent(
     source: SceneSource.CameraSource,
     modifier: Modifier,
 ) {
+    val deckLink = LocalCanvasDeckLink.current
     if (source.devicePath.isBlank()) {
         Box(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),

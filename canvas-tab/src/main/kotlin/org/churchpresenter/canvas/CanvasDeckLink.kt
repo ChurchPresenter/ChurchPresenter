@@ -17,6 +17,9 @@ interface CanvasDeckLink {
     /** Whether the DeckLink driver loaded at all. False on a machine with no card or no SDK. */
     fun isAvailable(): Boolean
 
+    /** The cards attached, for the source picker's device list. */
+    fun listDevices(): List<Device>
+
     /** Whether [deviceIndex] is already busy sending a program feed, so it cannot also capture. */
     fun isOutputActive(deviceIndex: Int): Boolean
 
@@ -35,6 +38,9 @@ interface CanvasDeckLink {
     /** Stops capture and releases the device. */
     fun closeInput(deviceIndex: Int)
 
+    /** One attached card. */
+    data class Device(val index: Int, val name: String)
+
     /** One video mode a card can capture in. [encodedValue] is what the driver is given back. */
     data class InputMode(val name: String, val encodedValue: String)
 
@@ -45,6 +51,7 @@ interface CanvasDeckLink {
         /** No card present. */
         val None: CanvasDeckLink = object : CanvasDeckLink {
             override fun isAvailable() = false
+            override fun listDevices() = emptyList<Device>()
             override fun isOutputActive(deviceIndex: Int) = false
             override fun listInputModes(deviceIndex: Int) = emptyList<InputMode>()
             override fun listVideoConnections(deviceIndex: Int) = emptyList<VideoConnection>()

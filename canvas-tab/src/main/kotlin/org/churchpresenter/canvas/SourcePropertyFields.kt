@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions

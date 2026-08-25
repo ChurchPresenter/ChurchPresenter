@@ -36,6 +36,8 @@ dependencies {
     // A video source is played straight into a pixel buffer by SceneSourceRenderer, so the tab
     // needs VLC itself rather than the app's VideoPlayer composable.
     implementation("uk.co.caprica:vlcj:4.8.3")
+    // SceneViewModel persists scenes as JSON.
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.zxing.core)
     implementation(libs.zxing.javase)
     testImplementation(kotlin("test"))

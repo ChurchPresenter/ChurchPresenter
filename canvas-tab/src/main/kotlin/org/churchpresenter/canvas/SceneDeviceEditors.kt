@@ -55,6 +55,7 @@ private const val MAX_CAPTURE_INTERVAL_MS = 1000f
 
 @Composable
 internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+    val deckLink = LocalCanvasDeckLink.current
     Text(
         stringResource(Res.string.canvas_source_camera),
         style = MaterialTheme.typography.labelMedium,
@@ -62,11 +63,11 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
     )
 
     val deckLinkDeviceFormat = stringResource(Res.string.canvas_decklink_device)
-    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLinkDeviceFormat)) }
+    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLink, deckLinkDeviceFormat)) }
     val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
 
     Button(
-        onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
+        onClick = { devices = listCameraDevicesWithDeckLink(deckLink, deckLinkDeviceFormat) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -207,6 +208,7 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
 
 @Composable
 internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onUpdate: (SceneSource) -> Unit) {
+    val deckLink = LocalCanvasDeckLink.current
     Text(
         stringResource(Res.string.canvas_source_screen_capture),
         style = MaterialTheme.typography.labelMedium,

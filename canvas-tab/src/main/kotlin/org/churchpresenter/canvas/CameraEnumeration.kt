@@ -60,11 +60,14 @@ internal data class CameraDevice(
     val deckLinkIndex: Int = -1
 )
 
-internal fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckLink: %1\$s"): List<CameraDevice> {
+internal fun listCameraDevicesWithDeckLink(
+    deckLink: CanvasDeckLink = CanvasDeckLink.None,
+    deckLinkDeviceFormat: String = "DeckLink: %1\$s",
+): List<CameraDevice> {
     val devices = mutableListOf<CameraDevice>()
 
-    if (DeckLinkManager.isAvailable()) {
-        val deckLinkDevices = DeckLinkManager.listDevices()
+    if (deckLink.isAvailable()) {
+        val deckLinkDevices = deckLink.listDevices()
         for (device in deckLinkDevices) {
             devices.add(CameraDevice(
                 name = device.name,

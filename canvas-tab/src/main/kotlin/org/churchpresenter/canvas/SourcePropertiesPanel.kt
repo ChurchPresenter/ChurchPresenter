@@ -39,6 +39,15 @@ fun SourcePropertiesPanel(
     modifier: Modifier = Modifier,
     appSettings: AppSettings? = null,
     fileChooser: CanvasFilePicker = CanvasFilePicker.None,
+    /**
+     * The editor for a Bible scene source.
+     *
+     * A slot rather than a function here because it builds a `BibleViewModel` and reads the Bible
+     * folder — the whole scripture stack, for one of a dozen source types. `:composeApp` supplies it;
+     * everything else on this panel is self-contained. Empty by default, so a preview or a test
+     * composes the rest of the panel without a Bible on disk.
+     */
+    bibleProperties: @Composable (SceneSource.BibleSource, (SceneSource) -> Unit) -> Unit = { _, _ -> },
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(
@@ -99,7 +108,7 @@ fun SourcePropertiesPanel(
             is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
             is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
-            is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)
+            is SceneSource.BibleSource -> bibleProperties(source, onSourceUpdate)
         }
     }
 }
