@@ -68,6 +68,17 @@ import org.churchpresenter.theme.semantic
 import androidx.compose.ui.text.AnnotatedString
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * The Live Captions tab: the connection to the speech-to-text server, the transcript and the
+ * translation it streams, and the controls that put them on the screen.
+ *
+ * @param output what the screens are showing, and how to put the captions there. Two members, so
+ *   the tab does not need `PresenterManager` or the app's `Presenting` enum.
+ * @param onOpenSettings open the Live Captions settings dialog. The dialog itself stays in
+ *   `:composeApp` with the other pages of the options dialog: it positions itself against the main
+ *   window and is a peer of the app's other settings screens, not part of the tab. The tab only
+ *   knows that something opens.
+ */
 @Composable
 fun STTTab(
     modifier: Modifier = Modifier,
@@ -75,13 +86,6 @@ fun STTTab(
     output: SttOutput,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    /**
-     * Open the Live Captions settings dialog.
-     *
-     * The dialog itself stays in `:composeApp` with the other pages of the options dialog: it is
-     * positioned against the main window (`LocalMainWindowState`) and is a peer of the app's other
-     * settings screens, not part of the tab. The tab only knows that something opens.
-     */
     onOpenSettings: () -> Unit = {},
 ) {
     val sttSettings = appSettings.sttSettings
@@ -116,7 +120,12 @@ fun STTTab(
                 enabled = !connected && !connecting,
                 trailingIcon = {
                     if (!connected && !connecting && urlInput.isNotEmpty()) {
-                        IconButton(onClick = { urlInput = "" }, colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        IconButton(
+                            onClick = { urlInput = "" },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(Res.string.clear),
@@ -149,7 +158,8 @@ fun STTTab(
             } else {
                 ActionIconButton(
                     onClick = {
-                        val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
+                        val hasScheme = urlInput.startsWith("http://") || urlInput.startsWith("https://")
+                        val url = if (urlInput.isNotBlank() && !hasScheme) "http://$urlInput" else urlInput
                         urlInput = url
                         onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
                         sttManager.connect(url)
@@ -199,7 +209,12 @@ fun STTTab(
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Live preview area
-        Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            stringResource(Res.string.stt_live_preview),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
 
         val maxSeg = sttSettings.maxSegments
         val displaySegments = if (maxSeg > 0) segments.takeLast(maxSeg) else segments
@@ -249,11 +264,21 @@ fun STTTab(
                         Column(
                             modifier = Modifier.fillMaxSize().verticalScroll(transcriptionScrollState).padding(4.dp)
                         ) {
-                            Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(Res.string.stt_transcription_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
                             Spacer(Modifier.height(4.dp))
                             displaySegments.forEach { segment ->
                                 Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface),
+                                    text = applyHighlighting(
+                                        segment.text,
+                                        highlightedWords,
+                                        highlightingEnabled,
+                                        MaterialTheme.colorScheme.onSurface,
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )
@@ -284,11 +309,21 @@ fun STTTab(
                         Column(
                             modifier = Modifier.fillMaxSize().verticalScroll(translationScrollState).padding(4.dp)
                         ) {
-                            Text(stringResource(Res.string.stt_translation_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            Text(
+                                stringResource(Res.string.stt_translation_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
                             Spacer(Modifier.height(4.dp))
                             displayTranslation.forEach { segment ->
                                 Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary),
+                                    text = applyHighlighting(
+                                        segment.text,
+                                        highlightedWords,
+                                        highlightingEnabled,
+                                        MaterialTheme.colorScheme.primary,
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )

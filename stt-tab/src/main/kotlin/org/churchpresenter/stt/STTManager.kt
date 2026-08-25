@@ -175,6 +175,62 @@ class STTManager(
     internal fun shouldCaptureFinalSnapshot(helpDev: Boolean, baseUrl: String?): Boolean =
         helpDev && !baseUrl.isNullOrBlank()
 
+    /**
+     * What the app does with each event the STT server sends.
+     *
+     * Split out of [connect] so it can be exercised without a socket.io server. Everything here is
+     * a decision — which transition a disconnect reason maps to, whether a payload is shaped like
+     * something we can read, what gets requested the moment the link comes up — and none of it
+     * needs a network to be worth testing. [connect] keeps only the parts that genuinely do:
+     * building the real socket and dialling it.
+     *
+     * [s] is the socket as this class uses it, which is two methods; `IoSttSocket` is the real one
+     * and the suite passes a fake.
+     */
+    internal fun installHandlers(s: SttSocket, url: String) {
+        s.on(Socket.EVENT_CONNECT) {
+            scope.launch { applyConnected() }
+            // Request initial data
+            s.emit("request_all_entries")
+            s.emit("request_all_translation_entries")
+            // Fetch word highlighting via REST (not sent on connect via socket)
+            scope.launch(Dispatchers.IO) {
+                fetchWordHighlighting(url)
+            }
+            startDbCapture(url)
+        }
+
+        s.on(Socket.EVENT_DISCONNECT) { args ->
+            val reason = args.firstOrNull()?.toString()
+            scope.launch { applyDisconnected(reason) }
+        }
+
+        s.on(Socket.EVENT_CONNECT_ERROR) {
+            scope.launch { applyConnectError() }
+        }
+
+        s.on("transcription_update") { args ->
+            if (args.isNotEmpty() && args[0] is JSONObject) {
+                val data = args[0] as JSONObject
+                scope.launch { handleTranscriptionUpdate(data) }
+            }
+        }
+
+        s.on("translation_update") { args ->
+            if (args.isNotEmpty() && args[0] is JSONObject) {
+                val data = args[0] as JSONObject
+                scope.launch { handleTranslationUpdate(data) }
+            }
+        }
+
+        s.on("word_highlighting_update") { args ->
+            if (args.isNotEmpty() && args[0] is JSONObject) {
+                val data = args[0] as JSONObject
+                scope.launch { handleWordHighlightingUpdate(data) }
+            }
+        }
+    }
+
     fun connect(url: String) {
         if (_connected.value || _connecting.value) return
         // Clean up any leftover socket (e.g. from a previous failed connection)
@@ -195,54 +251,7 @@ class STTManager(
                     .build()
 
                 val s = IO.socket(URI.create(url), opts)
-
-                s.on(Socket.EVENT_CONNECT) {
-                    scope.launch { applyConnected() }
-                    // Request initial data
-                    s.emit("request_all_entries")
-                    s.emit("request_all_translation_entries")
-                    // Fetch word highlighting via REST (not sent on connect via socket)
-                    scope.launch(Dispatchers.IO) {
-                        fetchWordHighlighting(url)
-                    }
-                    startDbCapture(url)
-                }
-
-                s.on(Socket.EVENT_DISCONNECT) { args ->
-                    val reason = args.firstOrNull()?.toString()
-                    scope.launch { applyDisconnected(reason) }
-                }
-
-                s.on(Socket.EVENT_CONNECT_ERROR) {
-                    scope.launch { applyConnectError() }
-                }
-
-                s.on("transcription_update") { args ->
-                    if (args.isNotEmpty() && args[0] is JSONObject) {
-                        val data = args[0] as JSONObject
-                        scope.launch {
-                            handleTranscriptionUpdate(data)
-                        }
-                    }
-                }
-
-                s.on("translation_update") { args ->
-                    if (args.isNotEmpty() && args[0] is JSONObject) {
-                        val data = args[0] as JSONObject
-                        scope.launch {
-                            handleTranslationUpdate(data)
-                        }
-                    }
-                }
-
-                s.on("word_highlighting_update") { args ->
-                    if (args.isNotEmpty() && args[0] is JSONObject) {
-                        val data = args[0] as JSONObject
-                        scope.launch {
-                            handleWordHighlightingUpdate(data)
-                        }
-                    }
-                }
+                installHandlers(IoSttSocket(s), url)
 
                 socket = s
                 s.connect()
@@ -469,5 +478,28 @@ class STTManager(
     private companion object {
         /** socket.io's disconnect reason when the client itself closed the socket. */
         const val CLIENT_DISCONNECT_REASON = "io client disconnect"
+    }
+}
+
+/**
+ * The socket as [STTManager] uses it: subscribe to an event, and fire one with no payload.
+ *
+ * socket.io's `Socket` is a large final class that can only be obtained by dialling a server, which
+ * put every one of the manager's event handlers out of reach of the suite. This is the whole of the
+ * surface those handlers need, so `installHandlers` can be driven directly.
+ */
+internal interface SttSocket {
+    fun on(event: String, listener: (Array<out Any>) -> Unit)
+    fun emit(event: String)
+}
+
+/** [SttSocket] over the real socket.io client. The only implementation used in production. */
+private class IoSttSocket(private val socket: Socket) : SttSocket {
+    override fun on(event: String, listener: (Array<out Any>) -> Unit) {
+        socket.on(event) { args -> listener(args) }
+    }
+
+    override fun emit(event: String) {
+        socket.emit(event)
     }
 }

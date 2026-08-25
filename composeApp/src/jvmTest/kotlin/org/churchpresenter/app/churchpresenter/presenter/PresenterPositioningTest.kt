@@ -26,16 +26,14 @@ class PresenterPositioningTest {
         return { position -> m.invoke(null, position) as Alignment }
     }
 
-    /** The one of the three that still lives in the app. */
-    private fun appPresenter(fileClass: String, method: String) =
-        mapper("org.churchpresenter.app.churchpresenter.presenter.$fileClass", method)
-
-    // Two of the three have moved into modules of their own; each still carries its own copy of the
-    // table, which is exactly why they have to be checked against each other.
+    // All three have moved into modules of their own, and each still carries its own copy of the
+    // table — which is exactly why they have to be checked against each other. Reflection rather
+    // than a direct call because :composeApp is not a friend of any of those modules, so their
+    // mapping functions are not visible from here whether they are private or internal.
     private val announcements =
         mapper("org.churchpresenter.announcements.AnnouncementsPresenterKt", "positionToAlignment")
     private val questions = mapper("org.churchpresenter.qa.QAPresenterKt", "positionToAlignment")
-    private val captions = appPresenter("STTPresenterKt", "sttPositionToAlignment")
+    private val captions = mapper("org.churchpresenter.stt.STTPresenterKt", "sttPositionToAlignment")
 
     private val allThree = mapOf(
         "announcements" to announcements,

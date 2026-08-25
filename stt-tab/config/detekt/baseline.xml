@@ -1,5 +1,10 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:STTPresenter.kt$@Composable fun STTPresenter( modifier: Modifier = Modifier, segments: List&lt;STTSegment&gt;, inProgressText: String, translationSegments: List&lt;STTSegment&gt;, inProgressTranslation: String, highlightedWords: List&lt;HighlightedWord&gt;, sttSettings: STTSettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, )</ID>
+    <ID>LongMethod:STTTab.kt$@Composable fun STTTab( modifier: Modifier = Modifier, sttManager: STTManager, output: SttOutput, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onOpenSettings: () -&gt; Unit = {}, )</ID>
+    <ID>LongParameterList:STTPresenter.kt$( segments: List&lt;STTSegment&gt;, inProgressText: String, showInProgress: Boolean, highlightedWords: List&lt;HighlightedWord&gt;, showWordHighlighting: Boolean, baseColor: Color )</ID>
+    <ID>TooManyFunctions:STTManager.kt$STTManager</ID>
+  </CurrentIssues>
 </SmellBaseline>

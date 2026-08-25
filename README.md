@@ -60,6 +60,13 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > port, so `PresenterManager` stays in the app; its `QAManager` is what `:companion-server` moderates
 > through. `./gradlew :qa-tab:test`.
 >
+> **[`stt-tab/`](./stt-tab)** — the Live Captions tab: the connection to a speech-to-text
+> server, the transcript and translation it streams, and the presenter that draws them on the
+> screen. It reaches the outputs through its own `SttOutput` port, so `PresenterManager` stays
+> in the app; its `STTManager` is what the Bible tab's auto-follow, the presenter windows and
+> the Browser Source overlay all read the live transcript from. The settings dialog stays in
+> the app with the other options pages. `./gradlew :stt-tab:test`.
+>
 > **[`lower-third-tab/`](./lower-third-tab)** — the Lower Third tab: the animated Lottie band the
 > audience sees over the picture, its presets and playback, the offscreen renderer the Browser Source
 > overlay and the ATEM upload both rasterise through, and the media-pool upload itself. It was

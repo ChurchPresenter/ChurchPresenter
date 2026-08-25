@@ -376,7 +376,7 @@ private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: L
     return applyRevealBudget(segments, revealed.intValue)
 }
 
-private fun sttPositionToAlignment(position: String): Alignment = when (position) {
+internal fun sttPositionToAlignment(position: String): Alignment = when (position) {
     Constants.TOP_LEFT -> Alignment.TopStart
     Constants.TOP_CENTER -> Alignment.TopCenter
     Constants.TOP_RIGHT -> Alignment.TopEnd

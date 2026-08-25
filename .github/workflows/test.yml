@@ -269,7 +269,7 @@ jobs:
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
           :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
-          :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt
+          :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt :stt-tab:detekt
 
       - name: App unit tests
         id: unit_tests
