@@ -128,12 +128,13 @@ they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:lower-third-tab` names one (`COMPLEXITY` at 0.82); `:theme`, `:core-models`,
+  each; `:web-tab` names three (`BRANCH` 0.73, `LINE` 0.83, `COMPLEXITY` 0.70 — it embeds
+  Chromium; see its own `AGENT.md`); `:lower-third-tab` names one (`COMPLEXITY` at 0.82);
+  `:theme`, `:core-models`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
   `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
-  `:announcements-tab`, `:qa-tab`, `:stt-tab`, `:web-tab`, `:companion-server` and `:statistics`
-  name none.
+  `:announcements-tab`, `:qa-tab`, `:stt-tab`, `:companion-server` and `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

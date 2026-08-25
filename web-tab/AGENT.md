@@ -48,24 +48,40 @@ The `--add-exports=java.desktop/sun.awt=...` list on `Test` tasks is the same on
 applies to its `JavaExec` tasks. Without it anything touching `CefBrowserWindowMac` dies with
 `IllegalAccessError`.
 
-## Coverage: six floor overrides, and why
+## Coverage: three floor overrides, and why
 
 Read the long comment above `extra["coverageFloors"]` in `build.gradle.kts` before touching them.
-The short version: this module embeds a browser, and three kinds of code here need a running one —
-`CefManager`'s native install and JVM module patching, `EmbeddedWebView`'s CEF handler callbacks,
-and the key-forwarding lambda. The numbers are the measured values with almost no headroom, so the
-gate still bites on a regression.
 
-**The mouse and scroll forwarding are NOT in that category any more.** They went from 0.00 to 0.82
-and 0.87 by giving the test a browser stub that *declares* the reflected methods — `findMethod`
-walks up the class hierarchy for `sendMouseEvent`, which lives on JCEF's `CefBrowser_N` rather than
-the `CefBrowser` interface, so a plain `mockk<CefBrowser>` never satisfies it but an abstract
-subclass declaring it does. `WebInputForwardingTest` is the worked example, and it asserts the
-mapped coordinates rather than that a mock was called.
+**Only three counters are named.** `INSTRUCTION` (0.852), `METHOD` (0.864) and `CLASS` (0.852) clear
+the root build's 0.85 default and are left on it — they must keep clearing it, so do not add them.
+The overridden three are `BRANCH` 0.73, `LINE` 0.83 and `COMPLEXITY` 0.70, each the measured value
+with a hair of headroom so a regression still fails the gate.
 
-**The honest remaining target is `WebTabKt` itself** — 430 instructions and 102 decision points
-inside one 644-line composable, all reachable through ordinary interaction. Raise the floors as that
-comes down.
+The reason is the same for all three: this module embeds Chromium. Measured, not guessed —
+`WebsitePresenter.kt` holds 64 of the 190 missed branches and 924 of the 1359 missed instructions,
+all of it `CefManager.init()` starting a browser or code past `EmbeddedWebView`'s
+`createClient() ?: return`. Another 39 branches are readiness arms in the input-forwarding block
+that need a real, showing AWT render surface.
+
+**Two seams did most of the work getting here, and neither is optional.**
+
+- **`CefHandlers.kt`.** The display, popup and user-agent handlers were `object :` expressions inside
+  `EmbeddedWebView`, constructible only once Chromium was running. As named factories they are at
+  **100% coverage**, and that is what took `CLASS` from 0.615 over the line. Do not inline them back.
+- **The browser stub in `WebInputForwardingTest`.** `findMethod` walks *up* the class hierarchy for
+  `sendMouseEvent`, which lives on JCEF's `CefBrowser_N` rather than the `CefBrowser` interface — so
+  a plain `mockk<CefBrowser>` never satisfies it, but an abstract subclass declaring it does. That
+  took the mouse and scroll lambdas from 0.00 to ~0.85, and the test asserts the mapped coordinates
+  rather than that a mock was called.
+
+**What is left is nearly mined out.** The long tail is inside `WebTab.kt`'s 644-line composable, and
+the last ten tests written against it bought three branches between them. The suite is 222 tests; do
+not expect another 20 to move these numbers.
+
+**The one change that would move them a long way** is putting `EmbeddedWebView`'s
+`CefManager.createClient()` behind a parameter, the way the handlers were extracted. That makes most
+of those 924 instructions reachable. It touches the live rendering path, so it is a deliberate piece
+of work rather than something to slip in — but it is the answer if these floors need to rise.
 
 ## A suspected production bug, left alone
 
