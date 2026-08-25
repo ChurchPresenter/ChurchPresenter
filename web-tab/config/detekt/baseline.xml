@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:WebTab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun WebTab( modifier: Modifier = Modifier, output: WebOutput? = null, selectedWebsiteItem: ScheduleItem.WebsiteItem? = null, selectedWebsiteItemVersion: Int = 0, appSettings: AppSettings = AppSettings(), onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit = {}, onAddToSchedule: ((url: String, title: String) -&gt; Unit)? = null, onUpdateScheduleTitle: ((url: String, title: String) -&gt; Unit)? = null, cefInitialized: Boolean = CefManager.initialized, cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported, cefWindowsUnsupported: Boolean = CefManager.windowsUnsupported )</ID>
+    <ID>TooGenericExceptionCaught:WebsitePresenter.kt$CefManager$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -20,7 +20,7 @@ import org.churchpresenter.qa.QAQRCodePresenter
 import org.churchpresenter.stt.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
+import org.churchpresenter.web.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.stt.STTManager

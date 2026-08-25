@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import io.mockk.mockk
 import io.mockk.verify
 import org.cef.browser.CefBrowser
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -35,20 +34,20 @@ class WebTabBrowserBridgeTest {
     // ── The URL bar's Enter key ─────────────────────────────────────────────────
 
     @Test
-    fun `pressing Enter in the URL bar normalises it and updates the presenter`() = webTab { presenter, _ ->
+    fun `pressing Enter in the URL bar normalises it and updates the presenter`() = webTab { output, _ ->
         onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
         onNodeWithText("example.com").performKeyInput { pressKey(Key.Enter) }
         waitForIdle()
 
         onNodeWithText("https://example.com").assertExists()
-        assertEquals("https://example.com", presenter.websiteUrl.value)
+        assertEquals("https://example.com", output.url)
     }
 
     @Test
-    fun `pressing Enter in the URL bar while live also navigates the live browser`() = webTab { presenter, _ ->
+    fun `pressing Enter in the URL bar while live also navigates the live browser`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
@@ -61,21 +60,21 @@ class WebTabBrowserBridgeTest {
     // ── Attaching a live browser ─────────────────────────────────────────────────
 
     @Test
-    fun `attaching a live browser applies the current zoom level`() = webTab { presenter, _ ->
+    fun `attaching a live browser applies the current zoom level`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
+        output.live = true
 
-        presenter.setLiveBrowser(browser)
+        output.liveBrowser = browser
         waitForIdle()
 
         verify { browser.setZoomLevel(0.0) }
     }
 
     @Test
-    fun `toggling desktop-mobile while live reloads the live browser`() = webTab { presenter, _ ->
+    fun `toggling desktop-mobile while live reloads the live browser`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         onNodeWithText(WebLabel.DESKTOP).performClick()
@@ -88,10 +87,10 @@ class WebTabBrowserBridgeTest {
 
     @Test
     fun `typing into the type-to-page field with a live browser injects JavaScript per character`() =
-        webTab { presenter, _ ->
+        webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("hi")
@@ -102,10 +101,10 @@ class WebTabBrowserBridgeTest {
     }
 
     @Test
-    fun `typing a quote and a backslash escapes them for JavaScript`() = webTab { presenter, _ ->
+    fun `typing a quote and a backslash escapes them for JavaScript`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("a\"\\")
@@ -116,10 +115,10 @@ class WebTabBrowserBridgeTest {
     }
 
     @Test
-    fun `pressing Enter in the type-to-page field submits and clears it`() = webTab { presenter, _ ->
+    fun `pressing Enter in the type-to-page field submits and clears it`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("hi")
@@ -130,10 +129,10 @@ class WebTabBrowserBridgeTest {
     }
 
     @Test
-    fun `clicking Focus first input with a live browser attached executes the focus script`() = webTab { presenter, _ ->
+    fun `clicking Focus first input with a live browser attached executes the focus script`() = webTab { output, _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
-        presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
+        output.live = true
+        output.liveBrowser = browser
         waitForIdle()
 
         webButton(WebLabel.FOCUS_FIRST_INPUT).performClick()

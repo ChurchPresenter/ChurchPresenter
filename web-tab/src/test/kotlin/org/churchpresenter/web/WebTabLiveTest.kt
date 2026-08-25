@@ -1,22 +1,22 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class WebTabLiveTest {
 
     @Test
-    fun `going live shows the LIVE badge and syncs the URL and title from the presenter`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `going live shows the LIVE badge and syncs the URL and title from the presenter`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
-        presenter.setWebsiteUrl("https://live.example")
-        presenter.setWebPageTitle("Live Page")
+        output.setUrl("https://live.example")
+        output.setTitle("Live Page")
         waitForIdle()
 
         onNodeWithText(WebLabel.LIVE_BADGE).assertExists()
@@ -25,8 +25,8 @@ class WebTabLiveTest {
     }
 
     @Test
-    fun `mirror mode is the default and the type-to-page field is shown`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `mirror mode is the default and the type-to-page field is shown`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
 
         onNodeWithText(WebLabel.MIRROR).assertExists()
@@ -35,8 +35,8 @@ class WebTabLiveTest {
     }
 
     @Test
-    fun `toggling to interactive mode hides the type-to-page field`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `toggling to interactive mode hides the type-to-page field`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
 
         onNodeWithText(WebLabel.MIRROR).performClick()
@@ -49,8 +49,8 @@ class WebTabLiveTest {
     }
 
     @Test
-    fun `typing into the type-to-page field updates it even with no live browser attached`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `typing into the type-to-page field updates it even with no live browser attached`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
 
         onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("hello")
@@ -59,23 +59,23 @@ class WebTabLiveTest {
     }
 
     @Test
-    fun `clicking Focus first input does not crash with no live browser attached`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `clicking Focus first input does not crash with no live browser attached`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
 
         webButton(WebLabel.FOCUS_FIRST_INPUT).performClick()
 
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+        assertTrue(output.isLive)
     }
 
     @Test
-    fun `leaving live mode clears the snapshot`() = webTab { presenter, _ ->
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    fun `leaving live mode clears the snapshot`() = webTab { output, _ ->
+        output.live = true
         waitForIdle()
-        presenter.setPresentingMode(Presenting.NONE)
+        output.live = false
         waitForIdle()
 
         onNodeWithText(WebLabel.LIVE_BADGE).assertDoesNotExist()
-        assertEquals(null, presenter.webSnapshot.value)
+        assertEquals(null, output.snapshot)
     }
 }

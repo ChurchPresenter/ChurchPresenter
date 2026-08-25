@@ -66,6 +66,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > in the app; its `STTManager` is what the Bible tab's auto-follow, the presenter windows and
 > the Browser Source overlay all read the live transcript from. The settings dialog stays in
 > the app with the other options pages. `./gradlew :stt-tab:test`.
+> **[`web-tab/`](./web-tab)** — the Web tab: the embedded Chromium browser the operator drives,
+> its bookmarks, zoom and device emulation, and the presenter that puts a live page on the
+> screen. It reaches the outputs through its own `WebOutput` port — a wider one than the other
+> tabs', because when a page is live the tab and the output share the *same* browser, so the
+> reference itself crosses the boundary. `./gradlew :web-tab:test`.
 >
 > **[`lower-third-tab/`](./lower-third-tab)** — the Lower Third tab: the animated Lottie band the
 > audience sees over the picture, its presets and playback, the offscreen renderer the Browser Source

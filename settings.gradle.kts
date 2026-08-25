@@ -131,6 +131,11 @@ include(":lower-third-settings-tab")
 // so PresenterManager stays in the app; its STTManager is what the Bible tab's auto-follow, the
 // presenter windows and the Browser Source overlay all read the live transcript from.
 include(":stt-tab")
+// The Web tab: the embedded Chromium browser, its bookmarks and navigation, and the presenter that
+// puts a live page on the screen. It reaches the outputs through its own WebOutput port, so
+// PresenterManager stays in the app; its CefManager is what main.kt initialises JCEF through and
+// what the diagnostics report reads its availability from.
+include(":web-tab")
 // The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
 // timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
 // touching PresenterManager, so it knows nothing about the rest of the app.

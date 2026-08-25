@@ -334,6 +334,7 @@ kotlin {
             implementation(projects.dictionarySettingsTab)
             implementation(projects.lowerThirdTab)
             implementation(projects.sttTab)
+            implementation(projects.webTab)
             implementation(projects.qaTab)
             implementation(projects.lowerThirdSettingsTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the

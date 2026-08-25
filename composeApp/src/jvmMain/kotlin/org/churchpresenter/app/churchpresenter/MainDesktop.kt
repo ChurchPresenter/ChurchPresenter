@@ -137,7 +137,8 @@ import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.tabs.WebTab
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterWebOutput
+import org.churchpresenter.web.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
@@ -1652,7 +1653,9 @@ fun MainDesktop(
 
                             Tabs.WEB -> WebTab(
                                 modifier = Modifier.fillMaxSize(),
-                                presenterManager = presenterManager,
+                                output = remember(presenterManager, presenting) {
+                                    PresenterWebOutput(presenterManager, presenting)
+                                },
                                 selectedWebsiteItem = selectedWebsiteItem,
                                 selectedWebsiteItemVersion = selectedWebsiteItemVersion,
                                 appSettings = appSettings,

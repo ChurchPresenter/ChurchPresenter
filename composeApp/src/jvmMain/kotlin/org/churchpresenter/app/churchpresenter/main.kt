@@ -89,7 +89,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.lowerthird.SkiaLottieFrameRenderer
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
-import org.churchpresenter.app.churchpresenter.presenter.CefManager
+import org.churchpresenter.web.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene

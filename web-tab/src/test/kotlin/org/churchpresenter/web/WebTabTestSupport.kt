@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -14,12 +14,10 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 internal class WebReports {
     val scheduled = mutableListOf<Pair<String, String>>()
@@ -30,7 +28,7 @@ internal class WebReports {
 
 @OptIn(ExperimentalTestApi::class)
 internal fun webTab(
-    presenterManager: PresenterManager = PresenterManager(),
+    output: FakeWebOutput = FakeWebOutput(),
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
     settings: (AppSettings) -> AppSettings = { it },
     cefInitialized: Boolean = true,
@@ -47,9 +45,11 @@ internal fun webTab(
      */
     width: Dp? = null,
     themeMode: ThemeMode? = null,
-    block: ComposeUiTest.(presenter: PresenterManager, reports: WebReports) -> Unit,
+    block: ComposeUiTest.(output: FakeWebOutput, reports: WebReports) -> Unit,
 ) {
-    TestSingletons.latchToTestHome()
+    // :composeApp latched InstanceLinkLogger here, because it resolves its directory once per JVM
+    // and a later user.home swap would strand it. That class is in :companion-server, which is not
+    // on this module's classpath, and no test here swaps user.home — so there is nothing to latch.
     val appSettings = settings(AppSettings())
     val reports = WebReports()
     runComposeUiTest {
@@ -57,7 +57,7 @@ internal fun webTab(
             ThemedForTest(themeMode) {
                 Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     WebTab(
-                        presenterManager = presenterManager,
+                        output = output,
                         selectedWebsiteItem = selectedWebsiteItem,
                         appSettings = appSettings,
                         onSettingsChange = { transform ->
@@ -74,17 +74,17 @@ internal fun webTab(
                 }
             }
         }
-        block(presenterManager, reports)
+        block(output, reports)
     }
 }
 
 /**
- * Renders the tab with **no** [PresenterManager] at all — the parameter's own default.
+ * Renders the tab with **no** [WebOutput] at all — the parameter's own default.
  *
- * `WebTab` reaches the presenter through about forty `presenterManager?.` calls, and [webTab] always
- * supplies one, so every null side of those went untaken. This is not a synthetic case: the tab is
- * declared with `presenterManager: PresenterManager? = null` and previews and the setup wizard
- * compose it that way, so the whole toolbar has to stay usable with nothing behind it.
+ * `WebTab` reaches the screens through about forty `output?.` calls, and [webTab] always supplies
+ * one, so every null side of those went untaken. This is not a synthetic case: the tab is declared
+ * with `output: WebOutput? = null` and previews and the setup wizard compose it that way, so the
+ * whole toolbar has to stay usable with nothing behind it.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun webTabWithoutPresenter(
@@ -93,14 +93,13 @@ internal fun webTabWithoutPresenter(
     themeMode: ThemeMode? = null,
     block: ComposeUiTest.(reports: WebReports) -> Unit,
 ) {
-    TestSingletons.latchToTestHome()
     val appSettings = settings(AppSettings())
     val reports = WebReports()
     runComposeUiTest {
         setContent {
             ThemedForTest(themeMode) {
                 WebTab(
-                    presenterManager = null,
+                    output = null,
                     selectedWebsiteItem = selectedWebsiteItem,
                     appSettings = appSettings,
                     onSettingsChange = { transform ->
@@ -143,6 +142,7 @@ internal object WebLabel {
     const val MIRROR = "Mirror"
     const val INTERACTIVE = "Interactive"
     const val URL_PLACEHOLDER_DEFAULT = "https://"
+    const val URL_HINT = "https://example.com"
     const val PREVIEW_HINT = "Enter a URL above and tap Go Live"
     const val TYPE_TO_PAGE_PLACEHOLDER = "Click an input on the live page first"
     const val ENGINE_UNAVAILABLE_TITLE = "Web browser unavailable"

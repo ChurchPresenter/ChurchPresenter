@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web
 
 import java.io.File
 import java.nio.file.Files

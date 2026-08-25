@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.web.screenshot
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Canvas
@@ -16,11 +16,10 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.WebLabel
-import org.churchpresenter.app.churchpresenter.tabs.webButton
-import org.churchpresenter.app.churchpresenter.tabs.webTab
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.web.WebLabel
+import org.churchpresenter.web.webButton
+import org.churchpresenter.web.webTab
+import org.churchpresenter.web.FakeWebOutput
 import kotlin.test.Test
 import org.churchpresenter.ui.screenshot.captureTo
 import org.churchpresenter.ui.screenshot.stackedThemes
@@ -49,7 +48,7 @@ class WebTabScreenshotTest {
         cefWindowsUnsupported: Boolean = false,
         schedule: Boolean = true,
         width: Dp? = null,
-        drive: ComposeUiTest.(PresenterManager) -> Unit = {},
+        drive: ComposeUiTest.(FakeWebOutput) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         webTab(
             settings = settings,
@@ -60,8 +59,8 @@ class WebTabScreenshotTest {
             includeAddToSchedule = schedule,
             width = width,
             themeMode = mode,
-        ) { presenter, _ ->
-            drive(presenter)
+        ) { output, _ ->
+            drive(output)
             waitForIdle()
             captureTo(file)
         }
@@ -123,28 +122,28 @@ class WebTabScreenshotTest {
      * arrive. Both are shot, the second by advancing the test clock past that delay.
      */
     @Test
-    fun `live, waiting for the first frame`() = shoot("live_waiting") { presenter ->
-        goLive(presenter)
+    fun `live, waiting for the first frame`() = shoot("live_waiting") { output ->
+        goLive(output)
     }
 
     @Test
-    fun `live, waiting long enough for the hint`() = shoot("live_waiting_hint") { presenter ->
-        goLive(presenter)
+    fun `live, waiting long enough for the hint`() = shoot("live_waiting_hint") { output ->
+        goLive(output)
         mainClock.advanceTimeBy(7_001)
         waitForIdle()
     }
 
     @Test
-    fun `live, mirroring the page on screen`() = shoot("live_mirror") { presenter ->
-        goLive(presenter)
-        presenter.setWebSnapshot(pageSnapshot())
+    fun `live, mirroring the page on screen`() = shoot("live_mirror") { output ->
+        goLive(output)
+        output.setSnapshot(pageSnapshot())
         waitForIdle()
     }
 
     @Test
-    fun `live, with something typed into the page`() = shoot("live_type_to_page") { presenter ->
-        goLive(presenter)
-        presenter.setWebSnapshot(pageSnapshot())
+    fun `live, with something typed into the page`() = shoot("live_type_to_page") { output ->
+        goLive(output)
+        output.setSnapshot(pageSnapshot())
         onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextReplacement("Sunday 10:30")
         waitForIdle()
     }
@@ -154,8 +153,8 @@ class WebTabScreenshotTest {
      * committed — the tab then draws its placeholder instead of starting JCEF.
      */
     @Test
-    fun `live, switched to interactive`() = shoot("live_interactive") { presenter ->
-        goLive(presenter)
+    fun `live, switched to interactive`() = shoot("live_interactive") { output ->
+        goLive(output)
         onNodeWithText(WebLabel.MIRROR).performClick()
         waitForIdle()
     }
@@ -168,7 +167,7 @@ class WebTabScreenshotTest {
             url = URL,
             title = "Church Notices",
         ),
-    ) { presenter -> presenter.setWebSnapshot(pageSnapshot()); waitForIdle() }
+    ) { output -> output.setSnapshot(pageSnapshot()); waitForIdle() }
 
     // ── The engine failing to start ─────────────────────────────────────────────────────────────
 
@@ -204,10 +203,10 @@ class WebTabScreenshotTest {
         waitForIdle()
     }
 
-    private fun ComposeUiTest.goLive(presenter: PresenterManager) {
-        presenter.setPresentingMode(Presenting.WEBSITE)
+    private fun ComposeUiTest.goLive(output: FakeWebOutput) {
+        output.goLive()
         waitForIdle()
-        presenter.setWebPageTitle("Church Notices — Sunday Services")
+        output.setTitle("Church Notices — Sunday Services")
         waitForIdle()
     }
 
