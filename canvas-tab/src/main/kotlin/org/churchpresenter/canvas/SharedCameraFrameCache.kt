@@ -50,7 +50,9 @@ enum class CameraFailure {
 }
 
 /** What one ffmpeg attempt produced — the success signal, and why it failed when it didn't. */
-private enum class CaptureOutcome { FRAMES, NO_DIMENSIONS, NO_FRAMES }
+/** Why a capture stopped: it delivered, it never announced a picture size, or it announced one and
+ *  then sent nothing. Internal because [SharedCameraFrameCache.streamFrames] returns it. */
+internal enum class CaptureOutcome { FRAMES, NO_DIMENSIONS, NO_FRAMES }
 
 /**
  * Shared camera frame cache — ensures only one capture process runs per device,
@@ -62,7 +64,8 @@ object SharedCameraFrameCache {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
 
-    private class CacheEntry(
+    /** Internal so the stream functions above can be driven from a test. */
+    internal class CacheEntry(
         val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
         val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
         var refCount: Int = 0,
@@ -234,7 +237,15 @@ object SharedCameraFrameCache {
      * arrived is what tells a dropped stream apart from a device that never opened; the two failing
      * outcomes are kept apart so the diagnostic can say which one it was.
      */
-    private suspend fun streamFrames(process: Process, entry: CacheEntry): CaptureOutcome {
+    /**
+     * Reads frames off a running ffmpeg until it stops, and says why it stopped.
+     *
+     * `internal` so it can be driven with a stand-in [Process]. Everything here is decoding and
+     * bookkeeping — finding the picture size in ffmpeg's chatter, reassembling BGRA frames that
+     * arrive in arbitrary chunks, deciding whether a stop was a failure — and none of it needs an
+     * actual camera or an ffmpeg binary.
+     */
+    internal suspend fun streamFrames(process: Process, entry: CacheEntry): CaptureOutcome {
         entry.ffmpegProcess = process
 
         // Drain stderr and extract video dimensions from ffmpeg output
@@ -301,7 +312,7 @@ object SharedCameraFrameCache {
     }
 
     /** Frames read into [entry] until the stream stops; the count is the caller's success signal. */
-    private suspend fun readFramesInto(process: Process, entry: CacheEntry, videoW: Int, videoH: Int): Int {
+    internal suspend fun readFramesInto(process: Process, entry: CacheEntry, videoW: Int, videoH: Int): Int {
         val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
         System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
 
@@ -327,7 +338,7 @@ object SharedCameraFrameCache {
         return frameCount
     }
 
-    private fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
+    internal fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
         try {
             var read = 0
             var endOfStream = false

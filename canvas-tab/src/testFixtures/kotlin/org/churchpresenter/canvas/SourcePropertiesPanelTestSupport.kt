@@ -90,18 +90,22 @@ fun sourcePanel(
     initial: SceneSource,
     appSettings: AppSettings? = null,
     fileChooser: CanvasFilePicker = CanvasFilePicker.None,
+    /** The capture card the editor should see. Defaults to none, as a test machine has. */
+    deckLink: CanvasDeckLink = CanvasDeckLink.None,
     block: ComposeUiTest.(get: () -> SceneSource) -> Unit,
 ) = runComposeUiTest {
     var current = initial
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(initial) }
+            androidx.compose.runtime.CompositionLocalProvider(LocalCanvasDeckLink provides deckLink) {
             SourcePropertiesPanel(
                 source = state,
                 appSettings = appSettings,
                 fileChooser = fileChooser,
                 onSourceUpdate = { updated -> state = updated; current = updated },
             )
+            }
         }
     }
     block { current }
@@ -432,3 +436,7 @@ fun ComposeUiTest.assertFieldShows(value: String, what: String) {
         .mapNotNull { it.config.getOrNull(SemanticsProperties.EditableText)?.text }
     assertEquals(true, value in shown, "$what must display \"$value\" — fields show $shown")
 }
+
+/** Every node whose text contains [text] — for labels too long to quote in full. */
+fun ComposeUiTest.onAllNodesWithTextContaining(text: String): List<androidx.compose.ui.semantics.SemanticsNode> =
+    onAllNodesWithText(text, substring = true).fetchSemanticsNodes(atLeastOneRootRequired = false)

@@ -63,7 +63,15 @@ private const val CDP_RESPONSE_TIMEOUT_S = 30L
 object SharedBrowserFrameCache {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val entries = mutableMapOf<String, CacheEntry>()
+    /**
+     * The live browser per source id.
+     *
+     * `internal` so a test can put an entry in with a connection to a fake CDP endpoint. Every
+     * public method here bails unless an entry exists with a connection, which used to mean a real
+     * Chromium and so meant none of them ever ran. Nothing outside this object writes to it in
+     * production — [acquire] and [release] are still the only callers that do.
+     */
+    internal val entries = mutableMapOf<String, CacheEntry>()
     private val httpClient = HttpClient.newHttpClient()
     private val isWindows = System.getProperty("os.name", "").lowercase().contains("win")
     @Volatile private var zombiesCleaned = false
@@ -78,7 +86,8 @@ object SharedBrowserFrameCache {
         })
     }
 
-    private class CacheEntry(
+    /** Internal so [captureFrame] can be driven from a test without a browser behind it. */
+    internal class CacheEntry(
         val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
         val error: MutableStateFlow<String?> = MutableStateFlow(null),
         val currentUrl: MutableStateFlow<String> = MutableStateFlow(""),
@@ -420,7 +429,15 @@ object SharedBrowserFrameCache {
     }
 
     /** Viewport, transparency and navigation for a freshly connected page. */
-    private suspend fun configurePage(
+    /**
+     * Sends the page setup a browser source needs: viewport, transparency, custom CSS, navigation.
+     *
+     * `internal` rather than private so it can be driven against a fake CDP endpoint. It is a long
+     * sequence of protocol commands whose *order* matters — the viewport has to be set before the
+     * page is told to navigate, or the first frames come back at the wrong size — and that ordering
+     * is exactly what a test can check without a browser.
+     */
+    internal suspend fun configurePage(
         cdp: CdpConnection,
         url: String,
         renderWidth: Int,
@@ -501,7 +518,13 @@ object SharedBrowserFrameCache {
     }
 
     /** Screenshots the page once into [entry]; false when nothing decodable came back. */
-    private suspend fun captureFrame(entry: CacheEntry, cdp: CdpConnection, first: Boolean): Boolean {
+    /**
+     * Asks for one screenshot and turns it into a frame.
+     *
+     * `internal` for the same reason as [configurePage]: everything here is decoding and error
+     * handling — a missing `data`, bytes that are not an image — and none of it needs Chromium.
+     */
+    internal suspend fun captureFrame(entry: CacheEntry, cdp: CdpConnection, first: Boolean): Boolean {
         val response = cdp.sendAsync("Page.captureScreenshot", buildJsonObject { put("format", "png") })
         val data = response?.get("data")?.jsonPrimitive?.contentOrNull
         if (data == null) {
@@ -523,7 +546,7 @@ object SharedBrowserFrameCache {
         return true
     }
 
-    private fun reportMissingScreenshot(response: JsonObject?) {
+    internal fun reportMissingScreenshot(response: JsonObject?) {
         if (response == null) {
             System.err.println("[BrowserSource] captureScreenshot returned null")
         } else {
