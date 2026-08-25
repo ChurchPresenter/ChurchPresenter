@@ -83,9 +83,10 @@ object TrainingDataLogger {
     /**
      * Deletes dated training-data logs older than [MAX_AGE_DAYS]. Runs at most once per process
      * (first write triggers it). Mirrors CrashReporter's age-based cleanup. Best-effort.
-     * Also sweeps the `.db` snapshots [org.churchpresenter.app.churchpresenter.viewmodel.STTManager]'s
-     * "Help Dev" capture writes into this same folder — they bypass this object's own write path
-     * entirely, but share its retention policy, so `internal` lets STTManager trigger this sweep too
+     * Also sweeps the `.db` snapshots `:stt-tab`'s `STTManager` "Help Dev" capture writes into this
+     * same folder — they bypass this object's own write path entirely, but share its retention
+     * policy. That class is in another module now and cannot see an `internal`, so `main.kt` passes
+     * this method to its `cleanupSharedLogs` constructor parameter when it builds the manager
      * (idempotent either way; whichever of the two runs first each process wins).
      */
     internal fun cleanupOldLogsOnce() {

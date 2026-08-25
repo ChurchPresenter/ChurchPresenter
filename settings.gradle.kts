@@ -126,6 +126,11 @@ include(":lower-third-tab")
 // :dictionary-tab — but unlike that pair it does depend on the tab module, because the preview is
 // the same compottie render with the same bundled fonts.
 include(":lower-third-settings-tab")
+// The Live Captions tab: the speech-to-text connection, the transcript and the translation it
+// streams, and the presenter that draws them. It reaches the outputs through its own SttOutput port,
+// so PresenterManager stays in the app; its STTManager is what the Bible tab's auto-follow, the
+// presenter windows and the Browser Source overlay all read the live transcript from.
+include(":stt-tab")
 // The Announcements tab: on-screen text with its slide and scroll animations, and the countdown
 // timers beside it. It speaks to the outputs through the AnnouncementsOutput port rather than
 // touching PresenterManager, so it knows nothing about the rest of the app.

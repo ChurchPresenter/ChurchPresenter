@@ -333,6 +333,7 @@ kotlin {
             implementation(projects.dictionaryTab)
             implementation(projects.dictionarySettingsTab)
             implementation(projects.lowerThirdTab)
+            implementation(projects.sttTab)
             implementation(projects.qaTab)
             implementation(projects.lowerThirdSettingsTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
@@ -499,6 +500,10 @@ dependencies {
     // here, and the options page that lists the same folder now lives in
     // :lower-third-settings-tab, so both read one definition rather than a copy each.
     add("jvmTestImplementation", testFixtures(projects.lowerThirdTab))
+    // SILENT_STT_URL: a loopback port that accepts and then says nothing. The Bible tab's
+    // auto-follow tests need an STT server that never answers, and getting that wrong once
+    // pushed jvmTest past CI's step budget -- so there is one definition, in the STT module.
+    add("jvmTestImplementation", testFixtures(projects.sttTab))
 }
 
 compose.desktop {

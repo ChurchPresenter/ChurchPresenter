@@ -7,7 +7,7 @@ import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import kotlin.test.AfterTest
 import kotlin.test.Test

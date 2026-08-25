@@ -33,7 +33,7 @@ import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.companionserver.ScheduleItemDto
 import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.qa.QAManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.theme.ThemeMode

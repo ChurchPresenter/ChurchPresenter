@@ -12,7 +12,8 @@ import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.SILENT_STT_URL
+import org.churchpresenter.stt.STTManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

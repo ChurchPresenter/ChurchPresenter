@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.tabs.actionButton
 import org.churchpresenter.app.churchpresenter.tabs.bibleSearch
 import org.churchpresenter.app.churchpresenter.tabs.bibleTab
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
