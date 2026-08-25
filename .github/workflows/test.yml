@@ -288,8 +288,7 @@ jobs:
           :statistics:detekt
           :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
           :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt
-          :lower-third-settings-tab:detekt :stt-tab:detekt
-          :lower-third-settings-tab:detekt :web-tab:detekt
+          :lower-third-settings-tab:detekt :stt-tab:detekt :web-tab:detekt
 
       - name: App unit tests
         id: unit_tests
