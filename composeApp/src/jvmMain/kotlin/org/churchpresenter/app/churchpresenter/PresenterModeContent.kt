@@ -18,7 +18,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.qa.QAPresenter
 import org.churchpresenter.qa.QAQRCodePresenter
 import org.churchpresenter.stt.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.web.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel

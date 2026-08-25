@@ -122,7 +122,8 @@ import org.churchpresenter.companionserver.SongCatalogResponse
 import org.churchpresenter.companionserver.SongDetailDto
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
-import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterCanvasOutput
+import org.churchpresenter.canvas.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
 import org.churchpresenter.lowerthird.LowerThirdTab
@@ -151,7 +152,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.stt.STTManager
-import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
+import org.churchpresenter.canvas.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -1672,7 +1673,9 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
-                                presenterManager = presenterManager,
+                                output = remember(presenterManager, presenting) {
+                                    PresenterCanvasOutput(presenterManager, presenting)
+                                },
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)

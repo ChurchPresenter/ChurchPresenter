@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.canvas.ScenePresenter
+
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween

@@ -21,22 +21,17 @@ compose.resources {
 
 dependencies {
     api(projects.settings)
-    // SceneSource and the rest of the scene model the tab edits.
     api(projects.coreModels)
     api(projects.resources)
     implementation(projects.uiComponents)
     implementation(projects.theme)
     implementation(projects.diagnostics)
-    // LocalShortcuts: the canvas has its own scoped bindings.
     implementation(projects.shortcuts)
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
-    // A video source is played straight into a pixel buffer by SceneSourceRenderer, so the tab
-    // needs VLC itself rather than the app's VideoPlayer composable.
-    implementation("uk.co.caprica:vlcj:4.8.3")
-    // SceneViewModel persists scenes as JSON.
+    implementation(libs.vlcj)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.zxing.core)
     implementation(libs.zxing.javase)
@@ -45,6 +40,13 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(testFixtures(projects.uiComponents))
     testImplementation(testFixtures(projects.coreModels))
+    // GraphicsDevice is abstract and the suite is headless, so the screen-geometry tests mock it.
+    testImplementation(libs.mockk)
+    // SharedBrowserFrameCache discovers pages over the DevTools HTTP endpoint, so its tests
+    // stand up a real little server rather than mocking a protocol.
+    testImplementation(libs.ktor.server.core)
+    testImplementation(libs.ktor.server.netty)
+    testImplementation(libs.ktor.server.websockets)
 }
 
 tasks.withType<Test>().configureEach {

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.canvas.PropertyTextField
+
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement

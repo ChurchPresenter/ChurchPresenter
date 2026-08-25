@@ -28,7 +28,14 @@ import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.StyledTextField
 
 @Composable
-internal fun PropertyTextField(label: String, value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
+/**
+ * A labelled text field for one property of a scene source.
+ *
+ * Public rather than `internal` because `:composeApp`'s Bible source editor draws with it — that
+ * editor stays in the app (it builds a `BibleViewModel`) and reaches this panel through the
+ * `bibleProperties` slot, so its fields have to match the rest of the panel exactly.
+ */
+fun PropertyTextField(label: String, value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
     var text by remember(value) { mutableStateOf(value) }
     StyledTextField(
         value = text,

@@ -353,6 +353,7 @@ kotlin {
             // The custom composables the tabs and dialogs are built from.
             implementation(projects.uiComponents)
             implementation(projects.shortcuts)
+            implementation(projects.canvasTab)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -403,7 +404,7 @@ kotlin {
             implementation(libs.bouncycastle.pkix)
             implementation(libs.bouncycastle.prov)
             // VLCJ for media playback (requires VLC installed on system)
-            implementation("uk.co.caprica:vlcj:4.8.3")
+            implementation(libs.vlcj)
             implementation("net.java.dev.jna:jna:5.18.1")
             implementation("net.java.dev.jna:jna-platform:5.18.1")
             implementation(libs.zxing.core)

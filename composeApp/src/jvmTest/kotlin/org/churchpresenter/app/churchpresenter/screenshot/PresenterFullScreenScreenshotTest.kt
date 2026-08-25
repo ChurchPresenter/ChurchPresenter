@@ -24,13 +24,9 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.core.models.scene.Scene
-import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
@@ -58,8 +54,8 @@ import org.churchpresenter.ui.screenshot.SCREENSHOT_ROOT
  * Only the presenters `:composeApp` still owns are shot here. A presenter that has moved into a
  * module is shot by that module, against that module's own `screenshots/` directory —
  * `AnnouncementsPresenterScreenshotTest` in `:announcements-tab`,
- * `DictionaryPresenterScreenshotTest` in `:dictionary-tab` and `QAPresenterScreenshotTest` in
- * `:qa-tab`.
+ * `DictionaryPresenterScreenshotTest` in `:dictionary-tab`, `QAPresenterScreenshotTest` in
+ * `:qa-tab` and `ScenePresenterScreenshotTest` in `:canvas-tab`.
  */
 class PresenterFullScreenScreenshotTest {
 
@@ -816,11 +812,6 @@ class PresenterFullScreenScreenshotTest {
         PresentationPresenter(frame = null, slide = slideBitmap(), frozen = true)
     }
 
-    // ── Canvas scenes ───────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a canvas scene`() = shoot("scene") { ScenePresenter(scene = scene()) }
-
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     private fun song(
@@ -1011,19 +1002,6 @@ class PresenterFullScreenScreenshotTest {
     )
 
 
-    private fun scene() = Scene(
-        name = "Welcome",
-        sources = listOf(
-            SceneSource.ColorSource(id = "c1", name = "Backdrop", color = "#1B2A5B"),
-            SceneSource.TextSource(
-                id = "t1",
-                name = "Welcome",
-                text = "Welcome to the 10:30 service",
-                transform = SourceTransform(x = 0.1f, y = 0.4f, width = 0.8f, height = 0.2f),
-                fontSize = 96,
-            ),
-        ),
-    )
 
     /** A stand-in for a rasterised deck slide. */
     private fun slideBitmap(): ImageBitmap {

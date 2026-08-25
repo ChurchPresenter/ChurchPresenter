@@ -35,7 +35,7 @@ import org.churchpresenter.lowerthird.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.qa.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.skia.Bitmap
