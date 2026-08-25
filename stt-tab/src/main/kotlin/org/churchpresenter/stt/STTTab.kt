@@ -75,6 +75,14 @@ fun STTTab(
     output: SttOutput,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /**
+     * Open the Live Captions settings dialog.
+     *
+     * The dialog itself stays in `:composeApp` with the other pages of the options dialog: it is
+     * positioned against the main window (`LocalMainWindowState`) and is a peer of the app's other
+     * settings screens, not part of the tab. The tab only knows that something opens.
+     */
+    onOpenSettings: () -> Unit = {},
 ) {
     val sttSettings = appSettings.sttSettings
     val connected by sttManager.connected
@@ -88,7 +96,6 @@ fun STTTab(
     val inProgressTranslation by sttManager.inProgressTranslation
 
     var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl.ifEmpty { "http://" }) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier.fillMaxSize().padding(12.dp),
@@ -156,7 +163,7 @@ fun STTTab(
             }
 
             ActionIconButton(
-                onClick = { showSettingsDialog = true },
+                onClick = onOpenSettings,
                 tooltipText = stringResource(Res.string.tooltip_stt_settings),
                 icon = Icons.Default.Tune,
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -305,13 +312,6 @@ fun STTTab(
         }
     }
 
-    if (showSettingsDialog) {
-        STTSettingsDialog(
-            appSettings = appSettings,
-            onSettingsChange = onSettingsChange,
-            onDismiss = { showSettingsDialog = false }
-        )
-    }
 }
 
 internal fun applyHighlighting(

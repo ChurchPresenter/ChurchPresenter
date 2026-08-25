@@ -130,6 +130,7 @@ import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterSttOutput
+import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
 import org.churchpresenter.stt.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
@@ -369,6 +370,10 @@ fun MainDesktop(
     val timerExpiredDefaultLabel = stringResource(Res.string.timer_expired)
 
     var showCrosswordTab by remember { mutableStateOf(false) }
+    // The Live Captions settings dialog is hosted here rather than inside the tab: it positions
+    // itself against the main window and is a peer of the app's other settings screens, so it
+    // stayed in :composeApp when the tab moved to :stt-tab.
+    var showSttSettings by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     val hasCompanionTabConnections = appSettings.companionSatelliteConnections.any { it.showInTab && it.host.isNotBlank() }
     val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab, hasCompanionTabConnections) {
@@ -1716,7 +1721,8 @@ fun MainDesktop(
                                         PresenterSttOutput(presenterManager, presenting)
                                     },
                                     appSettings = appSettings,
-                                    onSettingsChange = onSettingsChange
+                                    onSettingsChange = onSettingsChange,
+                                    onOpenSettings = { showSttSettings = true }
                                 )
                             }
 
@@ -1853,6 +1859,14 @@ fun MainDesktop(
         isVisible = showKonamiEasterEgg,
         onDismiss = { showKonamiEasterEgg = false },
     )
+
+    if (showSttSettings) {
+        STTSettingsDialog(
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange,
+            onDismiss = { showSttSettings = false }
+        )
+    }
 
     // Invite feedback on the launch after an unexpected shutdown (opt-in analytics only).
     var showCrashFeedback by remember {

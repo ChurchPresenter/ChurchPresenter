@@ -1,4 +1,4 @@
-package org.churchpresenter.stt
+package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
