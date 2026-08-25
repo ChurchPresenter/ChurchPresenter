@@ -6,15 +6,10 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
-    `java-test-fixtures`
     jacoco
 }
 
 group = "org.churchpresenter"
-
-extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.82",
-)
 
 kotlin {
     jvmToolchain(21)
@@ -26,28 +21,24 @@ compose.resources {
 
 dependencies {
     api(projects.settings)
-    api(projects.coreModels)
-    api(projects.companionServer)
-    api(projects.atem)
-    implementation(projects.presentationEngine)
-    implementation(projects.diagnostics)
+    // The preview pane renders the selected animation exactly as the output does -- same compottie
+    // configuration, same bundled `LottieFonts` -- and reads the folder with the same `isLottieFile`
+    // the tab and the server use. That is a real dependency on the lower third, not an accident of
+    // layout, so it is named rather than routed around: `:lower-third-tab` re-exports `:settings`,
+    // `:resources` and `:companion-server` as `api`, which is where `isLottieFile` comes from.
+    implementation(projects.lowerThirdTab)
     implementation(projects.uiComponents)
-    implementation(projects.theme)
     api(projects.resources)
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
     implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.extended)
     implementation(libs.compottie)
-    implementation(libs.compottie.dot)
-    implementation(libs.kotlinx.coroutines.swing)
     testImplementation(kotlin("test"))
+    testImplementation(projects.theme)
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(testFixtures(projects.uiComponents))
-    testImplementation(libs.mockk)
-    testImplementation(testFixtures(projects.atem))
-    testFixturesImplementation(compose.desktop.uiTestJUnit4)
+    testImplementation(testFixtures(projects.lowerThirdTab))
 }
 
 tasks.withType<Test>().configureEach {

@@ -5,6 +5,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import org.churchpresenter.lowerthird.NOT_LOTTIE_JSON
+import org.churchpresenter.lowerthird.lottieJson
+import org.churchpresenter.lowerthird.withLottieFolder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.companionserver.CompanionServer
 import org.junit.AfterClass

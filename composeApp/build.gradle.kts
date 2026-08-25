@@ -335,6 +335,7 @@ kotlin {
             implementation(projects.lowerThirdTab)
             implementation(projects.sttTab)
             implementation(projects.qaTab)
+            implementation(projects.lowerThirdSettingsTab)
             // The HTTP/WebSocket surface the app exposes: the wire format, the routes, TLS, the
             // tunnel and the instance-link client. What a remote request then does to the app is
             // `remote/` here.
@@ -494,6 +495,11 @@ dependencies {
     // app's remote-command and instance-link suites drive a real server, so they borrow the fixture
     // from the module that owns the wire format rather than standing one up twice.
     add("jvmTestImplementation", testFixtures(projects.companionServer))
+    // The Lottie-folder fixtures -- what counts as an animation on disk, and the wait for the
+    // scan that decides. The server tab's lower-third triggers are driven from a real folder
+    // here, and the options page that lists the same folder now lives in
+    // :lower-third-settings-tab, so both read one definition rather than a copy each.
+    add("jvmTestImplementation", testFixtures(projects.lowerThirdTab))
     // SILENT_STT_URL: a loopback port that accepts and then says nothing. The Bible tab's
     // auto-follow tests need an STT server that never answers, and getting that wrong once
     // pushed jvmTest past CI's step budget -- so there is one definition, in the STT module.

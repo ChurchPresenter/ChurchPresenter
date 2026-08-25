@@ -105,11 +105,11 @@
 **Source locations:**
 - `lower-third-tab/` (the `:lower-third-tab` Gradle module) — the tab itself: `LowerThirdTab.kt`,
   `LowerThirdPresenter.kt`, `LowerThirdOffscreenRenderer.kt`, `LottieFrameStream.kt` and `LottieFonts.kt`
-- `viewmodel/LowerThirdSettingsViewModel.kt` — stays in the app, with its settings tab
 - `data/settings/LottiePreset.kt`, `data/settings/LottieSearchReplacePair.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `companion-server/` — `LowerThirdSequencer.kt`, `LottieRenderCache.kt` (the pre-rendered `.lrcc` clip cache)
-- `dialogs/tabs/LowerThirdSettingsTab.kt`
+- `lower-third-settings-tab/` (the `:lower-third-settings-tab` Gradle module) — `LowerThirdSettingsTab.kt`
+  and `LowerThirdSettingsViewModel.kt`, the options-dialog page behind the tab
 
 ## Announcements & Timers
 - **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping.

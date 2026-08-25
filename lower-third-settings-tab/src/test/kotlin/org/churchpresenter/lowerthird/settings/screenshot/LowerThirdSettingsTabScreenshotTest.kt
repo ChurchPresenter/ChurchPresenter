@@ -1,8 +1,8 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.lowerthird.settings.screenshot
 
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.awaitFolderScan
+import org.churchpresenter.lowerthird.awaitFolderScan
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +20,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.StreamingSettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
+import org.churchpresenter.lowerthird.settings.LowerThirdSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
