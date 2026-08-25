@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
-import org.churchpresenter.canvas.PropertyTextField
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
@@ -19,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.ui.FontSettingsDropdown
+import org.churchpresenter.ui.tidyPreviewLines
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.canvas_font_color
@@ -57,11 +58,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.ui.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import androidx.compose.runtime.produceState
 import java.io.File
-import org.churchpresenter.bible.readTranslationTitle
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.ui.DropdownSelector
 import org.churchpresenter.ui.HorizontalAlignmentButtons
 import org.churchpresenter.ui.LabeledCheckbox
@@ -69,43 +67,46 @@ import org.churchpresenter.ui.SlimSlider
 import org.churchpresenter.ui.StyledTextField
 import org.churchpresenter.ui.VerticalAlignmentButtons
 
+/**
+ * The properties panel for a Bible scene source: which translation, which passage, and how the verse
+ * and its reference are drawn.
+ *
+ * It lives here rather than in `:composeApp` for one reason worth stating: it was a slot the app
+ * filled, the slot was left empty when the tab moved out, and a Bible source silently had no verse
+ * picker at all. Nothing in a build, a gate or a screenshot said so, because an empty slot renders
+ * as an empty panel. It reads its own translation through [CanvasBibleBrowser], so there is nothing
+ * left to forget to pass in.
+ */
 @Composable
 internal fun BibleProperties(
     source: SceneSource.BibleSource,
     onUpdate: (SceneSource) -> Unit,
-    appSettings: AppSettings?
+    appSettings: AppSettings?,
 ) {
     val availableFonts = rememberSystemFonts()
 
     val storageDir = appSettings?.bibleSettings?.storageDirectory ?: ""
     val bibleOptions by produceState(emptyList<Pair<String, String>>(), storageDir) {
-        value = withContext(Dispatchers.IO) {
-            if (storageDir.isEmpty()) emptyList()
-            else FileManager().getBibleFilesInDirectory(storageDir)
-                .map { fileName -> fileName to readTranslationTitle(File(storageDir, fileName)) }
-        }
+        value = withContext(Dispatchers.IO) { bibleTranslationsIn(storageDir) }
     }
 
     var selectedBibleFile by remember {
         mutableStateOf(appSettings?.bibleSettings?.translationList()?.firstOrNull()?.fileName ?: "")
     }
 
-    val bibleVm = remember(appSettings, selectedBibleFile) {
-        appSettings?.let {
-            val settings = it.copy(
-                bibleSettings = it.bibleSettings.withTranslations(
-                    listOf(BibleTranslationSettings(fileName = selectedBibleFile)),
-                ),
-            )
-            BibleViewModel(settings)
-        }
+    // Loading parses a whole translation, so it happens off the composition and only when the file
+    // being browsed changes.
+    val browser by produceState(CanvasBibleBrowser.Empty, storageDir, selectedBibleFile) {
+        value = withContext(Dispatchers.IO) { CanvasBibleBrowser.of(storageDir, selectedBibleFile) }
     }
 
-    val bible = bibleVm?.primaryBible?.value
-    val books = bibleVm?.books?.value ?: emptyList()
-    val verses = bibleVm?.verses?.value ?: emptyList()
-    val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
-    val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
+    val bible: Bible? = browser.bible
+    val books = browser.books
+    var selectedBookIndex by remember(browser) { mutableStateOf(0) }
+    var selectedChapter by remember(browser) { mutableStateOf(1) }
+    val verses = remember(browser, selectedBookIndex, selectedChapter) {
+        browser.verses(selectedBookIndex, selectedChapter)
+    }
 
     Text(stringResource(Res.string.canvas_source_bible), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -126,18 +127,21 @@ internal fun BibleProperties(
             selected = books.getOrElse(selectedBookIndex) { "" },
             onSelectedChange = { bookName ->
                 val idx = books.indexOf(bookName)
-                if (idx >= 0) bibleVm?.loadChapter(idx, 1)
+                if (idx >= 0) {
+                    selectedBookIndex = idx
+                    selectedChapter = 1
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
 
-        val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
+        val chapterCount = browser.chapterCount(selectedBookIndex)
         if (chapterCount > 0) {
             DropdownSelector(
                 label = stringResource(Res.string.chapter),
                 items = (1..chapterCount).map { it.toString() },
                 selected = selectedChapter.toString(),
-                onSelectedChange = { bibleVm?.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
+                onSelectedChange = { selectedChapter = it.toIntOrNull() ?: 1 },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -174,18 +178,14 @@ internal fun BibleProperties(
 
             Button(
                 onClick = {
-                    val bookName = books.getOrElse(selectedBookIndex) { "" }
-                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@Button
-                    val verseTexts = (startVerse..endVerse).mapNotNull { vNum ->
-                        bible.getVerseDetails(bookId, selectedChapter, vNum)?.second
-                    }
-                    val combinedText = verseTexts.joinToString(" ")
-                    val reference = if (startVerse == endVerse) {
-                        "$bookName $selectedChapter:$startVerse"
-                    } else {
-                        "$bookName $selectedChapter:$startVerse-$endVerse"
-                    }
-                    onUpdate(source.copy(verseText = combinedText, referenceText = reference))
+                    onUpdate(
+                        source.copy(
+                            verseText = browser.passage(selectedBookIndex, selectedChapter, startVerse, endVerse),
+                            referenceText = browser.reference(
+                                selectedBookIndex, selectedChapter, startVerse, endVerse,
+                            ),
+                        )
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
@@ -242,7 +242,12 @@ internal fun BibleProperties(
         fillWidth = true,
         // This panel loads its own translation, which is the one this source will project — so the
         // font preview quotes that rather than whatever the main window happens to have open.
-        previewLines = remember(bible) { previewLinesFrom(listOfNotNull(bible)) },
+        // Genesis 1:1 out of the translation this source will project, rather than whatever the
+        // main window happens to have open. The same two calls `:composeApp`'s `previewLinesFrom`
+        // makes; inlined because that helper is the app's and this module does not depend on it.
+        previewLines = remember(bible) {
+            tidyPreviewLines(listOfNotNull(bible?.getVerseDetails(1, 1, 1)?.second))
+        },
         onValueChange = { onUpdate(source.copy(fontFamily = it)) },
         modifier = Modifier.fillMaxWidth()
     )

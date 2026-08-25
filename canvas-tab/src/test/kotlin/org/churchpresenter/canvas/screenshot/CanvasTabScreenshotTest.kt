@@ -2,6 +2,7 @@
 
 package org.churchpresenter.canvas.screenshot
 
+import org.churchpresenter.canvas.CanvasVideoSupport
 import org.churchpresenter.canvas.SceneViewModel
 
 import androidx.compose.ui.test.ComposeUiTest
@@ -46,6 +47,12 @@ class CanvasTabScreenshotTest {
         width: Dp? = null,
         rootIndex: Int = 0,
         seed: SceneViewModel.() -> Unit = {},
+        /**
+         * What the tab is told about VLC. `available` by default, which is what an operator who can
+         * play video sees — the app hands the same thing in. Safe here because every video fixture
+         * points at a file that does not exist, so the placeholder is chosen before a player is built.
+         */
+        videoSupport: CanvasVideoSupport = CanvasVideoSupport(available = true),
         drive: ComposeUiTest.(SceneViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         // Every state starts from a scene: with none the tab has nothing to draw into and no source
@@ -55,6 +62,7 @@ class CanvasTabScreenshotTest {
             settings = settings,
             width = width,
             themeMode = mode,
+            videoSupport = videoSupport,
         ) { vm, _, _ ->
             drive(vm)
             waitForIdle()

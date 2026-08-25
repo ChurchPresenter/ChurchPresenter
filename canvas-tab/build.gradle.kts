@@ -12,6 +12,11 @@ plugins {
 
 group = "org.churchpresenter"
 
+extra["coverageFloors"] = mapOf(
+    "BRANCH" to "0.83",
+    "COMPLEXITY" to "0.80",
+)
+
 kotlin {
     jvmToolchain(21)
 }
@@ -24,6 +29,7 @@ dependencies {
     api(projects.settings)
     api(projects.coreModels)
     api(projects.resources)
+    implementation(projects.bible)
     implementation(projects.uiComponents)
     implementation(projects.theme)
     implementation(projects.diagnostics)

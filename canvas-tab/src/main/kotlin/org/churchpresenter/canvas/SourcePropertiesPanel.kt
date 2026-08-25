@@ -47,7 +47,6 @@ fun SourcePropertiesPanel(
      * everything else on this panel is self-contained. Empty by default, so a preview or a test
      * composes the rest of the panel without a Bible on disk.
      */
-    bibleProperties: @Composable (SceneSource.BibleSource, (SceneSource) -> Unit) -> Unit = { _, _ -> },
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(
@@ -108,7 +107,7 @@ fun SourcePropertiesPanel(
             is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
             is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
-            is SceneSource.BibleSource -> bibleProperties(source, onSourceUpdate)
+            is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)
         }
     }
 }

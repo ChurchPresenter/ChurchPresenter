@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -99,6 +100,7 @@ import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.ui.rememberTokenGate
 import org.churchpresenter.ui.resizedPanelWidth
 import org.jetbrains.compose.resources.painterResource
@@ -122,7 +124,8 @@ import org.churchpresenter.companionserver.SongCatalogResponse
 import org.churchpresenter.companionserver.SongDetailDto
 import org.churchpresenter.companionserver.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
-import org.churchpresenter.app.churchpresenter.composables.BibleProperties
+import org.churchpresenter.canvas.CanvasVideoSupport
+import org.churchpresenter.canvas.LocalCanvasVideoSupport
 import org.churchpresenter.app.churchpresenter.viewmodel.FileChooserCanvasFilePicker
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterCanvasOutput
 import org.churchpresenter.canvas.CanvasTab
@@ -1671,7 +1674,17 @@ fun MainDesktop(
                                 }
                             )
 
-                            Tabs.CANVAS -> CanvasTab(
+                            Tabs.CANVAS -> CompositionLocalProvider(
+                                // Whether VLC loaded is worked out once at startup; :canvas-tab has
+                                // no way to ask, so it is handed in. Left out, every video scene
+                                // source reports "VLC not found" on a machine where VLC works.
+                                LocalCanvasVideoSupport provides remember {
+                                    CanvasVideoSupport(
+                                        available = isVlcAvailable,
+                                        loadFailed = isVlcLoadFailed,
+                                    )
+                                }
+                            ) { CanvasTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
@@ -1683,11 +1696,8 @@ fun MainDesktop(
                                     currentScheduleActions.addScene(sceneId, sceneName)
                                 },
                                 fileChooser = remember { FileChooserCanvasFilePicker() },
-                                bibleProperties = { bibleSource, onUpdate ->
-                                    BibleProperties(bibleSource, onUpdate, appSettings)
-                                },
                                 dialogDismissSignal = dialogDismissSignal
-                            )
+                            ) }
 
                             Tabs.QA -> if (qaManager != null) {
                                 QATab(

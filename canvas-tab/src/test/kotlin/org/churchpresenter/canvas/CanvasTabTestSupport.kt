@@ -5,6 +5,7 @@ package org.churchpresenter.canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
@@ -72,6 +73,15 @@ internal fun canvasTab(
     settings: (AppSettings) -> AppSettings = { it },
     width: Dp? = null,
     themeMode: ThemeMode? = null,
+    /**
+     * What the tab is told about VLC.
+     *
+     * The app hands this in from what it worked out at startup; left at the default the video source
+     * reports "VLC not found", which is right for a machine without it and wrong for every other. A
+     * test can say `available = true` safely as long as the file it points at does not exist — the
+     * placeholder branch is chosen before any player is built.
+     */
+    videoSupport: CanvasVideoSupport = CanvasVideoSupport.Unavailable,
     block: ComposeUiTest.(vm: SceneViewModel, output: FakeCanvasOutput, reports: CanvasReports) -> Unit,
 ) {
     // :composeApp latched InstanceLinkLogger here; that class is in :companion-server and is not on
@@ -87,6 +97,7 @@ internal fun canvasTab(
         runComposeUiTest {
             setContent {
                 ThemedForTest(themeMode) {
+                    CompositionLocalProvider(LocalCanvasVideoSupport provides videoSupport) {
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                         CanvasTab(
                             appSettings = settings(AppSettings()),
@@ -95,6 +106,7 @@ internal fun canvasTab(
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
                         )
+                    }
                     }
                 }
             }
