@@ -73,9 +73,9 @@ import org.churchpresenter.settings.swapBibleTranslations
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutAction
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.shortcuts.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.isMultiTranslationPresentation

@@ -116,8 +116,8 @@ import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.shortcuts.LocalShortcuts
+import org.churchpresenter.shortcuts.ShortcutMap
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.ui.presenterScreenBounds
 

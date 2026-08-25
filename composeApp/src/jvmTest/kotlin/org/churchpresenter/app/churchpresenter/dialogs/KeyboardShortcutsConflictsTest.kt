@@ -20,7 +20,7 @@ import androidx.compose.ui.test.withKeyDown
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutAction
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

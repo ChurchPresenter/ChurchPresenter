@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.shortcuts.keyCaps
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,8 +57,7 @@ import org.churchpresenter.resources.generated.resources.shortcut_unbound
 import org.churchpresenter.ui.ConditionalTooltipArea
 import org.churchpresenter.ui.TooltipIconButton
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.keyCaps
+import org.churchpresenter.shortcuts.ShortcutAction
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

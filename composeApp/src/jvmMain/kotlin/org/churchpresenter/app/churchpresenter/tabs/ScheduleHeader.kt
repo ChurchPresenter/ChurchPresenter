@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.shortcuts.label
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipPlacement
@@ -8,9 +10,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.LocalShortcuts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

@@ -1,13 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.core.utils.keyDown
+
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.keyDown
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

@@ -107,6 +107,11 @@ include(":statistics")
 // dropdowns, settings fields, segmented buttons, the colour picker, tooltips and the rest. Generic
 // by construction: it knows the theme and the resources, and nothing else about the app.
 include(":ui-components")
+// The keyboard shortcuts: what actions there are, what they are currently bound to, and how a
+// binding is written out for a human to read. Its own module because every tab needs it — six of
+// them still in :composeApp, and each one that moves out would otherwise have to reach back in.
+// Not part of :ui-components, which is deliberately kept free of a production :settings dependency.
+include(":shortcuts")
 // The Dictionary tab, whole: the Strong's browser and its "In Scripture" panel, the view model
 // behind them, the settings tab that styles the output, and the presenter that draws it. The data
 // it reads is :dictionary; this is everything the operator and the audience see of it.

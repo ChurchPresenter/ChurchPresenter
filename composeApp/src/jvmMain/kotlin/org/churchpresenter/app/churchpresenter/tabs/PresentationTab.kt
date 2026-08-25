@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.shortcuts.label
+import org.churchpresenter.shortcuts.pairLabel
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.Image
@@ -167,12 +170,10 @@ import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.shortcuts.LocalShortcuts
+import org.churchpresenter.shortcuts.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource

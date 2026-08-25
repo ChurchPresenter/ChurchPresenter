@@ -1,7 +1,7 @@
-package org.churchpresenter.app.churchpresenter.models
+package org.churchpresenter.shortcuts
 
 import androidx.compose.ui.input.key.Key
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

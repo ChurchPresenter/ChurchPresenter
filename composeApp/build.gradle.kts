@@ -352,6 +352,7 @@ kotlin {
             api(projects.resources)
             // The custom composables the tabs and dialogs are built from.
             implementation(projects.uiComponents)
+            implementation(projects.shortcuts)
             implementation(projects.songlibrary)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
