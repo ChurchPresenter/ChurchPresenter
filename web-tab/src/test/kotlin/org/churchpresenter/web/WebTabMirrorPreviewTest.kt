@@ -3,6 +3,7 @@
 package org.churchpresenter.web
 
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
@@ -145,5 +146,19 @@ class WebTabMirrorPreviewTest {
         // belongs on screen — a leftover spinner there would sit on top of a live page.
         onNode(spinner).assertDoesNotExist()
         assertTrue(hasWebButton(WebLabel.FOCUS_FIRST_INPUT).not(), "mirror-only controls go with it")
+    }
+
+    @Test
+    fun `a tall narrow panel fits the preview to its height instead of its width`() {
+        // The preview keeps the output's aspect ratio and picks the larger of the two fits. Every
+        // other test here gets the whole test window, which is wide, so only the fit-by-width arm
+        // ever ran; a tall narrow panel is what an operator with the sidebar open actually has.
+        webTab(width = 300.dp) { output, _ ->
+            output.live = true
+            output.setSnapshot(ImageBitmap(64, 64))
+            waitForIdle()
+
+            onNode(spinner).assertDoesNotExist()
+        }
     }
 }

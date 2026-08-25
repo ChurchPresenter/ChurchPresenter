@@ -4,6 +4,7 @@ package org.churchpresenter.web
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.ScrollWheel
 import androidx.compose.ui.test.performMouseInput
 import io.mockk.every
 import io.mockk.mockk
@@ -159,5 +160,82 @@ class WebInputForwardingTest {
 
             assertEquals(null, output.liveBrowser)
         }
+    }
+
+    @Test
+    fun `moving the pointer across the mirror forwards move events`() {
+        val component = ShowingCanvas(800, 600)
+        val browser = browserOn(component)
+
+        webTab { output, _ ->
+            output.live = true
+            output.liveBrowser = browser
+            output.setSnapshot(ImageBitmap(400, 300))
+            waitForIdle()
+
+            onRoot().performMouseInput {
+                moveTo(center)
+                moveBy(androidx.compose.ui.geometry.Offset(5f, 5f))
+                moveBy(androidx.compose.ui.geometry.Offset(5f, 5f))
+            }
+            waitForIdle()
+        }
+        drainEdt()
+
+        // The move path is throttled to one event per 50ms, and synthetic moves all land inside
+        // the same millisecond — so a burst of them forwards at most one. That throttle is the
+        // point: without it, dragging across the mirror would flood the live page with events.
+        assertTrue(mouseEventsSentTo(browser).size <= 1, "the 20fps throttle should hold the burst")
+    }
+
+    @Test
+    fun `dragging across the mirror forwards while the button is down`() {
+        val component = ShowingCanvas(800, 600)
+        val browser = browserOn(component)
+
+        webTab { output, _ ->
+            output.live = true
+            output.liveBrowser = browser
+            output.setSnapshot(ImageBitmap(400, 300))
+            waitForIdle()
+
+            onRoot().performMouseInput {
+                moveTo(center)
+                press()
+                moveBy(androidx.compose.ui.geometry.Offset(10f, 10f))
+                moveBy(androidx.compose.ui.geometry.Offset(10f, 10f))
+                release()
+            }
+            waitForIdle()
+        }
+        drainEdt()
+
+        // A drag is how an operator selects text or pans a map on the live page. The press gets
+        // through; the moves behind it are throttled as above.
+        assertTrue(mouseEventsSentTo(browser).isNotEmpty(), "the drag never reached the browser")
+    }
+
+    @Test
+    fun `scrolling sideways forwards a horizontal wheel event`() {
+        val component = ShowingCanvas(800, 600)
+        val browser = browserOn(component)
+
+        webTab { output, _ ->
+            output.live = true
+            output.liveBrowser = browser
+            output.setSnapshot(ImageBitmap(400, 300))
+            waitForIdle()
+
+            onRoot().performMouseInput {
+                moveTo(center)
+                scroll(1f, ScrollWheel.Horizontal)
+            }
+            waitForIdle()
+        }
+        drainEdt()
+
+        // Horizontal scroll takes its own arm, sending SHIFT_DOWN_MASK, because that is how the
+        // platform expresses a sideways wheel to a browser.
+        assertTrue(wheelEventsSentTo(browser).isNotEmpty(), "no sideways scroll reached the browser")
     }
 }

@@ -21,12 +21,6 @@ import org.cef.CefApp
 import org.cef.CefClient
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
-import org.cef.handler.CefDisplayHandlerAdapter
-import org.cef.handler.CefLifeSpanHandlerAdapter
-import org.cef.handler.CefRequestHandlerAdapter
-import org.cef.handler.CefResourceRequestHandlerAdapter
-import org.cef.handler.CefResourceRequestHandler
-import org.cef.misc.BoolRef
 import org.cef.network.CefRequest
 import java.awt.Rectangle
 import java.awt.Robot
@@ -389,47 +383,11 @@ fun EmbeddedWebView(
     }
 
     DisposableEffect(Unit) {
-        val displayHandler = object : CefDisplayHandlerAdapter() {
-            override fun onAddressChange(browser: CefBrowser, frame: CefFrame, url: String) {
-                handleAddressChange(frame, url, onUrlChanged)
-            }
-            override fun onTitleChange(browser: CefBrowser, title: String) {
-                onTitleChanged?.invoke(title)
-            }
-        }
-        client.addDisplayHandler(displayHandler)
-
+        client.addDisplayHandler(displayHandler(onUrlChanged, onTitleChanged))
         // Intercept popups (target="_blank" links) — load in current browser instead
-        val lifeSpanHandler = object : CefLifeSpanHandlerAdapter() {
-            override fun onBeforePopup(
-                browser: CefBrowser, frame: CefFrame, targetUrl: String?, targetFrameName: String?
-            ): Boolean {
-                handlePopupTarget(browser, targetUrl)
-                return true // cancel the popup
-            }
-        }
-        client.addLifeSpanHandler(lifeSpanHandler)
-
+        client.addLifeSpanHandler(popupCancellingHandler())
         // Override User-Agent for mobile emulation
-        val requestHandler = object : CefRequestHandlerAdapter() {
-            override fun getResourceRequestHandler(
-                browser: CefBrowser?, frame: CefFrame?, request: CefRequest?,
-                isNavigation: Boolean, isDownload: Boolean, requestInitiator: String?,
-                disableDefaultHandling: BoolRef?
-            ): CefResourceRequestHandler {
-                return object : CefResourceRequestHandlerAdapter() {
-                    override fun onBeforeResourceLoad(
-                        browser: CefBrowser?,
-                        frame: CefFrame?,
-                        request: CefRequest?,
-                    ): Boolean {
-                        applyMobileUserAgent(navController?.mobileMode == true, request)
-                        return false
-                    }
-                }
-            }
-        }
-        client.addRequestHandler(requestHandler)
+        client.addRequestHandler(mobileUserAgentHandler { navController?.mobileMode == true })
 
         // Snapshot timer — captures browser via Robot screen capture
         val robot = try { Robot() } catch (_: Exception) { null }
