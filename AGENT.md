@@ -44,7 +44,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `remote/`        | What a remote request *does* to the app — the server itself is `:companion-server` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
-| `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
+| `models/`        | Only the two Companion UI states — ShortcutAction moved to `:shortcuts` |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
 | `dialogs/`       | All dialogs and settings dialog tabs — except the Dictionary and Lower Third ones, in `:dictionary-settings-tab` and `:lower-third-settings-tab` |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
@@ -88,6 +88,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `dictionary/`          | `:dictionary`          | The bundled Strong's dictionary and the interlinear index over it — 18 MB of data  | [AGENT.md](dictionary/AGENT.md)          |
 | `resources/`           | `:resources`           | Every asset the app draws or reads — icons, the 35 locales, fonts, bundled files   | [AGENT.md](resources/AGENT.md)           |
 | `ui-components/`       | `:ui-components`       | The app's own widget library — the custom composables tabs and dialogs are built from | [AGENT.md](ui-components/AGENT.md)     |
+| `shortcuts/`           | `:shortcuts`           | The keyboard shortcuts — the actions, what they are bound to, and how a binding reads | [AGENT.md](shortcuts/AGENT.md)           |
 | `dictionary-tab/`      | `:dictionary-tab`      | The Dictionary tab — its browser, its view model and its presenter                | [AGENT.md](dictionary-tab/AGENT.md)      |
 | `dictionary-settings-tab/` | `:dictionary-settings-tab` | The options-dialog page that styles a Strong's entry for the screen           | [AGENT.md](dictionary-settings-tab/AGENT.md) |
 | `lower-third-settings-tab/` | `:lower-third-settings-tab` | The options-dialog page that picks a Lottie preset and places the band        | [AGENT.md](lower-third-settings-tab/AGENT.md) |
@@ -134,7 +135,8 @@ they must be set **above everything else** in the file:
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
   `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,
-  `:announcements-tab`, `:qa-tab`, `:stt-tab`, `:companion-server` and `:statistics` name none.
+  `:announcements-tab`, `:qa-tab`, `:stt-tab`, `:shortcuts`, `:companion-server` and
+  `:statistics` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

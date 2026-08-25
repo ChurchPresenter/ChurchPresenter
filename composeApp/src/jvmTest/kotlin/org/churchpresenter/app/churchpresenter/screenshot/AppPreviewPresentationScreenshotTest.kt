@@ -7,7 +7,7 @@ import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import kotlin.test.Test
 import org.churchpresenter.ui.screenshot.RENDER_TIMEOUT_MS
 

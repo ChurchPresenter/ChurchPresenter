@@ -20,7 +20,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 

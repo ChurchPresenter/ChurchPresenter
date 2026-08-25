@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.shortcuts.label
+import org.churchpresenter.shortcuts.searchText
+
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -86,11 +89,9 @@ import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.ui.SearchField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.searchText
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutScope
+import org.churchpresenter.shortcuts.ShortcutMap
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

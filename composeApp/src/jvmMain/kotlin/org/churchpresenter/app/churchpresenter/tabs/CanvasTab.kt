@@ -99,8 +99,8 @@ import org.churchpresenter.ui.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
 import org.churchpresenter.ui.formatAspectRatio
 import org.churchpresenter.core.models.scene.SceneSource

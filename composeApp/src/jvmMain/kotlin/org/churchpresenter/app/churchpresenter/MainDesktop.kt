@@ -112,8 +112,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KonamiEasterEggDialog
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutScope
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.companionserver.InstanceLinkStatus
 import org.churchpresenter.companionserver.ScheduleItemDto
@@ -136,11 +136,11 @@ import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterWebOutput
 import org.churchpresenter.web.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.shortcuts.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel

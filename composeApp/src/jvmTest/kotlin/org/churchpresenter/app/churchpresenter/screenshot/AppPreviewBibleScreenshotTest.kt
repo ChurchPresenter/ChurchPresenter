@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.screenshot
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import kotlin.test.Test
 
 class AppPreviewBibleScreenshotTest {

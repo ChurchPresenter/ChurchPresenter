@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.core.utils
 
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key

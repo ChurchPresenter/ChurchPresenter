@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.shortcuts.pairLabel
+
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.ui.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -75,10 +77,9 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.shortcuts.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.availableSongColumns
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents

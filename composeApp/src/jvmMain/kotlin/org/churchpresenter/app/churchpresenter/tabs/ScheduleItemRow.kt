@@ -8,7 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.ui.finalPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.shortcuts.label
 import org.churchpresenter.ui.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

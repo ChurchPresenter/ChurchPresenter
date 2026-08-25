@@ -251,6 +251,12 @@ jobs:
               - 'ui-components/**'      # implementation(projects.uiComponents)
               - 'theme/**'              # implementation(projects.theme)
               - 'diagnostics/**'        # implementation(projects.diagnostics)
+            shortcuts:
+              - *shared
+              - 'shortcuts/**'
+              - 'settings/**'           # api(projects.settings) — the saved bindings
+              - 'core-models/**'        # api(projects.coreModels) — KeyChord, Tabs
+              - 'resources/**'          # api(projects.resources) — every action name and key alias
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -286,7 +292,7 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
-          :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
+          :shortcuts:detekt :ui-components:detekt :dictionary-tab:detekt :dictionary-settings-tab:detekt
           :announcements-tab:detekt :qa-tab:detekt :lower-third-tab:detekt
           :lower-third-settings-tab:detekt :stt-tab:detekt :web-tab:detekt
 
@@ -457,6 +463,14 @@ jobs:
       - name: UI components coverage floor
         if: always() && steps.modules.outputs.uicomponents == 'true'
         run: ./gradlew :ui-components:jacocoTestCoverageVerification -x test
+
+      - name: Shortcuts tests
+        if: always() && steps.modules.outputs.shortcuts == 'true'
+        run: ./gradlew :shortcuts:test
+
+      - name: Shortcuts coverage floor
+        if: always() && steps.modules.outputs.shortcuts == 'true'
+        run: ./gradlew :shortcuts:jacocoTestCoverageVerification -x test
 
       - name: Dictionary tab tests
         if: always() && steps.modules.outputs.dictionarytab == 'true'
@@ -670,6 +684,7 @@ jobs:
             song-chords/build/test-results/**/TEST-*.xml
             statistics/build/test-results/**/TEST-*.xml
             ui-components/build/test-results/**/TEST-*.xml
+            shortcuts/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             dictionary/build/test-results/**/TEST-*.xml
             dictionary-tab/build/test-results/**/TEST-*.xml
@@ -704,6 +719,7 @@ jobs:
             Song chords
             Statistics
             UI components
+            Shortcuts
             Bible
             Dictionary
             Dictionary tab
@@ -865,6 +881,8 @@ jobs:
             statistics/build/test-results/
             ui-components/build/reports/tests/
             ui-components/build/test-results/
+            shortcuts/build/reports/tests/
+            shortcuts/build/test-results/
             bible/build/reports/tests/
             bible/build/test-results/
             dictionary/build/reports/tests/

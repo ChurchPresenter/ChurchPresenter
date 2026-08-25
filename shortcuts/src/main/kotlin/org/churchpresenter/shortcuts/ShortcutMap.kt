@@ -1,11 +1,9 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.shortcuts
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.input.key.KeyEvent
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 
 /**
  * The bindings actually in force — defaults with the user's overrides applied.

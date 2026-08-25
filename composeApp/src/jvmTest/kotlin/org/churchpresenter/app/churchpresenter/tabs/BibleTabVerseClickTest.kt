@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.core.utils.keyDown
+
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsNodeInteraction

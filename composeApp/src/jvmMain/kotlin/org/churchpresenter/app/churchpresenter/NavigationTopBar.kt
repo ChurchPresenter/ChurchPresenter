@@ -88,8 +88,8 @@ import org.churchpresenter.resources.generated.resources.menu_settings
 import org.churchpresenter.resources.generated.resources.menu_statistics
 import org.churchpresenter.resources.generated.resources.system_theme
 import org.churchpresenter.app.churchpresenter.data.Language
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.LocalShortcuts
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource

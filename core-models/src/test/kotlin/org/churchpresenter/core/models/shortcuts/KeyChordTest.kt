@@ -1,9 +1,10 @@
 package org.churchpresenter.core.models.shortcuts
 
+import org.churchpresenter.core.utils.keyDown
+
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.utils.keyDown
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

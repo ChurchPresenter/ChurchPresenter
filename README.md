@@ -118,6 +118,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.
 > `./gradlew :song-chords:test`.
 >
+> **[`shortcuts/`](./shortcuts)** — the keyboard shortcuts: every action the app can be driven
+> by, what each is currently bound to once the operator's overrides are applied, and how a
+> binding is written out — as a label, as individual keycaps, and as the text the shortcuts
+> search matches. Its own module because every tab reads it. `./gradlew :shortcuts:test`.
+>
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,

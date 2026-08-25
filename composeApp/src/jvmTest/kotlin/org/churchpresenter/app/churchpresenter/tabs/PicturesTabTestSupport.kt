@@ -25,8 +25,8 @@ import org.churchpresenter.settings.PictureSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.shortcuts.LocalShortcuts
+import org.churchpresenter.shortcuts.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.awt.image.BufferedImage

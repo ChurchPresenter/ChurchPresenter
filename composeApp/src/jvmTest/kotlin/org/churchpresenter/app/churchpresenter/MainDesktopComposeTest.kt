@@ -35,7 +35,7 @@ import org.churchpresenter.companionserver.SelectBibleVerseRequest
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

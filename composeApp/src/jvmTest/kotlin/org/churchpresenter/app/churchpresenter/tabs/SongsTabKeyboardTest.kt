@@ -15,8 +15,8 @@ import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.shortcuts.ShortcutAction
+import org.churchpresenter.shortcuts.ShortcutMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

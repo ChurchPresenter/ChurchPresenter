@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.core.models.tabs.Tabs
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier

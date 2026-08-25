@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.models
+package org.churchpresenter.shortcuts
 
 import androidx.compose.ui.input.key.Key
 import org.churchpresenter.resources.generated.resources.Res
@@ -59,7 +59,7 @@ import org.churchpresenter.resources.generated.resources.shortcut_description_sa
 import org.churchpresenter.resources.generated.resources.shortcut_description_save_schedule_as
 import org.churchpresenter.resources.generated.resources.shortcut_description_settings
 import org.churchpresenter.resources.generated.resources.shortcut_description_undo
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.tabs.Tabs
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.jetbrains.compose.resources.StringResource
 

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.shortcuts
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.Key
@@ -24,7 +24,6 @@ import org.churchpresenter.resources.generated.resources.key_name_space
 import org.churchpresenter.resources.generated.resources.key_name_tab
 import org.churchpresenter.resources.generated.resources.shortcut_unbound
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.jetbrains.compose.resources.stringResource
 
 /** Chords of a multi-key binding are shown separated by this, e.g. `← / ↑`. */
