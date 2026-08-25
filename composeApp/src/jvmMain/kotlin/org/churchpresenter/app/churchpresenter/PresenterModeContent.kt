@@ -17,13 +17,13 @@ import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.qa.QAPresenter
 import org.churchpresenter.qa.QAQRCodePresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
+import org.churchpresenter.stt.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.web.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 
 /**
  * Draws whatever [mode] means for one output: the dispatch from [Presenting] to the matching

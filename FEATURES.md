@@ -146,10 +146,11 @@
 - **Live translation** — show transcription, translation, or both together in stacked or side-by-side layouts.
 
 **Source locations:**
-- `tabs/STTTab.kt` — main UI
-- `viewmodel/STTManager.kt`
+- `stt-tab/` (the `:stt-tab` Gradle module) — the tab itself: `STTTab.kt`, `STTManager.kt`,
+  `STTPresenter.kt`, `SttDripFeed.kt` and the `SttOutput` port it drives the screens through
+- `viewmodel/PresenterSttOutput.kt` — the app's implementation of that port, over `PresenterManager`
+- `dialogs/STTSettingsDialog.kt` — stays in the app, with the other settings screens
 - `data/settings/STTSettings.kt`
-- `presenter/STTPresenter.kt`
 
 ## Audience Q&A
 - **Questions from the congregation** — people scan a QR code and submit questions from their phones.

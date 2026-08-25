@@ -91,6 +91,7 @@ jobs:
           :qa-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :lower-third-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :lower-third-settings-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :stt-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
           :web-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
@@ -112,6 +113,7 @@ jobs:
             qa-tab/screenshots
             lower-third-tab/screenshots
             lower-third-settings-tab/screenshots
+            stt-tab/screenshots
             web-tab/screenshots
           retention-days: 30
           if-no-files-found: error

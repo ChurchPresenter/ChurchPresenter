@@ -126,6 +126,11 @@ include(":lower-third-tab")
 // :dictionary-tab — but unlike that pair it does depend on the tab module, because the preview is
 // the same compottie render with the same bundled fonts.
 include(":lower-third-settings-tab")
+// The Live Captions tab: the speech-to-text connection, the transcript and the translation it
+// streams, and the presenter that draws them. It reaches the outputs through its own SttOutput port,
+// so PresenterManager stays in the app; its STTManager is what the Bible tab's auto-follow, the
+// presenter windows and the Browser Source overlay all read the live transcript from.
+include(":stt-tab")
 // The Web tab: the embedded Chromium browser, its bookmarks and navigation, and the presenter that
 // puts a live page on the screen. It reaches the outputs through its own WebOutput port, so
 // PresenterManager stays in the app; its CefManager is what main.kt initialises JCEF through and
