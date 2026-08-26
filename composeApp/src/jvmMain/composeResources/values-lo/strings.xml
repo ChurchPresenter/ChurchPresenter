@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">ບາງທີພາຍຫຼັງ</string>
     <string name="story_prompt_reassurance">ຈະບໍ່ມີການເຜີຍແຜ່ຫຍັງ ຖ້າທ່ານບໍ່ອະນຸຍາດ.</string>
     <string name="menu_developer_story_prompt">ກ່ອງໂຕ້ຕອບ "ແບ່ງປັນເລື່ອງລາວຂອງທ່ານ"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">ຄົ້ນຫາຟອນ…</string>
+    <string name="font_picker_clear_search">ລ້າງການຄົ້ນຫາ</string>
+    <string name="font_group_recent">ໃຊ້ຫຼ້າສຸດ</string>
+    <string name="font_group_recommended">ເໝາະສຳລັບການສາຍ</string>
+    <string name="font_group_all">ຟອນທັງໝົດ</string>
+    <string name="font_group_matches">ຜົນທີ່ກົງກັນ</string>
+    <string name="font_category_sans">ບໍ່ມີຂາ</string>
+    <string name="font_category_serif">ມີຂາ</string>
+    <string name="font_category_mono">ໂມໂນ</string>
+    <string name="font_category_display">ຕົກແຕ່ງ</string>
+    <string name="font_preview">ເບິ່ງກ່ອນ</string>
+    <string name="font_preview_sample">ຂໍ້ຄວາມຕົວຢ່າງດ້ວຍຟອນທີ່ເລືອກ</string>
+    <string name="font_warning_no_cyrillic">%1$s ບໍ່ມີຕົວອັກສອນຊີຣິລລິກ — ຂໍ້ພະຄຳພີຊີຣິລລິກຈະສະແດງເທິງຈໍດ້ວຍຟອນອື່ນ</string>
+    <string name="font_warning_no_hebrew">%1$s ບໍ່ມີຕົວອັກສອນເຮັບເລີ — ຂໍ້ຄວາມເຮັບເລີຈະສະແດງເທິງຈໍດ້ວຍຟອນອື່ນ</string>
+    <string name="font_hidden_note">ເຊື່ອງຟອນສັນຍາລັກ ແລະ ລະບົບ %1$d ລາຍການ · ສະແດງ %2$d ຈາກ %3$d</string>
+    <string name="font_shown_note">ສະແດງ %1$d ຈາກ %2$d</string>
+    <string name="font_picker_keys">↑↓ ເລື່ອນ · ⏎ ເລືອກ · esc ປິດ</string>
 </resources>

@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">सायद पछि</string>
     <string name="story_prompt_reassurance">तपाईंको अनुमतिबिना केही पनि प्रकाशित हुँदैन।</string>
     <string name="menu_developer_story_prompt">"आफ्नो कथा सुनाउनुहोस्" संवाद</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">फन्ट खोज्नुहोस्…</string>
+    <string name="font_picker_clear_search">खोज खाली गर्नुहोस्</string>
+    <string name="font_group_recent">भर्खरै प्रयोग गरिएका</string>
+    <string name="font_group_recommended">प्रोजेक्सनका लागि राम्रा</string>
+    <string name="font_group_all">सबै फन्ट</string>
+    <string name="font_group_matches">मिल्दा</string>
+    <string name="font_category_sans">स्यान्स</string>
+    <string name="font_category_serif">सेरिफ</string>
+    <string name="font_category_mono">मोनो</string>
+    <string name="font_category_display">डिस्प्ले</string>
+    <string name="font_preview">पूर्वदृश्य</string>
+    <string name="font_preview_sample">छानिएको फन्टमा नमुना पाठ</string>
+    <string name="font_warning_no_cyrillic">%1$s मा सिरिलिक अक्षर छैनन् — सिरिलिक पदहरू पर्दामा अर्कै फन्टमा देखिनेछन्।</string>
+    <string name="font_warning_no_hebrew">%1$s मा हिब्रू अक्षर छैनन् — हिब्रू पाठ पर्दामा अर्कै फन्टमा देखिनेछ।</string>
+    <string name="font_hidden_note">%1$d प्रतीक र प्रणाली फन्ट लुकाइए · %3$d मध्ये %2$d देखाइँदै</string>
+    <string name="font_shown_note">%2$d मध्ये %1$d देखाइँदै</string>
+    <string name="font_picker_keys">↑↓ सार्नुहोस् · ⏎ छान्नुहोस् · esc बन्द</string>
 </resources>

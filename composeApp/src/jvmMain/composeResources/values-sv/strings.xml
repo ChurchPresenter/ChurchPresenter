@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Kanske senare</string>
     <string name="story_prompt_reassurance">Inget publiceras utan ditt godkännande.</string>
     <string name="menu_developer_story_prompt">Dialogen Berätta din historia</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Sök teckensnitt…</string>
+    <string name="font_picker_clear_search">Rensa sökningen</string>
+    <string name="font_group_recent">Nyligen använda</string>
+    <string name="font_group_recommended">Bra för projektion</string>
+    <string name="font_group_all">Alla teckensnitt</string>
+    <string name="font_group_matches">Träffar</string>
+    <string name="font_category_sans">Sanserif</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Förhandsvisning</string>
+    <string name="font_preview_sample">Exempeltext i det valda teckensnittet</string>
+    <string name="font_warning_no_cyrillic">%1$s saknar kyrilliska tecken – kyrilliska verser visas på skärmen med ett annat teckensnitt.</string>
+    <string name="font_warning_no_hebrew">%1$s saknar hebreiska tecken – hebreisk text visas på skärmen med ett annat teckensnitt.</string>
+    <string name="font_hidden_note">%1$d symbol- och systemteckensnitt dolda · visar %2$d av %3$d</string>
+    <string name="font_shown_note">Visar %1$d av %2$d</string>
+    <string name="font_picker_keys">↑↓ flytta · ⏎ välj · esc stäng</string>
 </resources>

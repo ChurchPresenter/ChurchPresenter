@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Labda baadaye</string>
     <string name="story_prompt_reassurance">Hakuna kinachochapishwa bila idhini yako.</string>
     <string name="menu_developer_story_prompt">Kidirisha cha "Shiriki hadithi yako"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Tafuta fonti…</string>
+    <string name="font_picker_clear_search">Futa utafutaji</string>
+    <string name="font_group_recent">Zilizotumika hivi karibuni</string>
+    <string name="font_group_recommended">Nzuri kwa uonyeshaji</string>
+    <string name="font_group_all">Fonti zote</string>
+    <string name="font_group_matches">Zinazolingana</string>
+    <string name="font_category_sans">Sans</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Onyesho la awali</string>
+    <string name="font_preview_sample">Maandishi ya mfano kwa fonti iliyochaguliwa</string>
+    <string name="font_warning_no_cyrillic">%1$s haina herufi za Kikrili — mistari ya Kikrili itaonekana skrini kwa fonti nyingine.</string>
+    <string name="font_warning_no_hebrew">%1$s haina herufi za Kiebrania — maandishi ya Kiebrania yataonekana skrini kwa fonti nyingine.</string>
+    <string name="font_hidden_note">Fonti %1$d za alama na za mfumo zimefichwa · zinaonyesha %2$d kati ya %3$d</string>
+    <string name="font_shown_note">Zinaonyesha %1$d kati ya %2$d</string>
+    <string name="font_picker_keys">↑↓ sogeza · ⏎ chagua · esc funga</string>
 </resources>

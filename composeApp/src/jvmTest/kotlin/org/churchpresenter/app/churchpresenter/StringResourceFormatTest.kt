@@ -80,6 +80,11 @@ class StringResourceFormatTest {
         // Escape dismisses a focusable Compose Popup. That is the toolkit's own behaviour, not an
         // entry in ShortcutMap, so there is no binding to render it from and none to go stale.
         "bible_cross_references_dismiss_hint",
+        // Same shape: the font picker's ↑↓/⏎/esc are read by the panel's own `onPreviewKeyEvent`
+        // (`FontSettingsDropdown.kt`), which names `Key.DirectionUp`/`Enter`/`Escape` outright.
+        // They are the list-box keys any menu answers to rather than an app shortcut, so there is
+        // no binding to render them from and none that can go stale under them.
+        "font_picker_keys",
     )
 
     /**
