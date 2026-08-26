@@ -201,7 +201,16 @@ class DictionaryViewModel {
         }
     }
 
-    fun loadAvailableBibles(directory: String) {
+    /**
+     * Lists the modules under [directory] for the dictionary's bible picker.
+     *
+     * [customNames] is the operator's own name per module, keyed the way the Bible settings key it
+     * — by path *relative* to the storage folder — while this list is keyed by absolute path, so
+     * each file is relativised to look its rename up. Renaming a translation in one place and
+     * having it still read as its old self here is the kind of half-applied setting that reads as a
+     * bug.
+     */
+    fun loadAvailableBibles(directory: String, customNames: Map<String, String> = emptyMap()) {
         if (directory.isEmpty()) { availableDictBibles = emptyList(); return }
         viewModelScope.launch {
             val dir = File(directory)
@@ -213,7 +222,10 @@ class DictionaryViewModel {
                 dir.walkTopDown().maxDepth(FileManager.MAX_BIBLE_SCAN_DEPTH)
                     .filter { it.isFile && it.extension.lowercase() == "spb" }
                     .sortedBy { it.absolutePath }
-                    .map { f -> f.absolutePath to readTranslationTitle(f) }
+                    .map { f ->
+                        val key = f.relativeToOrNull(dir)?.invariantSeparatorsPath
+                        f.absolutePath to readTranslationTitle(f, key?.let(customNames::get))
+                    }
                     .toList()
             }
         }

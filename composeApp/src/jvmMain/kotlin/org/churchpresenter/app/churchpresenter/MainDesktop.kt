@@ -596,8 +596,14 @@ fun MainDesktop(
 
     val dictionaryViewModel = remember { DictionaryViewModel() }
     DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }
-    LaunchedEffect(appSettings.bibleSettings.storageDirectory) {
-        dictionaryViewModel.loadAvailableBibles(appSettings.bibleSettings.storageDirectory)
+    LaunchedEffect(
+        appSettings.bibleSettings.storageDirectory,
+        appSettings.bibleSettings.customNameKey(),
+    ) {
+        dictionaryViewModel.loadAvailableBibles(
+            appSettings.bibleSettings.storageDirectory,
+            appSettings.bibleSettings.customNames(),
+        )
     }
 
     // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
