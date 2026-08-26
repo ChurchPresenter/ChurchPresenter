@@ -84,6 +84,8 @@ internal fun LeftColumn(
     availableFonts: List<String>
 ) {
 
+    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
+    val scope = LocalOutputStyleScope.current
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
     val everyPageStr = stringResource(Res.string.every_page)
@@ -91,13 +93,13 @@ internal fun LeftColumn(
     SettingsSection(title = stringResource(Res.string.song_number)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            NumberSettingsTextField(
+            if (scope.showsFullScreen) NumberSettingsTextField(
                 label = stringResource(Res.string.full_screen),
                 initialText = settings.songSettings.songNumberFontSize,
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
                 range = 8..150
             )
-            NumberSettingsTextField(
+            if (scope.showsLowerThird) NumberSettingsTextField(
                 label = stringResource(Res.string.lower_third_size),
                 initialText = settings.songSettings.songNumberLowerThirdFontSize,
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
@@ -108,7 +110,7 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.show_number)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-            DropdownSettingsField(
+            if (scope.showsFullScreen) DropdownSettingsField(
                 label = stringResource(Res.string.full_screen),
                 value = when (settings.songSettings.showNumber) {
                     Constants.NONE -> noneStr
@@ -127,7 +129,7 @@ internal fun LeftColumn(
                     onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumber = storedValue)) }
                 }
             )
-            DropdownSettingsField(
+            if (scope.showsLowerThird) DropdownSettingsField(
                 label = stringResource(Res.string.lower_third_size),
                 value = when (settings.songSettings.showNumberLowerThird) {
                     Constants.NONE -> noneStr
@@ -153,7 +155,10 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberPosition,
@@ -162,7 +167,10 @@ internal fun LeftColumn(
                     belowValue = Constants.BELOW_VERSE
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberLowerThirdPosition,
@@ -176,7 +184,10 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberHorizontalAlignment,
@@ -186,7 +197,10 @@ internal fun LeftColumn(
                     rightValue = Constants.RIGHT
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberLowerThirdHorizontalAlignment,
@@ -203,7 +217,10 @@ internal fun LeftColumn(
             settings.songSettings.songNumberHorizontalAlignment == settings.songSettings.titleHorizontalAlignment
     val sameLowerThird = settings.songSettings.songNumberLowerThirdPosition == settings.songSettings.titleLowerThirdPosition &&
             settings.songSettings.songNumberLowerThirdHorizontalAlignment == settings.songSettings.titleLowerThirdHorizontalAlignment
-    AnimatedVisibility(visible = sameFullscreen || sameLowerThird) {
+    // Only the profile this surface actually shows can overlap: warning about a lower-third clash
+    // in a fullscreen-only dialog points at two fields that are not on the screen.
+    val overlaps = (scope.showsFullScreen && sameFullscreen) || (scope.showsLowerThird && sameLowerThird)
+    AnimatedVisibility(visible = overlaps) {
         LabeledCheckbox(
             checked = settings.songSettings.songNumberBeforeTitle,
             onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) } },
@@ -217,7 +234,7 @@ internal fun LeftColumn(
     SettingsSection(title = stringResource(Res.string.title)) {
     SettingRow(stringResource(Res.string.show_title)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-            DropdownSettingsField(
+            if (scope.showsFullScreen) DropdownSettingsField(
                 label = stringResource(Res.string.full_screen),
                 value = when (settings.songSettings.titleDisplay) {
                     Constants.NONE -> noneStr
@@ -236,7 +253,7 @@ internal fun LeftColumn(
                     onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleDisplay = storedValue)) }
                 }
             )
-            DropdownSettingsField(
+            if (scope.showsLowerThird) DropdownSettingsField(
                 label = stringResource(Res.string.lower_third_size),
                 value = when (settings.songSettings.titleLowerThirdDisplay) {
                     Constants.NONE -> noneStr
@@ -260,13 +277,13 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            NumberSettingsTextField(
+            if (scope.showsFullScreen) NumberSettingsTextField(
                 label = stringResource(Res.string.full_screen),
                 initialText = settings.songSettings.titleFontSize,
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontSize = it)) } },
                 range = 8..150
             )
-            NumberSettingsTextField(
+            if (scope.showsLowerThird) NumberSettingsTextField(
                 label = stringResource(Res.string.lower_third_size),
                 initialText = settings.songSettings.titleLowerThirdFontSize,
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontSize = it)) } },
@@ -277,13 +294,13 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FontSettingsDropdown(
+            if (scope.showsFullScreen) FontSettingsDropdown(
                 label = stringResource(Res.string.full_screen),
                 value = settings.songSettings.titleFontType,
                 fonts = availableFonts,
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontType = it)) } }
             )
-            FontSettingsDropdown(
+            if (scope.showsLowerThird) FontSettingsDropdown(
                 label = stringResource(Res.string.lower_third_size),
                 value = settings.songSettings.titleLowerThirdFontType,
                 fonts = availableFonts,
@@ -300,7 +317,10 @@ internal fun LeftColumn(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (scope.showsFullScreen) Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             ColorPickerField(
                 label = stringResource(Res.string.full_screen),
                 modifier = Modifier.width(120.dp),
@@ -318,7 +338,7 @@ internal fun LeftColumn(
                 onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
             )
         }
-        AnimatedVisibility(visible = settings.songSettings.titleShadow) {
+        if (scope.showsFullScreen) AnimatedVisibility(visible = settings.songSettings.titleShadow) {
             ShadowDetailRow(
                 shadowColor = settings.songSettings.titleShadowColor,
                 shadowSize = settings.songSettings.titleShadowSize,
@@ -328,7 +348,10 @@ internal fun LeftColumn(
                 onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) } }
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (scope.showsLowerThird) Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             ColorPickerField(
                 label = stringResource(Res.string.lower_third_size),
                 modifier = Modifier.width(120.dp),
@@ -346,7 +369,7 @@ internal fun LeftColumn(
                 onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadow = it)) } }
             )
         }
-        AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
+        if (scope.showsLowerThird) AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
             ShadowDetailRow(
                 shadowColor = settings.songSettings.titleLowerThirdShadowColor,
                 shadowSize = settings.songSettings.titleLowerThirdShadowSize,
@@ -360,7 +383,10 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.titlePosition,
@@ -369,7 +395,10 @@ internal fun LeftColumn(
                     belowValue = Constants.BELOW_VERSE
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.titleLowerThirdPosition,
@@ -383,7 +412,10 @@ internal fun LeftColumn(
 
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleHorizontalAlignment,
@@ -393,7 +425,10 @@ internal fun LeftColumn(
                     rightValue = Constants.RIGHT
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleLowerThirdHorizontalAlignment,

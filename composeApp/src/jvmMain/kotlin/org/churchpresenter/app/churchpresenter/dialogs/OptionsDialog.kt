@@ -52,8 +52,6 @@ import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
 import churchpresenter.composeapp.generated.resources.companion_satellite_settings
-import churchpresenter.composeapp.generated.resources.stage_monitor
-import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
@@ -71,8 +69,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.theme.AppThemeWrapper
@@ -85,10 +81,8 @@ private const val TAB_BACKGROUND = 3
 private const val TAB_PROJECTION = 4
 private const val TAB_LOWER_THIRD = 5
 private const val TAB_SERVER = 6
-private const val TAB_STAGE_MONITOR = 7
-private const val TAB_ATEM = 8
-private const val TAB_DICTIONARY = 9
-private const val TAB_INTEGRATIONS = 10
+private const val TAB_ATEM = 7
+private const val TAB_INTEGRATIONS = 8
 
 @Composable
 fun OptionsDialog(
@@ -170,7 +164,7 @@ internal fun OptionsDialogContent(
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt
 ) {
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val companionSatelliteTabIndex = if (obsManager != null) 11 else 10
+    val companionSatelliteTabIndex = if (obsManager != null) 9 else 8
     val tabCount = companionSatelliteTabIndex + 1
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
@@ -235,24 +229,14 @@ internal fun OptionsDialogContent(
                                 text = { Text(stringResource(Res.string.server_settings)) }
                             )
                             Tab(
-                                selected = safeTabIndex == 7,
-                                onClick = { selectedTabIndex = 7 },
-                                text = { Text(stringResource(Res.string.stage_monitor)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 8,
-                                onClick = { selectedTabIndex = 8 },
+                                selected = safeTabIndex == TAB_ATEM,
+                                onClick = { selectedTabIndex = TAB_ATEM },
                                 text = { Text(stringResource(Res.string.atem_settings)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 9,
-                                onClick = { selectedTabIndex = 9 },
-                                text = { Text(stringResource(Res.string.tab_dictionary)) }
                             )
                             if (obsManager != null) {
                                 Tab(
-                                    selected = safeTabIndex == 10,
-                                    onClick = { selectedTabIndex = 10 },
+                                    selected = safeTabIndex == TAB_INTEGRATIONS,
+                                    onClick = { selectedTabIndex = TAB_INTEGRATIONS },
                                     text = { Text(stringResource(Res.string.obs_settings)) }
                                 )
                             }
@@ -313,9 +297,6 @@ internal fun OptionsDialogContent(
                             )
                             TAB_LOWER_THIRD -> LowerThirdSettingsTab(
                                 settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
                                 onOpenLottieGen = onOpenLottieGen
                             )
                             TAB_SERVER -> ServerSettingsTab(
@@ -326,19 +307,7 @@ internal fun OptionsDialogContent(
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager
                             )
-                            TAB_STAGE_MONITOR -> StageMonitorSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
                             TAB_ATEM -> AtemSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            TAB_DICTIONARY -> DictionarySettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

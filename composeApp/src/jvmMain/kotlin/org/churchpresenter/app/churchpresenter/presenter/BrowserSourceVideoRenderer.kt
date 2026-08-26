@@ -42,6 +42,7 @@ import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -494,8 +495,11 @@ internal fun BrowserSourceContent(
             LocalTransparentBlanking provides true,
             LocalMediaViewModel provides mediaViewModel
         ) {
-            val appSettings by appSettingsState
+            val globalSettings by appSettingsState
             val screenAssignment by screenAssignmentState
+            // What THIS browser source renders with: the same per-output override resolution the
+            // presenter windows do in PresenterOutputContent.
+            val outputSettings = globalSettings.resolvedFor(screenAssignment)
             val effectiveMode by effectiveModeState
             val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
             val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
@@ -527,7 +531,7 @@ internal fun BrowserSourceContent(
                 }
             } else if (isStageMonitor) {
                 StageMonitorScreen(
-                    sm = appSettings.stageMonitorSettings,
+                    sm = outputSettings.stageMonitorSettings,
                     presentingMode = effectiveMode,
                     showChords = screenAssignment.showChords,
                     currentLyricSection = presenterManager.displayedLyricSection.value,
@@ -541,13 +545,13 @@ internal fun BrowserSourceContent(
                     presenterNotes = presenterManager.presenterNotes.value,
                     activeScene = presenterManager.activeScene.value,
                     displayedQuestion = presenterManager.displayedQuestion.value,
-                    qaSettings = appSettings.qaSettings,
+                    qaSettings = outputSettings.qaSettings,
                     displayedDictionaryEntry = presenterManager.displayedDictionaryEntry.value,
-                    dictionarySettings = appSettings.dictionarySettings
+                    dictionarySettings = outputSettings.dictionarySettings
                 )
             } else {
                 PresenterScreen(
-                    appSettings = appSettings,
+                    appSettings = outputSettings,
                     outputRole = outputRole,
                     isLowerThird = isLowerThird,
                     showBackground = showBg
@@ -556,12 +560,12 @@ internal fun BrowserSourceContent(
                     // real output windows (main.kt): fades only when bible/song crossfade
                     // is enabled and neither the outgoing nor incoming mode is NONE.
                     val modeCrossfadeDuration = BrowserSourceVideoRenderer.crossfadeDurationMs(
-                        appSettings.bibleSettings.crossfade, appSettings.bibleSettings.transitionDuration.toInt(),
-                        appSettings.songSettings.crossfade, appSettings.songSettings.transitionDuration.toInt()
+                        outputSettings.bibleSettings.crossfade, outputSettings.bibleSettings.transitionDuration.toInt(),
+                        outputSettings.songSettings.crossfade, outputSettings.songSettings.transitionDuration.toInt()
                     )
                     var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                     val screenCrossfadeActive = BrowserSourceVideoRenderer.isScreenCrossfadeActive(
-                        appSettings.bibleSettings.crossfade, appSettings.songSettings.crossfade,
+                        outputSettings.bibleSettings.crossfade, outputSettings.songSettings.crossfade,
                         effectiveMode, prevEffectiveMode
                     )
                     if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
@@ -574,18 +578,18 @@ internal fun BrowserSourceContent(
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(
                                     selectedVerses = presenterManager.displayedVerses.value,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.bibleTransitionAlpha.value,
                                     showBackground = showBg && screenAssignment.showBibleBackground,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                    crossfadeEnabled = outputSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = outputRole,
@@ -595,7 +599,7 @@ internal fun BrowserSourceContent(
                                     allLyricSections = presenterManager.allLyricSections.value,
                                     displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
                                     showBackground = showBg && screenAssignment.showSongsBackground,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                    crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
                     showChords = screenAssignment.showChords,
                                 )
@@ -608,7 +612,7 @@ internal fun BrowserSourceContent(
                                 )
                                 Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
                                     text = presenterManager.displayedAnnouncementText.value,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.announcementTransitionAlpha.value,
                                     showBackground = showBg
@@ -633,7 +637,7 @@ internal fun BrowserSourceContent(
                                     LowerThirdPresenter(
                                         composition = lottieComposition,
                                         progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings,
+                                        appSettings = outputSettings,
                                         outputRole = outputRole,
                                         frame = presenterManager.lottieFrame.value
                                     )
@@ -670,9 +674,19 @@ internal fun BrowserSourceContent(
                                     val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
                                     if (showQRCode) {
                                         val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
-                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        QAQRCodePresenter(
+                                            url = "$base/qa",
+                                            qaSettings = outputSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha,
+                                        )
                                     } else {
-                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        QAPresenter(
+                                            question = presenterManager.displayedQuestion.value,
+                                            qaSettings = outputSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha,
+                                        )
                                     }
                                 }
                                 Presenting.STT -> {
@@ -683,14 +697,14 @@ internal fun BrowserSourceContent(
                                             translationSegments = stt.translationSegments,
                                             inProgressTranslation = stt.inProgressTranslation.value,
                                             highlightedWords = stt.highlightedWords,
-                                            sttSettings = appSettings.sttSettings,
+                                            sttSettings = outputSettings.sttSettings,
                                             outputRole = outputRole
                                         )
                                     }
                                 }
                                 Presenting.DICTIONARY -> DictionaryPresenter(
                                     entry = presenterManager.displayedDictionaryEntry.value,
-                                    dictionarySettings = appSettings.dictionarySettings,
+                                    dictionarySettings = outputSettings.dictionarySettings,
                                     outputRole = outputRole,
                                     transitionAlpha = 1f
                                 )

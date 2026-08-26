@@ -850,6 +850,22 @@
     <string name="content_outputs_preview">This Output Shows</string>
     <string name="content_outputs_preview_empty">Nothing enabled — this output stays blank</string>
     <string name="content_outputs_preview_translations">%1$s (%2$s)</string>
+
+    <!-- Per-output Customize dialog -->
+    <string name="customize">Customize</string>
+    <string name="customize_dialog_title">Display Settings — %1$s</string>
+    <string name="customize_dialog_subtitle">%1$d of %2$d customized</string>
+    <string name="customize_pane_header">%1$s on this screen</string>
+    <string name="customize_hint_on">Using settings specific to this screen</string>
+    <string name="customize_hint_off">Following the global settings — turn on to customize</string>
+    <string name="customize_hint_stage_on">This screen has its own zone layout</string>
+    <string name="customize_hint_stage_off">Turn on to give this screen a zone layout</string>
+    <string name="customize_reset_to_global">Reset to global</string>
+    <string name="customize_done">Done</string>
+    <string name="customize_bible">Bible</string>
+    <string name="customize_songs">Songs</string>
+    <string name="customize_lower_third_orientation">Orientation</string>
+    <string name="customize_lower_third_vertical_hint">A strip down the side instead of a band across the bottom.</string>
     <string name="content_bible_translations_header">Bible Translations</string>
     <string name="content_bible_translations_all">All</string>
     <string name="content_bible_translations_enabled">%1$d of %2$d translations enabled</string>

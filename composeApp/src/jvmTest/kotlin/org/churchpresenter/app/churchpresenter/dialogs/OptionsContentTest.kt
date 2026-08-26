@@ -17,6 +17,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_BACK_TAG
@@ -24,10 +29,6 @@ import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_FORWA
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.MetronomePosition
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ContentLabel
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.MetronomeLabel
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.chooseRouting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
@@ -63,6 +64,9 @@ class OptionsContentTest {
         home.deleteRecursively()
     }
 
+    /** Narrow enough that the tab strip always overflows, whatever the tab count. */
+    private val OVERFLOWING_STRIP_WIDTH = 500.dp
+
     private class Result {
         var dismissed = 0
         var saved: AppSettings? = null
@@ -71,11 +75,15 @@ class OptionsContentTest {
     private fun dialog(
         initialTab: Int = 0,
         obsManager: OBSWebSocketManager? = null,
+        // Pinned only by the overflow-arrows test, so that it stays a test of the arrows rather
+        // than of how many tabs happen to exist: removing a tab must not silently make it vacuous.
+        width: Dp = Dp.Unspecified,
         block: ComposeUiTest.(Result) -> Unit,
     ) {
         val result = Result()
         runComposeUiTest {
             setContent {
+              Box(modifier = if (width == Dp.Unspecified) Modifier else Modifier.width(width)) {
                 OptionsDialogContent(
                     theme = ThemeMode.LIGHT,
                     settingsManager = SettingsManager(),
@@ -88,6 +96,7 @@ class OptionsContentTest {
                     initialTab = initialTab,
                     detectScreens = { emptyList() },
                 )
+              }
             }
             block(result)
         }
@@ -97,9 +106,12 @@ class OptionsContentTest {
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
             "System", "Bible", "Song", "Background", "Projection", "Lower Third",
-            "Server", "Stage Monitor", "ATEM", "Dictionary", "Companion Satellite",
+            "Server", "ATEM", "Companion Satellite",
         ).forEach { onNodeWithText(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
+        // Stage Monitor and Dictionary are configured per output, from Projection -> Customize.
+        onNodeWithText("Stage Monitor").assertDoesNotExist()
+        onNodeWithText("Dictionary").assertDoesNotExist()
     }
 
     @Test
@@ -153,8 +165,7 @@ class OptionsContentTest {
     @Test
     fun `every tab renders its own settings content when selected`() = dialog {
         listOf(
-            "System", "Song", "Background", "Projection", "Lower Third", "Server",
-            "Stage Monitor", "ATEM", "Dictionary",
+            "System", "Song", "Background", "Projection", "Lower Third", "Server", "ATEM",
         ).forEach { label ->
             onNode(hasText(label) and hasClickAction()).performClick()
             onNode(hasText(label) and hasClickAction()).assertIsSelected()
@@ -206,15 +217,6 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `editing the window-left field on the Lower Third tab feeds back into saved settings`() =
-        dialog(initialTab = 5) { result ->
-        onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("77")
-        onNodeWithText("Apply").performClick()
-
-        assertEquals(77, result.saved?.streamingSettings?.windowLeft)
-    }
-
-    @Test
     fun `toggling API Key Protection on the Server tab feeds back into saved settings`() =
         dialog(initialTab = 6) { result ->
         // Ordinal 0 is Enable Server, which starts a real server on a real port — never touch it.
@@ -225,16 +227,7 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `picking the metronome position on the Stage Monitor tab feeds back into saved settings`() =
-        dialog(initialTab = 7) { result ->
-        chooseRouting(ContentLabel.METRONOME, MetronomeLabel.CENTER)
-        onNodeWithText("Apply").performClick()
-
-        assertEquals(MetronomePosition.CENTER, result.saved?.stageMonitorSettings?.metronomePosition)
-    }
-
-    @Test
-    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 8) { result ->
+    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("test-atem-host")
         onNodeWithText("Apply").performClick()
 
@@ -242,16 +235,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `toggling Show Word on the Dictionary tab feeds back into saved settings`() = dialog(initialTab = 9) { result ->
-        onAllNodes(isToggleable())[0].performScrollTo().performClick()
-        onNodeWithText("Apply").performClick()
-
-        assertEquals(!AppSettings().dictionarySettings.showWord, result.saved?.dictionarySettings?.showWord)
-    }
-
-    @Test
     fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
-        dialog(initialTab = 10) { result ->
+        dialog(initialTab = 8) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -260,7 +245,7 @@ class OptionsContentTest {
 
     @Test
     fun `the OBS and Companion Satellite tabs feed control changes back into saved settings`() = dialog(
-        initialTab = 10,
+        initialTab = 8,
         obsManager = OBSWebSocketManager(),
     ) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick() // OBS tab: "Connect to OBS Studio"
@@ -275,9 +260,10 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `the tab strip's overflow arrows appear with the overflow and scroll it`() = dialog {
-        // A dozen tabs do not fit this dialog's width, which is the whole reason the arrows exist:
-        // there is somewhere to go forward to, and nowhere to go back to until we have.
+    fun `the tab strip's overflow arrows appear with the overflow and scroll it`() =
+        dialog(width = OVERFLOWING_STRIP_WIDTH) {
+        // The tabs do not fit this width, which is the whole reason the arrows exist: there is
+        // somewhere to go forward to, and nowhere to go back to until we have.
         onNodeWithTag(TAB_STRIP_ARROW_BACK_TAG).assertDoesNotExist()
         onNodeWithTag(TAB_STRIP_ARROW_FORWARD_TAG).assertExists()
 

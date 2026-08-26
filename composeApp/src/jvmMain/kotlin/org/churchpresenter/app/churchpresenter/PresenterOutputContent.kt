@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.screen_number
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -68,7 +69,12 @@ internal fun PresenterOutputContent(
     clearAnnouncementOnFinish: () -> Unit,
 ) {
     val presentingMode by presenterManager.presentingMode
-    val modeCrossfadeDuration = modeCrossfadeDuration(appSettings.bibleSettings, appSettings.songSettings)
+    // What THIS output renders with: the global document unless the operator has customized this
+    // screen, in which case its own Stage Monitor / Bible / Song appearance replaces the global
+    // one. Resolved here rather than at the caller so no output path can forget to do it, and
+    // identical to [appSettings] for an output that has never been customized.
+    val outputSettings = appSettings.resolvedFor(screenAssignment)
+    val modeCrossfadeDuration = modeCrossfadeDuration(outputSettings.bibleSettings, outputSettings.songSettings)
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val displayedLyricSection by presenterManager.displayedLyricSection
@@ -89,7 +95,7 @@ internal fun PresenterOutputContent(
             if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
                 // Stage monitor: dedicated presenter-confidence layout
                 StageMonitorScreen(
-                    sm = appSettings.stageMonitorSettings,
+                    sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
                     showChords = screenAssignment.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
@@ -104,15 +110,15 @@ internal fun PresenterOutputContent(
                     presenterNotes = presenterNotes,
                     activeScene = activeScene,
                     displayedQuestion = displayedQuestion,
-                    qaSettings = appSettings.qaSettings,
+                    qaSettings = outputSettings.qaSettings,
                     displayedDictionaryEntry = displayedDictionaryEntry,
-                    dictionarySettings = appSettings.dictionarySettings,
+                    dictionarySettings = outputSettings.dictionarySettings,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
                 PresenterScreen(
                     modifier = Modifier.fillMaxSize(),
-                    appSettings = appSettings,
+                    appSettings = outputSettings,
                     outputRole = primaryRole,
                     isLowerThird = screenAssignment.isLowerThird,
                     showBackground = showBg
@@ -130,7 +136,7 @@ internal fun PresenterOutputContent(
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
-                        appSettings.bibleSettings, appSettings.songSettings, effectiveMode, prevEffectiveMode,
+                        outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
                     )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
                         Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
@@ -138,7 +144,7 @@ internal fun PresenterOutputContent(
                                 mode = mode,
                                 screenAssignment = screenAssignment,
                                 presenterManager = presenterManager,
-                                appSettings = appSettings,
+                                appSettings = outputSettings,
                                 mediaViewModel = mediaViewModel,
                                 sttManager = sttManager,
                                 serverUrl = serverUrl,

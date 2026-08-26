@@ -56,8 +56,7 @@ import churchpresenter.composeapp.generated.resources.content_bible_translation_
 import churchpresenter.composeapp.generated.resources.content_bible_translation_portion_nt
 import churchpresenter.composeapp.generated.resources.content_bible_translation_portion_ot
 import churchpresenter.composeapp.generated.resources.display_fullscreen
-import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
-import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.key_output_none
 import churchpresenter.composeapp.generated.resources.left
@@ -369,13 +368,16 @@ fun ProjectionSettingsTab(
     val contentGroup = contentCols.dropLast(4)
 
     val fullScreenLabel = stringResource(Res.string.display_fullscreen)
-    val lowerThirdLabel = stringResource(Res.string.display_lower_third_horizontal)
-    val lowerThirdVerticalLabel = stringResource(Res.string.display_lower_third_vertical)
+    val lowerThirdLabel = stringResource(Res.string.display_lower_third)
     val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
+    // One Lower Third entry, not two. Horizontal band and vertical strip are the same mode wearing
+    // the same style profile -- only the band's geometry differs -- so the orientation is a
+    // property of the lower third rather than a mode of its own, and it is set in Customize.
+    // `shownDisplayMode`/`pickedDisplayMode` are what keep a vertical output reading "Lower Third"
+    // here instead of falling through to the Full Screen label.
     val displayModes = listOf(
         fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
         lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-        lowerThirdVerticalLabel to Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL,
         stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
     )
 

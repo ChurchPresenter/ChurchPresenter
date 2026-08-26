@@ -235,7 +235,7 @@ class ProjectionSettingsTabBrowserSourceTest {
             // Three dropdowns read "Full Screen": the two screen rows, then this one.
             rowDropdown("Full Screen").performScrollTo().performClick()
             waitForIdle()
-            onAllNodesWithText("Horizontal Lower Third").onLast().performClick()
+            onAllNodesWithText("Lower Third").onLast().performClick()
             waitForIdle()
 
             assertEquals(

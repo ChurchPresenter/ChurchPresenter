@@ -84,6 +84,41 @@ data class ScreenAssignment(
      * Read through [ProjectionSettings.screenLabelOr], which prefers the monitor's name.
      */
     val screenName: String = "",
+    /**
+     * This output's own Stage Monitor settings, or null to follow the global ones.
+     *
+     * Null is not "no stage monitor" — it is "the same one everybody else uses". An output only
+     * gets an entry here once the operator has customized it, so an install that never opens the
+     * Customize dialog carries none of these and keeps behaving exactly as it did.
+     */
+    val stageMonitorOverride: StageMonitorSettings? = null,
+    /**
+     * This output's own Bible appearance, or null to follow the global settings.
+     *
+     * Stored as a whole [BibleSettings] rather than a diff so the settings tab can edit it
+     * unchanged, but only its *appearance* is ever read: the library folder, the file list and the
+     * translation stack come from the global document — see `BibleSettings.withAppearanceOf`.
+     */
+    val bibleOverride: BibleSettings? = null,
+    /** This output's own Song appearance, or null to follow the global settings. Mirrors
+     *  [bibleOverride], including that only its appearance is read. */
+    val songOverride: SongSettings? = null,
+    /**
+     * This output's own lower-third window padding, or null to follow the global settings.
+     *
+     * Only the four `window*` insets are read from it — the Lottie folder, the presets and the
+     * saved search/replace pairs stay global, the same way [bibleOverride] leaves the Bible library
+     * alone. See `StreamingSettings.withAppearanceOf`.
+     */
+    val streamingOverride: StreamingSettings? = null,
+    /**
+     * This output's own Strong's dictionary appearance, or null to follow the global settings.
+     *
+     * Replaced whole rather than merged: unlike Bible and Song, [DictionarySettings] is nothing but
+     * appearance — it names no folder and selects no content — so there is nothing in it that has
+     * to stay one per install.
+     */
+    val dictionaryOverride: DictionarySettings? = null,
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -106,6 +141,17 @@ data class ScreenAssignment(
 
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0
+
+    /**
+     * True once this output has appearance of its own rather than the global settings.
+     *
+     * What the Customize button reads to show that a row has been customized, and what
+     * `AppSettings.resolvedFor` short-circuits on so an untouched output renders from the very
+     * same settings instance it always did.
+     */
+    val isCustomized: Boolean
+        get() = stageMonitorOverride != null || bibleOverride != null || songOverride != null ||
+            streamingOverride != null || dictionaryOverride != null
 
     /** Primary window role: "fill" if key output is configured, "normal" otherwise */
     val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL

@@ -34,10 +34,10 @@ internal fun lowerThirdTab(
     var current = initial
     setContent {
         MaterialTheme {
-            var state by remember { mutableStateOf(current) }
+            // The tab reads settings but no longer writes any: its window-padding block moved to
+            // the per-output Customize dialog. `get` therefore always answers [initial].
             LowerThirdSettingsTab(
-                settings = state,
-                onSettingsChange = { transform -> state = transform(state); current = state },
+                settings = current,
                 onOpenLottieGen = onOpenLottieGen,
             )
         }

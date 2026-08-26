@@ -231,7 +231,7 @@ private fun TranslationStyleSection(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
     ) {
-        TranslationNameSection(
+        if (!LocalOutputStyleScope.current.isOutputScoped) TranslationNameSection(
             translation = translation,
             moduleTitle = moduleTitle,
             update = ::update,
@@ -318,13 +318,15 @@ private fun LeftColumn(
     bibleFileDisplayNames: Map<String, String>,
     scanning: Boolean
 ) {
+    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
+    val scope = LocalOutputStyleScope.current
     val noneStr = stringResource(Res.string.none)
     val bibleDisplayOptions = listOf(noneStr) + bibleFilesInDirectory.map { fileName ->
         bibleFileDisplayNames[fileName] ?: fileName
     }
 
     // Bible Selection
-    SettingsSection(title = stringResource(Res.string.bible_selection)) {
+    if (!scope.isOutputScoped) SettingsSection(title = stringResource(Res.string.bible_selection)) {
         val translations = settings.bibleSettings.translationList()
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -479,7 +481,7 @@ private fun LeftColumn(
 
 
     // Split Browse Mode
-    SettingsSection(title = stringResource(Res.string.bible_split_browse_mode)) {
+    if (!scope.isOutputScoped) SettingsSection(title = stringResource(Res.string.bible_split_browse_mode)) {
         LabeledCheckbox(
             checked = settings.bibleSettings.splitBrowseMode,
             onCheckedChange = { enabled ->
@@ -493,7 +495,7 @@ private fun LeftColumn(
         )
     }
 
-    SettingsSection(title = stringResource(Res.string.bible_cross_references)) {
+    if (!scope.isOutputScoped) SettingsSection(title = stringResource(Res.string.bible_cross_references)) {
         LabeledCheckbox(
             checked = settings.bibleSettings.crossReferencesEnabled,
             onCheckedChange = { enabled ->
@@ -603,9 +605,14 @@ private fun TranslationTextSection(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
+    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
+    val scope = LocalOutputStyleScope.current
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ColorPickerField(
                     label = stringResource(Res.string.full_screen),
                     modifier = Modifier.width(120.dp),
@@ -625,7 +632,7 @@ private fun TranslationTextSection(
                     onShadowChange = { update { t -> t.copy(textShadow = it) } }
                 )
             }
-            AnimatedVisibility(visible = translation.textShadow) {
+            if (scope.showsFullScreen) AnimatedVisibility(visible = translation.textShadow) {
                 ShadowDetailRow(
                     shadowColor = translation.textShadowColor,
                     shadowSize = translation.textShadowSize,
@@ -635,7 +642,10 @@ private fun TranslationTextSection(
                     onOpacityChange = { update { t -> t.copy(textShadowOpacity = it) } }
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ColorPickerField(
                     label = stringResource(Res.string.lower_third_size),
                     modifier = Modifier.width(120.dp),
@@ -655,7 +665,7 @@ private fun TranslationTextSection(
                     onShadowChange = { update { t -> t.copy(lowerThirdTextShadow = it) } }
                 )
             }
-            AnimatedVisibility(visible = translation.lowerThirdTextShadow) {
+            if (scope.showsLowerThird) AnimatedVisibility(visible = translation.lowerThirdTextShadow) {
                 ShadowDetailRow(
                     shadowColor = translation.lowerThirdTextShadowColor,
                     shadowSize = translation.lowerThirdTextShadowSize,
@@ -669,7 +679,7 @@ private fun TranslationTextSection(
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FontSettingsDropdown(
+            if (scope.showsFullScreen) FontSettingsDropdown(
                 label = stringResource(Res.string.full_screen),
                 value = translation.textFontType,
                 fonts = availableFonts,
@@ -677,7 +687,7 @@ private fun TranslationTextSection(
                     update { t -> t.copy(textFontType = it) }
                 }
             )
-            FontSettingsDropdown(
+            if (scope.showsLowerThird) FontSettingsDropdown(
                 label = stringResource(Res.string.lower_third_size),
                 value = translation.lowerThirdTextFontType,
                 fonts = availableFonts,
@@ -699,7 +709,7 @@ private fun TranslationTextSection(
     val hasLowerThirdScreen = activeScreens.any { it.isLowerThird }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (scope.showsFullScreen) Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
                         label = stringResource(Res.string.full_screen),
@@ -746,7 +756,7 @@ private fun TranslationTextSection(
                     }
                 }
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (scope.showsLowerThird) Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
                         label = stringResource(Res.string.lower_third_size),
@@ -796,7 +806,10 @@ private fun TranslationTextSection(
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.textHorizontalAlignment,
@@ -804,7 +817,10 @@ private fun TranslationTextSection(
                     leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.lowerThirdTextHorizontalAlignment,
@@ -822,9 +838,14 @@ private fun TranslationReferenceSection(
     update: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
     availableFonts: List<String>,
 ) {
+    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
+    val scope = LocalOutputStyleScope.current
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ColorPickerField(
                     label = stringResource(Res.string.full_screen),
                     modifier = Modifier.width(120.dp),
@@ -844,7 +865,7 @@ private fun TranslationReferenceSection(
                     onShadowChange = { update { t -> t.copy(referenceShadow = it) } }
                 )
             }
-            AnimatedVisibility(visible = translation.referenceShadow) {
+            if (scope.showsFullScreen) AnimatedVisibility(visible = translation.referenceShadow) {
                 ShadowDetailRow(
                     shadowColor = translation.referenceShadowColor,
                     shadowSize = translation.referenceShadowSize,
@@ -854,7 +875,10 @@ private fun TranslationReferenceSection(
                     onOpacityChange = { update { t -> t.copy(referenceShadowOpacity = it) } }
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ColorPickerField(
                     label = stringResource(Res.string.lower_third_size),
                     modifier = Modifier.width(120.dp),
@@ -874,7 +898,7 @@ private fun TranslationReferenceSection(
                     onShadowChange = { update { t -> t.copy(lowerThirdReferenceShadow = it) } }
                 )
             }
-            AnimatedVisibility(visible = translation.lowerThirdReferenceShadow) {
+            if (scope.showsLowerThird) AnimatedVisibility(visible = translation.lowerThirdReferenceShadow) {
                 ShadowDetailRow(
                     shadowColor = translation.lowerThirdReferenceShadowColor,
                     shadowSize = translation.lowerThirdReferenceShadowSize,
@@ -888,7 +912,7 @@ private fun TranslationReferenceSection(
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FontSettingsDropdown(
+            if (scope.showsFullScreen) FontSettingsDropdown(
                 label = stringResource(Res.string.full_screen),
                 value = translation.referenceFontType,
                 fonts = availableFonts,
@@ -896,7 +920,7 @@ private fun TranslationReferenceSection(
                     update { t -> t.copy(referenceFontType = it) }
                 }
             )
-            FontSettingsDropdown(
+            if (scope.showsLowerThird) FontSettingsDropdown(
                 label = stringResource(Res.string.lower_third_size),
                 value = translation.lowerThirdReferenceFontType,
                 fonts = availableFonts,
@@ -908,13 +932,13 @@ private fun TranslationReferenceSection(
     }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            NumberSettingsTextField(
+            if (scope.showsFullScreen) NumberSettingsTextField(
                 label = stringResource(Res.string.full_screen),
                 initialText = translation.referenceFontSize,
                 onValueChange = { update { t -> t.copy(referenceFontSize = it) } },
                 range = 8..150
             )
-            NumberSettingsTextField(
+            if (scope.showsLowerThird) NumberSettingsTextField(
                 label = stringResource(Res.string.lower_third_size),
                 initialText = translation.lowerThirdReferenceFontSize,
                 onValueChange = { update { t -> t.copy(lowerThirdReferenceFontSize = it) } },
@@ -924,7 +948,10 @@ private fun TranslationReferenceSection(
     }
     SettingRow(stringResource(Res.string.position)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = translation.referencePosition,
@@ -935,7 +962,10 @@ private fun TranslationReferenceSection(
                     belowValue = Constants.POSITION_BELOW
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = translation.lowerThirdReferencePosition,
@@ -950,7 +980,10 @@ private fun TranslationReferenceSection(
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsFullScreen) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.referenceHorizontalAlignment,
@@ -958,7 +991,10 @@ private fun TranslationReferenceSection(
                     leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (scope.showsLowerThird) Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.lowerThirdReferenceHorizontalAlignment,

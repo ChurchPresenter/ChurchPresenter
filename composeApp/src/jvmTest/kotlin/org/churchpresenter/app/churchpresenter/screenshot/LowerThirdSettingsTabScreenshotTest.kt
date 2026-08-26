@@ -134,11 +134,7 @@ class LowerThirdSettingsTabScreenshotTest {
                 ChurchPresenterTheme(themeMode = mode) {
                     Surface(color = MaterialTheme.colorScheme.background) {
                         Box(Modifier.fillMaxSize()) {
-                            var current by remember { mutableStateOf(settings) }
-                            LowerThirdSettingsTab(
-                                settings = current,
-                                onSettingsChange = { transform -> current = transform(current) },
-                            )
+                            LowerThirdSettingsTab(settings = settings)
                         }
                     }
                 }

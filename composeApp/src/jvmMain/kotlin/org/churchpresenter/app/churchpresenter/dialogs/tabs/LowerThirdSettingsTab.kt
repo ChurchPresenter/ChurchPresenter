@@ -6,19 +6,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,29 +42,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.generate_lower_third
-import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lottie_files
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.no_lottie_files
 import churchpresenter.composeapp.generated.resources.scanning_directory
 import churchpresenter.composeapp.generated.resources.remove_lottie_file
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.window_position
+import io.github.alexzhirkevich.compottie.LottieComposition
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
@@ -84,7 +75,6 @@ private const val PREVIEW_ASPECT_H = 9f
 @Composable
 fun LowerThirdSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
 ) {
     val viewModel = remember { LowerThirdSettingsViewModel() }
@@ -158,62 +148,14 @@ fun LowerThirdSettingsTab(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
-            val listAccentColor = MaterialTheme.colorScheme.primary
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                if (lottieFiles == null && lottieFolder.isNotEmpty()) {
-                    // "No Lottie files" is a verdict about the folder; until the read finishes
-                    // it would be an unearned one.
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(250.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        ScanningRow(scanningDirectoryStr)
-                    }
-                } else if (lottieFilesInDirectory.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(250.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    lottieFilesInDirectory.forEach { fileName ->
-                        val isSelected = fileName == selectedFile
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                                    else MaterialTheme.colorScheme.surface
-                                )
-                                .drawBehind {
-                                    if (isSelected) drawRect(color = listAccentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
-                                }
-                                .clickable { viewModel.selectFile(fileName) }
-                                .padding(vertical = 8.dp, horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = fileName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-                                        else MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    }
-                }
-            }
+            LottieFileList(
+                files = lottieFilesInDirectory,
+                stillScanning = lottieFiles == null && lottieFolder.isNotEmpty(),
+                selectedFile = selectedFile,
+                emptyText = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
+                scanningText = scanningDirectoryStr,
+                onSelect = { viewModel.selectFile(it) },
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -236,135 +178,12 @@ fun LowerThirdSettingsTab(
         }
 
         // ── Right panel — live preview ───────────────────────────────
-        Column(
-            modifier = Modifier
-                .weight(COLUMN_WEIGHT)
-                .widthIn(min = 400.dp, max = 450.dp)
-                .heightIn(min = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = selectedFile ?: stringResource(Res.string.lottie_select_preset),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (previewJsonContent.isNotBlank()) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Lottie preview box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(PREVIEW_ASPECT_W / PREVIEW_ASPECT_H)
-                    .background(Color.Black, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                if (previewJsonContent.isNotBlank()) {
-                    Image(
-                        painter = rememberLottiePainter(
-                            composition = composition,
-                            progress = { progress },
-                            fontManager = LottieFonts
-                        ),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.lottie_select_preset),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.4f)
-                    )
-                }
-            }
-
-            // ── Window Position ──────────────────────────────────────
-            HorizontalDivider()
-            Text(
-                text = stringResource(Res.string.window_position),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            val streaming = settings.streamingSettings
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp).offset(y = 42.dp),
-                        label = stringResource(Res.string.left),
-                        initialText = streaming.windowLeft,
-                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v)) } },
-                        range = 0..10000
-                    )
-                    TvScreenBox(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp)
-                            .height(180.dp)
-                    ) {
-                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                            val bandHeight = maxHeight * (settings.projectionSettings.lowerThirdHeightPercent / 100f)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(bandHeight)
-                                    .align(Alignment.BottomCenter)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.display_lower_third),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                            // Top field sits just above the lower-third band, centered on the screen.
-                            NumberSettingsTextField(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .offset(y = -bandHeight)
-                                    .width(100.dp),
-                                label = stringResource(Res.string.top),
-                                initialText = streaming.windowTop,
-                                onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
-                                range = 0..10000
-                            )
-                        }
-                    }
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp).offset(y = 42.dp),
-                        label = stringResource(Res.string.right),
-                        initialText = streaming.windowRight,
-                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v)) } },
-                        range = 0..10000
-                    )
-                }
-
-                NumberSettingsTextField(
-                    modifier = Modifier.width(100.dp),
-                    label = stringResource(Res.string.bottom),
-                    initialText = streaming.windowBottom,
-                    onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v)) } },
-                    range = 0..10000
-                )
-            }
-        }
+        LottiePreviewPanel(
+            selectedFile = selectedFile,
+            previewJsonContent = previewJsonContent,
+            composition = composition,
+            progress = progress,
+        )
     }
         SettingsScrollbar(scrollState)
     }
@@ -391,3 +210,136 @@ private fun ModernButton(
 }
 
 
+
+
+/** The selected preset, drawn as it will play. */
+@Composable
+private fun RowScope.LottiePreviewPanel(
+    selectedFile: String?,
+    previewJsonContent: String,
+    composition: LottieComposition?,
+    progress: Float,
+) {
+    Column(
+        modifier = Modifier
+            .weight(COLUMN_WEIGHT)
+            .widthIn(min = 400.dp, max = 450.dp)
+            .heightIn(min = 600.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = selectedFile ?: stringResource(Res.string.lottie_select_preset),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (previewJsonContent.isNotBlank()) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Lottie preview box
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(PREVIEW_ASPECT_W / PREVIEW_ASPECT_H)
+                .background(Color.Black, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (previewJsonContent.isNotBlank()) {
+                Image(
+                    painter = rememberLottiePainter(
+                        composition = composition,
+                        progress = { progress },
+                        fontManager = LottieFonts
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text(
+                    text = stringResource(Res.string.lottie_select_preset),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.4f)
+                )
+            }
+        }
+
+    }
+}
+
+/**
+ * The Lottie files found in the folder, one clickable row each.
+ *
+ * [stillScanning] is kept apart from an empty [files]: "No Lottie files" is a verdict about
+ * the folder, and until the read finishes it would be an unearned one.
+ */
+@Composable
+private fun LottieFileList(
+    files: List<String>,
+    stillScanning: Boolean,
+    selectedFile: String?,
+    emptyText: String,
+    scanningText: String,
+    onSelect: (String) -> Unit,
+) {
+    val listAccentColor = MaterialTheme.colorScheme.primary
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        if (stillScanning) {
+            // "No Lottie files" is a verdict about the folder; until the read finishes
+            // it would be an unearned one.
+            Box(
+                modifier = Modifier.fillMaxWidth().height(250.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                ScanningRow(scanningText)
+            }
+        } else if (files.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(250.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = emptyText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            files.forEach { fileName ->
+                val isSelected = fileName == selectedFile
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                            else MaterialTheme.colorScheme.surface
+                        )
+                        .drawBehind {
+                            if (isSelected) drawRect(color = listAccentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
+                        }
+                        .clickable { onSelect(fileName) }
+                        .padding(vertical = 8.dp, horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = fileName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+        }
+    }
+}

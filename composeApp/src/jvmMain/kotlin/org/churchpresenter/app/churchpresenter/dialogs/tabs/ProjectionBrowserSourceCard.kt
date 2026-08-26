@@ -296,7 +296,8 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = displayModes.find { it.second == output.displayMode }?.first ?: fullScreenLabel,
+                                text = displayModes.find { it.second == shownDisplayMode(output.displayMode) }?.first
+                                ?: fullScreenLabel,
                                 style = MaterialTheme.typography.labelSmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -311,7 +312,9 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                     text = { Text(label, style = MaterialTheme.typography.bodySmall) },
                                     onClick = {
                                         displayModeExpanded = false
-                                        val updated = output.copy(displayMode = modeValue)
+                                        val updated = output.copy(
+                                    displayMode = pickedDisplayMode(modeValue, output.displayMode),
+                                )
                                         onSettingsChange { s ->
                                             s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
                                         }
@@ -442,16 +445,36 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         var showContentDialog by remember { mutableStateOf(false) }
                         val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
                         val totalCount = contentOutputsTotalCount(contentGroup, backgroundGroup)
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { showContentDialog = true },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
-                                style = MaterialTheme.typography.labelSmall
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { showContentDialog = true },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(
+                                        Res.string.content_outputs_enabled_short, enabledCount, totalCount,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                            CustomizeOutputCell(
+                                assignment = output,
+                                screenLabel = outputLabel,
+                                settings = settings,
+                                onApply = { updated ->
+                                    onSettingsChange { s ->
+                                        s.copy(
+                                            projectionSettings =
+                                                s.projectionSettings.withBrowserSourceOutput(i, updated),
+                                        )
+                                    }
+                                },
                             )
                         }
                         if (showContentDialog) {

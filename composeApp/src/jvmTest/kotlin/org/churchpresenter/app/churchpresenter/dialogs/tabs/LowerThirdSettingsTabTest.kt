@@ -21,13 +21,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Drives the lower-third settings tab: the Lottie animation library on the left, the live preview on
- * the right, and the streaming-window margins beneath it.
+ * Drives the lower-third settings tab: the Lottie animation library on the left and the live preview
+ * on the right.
  *
  * The library is read from a real folder, so each test that needs files works in its own temporary
- * one — see `LowerThirdSettingsTabTestSupport.kt`. The margins write into [StreamingSettings]; the
- * file list and selection live in the tab's own view model and are asserted through what reaches the
- * screen.
+ * one — see `LowerThirdSettingsTabTestSupport.kt`. The file list and selection live in the tab's own
+ * view model and are asserted through what reaches the screen. The streaming-window margins that
+ * used to sit under the preview are now per output — see `LowerThirdWindowPositionTest`.
  */
 class LowerThirdSettingsTabTest {
 
@@ -46,7 +46,9 @@ class LowerThirdSettingsTabTest {
         onNodeWithText("Lottie Files").assertExists("the library panel must render")
         onNodeWithText("To trigger lower thirds via API visit the Server tab.")
             .assertExists("with the hint about the Server tab")
-        onNodeWithText("Window Position").assertExists("and the preview panel's margins")
+        // The window margins moved to the per-output Customize dialog — see
+        // LowerThirdWindowPositionTest.
+        onNodeWithText("Window Position").assertDoesNotExist()
     }
 
     @Test
@@ -59,14 +61,6 @@ class LowerThirdSettingsTabTest {
     fun `the preview panel shows a placeholder until a preset is chosen`() = lowerThirdTab { _ ->
         // Once as the panel's caption, once inside the empty preview box.
         onAllNodesWithText("Select a preset to preview").assertCountEquals(2)
-    }
-
-    @Test
-    fun `the window position diagram labels the lower third band`() = lowerThirdTab { _ ->
-        onNodeWithText("Lower Third").assertExists("the band in the screen diagram must be labelled")
-        for (edge in listOf("LEFT", "TOP", "RIGHT", "BOTTOM")) {
-            onNodeWithText(edge).assertExists("the $edge margin field must be captioned")
-        }
     }
 
     // ── The library, empty ──────────────────────────────────────────────────────────────────────
@@ -283,68 +277,4 @@ class LowerThirdSettingsTabTest {
      * nothing on its own — every margin test here closes the loop by re-rendering a fresh tab from
      * the settings that came out, where the field can only be showing what was stored.
      */
-    @Test
-    fun `each streaming-window margin field writes its own value back`() {
-        // The four share a default, so give each one a value only it holds.
-        val distinct = settingsWith { copy(windowLeft = 41, windowTop = 42, windowRight = 43, windowBottom = 44) }
-        var saved = AppSettings()
-        lowerThirdTab(initial = distinct) { get ->
-            retype(showing = 41, to = 11)
-            assertEquals(11, get().streamingSettings.windowLeft, "the left margin must be stored")
-
-            retype(showing = 42, to = 22)
-            assertEquals(22, get().streamingSettings.windowTop, "the top margin must be stored")
-
-            retype(showing = 43, to = 33)
-            assertEquals(33, get().streamingSettings.windowRight, "the right margin must be stored")
-
-            retype(showing = 44, to = 55)
-            assertEquals(55, get().streamingSettings.windowBottom, "the bottom margin must be stored")
-
-            assertEquals(11, get().streamingSettings.windowLeft, "and none of them disturbed a neighbour")
-            assertEquals(33, get().streamingSettings.windowRight)
-            saved = get()
-        }
-        // Re-rendered from the saved settings alone: each field can only show what was stored.
-        lowerThirdTab(initial = saved) { _ ->
-            for (value in listOf(11, 22, 33, 55)) {
-                onNode(hasSetTextAction() and hasText(value.toString()))
-                    .assertExists("a fresh render must show the stored margin $value")
-            }
-        }
-    }
-
-    @Test
-    fun `a margin outside the allowed range is not stored`() {
-        var saved = AppSettings()
-        lowerThirdTab(initial = settingsWith { copy(windowLeft = 41) }) { get ->
-            retype(showing = 41, to = 99999)
-            assertEquals(41, get().streamingSettings.windowLeft, "99999 is outside 0..10000")
-            // The field itself echoes the rejected entry — that is the widget's own state, not
-            // anything that was stored.
-            onNode(hasSetTextAction() and hasText("99999")).assertExists()
-            saved = get()
-        }
-        lowerThirdTab(initial = saved) { _ ->
-            onAllNodes(hasSetTextAction() and hasText("99999"))
-                .assertCountEquals(0)
-            onNode(hasSetTextAction() and hasText("41"))
-                .assertExists("a fresh render shows the value that survived, not the rejected one")
-        }
-    }
-
-    // ── The lower-third band diagram ────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the band diagram renders whatever height is configured`() {
-        for (percent in listOf(10, 33, 60)) {
-            val settings = AppSettings().let {
-                it.copy(projectionSettings = it.projectionSettings.copy(lowerThirdHeightPercent = percent))
-            }
-            lowerThirdTab(initial = settings) { _ ->
-                onNodeWithText("Lower Third")
-                    .assertExists("the band must be drawn and labelled at $percent%")
-            }
-        }
-    }
 }

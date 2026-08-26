@@ -98,6 +98,8 @@ internal fun RightColumn(
             presenterManager.lyricSection.value.lines.any { it.isNotBlank() }
         } }.value
     } else false
+    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
+    val scope = LocalOutputStyleScope.current
     val activeScreens = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
     val hasLowerThirdScreen = activeScreens.any { it.isLowerThird }
@@ -143,7 +145,7 @@ internal fun RightColumn(
     }
     }
 
-    SettingsSection(title = stringResource(Res.string.fullscreen_display)) {
+    if (scope.showsFullScreen) SettingsSection(title = stringResource(Res.string.fullscreen_display)) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         val fsDisplayMode = settings.songSettings.fullscreenDisplayMode
         Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
@@ -308,7 +310,7 @@ internal fun RightColumn(
 
     }
 
-    SettingsSection(title = stringResource(Res.string.lower_third_display)) {
+    if (scope.showsLowerThird) SettingsSection(title = stringResource(Res.string.lower_third_display)) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         val ltDisplayMode = settings.songSettings.lowerThirdDisplayMode
         Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
