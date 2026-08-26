@@ -150,7 +150,10 @@ fun LivePreviewPanel(
                 sttManager = sttManager,
                 locks = presenterManager.screenLocks.value,
                 onToggleLock = { mode -> presenterManager.setScreenLock(i, mode) },
-                label = stringResource(Res.string.screen_number, i + 1),
+                // The operator's name for the monitor, falling back to the numbered default. This
+                // panel is the one place they watch all service long, so a booth driving "Foyer TV"
+                // and "Balcony" should not have to remember which of those is Screen 2.
+                label = proj.screenLabelOr(screenAssignment, stringResource(Res.string.screen_number, i + 1)),
             )
         }
 

@@ -108,6 +108,7 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
@@ -130,7 +131,10 @@ data class DetectedScreen(
     val boundsY: Int = Int.MIN_VALUE,
     val boundsW: Int = 0,
     val boundsH: Int = 0
-)
+) {
+    /** What a name typed for this monitor is stored against — see [ProjectionSettings.screenNames]. */
+    val key: String get() = screenKey(boundsX, boundsY, boundsW, boundsH)
+}
 
 /**
  * One row of the Bible Translations picker: [code] is the file stem (also the selection key,
@@ -167,6 +171,24 @@ fun detectScreensFromAwt(): List<DetectedScreen> {
         )
     }
 }
+
+/**
+ * How a display is named in a menu: the operator's own name for it, else its number, and always its
+ * geometry — which is what tells two displays apart when they are named alike or not at all.
+ */
+internal fun displayLabel(name: String, number: Int, screen: DetectedScreen): String {
+    val head = name.ifEmpty { "Display $number" }
+    return "$head (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})"
+}
+
+/**
+ * The same, shortened to fit the button face.
+ *
+ * A name stands on its own there — the operator chose it to be recognisable — while a numbered
+ * display keeps its resolution, which is all that distinguishes "D1" from "D2" at a glance.
+ */
+internal fun displayShortLabel(name: String, number: Int, screen: DetectedScreen): String =
+    name.ifEmpty { "D$number (${screen.boundsW}x${screen.boundsH})" }
 
 /** One selectable output target: None, a physical display, or a DeckLink device. */
 internal data class DisplayOption(
@@ -257,17 +279,21 @@ fun ProjectionSettingsTab(
     // ScreenAssignmentCard can take them as a parameter.
 
     val noneLabel = stringResource(Res.string.key_output_none)
-    val displayOptions = remember(screenDevicesAll, noneLabel) {
+    val screenNames = proj.screenNames
+    val displayOptions = remember(screenDevicesAll, noneLabel, screenNames) {
         val options = mutableListOf<DisplayOption>()
         options.add(DisplayOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
         // Add physical displays, skipping the primary monitor
         var displayNum = 1
         for (screen in screenDevicesAll) {
             if (screen.isPrimary) continue
+            // A renamed monitor is named in the menu too: the whole point of calling it "Foyer TV"
+            // is not having to remember which of three geometries that is.
+            val named = proj.screenName(screen.key)
             options.add(
                 DisplayOption(
-                    label = "Display $displayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})",
-                    shortLabel = "D$displayNum (${screen.boundsW}x${screen.boundsH})",
+                    label = displayLabel(named, displayNum, screen),
+                    shortLabel = displayShortLabel(named, displayNum, screen),
                     targetDisplay = screen.index,
                     targetType = "screen",
                     boundsX = screen.boundsX,
