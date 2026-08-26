@@ -656,7 +656,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
             )
             val effectiveModeState = remember {
-                derivedStateOf { presenterManager.presentingMode.value }
+                derivedStateOf {
+                    effectiveOutputMode(
+                        presenterManager.ndiLocks.value, i, presenterManager.presentingMode.value,
+                    )
+                }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
             val ndiOutput = virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)

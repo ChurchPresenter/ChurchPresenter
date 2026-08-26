@@ -113,6 +113,18 @@ class PresenterManager {
         _browserSourceLocks.value = updated
     }
 
+    // Per-NDI-output lock: a third independent index space, for the same reason the Browser Source
+    // one is separate from _screenLocks — ProjectionSettings.ndiOutputs has its own 0-based indices,
+    // so NDI output 0 and Browser Source output 0 are different outputs and must lock separately.
+    private val _ndiLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val ndiLocks: State<Map<Int, Presenting>> = _ndiLocks
+
+    fun setNdiLock(index: Int, mode: Presenting?) {
+        val updated = _ndiLocks.value.toMutableMap()
+        if (mode == null) updated.remove(index) else updated[index] = mode
+        _ndiLocks.value = updated
+    }
+
     // Indices of Browser Source outputs currently showing the "Identify" overlay
     // (their output number, briefly flashed) — same idea as identifyingScreen for
     // physical displays, but per-output since there's no window to flash instead.

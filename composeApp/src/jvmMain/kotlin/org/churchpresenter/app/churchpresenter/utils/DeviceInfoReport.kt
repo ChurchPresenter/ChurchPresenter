@@ -11,6 +11,7 @@ import java.awt.GraphicsEnvironment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 
 /**
  * Builds a plain-text snapshot of the machine/app configuration for bug reports — OS, display
@@ -139,6 +140,11 @@ object DeviceInfoReport {
         appendLine("-- Outputs & Integrations --")
         appendLine("Configured outputs: ${settings.projectionSettings.screenAssignments.size}")
         appendLine("Browser Source outputs: ${settings.projectionSettings.browserSourceOutputs.size}")
+        // The runtime line matters more than the count: NDI is installed separately, so "configured
+        // two outputs but the runtime is NotInstalled" is the single most likely NDI bug report, and
+        // it is invisible from the count alone.
+        appendLine("NDI outputs: ${settings.projectionSettings.ndiOutputs.size}")
+        appendLine("NDI runtime: ${NdiManager.status.value}")
         appendLine("ATEM: ${if (settings.atemSettings.host.isNotBlank()) "configured" else "not configured"}")
         appendLine("OBS: ${if (settings.obsSettings.enabled) "enabled" else "disabled"}")
         appendLine("Companion server: ${if (settings.serverSettings.enabled) "enabled" else "disabled"}")
