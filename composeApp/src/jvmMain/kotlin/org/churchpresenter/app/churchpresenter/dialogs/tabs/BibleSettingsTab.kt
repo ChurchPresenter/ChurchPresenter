@@ -464,19 +464,21 @@ private fun LeftColumn(
                 },
                 range = 0..200,
             )
-            Spacer(Modifier.width(4.dp))
-            LabeledCheckbox(
-                checked = settings.bibleSettings.multiTranslationDivider,
-                onCheckedChange = { enabled ->
-                    onSettingsChange { app ->
-                        app.copy(bibleSettings = app.bibleSettings.copy(multiTranslationDivider = enabled))
-                    }
-                },
-                label = stringResource(Res.string.bible_translation_divider),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
+        // Its own line: the label is a sentence rather than a word, and beside the spacing field it
+        // pushed the section wider than the column it sits in.
+        LabeledCheckbox(
+            checked = settings.bibleSettings.multiTranslationDivider,
+            onCheckedChange = { enabled ->
+                onSettingsChange { app ->
+                    app.copy(bibleSettings = app.bibleSettings.copy(multiTranslationDivider = enabled))
+                }
+            },
+            label = stringResource(Res.string.bible_translation_divider),
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 
 

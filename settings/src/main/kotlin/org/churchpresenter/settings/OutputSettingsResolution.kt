@@ -96,5 +96,6 @@ fun AppSettings.resolvedFor(assignment: ScreenAssignment): AppSettings {
         streamingSettings = assignment.streamingOverride
             ?.let { streamingSettings.withAppearanceOf(it) } ?: streamingSettings,
         dictionarySettings = assignment.dictionaryOverride ?: dictionarySettings,
+        backgroundSettings = assignment.backgroundOverride ?: backgroundSettings,
     )
 }

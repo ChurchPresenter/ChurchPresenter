@@ -58,6 +58,8 @@ import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSecti
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.utils.letterSpacingEm
+import org.churchpresenter.app.churchpresenter.utils.presentedText
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f
@@ -188,11 +190,16 @@ fun SongPresenter(
     val effectiveLyricsShadow = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow
     } else if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
+    // Letters, words and case: one profile's worth, picked the same way every other lyric style is.
+    val lyricsLetterSpacing = if (isLowerThird) ss.lyricsLowerThirdLetterSpacing else ss.lyricsLetterSpacing
+    val lyricsWordSpacing = if (isLowerThird) ss.lyricsLowerThirdWordSpacing else ss.lyricsWordSpacing
+    val lyricsTransform = if (isLowerThird) ss.lyricsLowerThirdTextTransform else ss.lyricsTextTransform
     val lyricsTextStyle = TextStyle(
         fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
+        shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null,
+        letterSpacing = letterSpacingEm(lyricsLetterSpacing),
     )
     val chartHorizontalAlignment = when (
         if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
@@ -753,7 +760,7 @@ fun SongPresenter(
                             fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
                             fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
                             softWrap = appSettings.songSettings.wordWrap,
-                            text = line,
+                            text = presentedText(line, lyricsTransform, lyricsWordSpacing),
                             color = if (isLookAheadLine) laColor else lyricsColor,
                             style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
                         )

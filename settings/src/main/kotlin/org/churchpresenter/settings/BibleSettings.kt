@@ -74,6 +74,19 @@ data class BibleTranslationSettings(
     val lowerThirdReferenceShadowColor: String = "#000000",
     val lowerThirdReferenceShadowSize: Int = 100,
     val lowerThirdReferenceShadowOpacity: Int = 90,
+    /**
+     * Letter and word spacing, in hundredths of an em, and how the verse is re-cased.
+     *
+     * Stored per style profile like everything else here: a lower-third band is short and often
+     * wants the letters opened up where the full screen does not. Spacing is an em fraction rather
+     * than pixels so it tracks the font size, including the size auto-fit lands on.
+     */
+    val textLetterSpacing: Int = 0,
+    val textWordSpacing: Int = 0,
+    val textTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdTextLetterSpacing: Int = 0,
+    val lowerThirdTextWordSpacing: Int = 0,
+    val lowerThirdTextTransform: String = Constants.TEXT_TRANSFORM_NONE,
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the

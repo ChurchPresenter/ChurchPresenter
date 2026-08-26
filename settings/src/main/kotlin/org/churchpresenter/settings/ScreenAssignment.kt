@@ -119,6 +119,15 @@ data class ScreenAssignment(
      * to stay one per install.
      */
     val dictionaryOverride: DictionarySettings? = null,
+    /**
+     * This output's own backgrounds, or null to follow the global settings.
+     *
+     * Replaced whole, like [dictionaryOverride]: [BackgroundSettings] is colours, images, videos and
+     * opacities and nothing else. Note this wins over the backgrounds an Instance Link follower
+     * mirrors from its primary — a background chosen for *this* screen is a local decision, and the
+     * mirror is the fallback for screens that have not made one.
+     */
+    val backgroundOverride: BackgroundSettings? = null,
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -151,7 +160,7 @@ data class ScreenAssignment(
      */
     val isCustomized: Boolean
         get() = stageMonitorOverride != null || bibleOverride != null || songOverride != null ||
-            streamingOverride != null || dictionaryOverride != null
+            streamingOverride != null || dictionaryOverride != null || backgroundOverride != null
 
     /** Primary window role: "fill" if key output is configured, "normal" otherwise */
     val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL

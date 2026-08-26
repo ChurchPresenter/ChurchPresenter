@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,8 +29,10 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,7 +59,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.customize
+import churchpresenter.composeapp.generated.resources.customize_count
 import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
@@ -101,6 +106,7 @@ private enum class CustomizePane(val icon: ImageVector) {
     BIBLE(Icons.Filled.MenuBook),
     SONGS(Icons.Filled.MusicNote),
     LOWER_THIRD(Icons.Filled.Subtitles),
+    BACKGROUND(Icons.Filled.Wallpaper),
     DICTIONARY(Icons.Filled.Book);
 
     /** True once this output has appearance of its own for this category. */
@@ -109,6 +115,7 @@ private enum class CustomizePane(val icon: ImageVector) {
         BIBLE -> assignment.bibleOverride != null
         SONGS -> assignment.songOverride != null
         LOWER_THIRD -> assignment.streamingOverride != null
+        BACKGROUND -> assignment.backgroundOverride != null
         DICTIONARY -> assignment.dictionaryOverride != null
     }
 
@@ -121,6 +128,7 @@ private enum class CustomizePane(val icon: ImageVector) {
             BIBLE -> assignment.copy(bibleOverride = if (on) edited.bibleSettings else null)
             SONGS -> assignment.copy(songOverride = if (on) edited.songSettings else null)
             LOWER_THIRD -> assignment.copy(streamingOverride = if (on) edited.streamingSettings else null)
+            BACKGROUND -> assignment.copy(backgroundOverride = if (on) edited.backgroundSettings else null)
             DICTIONARY -> assignment.copy(dictionaryOverride = if (on) edited.dictionarySettings else null)
         }
 }
@@ -136,6 +144,7 @@ private fun customizePanes(displayMode: String): List<CustomizePane> =
             CustomizePane.BIBLE,
             CustomizePane.SONGS,
             CustomizePane.LOWER_THIRD,
+            CustomizePane.BACKGROUND,
             CustomizePane.DICTIONARY,
         )
     }
@@ -146,6 +155,7 @@ private fun CustomizePane.label(): String = when (this) {
     CustomizePane.BIBLE -> stringResource(Res.string.customize_bible)
     CustomizePane.SONGS -> stringResource(Res.string.customize_songs)
     CustomizePane.LOWER_THIRD -> stringResource(Res.string.display_lower_third)
+    CustomizePane.BACKGROUND -> stringResource(Res.string.background)
     CustomizePane.DICTIONARY -> stringResource(Res.string.tab_dictionary)
 }
 
@@ -454,14 +464,14 @@ private fun CustomizePaneContent(
     onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     when (pane) {
+        // The stage monitor keeps its own tab: its pane is a zone layout picker and a per-zone style
+        // list, which is what that tab already is — there is no compact form to reduce it to.
         CustomizePane.STAGE_MONITOR ->
             StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        CustomizePane.BIBLE ->
-            BibleSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        CustomizePane.SONGS ->
-            SongSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        CustomizePane.DICTIONARY ->
-            DictionarySettingsTab(settings = draft, onSettingsChange = onSettingsChange)
+        CustomizePane.BIBLE -> BibleCustomizePane(draft, onSettingsChange)
+        CustomizePane.SONGS -> SongCustomizePane(draft, onSettingsChange)
+        CustomizePane.BACKGROUND -> BackgroundCustomizePane(draft, onSettingsChange)
+        CustomizePane.DICTIONARY -> DictionaryCustomizePane(draft, onSettingsChange)
         CustomizePane.LOWER_THIRD -> Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -535,24 +545,39 @@ internal fun CustomizeOutputCell(
     modifier: Modifier = Modifier,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val tint = if (assignment.isCustomized) MaterialTheme.colorScheme.primary
+    // How many of this output's categories have settings of their own. A plain tint said only
+    // "something here is different"; the count says how much, and reads at a glance down a column
+    // of rows — which is the question the Projection tab is actually being asked.
+    val customized = customizePanes(assignment.displayMode).count { it.isOverridden(assignment) }
+    val tint = if (customized > 0) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.onSurfaceVariant
     OutlinedButton(
         shape = RoundedCornerShape(6.dp),
         onClick = { showDialog = true },
-        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (customized > 0) MaterialTheme.colorScheme.primaryContainer
+            else Color.Transparent,
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (customized > 0) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.outline,
+        ),
         modifier = modifier,
     ) {
         Icon(
             Icons.Filled.Settings,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(16.dp),
         )
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = stringResource(Res.string.customize),
+            text = if (customized > 0) stringResource(Res.string.customize_count, customized)
+            else stringResource(Res.string.customize),
             style = MaterialTheme.typography.labelSmall,
+            fontWeight = if (customized > 0) FontWeight.SemiBold else FontWeight.Normal,
             color = tint,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
