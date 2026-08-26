@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Belki sonra</string>
     <string name="story_prompt_reassurance">Onayınız olmadan hiçbir şey yayımlanmaz.</string>
     <string name="menu_developer_story_prompt">"Hikâyenizi paylaşın" penceresi</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Yazı tiplerinde ara…</string>
+    <string name="font_picker_clear_search">Aramayı temizle</string>
+    <string name="font_group_recent">Son kullanılanlar</string>
+    <string name="font_group_recommended">Yansıtma için uygun</string>
+    <string name="font_group_all">Tüm yazı tipleri</string>
+    <string name="font_group_matches">Eşleşmeler</string>
+    <string name="font_category_sans">Tırnaksız</string>
+    <string name="font_category_serif">Tırnaklı</string>
+    <string name="font_category_mono">Eş aralıklı</string>
+    <string name="font_category_display">Gösterim</string>
+    <string name="font_preview">Ön izleme</string>
+    <string name="font_preview_sample">Seçilen yazı tipiyle örnek metin</string>
+    <string name="font_warning_no_cyrillic">%1$s Kiril harflerini içermiyor — Kiril ayetler ekranda başka bir yazı tipiyle görünür.</string>
+    <string name="font_warning_no_hebrew">%1$s İbranice harfleri içermiyor — İbranice metin ekranda başka bir yazı tipiyle görünür.</string>
+    <string name="font_hidden_note">%1$d sembol ve sistem yazı tipi gizlendi · %3$d yazı tipinden %2$d tanesi gösteriliyor</string>
+    <string name="font_shown_note">%2$d yazı tipinden %1$d tanesi gösteriliyor</string>
+    <string name="font_picker_keys">↑↓ gezin · ⏎ seç · esc kapat</string>
 </resources>

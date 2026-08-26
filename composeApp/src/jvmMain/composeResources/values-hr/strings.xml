@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Možda kasnije</string>
     <string name="story_prompt_reassurance">Ništa se ne objavljuje bez vašeg pristanka.</string>
     <string name="menu_developer_story_prompt">Dijalog „Podijelite svoju priču"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Traži fontove…</string>
+    <string name="font_picker_clear_search">Očisti pretragu</string>
+    <string name="font_group_recent">Nedavno korišteni</string>
+    <string name="font_group_recommended">Dobri za projekciju</string>
+    <string name="font_group_all">Svi fontovi</string>
+    <string name="font_group_matches">Podudaranja</string>
+    <string name="font_category_sans">Bezserifni</string>
+    <string name="font_category_serif">Serifni</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Dekorativni</string>
+    <string name="font_preview">Pretpregled</string>
+    <string name="font_preview_sample">Ogledni tekst odabranim fontom</string>
+    <string name="font_warning_no_cyrillic">%1$s nema ćirilične znakove – reci na ćirilici na zaslonu će se prikazati drugim fontom.</string>
+    <string name="font_warning_no_hebrew">%1$s nema hebrejske znakove – hebrejski tekst na zaslonu će se prikazati drugim fontom.</string>
+    <string name="font_hidden_note">%1$d simbolskih i sustavskih fontova skriveno · prikazano %2$d od %3$d</string>
+    <string name="font_shown_note">Prikazano %1$d od %2$d</string>
+    <string name="font_picker_keys">↑↓ kretanje · ⏎ odabir · esc zatvori</string>
 </resources>

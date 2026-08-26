@@ -84,6 +84,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
@@ -502,6 +503,14 @@ fun MainDesktop(
         )
     }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    // Genesis 1:1 out of whatever is loaded, for the font pickers to preview. Pushed rather than
+    // read: the pickers sit inside settings dialogs that are windows of their own, and none of them
+    // may be handed the ViewModel.
+    val loadedTranslations = bibleViewModel.loadedTranslations.value
+    LaunchedEffect(loadedTranslations) {
+        FontPreviewText.update(loadedTranslations.map { it.bible })
+    }
 
     // Mirrors the primary's bible while connected via Instance Link — see
     // BibleViewModel.setInstanceLinkSource. Only in Controlled mode, same reasoning as Songs above.

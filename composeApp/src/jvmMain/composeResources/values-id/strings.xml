@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Mungkin nanti</string>
     <string name="story_prompt_reassurance">Tidak ada yang dipublikasikan tanpa izin Anda.</string>
     <string name="menu_developer_story_prompt">Dialog "Bagikan kisah Anda"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Cari font…</string>
+    <string name="font_picker_clear_search">Bersihkan pencarian</string>
+    <string name="font_group_recent">Baru digunakan</string>
+    <string name="font_group_recommended">Bagus untuk proyeksi</string>
+    <string name="font_group_all">Semua font</string>
+    <string name="font_group_matches">Kecocokan</string>
+    <string name="font_category_sans">Tanpa kait</string>
+    <string name="font_category_serif">Berkait</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Pratinjau</string>
+    <string name="font_preview_sample">Teks contoh dengan font yang dipilih</string>
+    <string name="font_warning_no_cyrillic">%1$s tidak memiliki glif Kiril — ayat berhuruf Kiril akan tampil di layar dengan font lain.</string>
+    <string name="font_warning_no_hebrew">%1$s tidak memiliki glif Ibrani — teks Ibrani akan tampil di layar dengan font lain.</string>
+    <string name="font_hidden_note">%1$d font simbol dan sistem disembunyikan · menampilkan %2$d dari %3$d</string>
+    <string name="font_shown_note">Menampilkan %1$d dari %2$d</string>
+    <string name="font_picker_keys">↑↓ pindah · ⏎ pilih · esc tutup</string>
 </resources>

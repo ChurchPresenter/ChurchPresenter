@@ -17,6 +17,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.isEditable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -24,13 +25,15 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.FontCatalog
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.assertFalse
@@ -180,9 +183,13 @@ private val horizontalAlignButton =
 internal fun ComposeUiTest.numberFields(): SemanticsNodeInteractionCollection =
     onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Default))
 
-/** Every `FontSettingsDropdown` on the tab — its editor commits the picked font on ImeAction.Done. */
+/** Every `FontSettingsDropdown` on the tab — the only controls that call themselves a dropdown list. */
 internal fun ComposeUiTest.fontFields(): SemanticsNodeInteractionCollection =
-    onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Done))
+    onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.DropdownList))
+
+/** The search box of the open font panel, which is the only labelled field inside it. */
+internal fun ComposeUiTest.fontSearchBox(): SemanticsNodeInteraction =
+    onNodeWithContentDescription(FONT_SEARCH_LABEL)
 
 /** Every None / First Page / Every Page dropdown on the tab. */
 internal fun ComposeUiTest.showDropdowns(): SemanticsNodeInteractionCollection =
@@ -267,7 +274,7 @@ internal fun SemanticsNodeInteraction.renderedPixels(): IntArray = captureToImag
 
 /** Asserts some font dropdown on the tab is displaying [family]. */
 internal fun ComposeUiTest.assertFontFieldShows(family: String, what: String) {
-    onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText(family))
+    onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.DropdownList) and hasText(family))
         .onFirstNode("$what must display $family")
         .assertExists("$what must display $family")
 }
@@ -280,30 +287,43 @@ internal fun ComposeUiTest.assertNumberFieldShows(value: Int, what: String) {
 }
 
 /**
- * Picks [to] in the font dropdown currently displaying [showing]. Typing filters the menu; the
- * dropdown commits on the IME action when the filter leaves exactly one candidate, so [to] must be
- * a font name that is a substring of no other installed family — see [uniquelyNamedFont].
+ * Opens the font dropdown currently displaying [showing] and picks [to] from its panel.
+ *
+ * The panel lists every installed family, so the search box is what brings [to] into view — and [to]
+ * must be a name no other family contains, or the row clicked here would be ambiguous. See
+ * [uniquelyNamedFont].
  */
 internal fun ComposeUiTest.pickFont(showing: String, to: String) {
-    onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText(showing))
-        .onFirstNode("no font dropdown is showing $showing")
-        .performTextReplacement(to)
+    openFontPanel(showing)
+    fontSearchBox().performTextInput(to)
     waitForIdle()
-    onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText(to))
-        .onFirstNode("the font dropdown should now hold the typed filter $to")
-        .performImeAction()
+    // Not merely "clickable text carrying the name": the search box now holds that same name as its
+    // own editable text, and a text field answers to a click too.
+    onAllNodes(hasText(to) and hasClickAction() and !isEditable())
+        .onFirstNode("the font panel should be offering $to")
+        .performClick()
     waitForIdle()
     assertFontFieldShows(to, "the font dropdown just committed")
 }
 
 /**
- * Types [filter] into the font dropdown currently displaying [showing] without committing it. The
- * dropdown treats typing purely as a menu filter, so nothing is written back to the settings.
+ * Types [filter] into the panel of the font dropdown displaying [showing] without picking anything.
+ *
+ * The panel leaves the field alone until a row is chosen, so nothing reaches the settings — and the
+ * panel is left open, which is what a caller asserting on the filtered list wants.
  */
 internal fun ComposeUiTest.pickFontFilterOnly(showing: String, filter: String) {
-    onAllNodes(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText(showing))
+    openFontPanel(showing)
+    fontSearchBox().performTextInput(filter)
+    waitForIdle()
+}
+
+/** Clicks open the font dropdown currently displaying [showing]. */
+internal fun ComposeUiTest.openFontPanel(showing: String) {
+    onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.DropdownList) and hasText(showing))
         .onFirstNode("no font dropdown is showing $showing")
-        .performTextReplacement(filter)
+        .performScrollTo()
+        .performClick()
     waitForIdle()
 }
 
@@ -329,12 +349,17 @@ internal fun ComposeUiTest.chooseShowOption(group: Int, option: String) {
  * from which the dropdown commits on the IME action.
  */
 internal fun uniquelyNamedFont(): String {
-    val fonts = Utils.getAvailableSystemFonts()
+    // Offerable, not merely installed: the picker hides the system's own internal faces, and the
+    // first uniquely-named family on a Mac is ".AppleSystemUIFont", which is exactly one of those.
+    val fonts = Utils.getAvailableSystemFonts().filterNot { FontCatalog.isHidden(it) }
     return fonts.first { candidate -> fonts.count { it.contains(candidate, ignoreCase = true) } == 1 }
 }
 
 /** A font name no installed family matches, used to park a dropdown on a value only it holds. */
 internal const val SENTINEL_FONT = "ZzUnusedTestFont"
+
+/** The font panel's search box announces itself with its own placeholder. */
+internal const val FONT_SEARCH_LABEL = "Search fonts…"
 
 private fun SemanticsNodeInteractionCollection.onFirstNode(message: String): SemanticsNodeInteraction {
     val count = fetchSemanticsNodes(atLeastOneRootRequired = false).size
