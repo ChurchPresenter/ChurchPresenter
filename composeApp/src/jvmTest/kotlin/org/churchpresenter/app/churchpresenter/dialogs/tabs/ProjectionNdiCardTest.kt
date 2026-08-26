@@ -12,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -180,11 +182,53 @@ class ProjectionNdiCardTest {
     }
 
     @Test
-    fun `typing a name writes it back`() {
+    fun `typing a name does not commit it`() {
+        // NDI cannot rename a source in place, so a committed keystroke destroys and re-advertises
+        // the sender. Typing "Lyrics" used to do that six times, in front of every receiver.
         card(oneOutput()) { read ->
             onNodeWithText("NDI Output 1").performTextInput("Lyrics")
             waitForIdle()
+            assertEquals("", read().projectionSettings.ndiOutputs.single().ndiName, "not until Apply")
+        }
+    }
+
+    @Test
+    fun `Apply commits the typed name`() {
+        card(oneOutput()) { read ->
+            onNodeWithText("NDI Output 1").performTextInput("Lyrics")
+            waitForIdle()
+            onNodeWithText("Apply").performClick()
+            waitForIdle()
             assertEquals("Lyrics", read().projectionSettings.ndiOutputs.single().ndiName)
+        }
+    }
+
+    @Test
+    fun `Apply is disabled until the name actually differs`() {
+        card(oneOutput()) { _ ->
+            onNodeWithText("Apply").assertIsNotEnabled()
+            onNodeWithText("NDI Output 1").performTextInput("L")
+            waitForIdle()
+            onNodeWithText("Apply").assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `Apply settles once committed, with nothing left to apply`() {
+        card(oneOutput()) { _ ->
+            onNodeWithText("NDI Output 1").performTextInput("Lyrics")
+            waitForIdle()
+            onNodeWithText("Apply").performClick()
+            waitForIdle()
+            onNodeWithText("Apply").assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun `an existing name is shown in the field before anything is typed`() {
+        card(oneOutput(ScreenAssignment(ndiName = "Stage"))) { _ ->
+            onNodeWithText("Stage").assertExists()
+            onNodeWithText("Apply").assertIsNotEnabled()
         }
     }
 

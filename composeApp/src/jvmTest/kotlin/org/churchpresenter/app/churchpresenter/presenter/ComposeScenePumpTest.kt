@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.AfterTest
@@ -21,6 +21,7 @@ import kotlin.test.assertTrue
 
 private const val W = 8
 private const val H = 4
+private const val POLL_MS = 2L
 private const val WAIT_MS = 4_000L
 
 /**
@@ -41,12 +42,21 @@ class ComposeScenePumpTest {
         scope.cancel()
     }
 
-    /** Waits until [condition] holds, failing rather than continuing if it never does. */
+    /**
+     * Waits until [condition] holds, failing rather than continuing if it never does.
+     *
+     * Polls with a short [delay] rather than [yield]: yielding in a `runBlocking` loop is a
+     * busy-wait that pins a core for the whole wait, and this suite runs on four parallel forks —
+     * so a dozen of these spinning at once starves the *other* forks. That is a plausible cause of
+     * a loopback websocket handshake in an unrelated suite missing its 15s deadline on CI.
+     *
+     * Still ends on the positive signal, never on the timeout: the deadline only fails the test.
+     */
     private fun waitFor(what: String, condition: () -> Boolean) = runBlocking {
         val deadline = System.nanoTime() + WAIT_MS * 1_000_000
         while (!condition()) {
             if (System.nanoTime() > deadline) throw AssertionError("timed out waiting for $what")
-            yield()
+            delay(POLL_MS)
         }
     }
 

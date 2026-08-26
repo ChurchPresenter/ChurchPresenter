@@ -58,6 +58,7 @@ import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.ndi.NdiSender
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_ndi_output
+import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.content_bible
@@ -363,6 +364,20 @@ private fun NdiOutputRow(
     val labelHeight = 32.dp
     var showRemoveConfirm by remember { mutableStateOf(false) }
 
+    /**
+     * The name as typed, committed only by [Apply][applyName] — never per keystroke.
+     *
+     * NDI has no way to rename a source in place: the sender has to be destroyed and recreated
+     * under the new name. Committed on every keystroke, typing "Lyrics" tore the source off the
+     * network and re-advertised it six times, which every receiver watching it sees.
+     *
+     * Keyed on the committed value so an edit made elsewhere — a settings import, the operator
+     * removing the output above this one and renumbering it — replaces an untouched draft rather
+     * than being overwritten by it.
+     */
+    var draftName by remember(output.ndiName) { mutableStateOf(output.ndiName) }
+    val nameChanged = draftName != output.ndiName
+
     fun update(updated: ScreenAssignment) {
         onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.withNdiOutput(index, updated)) }
     }
@@ -399,8 +414,8 @@ private fun NdiOutputRow(
                     state = rememberTooltipState(),
                 ) {
                     SettingsTextField(
-                        value = output.ndiName,
-                        onValueChange = { update(output.copy(ndiName = it)) },
+                        value = draftName,
+                        onValueChange = { draftName = it },
                         placeholder = {
                             Text(
                                 text = defaultLabel,
@@ -412,6 +427,16 @@ private fun NdiOutputRow(
                         },
                         modifier = Modifier.width(NAME_FIELD_WIDTH),
                     )
+                }
+                // Only enabled once the draft differs, so it reads as "there is something to
+                // commit" rather than as a button that might do nothing.
+                Button(
+                    shape = RoundedCornerShape(6.dp),
+                    enabled = nameChanged,
+                    onClick = { update(output.copy(ndiName = draftName)) },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                ) {
+                    Text(stringResource(Res.string.apply), style = MaterialTheme.typography.labelSmall)
                 }
                 // An NDI source nobody has subscribed to looks exactly like a broken one without
                 // this, which is why the count is worth the space.

@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.ndi.FakeNdiLibrary
 import org.churchpresenter.ndi.NdiOutputMode
@@ -24,6 +24,7 @@ import kotlin.test.assertTrue
 private const val OUTPUT_NAME = "Lower Third"
 private const val W = 8
 private const val H = 4
+private const val POLL_MS = 2L
 private const val WAIT_MS = 4_000L
 
 /**
@@ -41,11 +42,16 @@ class NdiVideoRendererTest {
         scope.cancel()
     }
 
+    /**
+     * Polls with a short [delay] rather than [kotlinx.coroutines.yield]: yielding in a
+     * `runBlocking` loop is a busy-wait that pins a core, and this suite runs on four parallel
+     * forks. Still ends on the positive signal — the deadline only fails the test.
+     */
     private fun waitFor(what: String, condition: () -> Boolean) = runBlocking {
         val deadline = System.nanoTime() + WAIT_MS * 1_000_000
         while (!condition()) {
             if (System.nanoTime() > deadline) throw AssertionError("timed out waiting for $what")
-            yield()
+            delay(POLL_MS)
         }
     }
 
