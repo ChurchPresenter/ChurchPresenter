@@ -169,6 +169,81 @@ class ProjectionSettingsTest {
             "a screen and a browser source are configured separately",
         )
     }
+
+    // ── NDI outputs ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `an ndi output is added at the end`() {
+        val settings = ProjectionSettings().addNdiOutput().addNdiOutput()
+
+        assertEquals(2, settings.ndiOutputs.size)
+    }
+
+    @Test
+    fun `an ndi output can be configured by index`() {
+        val settings = ProjectionSettings().addNdiOutput().withNdiOutput(0, ScreenAssignment(ndiName = "Stage"))
+
+        assertEquals("Stage", settings.getNdiOutput(0).ndiName)
+    }
+
+    @Test
+    fun `configuring an ndi output past the end fills the gap`() {
+        val settings = ProjectionSettings().withNdiOutput(2, ScreenAssignment(ndiName = "Stage"))
+
+        assertEquals(3, settings.ndiOutputs.size)
+        assertEquals("Stage", settings.getNdiOutput(2).ndiName)
+    }
+
+    @Test
+    fun `reading an ndi output that is not there gives a default rather than throwing`() {
+        assertEquals(ScreenAssignment(), ProjectionSettings().getNdiOutput(4))
+    }
+
+    @Test
+    fun `removing an ndi output shifts the ones after it down`() {
+        val settings = ProjectionSettings()
+            .withNdiOutput(0, ScreenAssignment(ndiName = "One"))
+            .withNdiOutput(1, ScreenAssignment(ndiName = "Two"))
+            .withNdiOutput(2, ScreenAssignment(ndiName = "Three"))
+
+        val afterRemoval = settings.removeNdiOutput(1)
+
+        assertEquals(2, afterRemoval.ndiOutputs.size)
+        assertEquals("One", afterRemoval.getNdiOutput(0).ndiName)
+        assertEquals("Three", afterRemoval.getNdiOutput(1).ndiName, "the third becomes the second")
+    }
+
+    @Test
+    fun `removing an ndi output that is not there changes nothing`() {
+        val settings = ProjectionSettings().addNdiOutput()
+
+        assertEquals(1, settings.removeNdiOutput(5).ndiOutputs.size)
+        assertEquals(1, settings.removeNdiOutput(-1).ndiOutputs.size)
+    }
+
+    @Test
+    fun `ndi outputs are kept apart from screens and from browser sources`() {
+        // The whole reason they are their own list: screenAssignments is reconciled against
+        // detected hardware, and an NDI output maps to no display and opens no window.
+        val settings = ProjectionSettings()
+            .withAssignment(0, assignment(1))
+            .addBrowserSourceOutput()
+            .addNdiOutput()
+
+        assertEquals(1, settings.screenAssignments.size)
+        assertEquals(1, settings.browserSourceOutputs.size)
+        assertEquals(1, settings.ndiOutputs.size)
+    }
+
+    @Test
+    fun `an app with no ndi output configured has none`() {
+        assertTrue(ProjectionSettings().ndiOutputs.isEmpty(), "NDI is off until an output is added")
+    }
+
+    @Test
+    fun `the ndi runtime path is empty until the operator overrides it`() {
+        assertEquals("", ProjectionSettings().ndiRuntimePath, "auto-detect, exactly as vlcPath does")
+    }
 }
 
 /**

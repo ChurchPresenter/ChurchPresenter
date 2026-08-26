@@ -175,6 +175,7 @@
 - **Built-in stock photo & video search** — search and download from Pexels and Pixabay right inside the app with a free API key, plus a set of preloaded backgrounds ready to use offline.
 - **Broadcast fill + key** — output separate fill and key signals for hardware keying, including SDI via Blackmagic DeckLink.
 - **Browser Source streaming output** — a transparent, OBS-ready browser-source overlay with true alpha transparency, crossfaded mode switching and configurable per-output resolution/fps — for lower thirds, media, websites and more, no OBS scene-switching integration required.
+- **NDI output** — send live content over the network as an NDI® source and pick it up in OBS, vMix or a hardware switcher, with no capture card. Alpha mode carries genuine per-pixel transparency, so a lower third arrives already keyed — no second source, no downstream keyer. Fill-only and discrete fill + key are there for gear that wants them. Needs the free NDI Runtime, installed separately and detected automatically, exactly as VLC is.
 - **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
 - **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
 
@@ -183,6 +184,9 @@
 - `presenter/Presenting.kt` — active-content state enum
 - `presenter/DeckLinkComposeOutput.kt`
 - `presenter/BrowserSourceVideoRenderer.kt`, `presenter/LocalTransparentBlanking.kt` — Browser Source output
+- `presenter/ComposeScenePump.kt`, `presenter/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
+- `ndi/` (the `:ndi` Gradle module) — NDI itself: `NdiRuntime`, `NdiLibrary`/`JnaNdiLibrary`, `NdiSender` and `NdiOutputMode`
+- `presenter/NdiVideoRenderer.kt`, `presenter/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
 - `data/StockMediaClient.kt`, `dialogs/StockMediaBrowserDialog.kt`, `viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkIO.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`

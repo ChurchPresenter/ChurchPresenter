@@ -46,6 +46,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
@@ -88,6 +89,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
+import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -595,7 +598,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+                virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -605,7 +608,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val bsOutput = browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+            val bsOutput = virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
             val renderer = remember(
                 i,
                 bsOutput.browserSourceWidth,
@@ -630,6 +633,74 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
             }
             DisposableEffect(renderer) {
                 onDispose { renderer.stop() }
+            }
+        }
+    }
+    // NDI outputs. Registered here beside the Browser Source block above and for the same reason:
+    // both are virtual outputs that open no window, so PresenterWindows.kt never sees them. The
+    // runtime is brought up once, keyed on the configured path so an operator who points the app at
+    // a different install does not have to restart it.
+    LaunchedEffect(appSettings.projectionSettings.ndiRuntimePath) {
+        // Off the composition's dispatcher: bringing the runtime up is a `Native.load` plus an
+        // initialize, and doing that inline would stall the first frame of the app on every launch
+        // of a machine that has NDI installed.
+        withContext(Dispatchers.IO) {
+            NdiManager.ensureStarted(appSettings.projectionSettings.ndiRuntimePath)
+        }
+    }
+    val ndiStatus by NdiManager.status.collectAsState()
+    appSettings.projectionSettings.ndiOutputs.indices.forEach { i ->
+        composeKey(i) {
+            val appSettingsState = rememberUpdatedState(effectiveAppSettings)
+            val screenAssignmentState = rememberUpdatedState(
+                virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            )
+            val effectiveModeState = remember {
+                derivedStateOf { presenterManager.presentingMode.value }
+            }
+            val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
+            val ndiOutput = virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            val defaultName = stringResource(Res.string.ndi_output_numbered, i + 1)
+            // Keyed on everything a sender is created with, because NDI has no way to change any of
+            // them in place: a rename, a resize or a mode change is a new source on the network.
+            // Known rough edge — the name is one of those keys and the settings field commits per
+            // keystroke, so typing a name recreates the source once per character. Harmless while
+            // nothing is receiving, and an operator names an output before a service rather than
+            // during one, but it is churn rather than something anyone would design.
+            val renderer = remember(
+                i,
+                ndiStatus,
+                ndiOutput.ndiLabelOr(defaultName),
+                ndiOutput.ndiWidth,
+                ndiOutput.ndiHeight,
+                ndiOutput.ndiFps,
+                ndiOutput.ndiMode,
+            ) {
+                NdiManager.createRenderer(
+                    index = i,
+                    assignment = ndiOutput,
+                    context = OffscreenOutputContext(
+                        presenterManager = presenterManager,
+                        appSettingsState = appSettingsState,
+                        screenAssignmentState = screenAssignmentState,
+                        effectiveModeState = effectiveModeState,
+                        // NDI has no identify button of its own, so no index can ever match it.
+                        outputIndex = OffscreenOutputContext.NO_IDENTIFY,
+                        sttManager = sttManager,
+                        mediaViewModel = mediaViewModel,
+                        qaDisplayUrlState = qaDisplayUrlState,
+                        serverUrlState = browserSourceServerUrlState,
+                    ),
+                    screenAssignmentState = screenAssignmentState,
+                    name = ndiOutput.ndiLabelOr(defaultName),
+                )
+            }
+            LaunchedEffect(renderer) { renderer?.start(this) }
+            DisposableEffect(renderer) {
+                onDispose {
+                    renderer?.stop()
+                    renderer?.let { NdiManager.release(i, it) }
+                }
             }
         }
     }

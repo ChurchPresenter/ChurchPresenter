@@ -25,7 +25,7 @@ import kotlin.test.Test
  * This is the content of the `ImageComposeScene` inside [BrowserSourceVideoRenderer.start] — 209
  * lines that no test could reach while they were the lambda of a scene inside a coroutine, because
  * reaching them meant standing up the whole render loop. Extracting them into
- * [BrowserSourceContent] makes them ordinary Compose, and this renders each of its three top-level
+ * [OffscreenOutputContent] makes them ordinary Compose, and this renders each of its three top-level
  * branches.
  *
  * These matter because a Browser Source is what a stream sees. The branches are mutually exclusive
@@ -40,7 +40,7 @@ import kotlin.test.Test
  * `encodeFrame`).
  */
 @OptIn(ExperimentalTestApi::class)
-class BrowserSourceContentRenderTest {
+class OffscreenOutputContentRenderTest {
 
     /**
      * Deliberately not 1920x1080. These assert that text reaches the semantics tree, not how it is
@@ -61,7 +61,7 @@ class BrowserSourceContentRenderTest {
     )
 
     /**
-     * Renders [BrowserSourceContent] the way the renderer does, with the optional collaborators the
+     * Renders [OffscreenOutputContent] the way the renderer does, with the optional collaborators the
      * scene passes as null — a Browser Source with no STT, Q&A url or server url configured is the
      * ordinary case, and the ones that need them have their own presenters tested elsewhere.
      */
@@ -76,16 +76,14 @@ class BrowserSourceContentRenderTest {
         val manager = PresenterManager().apply(seed)
         setContent {
             Box(screen) {
-                BrowserSourceContent(
-                    appSettingsState = mutableStateOf(settings),
-                    screenAssignmentState = mutableStateOf(assignment),
-                    effectiveModeState = mutableStateOf(mode),
-                    presenterManager = manager,
-                    mediaViewModel = null,
-                    outputIndex = outputIndex,
-                    sttManager = null,
-                    qaDisplayUrlState = null,
-                    serverUrlState = null,
+                OffscreenOutputContent(
+                    OffscreenOutputContext(
+                        presenterManager = manager,
+                        appSettingsState = mutableStateOf(settings),
+                        screenAssignmentState = mutableStateOf(assignment),
+                        effectiveModeState = mutableStateOf(mode),
+                        outputIndex = outputIndex,
+                    )
                 )
             }
         }
@@ -185,7 +183,7 @@ class BrowserSourceContentRenderTest {
 
     // ── The rest of the mode dispatch ───────────────────────────────────────────
     //
-    // One test per branch of the `when (mode)` inside [BrowserSourceContent]. These were
+    // One test per branch of the `when (mode)` inside [OffscreenOutputContent]. These were
     // unreachable before the extraction for the same reason as everything above, and each is a
     // thing that can end up on a live stream. The device-backed modes (MEDIA, PICTURES,
     // PRESENTATION, CANVAS, WEBSITE) are deliberately left out: they need VLC, a decoded image, a

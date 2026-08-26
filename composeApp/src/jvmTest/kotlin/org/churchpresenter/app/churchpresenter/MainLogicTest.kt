@@ -227,13 +227,13 @@ class MainLogicTest {
     @Test
     fun `a configured browser source output is used`() {
         val configured = ScreenAssignment(displayMode = "browser_source")
-        assertEquals(configured, browserSourceOutputAt(listOf(configured), 0))
+        assertEquals(configured, virtualOutputAt(listOf(configured), 0))
     }
 
     @Test
     fun `an output that was never configured falls back rather than failing`() {
-        assertEquals(ScreenAssignment(), browserSourceOutputAt(emptyList(), 0))
-        assertEquals(ScreenAssignment(), browserSourceOutputAt(listOf(ScreenAssignment()), 3))
+        assertEquals(ScreenAssignment(), virtualOutputAt(emptyList(), 0))
+        assertEquals(ScreenAssignment(), virtualOutputAt(listOf(ScreenAssignment()), 3))
     }
 
     // ── What a follower is told is live ─────────────────────────────────────────

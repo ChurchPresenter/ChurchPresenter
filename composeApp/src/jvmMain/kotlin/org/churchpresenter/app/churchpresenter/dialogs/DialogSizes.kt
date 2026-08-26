@@ -28,7 +28,11 @@ internal val ADD_WEBSITE_DIALOG_HEIGHT: Dp = 440.dp
 
 /** `AboutDialog`. */
 internal val ABOUT_DIALOG_WIDTH: Dp = 420.dp
-internal val ABOUT_DIALOG_HEIGHT: Dp = 490.dp
+// 560 rather than the height it shipped with, since the NDI trademark line joined the copyright.
+// Sized against the *larger* of the two platforms measured, not the one that happened to be to
+// hand: DialogViewportTest puts the content at 504dp on macOS and 524dp on CI's Linux with its text
+// 30% larger, because Skia rasterises text per platform. 560 leaves ~36dp over the taller of them.
+internal val ABOUT_DIALOG_HEIGHT: Dp = 560.dp
 
 /** `KonamiEasterEggDialog`. */
 internal val KONAMI_DIALOG_WIDTH: Dp = 420.dp

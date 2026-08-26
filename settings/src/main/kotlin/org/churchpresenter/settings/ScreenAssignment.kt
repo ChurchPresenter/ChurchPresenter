@@ -61,7 +61,28 @@ data class ScreenAssignment(
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceHeight: Int = 1080, // only used by ProjectionSettings.browserSourceOutputs entries
-    val browserSourceFps: Int = 30 // max sampling fps; only changed frames are actually encoded
+    val browserSourceFps: Int = 30, // max sampling fps; only changed frames are actually encoded
+    /**
+     * What the operator calls this NDI output — the name receivers see on the network.
+     *
+     * Blank means it has never been renamed and the numbered default is used, exactly as
+     * [browserSourceName] works. Unlike that one this name is also visible outside this app: it is
+     * what an OBS or vMix operator picks from a source list, so it is worth their while to set it.
+     *
+     * Only used by ProjectionSettings.ndiOutputs entries.
+     */
+    val ndiName: String = "",
+    val ndiEnabled: Boolean = true, // only used by ProjectionSettings.ndiOutputs entries
+    val ndiWidth: Int = 1920, // only used by ProjectionSettings.ndiOutputs entries
+    val ndiHeight: Int = 1080, // only used by ProjectionSettings.ndiOutputs entries
+    val ndiFps: Int = 30, // only used by ProjectionSettings.ndiOutputs entries
+    /**
+     * One of `Constants.NDI_MODE_*`. Defaults to alpha, which is the mode worth defaulting to: it
+     * is the one SDI cannot do, and it is what makes a lower third arrive in OBS already keyed.
+     *
+     * Only used by ProjectionSettings.ndiOutputs entries.
+     */
+    val ndiMode: String = Constants.NDI_MODE_ALPHA,
 ) {
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
@@ -87,4 +108,14 @@ data class ScreenAssignment(
      * on every screen that shows one.
      */
     fun browserSourceLabelOr(default: String): String = browserSourceName.trim().ifBlank { default }
+
+    /**
+     * This NDI output's name on the network: the operator's own if they gave it one, otherwise
+     * [default] — the numbered "NDI Output N" label, which is localized and so has to be resolved
+     * by the caller.
+     *
+     * Trimmed for the same reason as [browserSourceLabelOr], and it matters more here: a source
+     * advertised under a name of nothing but spaces is one an operator cannot pick out of a list.
+     */
+    fun ndiLabelOr(default: String): String = ndiName.trim().ifBlank { default }
 }
