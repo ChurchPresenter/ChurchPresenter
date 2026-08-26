@@ -22,16 +22,21 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEditable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.FONT_SEARCH_LABEL
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.uniquelyNamedFont
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
@@ -327,6 +332,24 @@ internal fun ComposeUiTest.chooseFromDropdown(showing: String, option: String) {
     onAllNodesWithText(showing).onLast().performScrollTo().performClick()
     waitForIdle()
     onAllNodesWithText(option).onLast().performClick()
+    waitForIdle()
+}
+
+/**
+ * Opens the font dropdown showing [showing] and picks [option] from its panel.
+ *
+ * Not [chooseFromDropdown]: the font panel lists every installed family in a `LazyColumn`, so the
+ * row wanted is not composed until the search box brings it into view. [option] must also be a name
+ * no other family contains, or several rows would answer to the click — see [uniquelyNamedFont].
+ */
+internal fun ComposeUiTest.chooseFont(showing: String, option: String) {
+    onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.DropdownList) and hasText(showing))
+        .onLast().performScrollTo().performClick()
+    waitForIdle()
+    onNodeWithContentDescription(FONT_SEARCH_LABEL).performTextInput(option)
+    waitForIdle()
+    // The search box holds that same text now, and a text field answers to a click too.
+    onAllNodes(hasText(option) and hasClickAction() and !isEditable()).onLast().performClick()
     waitForIdle()
 }
 
