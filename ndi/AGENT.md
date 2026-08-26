@@ -101,11 +101,31 @@ hand-copied literal.
   would have hidden a real bug — `Memory(0)` throws, so a zero-sized frame took the render loop
   down until a test found it.
 
-## Testing live sending
+## Testing against a real runtime
 
-Sending for real needs the runtime *and* a receiver, so it cannot be a unit test. Do it by hand:
-install the runtime, add an output in Projection settings, and pick the source in OBS or NDI Studio
-Monitor. `FakeNdiLibrary` (a test fixture, so `:composeApp` shares it) covers everything else.
+`NdiHardwareTest` binds the actual NDI Runtime instead of `FakeNdiLibrary`. It is **opt-in and inert
+by default**, on the `DeckLinkHardwareTest` model:
+
+```bash
+./gradlew :ndi:test -PndiHardware=true --tests '*NdiHardwareTest*'
+```
+
+Gated rather than self-skipping because it loads a 30 MB native library, starts the runtime's own
+threads, and **advertises a source every NDI receiver on the LAN can discover** — on a machine
+mid-service, a stray source in the operator's list.
+
+It exists because the fake proves the logic but cannot prove the *binding*: that `libndi` exports the
+flat C symbols `NdiLibC` declares, and that `NdiSendCreateStruct`/`NdiVideoFrameStruct` match the
+SDK's ABI field-for-field. Those fail **silently** — a wrong `@Structure.FieldOrder` is not a compile
+error and not an exception, it is a wrong picture.
+
+**Verified 2026-08-26 against NDI SDK 6.3.2.0 on macOS** (`NDI SDK APPLE ... 6.3.2.0`, found at
+`/Library/NDI SDK for Apple/lib/macOS/libndi.dylib`): discovery, `JnaNdiLibrary.load`, the version
+and CPU checks, and a frame sent in all three modes — so the flat-symbol assumption and both struct
+layouts are confirmed, not assumed.
+
+What it deliberately does **not** assert is that a receiver saw a correct picture: that needs a
+second machine or NDI Studio Monitor running beside it, and remains a manual check.
 
 ## Dependencies
 

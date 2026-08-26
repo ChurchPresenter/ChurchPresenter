@@ -29,6 +29,13 @@ link; nothing else in the app is affected.
 
 No runtime and no network needed — the suite drives the whole module through a plain Kotlin fake.
 
+To check the *binding* against a real runtime instead (opt-in, and it briefly advertises a source on
+your network):
+
+```bash
+./gradlew :ndi:test -PndiHardware=true --tests '*NdiHardwareTest*'
+```
+
 ---
 
 NDI® is a registered trademark of Vizrt NDI AB.

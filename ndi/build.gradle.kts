@@ -26,6 +26,18 @@ dependencies {
     testImplementation(testFixtures(project(":ndi")))
 }
 
+// Opt-in gate for NdiHardwareTest, which binds the real NDI Runtime and puts a source on the
+// network: it loads a native library, advertises a sender that other machines can discover, and
+// pays runtime-init time, so it must never run as part of an ordinary `check`. Off by default;
+// enable for a deliberate hardware pass with:
+//   ./gradlew :ndi:test -PndiHardware=true --tests '*NdiHardwareTest*'
+tasks.withType<Test>().configureEach {
+    systemProperty(
+        "churchpresenter.ndiHardware",
+        if (project.hasProperty("ndiHardware")) project.property("ndiHardware").toString() else "false"
+    )
+}
+
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
