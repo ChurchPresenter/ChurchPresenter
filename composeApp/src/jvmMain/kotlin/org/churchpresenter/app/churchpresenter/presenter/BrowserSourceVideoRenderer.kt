@@ -1,67 +1,25 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.sp
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.announcements.AnnouncementsPresenter
 import org.churchpresenter.companionserver.BrowserSourceFrame
-import org.churchpresenter.app.churchpresenter.PresenterScreen
-import org.churchpresenter.app.churchpresenter.StageMonitorScreen
-import org.churchpresenter.dictionary.tab.DictionaryPresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.stt.STTManager
-import org.churchpresenter.stt.STTPresenter
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import org.churchpresenter.lowerthird.LowerThirdPresenter
-import org.churchpresenter.qa.QAQRCodePresenter
-import org.churchpresenter.qa.QAPresenter
 
 private const val ALPHA_SHIFT = 24
 private const val OPAQUE_ALPHA = 0xFF
 private const val MIN_CROSSFADE_MS = 100
-private const val NANOS_PER_MILLI = 1_000_000L
 
 /**
  * Renders a Browser Source output's live content off-screen (no window, no JCEF — same
@@ -108,11 +66,38 @@ class BrowserSourceVideoRenderer(
     private val height: Int = 1080,
     fps: Int = 30,
 ) {
+    /**
+     * The off-screen render loop itself. Everything generic about it — the scene, the virtual
+     * clock, the pixel readback and the idle parking — lives in [ComposeScenePump]; what stays
+     * here is the Browser-Source-specific stage that runs on each frame it produces.
+     */
+    private val pump = ComposeScenePump(
+        width = width,
+        height = height,
+        fps = fps,
+        shouldRender = {
+            shouldRenderTick(screenAssignmentState.value.browserSourceEnabled, frames.subscriptionCount.value)
+        },
+        onPark = ::onPark,
+    ) {
+        OffscreenOutputContent(
+            OffscreenOutputContext(
+                presenterManager = presenterManager,
+                appSettingsState = appSettingsState,
+                screenAssignmentState = screenAssignmentState,
+                effectiveModeState = effectiveModeState,
+                outputIndex = outputIndex,
+                sttManager = sttManager,
+                mediaViewModel = mediaViewModel,
+                qaDisplayUrlState = qaDisplayUrlState,
+                serverUrlState = serverUrlState,
+            )
+        )
+    }
+
     // Sampling cadence from the per-output fps setting; only changed frames are actually
     // encoded/emitted, so this is a ceiling, not a constant cost.
-    internal val tickDelayMs = 1000L / fps.coerceIn(1, 60)
-    // Keep the virtual animation clock in step with real sampling time
-    private val frameNanos = tickDelayMs * 1_000_000L
+    internal val tickDelayMs: Long get() = pump.tickDelayMs
 
     internal companion object {
         // DROP_OLDEST (below) is only safe for dirty-rect deltas because of this: each delta is
@@ -123,13 +108,12 @@ class BrowserSourceVideoRenderer(
         private const val FULL_FRAME_RESEED_MS = 5_000L
 
         /**
-         * How often to re-check for work while parked. Only a subscription-count read, so this
-         * costs nothing measurable; it just bounds how long a connecting client waits for its
-         * first frame. Deliberately slower than any tick rate — the reseed path gives that client
-         * a full frame the moment the loop wakes, so a quarter second of latency on connect buys
-         * back a permanently idle output.
+         * How often to re-check for work while parked — [ComposeScenePump]'s, re-exported because
+         * it is this class's own invariant that it stay well above [tickDelayMs]. The reseed path
+         * gives a connecting client a full frame the moment the loop wakes, so a quarter second of
+         * latency on connect buys back a permanently idle output.
          */
-        internal const val IDLE_POLL_MS = 250L
+        internal const val IDLE_POLL_MS = ComposeScenePump.IDLE_POLL_MS
 
         /**
          * Whether this tick is worth rendering at all.
@@ -337,357 +321,74 @@ class BrowserSourceVideoRenderer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    private var job: Job? = null
+    /**
+     * The previous frame's pixels, reused rather than reallocated. This used to be
+     * `lastBuf = intBuf.copyOf()` per changed frame — a fresh width*height IntArray (8.3 MB at
+     * 1080p) every time, and 34% of the app's total allocation. The contents are only ever read by
+     * [decideTick]/[computeDirtyRect] before being overwritten, so one buffer for the lifetime of
+     * the renderer is enough. Lazy, because a configured-but-never-started output should not pay
+     * for it.
+     */
+    private val previousBuf by lazy { IntArray(width * height) }
+    private var hasPrevious = false
+    private var lastSeenSubscriberCount = 0
+    private var lastFullFrameAtMs = 0L
 
-    fun start(scope: CoroutineScope) {
-        if (job != null) return
-        job = scope.launch(Dispatchers.Default) {
-            val scene = ImageComposeScene(width, height, Density(1f)) {
-                BrowserSourceContent(
-                    appSettingsState = appSettingsState,
-                    screenAssignmentState = screenAssignmentState,
-                    effectiveModeState = effectiveModeState,
-                    presenterManager = presenterManager,
-                    mediaViewModel = mediaViewModel,
-                    outputIndex = outputIndex,
-                    sttManager = sttManager,
-                    qaDisplayUrlState = qaDisplayUrlState,
-                    serverUrlState = serverUrlState,
-                )
-            }
+    fun start(scope: CoroutineScope) = pump.start(scope, ::onFrame)
 
-            try {
-                var timeNanos = 0L
-                val intBuf = IntArray(width * height)
-                // The previous frame's pixels, reused rather than reallocated. This used to be
-                // `lastBuf = intBuf.copyOf()` per changed frame — a fresh width*height IntArray
-                // (8.3 MB at 1080p) every time, and 34% of the app's total allocation. The
-                // contents are only ever read by decideTick/computeDirtyRect before being
-                // overwritten, so one buffer for the lifetime of the loop is enough.
-                val previousBuf = IntArray(width * height)
-                var hasPrevious = false
-                var lastSeenSubscriberCount = 0
-                var lastFullFrameAtMs = 0L
-                var parked = false
-                while (true) {
-                    val subscriberCount = frames.subscriptionCount.value
+    fun stop() = pump.stop()
 
-                    if (!shouldRenderTick(screenAssignmentState.value.browserSourceEnabled, subscriberCount)) {
-                        if (!parked) {
-                            parked = true
-                            // Forget the baseline: whoever connects next has an empty canvas, so
-                            // the next rendered frame has to be a full one regardless. Dropping it
-                            // here means that happens via decideTick's existing first-frame path
-                            // rather than by diffing against pixels no client ever received.
-                            hasPrevious = false
-                            // And drop what [frames] would replay. The last thing emitted before
-                            // parking is usually a dirty-rect delta, which only means anything
-                            // applied on top of the canvas the client before it had built up — so
-                            // replaying it to the *next* client paints a fragment of old content
-                            // at that rectangle until the wake-up full frame lands a poll later.
-                            frames.resetReplayCache()
-                        }
-                        lastSeenSubscriberCount = subscriberCount
-                        // Keep the virtual animation clock on real time so a client that connects
-                        // after a long park doesn't resume mid-animation at a stale timestamp.
-                        timeNanos += IDLE_POLL_MS * NANOS_PER_MILLI
-                        delay(IDLE_POLL_MS)
-                        continue
-                    }
+    /**
+     * The Browser-Source stage of one frame: decide whether these pixels are worth sending and, if
+     * so, encode and emit either a dirty-rect delta or the whole canvas.
+     *
+     * Runs on the pump's coroutine, once per rendered tick. [intBuf] is the pump's own buffer and
+     * is overwritten by the next tick, which is why a frame that is kept as the diff baseline is
+     * copied into [previousBuf] rather than aliased.
+     */
+    private suspend fun onFrame(intBuf: IntArray, w: Int, h: Int, elapsedMs: Long) {
+        // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened mid-service)
+        // must be seeded with a full frame before any dirty-rect delta means anything to it, so
+        // force one whenever the subscriber count rises — even on a tick where content didn't
+        // otherwise change.
+        val subscriberCount = frames.subscriptionCount.value
+        val newSubscriberJoined = subscriberCount > lastSeenSubscriberCount
+        lastSeenSubscriberCount = subscriberCount
 
-                    parked = false
-                    timeNanos += frameNanos
-                    Snapshot.sendApplyNotifications()
-                    val img = scene.render(timeNanos)
-                    try {
-                        img.toComposeImageBitmap().readPixels(intBuf)
-                    } finally {
-                        img.close()
-                    }
+        val lastBuf = if (hasPrevious) previousBuf else null
+        val decision = decideTick(intBuf, lastBuf, w, h, newSubscriberJoined, elapsedMs, lastFullFrameAtMs)
+            ?: return
 
-                    // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened
-                    // mid-service) must be seeded with a full frame before any dirty-rect delta
-                    // means anything to it, so force one whenever the subscriber count rises —
-                    // even on a tick where content didn't otherwise change.
-                    val newSubscriberJoined = subscriberCount > lastSeenSubscriberCount
-                    lastSeenSubscriberCount = subscriberCount
-
-                    val elapsedMs = timeNanos / 1_000_000
-                    val lastBuf = if (hasPrevious) previousBuf else null
-                    val decision = decideTick(intBuf, lastBuf, width, height, newSubscriberJoined, elapsedMs, lastFullFrameAtMs)
-
-                    if (decision != null) {
-                        val rect = decision.rect
-                        val frame = if (decision.forceFullFrame) {
-                            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, width, height, encodeFrame(intBuf, width, height))
-                        } else {
-                            val cropped = cropPixels(intBuf, width, rect.x, rect.y, rect.w, rect.h)
-                            BrowserSourceFrame(
-                                rect.x, rect.y, rect.w, rect.h, width, height,
-                                encodeFrame(cropped, rect.w, rect.h)
-                            )
-                        }
-                        frames.emit(frame)
-                        if (decision.forceFullFrame) lastFullFrameAtMs = elapsedMs
-                        if (decision.contentChanged) {
-                            System.arraycopy(intBuf, 0, previousBuf, 0, intBuf.size)
-                            hasPrevious = true
-                        }
-                    }
-                    delay(tickDelayMs)
-                }
-            } finally {
-                scene.close()
-            }
+        val rect = decision.rect
+        val frame = if (decision.forceFullFrame) {
+            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(intBuf, w, h))
+        } else {
+            val cropped = cropPixels(intBuf, w, rect.x, rect.y, rect.w, rect.h)
+            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(cropped, rect.w, rect.h))
+        }
+        frames.emit(frame)
+        if (decision.forceFullFrame) lastFullFrameAtMs = elapsedMs
+        if (decision.contentChanged) {
+            System.arraycopy(intBuf, 0, previousBuf, 0, intBuf.size)
+            hasPrevious = true
         }
     }
 
-    fun stop() {
-        job?.cancel()
-        job = null
+    /**
+     * Called once each time the pump parks, i.e. when [shouldRenderTick] turns false.
+     *
+     * Forgets the diff baseline: whoever connects next has an empty canvas, so the next rendered
+     * frame has to be a full one regardless. Dropping it here means that happens via [decideTick]'s
+     * existing first-frame path rather than by diffing against pixels no client ever received.
+     *
+     * And drops what [frames] would replay. The last thing emitted before parking is usually a
+     * dirty-rect delta, which only means anything applied on top of the canvas the client before it
+     * had built up — so replaying it to the *next* client paints a fragment of old content at that
+     * rectangle until the wake-up full frame lands a poll later.
+     */
+    private fun onPark() {
+        hasPrevious = false
+        lastSeenSubscriberCount = frames.subscriptionCount.value
+        frames.resetReplayCache()
     }
-}
-
-/**
- * Everything a Browser Source output draws, as a composable in its own right.
- *
- * Extracted from [BrowserSourceVideoRenderer.start], where it was the content lambda of an
- * `ImageComposeScene` inside a coroutine — 209 lines that no test could reach, because reaching them
- * meant standing up the whole render loop. It is ordinary Compose: the identify overlay, the stage
- * monitor, and the mode dispatch to each presenter. Only the frame pump around it genuinely needs
- * the scene, and that stays in [BrowserSourceVideoRenderer.start].
- *
- * This mirrors the `…Content` split the dialogs already use (`PlanningCenterImportDialogContent`,
- * `RemoteEventDialogContent`, `CCLIReportContent`): the window or loop keeps the part that cannot be
- * tested, the content becomes a composable a test can render.
- *
- * [presenterManager] is passed in rather than reached for. That is the rendering-bridge exception
- * AGENT.md allows — this composable *is* the panel the renderer draws, and it read the same manager
- * before the extraction; nothing new escapes the renderer.
- */
-@Composable
-internal fun BrowserSourceContent(
-    appSettingsState: State<AppSettings>,
-    screenAssignmentState: State<ScreenAssignment>,
-    effectiveModeState: State<Presenting>,
-    presenterManager: PresenterManager,
-    mediaViewModel: MediaViewModel?,
-    outputIndex: Int,
-    sttManager: STTManager?,
-    qaDisplayUrlState: State<String>?,
-    serverUrlState: State<String>?,
-) {
-        // Transparent blanking (real alpha for OBS keying) + the media view model
-        // for MEDIA playback — the same CompositionLocal the real windows provide.
-        CompositionLocalProvider(
-            LocalTransparentBlanking provides true,
-            LocalMediaViewModel provides mediaViewModel
-        ) {
-            val appSettings by appSettingsState
-            val screenAssignment by screenAssignmentState
-            val effectiveMode by effectiveModeState
-            val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
-            val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
-            val isLowerThird = screenAssignment.isLowerThird
-            val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-            val outputRole = Constants.OUTPUT_ROLE_NORMAL
-            // General per-output background toggle — same field/logic as native output
-            // (main.kt). showBibleBackground/showSongsBackground below are an additional
-            // layer on top of this, not a replacement for it.
-            val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
-
-            if (isIdentifying) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BasicText(
-                        // Rendered into the OBS feed rather than into the app's own UI, which has
-                        // no compose-resource environment here — hence the literal fallback. A
-                        // renamed output shows the operator's own name instead.
-                        text = screenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}"),
-                        style = TextStyle(
-                            color = Color.White,
-                            fontSize = 96.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                }
-            } else if (isStageMonitor) {
-                StageMonitorScreen(
-                    sm = appSettings.stageMonitorSettings,
-                    presentingMode = effectiveMode,
-                    showChords = screenAssignment.showChords,
-                    currentLyricSection = presenterManager.displayedLyricSection.value,
-                    allLyricSections = presenterManager.allLyricSections.value,
-                    songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
-                    displayedVerses = presenterManager.displayedVerses.value,
-                    nextVerses = presenterManager.nextVerses.value,
-                    announcementText = presenterManager.displayedAnnouncementText.value,
-                    displayedImagePath = presenterManager.displayedImagePath.value,
-                    displayedSlide = presenterManager.displayedSlide.value,
-                    presenterNotes = presenterManager.presenterNotes.value,
-                    activeScene = presenterManager.activeScene.value,
-                    displayedQuestion = presenterManager.displayedQuestion.value,
-                    qaSettings = appSettings.qaSettings,
-                    displayedDictionaryEntry = presenterManager.displayedDictionaryEntry.value,
-                    dictionarySettings = appSettings.dictionarySettings
-                )
-            } else {
-                PresenterScreen(
-                    appSettings = appSettings,
-                    outputRole = outputRole,
-                    isLowerThird = isLowerThird,
-                    showBackground = showBg
-                ) {
-                    // Mode-to-mode crossfade — same behavior and duration formula as the
-                    // real output windows (main.kt): fades only when bible/song crossfade
-                    // is enabled and neither the outgoing nor incoming mode is NONE.
-                    val modeCrossfadeDuration = BrowserSourceVideoRenderer.crossfadeDurationMs(
-                        appSettings.bibleSettings.crossfade, appSettings.bibleSettings.transitionDuration.toInt(),
-                        appSettings.songSettings.crossfade, appSettings.songSettings.transitionDuration.toInt()
-                    )
-                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
-                    val screenCrossfadeActive = BrowserSourceVideoRenderer.isScreenCrossfadeActive(
-                        appSettings.bibleSettings.crossfade, appSettings.songSettings.crossfade,
-                        effectiveMode, prevEffectiveMode
-                    )
-                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                    Crossfade(
-                        targetState = effectiveMode,
-                        animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
-                    ) { mode ->
-                        val showsContent = BrowserSourceVideoRenderer.showsContentFor(mode, screenAssignment)
-                        if (mode != Presenting.NONE && showsContent) {
-                            when (mode) {
-                                Presenting.BIBLE -> BiblePresenter(
-                                    selectedVerses = presenterManager.displayedVerses.value,
-                                    appSettings = appSettings,
-                                    isLowerThird = isLowerThird,
-                                    isLowerThirdVertical = isLowerThirdVertical,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-                                    showBackground = showBg && screenAssignment.showBibleBackground,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations
-                                )
-                                Presenting.LYRICS -> SongPresenter(
-                                    lyricSection = presenterManager.displayedLyricSection.value,
-                                    appSettings = appSettings,
-                                    isLowerThird = isLowerThird,
-                                    isLowerThirdVertical = isLowerThirdVertical,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.songTransitionAlpha.value,
-                                    displayLineIndex = presenterManager.songDisplayLineIndex.value,
-                                    lookAheadEnabled = screenAssignment.songLookAhead,
-                                    allLyricSections = presenterManager.allLyricSections.value,
-                                    displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
-                                    showBackground = showBg && screenAssignment.showSongsBackground,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode,
-                    showChords = screenAssignment.showChords,
-                                )
-                                Presenting.PICTURES -> PicturePresenter(
-                                    imagePath = presenterManager.displayedImagePath.value,
-                                    previousImagePath = presenterManager.previousDisplayedImagePath.value,
-                                    transitionAlpha = presenterManager.pictureTransitionAlpha.value,
-                                    slideOffset = presenterManager.pictureSlideOffset.value,
-                                    animationType = presenterManager.animationType.value
-                                )
-                                Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
-                                    text = presenterManager.displayedAnnouncementText.value,
-                                    appSettings = appSettings,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.announcementTransitionAlpha.value,
-                                    showBackground = showBg
-                                )
-                                Presenting.PRESENTATION -> {
-                                    PresentationPresenter(
-                                        frame = presenterManager.presentationFrame.value,
-                                        slide = presenterManager.displayedSlide.value,
-                                        previousSlide = presenterManager.previousDisplayedSlide.value,
-                                        transitionAlpha = presenterManager.slideTransitionAlpha.value,
-                                        slideOffset = presenterManager.slideSlideOffset.value,
-                                        animationType = presenterManager.animationType.value,
-                                        outputRole = outputRole,
-                                        frozen = presenterManager.slideFrozen.value
-                                    )
-                                }
-                                Presenting.LOWER_THIRD -> {
-                                    val lottieJsonContent = presenterManager.lottieJsonContent.value
-                                    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
-                                        LottieCompositionSpec.JsonString(lottieJsonContent.ifBlank { "{}" })
-                                    }
-                                    LowerThirdPresenter(
-                                        composition = lottieComposition,
-                                        progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings,
-                                        outputRole = outputRole,
-                                        frame = presenterManager.lottieFrame.value
-                                    )
-                                }
-                                Presenting.MEDIA -> {
-                                    // Same rule as the real output (main.kt): audio-only files
-                                    // show background only; video draws muted — frames come from
-                                    // the master player via SharedVideoOutput, audio stays on the
-                                    // main output's audio device.
-                                    if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                        MediaPresenter(
-                                            modifier = Modifier.fillMaxSize(),
-                                            transitionAlpha = presenterManager.mediaTransitionAlpha.value
-                                        )
-                                    }
-                                }
-                                Presenting.WEBSITE -> {
-                                    // Mirror of the live JCEF browser's periodic snapshot — only
-                                    // updates while the Web tab or a real output window shows the
-                                    // site (a Browser Source alone cannot drive a website). No
-                                    // snapshot yet -> nothing (transparent).
-                                    presenterManager.webSnapshot.value?.let { snapshot ->
-                                        Image(
-                                            bitmap = snapshot,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.FillBounds,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-                                }
-                                Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)
-                                Presenting.QA -> {
-                                    val showQRCode = presenterManager.showQRCodeOnDisplay.value
-                                    val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
-                                    if (showQRCode) {
-                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
-                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
-                                    } else {
-                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
-                                    }
-                                }
-                                Presenting.STT -> {
-                                    sttManager?.let { stt ->
-                                        STTPresenter(
-                                            segments = stt.segments,
-                                            inProgressText = stt.inProgressText.value,
-                                            translationSegments = stt.translationSegments,
-                                            inProgressTranslation = stt.inProgressTranslation.value,
-                                            highlightedWords = stt.highlightedWords,
-                                            sttSettings = appSettings.sttSettings,
-                                            outputRole = outputRole
-                                        )
-                                    }
-                                }
-                                Presenting.DICTIONARY -> DictionaryPresenter(
-                                    entry = presenterManager.displayedDictionaryEntry.value,
-                                    dictionarySettings = appSettings.dictionarySettings,
-                                    outputRole = outputRole,
-                                    transitionAlpha = 1f
-                                )
-                                Presenting.NONE -> {}
-                            }
-                        }
-                    }
-                }
-            }
-        }
 }

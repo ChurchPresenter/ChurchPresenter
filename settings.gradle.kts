@@ -67,6 +67,11 @@ include(":diagnostics")
 // — connect, state dump, upstream/downstream key, media-pool upload. Depended on by :composeApp,
 // which wires it to settings and the lower third in AtemBridge.
 include(":atem")
+// NDI (Network Device Interface): the send half of Vizrt's IP video protocol, over the NDI Runtime
+// the user installs separately — this module ships no NDI binaries. Plain Kotlin over JNA, with
+// every native call behind one interface. Depended on by :composeApp, which wires it to settings
+// and the presenters in NdiVideoRenderer.
+include(":ndi")
 // The Planning Center Online client: the OAuth conversation, the Services REST calls and the
 // loopback listener that catches the consent redirect. Depended on by :composeApp, which wraps it
 // in PlanningCenterImportViewModel.

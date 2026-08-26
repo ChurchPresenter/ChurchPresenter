@@ -27,6 +27,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.companionserver.CompanionServer
+import org.churchpresenter.ndi.NdiRuntimeStatus
 import kotlin.test.assertEquals
 
 /**
@@ -51,12 +52,19 @@ import kotlin.test.assertEquals
  * those ordinals assume. Everything else is found by the text it displays.
  *
  * Never clicked: the "Browse" button next to the VLC path opens a **native** file chooser, which
- * would block the run.
+ * would block the run — and neither is the NDI card's own "Browse", for the same reason. Its "Get
+ * the NDI Runtime" is not clicked either: that one opens the operator's web browser.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun projectionTab(
     initial: AppSettings = AppSettings(),
     screens: List<DetectedScreen> = twoExternalScreens(),
+    /**
+     * Pinned, never read from the machine. Left on the live [NdiManager] the NDI card would render
+     * differently depending on whether the machine running the suite has an NDI Runtime installed —
+     * and these tests count the tab's controls, so that would decide whether they pass.
+     */
+    ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -69,6 +77,8 @@ internal fun projectionTab(
                 onSettingsChange = { transform -> state = transform(state); current = state },
                 companionServer = server,
                 detectScreens = { screens },
+                ndiStatus = { ndiStatus },
+                ndiReceiverCount = { 0 },
             )
         }
     }
@@ -182,8 +192,15 @@ internal object Grid {
      * "Add Output" and the VLC-path "Browse" button are always there. The audio-device dropdown
      * between them is not: the tab composes the whole device row only when VLC is present, and
      * shows an "install VLC" message in its place otherwise — the state on a CI runner.
+     *
+     * [NDI_BUTTONS] is the NDI card's contribution with no runtime installed, which is what
+     * [projectionTab] pins: "Check again", its own "Browse", and "Get the NDI Runtime". With a
+     * runtime it is one fewer (no install link) plus its own "Add Output", so a suite that pins a
+     * ready runtime has to count for itself.
      */
-    val trailing: Int get() = if (isVlcAvailable) 3 else 2
+    const val NDI_BUTTONS = 3
+
+    val trailing: Int get() = (if (isVlcAvailable) 3 else 2) + NDI_BUTTONS
 }
 
 /**

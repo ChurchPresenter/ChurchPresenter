@@ -31,6 +31,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.oneExternalScreen
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.threeTranslations
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.twoExternalScreens
 import org.churchpresenter.companionserver.CompanionServer
+import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -63,6 +64,83 @@ import org.churchpresenter.ui.screenshot.stackedThemes
  *    and an ephemeral port. The server is not started here, so those rows draw without them.
  */
 class ProjectionSettingsTabScreenshotTest {
+
+
+    // ── NDI outputs ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * What almost every operator meets first: the NDI Runtime is a separate free download and this
+     * app ships none of it, so the card is a paragraph and a link. It has to read as "not yet",
+     * not as a fault.
+     */
+    @Test
+    fun `ndi with no runtime installed`() =
+        shoot("ndi_not_installed", drive = { scrollTo("registered trademark", substring = true) })
+
+    /** With a runtime: the version, the path override, and the Add Output button. */
+    @Test
+    fun `ndi with a runtime and no outputs`() = shoot(
+        "ndi_runtime_ready",
+        ndiStatus = READY_RUNTIME,
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
+
+    /** One output, in the alpha mode a new one defaults to, with nobody watching yet. */
+    @Test
+    fun `an ndi output with no receivers`() = shoot(
+        "ndi_output_alpha",
+        settings = settings(ProjectionSettings(ndiOutputs = listOf(ScreenAssignment()))),
+        ndiStatus = READY_RUNTIME,
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
+
+    /** Named, in fill+key, at 4K/60, with receivers connected — the fully configured row. */
+    @Test
+    fun `a named ndi output in fill and key with receivers`() = shoot(
+        "ndi_output_fill_key",
+        settings = settings(
+            ProjectionSettings(
+                ndiOutputs = listOf(
+                    ScreenAssignment(
+                        ndiName = "Lyrics",
+                        ndiMode = Constants.NDI_MODE_FILL_AND_KEY,
+                        ndiWidth = 3840,
+                        ndiHeight = 2160,
+                        ndiFps = 60,
+                        displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    ),
+                ),
+            ),
+        ),
+        ndiStatus = READY_RUNTIME,
+        ndiReceivers = 3,
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
+
+    /** Switched off: the row stays, dimmed, exactly as a disabled browser source does. */
+    @Test
+    fun `a disabled ndi output`() = shoot(
+        "ndi_output_disabled",
+        settings = settings(ProjectionSettings(ndiOutputs = listOf(ScreenAssignment(ndiEnabled = false)))),
+        ndiStatus = READY_RUNTIME,
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
+
+    /** A runtime that is there but will not load — one of only two states here that is a fault. */
+    @Test
+    fun `ndi with a runtime that will not load`() = shoot(
+        "ndi_runtime_load_failed",
+        ndiStatus = NdiRuntimeStatus.LoadFailed("/usr/local/lib/libndi.dylib"),
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
+
+    /** The other: a processor without SSE4.2, which NDI cannot run on at all. */
+    @Test
+    fun `ndi on an unsupported processor`() = shoot(
+        "ndi_unsupported_cpu",
+        ndiStatus = NdiRuntimeStatus.UnsupportedCpu,
+        drive = { scrollTo("registered trademark", substring = true) },
+    )
 
     // ── The tab as the attached hardware makes it ───────────────────────────────────────────────
 
@@ -315,6 +393,10 @@ class ProjectionSettingsTabScreenshotTest {
         settings: AppSettings = settings(),
         screens: List<DetectedScreen> = twoExternalScreens(),
         rootIndex: Int = 0,
+        // Pinned, never read from the machine: whether NDI is installed here would otherwise decide
+        // what the card draws, the way canvasTab/source_camera used to enumerate real cameras.
+        ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
+        ndiReceivers: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
@@ -329,6 +411,8 @@ class ProjectionSettingsTabScreenshotTest {
                                 onSettingsChange = { transform -> current = transform(current) },
                                 companionServer = server,
                                 detectScreens = { screens },
+                                ndiStatus = { ndiStatus },
+                                ndiReceiverCount = { ndiReceivers },
                             )
                         }
                     }
@@ -419,6 +503,9 @@ class ProjectionSettingsTabScreenshotTest {
 
     private companion object {
         const val SECTION = "projectionSettingsTab"
+
+        /** A fixed "installed" runtime, so the version on screen is a constant and not the host's. */
+        val READY_RUNTIME = NdiRuntimeStatus.Ready("6.1.1", "/usr/local/lib/libndi.dylib")
 
         val DISPLAY_1 = twoExternalScreens()[1]
         val DISPLAY_2 = twoExternalScreens()[2]

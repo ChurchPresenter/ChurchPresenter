@@ -28,7 +28,9 @@ internal val ADD_WEBSITE_DIALOG_HEIGHT: Dp = 440.dp
 
 /** `AboutDialog`. */
 internal val ABOUT_DIALOG_WIDTH: Dp = 420.dp
-internal val ABOUT_DIALOG_HEIGHT: Dp = 490.dp
+// 520 rather than 490 since the NDI trademark line joined the copyright: DialogViewportTest measured
+// the content at 504dp with its text 30% larger, i.e. 14dp off the bottom of the old window.
+internal val ABOUT_DIALOG_HEIGHT: Dp = 520.dp
 
 /** `KonamiEasterEggDialog`. */
 internal val KONAMI_DIALOG_WIDTH: Dp = 420.dp

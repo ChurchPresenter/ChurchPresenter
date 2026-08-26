@@ -123,8 +123,14 @@ internal fun isTunnelConnected(status: TunnelStatus): Boolean = status is Tunnel
 internal fun tunnelJustDropped(previouslyConnected: Boolean, isConnected: Boolean): Boolean =
     previouslyConnected && !isConnected
 
-/** The browser-source output configured at [index], or an unconfigured one when there is none. */
-internal fun browserSourceOutputAt(outputs: List<ScreenAssignment>, index: Int): ScreenAssignment =
+/**
+ * The virtual output configured at [index] of [outputs], or an unconfigured one when there is none.
+ *
+ * Used for both lists of virtual outputs — Browser Source and NDI. Neither is reconciled against
+ * detected hardware the way `screenAssignments` is, so either can be shorter than the loop reading
+ * it for a frame after one is removed.
+ */
+internal fun virtualOutputAt(outputs: List<ScreenAssignment>, index: Int): ScreenAssignment =
     outputs.getOrNull(index) ?: ScreenAssignment()
 
 /** Whether media is what is on the output, which is what connected phones are told. */

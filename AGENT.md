@@ -81,6 +81,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `settings/`            | `:settings`            | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md)            |
 | `diagnostics/`         | `:diagnostics`         | Crash reporting: the crash log on disk and the Sentry bridge behind it            | [AGENT.md](diagnostics/AGENT.md)         |
 | `atem/`                | `:atem`                | The Blackmagic ATEM protocol client — UDP, state, keyers, media-pool upload       | [AGENT.md](atem/AGENT.md)                |
+| `ndi/`                 | `:ndi`                 | NDI output — runtime discovery and the six native send calls, behind one interface | [AGENT.md](ndi/AGENT.md)                 |
 | `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
@@ -131,7 +132,7 @@ they must be set **above everything else** in the file:
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
   each; `:web-tab` names three (`BRANCH` 0.73, `LINE` 0.83, `COMPLEXITY` 0.70 — it embeds
   Chromium; see its own `AGENT.md`); `:lower-third-tab` names one (`COMPLEXITY` at 0.82);
-  `:theme`, `:core-models`,
+  `:theme`, `:core-models`, `:ndi`,
   `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`, `:diagnostics`, `:atem`,
   `:planning-center`, `:bible-formats`, `:song-chords`, `:bible`, `:dictionary`, `:ui-components`,
   `:dictionary-tab`, `:dictionary-settings-tab`, `:lower-third-settings-tab`,

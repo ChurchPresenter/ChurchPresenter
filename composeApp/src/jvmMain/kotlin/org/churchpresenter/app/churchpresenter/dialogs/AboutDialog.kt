@@ -39,6 +39,7 @@ import org.churchpresenter.ui.LocalMainWindowState
 import org.churchpresenter.ui.centeredOnMainWindow
 import org.churchpresenter.resources.generated.resources.Res
 import org.churchpresenter.resources.generated.resources.about_copyright
+import org.churchpresenter.resources.generated.resources.ndi_trademark
 import org.churchpresenter.resources.generated.resources.about_title
 import org.churchpresenter.resources.generated.resources.app_name
 import org.churchpresenter.resources.generated.resources.action_ok
@@ -163,6 +164,15 @@ internal fun AboutDialogContent(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(Res.string.about_copyright, "2026"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                // Required by NDI's licence terms wherever the app offers NDI, alongside the same
+                // line on the Projection settings card. Not optional, and not conditional on a
+                // runtime being installed: the app offers the feature either way.
+                Text(
+                    text = stringResource(Res.string.ndi_trademark),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -91,6 +91,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.ndi.NdiRuntimeStatus
+import androidx.compose.runtime.collectAsState
 import org.churchpresenter.ui.SettingsScrollbar
 import org.churchpresenter.ui.SettingsScrollbarGutter
 import org.churchpresenter.ui.SettingsSection
@@ -187,7 +190,15 @@ fun ProjectionSettingsTab(
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
-    detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt
+    detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt,
+    /**
+     * What the app found when it looked for an NDI runtime, and how many receivers each output has.
+     *
+     * Parameters for the same reason [detectScreens] is one: both read the machine the app is
+     * running on, and a screenshot that reads them draws whatever that machine happens to have.
+     */
+    ndiStatus: @Composable () -> NdiRuntimeStatus = { NdiManager.status.collectAsState().value },
+    ndiReceiverCount: (Int) -> Int = NdiManager::connectionCount,
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
@@ -455,6 +466,19 @@ fun ProjectionSettingsTab(
         onSettingsChange = onSettingsChange,
         companionServer = companionServer,
         onIdentifyBrowserSource = onIdentifyBrowserSource,
+        contentGroup = contentGroup,
+        backgroundGroup = backgroundGroup,
+        displayModes = displayModes,
+        songLangModes = songLangModes,
+        translationDisplays = translationDisplays,
+        translationNames = translationNames,
+    )
+
+    NdiOutputsCard(
+        status = ndiStatus(),
+        receiverCount = ndiReceiverCount,
+        settings = settings,
+        onSettingsChange = onSettingsChange,
         contentGroup = contentGroup,
         backgroundGroup = backgroundGroup,
         displayModes = displayModes,

@@ -193,6 +193,14 @@ object Constants {
     // Key output target sentinel: no key output configured
     const val KEY_TARGET_NONE = -2
 
+    // What an NDI output puts on the network. Persisted as strings for the same reason the display
+    // modes are: a settings file written by a newer build must stay readable by an older one, and an
+    // enum ordinal would silently shift the meaning of every stored value if the list ever grew in
+    // the middle. The `:ndi` module's NdiOutputMode is the behaviour; these are the stored names.
+    const val NDI_MODE_ALPHA = "alpha"
+    const val NDI_MODE_FILL = "fill"
+    const val NDI_MODE_FILL_AND_KEY = "fill_key"
+
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L
 

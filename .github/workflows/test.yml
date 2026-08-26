@@ -137,6 +137,10 @@ jobs:
               - *shared
               - 'atem/**'
               - 'diagnostics/**'          # implementation(projects.diagnostics)
+            ndi:
+              - *shared
+              - 'ndi/**'
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
             planningcenter:
               - *shared
               - 'planning-center/**'
@@ -288,7 +292,7 @@ jobs:
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
+          :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :dictionary:detekt :companion-server:detekt :lottieGenerator:detekt
           :statistics:detekt
@@ -594,6 +598,17 @@ jobs:
         if: always() && steps.modules.outputs.atem == 'true'
         run: ./gradlew :atem:jacocoTestCoverageVerification -x test
 
+      # The NDI send client. Its suite drives the whole module -- the JNA marshalling included --
+      # through a plain Kotlin fake, so it needs no NDI Runtime and no network, and it meets the
+      # default 85% floor on all six counters with no override.
+      - name: NDI client tests
+        if: always() && steps.modules.outputs.ndi == 'true'
+        run: ./gradlew :ndi:test
+
+      - name: NDI client coverage floor
+        if: always() && steps.modules.outputs.ndi == 'true'
+        run: ./gradlew :ndi:jacocoTestCoverageVerification -x test
+
       - name: Planning Center tests
         if: always() && steps.modules.outputs.planningcenter == 'true'
         run: ./gradlew :planning-center:test
@@ -679,6 +694,7 @@ jobs:
             settings/build/test-results/**/TEST-*.xml
             diagnostics/build/test-results/**/TEST-*.xml
             atem/build/test-results/**/TEST-*.xml
+            ndi/build/test-results/**/TEST-*.xml
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
@@ -871,6 +887,8 @@ jobs:
             diagnostics/build/test-results/
             atem/build/reports/tests/
             atem/build/test-results/
+            ndi/build/reports/tests/
+            ndi/build/test-results/
             planning-center/build/reports/tests/
             planning-center/build/test-results/
             bible-formats/build/reports/tests/

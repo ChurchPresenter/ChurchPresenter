@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -650,5 +651,46 @@ class SettingsManagerTest {
         val sm = SettingsManager().loadSettings().stageMonitorSettings
 
         assertEquals(StageMonitorZone.E, sm.zoneFor(StageMonitorContentType.BIBLE))
+    }
+
+    // ── NDI: additive fields, absorbed with no migration ────────────────────────────────────────
+
+    @Test
+    fun `a settings file written before NDI existed loads with NDI simply not configured`() {
+        // The reason ndiOutputs and the ndi* fields needed no CURRENT_SETTINGS_VERSION bump: every
+        // one of them is defaulted, so an older document is absorbed rather than migrated. If this
+        // ever fails, the field that broke it is not additive and does need a migration step.
+        writeSettings(
+            """{"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+               "projectionSettings":{"screenAssignments":[{"targetDisplay":0}]}}""",
+        )
+
+        val projection = SettingsManager().loadSettings().projectionSettings
+
+        assertTrue(projection.ndiOutputs.isEmpty(), "no NDI output is configured until one is added")
+        assertEquals("", projection.ndiRuntimePath)
+    }
+
+    @Test
+    fun `a configured NDI output survives a save and load`() {
+        val manager = SettingsManager()
+        val loaded = manager.loadSettings()
+        val configured = loaded.copy(
+            projectionSettings = loaded.projectionSettings.copy(
+                ndiRuntimePath = "/opt/ndi",
+                ndiOutputs = listOf(
+                    ScreenAssignment(ndiName = "Lyrics", ndiFps = 60, ndiMode = Constants.NDI_MODE_FILL_AND_KEY),
+                ),
+            ),
+        )
+
+        manager.saveSettings(configured)
+        val reloaded = SettingsManager().loadSettings().projectionSettings
+
+        assertEquals("/opt/ndi", reloaded.ndiRuntimePath)
+        val output = reloaded.ndiOutputs.single()
+        assertEquals("Lyrics", output.ndiName)
+        assertEquals(60, output.ndiFps)
+        assertEquals(Constants.NDI_MODE_FILL_AND_KEY, output.ndiMode)
     }
 }

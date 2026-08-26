@@ -131,6 +131,12 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
 > protocol client. `./gradlew :companion-satellite:test`.
 >
+> **[`ndi/`](./ndi)** — NDI output: sending this app's live content over the network as an NDI®
+> source, so OBS, vMix or a hardware switcher can take lyrics or a lower third straight off the LAN
+> with no capture card. Alpha mode carries genuine per-pixel transparency, so a lower third arrives
+> already keyed — something SDI physically cannot do. **Ships no NDI binaries**: the free NDI
+> Runtime is installed separately and auto-detected, exactly as VLC is. `./gradlew :ndi:test`.
+>
 > **[`atem/`](./atem)** — the Blackmagic ATEM protocol client: the UDP conversation with the
 > switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
 > switcher built from a capture of real hardware, so no device is needed.
