@@ -246,4 +246,46 @@ class BibleFolderListingTest {
             other.deleteRecursively()
         }
     }
+
+    // ── Renames ─────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the scan keeps each module's own title so a rename costs no disk`() {
+        file("kjv.spb")
+
+        assertEquals(mapOf("kjv.spb" to "kjv.spb"), readBibleFolderListing(dir.path).titles)
+    }
+
+    @Test
+    fun `a rename renames only its own module`() {
+        file("kjv.spb")
+        file("rst.spb")
+
+        val listing = readBibleFolderListing(dir.path)
+
+        assertEquals(
+            mapOf("kjv.spb" to "Authorised", "rst.spb" to "rst.spb"),
+            listing.namesWith(mapOf("kjv.spb" to "Authorised")),
+        )
+    }
+
+    @Test
+    fun `no renames leaves the scanned names exactly as they were`() {
+        file("kjv.spb")
+        val listing = readBibleFolderListing(dir.path)
+
+        assertEquals(listing.displayNames, listing.namesWith(emptyMap()))
+    }
+
+    @Test
+    fun `renaming does not change what the listing was scanned as`() {
+        // The picker asks for renamed names; `displayNames` stays the modules' own, so a rename
+        // typed and then cleared cannot leave the scan holding a stale name.
+        file("kjv.spb")
+        val listing = readBibleFolderListing(dir.path)
+
+        listing.namesWith(mapOf("kjv.spb" to "Authorised"))
+
+        assertEquals("kjv.spb", listing.nameOf("kjv.spb"))
+    }
 }

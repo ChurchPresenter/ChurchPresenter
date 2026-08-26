@@ -68,6 +68,12 @@ data class BibleLoadError(
 class Bible {
     private var bibleAbbreviation: String = ""
     private var bibleTitle: String = ""
+
+    // The operator's own name for this module, kept apart from what the file said rather than
+    // written over it: clearing a rename has to give the module's own title back, and the only
+    // copy of that is the one the parse produced.
+    private var titleOverride: String? = null
+    private var abbreviationOverride: String? = null
     private val books = mutableListOf<BibleBook>()
     private val operatorBible = mutableListOf<BibleVerse>()
     // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
@@ -575,12 +581,27 @@ class Bible {
     /**
      * Get Bible translation abbreviation (e.g., "RSV", "KJV")
      */
-    fun getBibleAbbreviation(): String {
-        return bibleAbbreviation
-    }
+    fun getBibleAbbreviation(): String = abbreviationOverride ?: bibleAbbreviation
 
-    fun getBibleTitle(): String {
-        return bibleTitle
+    fun getBibleTitle(): String = titleOverride ?: bibleTitle
+
+    /** What the module's own header says it is called, whatever it has since been renamed to. */
+    fun getModuleTitle(): String = bibleTitle
+
+    /**
+     * Renames this loaded module to what the operator calls it.
+     *
+     * The two are independent, so a church can rename the translation without touching the
+     * abbreviation that labels every verse on screen, or the other way round; a blank or null
+     * argument is not a rename to nothing but a return to what the module calls itself, which is
+     * what makes emptying the settings field the way to undo one.
+     *
+     * Applied over the parse rather than into it: the `.spb` on disk is left exactly as downloaded,
+     * and the same file loaded elsewhere without the override still reads as itself.
+     */
+    fun applyNameOverride(name: String?, abbreviation: String?) {
+        titleOverride = name?.trim()?.takeIf { it.isNotEmpty() }
+        abbreviationOverride = abbreviation?.trim()?.takeIf { it.isNotEmpty() }
     }
 
     companion object {

@@ -14,6 +14,18 @@ import org.churchpresenter.settings.utils.Constants
 @Serializable
 data class BibleTranslationSettings(
     val fileName: String = "",
+    /**
+     * What this church calls the translation, overriding the `##Title:` its module carries.
+     *
+     * A module names itself in its own header and its abbreviation is derived from that title, so
+     * "King James Version" labels every verse "KJV" whether or not that is what the congregation
+     * calls it -- and neither is editable without a text editor, nor survives a redownload. Blank
+     * means "use what the module says", which is what makes clearing the field the way to undo a
+     * rename. [customAbbreviation] is separate because it is the string that goes on screen beside
+     * the verse, and a church can want one without the other.
+     */
+    val customName: String = "",
+    val customAbbreviation: String = "",
     val textColor: String = "#FFFFFF",
     val textFontType: String = "Arial",
     val textFontSize: Int = 70,
@@ -303,6 +315,30 @@ data class BibleSettings(
             it.add(target, item)
         })
     }
+
+    /**
+     * The renamed titles alone, keyed by file name -- what a picker needs to name its entries.
+     *
+     * Trimmed here rather than where the field is typed into: the settings field stores what it
+     * shows, so trimming on the way in would delete the space the operator has just pressed before
+     * the next letter arrives, and "King James Version" could not be typed at all -- it stuck at
+     * "King". Blank names are dropped for the same reason the loader treats one as no rename: the
+     * fallback is the module's own title, and an entry mapping to "" would blank the name rather
+     * than leave it alone.
+     */
+    fun customNames(): Map<String, String> = translationList()
+        .associate { it.fileName to it.customName.trim() }
+        .filterValues { it.isNotBlank() }
+
+    /** [fileName]'s rename as configured, or the empty pair when it has not been renamed. */
+    fun customNameOf(fileName: String): Pair<String, String> =
+        translationList().firstOrNull { it.fileName == fileName }
+            ?.let { it.customName to it.customAbbreviation }
+            ?: ("" to "")
+
+    /** The renames in stack order — the key a caller watches to notice one being typed. */
+    fun customNameKey(): List<String> =
+        translationList().flatMap { listOf(it.customName, it.customAbbreviation) }
 
     private fun primaryTranslation() = BibleTranslationSettings(
         fileName = primaryBible,
