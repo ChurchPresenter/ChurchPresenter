@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
@@ -80,7 +81,9 @@ class BibleSettingsTabStackTest {
     private fun files(harness: Harness) = harness.current.bibleSettings.translationList().map { it.fileName }
 
     private fun ComposeUiTest.expandSection(title: String) {
-        onNodeWithText(title, substring = true).performClick()
+        // Scrolled to first: an open section is taller than the test window, so the next section's
+        // header sits below the fold and a click at its coordinates lands on nothing.
+        onNodeWithText(title, substring = true).performScrollTo().performClick()
         waitForIdle()
     }
 

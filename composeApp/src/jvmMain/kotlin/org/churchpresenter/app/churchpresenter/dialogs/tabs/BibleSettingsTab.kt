@@ -50,6 +50,9 @@ import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.show_abbreviation
+import churchpresenter.composeapp.generated.resources.bible_custom_name
+import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
+import churchpresenter.composeapp.generated.resources.bible_custom_name_hint
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
@@ -90,6 +93,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
@@ -111,6 +115,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -120,6 +125,13 @@ private const val COLUMN_WEIGHT = 0.48f
 
 /** [ActionIconButton]'s own default size, which the reorder buttons take and their gaps stand in for. */
 private val REORDER_BUTTON_SIZE = 34.dp
+
+/** The name box against the abbreviation box: a title is a sentence, an abbreviation is "KJV". */
+private const val NAME_FIELD_WEIGHT = 0.65f
+private const val ABBREVIATION_FIELD_WEIGHT = 0.35f
+
+/** Dim enough to read as "not typed yet", solid enough to read at all. */
+private const val PLACEHOLDER_ALPHA = 0.6f
 
 @Composable
 fun BibleSettingsTab(
@@ -132,7 +144,9 @@ fun BibleSettingsTab(
     // used to happen inline here, so the whole dialog waited on it before painting once per open.
     val listing = rememberBibleFolderListing(settings.bibleSettings.storageDirectory)
     val bibleFilesInDirectory = listing?.files.orEmpty()
-    val bibleFileDisplayNames = listing?.displayNames.orEmpty()
+    // The renames are applied over the scan rather than baked into it, so typing in a name field
+    // re-labels every picker on the next frame without walking the Bible folder again.
+    val bibleFileDisplayNames = listing?.namesWith(settings.bibleSettings.customNames()).orEmpty()
 
     val scrollState = rememberScrollState()
     Box(
@@ -169,6 +183,7 @@ fun BibleSettingsTab(
                             translation = translation,
                             displayName = bibleFileDisplayNames[translation.fileName]
                                 ?: translation.fileName.substringBeforeLast('.'),
+                            moduleTitle = listing?.titles?.get(translation.fileName).orEmpty(),
                             expanded = expandedTranslation == index,
                             onExpandedChange = { open -> expandedTranslation = if (open) index else -1 },
                             onSettingsChange = onSettingsChange,
@@ -189,6 +204,7 @@ private fun TranslationStyleSection(
     index: Int,
     translation: BibleTranslationSettings,
     displayName: String,
+    moduleTitle: String,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -208,9 +224,73 @@ private fun TranslationStyleSection(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
     ) {
+        TranslationNameSection(
+            translation = translation,
+            moduleTitle = moduleTitle,
+            update = ::update,
+        )
         TranslationTextSection(settings, translation, ::update, availableFonts, presenterManager)
         TranslationReferenceSection(translation, ::update, availableFonts)
     }
+}
+
+/**
+ * What this church calls the translation, as against what its `.spb` header calls it.
+ *
+ * Both boxes are blank until the operator types in one, and both show what the module gives itself
+ * as their placeholder: a blank field means "keep using that", so the placeholder is the live value
+ * rather than a hint about one. The abbreviation is the string that labels every verse on screen,
+ * which is why it is editable separately -- a module titled "King James Version" abbreviates itself
+ * to "KJV" whatever the church actually puts under its scripture.
+ */
+@Composable
+private fun TranslationNameSection(
+    translation: BibleTranslationSettings,
+    moduleTitle: String,
+    update: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
+) {
+    val fileName = translation.fileName
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+            SettingsTextField(
+                value = translation.customName,
+                onValueChange = { typed -> update { it.copy(customName = typed) } },
+                label = stringResource(Res.string.bible_custom_name),
+                placeholder = { PlaceholderText(moduleTitle.ifBlank { fileName.substringBeforeLast('.') }) },
+                modifier = Modifier.weight(NAME_FIELD_WEIGHT),
+                fillWidth = true,
+            )
+            SettingsTextField(
+                value = translation.customAbbreviation,
+                onValueChange = { typed -> update { it.copy(customAbbreviation = typed) } },
+                label = stringResource(Res.string.bible_custom_abbreviation),
+                placeholder = {
+                    PlaceholderText(defaultTranslationAbbreviation(moduleTitle, fileName))
+                },
+                modifier = Modifier.weight(ABBREVIATION_FIELD_WEIGHT),
+                fillWidth = true,
+            )
+        }
+        Text(
+            text = stringResource(Res.string.bible_custom_name_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** The module's own value, shown in an empty name field as the thing that is still in force. */
+@Composable
+private fun PlaceholderText(value: String) {
+    Text(
+        text = value,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = PLACEHOLDER_ALPHA),
+        maxLines = 1,
+    )
 }
 
 @Composable

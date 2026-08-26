@@ -28,9 +28,30 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
     appSettings = newSettings
     if (translationReloadRequired(previous.bibleSettings, newSettings.bibleSettings)) {
         loadBibles()
-    } else {
-        applyTranslationOrder()
+        return
     }
+    applyTranslationOrder()
+
+    // A rename reads no file, so it is applied to the modules already in memory rather than by
+    // re-reading a folder of them for a label. It has to be applied to the *loaded* module and not
+    // only to the pickers: the verse on screen carries a copy of the name and abbreviation it was
+    // built with, which is why the selection is pushed again below -- without that, clearing a
+    // rename would take effect in every dropdown and in none of the output.
+    if (previous.bibleSettings.customNameKey() == newSettings.bibleSettings.customNameKey()) return
+    val settings = newSettings.bibleSettings
+    _loadedTranslations.value.forEach { translation ->
+        val (name, abbreviation) = settings.customNameOf(translation.fileName)
+        translation.bible.applyNameOverride(name, abbreviation)
+    }
+    _primaryBible.value?.let { primary ->
+        // The books-only module shown while the full parse is still running is not in that list.
+        if (_loadedTranslations.value.none { it.bible === primary }) {
+            val (name, abbreviation) =
+                settings.customNameOf(settings.translationList().firstOrNull()?.fileName.orEmpty())
+            primary.applyNameOverride(name, abbreviation)
+        }
+    }
+    if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
 }
 
 internal fun BibleViewModel.translationReloadRequired(previous: BibleSettings, next: BibleSettings): Boolean {
@@ -208,9 +229,14 @@ internal fun BibleViewModel.loadBibles() {
                 try { BibleBookNames.getEnglishBookNames() } catch (_: Exception) { emptyList() }
             }
             val quickPrimary = primaryPath?.let { path ->
+                val rename = configuredTranslations.firstOrNull()
                 async(ioDispatcher) {
-                    try { Bible().apply { loadBooksOnly(path.absolutePath) } }
-                    catch (_: Exception) { null }
+                    try {
+                        Bible().apply {
+                            loadBooksOnly(path.absolutePath)
+                            applyNameOverride(rename?.customName, rename?.customAbbreviation)
+                        }
+                    } catch (_: Exception) { null }
                 }
             }
 
@@ -354,9 +380,14 @@ private suspend fun BibleViewModel.loadModules(
     translationSources: List<Pair<String, File>>,
 ): LoadedModules = coroutineScope {
     val bibleDeferred = translationSources.map { (identity, path) ->
+        val rename = configuredTranslations.firstOrNull { it.fileName == identity }
         identity to async(ioDispatcher) {
-            try { Bible().apply { loadFromSpb(path.absolutePath) } }
-            catch (e: Exception) { e.printStackTrace(); null }
+            try {
+                Bible().apply {
+                    loadFromSpb(path.absolutePath)
+                    applyNameOverride(rename?.customName, rename?.customAbbreviation)
+                }
+            } catch (e: Exception) { e.printStackTrace(); null }
         }
     }
     val loadedByFile = bibleDeferred.associate { (fileName, deferred) -> fileName to deferred.await() }

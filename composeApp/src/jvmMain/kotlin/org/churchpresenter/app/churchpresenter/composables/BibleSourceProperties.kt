@@ -69,11 +69,14 @@ internal fun BibleProperties(
     val availableFonts = rememberSystemFonts()
 
     val storageDir = appSettings?.bibleSettings?.storageDirectory ?: ""
-    val bibleOptions by produceState(emptyList<Pair<String, String>>(), storageDir) {
+    val customNames = appSettings?.bibleSettings?.customNames().orEmpty()
+    val bibleOptions by produceState(emptyList<Pair<String, String>>(), storageDir, customNames) {
         value = withContext(Dispatchers.IO) {
             if (storageDir.isEmpty()) emptyList()
             else FileManager().getBibleFilesInDirectory(storageDir)
-                .map { fileName -> fileName to readTranslationTitle(File(storageDir, fileName)) }
+                .map { fileName ->
+                    fileName to readTranslationTitle(File(storageDir, fileName), customNames[fileName])
+                }
         }
     }
 
