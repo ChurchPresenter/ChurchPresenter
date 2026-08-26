@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
@@ -227,5 +229,98 @@ class BibleSettingsTabStackTest {
         val stack = harness.current.bibleSettings.translationList()
         assertEquals(38, stack[0].textFontSize)
         assertEquals(52, stack[1].textFontSize)
+    }
+
+    // ── Renaming ────────────────────────────────────────────────────────────────────────────────
+
+    /** The rename box standing empty, found by the module value it is showing as its placeholder. */
+    private fun ComposeUiTest.emptyFieldOffering(placeholder: String) =
+        onNode(hasSetTextAction() and hasText(placeholder))
+
+    @Test
+    fun `the name boxes start empty, offering what the module calls itself`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James Version")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        // Blank means "use what the module says", so both boxes show that as a placeholder rather
+        // than typing it in -- including the abbreviation, which is derived and written nowhere.
+        emptyFieldOffering("King James Version").assertExists()
+        emptyFieldOffering("KJV").assertExists()
+        val translation = harness.current.bibleSettings.translationList().single()
+        assertEquals("" to "", translation.customName to translation.customAbbreviation)
+    }
+
+    @Test
+    fun `typing a name renames that translation`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James Version")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        emptyFieldOffering("King James Version").performTextReplacement("Authorised Version")
+        waitForIdle()
+
+        assertEquals("Authorised Version", harness.current.bibleSettings.translationList().single().customName)
+    }
+
+    @Test
+    fun `a name keeps the spaces it was typed with`() = runComposeUiTest {
+        // Trimming on the way in deleted the space as it was pressed: "King James" stuck at "King".
+        val dir = bibleFolder("kjv.spb" to "King James Version")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        emptyFieldOffering("King James Version").performTextReplacement("King ")
+        waitForIdle()
+
+        assertEquals("King ", harness.current.bibleSettings.translationList().single().customName)
+    }
+
+    @Test
+    fun `typing an abbreviation renames only the abbreviation`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James Version")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        emptyFieldOffering("KJV").performTextReplacement("AV")
+        waitForIdle()
+
+        val translation = harness.current.bibleSettings.translationList().single()
+        assertEquals("AV" to "", translation.customAbbreviation to translation.customName)
+    }
+
+    @Test
+    fun `renaming the second section writes the second translation`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        expandSection("Translation 2 —")
+        emptyFieldOffering("Synodal").performTextReplacement("Pew Bible")
+        waitForIdle()
+
+        val stack = harness.current.bibleSettings.translationList()
+        assertEquals("Pew Bible", stack[1].customName)
+        assertEquals("", stack[0].customName)
+    }
+
+    @Test
+    fun `a renamed translation is offered under its new name in the picker`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James Version", "syn.spb" to "Synodal")
+        showTab(
+            AppSettings(
+                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
+                    listOf(BibleTranslationSettings(fileName = "kjv.spb", customName = "Authorised")),
+                ),
+            ),
+        )
+
+        onNode(hasText("TRANSLATION 1") and hasText("Authorised")).assertExists()
+    }
+
+    @Test
+    fun `the show-abbreviation switch sits with the abbreviation it governs`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James Version")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        onNodeWithText("Show book abbreviation").performScrollTo().performClick()
+        waitForIdle()
+
+        assertEquals(true, harness.current.bibleSettings.translationList().single().showAbbreviation)
     }
 }

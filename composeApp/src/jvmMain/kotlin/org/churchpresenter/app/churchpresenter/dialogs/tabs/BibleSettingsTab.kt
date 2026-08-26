@@ -126,9 +126,16 @@ private const val COLUMN_WEIGHT = 0.48f
 /** [ActionIconButton]'s own default size, which the reorder buttons take and their gaps stand in for. */
 private val REORDER_BUTTON_SIZE = 34.dp
 
-/** The name box against the abbreviation box: a title is a sentence, an abbreviation is "KJV". */
-private const val NAME_FIELD_WEIGHT = 0.65f
-private const val ABBREVIATION_FIELD_WEIGHT = 0.35f
+/**
+ * The name box against the abbreviation box and its switch: a title is a sentence, "KJV" is not.
+ *
+ * The switch's label wraps onto two lines at this width, as several of the checkboxes in the left
+ * column already do; taking the width back off the abbreviation box instead truncates its own
+ * label to "ABBREVIATI...", which is worse.
+ */
+private const val NAME_FIELD_WEIGHT = 0.42f
+private const val ABBREVIATION_FIELD_WEIGHT = 0.24f
+private const val SHOW_ABBREVIATION_WEIGHT = 0.34f
 
 /** Dim enough to read as "not typed yet", solid enough to read at all. */
 private const val PLACEHOLDER_ALPHA = 0.6f
@@ -272,6 +279,16 @@ private fun TranslationNameSection(
                 },
                 modifier = Modifier.weight(ABBREVIATION_FIELD_WEIGHT),
                 fillWidth = true,
+            )
+            // Beside the abbreviation rather than down in the reference section: this switch is
+            // what decides whether the string in that box reaches the screen at all, and the two
+            // read as one setting -- what to call it, and whether to show it.
+            LabeledCheckbox(
+                checked = translation.showAbbreviation,
+                onCheckedChange = { update { t -> t.copy(showAbbreviation = it) } },
+                label = stringResource(Res.string.show_abbreviation),
+                modifier = Modifier.weight(SHOW_ABBREVIATION_WEIGHT).padding(bottom = 6.dp),
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
         Text(
@@ -951,14 +968,5 @@ private fun TranslationReferenceSection(
             }
         }
     }
-    LabeledCheckbox(
-        checked = translation.showAbbreviation,
-        onCheckedChange = {
-                update { t -> t.copy(showAbbreviation = it) }
-            },
-        label = stringResource(Res.string.show_abbreviation),
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-        style = MaterialTheme.typography.bodyMedium,
-    )
 }
 
