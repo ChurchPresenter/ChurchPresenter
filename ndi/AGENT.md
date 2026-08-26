@@ -124,8 +124,22 @@ error and not an exception, it is a wrong picture.
 and CPU checks, and a frame sent in all three modes — so the flat-symbol assumption and both struct
 layouts are confirmed, not assumed.
 
-What it deliberately does **not** assert is that a receiver saw a correct picture: that needs a
-second machine or NDI Studio Monitor running beside it, and remains a manual check.
+What `NdiHardwareTest` deliberately does **not** assert is that a receiver saw a *correct picture*.
+That is `NdiLiveSenderProbe`, which holds a source up for a human to look at:
+
+```bash
+./gradlew :ndi:test -PndiHardware=true -PndiSeconds=240 --tests '*NdiLiveSenderProbe*'
+```
+
+**Its test pattern is load-bearing, and the obvious one is wrong.** An opaque shape on a transparent
+field cannot answer the question: alpha=0 over RGB=black looks black whether the alpha arrived or
+was dropped. The probe instead holds RGB at pure white and varies *only* the alpha byte across four
+bands (255/170/85/0), so the outcomes are visually opposite — a brightness staircase if alpha
+survives, a flat white rectangle if it did not.
+
+**Verified 2026-08-26, NDI SDK 6.3.2.0, received in NDI Video Monitor: a staircase darkening toward
+the bottom.** Alpha survives the BGRA path; a lower third reaches OBS already keyed, which is the
+whole premise of this feature.
 
 ## Dependencies
 

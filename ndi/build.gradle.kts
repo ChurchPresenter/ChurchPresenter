@@ -36,6 +36,11 @@ tasks.withType<Test>().configureEach {
         "churchpresenter.ndiHardware",
         if (project.hasProperty("ndiHardware")) project.property("ndiHardware").toString() else "false"
     )
+    // How long NdiLiveSenderProbe holds a source up for a human to look at. Only read by that probe.
+    systemProperty(
+        "churchpresenter.ndiSeconds",
+        if (project.hasProperty("ndiSeconds")) project.property("ndiSeconds").toString() else "30"
+    )
 }
 
 detekt {
