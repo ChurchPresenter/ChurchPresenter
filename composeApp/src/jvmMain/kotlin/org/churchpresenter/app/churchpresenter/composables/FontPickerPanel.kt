@@ -32,6 +32,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -91,10 +93,11 @@ internal fun FontSearchRow(
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
         Spacer(Modifier.width(6.dp))
+        val searchLabel = stringResource(Res.string.font_picker_search)
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) {
                 Text(
-                    text = stringResource(Res.string.font_picker_search),
+                    text = searchLabel,
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
@@ -108,7 +111,13 @@ internal fun FontSearchRow(
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    // The placeholder above is the only thing naming this box, and it is drawn only
+                    // while the box is empty -- so from the first keystroke the field would have no
+                    // accessible name at all. The name is carried here, where it does not come and go.
+                    .semantics { contentDescription = searchLabel },
             )
         }
         if (query.isNotEmpty()) {

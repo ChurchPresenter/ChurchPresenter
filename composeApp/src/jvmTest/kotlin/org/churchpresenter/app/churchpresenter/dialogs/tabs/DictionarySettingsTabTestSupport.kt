@@ -122,17 +122,15 @@ internal fun ComposeUiTest.switches(): SemanticsNodeInteractionCollection =
 internal fun ComposeUiTest.switch(ordinal: Int): SemanticsNodeInteraction = switches()[ordinal]
 
 /**
- * The expand arrow of the [group]-th `FontSettingsDropdown`.
+ * Every control on the tab with no accessible name at all: no text, no description, no role.
  *
- * `FontSettingsDropdown` draws it as a 14dp `Icon` with a bare `Modifier.clickable` — no role, no
- * text and `contentDescription = null` — so there is nothing to match on but the shape of the node
- * itself: clickable, focusable, and carrying none of the three labels. That makes it the only
- * control on the tab with no accessible name, which is a defect in the shared composable rather than
- * here; it is addressed this way rather than left untested because it is the affordance a mouse user
- * reaches for, and it opens a menu whose items write the setting by a different path than the
- * keyboard commit.
+ * A screen reader has nothing to announce for one of these, and neither of the completeness guards
+ * in `DictionarySettingsTabLabelsTest` can see it — one sweeps text, the other descriptions. The
+ * font dropdown used to put one on every tab: its expand arrow was a 14dp `Icon` with a bare
+ * `Modifier.clickable`, a `contentDescription` of null and no role of its own. The whole field is
+ * the affordance now and it calls itself a `Role.DropdownList`, so the expected count is nought.
  */
-internal fun ComposeUiTest.fontDropdownArrows(): SemanticsNodeInteractionCollection =
+internal fun ComposeUiTest.unlabelledControls(): SemanticsNodeInteractionCollection =
     onAllNodes(
         hasClickAction() and
             SemanticsMatcher.keyNotDefined(SemanticsProperties.Text) and
@@ -140,9 +138,6 @@ internal fun ComposeUiTest.fontDropdownArrows(): SemanticsNodeInteractionCollect
             SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription) and
             SemanticsMatcher.keyNotDefined(SemanticsProperties.Role),
     )
-
-internal fun ComposeUiTest.fontDropdownArrow(group: Int): SemanticsNodeInteraction =
-    fontDropdownArrows()[group]
 
 // ── Sliders ─────────────────────────────────────────────────────────────────────────────────────
 

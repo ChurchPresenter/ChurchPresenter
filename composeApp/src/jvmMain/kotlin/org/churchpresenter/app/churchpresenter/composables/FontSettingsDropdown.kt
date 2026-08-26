@@ -43,6 +43,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -164,6 +165,10 @@ private fun FontPickerTrigger(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
+                // What the field announces itself as. The panel behind it is a popup rather than a
+                // menu, so nothing else on the field says "this opens a list of choices" — to a
+                // screen reader it would otherwise read as an unlabelled clickable box.
+                role = Role.DropdownList,
                 onClick = onClick,
             )
             .padding(horizontal = 8.dp, vertical = 4.dp),
