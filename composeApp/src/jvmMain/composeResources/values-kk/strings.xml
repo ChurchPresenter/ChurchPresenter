@@ -2355,4 +2355,22 @@
     <string name="tab_strip_scroll_forward">Қойындыларды алға айналдыру</string>
     <string name="stock_photo_show_key">API кілтін көрсету</string>
     <string name="stock_photo_hide_key">API кілтін жасыру</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Қаріптерді іздеу…</string>
+    <string name="font_picker_clear_search">Іздеуді тазалау</string>
+    <string name="font_group_recent">Жақында қолданылған</string>
+    <string name="font_group_recommended">Проекцияға қолайлы</string>
+    <string name="font_group_all">Барлық қаріптер</string>
+    <string name="font_group_matches">Сәйкестіктер</string>
+    <string name="font_category_sans">Серифсіз</string>
+    <string name="font_category_serif">Серифті</string>
+    <string name="font_category_mono">Моно</string>
+    <string name="font_category_display">Дисплей</string>
+    <string name="font_preview">Алдын ала қарау</string>
+    <string name="font_preview_sample">Таңдалған қаріппен мәтін үлгісі</string>
+    <string name="font_warning_no_cyrillic">%1$s кирилл таңбаларын қамтымайды — кириллицадағы аяттар экранда басқа қаріппен көрсетіледі.</string>
+    <string name="font_warning_no_hebrew">%1$s иврит таңбаларын қамтымайды — иврит мәтіні экранда басқа қаріппен көрсетіледі.</string>
+    <string name="font_hidden_note">%1$d таңбалық және жүйелік қаріп жасырылды · %3$d ішінен %2$d көрсетілуде</string>
+    <string name="font_shown_note">%2$d ішінен %1$d көрсетілуде</string>
+    <string name="font_picker_keys">↑↓ жылжу · ⏎ таңдау · esc жабу</string>
 </resources>

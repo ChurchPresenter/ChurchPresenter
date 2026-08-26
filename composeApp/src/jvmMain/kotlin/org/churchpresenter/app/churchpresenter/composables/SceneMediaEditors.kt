@@ -231,11 +231,12 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             modifier = Modifier.weight(1f)
         )
     }
-    FontDropdown(
+    FontSettingsDropdown(
         label = stringResource(Res.string.canvas_font),
-        selected = source.fontFamily,
+        value = source.fontFamily,
         fonts = availableFonts,
-        onSelectedChange = { onUpdate(source.copy(fontFamily = it)) },
+        fillWidth = true,
+        onValueChange = { onUpdate(source.copy(fontFamily = it)) },
         modifier = Modifier.fillMaxWidth()
     )
     PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->

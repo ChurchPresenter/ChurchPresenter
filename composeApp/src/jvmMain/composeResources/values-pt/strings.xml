@@ -2383,4 +2383,22 @@
     <string name="tab_strip_scroll_forward">Deslocar separadores para a frente</string>
     <string name="stock_photo_show_key">Mostrar chave API</string>
     <string name="stock_photo_hide_key">Ocultar chave API</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Pesquisar fontes…</string>
+    <string name="font_picker_clear_search">Limpar pesquisa</string>
+    <string name="font_group_recent">Usadas recentemente</string>
+    <string name="font_group_recommended">Boas para projeção</string>
+    <string name="font_group_all">Todas as fontes</string>
+    <string name="font_group_matches">Correspondências</string>
+    <string name="font_category_sans">Sem serifa</string>
+    <string name="font_category_serif">Serifa</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Título</string>
+    <string name="font_preview">Pré-visualização</string>
+    <string name="font_preview_sample">Texto de exemplo na fonte escolhida</string>
+    <string name="font_warning_no_cyrillic">%1$s não tem glifos cirílicos: os versículos em cirílico aparecerão na tela com outra fonte.</string>
+    <string name="font_warning_no_hebrew">%1$s não tem glifos hebraicos: o texto hebraico aparecerá na tela com outra fonte.</string>
+    <string name="font_hidden_note">%1$d fontes de símbolos e do sistema ocultas · mostrando %2$d de %3$d</string>
+    <string name="font_shown_note">Mostrando %1$d de %2$d</string>
+    <string name="font_picker_keys">↑↓ mover · ⏎ escolher · esc fechar</string>
 </resources>

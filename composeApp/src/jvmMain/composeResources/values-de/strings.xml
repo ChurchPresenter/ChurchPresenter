@@ -2355,4 +2355,22 @@
     <string name="tab_strip_scroll_forward">Tabs vorblättern</string>
     <string name="stock_photo_show_key">API-Schlüssel anzeigen</string>
     <string name="stock_photo_hide_key">API-Schlüssel ausblenden</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Schriften suchen…</string>
+    <string name="font_picker_clear_search">Suche löschen</string>
+    <string name="font_group_recent">Zuletzt verwendet</string>
+    <string name="font_group_recommended">Gut für Projektion</string>
+    <string name="font_group_all">Alle Schriften</string>
+    <string name="font_group_matches">Treffer</string>
+    <string name="font_category_sans">Grotesk</string>
+    <string name="font_category_serif">Antiqua</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Vorschau</string>
+    <string name="font_preview_sample">Beispieltext in der gewählten Schrift</string>
+    <string name="font_warning_no_cyrillic">%1$s hat keine kyrillischen Glyphen – kyrillische Verse erscheinen am Bildschirm in einer anderen Schrift.</string>
+    <string name="font_warning_no_hebrew">%1$s hat keine hebräischen Glyphen – hebräischer Text erscheint am Bildschirm in einer anderen Schrift.</string>
+    <string name="font_hidden_note">%1$d Symbol- und Systemschriften ausgeblendet · %2$d von %3$d werden angezeigt</string>
+    <string name="font_shown_note">%1$d von %2$d werden angezeigt</string>
+    <string name="font_picker_keys">↑↓ bewegen · ⏎ wählen · Esc schließen</string>
 </resources>
