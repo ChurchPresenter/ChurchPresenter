@@ -15,6 +15,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -78,6 +79,47 @@ class LivePreviewPanelTest {
         onNodeWithText("Screen 1").assertExists()
         onNodeWithText("Screen 2").assertExists()
         onNodeWithText("Screen 3").assertExists()
+    }
+
+    @Test
+    fun `a renamed monitor is labelled by its name rather than its number`() = runComposeUiTest {
+        // This panel is what the booth watches all service, so a renamed display has to read as
+        // "Foyer TV" here — naming it in the settings tab and still seeing "Screen 1" in the one
+        // place it is looked at would be a rename that never arrived.
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(1920, 0, 1280, 720), "Foyer TV"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Foyer TV").assertExists()
+        onNodeWithText("Screen 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unnamed monitor keeps its numbered label`() = runComposeUiTest {
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(3200, 0, 3840, 2160), "Balcony"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Screen 1").assertExists("a name given to another monitor must not leak")
+        onNodeWithText("Balcony").assertDoesNotExist()
     }
 
     @Test
