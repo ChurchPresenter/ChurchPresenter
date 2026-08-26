@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -48,6 +49,7 @@ class ProjectionNdiCardTest {
         initial: AppSettings = AppSettings(),
         status: NdiRuntimeStatus = READY,
         receivers: Int = 0,
+        identified: MutableList<Int> = mutableListOf(),
         body: ComposeUiTest.(read: () -> AppSettings) -> Unit,
     ) = runComposeUiTest {
         var current = initial
@@ -69,6 +71,7 @@ class ProjectionNdiCardTest {
                         translationNames = emptyList(),
                         status = status,
                         receiverCount = { receivers },
+                        onIdentifyNdi = { identified += it },
                     )
                 }
             }
@@ -250,12 +253,73 @@ class ProjectionNdiCardTest {
         }
     }
 
+    @Test
+    fun `Identify asks for this output, by index`() {
+        val identified = mutableListOf<Int>()
+        val two = AppSettings(
+            projectionSettings = ProjectionSettings(
+                ndiOutputs = listOf(ScreenAssignment(ndiName = "First"), ScreenAssignment(ndiName = "Second")),
+            ),
+        )
+        card(two, identified = identified) { _ ->
+            // The second output's button, so a hard-coded 0 would pass by accident.
+            onAllNodesWithText("Identify")[1].performClick()
+            waitForIdle()
+        }
+        assertEquals(listOf(1), identified)
+    }
+
+    @Test
+    fun `every output offers Identify`() {
+        val two = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(ScreenAssignment(), ScreenAssignment())),
+        )
+        card(two) { _ -> onAllNodesWithText("Identify").assertCountEquals(2) }
+    }
+
     // ── The receiver count ──────────────────────────────────────────────────────
 
     @Test
     fun `an output nobody is watching says so`() {
         // Otherwise an unsubscribed NDI source looks exactly like a broken one.
         card(oneOutput(), receivers = 0) { _ -> onNodeWithText("No receivers").assertExists() }
+    }
+
+    @Test
+    fun `the receiver count follows the runtime rather than freezing at composition`() {
+        // Reported from a real install: the card said "No receivers" with a receiver attached,
+        // because the count was read once during composition and nothing invalidated it again.
+        var live = 0
+        runComposeUiTest {
+            val settings = oneOutput()
+            setContent {
+                Surface {
+                    Box(Modifier.fillMaxSize()) {
+                        NdiOutputsCard(
+                            settings = settings,
+                            onSettingsChange = {},
+                            contentGroup = emptyList(),
+                            backgroundGroup = emptyList(),
+                            displayModes = listOf("Full screen" to Constants.DISPLAY_MODE_FULLSCREEN),
+                            songLangModes = emptyList(),
+                            translationDisplays = emptyList(),
+                            translationNames = emptyList(),
+                            status = READY,
+                            receiverCount = { live },
+                        )
+                    }
+                }
+            }
+            waitForIdle()
+            onNodeWithText("No receivers").assertExists()
+
+            live = 2
+            // No settings change, no click — only the runtime's own answer moved, which is exactly
+            // how it happens in practice when someone opens a receiver.
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("2 receiving").fetchSemanticsNodes().isNotEmpty()
+            }
+        }
     }
 
     @Test

@@ -190,6 +190,7 @@ fun ProjectionSettingsTab(
     companionServer: CompanionServer,
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
+    onIdentifyNdi: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt,
     /**
@@ -476,6 +477,7 @@ fun ProjectionSettingsTab(
     )
 
     NdiOutputsCard(
+        onIdentifyNdi = onIdentifyNdi,
         status = ndiStatus(),
         receiverCount = ndiReceiverCount,
         settings = settings,

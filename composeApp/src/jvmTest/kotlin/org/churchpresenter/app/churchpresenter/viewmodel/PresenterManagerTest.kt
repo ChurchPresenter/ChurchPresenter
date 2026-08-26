@@ -265,6 +265,20 @@ class PresenterManagerTest {
     }
 
     @Test
+    fun `identifying an ndi output flags only that output, and not the browser source beside it`() {
+        val pm = manager()
+        pm.identifyNdiOutput(1)
+
+        assertEquals(setOf(1), pm.ndiIdentifying.value)
+        assertTrue(pm.browserSourceIdentifying.value.isEmpty(), "the two lists are independent")
+    }
+
+    @Test
+    fun `an ndi output is not identifying to begin with`() {
+        assertTrue(manager().ndiIdentifying.value.isEmpty())
+    }
+
+    @Test
     fun `an ndi output starts unlocked`() {
         assertTrue(manager().ndiLocks.value.isEmpty())
     }

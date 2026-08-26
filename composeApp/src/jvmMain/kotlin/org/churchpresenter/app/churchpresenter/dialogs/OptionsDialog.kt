@@ -102,6 +102,7 @@ fun OptionsDialog(
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
+    onIdentifyNdi: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
@@ -140,6 +141,7 @@ fun OptionsDialog(
             onSave = onSave,
             onIdentifyScreen = onIdentifyScreen,
             onIdentifyBrowserSource = onIdentifyBrowserSource,
+            onIdentifyNdi = onIdentifyNdi,
             scenes = scenes,
             onOpenLottieGen = onOpenLottieGen,
             obsManager = obsManager,
@@ -161,6 +163,7 @@ internal fun OptionsDialogContent(
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
+    onIdentifyNdi: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
@@ -308,6 +311,7 @@ internal fun OptionsDialogContent(
                                 companionServer = companionServer,
                                 onIdentifyScreen = { onIdentifyScreen() },
                                 onIdentifyBrowserSource = { index -> onIdentifyBrowserSource(index) },
+                                onIdentifyNdi = { index -> onIdentifyNdi(index) },
                                 scenes = scenes,
                                 detectScreens = detectScreens
                             )

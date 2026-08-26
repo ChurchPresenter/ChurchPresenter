@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
@@ -65,6 +67,7 @@ import churchpresenter.composeapp.generated.resources.content_outputs_for
 import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_mode
+import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.ndi_confirm_remove_message
 import churchpresenter.composeapp.generated.resources.ndi_enabled
 import churchpresenter.composeapp.generated.resources.ndi_fps
@@ -110,6 +113,15 @@ private val PATH_FIELD_WIDTH = 320.dp
 private val NDI_RESOLUTIONS = listOf(1280 to 720, 1920 to 1080, 2560 to 1440, 3840 to 2160)
 private val NDI_FRAME_RATES = listOf(24, 25, 30, 50, 60)
 
+/**
+ * How often the card re-asks the runtime how many receivers an output has.
+ *
+ * A second is far below what an operator notices and far above what the call costs — it is a
+ * non-blocking read of a counter the runtime already maintains (`NDIlib_send_get_no_connections`
+ * with a zero timeout).
+ */
+private const val RECEIVER_POLL_MS = 1_000L
+
 /** Where the runtime is downloaded from. Shown to the operator, and opened by the install button. */
 internal const val NDI_RUNTIME_URL = "https://ndi.video/download-ndi-sdk/"
 
@@ -134,6 +146,7 @@ internal fun NdiOutputsCard(
     songLangModes: List<Pair<String, String>>,
     translationDisplays: List<BibleTranslationDisplay>,
     translationNames: List<String>,
+    onIdentifyNdi: (Int) -> Unit = {},
     /**
      * What the app found when it looked for a runtime.
      *
@@ -172,6 +185,7 @@ internal fun NdiOutputsCard(
                     index = i,
                     output = output,
                     receiverCount = receiverCount,
+                    onIdentifyNdi = onIdentifyNdi,
                     onSettingsChange = onSettingsChange,
                     contentGroup = contentGroup,
                     backgroundGroup = backgroundGroup,
@@ -333,6 +347,7 @@ private fun NdiOutputRow(
     index: Int,
     output: ScreenAssignment,
     receiverCount: (Int) -> Int,
+    onIdentifyNdi: (Int) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
@@ -400,7 +415,18 @@ private fun NdiOutputRow(
                 }
                 // An NDI source nobody has subscribed to looks exactly like a broken one without
                 // this, which is why the count is worth the space.
-                val receivers = receiverCount(index)
+                //
+                // Polled rather than read once: the count lives in the NDI runtime, not in Compose
+                // state, so nothing invalidates this composition when someone attaches a receiver.
+                // Read inline it froze at whatever it was when the card opened — reported from a
+                // real install as "No receivers" with a receiver attached. The effect is keyed on
+                // the output and dies with the card, so it is bounded by the dialog being open.
+                val receivers by produceState(receiverCount(index), index) {
+                    while (true) {
+                        value = receiverCount(index)
+                        delay(RECEIVER_POLL_MS)
+                    }
+                }
                 Text(
                     text = if (receivers > 0) {
                         stringResource(Res.string.ndi_receivers, receivers)
@@ -410,6 +436,16 @@ private fun NdiOutputRow(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            // Flashes this output's name into the feed itself, the way the Browser Source card
+            // does. Worth having even though an NDI source is named in the receiver's list: with
+            // several outputs live, it answers "which of these am I actually looking at".
+            Button(
+                shape = RoundedCornerShape(6.dp),
+                onClick = { onIdentifyNdi(index) },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            ) {
+                Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
             }
             Button(
                 shape = RoundedCornerShape(6.dp),

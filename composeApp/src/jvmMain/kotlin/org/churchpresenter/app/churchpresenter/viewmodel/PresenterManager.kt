@@ -139,6 +139,20 @@ class PresenterManager {
         }
     }
 
+    // The same, for NDI outputs. A separate set for the same reason the locks are a separate map:
+    // NDI output 0 and Browser Source output 0 are different outputs, and flashing one must not
+    // flash the other.
+    private val _ndiIdentifying = mutableStateOf<Set<Int>>(emptySet())
+    val ndiIdentifying: State<Set<Int>> = _ndiIdentifying
+
+    fun identifyNdiOutput(index: Int) {
+        _ndiIdentifying.value = _ndiIdentifying.value + index
+        preRenderScope.launch {
+            delay(WATCHDOG_INTERVAL_MS)
+            _ndiIdentifying.value = _ndiIdentifying.value - index
+        }
+    }
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 

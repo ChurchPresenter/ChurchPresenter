@@ -70,6 +70,7 @@ class OffscreenOutputContentRenderTest {
         assignment: ScreenAssignment = ScreenAssignment(),
         settings: AppSettings = AppSettings(),
         outputIndex: Int = 0,
+        kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
         seed: PresenterManager.() -> Unit = {},
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
@@ -83,6 +84,7 @@ class OffscreenOutputContentRenderTest {
                         screenAssignmentState = mutableStateOf(assignment),
                         effectiveModeState = mutableStateOf(mode),
                         outputIndex = outputIndex,
+                        kind = kind,
                     )
                 )
             }
@@ -98,6 +100,40 @@ class OffscreenOutputContentRenderTest {
     ) {
         // One-based on screen: the operator is matching this against a numbered list, not an index.
         onNodeWithText("Browser Source 3").assertExists()
+    }
+
+    @Test
+    fun `identify covers an ndi output with its own number`() = render(
+        mode = Presenting.NONE,
+        outputIndex = 1,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyNdiOutput(1) },
+    ) {
+        onNodeWithText("NDI Output 2").assertExists()
+    }
+
+    @Test
+    fun `an identified ndi output shows its operator-given name`() = render(
+        mode = Presenting.NONE,
+        assignment = ScreenAssignment(ndiName = "Switcher feed"),
+        outputIndex = 0,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyNdiOutput(0) },
+    ) {
+        onNodeWithText("Switcher feed").assertExists()
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `identifying a browser source leaves the ndi output of the same index alone`() = render(
+        mode = Presenting.NONE,
+        outputIndex = 0,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyBrowserSourceOutput(0) },
+    ) {
+        // Both lists are 0-based. Sharing one identify set would flash the wrong output entirely.
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+        onNodeWithText("Browser Source 1").assertDoesNotExist()
     }
 
     @Test

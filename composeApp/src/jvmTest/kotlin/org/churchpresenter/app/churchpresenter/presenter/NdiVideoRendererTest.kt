@@ -61,7 +61,8 @@ class NdiVideoRendererTest {
             appSettingsState = mutableStateOf(AppSettings()),
             screenAssignmentState = assignment,
             effectiveModeState = mutableStateOf(Presenting.NONE),
-            outputIndex = OffscreenOutputContext.NO_IDENTIFY,
+            outputIndex = 0,
+            kind = OffscreenOutputKind.NDI,
         )
         return NdiVideoRenderer(sender, context, assignment, width = W, height = H, fps = 60) to sender
     }

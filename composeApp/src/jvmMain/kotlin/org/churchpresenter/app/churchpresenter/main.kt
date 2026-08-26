@@ -91,6 +91,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -688,8 +689,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                         appSettingsState = appSettingsState,
                         screenAssignmentState = screenAssignmentState,
                         effectiveModeState = effectiveModeState,
-                        // NDI has no identify button of its own, so no index can ever match it.
-                        outputIndex = OffscreenOutputContext.NO_IDENTIFY,
+                        outputIndex = i,
+                        kind = OffscreenOutputKind.NDI,
                         sttManager = sttManager,
                         mediaViewModel = mediaViewModel,
                         qaDisplayUrlState = qaDisplayUrlState,
@@ -1584,6 +1585,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 },
                                 onIdentifyBrowserSource = { index ->
                                     presenterManager.identifyBrowserSourceOutput(index)
+                                },
+                                onIdentifyNdi = { index ->
+                                    presenterManager.identifyNdiOutput(index)
                                 },
                                 onOpenLottieGen = { outputDir, onSaved ->
                                     if (isUsableOutputDir(outputDir)) {

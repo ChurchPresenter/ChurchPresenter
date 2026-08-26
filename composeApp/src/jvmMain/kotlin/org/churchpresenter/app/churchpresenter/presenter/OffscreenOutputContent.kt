@@ -78,7 +78,11 @@ internal fun OffscreenOutputContent(
             val appSettings by appSettingsState
             val screenAssignment by screenAssignmentState
             val effectiveMode by effectiveModeState
-            val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
+            val isIdentifying = when (context.kind) {
+                OffscreenOutputKind.BROWSER_SOURCE ->
+                    presenterManager.browserSourceIdentifying.value.contains(outputIndex)
+                OffscreenOutputKind.NDI -> presenterManager.ndiIdentifying.value.contains(outputIndex)
+            }
             val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
             val isLowerThird = screenAssignment.isLowerThird
             val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
@@ -97,7 +101,12 @@ internal fun OffscreenOutputContent(
                         // Rendered into the OBS feed rather than into the app's own UI, which has
                         // no compose-resource environment here — hence the literal fallback. A
                         // renamed output shows the operator's own name instead.
-                        text = screenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}"),
+                        text = when (context.kind) {
+                            OffscreenOutputKind.BROWSER_SOURCE ->
+                                screenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}")
+                            OffscreenOutputKind.NDI ->
+                                screenAssignment.ndiLabelOr("NDI Output ${outputIndex + 1}")
+                        },
                         style = TextStyle(
                             color = Color.White,
                             fontSize = 96.sp,

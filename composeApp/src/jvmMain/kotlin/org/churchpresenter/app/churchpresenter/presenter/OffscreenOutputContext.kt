@@ -24,19 +24,23 @@ data class OffscreenOutputContext(
     val appSettingsState: State<AppSettings>,
     val screenAssignmentState: State<ScreenAssignment>,
     val effectiveModeState: State<Presenting>,
-    /**
-     * Which output this is, for the identify overlay. Browser Source outputs are numbered from 0;
-     * an NDI output passes [NO_IDENTIFY], which matches no entry in the identifying set, because
-     * NDI has no identify button of its own.
-     */
+    /** Which output of its [kind] this is, numbered from 0. */
     val outputIndex: Int = 0,
     val sttManager: STTManager? = null,
     val mediaViewModel: MediaViewModel? = null,
     val qaDisplayUrlState: State<String>? = null,
     val serverUrlState: State<String>? = null,
-) {
-    companion object {
-        /** An output index that no identify request can ever name. */
-        const val NO_IDENTIFY = -1
-    }
+    /**
+     * Which of the two virtual-output lists this belongs to.
+     *
+     * Both are 0-based and independent, so the index alone does not say which output it is. The
+     * kind decides which identify set to consult and how an unnamed output labels itself.
+     */
+    val kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
+)
+
+/** The two kinds of virtual output that render through [OffscreenOutputContent]. */
+enum class OffscreenOutputKind {
+    BROWSER_SOURCE,
+    NDI,
 }
