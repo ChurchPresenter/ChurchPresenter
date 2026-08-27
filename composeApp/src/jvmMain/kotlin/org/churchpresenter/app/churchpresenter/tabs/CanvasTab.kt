@@ -111,7 +111,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
-import churchpresenter.composeapp.generated.resources.canvas_source_clock
+import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
@@ -198,7 +198,7 @@ fun CanvasTab(
     val strText          = stringResource(Res.string.canvas_source_text)
     val strColor         = stringResource(Res.string.canvas_source_color)
     val strVideo         = stringResource(Res.string.canvas_source_video)
-    val strClock         = stringResource(Res.string.canvas_source_clock)
+    val strTimer         = stringResource(Res.string.canvas_source_timer)
     val strQrCode        = stringResource(Res.string.canvas_source_qrcode)
     val strCamera        = stringResource(Res.string.canvas_source_camera)
     val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
@@ -561,13 +561,13 @@ fun CanvasTab(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_clock)) },
+                                text = { Text(stringResource(Res.string.canvas_source_timer)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
                                         SceneSource.ClockSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = strClock,
+                                            name = strTimer,
                                             transform = SourceTransform(width = 0.4f, height = 0.15f)
                                         )
                                     )

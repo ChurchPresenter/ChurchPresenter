@@ -41,6 +41,7 @@ import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
 import churchpresenter.composeapp.generated.resources.canvas_video_file_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
+import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
@@ -94,6 +95,9 @@ private const val VOLUME_PERCENT_SCALE = 100
 private const val URL_DEBOUNCE_MS = 800L
 private const val ERROR_TEXT_COLOR = 0xFFFF8888
 private const val POLL_INTERVAL_MS = 1000L
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
+private const val SECONDS_PER_DAY = 86400
 private const val MIN_CAPTURE_INTERVAL_MS = 33L
 private const val WINDOW_BOUNDS_FIELDS = 4
 private const val BOUNDS_WIDTH_INDEX = 2
@@ -530,50 +534,11 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
     val fontColor = parseHexColor(source.fontColor)
     val fontFamily = systemFontFamilyOrDefault(source.fontFamily)
 
-    var displayText by remember { mutableStateOf("") }
-
-    val totalSeconds = source.targetHour * 3600 + source.targetMinute * 60 + source.targetSecond
-
-    if (source.mode == "countdown") {
-        // Sync TimerStateManager when duration fields change
-        LaunchedEffect(totalSeconds) {
-            TimerStateManager.onDurationChanged(source.id, totalSeconds)
-        }
-
-        // Tick loop lives here so it runs even when the source is not selected
-        val timerState = TimerStateManager.getState(source.id, totalSeconds)
-        LaunchedEffect(timerState.isRunning) {
-            while (timerState.isRunning) {
-                delay(POLL_INTERVAL_MS)
-                TimerStateManager.tick(source.id)
-            }
-        }
-
-        val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
-        val h = remaining / 3600
-        val m = (remaining % 3600) / 60
-        val s = remaining % 60
-        displayText = buildString {
-            if (source.showHours) append("%02d:".format(h))
-            append("%02d".format(m))
-            if (source.showSeconds) append(":%02d".format(s))
-        }
-    } else {
-        LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
-            while (isActive) {
-                val now = LocalTime.now()
-                val pattern = buildString {
-                    if (source.showHours) {
-                        append(if (source.timeFormat == "12h") "hh:" else "HH:")
-                    }
-                    append("mm")
-                    if (source.showSeconds) append(":ss")
-                    if (source.timeFormat == "12h") append(" a")
-                }
-                displayText = now.format(DateTimeFormatter.ofPattern(pattern))
-                delay(POLL_INTERVAL_MS)
-            }
-        }
+    val displayText = when (source.mode) {
+        ClockModes.COUNTDOWN -> countdownText(source)
+        ClockModes.COUNT_UP -> countUpText(source)
+        ClockModes.TARGET_TIME -> targetTimeText(source)
+        else -> wallClockText(source)
     }
 
     Box(
@@ -588,6 +553,107 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
             fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal
         )
     }
+}
+
+/** hh:mm:ss, dropping either end as the source asks. */
+private fun formatElapsed(seconds: Int, showHours: Boolean, showSeconds: Boolean): String = buildString {
+    if (showHours) append("%02d:".format(seconds / SECONDS_PER_HOUR))
+    append("%02d".format((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE))
+    if (showSeconds) append(":%02d".format(seconds % SECONDS_PER_MINUTE))
+}
+
+/**
+ * Seconds from now until the next occurrence of a time of day — tomorrow's, once today's has been
+ * and gone, which is what keeps a "service starts at 10:00" countdown from going negative.
+ */
+private fun secondsUntilTimeOfDay(hour: Int, minute: Int, second: Int): Int {
+    val target = hour * SECONDS_PER_HOUR + minute * SECONDS_PER_MINUTE + second
+    val diff = target - LocalTime.now().toSecondOfDay()
+    return if (diff > 0) diff else diff + SECONDS_PER_DAY
+}
+
+/**
+ * The countdown's remaining time, or its expiry message once it has run out. The tick loop lives
+ * here rather than in the properties panel so it keeps running while the source is not selected.
+ */
+@Composable
+private fun countdownText(source: SceneSource.ClockSource): String {
+    val totalSeconds = source.targetHour * SECONDS_PER_HOUR +
+        source.targetMinute * SECONDS_PER_MINUTE + source.targetSecond
+
+    // Sync TimerStateManager when duration fields change
+    LaunchedEffect(totalSeconds) {
+        TimerStateManager.onDurationChanged(source.id, totalSeconds)
+    }
+
+    val timerState = TimerStateManager.getState(source.id, totalSeconds)
+    LaunchedEffect(timerState.isRunning) {
+        while (timerState.isRunning) {
+            delay(POLL_INTERVAL_MS)
+            TimerStateManager.tick(source.id)
+        }
+    }
+
+    val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
+    val expired = remaining == 0 && totalSeconds > 0
+    return if (expired && source.expiredText.isNotBlank()) source.expiredText
+    else formatElapsed(remaining, source.showHours, source.showSeconds)
+}
+
+/** A stopwatch: seeded at zero and counted up by the same shared state the countdown uses. */
+@Composable
+private fun countUpText(source: SceneSource.ClockSource): String {
+    val timerState = TimerStateManager.getState(source.id, 0)
+    LaunchedEffect(timerState.isRunning) {
+        while (timerState.isRunning) {
+            delay(POLL_INTERVAL_MS)
+            TimerStateManager.tickUp(source.id)
+        }
+    }
+    return formatElapsed(
+        TimerStateManager.getState(source.id, 0).remainingSeconds,
+        source.showHours,
+        source.showSeconds
+    )
+}
+
+/** Counts down to a time of day off the wall clock, so it needs no transport of its own. */
+@Composable
+private fun targetTimeText(source: SceneSource.ClockSource): String {
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(
+        source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond,
+        source.showHours, source.showSeconds
+    ) {
+        while (isActive) {
+            val remaining =
+                secondsUntilTimeOfDay(source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond)
+            text = formatElapsed(remaining, source.showHours, source.showSeconds)
+            delay(POLL_INTERVAL_MS)
+        }
+    }
+    return text
+}
+
+/** The wall clock itself, in the source's own 12h/24h format. */
+@Composable
+private fun wallClockText(source: SceneSource.ClockSource): String {
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
+        while (isActive) {
+            val pattern = buildString {
+                if (source.showHours) {
+                    append(if (source.timeFormat == "12h") "hh:" else "HH:")
+                }
+                append("mm")
+                if (source.showSeconds) append(":ss")
+                if (source.timeFormat == "12h") append(" a")
+            }
+            text = LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
+            delay(POLL_INTERVAL_MS)
+        }
+    }
+    return text
 }
 
 @Composable

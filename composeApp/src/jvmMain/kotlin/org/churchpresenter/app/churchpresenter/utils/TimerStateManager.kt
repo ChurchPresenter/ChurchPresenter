@@ -6,6 +6,9 @@ import androidx.compose.runtime.mutableStateMapOf
  * Singleton that holds countdown timer runtime state (remainingSeconds, isRunning)
  * keyed by ClockSource ID, so both the canvas renderer and the properties panel
  * share the same live state.
+ *
+ * A count-up source is held here too, and stores its elapsed seconds in the same
+ * [TimerState.remainingSeconds] field — it is seeded at zero and driven by [tickUp].
  */
 object TimerStateManager {
 
@@ -34,6 +37,14 @@ object TimerStateManager {
                 remainingSeconds = next,
                 isRunning = next > 0
             )
+        }
+    }
+
+    /** Counts up instead of down: no ceiling, so it never stops itself. */
+    fun tickUp(sourceId: String) {
+        val current = _states[sourceId] ?: return
+        if (current.isRunning) {
+            _states[sourceId] = current.copy(remainingSeconds = current.remainingSeconds + 1)
         }
     }
 

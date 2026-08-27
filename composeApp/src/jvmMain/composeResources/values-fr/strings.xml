@@ -993,6 +993,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Horloge</string>
     <string name="canvas_clock_mode_countdown">Compte à rebours</string>
+    <string name="canvas_clock_mode_count_up">Chronomètre</string>
     <string name="canvas_decklink_io_warning">Ce périphérique est actuellement utilisé pour la sortie. L'entrée peut ne pas être disponible sur les périphériques qui ne prennent pas en charge l'E/S simultanée.</string>
     <string name="canvas_tool_select">Sélectionner</string>
     <string name="canvas_tool_rectangle">Rectangle</string>
@@ -1004,6 +1005,7 @@
     <string name="canvas_opacity">Opacité</string>
     <string name="canvas_source_browser">Navigateur</string>
     <string name="canvas_source_clock">Horloge</string>
+    <string name="canvas_source_timer">Horloge et minuteur</string>
     <string name="canvas_source_qrcode">Code QR</string>
     <string name="canvas_source_camera">Caméra</string>
     <string name="canvas_source_screen_capture">Capture d'écran</string>

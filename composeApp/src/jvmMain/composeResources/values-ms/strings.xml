@@ -1212,6 +1212,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Jam</string>
     <string name="canvas_clock_mode_countdown">Kira Detik</string>
+    <string name="canvas_clock_mode_count_up">Jam randik</string>
     <string name="canvas_decklink_io_warning">Peranti ini sedang digunakan untuk output. Input mungkin tidak tersedia pada peranti yang tidak menyokong I/O serentak.</string>
     <string name="canvas_tool_select">Pilih</string>
     <string name="canvas_tool_rectangle">Segi Empat</string>
@@ -1223,6 +1224,7 @@
     <string name="canvas_opacity">Kelegapan</string>
     <string name="canvas_source_browser">Pelayar</string>
     <string name="canvas_source_clock">Jam</string>
+    <string name="canvas_source_timer">Jam &amp; Pemasa</string>
     <string name="canvas_source_qrcode">Kod QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Tangkapan Skrin</string>

@@ -1212,6 +1212,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Orasan</string>
     <string name="canvas_clock_mode_countdown">Countdown</string>
+    <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Ginagamit na ngayon ang device na ito para sa output. Maaaring hindi available ang input sa mga device na hindi sumusuporta sa sabay na I/O.</string>
     <string name="canvas_tool_select">Pumili</string>
     <string name="canvas_tool_rectangle">Rektanggulo</string>
@@ -1223,6 +1224,7 @@
     <string name="canvas_opacity">Opacity</string>
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Orasan</string>
+    <string name="canvas_source_timer">Orasan at Timer</string>
     <string name="canvas_source_qrcode">QR Code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>

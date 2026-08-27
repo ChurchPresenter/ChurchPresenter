@@ -15,10 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
+import org.churchpresenter.core.models.scene.ClockModes
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_color_2
@@ -30,16 +32,20 @@ import churchpresenter.composeapp.generated.resources.canvas_shape_fill_color
 import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_width
 import churchpresenter.composeapp.generated.resources.canvas_angle
 import churchpresenter.composeapp.generated.resources.canvas_opacity
-import churchpresenter.composeapp.generated.resources.canvas_source_clock
+import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_clock_mode
 import churchpresenter.composeapp.generated.resources.canvas_clock_format
 import churchpresenter.composeapp.generated.resources.canvas_clock_show_hours
 import churchpresenter.composeapp.generated.resources.canvas_clock_show_seconds
 import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
-import churchpresenter.composeapp.generated.resources.canvas_clock_target_hour
-import churchpresenter.composeapp.generated.resources.canvas_clock_target_minute
-import churchpresenter.composeapp.generated.resources.canvas_clock_target_second
+import churchpresenter.composeapp.generated.resources.canvas_clock_mode_count_up
+import churchpresenter.composeapp.generated.resources.timer_mode_clock
+import churchpresenter.composeapp.generated.resources.timer_hours
+import churchpresenter.composeapp.generated.resources.timer_minutes
+import churchpresenter.composeapp.generated.resources.timer_seconds
+import churchpresenter.composeapp.generated.resources.timer_target_time
+import churchpresenter.composeapp.generated.resources.timer_expired_text_label
 import churchpresenter.composeapp.generated.resources.canvas_text_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bold
@@ -79,6 +85,9 @@ private const val MIN_FONT_SIZE = 8
 private const val MAX_FONT_SIZE = 500
 private const val MAX_TARGET_HOUR = 99
 private const val MAX_MINUTE_OR_SECOND = 59
+private const val MAX_HOUR_OF_DAY = 23
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
 
 /**
  * The scene sources the app draws itself: shapes, a clock, and a QR code.
@@ -168,21 +177,14 @@ internal fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSo
 @Composable
 internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
     Text(
-        stringResource(Res.string.canvas_source_clock),
+        stringResource(Res.string.canvas_source_timer),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    val clockLabel = stringResource(Res.string.canvas_clock_mode_clock)
-    val countdownLabel = stringResource(Res.string.canvas_clock_mode_countdown)
     val format24hLabel = stringResource(Res.string.canvas_clock_format_24h)
     val format12hLabel = stringResource(Res.string.canvas_clock_format_12h)
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        DropdownSelector(
-            label = stringResource(Res.string.canvas_clock_mode),
-            items = listOf(clockLabel, countdownLabel),
-            selected = if (source.mode == "countdown") countdownLabel else clockLabel,
-            onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) }
-        )
+        ClockModeDropdown(source, onUpdate)
         DropdownSelector(
             label = stringResource(Res.string.canvas_clock_format),
             items = listOf(format24hLabel, format12hLabel),
@@ -214,72 +216,209 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         spacing = 4.dp,
     )
-    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
-        v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
+    // Half a row: a font size is three digits, and the panel is a narrow column.
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        PropertyTextField(
+            stringResource(Res.string.canvas_clock_font_size),
+            source.fontSize.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
+        }
+        Spacer(Modifier.weight(1f))
     }
-    ColorPickerField(
-        color = source.fontColor,
-        onColorChange = { onUpdate(source.copy(fontColor = it)) },
-        label = stringResource(Res.string.canvas_text_color)
-    )
-    ColorPickerField(
-        color = source.backgroundColor,
-        onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
-        label = stringResource(Res.string.canvas_text_bg_color)
-    )
-    if (source.mode == "countdown") {
-        PropertyTextField(stringResource(Res.string.canvas_clock_target_hour), source.targetHour.toString()) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(targetHour = it.coerceIn(0, MAX_TARGET_HOUR))) }
-        }
-        PropertyTextField(stringResource(Res.string.canvas_clock_target_minute), source.targetMinute.toString()) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(targetMinute = it.coerceIn(0, MAX_MINUTE_OR_SECOND))) }
-        }
-        PropertyTextField(stringResource(Res.string.canvas_clock_target_second), source.targetSecond.toString()) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(targetSecond = it.coerceIn(0, MAX_MINUTE_OR_SECOND))) }
-        }
-
-        val totalSeconds = source.targetHour * 3600 + source.targetMinute * 60 + source.targetSecond
-        val timerState = TimerStateManager.getState(source.id, totalSeconds)
-        val isRunning = timerState.isRunning
-        val remaining = timerState.remainingSeconds
-
-        val hh = remaining / 3600
-        val mm = (remaining % 3600) / 60
-        val ss = remaining % 60
-
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "%02d:%02d:%02d".format(hh, mm, ss),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ColorPickerField(
+            color = source.fontColor,
+            onColorChange = { onUpdate(source.copy(fontColor = it)) },
+            modifier = Modifier.weight(1f),
+            label = stringResource(Res.string.canvas_text_color)
         )
-        Spacer(Modifier.height(4.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Button(
-                onClick = { TimerStateManager.setRunning(source.id, totalSeconds, !isRunning) },
-                enabled = remaining > 0 || isRunning,
-                modifier = Modifier.weight(1f).height(32.dp),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-            ) {
-                Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
+        ColorPickerField(
+            color = source.backgroundColor,
+            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+            modifier = Modifier.weight(1f),
+            label = stringResource(Res.string.canvas_text_bg_color)
+        )
+    }
+    when (source.mode) {
+        ClockModes.COUNTDOWN -> ClockCountdownControls(source, onUpdate)
+        ClockModes.COUNT_UP -> ClockCountUpControls(source)
+        ClockModes.TARGET_TIME -> ClockTargetTimeFields(source, onUpdate)
+        else -> Unit
+    }
+}
+
+/**
+ * The four things the source can show. Picking one also re-seeds the shared timer, so a stopwatch
+ * never opens holding whatever a countdown left behind on the same source.
+ */
+@Composable
+private fun ClockModeDropdown(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
+    val modes = listOf(
+        ClockModes.CLOCK to stringResource(Res.string.canvas_clock_mode_clock),
+        ClockModes.COUNTDOWN to stringResource(Res.string.canvas_clock_mode_countdown),
+        ClockModes.COUNT_UP to stringResource(Res.string.canvas_clock_mode_count_up),
+        ClockModes.TARGET_TIME to stringResource(Res.string.timer_mode_clock),
+    )
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_clock_mode),
+        items = modes.map { it.second },
+        selected = modes.firstOrNull { it.first == source.mode }?.second ?: modes.first().second,
+        onSelectedChange = { picked ->
+            val mode = modes.firstOrNull { it.second == picked }?.first ?: ClockModes.CLOCK
+            TimerStateManager.reset(source.id, if (mode == ClockModes.COUNTDOWN) source.durationSeconds() else 0)
+            onUpdate(source.copy(mode = mode))
+        }
+    )
+}
+
+/** The duration counted down from, the message left on screen at zero, and the transport. */
+@Composable
+private fun ClockCountdownControls(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
+    TimeFieldRow(
+        listOf(
+            TimeField(stringResource(Res.string.timer_hours), source.targetHour, MAX_TARGET_HOUR) {
+                onUpdate(source.copy(targetHour = it))
+            },
+            TimeField(stringResource(Res.string.timer_minutes), source.targetMinute, MAX_MINUTE_OR_SECOND) {
+                onUpdate(source.copy(targetMinute = it))
+            },
+            TimeField(stringResource(Res.string.timer_seconds), source.targetSecond, MAX_MINUTE_OR_SECOND) {
+                onUpdate(source.copy(targetSecond = it))
+            },
+        )
+    )
+    PropertyTextField(stringResource(Res.string.timer_expired_text_label), source.expiredText) { v ->
+        onUpdate(source.copy(expiredText = v))
+    }
+
+    val totalSeconds = source.durationSeconds()
+    ClockTimerTransport(
+        sourceId = source.id,
+        seedSeconds = totalSeconds,
+        canStart = totalSeconds > 0
+    )
+}
+
+/** A stopwatch has nothing to configure, so it is the transport and its read-out alone. */
+@Composable
+private fun ClockCountUpControls(source: SceneSource.ClockSource) {
+    ClockTimerTransport(sourceId = source.id, seedSeconds = 0, canStart = true)
+}
+
+/** The time of day counted down to, entered on a 24-hour clock. */
+@Composable
+private fun ClockTargetTimeFields(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
+    TimeFieldRow(
+        listOf(
+            TimeField(stringResource(Res.string.timer_hours), source.targetTimeHour, MAX_HOUR_OF_DAY) {
+                onUpdate(source.copy(targetTimeHour = it))
+            },
+            TimeField(stringResource(Res.string.timer_minutes), source.targetTimeMinute, MAX_MINUTE_OR_SECOND) {
+                onUpdate(source.copy(targetTimeMinute = it))
+            },
+            TimeField(stringResource(Res.string.timer_seconds), source.targetTimeSecond, MAX_MINUTE_OR_SECOND) {
+                onUpdate(source.copy(targetTimeSecond = it))
+            },
+        )
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "%s %02d:%02d:%02d".format(
+            stringResource(Res.string.timer_target_time),
+            source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond
+        ),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
+    )
+}
+
+/** One hours/minutes/seconds box of a [TimeFieldRow]: what it is called, holds, and may hold. */
+private data class TimeField(val label: String, val value: Int, val max: Int, val onChange: (Int) -> Unit)
+
+/**
+ * Hours, minutes and seconds as one colon-separated row rather than three full-width fields —
+ * a time reads as a time, and the panel is a narrow column.
+ */
+@Composable
+private fun TimeFieldRow(fields: List<TimeField>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        fields.forEachIndexed { index, field ->
+            if (index > 0) {
+                Text(
+                    ":",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            Button(
-                onClick = { TimerStateManager.reset(source.id, totalSeconds) },
-                modifier = Modifier.weight(1f).height(32.dp),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-            ) {
-                Text(stringResource(Res.string.timer_reset), style = MaterialTheme.typography.labelSmall)
+            PropertyTextField(field.label, field.value.toString(), Modifier.weight(1f)) { typed ->
+                typed.toIntOrNull()?.let { field.onChange(it.coerceIn(0, field.max)) }
             }
         }
     }
 }
+
+/**
+ * The read-out and the two buttons the countdown and the stopwatch share. The value is
+ * [TimerStateManager]'s, not the source's, so the panel and the canvas always agree.
+ */
+@Composable
+private fun ClockTimerTransport(sourceId: String, seedSeconds: Int, canStart: Boolean) {
+    val timerState = TimerStateManager.getState(sourceId, seedSeconds)
+    val isRunning = timerState.isRunning
+    val seconds = timerState.remainingSeconds
+
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "%02d:%02d:%02d".format(
+            seconds / SECONDS_PER_HOUR,
+            (seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
+            seconds % SECONDS_PER_MINUTE
+        ),
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(4.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Button(
+            onClick = { TimerStateManager.setRunning(sourceId, seedSeconds, !isRunning) },
+            enabled = canStart || isRunning,
+            modifier = Modifier.weight(1f).height(32.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        ) {
+            Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
+        }
+        Button(
+            onClick = { TimerStateManager.reset(sourceId, seedSeconds) },
+            modifier = Modifier.weight(1f).height(32.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        ) {
+            Text(stringResource(Res.string.timer_reset), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+/** The length a countdown counts from, in seconds. */
+private fun SceneSource.ClockSource.durationSeconds(): Int =
+    targetHour * SECONDS_PER_HOUR + targetMinute * SECONDS_PER_MINUTE + targetSecond
 
 @Composable
 internal fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneSource) -> Unit) {

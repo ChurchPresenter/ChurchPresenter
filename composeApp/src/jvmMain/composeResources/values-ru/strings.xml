@@ -1252,6 +1252,7 @@
     <string name="canvas_opacity">Прозрачность</string>
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Часы</string>
+    <string name="canvas_source_timer">Часы и таймер</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захват экрана</string>
@@ -1344,6 +1345,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Часы</string>
     <string name="canvas_clock_mode_countdown">Обратный отсчёт</string>
+    <string name="canvas_clock_mode_count_up">Секундомер</string>
     <string name="canvas_decklink_io_warning">Это устройство используется для вывода. Ввод может быть недоступен на устройствах без одновременного ввода-вывода.</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>

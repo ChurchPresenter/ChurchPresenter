@@ -235,7 +235,7 @@ internal object Label {
     const val VIDEO = "Video"
     const val BROWSER = "Browser"
     const val SHAPE = "Shape"
-    const val CLOCK = "Clock"
+    const val CLOCK = "Clock & Timer"
     const val QRCODE = "QR Code"
     const val CAMERA = "Camera"
     const val SCREEN_CAPTURE = "Screen Capture"
