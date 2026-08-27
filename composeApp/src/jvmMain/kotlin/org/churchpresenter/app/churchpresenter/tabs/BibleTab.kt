@@ -165,6 +165,11 @@ fun BibleTab(
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
         translationSelectionKey,
+        // A rename changes neither the folder nor the selection, so without it here the view model
+        // never hears about one: the modules in memory keep the name they were loaded under, and
+        // the verse on screen keeps the abbreviation it was built with until something else forces
+        // a reload. That is what made a cleared abbreviation stay on the presentation screen.
+        appSettings.bibleSettings.customNameKey(),
     ) {
         if (isFirstComposition.value) {
             isFirstComposition.value = false

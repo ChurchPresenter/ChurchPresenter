@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">ربما لاحقًا</string>
     <string name="story_prompt_reassurance">لا يُنشر أي شيء دون موافقتك.</string>
     <string name="menu_developer_story_prompt">نافذة "شاركنا قصتك"</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">البحث في الخطوط…</string>
+    <string name="font_picker_clear_search">مسح البحث</string>
+    <string name="font_group_recent">المستخدمة مؤخرًا</string>
+    <string name="font_group_recommended">مناسبة للعرض</string>
+    <string name="font_group_all">كل الخطوط</string>
+    <string name="font_group_matches">النتائج</string>
+    <string name="font_category_sans">بلا زوائد</string>
+    <string name="font_category_serif">بزوائد</string>
+    <string name="font_category_mono">أحادي</string>
+    <string name="font_category_display">زخرفي</string>
+    <string name="font_preview">معاينة</string>
+    <string name="font_preview_sample">نص تجريبي بالخط المختار</string>
+    <string name="font_warning_no_cyrillic">%1$s لا يحتوي على حروف سيريلية — ستظهر الآيات السيريلية على الشاشة بخط آخر.</string>
+    <string name="font_warning_no_hebrew">%1$s لا يحتوي على حروف عبرية — سيظهر النص العبري على الشاشة بخط آخر.</string>
+    <string name="font_hidden_note">تم إخفاء %1$d من خطوط الرموز والنظام · عرض %2$d من %3$d</string>
+    <string name="font_shown_note">عرض %1$d من %2$d</string>
+    <string name="font_picker_keys">↑↓ التنقل · ⏎ الاختيار · esc الإغلاق</string>
 </resources>

@@ -2357,4 +2357,22 @@
     <string name="tab_strip_scroll_forward">Прокрутить вкладки вперёд</string>
     <string name="stock_photo_show_key">Показать API-ключ</string>
     <string name="stock_photo_hide_key">Скрыть API-ключ</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Поиск шрифтов…</string>
+    <string name="font_picker_clear_search">Очистить поиск</string>
+    <string name="font_group_recent">Недавно использованные</string>
+    <string name="font_group_recommended">Хорошо для проекции</string>
+    <string name="font_group_all">Все шрифты</string>
+    <string name="font_group_matches">Совпадения</string>
+    <string name="font_category_sans">Без засечек</string>
+    <string name="font_category_serif">С засечками</string>
+    <string name="font_category_mono">Моноширинный</string>
+    <string name="font_category_display">Акцидентный</string>
+    <string name="font_preview">Предпросмотр</string>
+    <string name="font_preview_sample">Образец текста выбранным шрифтом</string>
+    <string name="font_warning_no_cyrillic">%1$s не содержит кириллических глифов — стихи на кириллице на экране будут показаны другим шрифтом.</string>
+    <string name="font_warning_no_hebrew">%1$s не содержит еврейских глифов — еврейский текст на экране будет показан другим шрифтом.</string>
+    <string name="font_hidden_note">%1$d символьных и системных шрифтов скрыто · показано %2$d из %3$d</string>
+    <string name="font_shown_note">Показано %1$d из %2$d</string>
+    <string name="font_picker_keys">↑↓ выбор · ⏎ применить · esc закрыть</string>
 </resources>

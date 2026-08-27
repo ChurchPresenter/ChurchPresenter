@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">Balki keyinroq</string>
     <string name="story_prompt_reassurance">Roziligingizsiz hech narsa eʼlon qilinmaydi.</string>
     <string name="menu_developer_story_prompt">“Hikoyangizni ulashing” oynasi</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Shriftlarni qidirish…</string>
+    <string name="font_picker_clear_search">Qidiruvni tozalash</string>
+    <string name="font_group_recent">Yaqinda ishlatilgan</string>
+    <string name="font_group_recommended">Proyeksiya uchun mos</string>
+    <string name="font_group_all">Barcha shriftlar</string>
+    <string name="font_group_matches">Mosliklar</string>
+    <string name="font_category_sans">Serifsiz</string>
+    <string name="font_category_serif">Serifli</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Koʻrib chiqish</string>
+    <string name="font_preview_sample">Tanlangan shriftdagi namuna matn</string>
+    <string name="font_warning_no_cyrillic">%1$s kirill belgilariga ega emas — kirill oyatlari ekranda boshqa shriftda koʻrinadi.</string>
+    <string name="font_warning_no_hebrew">%1$s ibroniy belgilariga ega emas — ibroniy matn ekranda boshqa shriftda koʻrinadi.</string>
+    <string name="font_hidden_note">%1$d ta belgi va tizim shrifti yashirildi · %3$d tadan %2$d tasi koʻrsatilmoqda</string>
+    <string name="font_shown_note">%2$d tadan %1$d tasi koʻrsatilmoqda</string>
+    <string name="font_picker_keys">↑↓ harakat · ⏎ tanlash · esc yopish</string>
 </resources>

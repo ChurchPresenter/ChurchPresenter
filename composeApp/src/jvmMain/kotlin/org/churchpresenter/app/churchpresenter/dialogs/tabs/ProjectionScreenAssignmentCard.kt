@@ -2,11 +2,13 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
@@ -67,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.screen_col_label
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene
@@ -156,8 +161,9 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     Spacer(modifier = Modifier.height(4.dp))
 
     // Grid table — screens are rows (left), content types are columns (top)
-    // Wide enough for the longest label ("Dev Window") to stay on a single line
-    val screenLabelWidth = 90.dp
+    // Wide enough for the longest label ("Dev Window") to stay on a single line, and for a typed
+    // monitor name — the left column is a name box for any row that drives a real display.
+    val screenLabelWidth = 116.dp
     val displayDropdownWidth = 100.dp
 
     // Header row: Screen label + Display + Key Output + Display Mode + Content Outputs.
@@ -209,16 +215,29 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
         val assignment = screenAssignments[i]
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Screen label — the dev-window fallback always occupies slot 0
-            Text(
-                text = if (devWindowedFallback && i == 0) {
-                    stringResource(Res.string.dev_window_label)
-                } else {
-                    stringResource(Res.string.screen_col_label, i + 1)
+            val defaultScreenLabel = if (devWindowedFallback && i == 0) {
+                stringResource(Res.string.dev_window_label)
+            } else {
+                stringResource(Res.string.screen_col_label, i + 1)
+            }
+            val monitorKey = assignment.targetScreenKey
+            ScreenNameCell(
+                name = if (monitorKey.isEmpty()) assignment.screenName
+                else proj.screenNames[monitorKey].orEmpty(),
+                default = defaultScreenLabel,
+                width = screenLabelWidth,
+                onRename = { typed ->
+                    onSettingsChange { s ->
+                        val projection = s.projectionSettings
+                        s.copy(
+                            projectionSettings = if (monitorKey.isEmpty()) {
+                                projection.withAssignment(i, assignment.copy(screenName = typed))
+                            } else {
+                                projection.withScreenName(monitorKey, typed)
+                            },
+                        )
+                    }
                 },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                modifier = Modifier.width(screenLabelWidth)
             )
 
             // Display target dropdown
@@ -355,14 +374,15 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     val boundsW: Int = 0,
                     val boundsH: Int = 0
                 )
-                val keyOutputOptions = remember(screenDevicesAll, noneLabel) {
+                val keyOutputOptions = remember(screenDevicesAll, noneLabel, proj.screenNames) {
                     val opts = mutableListOf(KeyOutputOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
                     var keyDisplayNum = 1
                     for (screen in screenDevicesAll) {
                         if (screen.isPrimary) continue
+                        val named = proj.screenName(screen.key)
                         opts.add(KeyOutputOption(
-                            label = "Display $keyDisplayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})",
-                            shortLabel = "D$keyDisplayNum (${screen.boundsW}x${screen.boundsH})",
+                            label = displayLabel(named, keyDisplayNum, screen),
+                            shortLabel = displayShortLabel(named, keyDisplayNum, screen),
                             targetDisplay = screen.index, targetType = "screen",
                             boundsX = screen.boundsX, boundsY = screen.boundsY, boundsW = screen.boundsW, boundsH = screen.boundsH
                         ))
@@ -568,10 +588,11 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 }
             }
             if (showContentDialog) {
-                val screenLabel = if (devWindowedFallback && i == 0)
-                    stringResource(Res.string.dev_window_label)
-                else
-                    stringResource(Res.string.screen_col_label, i + 1)
+                val screenLabel = proj.screenLabelOr(
+                    assignment,
+                    if (devWindowedFallback && i == 0) stringResource(Res.string.dev_window_label)
+                    else stringResource(Res.string.screen_col_label, i + 1),
+                )
                 ContentOutputsDialog(
                     title = stringResource(Res.string.content_outputs_for, screenLabel),
                     screenLabel = screenLabel,
@@ -627,3 +648,47 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
 
 }
 }
+
+/**
+ * The left-hand column of an assignment row: what this output is called.
+ *
+ * Every row gets one, whatever it drives. Where it is stored depends on that: a row driving a real
+ * display names the *monitor* (keyed by its geometry, so the name follows the hardware and shows in
+ * the target menus), and a row set to None, pointed at a DeckLink device or standing in as the dev
+ * fallback names the slot instead. The first version of this offered the box only in the first case
+ * — which on a single-monitor machine, where the only row is the dev-fallback one, meant the
+ * feature was not there at all.
+ *
+ * Blank means "use the numbered default", which is what makes clearing the box the way to undo a
+ * rename, so the default is shown as the placeholder rather than typed into the field.
+ */
+@Composable
+private fun ScreenNameCell(
+    name: String,
+    default: String,
+    width: Dp,
+    onRename: (String) -> Unit,
+) {
+    SettingsTextField(
+        value = name,
+        onValueChange = onRename,
+        placeholder = {
+            Text(
+                text = default,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = SCREEN_NAME_PLACEHOLDER_ALPHA),
+                maxLines = 1,
+            )
+        },
+        modifier = Modifier.width(width).padding(end = 8.dp),
+        fillWidth = true,
+        // Done rather than the default: a name is finished when Enter is pressed, and it keeps this
+        // box out of the "numeric stepper" family. The steppers on this tab are addressed by
+        // ordinal among the fields carrying ImeAction.Default, so a name box answering to that
+        // description would silently renumber every one of them.
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+    )
+}
+
+/** Dim enough to read as "not typed yet", solid enough to read at all. */
+private const val SCREEN_NAME_PLACEHOLDER_ALPHA = 0.6f

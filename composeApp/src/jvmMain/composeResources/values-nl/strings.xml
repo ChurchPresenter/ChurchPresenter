@@ -2382,4 +2382,22 @@
     <string name="tab_strip_scroll_forward">Tabbladen vooruitschuiven</string>
     <string name="stock_photo_show_key">API-sleutel tonen</string>
     <string name="stock_photo_hide_key">API-sleutel verbergen</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">Lettertypen zoeken…</string>
+    <string name="font_picker_clear_search">Zoekopdracht wissen</string>
+    <string name="font_group_recent">Onlangs gebruikt</string>
+    <string name="font_group_recommended">Goed voor projectie</string>
+    <string name="font_group_all">Alle lettertypen</string>
+    <string name="font_group_matches">Overeenkomsten</string>
+    <string name="font_category_sans">Schreefloos</string>
+    <string name="font_category_serif">Schreef</string>
+    <string name="font_category_mono">Mono</string>
+    <string name="font_category_display">Display</string>
+    <string name="font_preview">Voorbeeld</string>
+    <string name="font_preview_sample">Voorbeeldtekst in het gekozen lettertype</string>
+    <string name="font_warning_no_cyrillic">%1$s heeft geen Cyrillische tekens – Cyrillische verzen verschijnen op het scherm in een ander lettertype.</string>
+    <string name="font_warning_no_hebrew">%1$s heeft geen Hebreeuwse tekens – Hebreeuwse tekst verschijnt op het scherm in een ander lettertype.</string>
+    <string name="font_hidden_note">%1$d symbool- en systeemlettertypen verborgen · %2$d van %3$d getoond</string>
+    <string name="font_shown_note">%1$d van %2$d getoond</string>
+    <string name="font_picker_keys">↑↓ verplaatsen · ⏎ kiezen · esc sluiten</string>
 </resources>

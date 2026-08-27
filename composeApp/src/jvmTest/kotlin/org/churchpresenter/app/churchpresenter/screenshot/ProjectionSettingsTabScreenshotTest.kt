@@ -20,6 +20,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.Grid
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
@@ -166,6 +167,38 @@ class ProjectionSettingsTabScreenshotTest {
     /** Three outputs, each in a different display mode, the first driving a key signal as well. */
     @Test
     fun `outputs configured differently`() = shoot("outputs_configured", screens = BOOTH, settings = configured())
+
+    /**
+     * Renamed monitors: the operator's own names in the row and in the target buttons beside them.
+     *
+     * Both displays are named here and the second is the one to read — its name is stored against
+     * the monitor's geometry, so it is what the Display button shows too, where an unnamed display
+     * would read "D2 (3840x2160)".
+     */
+    @Test
+    fun `named screens`() = shoot(
+        "screens_named",
+        settings = settings(
+            ProjectionSettings(
+                screenAssignments = listOf(
+                    ScreenAssignment().on(twoExternalScreens()[1]),
+                    ScreenAssignment().on(twoExternalScreens()[2]),
+                ),
+            )
+                .withScreenName(screenKey(1920, 0, 1280, 720), "Sanctuary Left")
+                .withScreenName(screenKey(3200, 0, 3840, 2160), "Foyer TV"),
+        ),
+    )
+
+    /** The dev-fallback row named: no monitor to key it to, so the name sits on the slot itself. */
+    @Test
+    fun `named dev window`() = shoot(
+        "dev_window_named",
+        screens = noExternalScreens(),
+        settings = settings(
+            ProjectionSettings(screenAssignments = listOf(ScreenAssignment(screenName = "Rehearsal"))),
+        ),
+    )
 
     // ── The dropdowns a row opens ───────────────────────────────────────────────────────────────
 

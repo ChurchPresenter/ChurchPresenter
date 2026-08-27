@@ -305,13 +305,23 @@ internal fun BibleColumnHeaderRow(
                         )
                     } else if (translations.size > 2) {
 
+                        // The renames come in on `translations` -- each entry carries its own --
+                        // so this reads them without a parameter of its own.
+                        val customNames = translations
+                            .associate { it.fileName to it.customName.trim() }
+                            .filterValues { it.isNotBlank() }
                         val translationDisplayNames by produceState(
                             initialValue = emptyMap<String, String>(),
                             storageDirectory,
+                            customNames,
                             translationSelectionKey,
                         ) {
                             value = withContext(Dispatchers.IO) {
-                                bibleDisplayNames(storageDirectory, translations.map { it.fileName })
+                                bibleDisplayNames(
+                                    storageDirectory,
+                                    translations.map { it.fileName },
+                                    customNames,
+                                )
                             }
                         }
                         TranslationOrderSelector(

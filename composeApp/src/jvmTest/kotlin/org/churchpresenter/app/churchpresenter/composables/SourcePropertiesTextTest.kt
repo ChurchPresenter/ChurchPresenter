@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.uniquelyNamedFont
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import kotlin.test.Test
@@ -127,13 +128,18 @@ class SourcePropertiesTextTest {
     @Test
     fun `the font dropdown offers the system's own families and stores the one chosen`() =
         sourcePanel(Fixture.text()) { get ->
-            // Which families exist is the machine's business, so the family to pick is taken from the
-            // same list the panel builds its menu from rather than hard-coded here.
-            val families = Utils.getAvailableSystemFonts()
-            assertTrue(families.size > 1, "the machine must report more than one font family")
-            val chosen = families.first { it != Fixture.text().fontFamily }
+            // Which families exist is the machine's business, so the family to pick is taken from
+            // the same list the panel builds its menu from rather than hard-coded here — and from
+            // the part of it the panel actually offers. The picker hides the system's own internal
+            // faces, and on a Mac the first family the JDK reports is one of them.
+            assertTrue(
+                Utils.getAvailableSystemFonts().size > 1,
+                "the machine must report more than one font family",
+            )
+            val chosen = uniquelyNamedFont()
+            assertTrue(chosen != Fixture.text().fontFamily, "the family picked must be a change")
 
-            chooseFromDropdown(showing = Fixture.text().fontFamily, option = chosen)
+            chooseFont(showing = Fixture.text().fontFamily, option = chosen)
 
             assertEquals(chosen, (get() as SceneSource.TextSource).fontFamily, "the menu writes the family")
             assertEquals(

@@ -3,8 +3,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -95,39 +93,26 @@ class StageMonitorSettingsTabZoneStyleTest {
         )
     }
 
+    /**
+     * The field opens the panel, and a family picked out of it is what gets stored — the path a
+     * mouse user takes, as opposed to the keyboard commit the other tests exercise.
+     */
     @Test
-    fun `the font dropdown arrow opens the menu and a picked font is stored`() {
+    fun `clicking the font field opens the panel and a picked font is stored`() {
         val installed = mixedCaseInstalledFont()
         stageMonitorTab(initial = fontMenuFixture(installed)) { get ->
+            // The field is parked on the lowercased spelling, so the properly-cased family is a
+            // value nothing on the tab is showing yet.
             onAllNodesWithText(installed).assertCountEquals(0)
 
-            fontDropdownArrow(ordinal).performScrollTo().performClick()
-            waitForIdle()
-            onAllNodesWithText(installed).assertCountEquals(1)
+            pickFont(showing = installed.lowercase(), to = installed)
 
-            onAllNodesWithText(installed)[0].performClick()
-            waitForIdle()
-            assertEquals(installed, get().styleOf(zone).fontType, "picking from the menu must be stored")
-            assertFontFieldShows(installed, "the zone's font dropdown")
+            assertEquals(installed, get().styleOf(zone).fontType, "picking from the panel must be stored")
             // Compared against the fixture, not the defaults: this fixture parks every zone on the
             // sentinel on purpose, so "untouched" here means still holding it.
             for (other in StageMonitorStyleZone.entries.filter { it != zone }) {
                 assertEquals(SENTINEL_FONT, get().styleOf(other).fontType, "$other's font must be untouched")
             }
-        }
-    }
-
-    /** The field itself is clickable too, and opens the same menu. */
-    @Test
-    fun `clicking the font field opens the menu`() {
-        val installed = mixedCaseInstalledFont()
-        stageMonitorTab(initial = fontMenuFixture(installed)) { _ ->
-            onAllNodesWithText(installed).assertCountEquals(0)
-
-            onAllNodes(hasClickAction() and hasText("FONT TYPE"))[ordinal].performScrollTo().performClick()
-            waitForIdle()
-
-            onAllNodesWithText(installed).assertCountEquals(1)
         }
     }
 

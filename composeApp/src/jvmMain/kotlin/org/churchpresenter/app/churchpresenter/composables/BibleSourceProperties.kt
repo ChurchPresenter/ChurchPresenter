@@ -69,11 +69,14 @@ internal fun BibleProperties(
     val availableFonts = rememberSystemFonts()
 
     val storageDir = appSettings?.bibleSettings?.storageDirectory ?: ""
-    val bibleOptions by produceState(emptyList<Pair<String, String>>(), storageDir) {
+    val customNames = appSettings?.bibleSettings?.customNames().orEmpty()
+    val bibleOptions by produceState(emptyList<Pair<String, String>>(), storageDir, customNames) {
         value = withContext(Dispatchers.IO) {
             if (storageDir.isEmpty()) emptyList()
             else FileManager().getBibleFilesInDirectory(storageDir)
-                .map { fileName -> fileName to readTranslationTitle(File(storageDir, fileName)) }
+                .map { fileName ->
+                    fileName to readTranslationTitle(File(storageDir, fileName), customNames[fileName])
+                }
         }
     }
 
@@ -226,11 +229,15 @@ internal fun BibleProperties(
     Spacer(modifier = Modifier.height(4.dp))
 
     Text(stringResource(Res.string.canvas_verse_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    FontDropdown(
+    FontSettingsDropdown(
         label = stringResource(Res.string.canvas_font),
-        selected = source.fontFamily,
+        value = source.fontFamily,
         fonts = availableFonts,
-        onSelectedChange = { onUpdate(source.copy(fontFamily = it)) },
+        fillWidth = true,
+        // This panel loads its own translation, which is the one this source will project — so the
+        // font preview quotes that rather than whatever the main window happens to have open.
+        previewLines = remember(bible) { previewLinesFrom(listOfNotNull(bible)) },
+        onValueChange = { onUpdate(source.copy(fontFamily = it)) },
         modifier = Modifier.fillMaxWidth()
     )
     PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->

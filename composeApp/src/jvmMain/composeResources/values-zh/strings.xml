@@ -2362,4 +2362,22 @@
     <string name="story_prompt_later">以后再说</string>
     <string name="story_prompt_reassurance">未经你同意，我们不会发布任何内容。</string>
     <string name="menu_developer_story_prompt">“分享你的故事”对话框</string>
+    <!-- Font picker -->
+    <string name="font_picker_search">搜索字体…</string>
+    <string name="font_picker_clear_search">清除搜索</string>
+    <string name="font_group_recent">最近使用</string>
+    <string name="font_group_recommended">适合投影</string>
+    <string name="font_group_all">所有字体</string>
+    <string name="font_group_matches">匹配项</string>
+    <string name="font_category_sans">无衬线</string>
+    <string name="font_category_serif">衬线</string>
+    <string name="font_category_mono">等宽</string>
+    <string name="font_category_display">展示</string>
+    <string name="font_preview">预览</string>
+    <string name="font_preview_sample">所选字体的示例文本</string>
+    <string name="font_warning_no_cyrillic">%1$s 没有西里尔字形 — 西里尔文经文将在屏幕上以其他字体显示。</string>
+    <string name="font_warning_no_hebrew">%1$s 没有希伯来字形 — 希伯来文将在屏幕上以其他字体显示。</string>
+    <string name="font_hidden_note">已隐藏 %1$d 个符号和系统字体 · 显示 %3$d 个中的 %2$d 个</string>
+    <string name="font_shown_note">显示 %2$d 个中的 %1$d 个</string>
+    <string name="font_picker_keys">↑↓ 移动 · ⏎ 选择 · esc 关闭</string>
 </resources>

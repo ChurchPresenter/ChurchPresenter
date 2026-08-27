@@ -3,6 +3,23 @@ package org.churchpresenter.settings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.settings.utils.Constants
 
+/**
+ * A monitor's identity for the purpose of naming it: its geometry, as `1920x1080@0,0`.
+ *
+ * Not the device index -- that is a position in a list the window system reorders when a cable
+ * moves. Two monitors cannot occupy the same bounds at once, so this tells them apart, and it is
+ * the same thing `ScreenAssignment` matches its target on.
+ *
+ * Bounds that were never resolved (an unassigned slot, a DeckLink device, the dev fallback window)
+ * have no geometry and so no key: they answer with the empty string, which
+ * [ProjectionSettings.withScreenName] refuses to store against.
+ */
+fun screenKey(boundsX: Int, boundsY: Int, boundsW: Int, boundsH: Int): String {
+    val hasSize = boundsW > 0 && boundsH > 0
+    val hasOrigin = boundsX != Int.MIN_VALUE && boundsY != Int.MIN_VALUE
+    return if (hasSize && hasOrigin) "${boundsW}x$boundsH@$boundsX,$boundsY" else ""
+}
+
 @Serializable
 data class ScreenAssignment(
     val targetDisplay: Int = -1,  // -1 = auto (resolved at runtime), -2 = none, 0+ = specific display (legacy)
@@ -57,6 +74,16 @@ data class ScreenAssignment(
      * Only used by ProjectionSettings.browserSourceOutputs entries.
      */
     val browserSourceName: String = "",
+    /**
+     * What the operator calls this output slot when it drives no monitor to hang the name on.
+     *
+     * The preferred home for a screen's name is [ProjectionSettings.screenNames], keyed by the
+     * monitor's own geometry, so that it follows the hardware rather than the row. A row set to
+     * None, pointed at a DeckLink device, or standing in as the dev-fallback window has no
+     * geometry — and it is still a row the operator wants to label, which is what this is for.
+     * Read through [ProjectionSettings.screenLabelOr], which prefers the monitor's name.
+     */
+    val screenName: String = "",
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -84,6 +111,11 @@ data class ScreenAssignment(
      */
     val ndiMode: String = Constants.NDI_MODE_ALPHA,
 ) {
+    /** The key of the monitor this output drives, or blank when it drives none. */
+    val targetScreenKey: String
+        get() = if (targetType != "screen") ""
+        else screenKey(targetBoundsX, targetBoundsY, targetBoundsW, targetBoundsH)
+
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
