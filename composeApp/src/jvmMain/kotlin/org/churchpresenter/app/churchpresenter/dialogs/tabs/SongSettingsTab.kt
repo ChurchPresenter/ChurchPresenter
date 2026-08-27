@@ -89,7 +89,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /** The rail is a fixed column of cards; the styling side takes whatever is left. */
-private val RAIL_MIN_WIDTH = 300.dp
+private val RAIL_MIN_WIDTH = 260.dp
 private val RAIL_MAX_WIDTH = 360.dp
 
 private const val MARGIN_MAX = 500
@@ -101,6 +101,9 @@ private const val TRANSITION_STEP_MS = 50f
 private val TARGET_BUTTON_WIDTH = 110.dp
 private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
+
+/** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
+private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
 
 /**
  * The Song tab of the settings dialog.
@@ -564,6 +567,7 @@ private fun SongElementRow(
             buttonWidth = ELEMENT_TAB_WIDTH,
             buttonHeight = 34.dp,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            compactColumns = ELEMENT_TAB_COMPACT_COLUMNS,
         )
         Spacer(Modifier.weight(1f))
     }
