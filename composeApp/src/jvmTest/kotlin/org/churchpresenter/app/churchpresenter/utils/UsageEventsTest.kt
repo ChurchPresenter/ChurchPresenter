@@ -141,6 +141,15 @@ class UsageEventsTest {
     }
 
     @Test
+    fun `the output-kind events keep the wire names the server counts`() {
+        // All three audience output kinds are counted the same way, and the server adds them up by
+        // these exact strings — renaming a constant must never quietly rename one of them.
+        assertEquals("decklinkOutput", UsageEvent.DECKLINK_OUTPUT.param)
+        assertEquals("ndiOutput", UsageEvent.NDI_OUTPUT.param)
+        assertEquals("browserSourceOutput", UsageEvent.BROWSER_SOURCE_OUTPUT.param)
+    }
+
+    @Test
     fun `every event has its own wire name, and they are distinct`() {
         val params = UsageEvent.entries.map { it.param }
         assertTrue(params.all { it.isNotBlank() })

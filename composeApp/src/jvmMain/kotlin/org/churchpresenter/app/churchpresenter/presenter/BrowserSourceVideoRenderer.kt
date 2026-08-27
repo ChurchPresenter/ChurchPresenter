@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
@@ -85,6 +88,15 @@ class BrowserSourceVideoRenderer(
     private val width: Int = 1920,
     private val height: Int = 1080,
     fps: Int = 30,
+    /**
+     * Called on every frame that has at least one client attached, so the usage ping can count the
+     * services where a Browser Source was genuinely consumed rather than merely configured.
+     *
+     * A defaulted constructor parameter so a test passes its own lambda and never reaches the
+     * process-wide store or `user.home`. Cheap to call per frame: [UsageEventStore.recordOncePerRun]
+     * is a set lookup after the first hit.
+     */
+    private val onConsumerSeen: () -> Unit = { UsageEvents.recordOncePerRun(UsageEvent.BROWSER_SOURCE_OUTPUT) },
 ) {
     /**
      * The off-screen render loop itself. Everything generic about it — the scene, the virtual
@@ -366,13 +378,17 @@ class BrowserSourceVideoRenderer(
      * Runs on the pump's coroutine, once per rendered tick. [intBuf] is the pump's own buffer and
      * is overwritten by the next tick, which is why a frame that is kept as the diff baseline is
      * copied into [previousBuf] rather than aliased.
+     *
+     * Internal rather than private so a test drives one frame directly, with a real subscriber on
+     * [frames], instead of standing up a Compose scene to reach it.
      */
-    private suspend fun onFrame(intBuf: IntArray, w: Int, h: Int, elapsedMs: Long) {
+    internal suspend fun onFrame(intBuf: IntArray, w: Int, h: Int, elapsedMs: Long) {
         // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened mid-service)
         // must be seeded with a full frame before any dirty-rect delta means anything to it, so
         // force one whenever the subscriber count rises — even on a tick where content didn't
         // otherwise change.
         val subscriberCount = frames.subscriptionCount.value
+        if (subscriberCount > 0) onConsumerSeen()
         val newSubscriberJoined = subscriberCount > lastSeenSubscriberCount
         lastSeenSubscriberCount = subscriberCount
 

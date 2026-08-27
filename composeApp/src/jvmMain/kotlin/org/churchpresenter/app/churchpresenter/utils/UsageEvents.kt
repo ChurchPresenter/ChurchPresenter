@@ -27,6 +27,18 @@ enum class UsageEvent(
     /** A Blackmagic DeckLink output was opened on real hardware. Once per run — see [UsageEventStore.recordOncePerRun]. */
     DECKLINK_OUTPUT("decklinkOutput"),
 
+    /**
+     * An NDI receiver actually connected to one of this app's NDI sources. Once per run.
+     *
+     * The receiver, not the sender: NDI keeps announcing an unwatched source, so an output that is
+     * merely switched on says nothing. This counts the services where something on the network took
+     * the feed, which is the same thing [DECKLINK_OUTPUT] counts for SDI.
+     */
+    NDI_OUTPUT("ndiOutput"),
+
+    /** A Browser Source client actually streamed frames from an output. Once per run. */
+    BROWSER_SOURCE_OUTPUT("browserSourceOutput"),
+
     /** A phone or tablet connected to the companion server. Once per run. */
     MOBILE_APP_CONNECTED("mobileAppConnected"),
 

@@ -27,6 +27,9 @@ private const val H = 4
 private const val POLL_MS = 2L
 private const val WAIT_MS = 4_000L
 
+/** Enough frames at the 60fps the tests build to cross several one-second poll ticks. */
+private const val FRAMES_OVER_SEVERAL_SECONDS = 200
+
 /**
  * The NDI output's app-side renderer: what reaches the wire, and when it does not.
  *
@@ -59,6 +62,7 @@ class NdiVideoRendererTest {
         lib: FakeNdiLibrary,
         mode: NdiOutputMode = NdiOutputMode.ALPHA,
         enabled: Boolean = true,
+        onReceiverSeen: () -> Unit = {},
     ): Pair<NdiVideoRenderer, NdiSender> {
         val sender = NdiSender(lib, OUTPUT_NAME, mode, fps = 60)
         val assignment = mutableStateOf(ScreenAssignment(ndiEnabled = enabled))
@@ -70,7 +74,9 @@ class NdiVideoRendererTest {
             outputIndex = 0,
             kind = OffscreenOutputKind.NDI,
         )
-        return NdiVideoRenderer(sender, context, assignment, width = W, height = H, fps = 60) to sender
+        return NdiVideoRenderer(
+            sender, context, assignment, width = W, height = H, fps = 60, onReceiverSeen = onReceiverSeen,
+        ) to sender
     }
 
     // ── What is put on the network ──────────────────────────────────────────────
@@ -221,5 +227,66 @@ class NdiVideoRendererTest {
     @Test
     fun `a new output defaults to alpha`() {
         assertEquals(NdiOutputMode.ALPHA, NdiVideoRenderer.modeOf(ScreenAssignment()))
+    }
+
+    // ── Noticing that someone is actually watching ──────────────────────────────
+
+    @Test
+    fun `isReceiverPollTick asks once per second and then stops`() {
+        // The first frame asks, the rest of that second does not: an unwatched source would
+        // otherwise make a native call on every one of its 60 frames, for ever.
+        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 0, fps = 60, alreadySeen = false))
+        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 1, fps = 60, alreadySeen = false))
+        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 59, fps = 60, alreadySeen = false))
+        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 60, fps = 60, alreadySeen = false))
+
+        // Once the answer is known there is nothing left to ask.
+        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 0, fps = 60, alreadySeen = true))
+        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 120, fps = 60, alreadySeen = true))
+
+        // A renderer built with no cadence polls every frame rather than dividing by zero.
+        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 7, fps = 0, alreadySeen = false))
+    }
+
+    @Test
+    fun `a source nobody is watching reports no usage`() {
+        val lib = FakeNdiLibrary().apply { connections = 0 }
+        var seen = 0
+        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        sender.open()
+
+        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+
+        // NDI keeps announcing an unwatched source, so "the output is on" must not count as usage.
+        assertEquals(0, seen)
+    }
+
+    @Test
+    fun `a receiver tuning in is reported once, not once per frame`() {
+        val lib = FakeNdiLibrary().apply { connections = 2 }
+        var seen = 0
+        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        sender.open()
+
+        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+
+        // Two receivers over several seconds of frames is still one service with NDI in use.
+        assertEquals(1, seen)
+    }
+
+    @Test
+    fun `a receiver that arrives mid-service is still noticed`() {
+        val lib = FakeNdiLibrary().apply { connections = 0 }
+        var seen = 0
+        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        sender.open()
+        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+        assertEquals(0, seen)
+
+        // The OBS operator opens the source ten minutes in, which is the normal case.
+        lib.connections = 1
+        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+
+        assertEquals(1, seen)
     }
 }

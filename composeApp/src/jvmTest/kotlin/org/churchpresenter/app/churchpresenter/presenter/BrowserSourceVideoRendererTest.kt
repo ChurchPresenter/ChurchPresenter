@@ -1,6 +1,13 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
@@ -13,14 +20,21 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+private const val W = 8
+private const val H = 4
+private const val OPAQUE_RED = 0xFFFF0000.toInt()
+private const val POLL_MS = 2L
+private const val WAIT_MS = 4_000L
+
 class BrowserSourceVideoRendererTest {
 
-    private fun renderer(fps: Int = 30) = BrowserSourceVideoRenderer(
+    private fun renderer(fps: Int = 30, onConsumerSeen: () -> Unit = {}) = BrowserSourceVideoRenderer(
         presenterManager = PresenterManager(),
         appSettingsState = mutableStateOf(AppSettings()),
         screenAssignmentState = mutableStateOf(ScreenAssignment()),
         effectiveModeState = mutableStateOf(Presenting.NONE),
         fps = fps,
+        onConsumerSeen = onConsumerSeen,
     )
 
     private fun solid(width: Int, height: Int, argb: Int) = IntArray(width * height) { argb }
@@ -387,5 +401,44 @@ class BrowserSourceVideoRendererTest {
     @Test
     fun `frames has no replay value before start is ever called`() {
         assertTrue(renderer().frames.replayCache.isEmpty())
+    }
+
+    // ── Noticing that a client is actually streaming ────────────────────────────
+
+    @Test
+    fun `a frame rendered with no client attached reports no usage`() = runBlocking {
+        var seen = 0
+        val r = renderer(onConsumerSeen = { seen++ })
+
+        r.onFrame(solid(W, H, OPAQUE_RED), W, H, elapsedMs = 0)
+
+        // An output configured but never opened in OBS is not a service that used Browser Source.
+        assertEquals(0, seen)
+    }
+
+    @Test
+    fun `a frame rendered while a client is streaming reports usage`() {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        try {
+            var seen = 0
+            val r = renderer(onConsumerSeen = { seen++ })
+            scope.launch { r.frames.collect { } }
+            // Wait on the subscription itself, not on a duration — collect() registers asynchronously.
+            waitFor("the client's subscription to register") { r.frames.subscriptionCount.value > 0 }
+
+            runBlocking { r.onFrame(solid(W, H, OPAQUE_RED), W, H, elapsedMs = 0) }
+
+            assertEquals(1, seen)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    private fun waitFor(what: String, condition: () -> Boolean) = runBlocking {
+        val deadline = System.nanoTime() + WAIT_MS * 1_000_000
+        while (!condition()) {
+            if (System.nanoTime() > deadline) throw AssertionError("timed out waiting for $what")
+            delay(POLL_MS)
+        }
     }
 }
