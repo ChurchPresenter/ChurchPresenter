@@ -29,10 +29,12 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.text_style_bold
 import churchpresenter.composeapp.generated.resources.text_style_italic
 import churchpresenter.composeapp.generated.resources.text_style_shadow
+import churchpresenter.composeapp.generated.resources.text_style_strikethrough
 import churchpresenter.composeapp.generated.resources.text_style_underline
 import churchpresenter.composeapp.generated.resources.tooltip_bold
 import churchpresenter.composeapp.generated.resources.tooltip_italic
 import churchpresenter.composeapp.generated.resources.tooltip_shadow
+import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
 import churchpresenter.composeapp.generated.resources.tooltip_underline
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.clickable
@@ -40,6 +42,11 @@ import androidx.compose.foundation.clickable
 /**
  * A row of toggle buttons for text style: Bold, Italic, Underline, Shadow.
  * Each button toggles its style independently.
+ *
+ * Strikethrough is offered only when [onStrikethroughChange] is given, and the shadow button only
+ * when [showShadow] is left on. Both default to the original four-button row, so a caller that
+ * wants neither is unchanged; the Bible settings tab passes a strikethrough handler and turns the
+ * shadow button off, having a labelled shadow row of its own.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,7 +60,10 @@ fun TextStyleButtons(
     onUnderlineChange: (Boolean) -> Unit,
     onShadowChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    buttonSize: Dp = 28.dp
+    buttonSize: Dp = 28.dp,
+    strikethrough: Boolean = false,
+    onStrikethroughChange: ((Boolean) -> Unit)? = null,
+    showShadow: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -84,13 +94,25 @@ fun TextStyleButtons(
             buttonSize = buttonSize,
             onClick = { onUnderlineChange(!underline) }
         )
-        TextStyleToggleButton(
-            label = stringResource(Res.string.text_style_shadow),
-            tooltip = stringResource(Res.string.tooltip_shadow),
-            isActive = shadow,
-            buttonSize = buttonSize,
-            onClick = { onShadowChange(!shadow) }
-        )
+        if (onStrikethroughChange != null) {
+            TextStyleToggleButton(
+                label = stringResource(Res.string.text_style_strikethrough),
+                tooltip = stringResource(Res.string.tooltip_strikethrough),
+                isActive = strikethrough,
+                textDecoration = TextDecoration.LineThrough,
+                buttonSize = buttonSize,
+                onClick = { onStrikethroughChange(!strikethrough) }
+            )
+        }
+        if (showShadow) {
+            TextStyleToggleButton(
+                label = stringResource(Res.string.text_style_shadow),
+                tooltip = stringResource(Res.string.tooltip_shadow),
+                isActive = shadow,
+                buttonSize = buttonSize,
+                onClick = { onShadowChange(!shadow) }
+            )
+        }
     }
 }
 
