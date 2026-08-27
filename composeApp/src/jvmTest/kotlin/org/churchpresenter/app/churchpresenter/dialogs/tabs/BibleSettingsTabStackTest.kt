@@ -13,7 +13,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
@@ -25,6 +24,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class BibleSettingsTabStackTest {
@@ -75,27 +75,37 @@ class BibleSettingsTabStackTest {
         waitForIdle()
     }
 
-    private fun ComposeUiTest.chooseFromMenu(label: String) {
-        onAllNodesWithText(label).onFirst().performClick()
+    /**
+     * Opens slot [index] and picks [label] out of the menu it drops.
+     *
+     * Which node that is cannot be "the first one reading [label]": the typography panel carries a
+     * text-transform option reading "None", which is on screen before the menu opens and traverses
+     * ahead of it. So the nodes are counted first and the one the click *added* is the one taken.
+     */
+    private fun ComposeUiTest.openSlotAndChoose(index: Int, label: String) {
+        val before = onAllNodesWithText(label)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false).map { it.id }.toSet()
+        openSlot(index)
+        val opened = onAllNodesWithText(label).fetchSemanticsNodes().indexOfFirst { it.id !in before }
+        assertTrue(opened >= 0, "opening slot $index must offer \"$label\"")
+        onAllNodesWithText(label)[opened].performClick()
+        waitForIdle()
+    }
+
+    /** Points the styling panel at translation [index] of the stack, one-based, via its chip. */
+    private fun ComposeUiTest.selectTranslation(index: Int) {
+        onAllNodesWithText("$index · ", substring = true).onFirst().performClick()
         waitForIdle()
     }
 
     private fun files(harness: Harness) = harness.current.bibleSettings.translationList().map { it.fileName }
-
-    private fun ComposeUiTest.expandSection(title: String) {
-        // Scrolled to first: an open section is taller than the test window, so the next section's
-        // header sits below the fold and a click at its coordinates lands on nothing.
-        onNodeWithText(title, substring = true).performScrollTo().performClick()
-        waitForIdle()
-    }
 
     @Test
     fun `picking another bible in a slot swaps it rather than adding one`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "niv.spb" to "New International")
         val harness = showTab(stackOf(dir, "kjv.spb"))
 
-        openSlot(1)
-        chooseFromMenu("New International")
+        openSlotAndChoose(1, "New International")
 
         assertEquals(listOf("niv.spb"), files(harness), "the stack keeps its size when a slot is repointed")
     }
@@ -105,8 +115,7 @@ class BibleSettingsTabStackTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal", "niv.spb" to "New International")
         val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
 
-        openSlot(1)
-        chooseFromMenu("New International")
+        openSlotAndChoose(1, "New International")
 
         assertEquals(listOf("niv.spb", "syn.spb"), files(harness))
     }
@@ -116,8 +125,7 @@ class BibleSettingsTabStackTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
 
-        openSlot(2)
-        chooseFromMenu("None")
+        openSlotAndChoose(2, "None")
 
         assertEquals(listOf("kjv.spb"), files(harness), "None removes the slot, it does not blank it")
     }
@@ -127,14 +135,13 @@ class BibleSettingsTabStackTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
 
-        openSlot(1)
-        chooseFromMenu("None")
+        openSlotAndChoose(1, "None")
 
         assertEquals(listOf("syn.spb"), files(harness))
     }
 
     @Test
-    fun `only the first translation section is open to begin with`() = runComposeUiTest {
+    fun `only the selected translation's styling is on screen`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         showTab(
             AppSettings(
@@ -150,17 +157,17 @@ class BibleSettingsTabStackTest {
         assertEquals(
             1,
             onAllNodesWithText("41").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-            "the open section shows its font size",
+            "the first translation is selected on arrival, so its font size is the one shown",
         )
         assertEquals(
             0,
             onAllNodesWithText("52").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-            "four full appearance profiles open at once would be unreadable",
+            "one set of controls stands for whichever translation is selected, so the other's is absent",
         )
     }
 
     @Test
-    fun `opening a later section closes the one before it`() = runComposeUiTest {
+    fun `picking a later translation points the panel at it`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         showTab(
             AppSettings(
@@ -173,7 +180,7 @@ class BibleSettingsTabStackTest {
             ),
         )
 
-        expandSection("Translation 2 —")
+        selectTranslation(2)
 
         assertEquals(
             1,
@@ -186,7 +193,7 @@ class BibleSettingsTabStackTest {
     }
 
     @Test
-    fun `editing the second section writes the second translation, not the first`() = runComposeUiTest {
+    fun `editing the second translation writes the second one, not the first`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(
             AppSettings(
@@ -199,18 +206,18 @@ class BibleSettingsTabStackTest {
             ),
         )
 
-        expandSection("Translation 2 —")
+        selectTranslation(2)
 
         onNodeWithText("52").performTextReplacement("63")
         waitForIdle()
 
         val stack = harness.current.bibleSettings.translationList()
-        assertEquals(63, stack[1].textFontSize, "the edited section is the second one")
+        assertEquals(63, stack[1].textFontSize, "the panel was pointed at the second translation")
         assertEquals(41, stack[0].textFontSize, "and the first must be untouched")
     }
 
     @Test
-    fun `editing the first section leaves the second alone`() = runComposeUiTest {
+    fun `editing the first translation leaves the second alone`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(
             AppSettings(
@@ -286,11 +293,11 @@ class BibleSettingsTabStackTest {
     }
 
     @Test
-    fun `renaming the second section writes the second translation`() = runComposeUiTest {
+    fun `renaming the second translation writes the second one`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
 
-        expandSection("Translation 2 —")
+        selectTranslation(2)
         emptyFieldOffering("Synodal").performTextReplacement("Pew Bible")
         waitForIdle()
 
@@ -318,7 +325,7 @@ class BibleSettingsTabStackTest {
         val dir = bibleFolder("kjv.spb" to "King James Version")
         val harness = showTab(stackOf(dir, "kjv.spb"))
 
-        onNodeWithText("Show book abbreviation").performScrollTo().performClick()
+        onNodeWithText("Show book abbreviation").performClick()
         waitForIdle()
 
         assertEquals(true, harness.current.bibleSettings.translationList().single().showAbbreviation)

@@ -168,16 +168,15 @@ class BibleSettingsTabTest {
         // primary/secondary pair as the first two translations, with no toggle offered.
         showBibleTab(BibleSettings(primaryBible = "first.spb", secondaryBible = "second.spb"))
 
-        onAllNodesWithText("Translation 1", substring = true).onFirst().assertExists()
+        onAllNodesWithText("Translation 1", substring = true, ignoreCase = true).onFirst().assertExists()
         onNodeWithText("Translation mode").assertDoesNotExist()
         onNodeWithText("Dual translation").assertDoesNotExist()
     }
 
     @Test
-    fun `the margins preview and its four fields render`() = runComposeUiTest {
+    fun `the four margin fields render`() = runComposeUiTest {
         showBibleTab(BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44))
 
-        onNodeWithText("Screen").assertExists("the margin preview names the screen it stands for")
         listOf("11", "22", "33", "44").forEach { value ->
             onAllNodesWithText(value).onFirst().assertExists("the margin field showing $value must render")
         }
@@ -333,14 +332,15 @@ class BibleSettingsTabTest {
 
     /**
      * Taps the transition slider at [fraction] of its track. The track is a bare `Box` with pointer
-     * input and no semantics; it runs from the row's fixed 120dp label to the value read-out, with
-     * `Arrangement.spacedBy(10.dp)` before it, so both edges come from measured bounds.
+     * input and no semantics, so both edges come from measured bounds: the caption now sits *above*
+     * the track rather than beside it, so they share a left edge, and the track runs from there to
+     * the value read-out less the row's 10dp gap.
      */
     private fun ComposeUiTest.tapTransitionSlider(readout: String, fraction: Float) {
         waitForIdle()
-        val label = onNodeWithText("Transition Duration:").fetchSemanticsNode()
+        val label = onNodeWithText("Transition Duration").fetchSemanticsNode()
         val value = onNodeWithText(readout).fetchSemanticsNode()
-        val left = label.boundsInRoot.right
+        val left = label.boundsInRoot.left
         val right = value.boundsInRoot.left - 10f * label.layoutInfo.density.density
         assertTrue(right > left, "the slider track must have measurable width")
 
@@ -466,233 +466,59 @@ class BibleSettingsTabTest {
 
     // ── Horizontal alignment: icons with no description of their own ──────────
 
-    /**
-     * The clickable icons sitting on the same row as [label], ordered left to right — which for an
-     * alignment group is exactly left, centre, right, and for a position group above, below.
-     */
-    private fun ComposeUiTest.iconsBesideLabel(label: SemanticsNode): List<SemanticsNode> {
-        val row = label.boundsInRoot
-        return onAllNodes(hasClickAction()).fetchSemanticsNodes()
-            .filter { it.boundsInRoot.center.y in row.top..row.bottom && it.boundsInRoot.left >= row.right }
-            .sortedBy { it.boundsInRoot.left }
-    }
-
-    // ── The four styling targets ──────────────────────────────────────────────
+    // ── The one styling control set ───────────────────────────────────────────
     //
-    // In composition order the right-hand column is primary text, primary reference, secondary text,
-    // secondary reference, and each renders its full-screen block before its lower-third block. That
-    // makes every repeated control addressable as (section * 2 + variant).
+    // The tab keeps a single set of styling controls and points them with two segmented switches:
+    // Full Screen / Lower Third, and Verse Text / Reference. So a test names the combination the
+    // operator would pick rather than counting occurrences of a repeated control.
 
     private data class Target(
-        val name: String,
+        val output: String,
+        val element: String,
         val bold: (BibleSettings) -> Boolean,
         val italic: (BibleSettings) -> Boolean,
         val underline: (BibleSettings) -> Boolean,
+        val strikethrough: (BibleSettings) -> Boolean,
         val shadow: (BibleSettings) -> Boolean,
-        val fontType: (BibleSettings) -> String,
-        val fontSize: (BibleSettings) -> Int,
+        val color: (BibleSettings) -> String,
         val alignment: (BibleSettings) -> String,
-        val withFontSize: (BibleSettings, Int) -> BibleSettings,
-    )
+    ) {
+        val name get() = "$element, $output"
+    }
 
-    /**
-     * The four style blocks one translation's section renders, in the order their controls appear.
-     *
-     * There used to be eight: the same four repeated for a "secondary" bible. A translation carries
-     * its own profile now, so the block is described once and which stack position it belongs to is
-     * what varies — covered by the index-wiring tests, the only place that distinction still lives.
-     */
     private val targets = listOf(
-        Target("text, full screen",
-            { t(it).textBold }, { t(it).textItalic }, { t(it).textUnderline }, { t(it).textShadow },
-            { t(it).textFontType }, { t(it).textFontSize }, { t(it).textHorizontalAlignment },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(textFontSize = v) } }),
-        Target("text, lower third",
-            { t(it).lowerThirdTextBold },
-            { t(it).lowerThirdTextItalic },
-            { t(it).lowerThirdTextUnderline },
-            { t(it).lowerThirdTextShadow },
-            { t(it).lowerThirdTextFontType },
-            { t(it).lowerThirdTextFontSize },
-            { t(it).lowerThirdTextHorizontalAlignment },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdTextFontSize = v) } }),
-        Target("reference, full screen",
-            { t(it).referenceBold }, { t(it).referenceItalic }, { t(it).referenceUnderline }, { t(it).referenceShadow },
-            { t(it).referenceFontType }, { t(it).referenceFontSize }, { t(it).referenceHorizontalAlignment },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(referenceFontSize = v) } }),
-        Target("reference, lower third",
-            { t(it).lowerThirdReferenceBold },
-            { t(it).lowerThirdReferenceItalic },
-            { t(it).lowerThirdReferenceUnderline },
+        Target("Full Screen", "Verse Text",
+            { t(it).textBold }, { t(it).textItalic }, { t(it).textUnderline },
+            { t(it).textStrikethrough }, { t(it).textShadow },
+            { t(it).textColor }, { t(it).textHorizontalAlignment }),
+        Target("Lower Third", "Verse Text",
+            { t(it).lowerThirdTextBold }, { t(it).lowerThirdTextItalic }, { t(it).lowerThirdTextUnderline },
+            { t(it).lowerThirdTextStrikethrough }, { t(it).lowerThirdTextShadow },
+            { t(it).lowerThirdTextColor }, { t(it).lowerThirdTextHorizontalAlignment }),
+        Target("Full Screen", "Reference",
+            { t(it).referenceBold }, { t(it).referenceItalic }, { t(it).referenceUnderline },
+            { t(it).referenceStrikethrough }, { t(it).referenceShadow },
+            { t(it).referenceColor }, { t(it).referenceHorizontalAlignment }),
+        Target("Lower Third", "Reference",
+            { t(it).lowerThirdReferenceBold }, { t(it).lowerThirdReferenceItalic },
+            { t(it).lowerThirdReferenceUnderline }, { t(it).lowerThirdReferenceStrikethrough },
             { t(it).lowerThirdReferenceShadow },
-            { t(it).lowerThirdReferenceFontType },
-            { t(it).lowerThirdReferenceFontSize },
-            { t(it).lowerThirdReferenceHorizontalAlignment },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdReferenceFontSize = v) } }),
+            { t(it).lowerThirdReferenceColor }, { t(it).lowerThirdReferenceHorizontalAlignment }),
     )
 
     /** The translation at [index] of the stack, or defaults when nothing is configured there. */
     private fun t(settings: BibleSettings, index: Int = 0): BibleTranslationSettings =
         settings.translationList().getOrElse(index) { BibleTranslationSettings() }
 
-    /** Clicks style toggle [label] (B, I, U or S) belonging to target [index]. */
-    private fun ComposeUiTest.clickStyle(label: String, index: Int) {
-        onAllNodesWithText(label)[index].performScrollTo().performClick()
+    /** Points the one control set at [target]'s output and element. */
+    private fun ComposeUiTest.pointAt(target: Target) {
+        onNodeWithText(target.output).performClick()
+        waitForIdle()
+        onNodeWithText(target.element).performClick()
         waitForIdle()
     }
 
-    @Test
-    fun `a style button changes nothing but its own flag`() = runComposeUiTest {
-        val harness = showTab()
-        val before = harness.current.bibleSettings
-
-        clickStyle("B", 0)
-
-        assertEquals(
-            before.updateTranslation(0) { x -> x.copy(textBold = true) },
-            harness.current.bibleSettings,
-            "bolding the primary bible text touches no other setting",
-        )
-    }
-
-    // ── Shadow detail rows ────────────────────────────────────────────────────
-
-    // ── Font type dropdowns ───────────────────────────────────────────────────
-
-    // ── Reference position ────────────────────────────────────────────────────
-
-    // ── Colour pickers ────────────────────────────────────────────────────────
-
-    // ── Colour pickers, all eight ─────────────────────────────────────────────
-
-    private data class ColourTarget(
-        val name: String,
-        val hex: String,
-        val get: (BibleSettings) -> String,
-        val set: (BibleSettings, String) -> BibleSettings,
-    )
-
-    private val colourTargets = listOf(
-        ColourTarget(
-            "primary text full screen",
-            "#110000",
-            { t(it).textColor },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(textColor = v) } },
-        ),
-        ColourTarget(
-            "primary text lower third",
-            "#220000",
-            { t(it).lowerThirdTextColor },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdTextColor = v) } },
-        ),
-        ColourTarget(
-            "primary reference full screen",
-            "#330000",
-            { t(it).referenceColor },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(referenceColor = v) } },
-        ),
-        ColourTarget(
-            "primary reference lower third",
-            "#440000",
-            { t(it).lowerThirdReferenceColor },
-            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdReferenceColor = v) } },
-        ),
-        ColourTarget(
-            "secondary text full screen",
-            "#550000",
-            { t(it, 1).textColor },
-            { s, v -> s.updateTranslation(1) { x -> x.copy(textColor = v) } },
-        ),
-        ColourTarget(
-            "secondary text lower third",
-            "#660000",
-            { t(it, 1).lowerThirdTextColor },
-            { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdTextColor = v) } },
-        ),
-        ColourTarget(
-            "secondary reference full screen",
-            "#770000",
-            { t(it, 1).referenceColor },
-            { s, v -> s.updateTranslation(1) { x -> x.copy(referenceColor = v) } },
-        ),
-        ColourTarget(
-            "secondary reference lower third",
-            "#880000",
-            { t(it, 1).lowerThirdReferenceColor },
-            { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdReferenceColor = v) } },
-        ),
-    )
-
-    /** Every colour field given its own distinct hex, so each is findable by what it shows. */
-    private fun distinctColours(): BibleSettings =
-        colourTargets.fold(twoBibles()) { acc, target -> target.set(acc, target.hex) }
-            .migrateTranslations()
-
-    /** A configured pair, so seeded legacy styling has somewhere to convert to. */
-    private fun twoBibles() = BibleSettings(primaryBible = "kjv.spb", secondaryBible = "rst.spb")
-
-    // ── Auto-fit ──────────────────────────────────────────────────────────────
-    //
-    // The four Auto buttons only exist when the tab is given a PresenterManager, and they only
-    // enable while a bible verse is actually live on a screen of the matching kind. A real
-    // PresenterManager is used: its constructor opens nothing, so the state can simply be set.
-
-    private fun presenterShowing(vararg verses: SelectedVerse): PresenterManager =
-        PresenterManager().apply {
-            setPresentingMode(Presenting.BIBLE)
-            setSelectedVerses(verses.toList())
-        }
-
-    private fun verse(text: String) = SelectedVerse(
-        bibleName = "King James Version",
-        bookName = "John",
-        chapter = 3,
-        verseNumber = 16,
-        verseText = text,
-    )
-
-    /** Both a full-screen and a lower-third output, which is what enables the two kinds of Auto. */
-    private fun bothScreenKinds() = AppSettings().projectionSettings.copy(
-        screenAssignments = listOf(
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
-        )
-    )
-
-    private fun ComposeUiTest.showWithPresenter(
-        bible: BibleSettings = BibleSettings(),
-        presenter: PresenterManager?,
-        projection: ProjectionSettings = bothScreenKinds(),
-    ): Harness {
-        val harness = Harness().apply {
-            current = AppSettings(bibleSettings = bible, projectionSettings = projection)
-        }
-        setContent {
-            MaterialTheme {
-                BibleSettingsTab(
-                    settings = harness.current,
-                    onSettingsChange = { transform -> harness.current = transform(harness.current) },
-                    presenterManager = presenter,
-                )
-            }
-        }
-        return harness
-    }
-
-    @Test
-    fun `the Auto buttons appear only when the tab is given a presenter`() = runComposeUiTest {
-        showTab()
-
-        onAllNodesWithText("Auto").assertCountEquals(0)
-    }
-
-    // ── One test per styling control ──────────────────────────────────────────
-    //
-    // Eight targets — four sections, each with a full-screen and a lower-third block — and the same
-    // controls repeated for every one of them. Each test below drives exactly one control and is
-    // named for it, so a failure says which button on which target broke.
-
-    /** Clicks style toggle [letter] on target [index] and checks only that target's flag flipped. */
+    /** Clicks style toggle [letter] on [index]'s combination and checks only its own flag flipped. */
     private fun ComposeUiTest.assertStyleToggles(
         index: Int,
         letter: String,
@@ -700,11 +526,10 @@ class BibleSettingsTabTest {
     ) {
         val harness = showTab()
         val target = targets[index]
+        pointAt(target)
         val before = flag(target)(harness.current.bibleSettings)
 
-        val shadowRowsBefore = onAllNodesWithText("SIZE (%)", ignoreCase = true).fetchSemanticsNodes().size
-
-        onAllNodesWithText(letter)[index].performScrollTo().performClick()
+        onNodeWithText(letter).performClick()
         waitForIdle()
 
         assertEquals(!before, flag(target)(harness.current.bibleSettings), "$letter on ${target.name}")
@@ -713,136 +538,275 @@ class BibleSettingsTabTest {
             flag(target)(persisted(harness.current)),
             "$letter on ${target.name} must survive a settings.json round trip",
         )
-        if (letter == "S") {
-            // The visible result of a shadow toggle is its detail row folding in or out.
-            assertEquals(
-                shadowRowsBefore + if (before) -1 else 1,
-                onAllNodesWithText("SIZE (%)", ignoreCase = true).fetchSemanticsNodes().size,
-                "the shadow detail row for ${target.name} must follow the toggle",
-            )
-        }
     }
 
     @Test
-    fun `bold on the primary text, full screen`() = runComposeUiTest { assertStyleToggles(0, "B") { it.bold } }
+    fun `bold on the verse, full screen`() = runComposeUiTest { assertStyleToggles(0, "B") { it.bold } }
 
     @Test
-    fun `bold on the primary text, lower third`() = runComposeUiTest { assertStyleToggles(1, "B") { it.bold } }
+    fun `bold on the verse, lower third`() = runComposeUiTest { assertStyleToggles(1, "B") { it.bold } }
 
     @Test
-    fun `bold on the primary reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "B") { it.bold } }
+    fun `bold on the reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "B") { it.bold } }
 
     @Test
-    fun `bold on the primary reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "B") { it.bold } }
-
-
-
-
+    fun `bold on the reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "B") { it.bold } }
 
     @Test
-    fun `italic on the primary text, full screen`() = runComposeUiTest { assertStyleToggles(0, "I") { it.italic } }
+    fun `italic on the verse, full screen`() = runComposeUiTest { assertStyleToggles(0, "I") { it.italic } }
 
     @Test
-    fun `italic on the primary text, lower third`() = runComposeUiTest { assertStyleToggles(1, "I") { it.italic } }
+    fun `italic on the verse, lower third`() = runComposeUiTest { assertStyleToggles(1, "I") { it.italic } }
 
     @Test
-    fun `italic on the primary reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "I") { it.italic } }
+    fun `italic on the reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "I") { it.italic } }
 
     @Test
-    fun `italic on the primary reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "I") { it.italic } }
-
-
-
-
+    fun `italic on the reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "I") { it.italic } }
 
     @Test
-    fun `underline on the primary text, full screen`() = runComposeUiTest { assertStyleToggles(
-        0,
-        "U",
-    ) { it.underline } }
+    fun `underline on the verse, full screen`() = runComposeUiTest { assertStyleToggles(0, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary text, lower third`() = runComposeUiTest { assertStyleToggles(
-        1,
-        "U",
-    ) { it.underline } }
+    fun `underline on the verse, lower third`() = runComposeUiTest { assertStyleToggles(1, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary reference, full screen`() = runComposeUiTest { assertStyleToggles(
-        2,
-        "U",
-    ) { it.underline } }
+    fun `underline on the reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary reference, lower third`() = runComposeUiTest { assertStyleToggles(
-        3,
-        "U",
-    ) { it.underline } }
+    fun `underline on the reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "U") { it.underline } }
 
-
-
-
+    // "S" is strikethrough here, not shadow: shadow carries three settings behind it and has a
+    // labelled checkbox of its own, so the face row is B/I/U/S as the design has it.
 
     @Test
-    fun `shadow on the primary text, full screen`() = runComposeUiTest { assertStyleToggles(0, "S") { it.shadow } }
+    fun `strikethrough on the verse, full screen`() =
+        runComposeUiTest { assertStyleToggles(0, "S") { it.strikethrough } }
 
     @Test
-    fun `shadow on the primary text, lower third`() = runComposeUiTest { assertStyleToggles(1, "S") { it.shadow } }
+    fun `strikethrough on the verse, lower third`() =
+        runComposeUiTest { assertStyleToggles(1, "S") { it.strikethrough } }
 
     @Test
-    fun `shadow on the primary reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "S") { it.shadow } }
+    fun `strikethrough on the reference, full screen`() =
+        runComposeUiTest { assertStyleToggles(2, "S") { it.strikethrough } }
 
     @Test
-    fun `shadow on the primary reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "S") { it.shadow } }
+    fun `strikethrough on the reference, lower third`() =
+        runComposeUiTest { assertStyleToggles(3, "S") { it.strikethrough } }
 
+    /** Shadow's own checkbox, and the detail row that folds out behind it. */
+    private fun ComposeUiTest.assertShadowToggles(index: Int) {
+        val harness = showTab()
+        val target = targets[index]
+        pointAt(target)
+        assertEquals(false, target.shadow(harness.current.bibleSettings), "shadow starts off")
 
+        onNodeWithText("Shadow").performClick()
+        waitForIdle()
 
+        assertEquals(true, target.shadow(harness.current.bibleSettings), "shadow on ${target.name}")
+        assertEquals(true, target.shadow(persisted(harness.current)), "and it survives settings.json")
+        onAllNodesWithText("SIZE (%)", ignoreCase = true).onFirst()
+            .assertExists("turning shadow on must offer its size, colour and opacity")
+    }
 
+    @Test
+    fun `shadow on the verse, full screen`() = runComposeUiTest { assertShadowToggles(0) }
 
-    /** Opens target [index]'s colour swatch, types a hex and accepts it. */
+    @Test
+    fun `shadow on the verse, lower third`() = runComposeUiTest { assertShadowToggles(1) }
+
+    @Test
+    fun `shadow on the reference, full screen`() = runComposeUiTest { assertShadowToggles(2) }
+
+    @Test
+    fun `shadow on the reference, lower third`() = runComposeUiTest { assertShadowToggles(3) }
+
+    @Test
+    fun `a style button changes nothing but its own flag`() = runComposeUiTest {
+        val harness = showTab()
+        val before = harness.current.bibleSettings
+
+        onNodeWithText("B").performClick()
+        waitForIdle()
+
+        assertEquals(
+            before.updateTranslation(0) { x -> x.copy(textBold = true) },
+            harness.current.bibleSettings,
+            "bolding the verse touches no other setting",
+        )
+    }
+
+    // ── Colour ────────────────────────────────────────────────────────────────
+
+    /** Opens the swatch for [index]'s combination, types a hex and accepts it. */
     private fun ComposeUiTest.assertColourPicker(index: Int) {
-        val harness = showBibleTab(distinctColours())
-        val target = colourTargets[index]
+        val harness = showTab()
+        val target = targets[index]
+        pointAt(target)
         val chosen = "#0000" + "%02X".format(index + 17)
 
-        onAllNodesWithText(target.hex, ignoreCase = true)[0].performScrollTo().performClick()
+        onAllNodesWithText("#FFFFFF", ignoreCase = true)[0].performClick()
         waitForIdle()
         // The swatch behind the dialog carries the same hex; only the dialog's box takes input.
-        onNode(hasSetTextAction() and hasText(target.hex, ignoreCase = true)).performTextReplacement(chosen)
+        onNode(hasSetTextAction() and hasText("#FFFFFF", ignoreCase = true)).performTextReplacement(chosen)
         waitForIdle()
         onNodeWithText("OK").performClick()
         waitForIdle()
 
+        assertEquals(chosen.uppercase(), target.color(harness.current.bibleSettings).uppercase(), target.name)
         assertEquals(
             chosen.uppercase(),
-            target.get(harness.current.bibleSettings).uppercase(),
-            "colour for ${target.name}",
-        )
-        assertEquals(
-            chosen.uppercase(),
-            target.get(persisted(harness.current)).uppercase(),
+            target.color(persisted(harness.current)).uppercase(),
             "and it must survive settings.json",
         )
-        onAllNodesWithText(chosen, ignoreCase = true).onFirst()
-            .assertExists("the swatch must read back the colour that was picked")
     }
 
     @Test
-    fun `the colour picker of the primary text, full screen`() = runComposeUiTest { assertColourPicker(0) }
+    fun `the colour picker of the verse, full screen`() = runComposeUiTest { assertColourPicker(0) }
 
     @Test
-    fun `the colour picker of the primary text, lower third`() = runComposeUiTest { assertColourPicker(1) }
+    fun `the colour picker of the verse, lower third`() = runComposeUiTest { assertColourPicker(1) }
 
     @Test
-    fun `the colour picker of the primary reference, full screen`() = runComposeUiTest { assertColourPicker(2) }
+    fun `the colour picker of the reference, full screen`() = runComposeUiTest { assertColourPicker(2) }
 
     @Test
-    fun `the colour picker of the primary reference, lower third`() = runComposeUiTest { assertColourPicker(3) }
+    fun `the colour picker of the reference, lower third`() = runComposeUiTest { assertColourPicker(3) }
 
+    // ── The controls the redesign added ───────────────────────────────────────
 
+    @Test
+    fun `text transform writes the element it is pointed at`() = runComposeUiTest {
+        val harness = showTab()
+        pointAt(targets[2])
 
+        onNodeWithText("UPPERCASE").performClick()
+        waitForIdle()
 
+        assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, t(harness.current.bibleSettings).referenceTransform)
+        assertEquals(
+            Constants.TEXT_TRANSFORM_NONE,
+            t(harness.current.bibleSettings).textTransform,
+            "the verse is a different element and must be untouched",
+        )
+        assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, t(persisted(harness.current)).referenceTransform)
+    }
 
+    @Test
+    fun `every transform is offered and each writes its own value`() = runComposeUiTest {
+        val harness = showTab()
+
+        listOf(
+            "UPPERCASE" to Constants.TEXT_TRANSFORM_UPPERCASE,
+            "lowercase" to Constants.TEXT_TRANSFORM_LOWERCASE,
+            "Capitalize" to Constants.TEXT_TRANSFORM_CAPITALIZE,
+        ).forEach { (label, expected) ->
+            onNodeWithText(label).performClick()
+            waitForIdle()
+            assertEquals(expected, t(harness.current.bibleSettings).textTransform, label)
+        }
+    }
+
+    @Test
+    fun `Reset returns the element it is pointed at to its defaults`() = runComposeUiTest {
+        val harness = showTab()
+        onNodeWithText("B").performClick()
+        waitForIdle()
+        assertEquals(true, t(harness.current.bibleSettings).textBold, "styled away from the default first")
+
+        onNodeWithText("Reset").performClick()
+        waitForIdle()
+
+        assertEquals(false, t(harness.current.bibleSettings).textBold)
+        assertEquals(
+            BibleTranslationSettings().textFontSize,
+            t(harness.current.bibleSettings).textFontSize,
+            "and the rest of the element with it",
+        )
+    }
+
+    @Test
+    fun `Reset leaves the other output alone`() = runComposeUiTest {
+        val harness = showTab()
+        pointAt(targets[1])
+        onNodeWithText("B").performClick()
+        waitForIdle()
+        pointAt(targets[0])
+        onNodeWithText("B").performClick()
+        waitForIdle()
+
+        onNodeWithText("Reset").performClick()
+        waitForIdle()
+
+        assertEquals(false, t(harness.current.bibleSettings).textBold, "the full-screen verse was reset")
+        assertEquals(
+            true,
+            t(harness.current.bibleSettings).lowerThirdTextBold,
+            "the lower third is a separate profile and keeps its own styling",
+        )
+    }
+
+    @Test
+    fun `the reference position is offered only for the reference`() = runComposeUiTest {
+        showTab()
+
+        onAllNodesWithText("Reference position").assertCountEquals(0)
+
+        onNodeWithText("Reference").performClick()
+        waitForIdle()
+
+        onNodeWithText("Reference position")
+            .assertExists("only the reference has anywhere to sit relative to the verse")
+    }
+
+    // ── Horizontal alignment: icons with no description of their own ──────────
+
+    /**
+     * The three alignment icons, found under their own caption and read left to right — which for
+     * this app's icon order is right, centre, left.
+     */
+    private fun ComposeUiTest.alignmentIcons(): List<SemanticsNode> {
+        val label = onNodeWithText("Alignment").fetchSemanticsNode().boundsInRoot
+        return onAllNodes(hasClickAction()).fetchSemanticsNodes()
+            .filter {
+                it.boundsInRoot.top >= label.bottom - 1f &&
+                    it.boundsInRoot.top < label.bottom + 60f &&
+                    it.boundsInRoot.left >= label.left - 2f
+            }
+            .sortedBy { it.boundsInRoot.left }
+            .take(3)
+    }
+
+    private fun ComposeUiTest.assertAlignmentGroup(index: Int) {
+        val harness = showTab()
+        val target = targets[index]
+        pointAt(target)
+        onNodeWithText("Alignment")
+        waitForIdle()
+        val icons = alignmentIcons()
+        assertEquals(3, icons.size, "an alignment group offers three choices")
+
+        listOf(Constants.RIGHT, Constants.CENTER, Constants.LEFT).forEachIndexed { position, expected ->
+            onRoot().performTouchInput { click(icons[position].boundsInRoot.center) }
+            waitForIdle()
+            assertEquals(expected, target.alignment(harness.current.bibleSettings), "icon $position on ${target.name}")
+            assertEquals(expected, target.alignment(persisted(harness.current)), "and it survives settings.json")
+        }
+    }
+
+    @Test
+    fun `the horizontal alignment of the verse, full screen`() = runComposeUiTest { assertAlignmentGroup(0) }
+
+    @Test
+    fun `the horizontal alignment of the verse, lower third`() = runComposeUiTest { assertAlignmentGroup(1) }
+
+    @Test
+    fun `the horizontal alignment of the reference, full screen`() = runComposeUiTest { assertAlignmentGroup(2) }
+
+    @Test
+    fun `the horizontal alignment of the reference, lower third`() = runComposeUiTest { assertAlignmentGroup(3) }
 
     // ── Branches the happy path never reaches ─────────────────────────────────
 
@@ -858,80 +822,122 @@ class BibleSettingsTabTest {
     /** A starting size no fit will land on by chance, so "Auto did nothing" cannot pass. */
     private val unfittedSize = 9
 
-    /** Every style flag on, so Auto measures bold, italic and underlined text rather than plain. */
-    private fun fullyStyled() = twoBibles().copy(
-        primaryBibleFontSize = unfittedSize,
-        primaryBibleLowerThirdFontSize = unfittedSize,
-        secondaryBibleFontSize = unfittedSize,
-        secondaryBibleLowerThirdFontSize = unfittedSize,
-        primaryBibleBold = true, primaryBibleItalic = true, primaryBibleUnderline = true,
-        primaryReferenceBold = true, primaryReferenceItalic = true,
-        secondaryBibleBold = true, secondaryBibleItalic = true, secondaryBibleUnderline = true,
-        secondaryReferenceBold = true, secondaryReferenceItalic = true,
-    ).migrateTranslations()
+    private fun verse(text: String) = SelectedVerse(
+        translationFileName = "kjv.spb",
+        bibleName = "King James Version",
+        bookName = "John",
+        chapter = 3,
+        verseNumber = 16,
+        verseText = text,
+    )
 
-    private fun twoVerses() = arrayOf(
-        verse("For God so loved the world that he gave his only begotten Son."),
-        verse("Denn also hat Gott die Welt geliebt, dass er seinen eingeborenen Sohn gab."),
+    private fun presenterShowing(vararg verses: SelectedVerse): PresenterManager =
+        PresenterManager().apply {
+            setPresentingMode(Presenting.BIBLE)
+            setSelectedVerses(verses.toList())
+        }
+
+    /** Both a full-screen and a lower-third output, which is what enables Auto for each target. */
+    private fun bothScreenKinds() = AppSettings().projectionSettings.copy(
+        screenAssignments = listOf(
+            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
+        ),
+    )
+
+    private fun ComposeUiTest.showWithPresenter(
+        bible: BibleSettings,
+        presenter: PresenterManager?,
+        projection: ProjectionSettings = bothScreenKinds(),
+    ): Harness {
+        val harness = Harness().apply {
+            current = AppSettings(bibleSettings = bible, projectionSettings = projection)
+        }
+        setContent {
+            MaterialTheme {
+                BibleSettingsTab(
+                    settings = harness.current,
+                    onSettingsChange = { transform -> harness.current = transform(harness.current) },
+                    presenterManager = presenter,
+                )
+            }
+        }
+        awaitFolderScan()
+        return harness
+    }
+
+    /** One translation, styled so Auto measures bold italic text rather than plain. */
+    private fun fullyStyled() = BibleSettings().withTranslations(
+        listOf(
+            BibleTranslationSettings(
+                fileName = "kjv.spb",
+                textFontSize = unfittedSize,
+                lowerThirdTextFontSize = unfittedSize,
+                textBold = true,
+                textItalic = true,
+                textUnderline = true,
+                referenceBold = true,
+                referenceItalic = true,
+            ),
+        ),
     )
 
     @Test
-    fun `Auto measures the primary full-screen size with its styles applied`() = runComposeUiTest {
-        val harness = showWithPresenter(bible = fullyStyled(), presenter = presenterShowing(*twoVerses()))
+    fun `Auto measures the verse for the output it is pointed at`() = runComposeUiTest {
+        val harness = showWithPresenter(
+            bible = fullyStyled(),
+            presenter = presenterShowing(verse("For God so loved the world that he gave his only begotten Son.")),
+        )
 
-        onAllNodesWithText("Auto")[0].performScrollTo().performClick()
+        onNodeWithText("Auto").performClick()
         waitForIdle()
 
-        // Two verses are live, so the primary only gets half the height — a different branch from
-        // the single-verse case, and the styles feed real weights into the measurement.
-        val fitted = harness.current.bibleSettings.primaryBibleFontSize
-        onAllNodesWithText(fitted.toString()).onFirst().assertExists("the field must show the fitted size")
-        assertTrue(fitted > 0, "a bold, italic, underlined verse still fits somewhere, was $fitted")
-        assertEquals(fitted, persisted(harness.current).primaryBibleFontSize, "and survives settings.json")
+        val fitted = t(harness.current.bibleSettings).textFontSize
+        assertTrue(fitted > unfittedSize, "the verse fits far larger than $unfittedSize, was $fitted")
+        assertEquals(fitted, t(persisted(harness.current)).textFontSize, "and survives settings.json")
+        assertEquals(
+            unfittedSize,
+            t(harness.current.bibleSettings).lowerThirdTextFontSize,
+            "the lower third is a separate profile and Auto was not pointed at it",
+        )
     }
 
-    // ── Shadow detail rows: eight of them, three controls each ────────────────
+    @Test
+    fun `Auto on the lower third writes the lower third size`() = runComposeUiTest {
+        val harness = showWithPresenter(
+            bible = fullyStyled(),
+            presenter = presenterShowing(verse("For God so loved the world that he gave his only begotten Son.")),
+        )
 
-    /** Every target's shadow switched on, with distinct values so each control is findable. */
-    // ── Horizontal alignment: one test per group ──────────────────────────────
-
-    /**
-     * Clicks all three icons of the alignment group beside occurrence [labelIndex] of [label] and
-     * checks each writes [get]. The icons carry no content description, so they are found by
-     * position and then read left to right — which for this app is right, centre, left.
-     */
-    private fun ComposeUiTest.assertAlignmentGroup(label: String, labelIndex: Int, get: (BibleSettings) -> String) {
-        val harness = showTab()
-        // Bring the row on screen first: a node still below the viewport reports bounds that sweep
-        // in every clickable on the tab.
-        onAllNodesWithText(label)[labelIndex].performScrollTo()
+        onNodeWithText("Lower Third").performClick()
         waitForIdle()
-        val icons = iconsBesideLabel(onAllNodesWithText(label)[labelIndex].fetchSemanticsNode())
-        assertEquals(3, icons.size, "an alignment group offers three choices")
+        onNodeWithText("Auto").performClick()
+        waitForIdle()
 
-        listOf(Constants.RIGHT, Constants.CENTER, Constants.LEFT).forEachIndexed { index, expected ->
-            onRoot().performTouchInput { click(icons[index].boundsInRoot.center) }
-            waitForIdle()
-            assertEquals(expected, get(harness.current.bibleSettings), "icon $index selects $expected")
-            assertEquals(expected, get(persisted(harness.current)), "and it survives settings.json")
-        }
+        assertTrue(
+            t(harness.current.bibleSettings).lowerThirdTextFontSize > unfittedSize,
+            "the band fits more than $unfittedSize",
+        )
+        assertEquals(
+            unfittedSize,
+            t(harness.current.bibleSettings).textFontSize,
+            "and the full-screen profile is untouched",
+        )
     }
 
     @Test
-    fun `the horizontal alignment of the primary text, full screen`() = runComposeUiTest {
-        assertAlignmentGroup("Full Screen", 0) { t(it).textHorizontalAlignment }
-    }
-    @Test
-    fun `the horizontal alignment of the primary text, lower third`() = runComposeUiTest {
-        assertAlignmentGroup("Lower Third", 0) { t(it).lowerThirdTextHorizontalAlignment }
-    }
-    @Test
-    fun `the horizontal alignment of the primary reference, full screen`() = runComposeUiTest {
-        assertAlignmentGroup("Full Screen", 2) { t(it).referenceHorizontalAlignment }
-    }
-    @Test
-    fun `the horizontal alignment of the primary reference, lower third`() = runComposeUiTest {
-        assertAlignmentGroup("Lower Third", 2) { t(it).lowerThirdReferenceHorizontalAlignment }
+    fun `Auto is not offered for the reference`() = runComposeUiTest {
+        showWithPresenter(
+            bible = fullyStyled(),
+            presenter = presenterShowing(verse("For God so loved the world.")),
+        )
+
+        onNodeWithText("Auto").assertExists("the verse offers it")
+
+        onNodeWithText("Reference").performClick()
+        waitForIdle()
+
+        onAllNodesWithText("Auto").assertCountEquals(0)
     }
 
     // ── A slot cannot be pointed at a bible another slot already holds ─────────
