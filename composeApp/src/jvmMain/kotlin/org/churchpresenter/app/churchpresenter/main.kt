@@ -115,7 +115,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -849,7 +849,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
             }
             MacMenuBarActivationFix()
             LanguageProvider(language = currentLanguage) {
-                AppThemeWrapper(theme = theme) {
+                AppWindowRoot(theme = theme) {
                     CompositionLocalProvider(
                         LocalMediaViewModel provides mediaViewModel,
                         LocalMainWindowState provides state,

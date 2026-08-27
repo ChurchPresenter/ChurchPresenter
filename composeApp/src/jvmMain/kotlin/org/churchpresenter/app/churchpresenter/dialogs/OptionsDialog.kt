@@ -75,7 +75,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -179,7 +179,7 @@ internal fun OptionsDialogContent(
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val tabScrollState = remember { ScrollState(0) }
 
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background

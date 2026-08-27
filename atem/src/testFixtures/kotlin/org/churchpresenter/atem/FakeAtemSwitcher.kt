@@ -134,11 +134,22 @@ class FakeAtemSwitcher(
         }
         if (flags and FLAG_ACK_REQUEST == 0) return
 
-        if (ackCommands) ack(u16(pkt, 10))
+        // Record BEFORE acking. The ack is the only signal `AtemClient.sendCommandAndWait` waits
+        // on, so a test whose call has returned is entitled to assume the command it sent is in
+        // `received`. Acking first made that false: the client could observe the ack, return,
+        // and have the test read `received` while this thread was still between the two — which
+        // is one preemption on a loaded runner, and surfaced as
+        // `an upstream keyer command was sent, saw []`.
+        //
+        // The ack still goes out ahead of `respondTo`, which is the order the client expects on
+        // the wire; only the bookkeeping moved.
         val commands = parseCommands(pkt)
         if (commands.isNotEmpty()) lastCommandSession = byteArrayOf(pkt[2], pkt[3])
         for ((name, payload) in commands) {
             received.add(name to payload)
+        }
+        if (ackCommands) ack(u16(pkt, 10))
+        for ((name, payload) in commands) {
             respondTo(name, payload)
         }
     }

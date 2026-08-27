@@ -121,7 +121,7 @@ import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.songchords.ChordSheetImporter
 import org.churchpresenter.songchords.ChordTransposer
@@ -299,7 +299,7 @@ internal fun EditSongContent(
         }
     }
 
-    AppThemeWrapper(theme = theme) {
+    AppWindowRoot(theme = theme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
