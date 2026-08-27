@@ -7,6 +7,14 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * The pure parts of camera capture: frame conversion, the ffmpeg command, and why a run gave up.
+ *
+ * Not covered: `runFfmpegCapture` returning early when ffmpeg is absent. Reaching it needs a real
+ * `isFfmpegAvailable()` — which launches a process — and asserting "nothing was reported" needs a
+ * seam on the `CrashReporter` singleton. The decision it makes is [cameraGiveUpReason]'s, and that
+ * is tested directly.
+ */
 class SharedCameraFrameCacheTest {
 
     private fun camera(
@@ -162,5 +170,44 @@ class SharedCameraFrameCacheTest {
         bgraBytesToArgbPixels(frame, pixels)
         assertEquals(0x7F7F7F7F, pixels[0])
         assertEquals(0x7F7F7F7F, pixels[1])
+    }
+
+    @Test
+    fun `giving up names which of the three causes it was`() {
+        // The warning used to carry only subsystem=camera, which cannot tell a machine whose PATH
+        // will not launch ffmpeg from one whose webcam is already held by a video call.
+        assertEquals(
+            "ffmpeg_not_launchable",
+            cameraGiveUpReason(everStarted = false, sawImmediateExit = false)
+        )
+        assertEquals(
+            "device_unavailable",
+            cameraGiveUpReason(everStarted = true, sawImmediateExit = true)
+        )
+        assertEquals(
+            "no_frames",
+            cameraGiveUpReason(everStarted = true, sawImmediateExit = false)
+        )
+    }
+
+    @Test
+    fun `a process that never started outranks anything a later attempt saw`() {
+        // everStarted is false only when no attempt produced a process, so nothing a process did
+        // can be reported against a run that never had one.
+        assertEquals(
+            "ffmpeg_not_launchable",
+            cameraGiveUpReason(everStarted = false, sawImmediateExit = true)
+        )
+    }
+
+    @Test
+    fun `the device scheme is tagged without the device path`() {
+        // The path names the user's hardware; the scheme is what separates a dshow problem from a
+        // v4l2 one, and is bounded enough to be a tag.
+        assertEquals("dshow", deviceScheme("dshow://Integrated Webcam"))
+        assertEquals("v4l2", deviceScheme("v4l2:///dev/video0"))
+        assertEquals("avfoundation", deviceScheme("avfoundation://0"))
+        assertEquals("unknown", deviceScheme(""))
+        assertEquals("unknown", deviceScheme("/dev/video0"))
     }
 }

@@ -319,7 +319,19 @@ object SharedCameraFrameCache {
             return
         }
 
+        // ffmpeg is an optional external tool, not something shipped with the app, and a machine
+        // without it fails every attempt for the same knowable reason. Discovering that five times
+        // over ten seconds tells the operator nothing the canvas has not already told them
+        // (canvas_camera_ffmpeg_hint), so the loop does not run and nothing is reported: a tool the
+        // user has not installed is not a fault in the app.
+        if (!isFfmpegAvailable()) {
+            System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
+            return
+        }
+
         var consecutiveFailures = 0
+        var everStarted = false
+        var sawImmediateExit = false
         while (currentCoroutineContext().isActive && consecutiveFailures < MAX_CONSECUTIVE_FAILURES) {
             // Kill any lingering process and wait for the OS to release the device
             val old = entry.ffmpegProcess
@@ -344,7 +356,9 @@ object SharedCameraFrameCache {
             val exitedImmediately = process != null && withContext(Dispatchers.IO) {
                 process.waitFor(2000, java.util.concurrent.TimeUnit.MILLISECONDS)
             } && process.exitValue() != 0
+            if (process != null) everStarted = true
             if (exitedImmediately) {
+                sawImmediateExit = true
                 System.err.println("[Camera] ffmpeg exited immediately with code ${process.exitValue()}")
                 withContext(Dispatchers.IO) { killFfmpegProcess(process) }
             }
@@ -360,14 +374,48 @@ object SharedCameraFrameCache {
         }
 
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-            System.err.println("[Camera] Giving up after $consecutiveFailures consecutive failures")
+            val reason = cameraGiveUpReason(everStarted, sawImmediateExit)
+            System.err.println("[Camera] Giving up after $consecutiveFailures consecutive failures ($reason)")
             CrashReporter.reportWarning(
                 "Camera: Giving up on device after $consecutiveFailures consecutive ffmpeg failures",
-                tags = mapOf("subsystem" to "camera")
+                tags = mapOf(
+                    "subsystem" to "camera",
+                    "give_up_reason" to reason,
+                    "device_scheme" to deviceScheme(path)
+                )
             )
         }
     }
 }
+
+/**
+ * Why the capture loop gave up, from what its attempts actually observed.
+ *
+ * The warning this tags used to carry `subsystem=camera` and nothing else, which cannot separate
+ * the three things that end the loop — and they have nothing in common. Each of these points at a
+ * different fix, and the first two are the user's environment rather than a defect:
+ *
+ *  * `ffmpeg_not_launchable` — ffmpeg answered `-version` but every attempt to run the capture
+ *    command failed to start a process at all. A PATH or permissions problem on the machine.
+ *  * `device_unavailable` — ffmpeg started and exited straight back out. The device is held by
+ *    another application, or was unplugged between enumeration and capture.
+ *  * `no_frames` — ffmpeg ran and stayed running without ever producing a frame. The one shape
+ *    here that suggests the command this code builds is wrong for the device.
+ */
+internal fun cameraGiveUpReason(everStarted: Boolean, sawImmediateExit: Boolean): String = when {
+    !everStarted -> "ffmpeg_not_launchable"
+    sawImmediateExit -> "device_unavailable"
+    else -> "no_frames"
+}
+
+/**
+ * The capture scheme [devicePath] names, or "unknown" — low-cardinality, so it can be a tag.
+ *
+ * Which OS capture API was in play separates a dshow problem from a v4l2 one without carrying the
+ * device path itself, which names the user's hardware.
+ */
+internal fun deviceScheme(devicePath: String): String =
+    devicePath.substringBefore("://", missingDelimiterValue = "").ifEmpty { "unknown" }
 
 /**
  * Builds the ffmpeg command line for capturing [source]'s device as raw BGRA video, or `null` when
