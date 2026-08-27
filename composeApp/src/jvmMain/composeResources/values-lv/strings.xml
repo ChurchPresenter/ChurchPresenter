@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Jo tik ļoti Dievs pasauli mīlēja, ka deva savu vienpiedzimušo Dēlu.</string>
     <string name="bible_preview_sample_book">Jāņa</string>
     <string name="bible_preview_no_translations">Pievienojiet tulkojumu, lai to redzētu šeit</string>
+    <string name="song_preview_full_screen">Pilnekrāna priekšskatījums</string>
+    <string name="song_preview_lower_third">Apakšējās trešdaļas priekšskatījums</string>
+    <string name="song_element_number">Numurs</string>
+    <string name="song_element_title">Nosaukums</string>
+    <string name="song_element_lyrics">Dziesmas teksts</string>
+    <string name="song_element_next_section">Nākamā daļa</string>
+    <string name="song_chunk_verse">1 pants</string>
+    <string name="song_chunk_line">1 rinda</string>
+    <string name="song_preview_chords">Akordi</string>
+    <string name="song_preview_label">Priekšskatījums</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Dziesmas valodas</string>
+    <string name="song_language_single">1 · Viena</string>
+    <string name="song_language_bilingual">2 · Divvalodu</string>
+    <string name="song_lyrics_layout">Teksta izkārtojums</string>
+    <string name="song_transition_and_markers">Pāreja un atzīmes</string>
+    <string name="song_element_look_ahead">Priekšskats</string>
+    <string name="song_chunk">Fragments</string>
+    <string name="song_language_scope">Valoda</string>
+    <string name="song_preview_look_ahead">Priekšskats</string>
 </resources>

@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">เพราะว่าพระเจ้าทรงรักโลกจนได้ประทานพระบุตรองค์เดียวของพระองค์</string>
     <string name="bible_preview_sample_book">ยอห์น</string>
     <string name="bible_preview_no_translations">เพิ่มคำแปลเพื่อดูที่นี่</string>
+    <string name="song_preview_full_screen">ตัวอย่างเต็มจอ</string>
+    <string name="song_preview_lower_third">ตัวอย่างแถบล่าง</string>
+    <string name="song_element_number">หมายเลข</string>
+    <string name="song_element_title">ชื่อ</string>
+    <string name="song_element_lyrics">เนื้อเพลง</string>
+    <string name="song_element_next_section">ท่อนถัดไป</string>
+    <string name="song_chunk_verse">ครั้งละ 1 ท่อน</string>
+    <string name="song_chunk_line">ครั้งละ 1 บรรทัด</string>
+    <string name="song_preview_chords">คอร์ด</string>
+    <string name="song_preview_label">ดูตัวอย่าง</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">ภาษาของเพลง</string>
+    <string name="song_language_single">1 · ภาษาเดียว</string>
+    <string name="song_language_bilingual">2 · สองภาษา</string>
+    <string name="song_lyrics_layout">การจัดวางเนื้อร้อง</string>
+    <string name="song_transition_and_markers">การเปลี่ยนภาพและเครื่องหมาย</string>
+    <string name="song_element_look_ahead">ดูล่วงหน้า</string>
+    <string name="song_chunk">ท่อน</string>
+    <string name="song_language_scope">ภาษา</string>
+    <string name="song_preview_look_ahead">ดูล่วงหน้า</string>
 </resources>

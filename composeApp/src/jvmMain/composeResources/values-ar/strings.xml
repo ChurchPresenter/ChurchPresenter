@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">لأنه هكذا أحب الله العالم حتى بذل ابنه الوحيد.</string>
     <string name="bible_preview_sample_book">يوحنا</string>
     <string name="bible_preview_no_translations">أضف ترجمة لعرضها هنا</string>
+    <string name="song_preview_full_screen">معاينة ملء الشاشة</string>
+    <string name="song_preview_lower_third">معاينة الشريط السفلي</string>
+    <string name="song_element_number">الرقم</string>
+    <string name="song_element_title">العنوان</string>
+    <string name="song_element_lyrics">الكلمات</string>
+    <string name="song_element_next_section">المقطع التالي</string>
+    <string name="song_chunk_verse">مقطع واحد</string>
+    <string name="song_chunk_line">سطر واحد</string>
+    <string name="song_preview_chords">الكوردات</string>
+    <string name="song_preview_label">معاينة</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">لغات الترنيمة</string>
+    <string name="song_language_single">١ · لغة واحدة</string>
+    <string name="song_language_bilingual">٢ · لغتان</string>
+    <string name="song_lyrics_layout">تخطيط الكلمات</string>
+    <string name="song_transition_and_markers">الانتقال والعلامات</string>
+    <string name="song_element_look_ahead">معاينة التالي</string>
+    <string name="song_chunk">مقطع</string>
+    <string name="song_language_scope">اللغة</string>
+    <string name="song_preview_look_ahead">معاينة التالي</string>
 </resources>

@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Ty så älskade Gud världen att han utgav sin enfödde Son.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Lägg till en översättning för att se den här</string>
+    <string name="song_preview_full_screen">Förhandsvisning helskärm</string>
+    <string name="song_preview_lower_third">Förhandsvisning nedre tredjedel</string>
+    <string name="song_element_number">Nummer</string>
+    <string name="song_element_title">Titel</string>
+    <string name="song_element_lyrics">Sångtext</string>
+    <string name="song_element_next_section">Nästa avsnitt</string>
+    <string name="song_chunk_verse">1 vers</string>
+    <string name="song_chunk_line">1 rad</string>
+    <string name="song_preview_chords">Ackord</string>
+    <string name="song_preview_label">Förhandsvisning</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Sångspråk</string>
+    <string name="song_language_single">1 · Ett</string>
+    <string name="song_language_bilingual">2 · Tvåspråkigt</string>
+    <string name="song_lyrics_layout">Textlayout</string>
+    <string name="song_transition_and_markers">Övergång &amp; markörer</string>
+    <string name="song_element_look_ahead">Förhandsblick</string>
+    <string name="song_chunk">Avsnitt</string>
+    <string name="song_language_scope">Språk</string>
+    <string name="song_preview_look_ahead">Förhandsblick</string>
 </resources>

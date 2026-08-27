@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Jer Bog je tako ljubio svijet da je dao svoga Sina Jedinorođenca.</string>
     <string name="bible_preview_sample_book">Ivan</string>
     <string name="bible_preview_no_translations">Dodajte prijevod da biste ga vidjeli ovdje</string>
+    <string name="song_preview_full_screen">Pregled cijelog zaslona</string>
+    <string name="song_preview_lower_third">Pregled donje trećine</string>
+    <string name="song_element_number">Broj</string>
+    <string name="song_element_title">Naslov</string>
+    <string name="song_element_lyrics">Tekst pjesme</string>
+    <string name="song_element_next_section">Sljedeći dio</string>
+    <string name="song_chunk_verse">1 stih</string>
+    <string name="song_chunk_line">1 redak</string>
+    <string name="song_preview_chords">Akordi</string>
+    <string name="song_preview_label">Pretpregled</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Jezici pjesme</string>
+    <string name="song_language_single">1 · Jedan</string>
+    <string name="song_language_bilingual">2 · Dvojezično</string>
+    <string name="song_lyrics_layout">Raspored teksta</string>
+    <string name="song_transition_and_markers">Prijelaz i oznake</string>
+    <string name="song_element_look_ahead">Najava sljedećeg</string>
+    <string name="song_chunk">Odsječak</string>
+    <string name="song_language_scope">Jezik</string>
+    <string name="song_preview_look_ahead">Najava sljedećeg</string>
 </resources>

@@ -2401,4 +2401,24 @@
     <string name="bible_preview_sample_verse">Бо так палюбіў Бог свет, што аддаў Сына Свайго Адзінароднага.</string>
     <string name="bible_preview_sample_book">Яна</string>
     <string name="bible_preview_no_translations">Дадайце пераклад, каб убачыць яго тут</string>
+    <string name="song_preview_full_screen">Прагляд поўнага экрана</string>
+    <string name="song_preview_lower_third">Прагляд ніжняй трэці</string>
+    <string name="song_element_number">Нумар</string>
+    <string name="song_element_title">Назва</string>
+    <string name="song_element_lyrics">Тэкст</string>
+    <string name="song_element_next_section">Наступная страфа</string>
+    <string name="song_chunk_verse">1 куплет</string>
+    <string name="song_chunk_line">1 радок</string>
+    <string name="song_preview_chords">Акорды</string>
+    <string name="song_preview_label">Папярэдні прагляд</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Мовы песні</string>
+    <string name="song_language_single">1 · Адна</string>
+    <string name="song_language_bilingual">2 · Двухмоўна</string>
+    <string name="song_lyrics_layout">Размяшчэнне тэксту</string>
+    <string name="song_transition_and_markers">Пераход і меткі</string>
+    <string name="song_element_look_ahead">Папярэдні прагляд</string>
+    <string name="song_chunk">Фрагмент</string>
+    <string name="song_language_scope">Мова</string>
+    <string name="song_preview_look_ahead">Папярэдні прагляд</string>
 </resources>

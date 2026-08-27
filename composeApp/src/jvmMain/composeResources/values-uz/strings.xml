@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Zero Xudo dunyoni shunchalik sevdiki, O'zining yagona O'g'lini berdi.</string>
     <string name="bible_preview_sample_book">Yuhanno</string>
     <string name="bible_preview_no_translations">Bu yerda ko'rish uchun tarjima qo'shing</string>
+    <string name="song_preview_full_screen">To'liq ekran ko'rinishi</string>
+    <string name="song_preview_lower_third">Pastki uchlik ko'rinishi</string>
+    <string name="song_element_number">Raqam</string>
+    <string name="song_element_title">Sarlavha</string>
+    <string name="song_element_lyrics">Qoʻshiq matni</string>
+    <string name="song_element_next_section">Keyingi qism</string>
+    <string name="song_chunk_verse">1 band</string>
+    <string name="song_chunk_line">1 satr</string>
+    <string name="song_preview_chords">Akkordlar</string>
+    <string name="song_preview_label">Koʻrib chiqish</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Qo'shiq tillari</string>
+    <string name="song_language_single">1 · Bitta</string>
+    <string name="song_language_bilingual">2 · Ikki tilli</string>
+    <string name="song_lyrics_layout">Matn joylashuvi</string>
+    <string name="song_transition_and_markers">O'tish va belgilar</string>
+    <string name="song_element_look_ahead">Oldindan ko'rish</string>
+    <string name="song_chunk">Bo'lak</string>
+    <string name="song_language_scope">Til</string>
+    <string name="song_preview_look_ahead">Oldindan ko'rish</string>
 </resources>

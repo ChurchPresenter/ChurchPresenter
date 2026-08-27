@@ -2401,4 +2401,24 @@
     <string name="bible_preview_sample_verse">Так бо Бог полюбив світ, що дав Сина Свого Однородженого.</string>
     <string name="bible_preview_sample_book">Івана</string>
     <string name="bible_preview_no_translations">Додайте переклад, щоб побачити його тут</string>
+    <string name="song_preview_full_screen">Перегляд повного екрана</string>
+    <string name="song_preview_lower_third">Перегляд нижньої третини</string>
+    <string name="song_element_number">Номер</string>
+    <string name="song_element_title">Назва</string>
+    <string name="song_element_lyrics">Текст</string>
+    <string name="song_element_next_section">Наступний куплет</string>
+    <string name="song_chunk_verse">1 куплет</string>
+    <string name="song_chunk_line">1 рядок</string>
+    <string name="song_preview_chords">Акорди</string>
+    <string name="song_preview_label">Попередній перегляд</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Мови пісні</string>
+    <string name="song_language_single">1 · Одна</string>
+    <string name="song_language_bilingual">2 · Двомовно</string>
+    <string name="song_lyrics_layout">Розташування тексту</string>
+    <string name="song_transition_and_markers">Перехід і мітки</string>
+    <string name="song_element_look_ahead">Попередній перегляд</string>
+    <string name="song_chunk">Фрагмент</string>
+    <string name="song_language_scope">Мова</string>
+    <string name="song_preview_look_ahead">Попередній перегляд</string>
 </resources>

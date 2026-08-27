@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">किनभने परमेश्वरले संसारलाई यस्तो प्रेम गर्नुभयो, कि उहाँले आफ्नो एकमात्र पुत्र दिनुभयो।</string>
     <string name="bible_preview_sample_book">यूहन्ना</string>
     <string name="bible_preview_no_translations">यहाँ हेर्न एउटा अनुवाद थप्नुहोस्</string>
+    <string name="song_preview_full_screen">पूर्ण स्क्रिन पूर्वावलोकन</string>
+    <string name="song_preview_lower_third">तल्लो तिहाइ पूर्वावलोकन</string>
+    <string name="song_element_number">नम्बर</string>
+    <string name="song_element_title">शीर्षक</string>
+    <string name="song_element_lyrics">गीतको बोल</string>
+    <string name="song_element_next_section">अर्को खण्ड</string>
+    <string name="song_chunk_verse">१ पद</string>
+    <string name="song_chunk_line">१ हरफ</string>
+    <string name="song_preview_chords">कर्ड</string>
+    <string name="song_preview_label">पूर्वदृश्य</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">गीतका भाषाहरू</string>
+    <string name="song_language_single">1 · एक</string>
+    <string name="song_language_bilingual">2 · द्विभाषी</string>
+    <string name="song_lyrics_layout">बोलको बनावट</string>
+    <string name="song_transition_and_markers">संक्रमण र चिन्हहरू</string>
+    <string name="song_element_look_ahead">अगाडिको झलक</string>
+    <string name="song_chunk">खण्ड</string>
+    <string name="song_language_scope">भाषा</string>
+    <string name="song_preview_look_ahead">अगाडिको झलक</string>
 </resources>

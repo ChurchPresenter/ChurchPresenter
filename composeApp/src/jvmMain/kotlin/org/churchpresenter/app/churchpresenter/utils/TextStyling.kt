@@ -12,8 +12,9 @@ import org.churchpresenter.settings.utils.Constants
  * the case transform, the strikethrough that has to combine with underline, and the word spacing
  * Compose has no property for.
  *
- * All three are applied as the text is drawn. Nothing here writes back to the verse, so turning a
- * transform off restores the scripture exactly as the module stores it.
+ * Shared by the Bible and the song presenters, which offer the same four controls per element. All
+ * three are applied as the text is drawn -- nothing here writes back, so turning a transform off
+ * restores the scripture or the lyric exactly as it is stored.
  */
 
 /** Case as it goes on screen. An unknown value is left alone, which is what an older file stores. */
@@ -25,7 +26,7 @@ fun applyTextTransform(text: String, transform: String): String = when (transfor
 }
 
 /**
- * The first letter of every word raised, the rest left as the translation wrote it.
+ * The first letter of every word raised, the rest left as it was written.
  *
  * CSS `text-transform: capitalize` is the model, and leaving the tail alone is the part that
  * matters for scripture: lowercasing it would turn "LORD" -- which many translations set that way
@@ -42,7 +43,7 @@ private fun capitalizeWords(text: String): String {
 }
 
 /** Underline and strikethrough compose, so neither can be expressed as the other's absence. */
-fun bibleTextDecoration(underline: Boolean, strikethrough: Boolean): TextDecoration = when {
+fun combinedTextDecoration(underline: Boolean, strikethrough: Boolean): TextDecoration = when {
     underline && strikethrough -> TextDecoration.combine(
         listOf(TextDecoration.Underline, TextDecoration.LineThrough),
     )
@@ -73,7 +74,7 @@ fun spacingEm(spacing: Int, fontSize: Int): Float =
  *
  * With no word spacing asked for there is nothing to annotate, and the plain string is returned.
  */
-fun bibleDisplayText(
+fun styledDisplayText(
     raw: String,
     transform: String,
     letterSpacingEm: Float,

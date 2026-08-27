@@ -180,7 +180,10 @@ class SettingsManager {
      * [BibleSettings.migrateTranslations]'s own guard.
      */
     private fun AppSettings.repaired(): AppSettings =
-        copy(bibleSettings = bibleSettings.migrateTranslations())
+        copy(
+            bibleSettings = bibleSettings.migrateTranslations(),
+            songSettings = songSettings.migrateSongNumberStyle(),
+        )
 
     /**
      * An output used to name which of two bibles it showed. With a stack of any length it names
