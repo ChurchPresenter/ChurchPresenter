@@ -324,7 +324,7 @@ object SharedCameraFrameCache {
         // over ten seconds tells the operator nothing the canvas has not already told them
         // (canvas_camera_ffmpeg_hint), so the loop does not run and nothing is reported: a tool the
         // user has not installed is not a fault in the app.
-        if (!isFfmpegAvailable()) {
+        if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
             System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
             return
         }
