@@ -1078,6 +1078,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Kell</string>
     <string name="canvas_clock_mode_countdown">Loendus</string>
+    <string name="canvas_clock_mode_count_up">Stopper</string>
     <string name="canvas_decklink_io_warning">See seade on praegu kasutusel väljundina. Sisend ei pruugi olla saadaval seadmetel, mis ei toeta samaaegset sisend/väljundit.</string>
     <string name="canvas_tool_select">Valik</string>
     <string name="canvas_tool_rectangle">Ristkülik</string>
@@ -1089,6 +1090,7 @@
     <string name="canvas_opacity">Läbipaistmatus</string>
     <string name="canvas_source_browser">Brauser</string>
     <string name="canvas_source_clock">Kell</string>
+    <string name="canvas_source_timer">Kell ja taimer</string>
     <string name="canvas_source_qrcode">QR-kood</string>
     <string name="canvas_source_camera">Kaamera</string>
     <string name="canvas_source_screen_capture">Ekraanihõive</string>

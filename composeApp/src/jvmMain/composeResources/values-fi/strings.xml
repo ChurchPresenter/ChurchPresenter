@@ -1212,6 +1212,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Kello</string>
     <string name="canvas_clock_mode_countdown">Ajastin</string>
+    <string name="canvas_clock_mode_count_up">Sekuntikello</string>
     <string name="canvas_decklink_io_warning">Tämä laite on nyt käytössä ulostulona. Sisääntulo ei ehkä ole käytettävissä laitteilla, jotka eivät tue samanaikaista I/O:ta.</string>
     <string name="canvas_tool_select">Valitse</string>
     <string name="canvas_tool_rectangle">Suorakulmio</string>
@@ -1223,6 +1224,7 @@
     <string name="canvas_opacity">Peittävyys</string>
     <string name="canvas_source_browser">Selain</string>
     <string name="canvas_source_clock">Kello</string>
+    <string name="canvas_source_timer">Kello ja ajastin</string>
     <string name="canvas_source_qrcode">QR-koodi</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Näytön kaappaus</string>

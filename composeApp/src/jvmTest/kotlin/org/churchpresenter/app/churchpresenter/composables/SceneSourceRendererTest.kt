@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
+import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.PathPoint
 import java.awt.image.BufferedImage
@@ -545,12 +547,129 @@ class SceneSourceRendererTest {
         waitForIdle()
         onNodeWithText("00:05").assertExists()
 
-        org.churchpresenter.app.churchpresenter.utils.TimerStateManager.setRunning(id, 5, true)
+        TimerStateManager.setRunning(id, 5, true)
         waitForIdle()
         mainClock.advanceTimeBy(1000)
         waitForIdle()
 
         onNodeWithText("00:04").assertExists("a running countdown must tick down once per second")
+    }
+
+    @Test
+    fun `a countdown that has run out shows its expiry message`() = runComposeUiTest {
+        val id = "clock-countdown-expired"
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = id, name = "Clock", mode = "countdown",
+                        targetSecond = 1, showHours = false, showSeconds = true,
+                        expiredText = "Time's up!",
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("00:01").assertExists("before it runs out it is still a countdown")
+
+        TimerStateManager.setRunning(id, 1, true)
+        waitForIdle()
+        mainClock.advanceTimeBy(1000)
+        waitForIdle()
+
+        onNodeWithText("Time's up!").assertExists()
+    }
+
+    @Test
+    fun `a countdown with no expiry message rests on zero`() = runComposeUiTest {
+        val id = "clock-countdown-nomessage"
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = id, name = "Clock", mode = "countdown",
+                        targetSecond = 1, showHours = false, showSeconds = true,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        TimerStateManager.setRunning(id, 1, true)
+        waitForIdle()
+        mainClock.advanceTimeBy(1000)
+        waitForIdle()
+
+        onNodeWithText("00:00").assertExists()
+    }
+
+    @Test
+    fun `a stopwatch starts at zero and counts up once a second`() = runComposeUiTest {
+        val id = "clock-countup-tick"
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = id, name = "Clock", mode = ClockModes.COUNT_UP,
+                        showHours = false, showSeconds = true,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("00:00").assertExists("a stopwatch counts from zero, whatever the duration fields say")
+
+        TimerStateManager.setRunning(id, 0, true)
+        waitForIdle()
+        mainClock.advanceTimeBy(1000)
+        waitForIdle()
+
+        onNodeWithText("00:01").assertExists()
+    }
+
+    @Test
+    fun `a stopwatch left stopped does not move`() = runComposeUiTest {
+        val id = "clock-countup-stopped"
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = id, name = "Clock", mode = ClockModes.COUNT_UP,
+                        showHours = false, showSeconds = true,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        mainClock.advanceTimeBy(3000)
+        waitForIdle()
+
+        onNodeWithText("00:00").assertExists()
+    }
+
+    @Test
+    fun `counting down to a time of day shows the time left, never a negative`() = runComposeUiTest {
+        // Midnight is in the past for all but one second of the day, so this is the rollover case:
+        // the source must read the time until tomorrow's midnight rather than a negative.
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = "clock-target-1", name = "Clock", mode = ClockModes.TARGET_TIME,
+                        targetTimeHour = 0, targetTimeMinute = 0, targetTimeSecond = 0,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+
+        val countdownShaped = Regex("^\\d{2}:\\d{2}:\\d{2}$")
+        val texts = onAllNodesWithText("", substring = true)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .mapNotNull { it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } }
+        assertTrue(
+            texts.any { countdownShaped.matches(it) },
+            "expected a hh:mm:ss countdown to the next midnight, found: $texts",
+        )
     }
 
     @Test

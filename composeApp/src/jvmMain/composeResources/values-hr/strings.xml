@@ -1212,6 +1212,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Sat</string>
     <string name="canvas_clock_mode_countdown">Odbrojavanje</string>
+    <string name="canvas_clock_mode_count_up">Štoperica</string>
     <string name="canvas_decklink_io_warning">Ovaj se uređaj trenutno koristi za izlaz. Ulaz možda nije dostupan na uređajima koji ne podržavaju istovremeni ulaz i izlaz.</string>
     <string name="canvas_tool_select">Odabir</string>
     <string name="canvas_tool_rectangle">Pravokutnik</string>
@@ -1223,6 +1224,7 @@
     <string name="canvas_opacity">Prozirnost</string>
     <string name="canvas_source_browser">Preglednik</string>
     <string name="canvas_source_clock">Sat</string>
+    <string name="canvas_source_timer">Sat i mjerač vremena</string>
     <string name="canvas_source_qrcode">QR kod</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Snimka zaslona</string>

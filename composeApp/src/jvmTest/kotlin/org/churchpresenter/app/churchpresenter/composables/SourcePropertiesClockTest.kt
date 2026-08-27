@@ -17,13 +17,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Clock source, which is two controls in one: a wall clock, and a countdown with its own timer.
+ * The Clock & Timer source, which is four controls in one: a wall clock, a countdown, a stopwatch and
+ * a countdown to a time of day.
  *
- * Choosing Countdown is what makes the difference — it unfolds three duration fields, a running
- * read-out and a pair of transport buttons that none of the clock modes offer. That read-out is the
- * only thing on the whole panel that is not stored on the source at all: it comes from
- * `TimerStateManager`, a process-wide singleton keyed by source id, which is why every test here uses
- * an id of its own. Sharing one would leave a running timer behind for whichever test ran next.
+ * The mode is what makes the difference — each unfolds its own fields, and two of them a transport.
+ * That read-out is the only thing on the whole panel that is not stored on the source at all: it
+ * comes from `TimerStateManager`, a process-wide singleton keyed by source id, which is why every
+ * test here uses an id of its own. Sharing one would leave a running timer behind for whichever test
+ * ran next.
  *
  * The two dropdowns both map between a stored constant and a shown label in both directions, so both
  * directions are walked; and because each maps "anything else" onto its own default, a stored value
@@ -37,6 +38,12 @@ class SourcePropertiesClockTest {
         const val TARGET_HOUR = 7
         const val TARGET_MINUTE = 8
         const val TARGET_SECOND = 9
+        const val EXPIRED_TEXT = 10
+
+        // The time of day a Specific Time clock counts to takes the same three slots.
+        const val TIME_HOUR = 7
+        const val TIME_MINUTE = 8
+        const val TIME_SECOND = 9
     }
 
     /** Ordinals of the panel's checkboxes, in composition order. */
@@ -60,8 +67,8 @@ class SourcePropertiesClockTest {
         ).forEach { caption ->
             onNodeWithText(caption).assertExists("\"$caption\" must caption a control on the clock panel")
         }
-        // "Clock" is both the section heading and the mode dropdown's current choice.
-        assertEquals(2, countOf(Label.CLOCK), "the section must be headed, above a mode reading Clock")
+        assertEquals(1, countOf(Label.CLOCK), "the section is headed for all four of its modes")
+        assertEquals(1, countOf("Clock"), "and the mode dropdown reads the one it is in")
     }
 
     @Test
@@ -69,7 +76,7 @@ class SourcePropertiesClockTest {
         sourcePanel(Fixture.clock("clk-shape")) { _ ->
             textFields().assertCountEquals(7)
             checkboxes().assertCountEquals(Check.COUNT)
-            listOf("Duration Hours", "Duration Minutes", "Duration Seconds", "Start", "Reset")
+            listOf("HR", "MIN", "SEC", "Start", "Reset")
                 .forEach { assertEquals(0, countOf(it), "\"$it\" belongs to the countdown") }
             roleButtons().assertCountEquals(0)
         }
@@ -88,11 +95,14 @@ class SourcePropertiesClockTest {
 
     @Test
     fun `the mode dropdown names the stored mode`() {
-        listOf("clock" to "Clock", "countdown" to "Countdown").forEach { (stored, shown) ->
+        listOf(
+            "clock" to "Clock",
+            "countdown" to "Countdown",
+            "count_up" to "Count Up",
+            "target_time" to "Specific Time",
+        ).forEach { (stored, shown) ->
             sourcePanel(Fixture.clock("clk-mode-$stored").copy(mode = stored)) { _ ->
-                // "Clock" is also the section heading, so its own label is the second one.
-                val expected = if (shown == "Clock") 2 else 1
-                assertEquals(expected, countOf(shown), "$stored must read as \"$shown\"")
+                assertEquals(1, countOf(shown), "$stored must read as \"$shown\"")
             }
         }
     }
@@ -102,6 +112,8 @@ class SourcePropertiesClockTest {
         sourcePanel(Fixture.clock("clk-mode-odd").copy(mode = "stopwatch")) { _ ->
             assertEquals(0, countOf("stopwatch"), "an unrecognised mode must not show itself")
             assertEquals(0, countOf("Countdown"), "and must not be treated as a countdown")
+            assertEquals(0, countOf("Count Up"))
+            assertEquals(0, countOf("Specific Time"))
         }
     }
 
@@ -111,10 +123,12 @@ class SourcePropertiesClockTest {
             chooseFromDropdown(showing = "Clock", option = "Countdown")
 
             assertEquals("countdown", (get() as SceneSource.ClockSource).mode)
-            onNodeWithText("DURATION HOURS").assertExists("the duration fields appear with it")
-            onNodeWithText("DURATION MINUTES").assertExists()
-            onNodeWithText("DURATION SECONDS").assertExists()
-            textFields().assertCountEquals(10)
+            onNodeWithText("HR").assertExists("the duration fields appear with it, as one hr:min:sec row")
+            onNodeWithText("MIN").assertExists()
+            onNodeWithText("SEC").assertExists()
+            assertEquals(2, countOf(":"), "with a colon between each pair")
+            onNodeWithText("TEXT WHEN TIMER EXPIRES").assertExists("and the message shown at zero")
+            textFields().assertCountEquals(11)
         }
 
     @Test
@@ -123,7 +137,7 @@ class SourcePropertiesClockTest {
             chooseFromDropdown(showing = "Countdown", option = "Clock")
 
             assertEquals("clock", (get() as SceneSource.ClockSource).mode)
-            assertEquals(0, countOf("DURATION HOURS"), "the duration fields go with it")
+            assertEquals(0, countOf("HR"), "the duration fields go with it")
             textFields().assertCountEquals(7)
         }
     }
@@ -428,6 +442,185 @@ class SourcePropertiesClockTest {
             waitForIdle()
 
             onNodeWithText("00:00:59").assertExists("the panel observes the shared timer, not its own copy")
+        }
+    }
+
+    // ── Text when the countdown expires ───────────────────────────────────────
+
+    @Test
+    fun `typing an expiry message stores it`() = sourcePanel(countdown("clk-expired")) { get ->
+        typeField(Field.EXPIRED_TEXT, "Time's up!")
+
+        assertEquals("Time's up!", (get() as SceneSource.ClockSource).expiredText)
+    }
+
+    @Test
+    fun `a stored expiry message is shown by the field that owns it`() {
+        sourcePanel(countdown("clk-expired-shown").copy(expiredText = "We begin shortly")) { _ ->
+            assertFieldShows("We begin shortly", "the expiry message field")
+        }
+    }
+
+    @Test
+    fun `the expiry message belongs to the countdown alone`() = sourcePanel(Fixture.clock("clk-no-expiry")) { _ ->
+        assertEquals(0, countOf("TEXT WHEN TIMER EXPIRES"))
+    }
+
+    // ── Count Up ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `choosing Count Up stores it and leaves nothing to configure but the transport`() =
+        sourcePanel(Fixture.clock("clk-to-countup")) { get ->
+            chooseFromDropdown(showing = "Clock", option = "Count Up")
+
+            assertEquals("count_up", (get() as SceneSource.ClockSource).mode)
+            textFields().assertCountEquals(7)
+            assertEquals(0, countOf("HR"), "a stopwatch counts from zero, not from a duration")
+            roleButtons().assertCountEquals(2)
+            onNodeWithText("00:00:00").assertExists("and it reads out at zero")
+        }
+
+    @Test
+    fun `a stopwatch can be started from zero, unlike a countdown of no length`() {
+        val id = "clk-countup-start"
+        sourcePanel(Fixture.clock(id).copy(mode = "count_up")) { _ ->
+            onNodeWithText("Start").assertIsEnabled()
+            onNodeWithText("Start").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(true, TimerStateManager.getState(id, 0).isRunning)
+            onNodeWithText("Pause").assertExists()
+        }
+    }
+
+    @Test
+    fun `the stopwatch read-out follows a tick up of the shared state`() {
+        val id = "clk-countup-tick"
+        sourcePanel(Fixture.clock(id).copy(mode = "count_up")) { _ ->
+            onNodeWithText("Start").performScrollTo().performClick()
+            waitForIdle()
+
+            TimerStateManager.tickUp(id)
+            waitForIdle()
+
+            onNodeWithText("00:00:01").assertExists()
+        }
+    }
+
+    @Test
+    fun `Reset puts the stopwatch back to zero and stops it`() {
+        val id = "clk-countup-reset"
+        sourcePanel(Fixture.clock(id).copy(mode = "count_up")) { _ ->
+            onNodeWithText("Start").performScrollTo().performClick()
+            waitForIdle()
+            TimerStateManager.tickUp(id)
+            waitForIdle()
+
+            onNodeWithText("Reset").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(TimerStateManager.TimerState(0, false), TimerStateManager.getState(id, 0))
+            onNodeWithText("00:00:00").assertExists()
+        }
+    }
+
+    @Test
+    fun `switching mode re-seeds the shared timer`() {
+        val id = "clk-mode-reseed"
+        sourcePanel(countdown(id, minutes = 5)) { _ ->
+            onNodeWithText("Start").performScrollTo().performClick()
+            TimerStateManager.tick(id)
+            waitForIdle()
+
+            chooseFromDropdown(showing = "Countdown", option = "Count Up")
+
+            assertEquals(
+                TimerStateManager.TimerState(0, false), TimerStateManager.getState(id, 0),
+                "a stopwatch must not open holding what the countdown left behind",
+            )
+        }
+    }
+
+    // ── Specific Time ─────────────────────────────────────────────────────────
+
+    @Test
+    fun `choosing Specific Time stores it and unfolds the three time fields`() =
+        sourcePanel(Fixture.clock("clk-to-target")) { get ->
+            chooseFromDropdown(showing = "Clock", option = "Specific Time")
+
+            assertEquals("target_time", (get() as SceneSource.ClockSource).mode)
+            onNodeWithText("HR").assertExists()
+            onNodeWithText("MIN").assertExists()
+            onNodeWithText("SEC").assertExists()
+            assertEquals(2, countOf(":"), "the time of day reads as one hr:min:sec row too")
+            textFields().assertCountEquals(10)
+        }
+
+    @Test
+    fun `a specific-time clock has no transport of its own`() {
+        sourcePanel(Fixture.clock("clk-target-notransport").copy(mode = "target_time")) { _ ->
+            roleButtons().assertCountEquals(0)
+            listOf("Start", "Pause", "Reset").forEach {
+                assertEquals(0, countOf(it), "\"$it\" belongs to the modes that are driven by hand")
+            }
+        }
+    }
+
+    @Test
+    fun `the time being counted to is read back under the fields`() {
+        val configured = Fixture.clock("clk-target-readout")
+            .copy(mode = "target_time", targetTimeHour = 10, targetTimeMinute = 30, targetTimeSecond = 5)
+        sourcePanel(configured) { _ ->
+            onNodeWithText("Count down to 10:30:05").assertExists()
+        }
+    }
+
+    @Test
+    fun `typing a target hour stores it`() {
+        sourcePanel(Fixture.clock("clk-target-h").copy(mode = "target_time")) { get ->
+            typeField(Field.TIME_HOUR, "10")
+
+            assertEquals(10, (get() as SceneSource.ClockSource).targetTimeHour)
+        }
+    }
+
+    @Test
+    fun `a target hour past the end of the day is lowered to it`() {
+        sourcePanel(Fixture.clock("clk-target-h-max").copy(mode = "target_time")) { get ->
+            typeField(Field.TIME_HOUR, "30")
+
+            assertEquals(23, (get() as SceneSource.ClockSource).targetTimeHour, "a time of day stops at 23")
+        }
+    }
+
+    @Test
+    fun `typing target minutes and seconds stores them`() {
+        sourcePanel(Fixture.clock("clk-target-ms").copy(mode = "target_time")) { get ->
+            typeField(Field.TIME_MINUTE, "45")
+            typeField(Field.TIME_SECOND, "20")
+
+            val source = get() as SceneSource.ClockSource
+            assertEquals(45, source.targetTimeMinute)
+            assertEquals(20, source.targetTimeSecond)
+        }
+    }
+
+    @Test
+    fun `target minutes and seconds past the end of an hour and a minute are lowered to them`() {
+        sourcePanel(Fixture.clock("clk-target-ms-max").copy(mode = "target_time")) { get ->
+            typeField(Field.TIME_MINUTE, "90")
+            typeField(Field.TIME_SECOND, "75")
+
+            val source = get() as SceneSource.ClockSource
+            assertEquals(59, source.targetTimeMinute)
+            assertEquals(59, source.targetTimeSecond)
+        }
+    }
+
+    @Test
+    fun `the expiry message belongs to the countdown, not to a specific time`() {
+        sourcePanel(Fixture.clock("clk-target-noduration").copy(mode = "target_time")) { _ ->
+            assertEquals(0, countOf("TEXT WHEN TIMER EXPIRES"))
         }
     }
 }

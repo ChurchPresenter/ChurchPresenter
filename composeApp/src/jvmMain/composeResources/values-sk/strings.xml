@@ -993,6 +993,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Hodiny</string>
     <string name="canvas_clock_mode_countdown">Odpočítavanie</string>
+    <string name="canvas_clock_mode_count_up">Stopky</string>
     <string name="canvas_decklink_io_warning">Toto zariadenie sa momentálne používa na výstup. Vstup nemusí byť dostupný na zariadeniach, ktoré nepodporujú simultánne I/O.</string>
     <string name="canvas_tool_select">Vybrať</string>
     <string name="canvas_tool_rectangle">Obdĺžnik</string>
@@ -1004,6 +1005,7 @@
     <string name="canvas_opacity">Nepriehľadnosť</string>
     <string name="canvas_source_browser">Prehliadač</string>
     <string name="canvas_source_clock">Hodiny</string>
+    <string name="canvas_source_timer">Hodiny a časovač</string>
     <string name="canvas_source_qrcode">QR kód</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Snímanie obrazovky</string>

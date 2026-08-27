@@ -132,7 +132,7 @@ sealed class SceneSource {
         override val transform: SourceTransform = SourceTransform(),
         override val visible: Boolean = true,
         override val locked: Boolean = false,
-        val mode: String = "clock",
+        val mode: String = ClockModes.CLOCK,
         val timeFormat: String = "24h",
         val showHours: Boolean = true,
         val showSeconds: Boolean = true,
@@ -141,9 +141,16 @@ sealed class SceneSource {
         val fontColor: String = "#FFFFFF",
         val backgroundColor: String = "#00000000",
         val bold: Boolean = true,
+        /** The length a [ClockModes.COUNTDOWN] counts down from. Not a time of day. */
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
-        val targetSecond: Int = 0
+        val targetSecond: Int = 0,
+        /** The time of day a [ClockModes.TARGET_TIME] counts down to, on a 24-hour clock. */
+        val targetTimeHour: Int = 0,
+        val targetTimeMinute: Int = 0,
+        val targetTimeSecond: Int = 0,
+        /** Shown in place of 00:00 once a [ClockModes.COUNTDOWN] runs out. Blank keeps the zeroes. */
+        val expiredText: String = ""
     ) : SceneSource()
 
     @Serializable

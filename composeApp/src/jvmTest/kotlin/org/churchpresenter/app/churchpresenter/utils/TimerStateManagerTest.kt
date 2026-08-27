@@ -78,6 +78,37 @@ class TimerStateManagerTest {
     }
 
     @Test
+    fun `tickUp counts up while running, from wherever it was seeded`() {
+        val id = id()
+        TimerStateManager.getState(id, 0)
+        TimerStateManager.tickUp(id)
+        assertEquals(0, TimerStateManager.getState(id, 0).remainingSeconds, "a stopped stopwatch must not move")
+
+        TimerStateManager.setRunning(id, 0, true)
+        repeat(3) { TimerStateManager.tickUp(id) }
+        assertEquals(3, TimerStateManager.getState(id, 0).remainingSeconds)
+    }
+
+    @Test
+    fun `tickUp has no ceiling and never stops itself`() {
+        val id = id()
+        TimerStateManager.getState(id, 0)
+        TimerStateManager.setRunning(id, 0, true)
+        repeat(100) { TimerStateManager.tickUp(id) }
+
+        val state = TimerStateManager.getState(id, 0)
+        assertEquals(100, state.remainingSeconds)
+        assertTrue(state.isRunning, "a stopwatch runs until it is paused")
+    }
+
+    @Test
+    fun `tickUp on an unknown source is a no-op and does not create state`() {
+        val id = id()
+        TimerStateManager.tickUp(id)
+        assertEquals(0, TimerStateManager.getState(id, 0).remainingSeconds)
+    }
+
+    @Test
     fun `timers are isolated per source id`() {
         val a = id()
         val b = id()

@@ -1212,6 +1212,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">นาฬิกา</string>
     <string name="canvas_clock_mode_countdown">นับถอยหลัง</string>
+    <string name="canvas_clock_mode_count_up">จับเวลาเดินหน้า</string>
     <string name="canvas_decklink_io_warning">อุปกรณ์นี้กำลังใช้เป็นช่องสัญญาณออก ช่องรับอาจใช้ไม่ได้บนอุปกรณ์ที่รับ-ส่งพร้อมกันไม่ได้</string>
     <string name="canvas_tool_select">เลือก</string>
     <string name="canvas_tool_rectangle">สี่เหลี่ยม</string>
@@ -1223,6 +1224,7 @@
     <string name="canvas_opacity">ความทึบ</string>
     <string name="canvas_source_browser">เบราว์เซอร์</string>
     <string name="canvas_source_clock">นาฬิกา</string>
+    <string name="canvas_source_timer">นาฬิกาและตัวจับเวลา</string>
     <string name="canvas_source_qrcode">คิวอาร์โค้ด</string>
     <string name="canvas_source_camera">กล้อง</string>
     <string name="canvas_source_screen_capture">การจับภาพหน้าจอ</string>

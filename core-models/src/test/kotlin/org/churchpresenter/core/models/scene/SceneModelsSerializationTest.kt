@@ -220,6 +220,35 @@ class SceneModelsSerializationTest {
     }
 
     @Test
+    fun `a clock source keeps the time of day it counts to and its expiry message`() {
+        val clock = SceneSource.ClockSource(
+            id = "cl2", name = "Service start", mode = ClockModes.TARGET_TIME,
+            targetTimeHour = 10, targetTimeMinute = 30, targetTimeSecond = 15,
+            expiredText = "Time's up!",
+        )
+
+        val back = roundTrip(clock)
+
+        assertEquals(clock, back)
+        assertEquals(ClockModes.TARGET_TIME, back.mode)
+        assertEquals(10, back.targetTimeHour)
+        assertEquals(30, back.targetTimeMinute)
+        assertEquals(15, back.targetTimeSecond)
+        assertEquals("Time's up!", back.expiredText)
+    }
+
+    @Test
+    fun `a clock source saved before the two new modes existed reads back as a wall clock`() {
+        val stored = """{"id":"cl3","name":"Clock","mode":"clock","targetHour":1}"""
+
+        val back = json.decodeFromString<SceneSource.ClockSource>(stored)
+
+        assertEquals(ClockModes.CLOCK, back.mode)
+        assertEquals(0, back.targetTimeHour, "a time of day the file never carried defaults to midnight")
+        assertEquals("", back.expiredText)
+    }
+
+    @Test
     fun `a QR source keeps wifi credentials and colours`() {
         val qr = SceneSource.QRCodeSource(
             id = "q1", name = "Guest wifi", contentType = "wifi", content = "",
