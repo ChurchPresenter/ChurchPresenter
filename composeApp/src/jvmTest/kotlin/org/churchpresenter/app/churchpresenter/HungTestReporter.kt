@@ -39,10 +39,35 @@ import java.util.concurrent.atomic.AtomicReference
  *   clock frozen, (b) an unbounded `delay` loop with the clock frozen, and (c) the same loop with
  *   the clock auto-advancing, completes all three in under three seconds.
  *
- * The lead that remains unexamined is the recorded stack itself: `runComposeUiTest` teardown ->
- * `waitForIdle` -> `advanceTimeByFrame` -> `SwingUtilities.invokeAndWait`, blocked on the AWT event
- * queue. Whatever the event queue was busy with is the thing to find, and that is what the dump
- * this class writes is for.
+ * ## The current lead (2026-08-27, occurrence four)
+ *
+ * That dump answered "what was the event queue busy with". It hung `LowerThirdFolderTest` -- a
+ * different class from the three before, which is itself the point: the class is not the property
+ * that matters. Two threads were `BLOCKED`, both inside `SnapshotStateObserver.drainChanges`:
+ *
+ * - `AWT-EventQueue-0`, in Compose Foundation's desktop scrollbar (`Scrollbar.skiko.kt` ->
+ *   `getThumbPixelRange` -> `getAverageVisibleLineSize`) reading a `DerivedSnapshotState`, which
+ *   calls `notifyObjectsInitialized` -> `advanceGlobalSnapshot` -> `drainChanges`.
+ * - `DefaultDispatcher-worker-4`, in `LowerThirdOffscreenRenderer.withSession` calling
+ *   `Snapshot.sendApplyNotifications()` per frame from `LottieRenderCache.renderToFile`. It is
+ *   already inside an outer `drainChanges` and blocks entering a second.
+ *
+ * `advanceGlobalSnapshot` runs *every* registered apply observer, so a background off-screen scene's
+ * snapshot advance reaches into the AWT scene's observer and back. `LottieRenderCache` is an
+ * `object` holding its own `CoroutineScope(Dispatchers.Default)`, so a pre-render started by an
+ * **earlier** test is still running during a later one -- which is why an isolated `--tests` run is
+ * green (nothing started the pre-render) and why the hanging class keeps changing.
+ *
+ * **This is a hypothesis, not a finding.** `Thread.getAllStackTraces` carries no monitor ownership,
+ * so two threads blocked in one method is consistent with a lock-order inversion and does not
+ * demonstrate one. Do not re-architect off-screen rendering on the strength of it. [appendLockInfo]
+ * was added for exactly this: the next occurrence prints the deadlock cycle and the lock owners, and
+ * that either proves the inversion or kills it. Fix what that dump shows.
+ *
+ * The same shape is worth holding in mind while reading it: `ComposeScenePump` builds its
+ * `ImageComposeScene` and calls `sendApplyNotifications` on `Dispatchers.Default` too, and
+ * `BrowserSourceVideoRenderer` -- which rides that pump -- is the culprit on an open production
+ * `ArrayIndexOutOfBoundsException` raised inside a hash-map resize during scene construction.
  */
 class HungTestReporter internal constructor(
     private val thresholdMs: Long,
