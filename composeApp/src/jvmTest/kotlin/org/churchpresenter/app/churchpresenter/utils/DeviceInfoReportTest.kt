@@ -80,6 +80,15 @@ class DeviceInfoReportTest {
     }
 
     @Test
+    fun `the report says how NDI is configured and whether its runtime loaded`() {
+        // The count alone would not identify the most likely NDI bug report — outputs configured on
+        // a machine where the separately-installed runtime is missing — so both lines are here.
+        val text = report()
+        assertTrue("NDI outputs: " in text, "the report must say how many NDI outputs are configured")
+        assertTrue("NDI runtime: " in text, "and whether the runtime was found, which is the usual fault")
+    }
+
+    @Test
     fun `every expected section is present`() {
         val text = report()
         for (section in listOf(

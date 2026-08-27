@@ -56,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
+import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
 import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
@@ -124,7 +125,7 @@ fun LivePreviewPanel(
     val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
     val mediaViewModel = LocalMediaViewModel.current
 
-    // Scrollable: with several outputs (displays, dev-fallback windows, browser sources) the
+    // Scrollable: with several outputs (displays, dev-fallback windows, browser sources, NDI) the
     // previews are taller than the sidebar and would otherwise be clipped at the bottom.
     Column(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -173,6 +174,28 @@ fun LivePreviewPanel(
                 onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
                 label = proj.browserSourceOutputs[i]
                     .browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1)),
+            )
+        }
+
+        // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
+        // get their own loop over ProjectionSettings.ndiOutputs and their own lock index space.
+        // A disabled output is skipped: main.kt renders nothing for it, so a preview would show a
+        // picture the network is not actually receiving.
+        for (i in proj.ndiOutputs.indices) {
+            val output = proj.ndiOutputs[i]
+            if (!output.ndiEnabled) continue
+            SingleDisplayPreview(
+                screenIndex = i,
+                screenAssignment = output,
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier.fillMaxWidth(),
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                locks = presenterManager.ndiLocks.value,
+                onToggleLock = { mode -> presenterManager.setNdiLock(i, mode) },
+                label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1)),
             )
         }
 

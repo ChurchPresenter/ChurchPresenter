@@ -24,10 +24,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.withBrowserSourceOutput
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

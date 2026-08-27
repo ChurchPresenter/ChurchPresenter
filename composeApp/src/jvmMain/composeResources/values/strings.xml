@@ -900,6 +900,37 @@
     <string name="copy_url_transparent">Copy URL for Transparent Background</string>
     <string name="copy_url_black_bg">Copy URL for Black Background</string>
 
+    <!-- NDI Outputs (Network Device Interface) -->
+    <string name="ndi_outputs">NDI Outputs</string>
+    <string name="ndi_outputs_help">Virtual outputs sent over the network as NDI® sources — pick one in OBS, vMix or a switcher. Alpha mode carries real transparency, so a lower third arrives already keyed.</string>
+    <string name="add_ndi_output">Add Output</string>
+    <string name="ndi_output_numbered">NDI Output %1$d</string>
+    <string name="ndi_name_tooltip">The name receivers see on the network — Lyrics, Lower Third, Stage…</string>
+    <string name="ndi_confirm_remove_message">Are you sure you want to remove %1$s?</string>
+    <string name="ndi_enabled">Enabled</string>
+    <string name="ndi_resolution">Resolution</string>
+    <string name="ndi_fps">Frame rate</string>
+    <string name="ndi_mode">Mode</string>
+    <string name="ndi_mode_alpha">Alpha (transparent)</string>
+    <string name="ndi_mode_alpha_help">One source with real per-pixel transparency. The one to use for lower thirds — OBS keys it directly, with no second source and no downstream keyer.</string>
+    <string name="ndi_mode_fill">Fill only</string>
+    <string name="ndi_mode_fill_help">One opaque source with the configured background drawn.</string>
+    <string name="ndi_mode_fill_key">Fill + Key</string>
+    <string name="ndi_mode_fill_key_help">Two sources — the picture, and a separate key signal named "%1$s" — for gear that expects them apart.</string>
+    <string name="ndi_receivers">%1$d receiving</string>
+    <string name="ndi_no_receivers">No receivers</string>
+    <string name="ndi_runtime_missing_title">NDI Runtime not installed</string>
+    <string name="ndi_runtime_missing_help">NDI output needs the free NDI Runtime, which is installed separately — this app does not include it. Install it, then check again.</string>
+    <string name="ndi_runtime_install_link">Get the NDI Runtime</string>
+    <string name="ndi_runtime_check_again">Check again</string>
+    <string name="ndi_runtime_unsupported_cpu">This computer\'s processor does not meet NDI\'s requirements (SSE4.2).</string>
+    <string name="ndi_runtime_load_failed">An NDI Runtime was found at %1$s but could not be loaded. It may be for a different processor architecture, or too old.</string>
+    <string name="ndi_runtime_ready">NDI Runtime %1$s</string>
+    <string name="ndi_runtime_path">NDI Runtime folder</string>
+    <string name="ndi_runtime_browse">Choose Folder</string>
+    <string name="ndi_runtime_path_help">Leave empty to detect automatically. NDI_RUNTIME_DIR_V6 and NDI_RUNTIME_DIR_V5 are honoured.</string>
+    <string name="ndi_trademark">NDI® is a registered trademark of Vizrt NDI AB.</string>
+
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background</string>
     <string name="default_background_color_help">Used when 'Default' is selected for Bible or Songs</string>

@@ -336,6 +336,10 @@ kotlin {
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
+            // The NDI send client: the runtime discovery and the six native calls behind one
+            // interface. NdiVideoRenderer is the app-side wiring. Ships no NDI binaries — the
+            // runtime is installed separately, exactly as VLC is.
+            implementation(projects.ndi)
             implementation(projects.theme)
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
@@ -379,8 +383,8 @@ kotlin {
             implementation(libs.bouncycastle.prov)
             // VLCJ for media playback (requires VLC installed on system)
             implementation("uk.co.caprica:vlcj:4.8.3")
-            implementation("net.java.dev.jna:jna:5.18.1")
-            implementation("net.java.dev.jna:jna-platform:5.18.1")
+            implementation(libs.jna)
+            implementation(libs.jna.platform)
             implementation("com.google.zxing:core:3.5.3")
             implementation("com.google.zxing:javase:3.5.3")
             // Socket.IO client for STT integration
@@ -462,6 +466,7 @@ dependencies {
     // was captured against, and the app's own ATEM tests (bridge, upload routes, lower third) borrow
     // it from there rather than keeping a second copy.
     add("jvmTestImplementation", testFixtures(projects.atem))
+    add("jvmTestImplementation", testFixtures(projects.ndi))
 }
 
 compose.desktop {

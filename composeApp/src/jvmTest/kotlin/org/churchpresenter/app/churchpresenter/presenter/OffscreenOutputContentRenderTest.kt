@@ -25,7 +25,7 @@ import kotlin.test.Test
  * This is the content of the `ImageComposeScene` inside [BrowserSourceVideoRenderer.start] — 209
  * lines that no test could reach while they were the lambda of a scene inside a coroutine, because
  * reaching them meant standing up the whole render loop. Extracting them into
- * [BrowserSourceContent] makes them ordinary Compose, and this renders each of its three top-level
+ * [OffscreenOutputContent] makes them ordinary Compose, and this renders each of its three top-level
  * branches.
  *
  * These matter because a Browser Source is what a stream sees. The branches are mutually exclusive
@@ -40,7 +40,7 @@ import kotlin.test.Test
  * `encodeFrame`).
  */
 @OptIn(ExperimentalTestApi::class)
-class BrowserSourceContentRenderTest {
+class OffscreenOutputContentRenderTest {
 
     /**
      * Deliberately not 1920x1080. These assert that text reaches the semantics tree, not how it is
@@ -61,7 +61,7 @@ class BrowserSourceContentRenderTest {
     )
 
     /**
-     * Renders [BrowserSourceContent] the way the renderer does, with the optional collaborators the
+     * Renders [OffscreenOutputContent] the way the renderer does, with the optional collaborators the
      * scene passes as null — a Browser Source with no STT, Q&A url or server url configured is the
      * ordinary case, and the ones that need them have their own presenters tested elsewhere.
      */
@@ -70,22 +70,22 @@ class BrowserSourceContentRenderTest {
         assignment: ScreenAssignment = ScreenAssignment(),
         settings: AppSettings = AppSettings(),
         outputIndex: Int = 0,
+        kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
         seed: PresenterManager.() -> Unit = {},
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply(seed)
         setContent {
             Box(screen) {
-                BrowserSourceContent(
-                    appSettingsState = mutableStateOf(settings),
-                    screenAssignmentState = mutableStateOf(assignment),
-                    effectiveModeState = mutableStateOf(mode),
-                    presenterManager = manager,
-                    mediaViewModel = null,
-                    outputIndex = outputIndex,
-                    sttManager = null,
-                    qaDisplayUrlState = null,
-                    serverUrlState = null,
+                OffscreenOutputContent(
+                    OffscreenOutputContext(
+                        presenterManager = manager,
+                        appSettingsState = mutableStateOf(settings),
+                        screenAssignmentState = mutableStateOf(assignment),
+                        effectiveModeState = mutableStateOf(mode),
+                        outputIndex = outputIndex,
+                        kind = kind,
+                    )
                 )
             }
         }
@@ -100,6 +100,40 @@ class BrowserSourceContentRenderTest {
     ) {
         // One-based on screen: the operator is matching this against a numbered list, not an index.
         onNodeWithText("Browser Source 3").assertExists()
+    }
+
+    @Test
+    fun `identify covers an ndi output with its own number`() = render(
+        mode = Presenting.NONE,
+        outputIndex = 1,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyNdiOutput(1) },
+    ) {
+        onNodeWithText("NDI Output 2").assertExists()
+    }
+
+    @Test
+    fun `an identified ndi output shows its operator-given name`() = render(
+        mode = Presenting.NONE,
+        assignment = ScreenAssignment(ndiName = "Switcher feed"),
+        outputIndex = 0,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyNdiOutput(0) },
+    ) {
+        onNodeWithText("Switcher feed").assertExists()
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `identifying a browser source leaves the ndi output of the same index alone`() = render(
+        mode = Presenting.NONE,
+        outputIndex = 0,
+        kind = OffscreenOutputKind.NDI,
+        seed = { identifyBrowserSourceOutput(0) },
+    ) {
+        // Both lists are 0-based. Sharing one identify set would flash the wrong output entirely.
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+        onNodeWithText("Browser Source 1").assertDoesNotExist()
     }
 
     @Test
@@ -185,7 +219,7 @@ class BrowserSourceContentRenderTest {
 
     // ── The rest of the mode dispatch ───────────────────────────────────────────
     //
-    // One test per branch of the `when (mode)` inside [BrowserSourceContent]. These were
+    // One test per branch of the `when (mode)` inside [OffscreenOutputContent]. These were
     // unreachable before the extraction for the same reason as everything above, and each is a
     // thing that can end up on a live stream. The device-backed modes (MEDIA, PICTURES,
     // PRESENTATION, CANVAS, WEBSITE) are deliberately left out: they need VLC, a decoded image, a

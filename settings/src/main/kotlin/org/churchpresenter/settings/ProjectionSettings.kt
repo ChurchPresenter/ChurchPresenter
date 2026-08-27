@@ -15,6 +15,13 @@ data class ProjectionSettings(
     // Browser Source outputs are virtual (no physical display/DeckLink device), so unlike
     // screenAssignments they are not auto-synced to detected hardware — added/removed freely.
     val browserSourceOutputs: List<ScreenAssignment> = emptyList(),
+    // NDI outputs are virtual in exactly the same way, and for the same reason are kept out of
+    // screenAssignments: that list is reconciled against detected hardware and drives the
+    // window-count arithmetic, and an NDI output maps to no display and opens no window.
+    val ndiOutputs: List<ScreenAssignment> = emptyList(),
+    // Custom NDI Runtime directory (empty = auto-detect), the exact counterpart of vlcPath. The
+    // runtime is installed separately — this app ships no NDI binaries and may not.
+    val ndiRuntimePath: String = "",
     // Number of simulated dev-fallback presenter windows to open when there is no real output
     // (single-monitor dev machine). Lets several independent outputs be simulated on one screen
     // for developing/testing per-output features. Only takes effect in the dev fallback; ignored
@@ -75,20 +82,4 @@ data class ProjectionSettings(
         mutable[index] = assignment
         return copy(screenAssignments = mutable)
     }
-
-    fun getBrowserSourceOutput(index: Int): ScreenAssignment =
-        browserSourceOutputs.getOrElse(index) { ScreenAssignment() }
-
-    fun withBrowserSourceOutput(index: Int, assignment: ScreenAssignment): ProjectionSettings {
-        val mutable = browserSourceOutputs.toMutableList()
-        while (mutable.size <= index) mutable.add(ScreenAssignment())
-        mutable[index] = assignment
-        return copy(browserSourceOutputs = mutable)
-    }
-
-    fun addBrowserSourceOutput(): ProjectionSettings =
-        copy(browserSourceOutputs = browserSourceOutputs + ScreenAssignment())
-
-    fun removeBrowserSourceOutput(index: Int): ProjectionSettings =
-        copy(browserSourceOutputs = browserSourceOutputs.filterIndexed { i, _ -> i != index })
 }

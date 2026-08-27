@@ -314,6 +314,95 @@ class LivePreviewPanelTest {
     }
 
     @Test
+    fun `ndi outputs render as additional, separately labeled previews`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(
+                ScreenAssignment(),
+                ScreenAssignment(),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("NDI Output 1").assertExists()
+        onNodeWithText("NDI Output 2").assertExists()
+    }
+
+    @Test
+    fun `a renamed ndi output is previewed under its own name`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(ScreenAssignment(ndiName = "Lyrics")))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Lyrics").assertExists()
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a disabled ndi output is not previewed`() = runComposeUiTest {
+        // main.kt renders nothing for a switched-off output, so a preview would show the operator a
+        // picture the network is not actually receiving.
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(
+                ScreenAssignment(ndiEnabled = false),
+                ScreenAssignment(ndiName = "Live one"),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+        onNodeWithText("Live one").assertExists()
+    }
+
+    @Test
+    fun `browser source and ndi outputs are previewed side by side, each under its own name`() = runComposeUiTest {
+        // Both lists are 0-based, so this is the case where one could shadow the other.
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(
+                browserSourceOutputs = listOf(ScreenAssignment(browserSourceName = "OBS overlay")),
+                ndiOutputs = listOf(ScreenAssignment(ndiName = "Switcher feed")),
+            )
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("OBS overlay").assertExists()
+        onNodeWithText("Switcher feed").assertExists()
+    }
+
+    @Test
+    fun `locking an ndi output uses its own, separate lock index space`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.QA)
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(ScreenAssignment()))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        // The NDI output is rendered after the screen loop, so its toggle is the last one.
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+
+        assertEquals(Presenting.QA, pm.ndiLocks.value[0])
+        assertTrue(pm.screenLocks.value.isEmpty(), "locking the NDI output must not also lock the screen")
+        assertTrue(pm.browserSourceLocks.value.isEmpty(), "nor a browser source")
+    }
+
+    @Test
     fun `stage monitor screens never show the LOCKED badge or lock toggle, even when locked`() = runComposeUiTest {
         val pm = PresenterManager()
         pm.setScreenLock(0, Presenting.BIBLE)

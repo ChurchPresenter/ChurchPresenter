@@ -61,6 +61,7 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
 > switcher built from a capture of real hardware, so no device is needed.
 > `./gradlew :atem:test`.
+./gradlew :ndi:test                    # the NDI send client's suite
 >
 > **[`theme/`](./theme)** — the app's look: the nine color schemes, the semantic color roles, the
 > typography and shape scales. `./gradlew :theme:test`.

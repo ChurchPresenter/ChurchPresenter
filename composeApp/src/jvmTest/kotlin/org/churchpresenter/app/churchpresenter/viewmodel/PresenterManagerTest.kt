@@ -246,6 +246,44 @@ class PresenterManagerTest {
     }
 
     @Test
+    fun `ndi locks are a third index space, independent of both the others`() {
+        // Three 0-based lists, three unrelated outputs. Sharing a map would have NDI output 0
+        // silently steal a browser source's lock, or a screen's.
+        val pm = manager()
+        pm.setScreenLock(0, Presenting.LYRICS)
+        pm.setBrowserSourceLock(0, Presenting.BIBLE)
+        pm.setNdiLock(0, Presenting.QA)
+
+        assertEquals(mapOf(0 to Presenting.LYRICS), pm.screenLocks.value)
+        assertEquals(mapOf(0 to Presenting.BIBLE), pm.browserSourceLocks.value)
+        assertEquals(mapOf(0 to Presenting.QA), pm.ndiLocks.value)
+
+        pm.setNdiLock(0, null)
+        assertTrue(pm.ndiLocks.value.isEmpty())
+        assertEquals(mapOf(0 to Presenting.LYRICS), pm.screenLocks.value, "releasing one must not touch the others")
+        assertEquals(mapOf(0 to Presenting.BIBLE), pm.browserSourceLocks.value)
+    }
+
+    @Test
+    fun `identifying an ndi output flags only that output, and not the browser source beside it`() {
+        val pm = manager()
+        pm.identifyNdiOutput(1)
+
+        assertEquals(setOf(1), pm.ndiIdentifying.value)
+        assertTrue(pm.browserSourceIdentifying.value.isEmpty(), "the two lists are independent")
+    }
+
+    @Test
+    fun `an ndi output is not identifying to begin with`() {
+        assertTrue(manager().ndiIdentifying.value.isEmpty())
+    }
+
+    @Test
+    fun `an ndi output starts unlocked`() {
+        assertTrue(manager().ndiLocks.value.isEmpty())
+    }
+
+    @Test
     fun `locks do not broadcast a live-state change`() {
         val pm = manager()
         pm.setScreenLock(0, Presenting.LYRICS)

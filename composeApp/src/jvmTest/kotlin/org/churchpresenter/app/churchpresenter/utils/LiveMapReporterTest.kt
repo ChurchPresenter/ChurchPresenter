@@ -224,6 +224,23 @@ class LiveMapReporterTest {
     }
 
     @Test
+    fun `every output kind reaches the ping under its own name`() {
+        // NDI and Browser Source are counted alongside DeckLink, so the three audience output
+        // kinds can be compared against each other rather than only SDI being visible.
+        val url = LiveMapReporter.buildPingUrl(
+            "linux", "26.1.0", null, isDevBuild = false,
+            events = mapOf(
+                UsageEvent.DECKLINK_OUTPUT to 1,
+                UsageEvent.NDI_OUTPUT to 1,
+                UsageEvent.BROWSER_SOURCE_OUTPUT to 2,
+            ),
+        )
+        assertTrue("decklinkOutput=1" in url, url)
+        assertTrue("ndiOutput=1" in url, url)
+        assertTrue("browserSourceOutput=2" in url, url)
+    }
+
+    @Test
     fun `an event with nothing new is not sent at all`() {
         val none = LiveMapReporter.buildPingUrl("linux", "26.1.0", null, isDevBuild = false)
         assertFalse(UsageEvent.SONG_DUAL_LANGUAGE.param in none, none)
