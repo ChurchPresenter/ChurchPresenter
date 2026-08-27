@@ -8,6 +8,7 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 private const val HANDLE_VALUE = 0x1234L
+private const val SECOND_HANDLE_VALUE = 0x5678L
 
 /**
  * A stand-in for the C symbols `libndi` exports.
@@ -198,6 +199,36 @@ class JnaNdiLibraryTest {
     }
 
     @Test
+    fun `two senders get a buffer each rather than writing over one another`() {
+        // One JnaNdiLibrary is shared by every sender the runtime hands out, and each sender is
+        // driven by its own pump coroutine. A single buffer would have two outputs writing into the
+        // same native memory from two threads.
+        val c = FakeNdiLibC()
+        val lib = JnaNdiLibrary(c)
+        lib.sendVideo(HANDLE_VALUE, frame(byteArrayOf(1, 2, 3, 4), 1, 1))
+        lib.sendVideo(SECOND_HANDLE_VALUE, frame(byteArrayOf(5, 6, 7, 8), 1, 1))
+        assertTrue(c.videoFrames[0].p_data !== c.videoFrames[1].p_data)
+        // The first sender's frame is still its own, not the second's.
+        assertEquals(listOf<Byte>(1, 2, 3, 4), c.videoFrames[0].p_data!!.getByteArray(0, 4).toList())
+    }
+
+    @Test
+    fun `destroying one sender releases its buffer and leaves the others alone`() {
+        val c = FakeNdiLibC()
+        val lib = JnaNdiLibrary(c)
+        lib.sendVideo(HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        lib.sendVideo(SECOND_HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        lib.sendDestroy(HANDLE_VALUE)
+        lib.sendVideo(SECOND_HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        // The surviving sender kept its allocation...
+        assertSame(c.videoFrames[1].p_data, c.videoFrames[2].p_data)
+        // ...and the destroyed one's is gone, so a stray frame allocates afresh rather than writing
+        // into memory that was freed with the handle.
+        lib.sendVideo(HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        assertTrue(c.videoFrames[0].p_data !== c.videoFrames[3].p_data)
+    }
+
+    @Test
     fun `sending to a dead handle does nothing`() {
         val c = FakeNdiLibC()
         JnaNdiLibrary(c).sendVideo(0L, frame(ByteArray(4), 1, 1))
@@ -234,15 +265,19 @@ class JnaNdiLibraryTest {
     }
 
     @Test
-    fun `destroy releases the native buffer and takes the runtime down`() {
+    fun `destroy releases every sender's native buffer and takes the runtime down`() {
         val c = FakeNdiLibC()
         val lib = JnaNdiLibrary(c)
         lib.sendVideo(HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        lib.sendVideo(SECOND_HANDLE_VALUE, frame(ByteArray(4), 1, 1))
         lib.destroy()
         assertEquals(1, c.destroyCount)
-        // The buffer is gone, so the next frame allocates afresh rather than writing into freed memory.
+        // The buffers are gone, so the next frame allocates afresh rather than writing into freed
+        // memory.
         lib.sendVideo(HANDLE_VALUE, frame(ByteArray(4), 1, 1))
-        assertTrue(c.videoFrames[0].p_data !== c.videoFrames[1].p_data)
+        lib.sendVideo(SECOND_HANDLE_VALUE, frame(ByteArray(4), 1, 1))
+        assertTrue(c.videoFrames[0].p_data !== c.videoFrames[2].p_data)
+        assertTrue(c.videoFrames[1].p_data !== c.videoFrames[3].p_data)
     }
 
     @Test

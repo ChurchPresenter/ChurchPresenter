@@ -18,6 +18,16 @@ private const val MAX_FPS = 60
 private const val MILLIS_PER_SECOND = 1000L
 
 /**
+ * What [ComposeScenePump] does with a rendered frame: its pixels in row-major ARGB, its dimensions,
+ * and the virtual clock's elapsed milliseconds.
+ *
+ * Suspending, so a callback may emit onto a flow or block on I/O without a second dispatch — it
+ * already runs on the pump's own [Dispatchers.Default] coroutine, and the loop is meant to wait
+ * for it rather than race ahead of it.
+ */
+typealias OnFrame = suspend (argb: IntArray, width: Int, height: Int, elapsedMs: Long) -> Unit
+
+/**
  * Renders a composable off-screen at a fixed cadence and hands each frame's pixels to a callback.
  *
  * This is the half of an off-screen output that has nothing to do with what the output *is*: build
@@ -40,16 +50,6 @@ private const val MILLIS_PER_SECOND = 1000L
  * `remember` in it — survives across frames. Restarting the pump is what discards it, which is why
  * callers `remember` an instance keyed on the dimensions and fps that would invalidate it.
  */
-/**
- * What [ComposeScenePump] does with a rendered frame: its pixels in row-major ARGB, its dimensions,
- * and the virtual clock's elapsed milliseconds.
- *
- * Suspending, so a callback may emit onto a flow or block on I/O without a second dispatch — it
- * already runs on the pump's own [Dispatchers.Default] coroutine, and the loop is meant to wait
- * for it rather than race ahead of it.
- */
-typealias OnFrame = suspend (argb: IntArray, width: Int, height: Int, elapsedMs: Long) -> Unit
-
 @OptIn(ExperimentalComposeUiApi::class)
 class ComposeScenePump(
     private val width: Int,

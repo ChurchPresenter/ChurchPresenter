@@ -5,6 +5,7 @@ import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
+import java.util.concurrent.ConcurrentHashMap
 
 private const val PROGRESSIVE = 1
 private const val SYNTHESIZE_TIMECODE = Long.MAX_VALUE
@@ -73,13 +74,19 @@ internal open class NdiVideoFrameStruct : Structure() {
  * and [load] is its one untestable line — binding a library that is not present on a CI machine and
  * cannot be shipped to one.
  *
- * Not thread-safe by itself: [sendVideo] writes into a native buffer it reuses across calls, sized
- * on first use and regrown only when a larger frame arrives. Each [NdiSender] drives its own pump
- * coroutine and its own instance, which is what keeps that safe — see [NdiSender].
+ * [sendVideo] writes into a native buffer it reuses across calls, sized on first use and regrown
+ * only when a larger frame arrives. **That buffer is per sender handle, not per library.** One
+ * instance of this class is shared by every sender the runtime hands out — see [NdiRuntimeHost] —
+ * and each sender is driven by its own pump coroutine, so a single buffer would have two outputs
+ * writing into the same native memory from two threads, tearing a frame at best and reading a
+ * pointer the other thread had just freed and regrown at worst. Keyed by handle, each sender's
+ * buffer is touched only by that sender's pump, which is what keeps the reuse safe — see
+ * [NdiSender].
  */
 class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary {
 
-    private var buffer: Memory? = null
+    /** One reused pixel buffer per sender handle. See the class doc for why it is not one buffer. */
+    private val buffers = ConcurrentHashMap<Long, Memory>()
 
     companion object {
         /**
@@ -123,10 +130,8 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
         // nothing — so a misconfigured output with a zero dimension would take the render loop down
         // instead of quietly sending no picture.
         if (needed <= 0) return
-        val target = buffer?.takeIf { it.size() >= needed } ?: Memory(needed).also {
-            buffer?.close()
-            buffer = it
-        }
+        val target = buffers[sender]?.takeIf { it.size() >= needed }
+            ?: Memory(needed).also { buffers.put(sender, it)?.close() }
         target.write(0, frame.bgra, 0, needed.toInt())
         val native = NdiVideoFrameStruct().apply {
             xres = frame.width
@@ -148,11 +153,14 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
     override fun sendDestroy(sender: Long) {
         if (sender == 0L) return
         lib.NDIlib_send_destroy(Pointer(sender))
+        // The handle is dead, so its buffer can never be written again; keeping it would leak a
+        // frame's worth of native memory per output an operator removes during a service.
+        buffers.remove(sender)?.close()
     }
 
     override fun destroy() {
-        buffer?.close()
-        buffer = null
+        for (buffer in buffers.values) buffer.close()
+        buffers.clear()
         lib.NDIlib_destroy()
     }
 }
