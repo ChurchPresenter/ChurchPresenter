@@ -24,7 +24,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.loading
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +56,7 @@ internal fun SplashWindow(theme: ThemeMode) {
 
 @Composable
 internal fun SplashContent(theme: ThemeMode) {
-    AppThemeWrapper(theme = theme) {
+    AppWindowRoot(theme = theme) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

@@ -211,6 +211,14 @@ class InstallHelpersTest {
     }
 
     @Test
+    fun `a connection the server closed mid-response is the operator's`() {
+        // ktor CIO raises EOFException("...the server prematurely closed the connection") when the
+        // bytes stop arriving. Reported once from a church whose network does that to
+        // raw.githubusercontent.com; it is TruncatedBodyException's fact, one layer lower.
+        assertTrue(isEnvironment(java.io.EOFException("the server prematurely closed the connection")))
+    }
+
+    @Test
     fun `something this code got wrong is still reported`() {
         assertFalse(isEnvironment(IllegalStateException("a bug in the unpacker")))
         assertFalse(isEnvironment(IOException("a read that failed for no stated reason")))
