@@ -649,9 +649,22 @@ class PresenterManager {
                         // the live renderer — better than switching to bitmaps of nothing.
                         stream.close()
                         cached.delete()
+                        // The message stays constant so this groups as one issue; everything that
+                        // varies goes in tags and extras. Carrying only the subsystem, as it did,
+                        // made the report unanswerable — a blank render is a property of the
+                        // variant and the file it produced, and neither was in it.
                         CrashReporter.reportWarning(
                             "Lottie pre-render produced blank frames, discarded",
-                            tags = mapOf("subsystem" to "lower_third")
+                            tags = mapOf(
+                                "subsystem" to "lower_third",
+                                "lottie.clip" to variant.clip.toString(),
+                                "lottie.empty_cache_file" to (cached.length() == 0L).toString()
+                            ),
+                            extras = mapOf(
+                                "variant" to "${variant.width}x${variant.height} " +
+                                    "@${variant.fps}fps, ${variant.frameCount} frames",
+                                "cacheFileBytes" to cached.length().toString()
+                            )
                         )
                         return@launch
                     }
