@@ -448,11 +448,32 @@ object CrashReporter {
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             Sentry.init { options -> configureOptions(options, dsn) }
-            // Static context that helps triage: OS arch and dev/release build.
+            // Static context that helps triage: OS family and arch, and dev/release build.
+            // Both are needed, and arch alone is a trap: Adoptium reports "aarch64" on Apple
+            // Silicon and on ARM Linux alike, and "x86_64" on Intel macOS against "amd64"
+            // elsewhere — so a report carrying only arch cannot say which OS a platform-specific
+            // path was taken on. Diagnosing the HEIC decode failures needed exactly that.
+            setTag("os.family", osFamily(System.getProperty("os.name", "")))
             setTag("os.arch", System.getProperty("os.arch", "unknown"))
             setTag("build.type", if (build.isRelease) "release" else "dev")
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
+        }
+    }
+
+    /**
+     * Which OS family [osName] names, as one of "macos", "windows", "linux" or "other".
+     *
+     * A tag wants the family rather than the raw `os.name`, which carries a version ("Windows 11",
+     * "Mac OS X 14.4") and would split one platform across a dozen values.
+     */
+    internal fun osFamily(osName: String): String {
+        val name = osName.lowercase()
+        return when {
+            name.contains("mac") || name.contains("darwin") -> "macos"
+            name.contains("win") -> "windows"
+            name.contains("nux") || name.contains("nix") -> "linux"
+            else -> "other"
         }
     }
 
