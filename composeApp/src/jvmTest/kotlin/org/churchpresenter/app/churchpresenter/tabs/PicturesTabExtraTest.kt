@@ -15,6 +15,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -178,4 +179,38 @@ class PicturesTabExtraTest {
 
         onNodeWithText(PictureLabel.NO_FOLDER).assertExists()
     }
+
+    // ── The grid against a folder that changes underneath it ────────────────────
+    //
+    // Not covered: the IndexOutOfBoundsException this pins the fix for. That one needs the list to
+    // shrink *between* the grid reading its count and the item provider being asked for a content
+    // type, inside a single measure pass — there is no hook to interleave those, and a test that
+    // raced it would pass most of the time, which is worse than not having one. What is covered is
+    // the property the fix rests on: the grid draws from the list it was handed.
+
+    @Test
+    fun `the grid follows the folder when a picture is removed`() = picturesTab { vm, _ ->
+        awaitThumbnails("one.png", "two.png", "three.jpg")
+        val folder = vm.selectedFolder!!
+
+        // A folder loses a file mid-service: someone tidies up, or a sync client moves it, and the
+        // folder is re-read. loadImagesFromFolder only ever adds — dropping a file is what
+        // selectFolder's clear-and-reload does, and it is the path the UI takes on a refresh.
+        assertTrue(File(folder, "two.png").delete(), "the fixture file was there to delete")
+        vm.selectFolder(folder)
+        waitForIdle()
+
+        assertEquals(
+            listOf("one.png", "three.jpg"),
+            vm.images.map { it.name },
+            "the view model dropped it",
+        )
+        waitUntil("the removed tile to go") { "two.png" !in drawnThumbnails() }
+        assertEquals(
+            listOf("one.png", "three.jpg").sorted(),
+            drawnThumbnails().sorted(),
+            "and the grid draws exactly what is left, having indexed only the list it was given",
+        )
+    }
+
 }
