@@ -143,6 +143,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 @Composable
 fun ServerSettingsTab(
@@ -154,8 +155,7 @@ fun ServerSettingsTab(
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
     val copyText: (String) -> Unit = { text ->
-        java.awt.Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(java.awt.datatransfer.StringSelection(text), null)
+        SystemClipboard.copy(text)
     }
 
     var portText by remember(settings.serverSettings.port) {

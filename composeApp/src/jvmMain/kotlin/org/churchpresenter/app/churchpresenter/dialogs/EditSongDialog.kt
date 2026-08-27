@@ -127,6 +127,7 @@ import org.churchpresenter.songchords.ChordSheetImporter
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 private const val BPM_MAX_DIGITS = 3
 private const val MAX_BPM = 300
@@ -884,12 +885,7 @@ private fun AnnotatedString.Builder.appendChordHighlighted(line: String, ink: Co
  * Read straight from AWT rather than through a Compose clipboard API: this runs inside a key
  * handler that has to decide, before the keystroke is consumed, whether the paste is a chord sheet.
  */
-private fun clipboardText(): String? = try {
-    java.awt.Toolkit.getDefaultToolkit().systemClipboard
-        .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String
-} catch (_: Exception) {
-    null
-}
+private fun clipboardText(): String? = SystemClipboard.paste()
 
 private val LyricsFieldShape = RoundedCornerShape(10.dp)
 

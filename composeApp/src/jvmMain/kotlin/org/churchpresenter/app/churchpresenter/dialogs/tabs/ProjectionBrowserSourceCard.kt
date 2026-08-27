@@ -82,6 +82,7 @@ import org.churchpresenter.settings.removeBrowserSourceOutput
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withBrowserSourceOutput
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
@@ -127,8 +128,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
 
     val serverUrl by companionServer.serverUrl.collectAsState()
     val copyText: (String) -> Unit = { text ->
-        java.awt.Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(java.awt.datatransfer.StringSelection(text), null)
+        SystemClipboard.copy(text)
     }
 
     proj.browserSourceOutputs.forEachIndexed { i, output ->

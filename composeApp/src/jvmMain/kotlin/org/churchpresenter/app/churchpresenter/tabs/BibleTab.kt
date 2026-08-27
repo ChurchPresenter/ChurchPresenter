@@ -105,6 +105,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.onSmartQueryChanged
 import org.churchpresenter.app.churchpresenter.viewmodel.selectSearchResult
 import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
 import org.churchpresenter.app.churchpresenter.viewmodel.updateSettings
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 internal val CROSS_REF_MIN_WIDTH = 200.dp
 
@@ -914,9 +915,7 @@ fun BibleTab(
                     val verseStr = verses.getOrNull(selectedVerseIndex) ?: ""
                     val bookName = books.getOrNull(selectedBookIndex) ?: ""
                     val reference = formatVerseReference(verseStr, bookName, selectedChapter)
-                    java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(
-                        java.awt.datatransfer.StringSelection("$reference\n${verseTextOf(verseStr)}"), null,
-                    )
+                    SystemClipboard.copy("$reference\n${verseTextOf(verseStr)}")
                 },
                 onAddToSchedule = {
                     viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->

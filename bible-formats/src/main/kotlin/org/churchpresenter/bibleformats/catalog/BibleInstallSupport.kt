@@ -20,11 +20,14 @@ import io.ktor.utils.io.ByteReadChannel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.nio.channels.UnresolvedAddressException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.zip.ZipFile
+import javax.net.ssl.SSLException
 import kotlin.random.Random
 import org.churchpresenter.diagnostics.CrashReporter
 
@@ -35,6 +38,9 @@ private const val HTTP_PARTIAL_CONTENT = 206
 private const val HTTP_RANGE_NOT_SATISFIABLE = 416
 private val HTTP_SUCCESS_RANGE = 200..299
 private const val MAX_CAUSE_DEPTH = 4
+
+/** Below this much free space, a failed write is taken to be a full disk rather than a fault. */
+private const val DISK_HEADROOM_BYTES = 1L * 1024 * 1024
 
 /**
  * The mechanics every Bible source shares: fetch an archive, prove it arrived intact, unpack it,
@@ -50,11 +56,41 @@ object BibleInstallSupport {
      * Reports [e] under [tags] and hands back [outcome], so a catch clause stays one line and the
      * set of things a pipeline catches reads as the mapping it is. Shared by all four sources —
      * every one of them reports and returns in exactly this shape.
+     *
+     * A failure that is the operator's own network or disk is returned without an event. Those are
+     * not defects and there is nothing to do about them in this code: the outcome still travels
+     * back, so the install dialog tells the user exactly what it always did. Reporting them anyway
+     * had filed one Sentry issue per underlying exception type — a failed DNS lookup, a body that
+     * arrived short and a full disk became three separate issues that all meant "a Bible download
+     * did not finish", which is a fact about the church's network, not about the app.
      */
     internal fun <T> reported(message: String, e: Throwable, tags: Map<String, String>, outcome: T): T {
-        CrashReporter.reportWarning(message, throwable = e, tags = tags)
+        if (!e.isOperatorEnvironment()) {
+            CrashReporter.reportWarning(message, throwable = e, tags = tags)
+        }
         return outcome
     }
+
+    /**
+     * Whether [this] is the operator's network or disk rather than something this code got wrong.
+     *
+     * Classified by type rather than by message, deliberately: the disk-full and access-denied
+     * cases identify themselves in the OS's language ("There is not enough space on the disk" on an
+     * English Windows), so matching on wording would work in one locale and silently stop working
+     * in the other thirty-three the app ships.
+     *
+     * Ktor wraps, so the cause chain is walked — but only as far as [isStall] walks it, for the
+     * same reason.
+     */
+    internal fun Throwable.isOperatorEnvironment(depth: Int = 0): Boolean =
+        this is UnresolvedAddressException ||
+            this is ConnectException ||
+            this is SocketTimeoutException ||
+            this is HttpRequestTimeoutException ||
+            this is TruncatedBodyException ||
+            this is InsufficientDiskSpaceException ||
+            this is SSLException ||
+            (depth < MAX_CAUSE_DEPTH && cause?.isOperatorEnvironment(depth + 1) == true)
 
     const val COPY_BUFFER_BYTES = 64 * 1024
     private const val MAX_ARCHIVE_ENTRIES = 64
@@ -121,6 +157,15 @@ object BibleInstallSupport {
     /** The body ended before the bytes the response promised had arrived. */
     private class TruncatedBodyException(promised: Long, received: Long) :
         IOException("Body ended after $received of $promised bytes")
+
+    /**
+     * The write failed and the volume has no room left.
+     *
+     * Separate from a plain [IOException] so the operator can be told the one thing they can act
+     * on, and so the failure is nameable without matching the OS's own wording for it.
+     */
+    class InsufficientDiskSpaceException(val usableBytes: Long, cause: Throwable) :
+        IOException("No space left on the volume ($usableBytes bytes usable)", cause)
 
     /** Every attempt stopped part-way: the link is alive, it just stops moving. */
     class DownloadStalledException(
@@ -278,9 +323,30 @@ object BibleInstallSupport {
         FileOutputStream(destination, append).use { out ->
             var endOfBody = false
             while (!endOfBody) {
-                endOfBody = !writeChunk(channel, buffer, out, state, onProgress)
+                endOfBody = try {
+                    !writeChunk(channel, buffer, out, state, onProgress)
+                } catch (e: IOException) {
+                    throw asDiskSpaceFailure(e, destination)
+                }
             }
         }
+    }
+
+    /**
+     * [e] as an [InsufficientDiskSpaceException] when the volume under [destination] has no room
+     * left, or unchanged when it has.
+     *
+     * A write failing and the disk being full is one thing the operator can act on and a different
+     * message from "the download failed", so it is worth separating — and the exception itself
+     * cannot be read for it without matching the OS's own language.
+     *
+     * Unlike the check made *before* a download starts, zero here is taken at face value: a write
+     * has already failed, so a volume reporting no usable space is reporting the reason rather than
+     * declining to answer.
+     */
+    private fun asDiskSpaceFailure(e: IOException, destination: File): IOException {
+        val usable = (destination.parentFile ?: destination).usableSpace
+        return if (usable < DISK_HEADROOM_BYTES) InsufficientDiskSpaceException(usable, e) else e
     }
 
     /** Writes one read's worth of bytes; false once the channel is exhausted. */

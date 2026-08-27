@@ -2,6 +2,11 @@ package org.churchpresenter.bibleformats.catalog
 
 import java.io.File
 import java.nio.file.Files
+import javax.net.ssl.SSLException
+import java.nio.channels.UnresolvedAddressException
+import java.net.SocketTimeoutException
+import java.net.ConnectException
+import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
@@ -180,4 +185,51 @@ class InstallHelpersTest {
 
         assertTrue(BebliaCatalogIndex.rawBase().startsWith("https://raw.githubusercontent.com/"))
     }
+
+    // ── Which failures are the operator's own network or disk ───────────────────
+
+    private fun isEnvironment(e: Throwable): Boolean =
+        with(BibleInstallSupport) { e.isOperatorEnvironment() }
+
+    @Test
+    fun `a network that never resolved or connected is the operator's, not a defect`() {
+        // A DNS failure and a full disk had become separate Sentry issues that both meant "a Bible
+        // download did not finish" — a fact about the church's network, not about the app.
+        assertTrue(isEnvironment(UnresolvedAddressException()))
+        assertTrue(isEnvironment(ConnectException("refused")))
+        assertTrue(isEnvironment(SocketTimeoutException("timed out")))
+        assertTrue(isEnvironment(SSLException("bad certificate")))
+    }
+
+    @Test
+    fun `a disk with no room left is the operator's too`() {
+        assertTrue(
+            isEnvironment(
+                BibleInstallSupport.InsufficientDiskSpaceException(0, IOException("write failed"))
+            )
+        )
+    }
+
+    @Test
+    fun `something this code got wrong is still reported`() {
+        assertFalse(isEnvironment(IllegalStateException("a bug in the unpacker")))
+        assertFalse(isEnvironment(IOException("a read that failed for no stated reason")))
+    }
+
+    @Test
+    fun `a wrapped cause is found, because ktor wraps`() {
+        val wrapped = IOException("request failed", UnresolvedAddressException())
+
+        assertTrue(isEnvironment(wrapped))
+    }
+
+    @Test
+    fun `the cause chain is not walked for ever`() {
+        // Matches isStall's bound: deep enough for ktor's wrapping, shallow enough to stay cheap.
+        var deep: Throwable = UnresolvedAddressException()
+        repeat(8) { deep = IOException("layer", deep) }
+
+        assertFalse(isEnvironment(deep), "a cause buried past the bound is not searched for")
+    }
+
 }

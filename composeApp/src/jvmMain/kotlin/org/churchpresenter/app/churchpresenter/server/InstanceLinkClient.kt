@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
@@ -48,6 +49,9 @@ import javax.net.ssl.SSLException
 import kotlin.random.Random
 
 private const val FAILURE_LOG_INTERVAL = 10
+
+/** The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke". */
+private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns")
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 
@@ -199,13 +203,14 @@ class InstanceLinkClient(
             } catch (e: Exception) {
                 consecutiveFailures++
                 System.err.println("InstanceLink: connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
-                if (consecutiveFailures == 1 || consecutiveFailures % FAILURE_LOG_INTERVAL == 0) {
+                val failureKind = classifyConnectFailure(e)
+                if (shouldReportConnectFailure(failureKind, consecutiveFailures)) {
                     CrashReporter.reportWarning(
                         "InstanceLink: connection failed — ${e.message}",
                         tags = mapOf(
                             "subsystem" to "instance_link",
                             "consecutive_failures" to consecutiveFailures.toString(),
-                            "failure_kind" to classifyConnectFailure(e)
+                            "failure_kind" to failureKind
                         )
                     )
                 }
@@ -232,12 +237,35 @@ class InstanceLinkClient(
     }
 
     /**
+     * Whether a connect failure this far into a run of them is worth a warning.
+     *
+     * A follower is configured once and then starts with the room, routinely before the primary
+     * does, so "refused" and "dns" on the first attempt are the ordinary startup order rather than
+     * a fault — and reporting them there made the follower's own boot sequence the single noisiest
+     * signal in the project. Those two therefore wait for the run to persist through
+     * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
+     * plausible "primary is still coming up" window and the link genuinely is not working.
+     *
+     * The kinds that suggest a regression rather than an ordering — a timeout, a certificate, or
+     * something unrecognised — still report on the first failure, because those are worth seeing
+     * once even if they never recur.
+     */
+    internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
+        val atInterval = consecutiveFailures % FAILURE_LOG_INTERVAL == 0
+        return if (kind in BENIGN_CONNECT_FAILURES) atInterval else consecutiveFailures == 1 || atInterval
+    }
+
+    /**
      * Buckets a connect failure so Sentry can be filtered/grouped by cause: "refused"/"dns" are
      * the expected, benign case (primary not started yet or misconfigured host/port), while
      * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
      * that crashed mid-session, or a protocol/certificate bug).
      */
     internal fun classifyConnectFailure(e: Exception): String = when (e) {
+        // Ktor's ConnectTimeoutException extends java.net.ConnectException, so it must be matched
+        // first or every connect timeout is filed as "refused" — the one bucket that says the
+        // operator simply has not started the primary yet.
+        is ConnectTimeoutException -> "timeout"
         is ConnectException -> "refused"
         is UnknownHostException -> "dns"
         is SocketTimeoutException -> "timeout"
