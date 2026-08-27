@@ -19,9 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -38,7 +36,6 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.min
 
 /** The reference the sample verse carries when a module could not be read. */
 private const val SAMPLE_CHAPTER = 3
@@ -149,7 +146,7 @@ internal fun BiblePreviewPanel(
                 modifier = Modifier.align(Alignment.Center),
             )
         } else {
-            ScaledPresenter(output) {
+            ScaledPresenterBox {
                 BiblePresenter(
                     selectedVerses = selectedVerses,
                     appSettings = settings,
@@ -183,41 +180,21 @@ internal fun BiblePreviewPanel(
 }
 
 /**
- * Lays [content] out at [output]'s own size and scales the drawn result into the space available.
+ * Hands [content] the preview box at density 1, which is all the scaling it needs.
  *
- * The same trick `LivePreviewPanel` uses, and for the same reason. Density is pinned to 1 so that a
- * dp is an output pixel: [BiblePresenter] derives its own scale factor from `maxWidth.toPx()`, so
- * without this it would see the *dialog's* density and size everything against that rather than
- * against the output. The scaling happens in a graphics layer afterwards, so every proportion the
- * presenter chose -- type, margins, the lower-third band, the auto-fit -- survives untouched.
+ * Both presenters derive their own scale from `maxWidth.toPx()` against 1920x1080 and then emit
+ * sizes in `sp`, so density is applied twice and a preview on a Retina screen came out about
+ * 1.6x too large. Pinning [LocalDensity] to 1 makes a unit a pixel and cancels the second
+ * application, and the presenter's own scale factor then does the rest -- it is built to fill
+ * whatever box it is given.
+ *
+ * Deliberately *not* the graphics-layer trick `LivePreviewPanel` uses. Measuring the presenter at
+ * the output's full 1920x1080 and scaling the drawn result leaves a node that size in the layout
+ * tree, which reads as a settings tab overflowing its dialog by 1600dp.
  */
 @Composable
-private fun ScaledPresenter(output: PreviewOutputSize, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .layout { measurable, constraints ->
-                val scale = min(
-                    constraints.maxWidth.toFloat() / output.width,
-                    constraints.maxHeight.toFloat() / output.height,
-                )
-                val placeable = measurable.measure(
-                    constraints.copy(
-                        minWidth = output.width,
-                        maxWidth = output.width,
-                        minHeight = output.height,
-                        maxHeight = output.height,
-                    ),
-                )
-                layout((output.width * scale).toInt(), (output.height * scale).toInt()) {
-                    placeable.placeWithLayer(0, 0) {
-                        this.scaleX = scale
-                        this.scaleY = scale
-                        transformOrigin = TransformOrigin(0f, 0f)
-                    }
-                }
-            },
-    ) {
+private fun ScaledPresenterBox(content: @Composable () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalDensity provides Density(1f)) {
             content()
         }

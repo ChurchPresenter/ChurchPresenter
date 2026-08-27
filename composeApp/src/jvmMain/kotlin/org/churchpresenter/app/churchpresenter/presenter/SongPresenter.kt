@@ -40,7 +40,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +57,13 @@ import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSecti
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
+import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
+import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f
@@ -165,16 +171,41 @@ fun SongPresenter(
         if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
     )
 
+    val songTarget = if (isLowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
+
     // Text styles derived from settings (resolved per fullscreen / lower third)
     val effectiveTitleBold = if (isLowerThird) ss.titleLowerThirdBold else ss.titleBold
     val effectiveTitleItalic = if (isLowerThird) ss.titleLowerThirdItalic else ss.titleItalic
     val effectiveTitleUnderline = if (isLowerThird) ss.titleLowerThirdUnderline else ss.titleUnderline
     val effectiveTitleShadow = if (isLowerThird) ss.titleLowerThirdShadow else ss.titleShadow
+    val titleStyleProfile = ss.elementStyle(SongStyleElement.TITLE, songTarget)
     val titleTextStyle = TextStyle(
         fontWeight = if (effectiveTitleBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveTitleItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (effectiveTitleUnderline) TextDecoration.Underline else TextDecoration.None,
+        textDecoration = combinedTextDecoration(effectiveTitleUnderline, titleStyleProfile.strikethrough),
+        letterSpacing = spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize).em,
         shadow = if (effectiveTitleShadow) titleBaseShadow else null
+    )
+
+    // The song number is drawn from its own profile now. It used to borrow the title's font, colour
+    // and face, which left its own stored fields unread -- see `SongSettings.migrateSongNumberStyle`,
+    // which carries a styled title across so a settings file written then still looks the same.
+    val numberStyleProfile = ss.elementStyle(SongStyleElement.NUMBER, songTarget)
+    val songNumberBaseShadow = makeSongShadow(
+        numberStyleProfile.shadowColor,
+        numberStyleProfile.shadowSize,
+        numberStyleProfile.shadowOpacity,
+    )
+    val songNumberTextStyle = TextStyle(
+        fontWeight = if (numberStyleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (numberStyleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(numberStyleProfile.underline, numberStyleProfile.strikethrough),
+        letterSpacing = spacingEm(numberStyleProfile.letterSpacing, numberStyleProfile.fontSize).em,
+        shadow = if (numberStyleProfile.shadow) songNumberBaseShadow else null,
+    )
+    val songNumberColor = if (isKey) Color.White else parseHexColor(numberStyleProfile.color)
+    val songNumberFontFamily = systemFontFamilyOrDefault(
+        numberStyleProfile.fontType.ifBlank { if (isLowerThird) ss.titleLowerThirdFontType else ss.titleFontType },
     )
     val effectiveLyricsBold = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold
@@ -188,10 +219,16 @@ fun SongPresenter(
     val effectiveLyricsShadow = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow
     } else if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
+    // Which profile the body text is drawn from: the look-ahead slide styles its lines separately.
+    val lyricsStyleProfile = ss.elementStyle(
+        if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
+        songTarget,
+    )
     val lyricsTextStyle = TextStyle(
         fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
+        textDecoration = combinedTextDecoration(effectiveLyricsUnderline, lyricsStyleProfile.strikethrough),
+        letterSpacing = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize).em,
         shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
     val chartHorizontalAlignment = when (
@@ -332,6 +369,17 @@ fun SongPresenter(
                 if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
                 if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity
             )) else titleTextStyle
+        val songNumberTextStyleScaled = if (numberStyleProfile.shadow) {
+            songNumberTextStyle.copy(
+                shadow = scaleElementShadow(
+                    numberStyleProfile.shadowColor,
+                    numberStyleProfile.shadowSize,
+                    numberStyleProfile.shadowOpacity,
+                ),
+            )
+        } else {
+            songNumberTextStyle
+        }
         val lyricsTextStyleScaled = if (effectiveLyricsShadow)
             lyricsTextStyle.copy(shadow = scaleElementShadow(
                 if (isLowerThird) ss.lyricsLowerThirdShadowColor else ss.lyricsShadowColor,
@@ -731,10 +779,12 @@ fun SongPresenter(
                         offset = Offset(6f * scaleFactor * laShadowSizeMul, 6f * scaleFactor * laShadowSizeMul),
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
+                    val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
-                        textDecoration = if (laUnderline) TextDecoration.Underline else TextDecoration.None,
+                        textDecoration = combinedTextDecoration(laUnderline, laStyleProfile.strikethrough),
+                        letterSpacing = spacingEm(laStyleProfile.letterSpacing, laStyleProfile.fontSize).em,
                         shadow = if (laShadowEnabled) laBaseShadow else null
                     )
                     // Look-ahead next uses auto-fit capped at its own configured max
@@ -747,13 +797,26 @@ fun SongPresenter(
                     @Composable
                     fun LyricLine(lineIdx: Int, line: String, laStart: Int) {
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
+                        val lineProfile = if (isLookAheadLine) laStyleProfile else lyricsStyleProfile
+                        // The next-section lines take their own alignment once one is set; blank
+                        // keeps them following the look-ahead's, which is what they always did.
+                        val lineAlign = if (isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank()) {
+                            getTextAlign(laStyleProfile.horizontalAlignment)
+                        } else {
+                            lyricsHorizontalAlignment
+                        }
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = lyricsHorizontalAlignment,
+                            textAlign = lineAlign,
                             fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
                             fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
                             softWrap = appSettings.songSettings.wordWrap,
-                            text = line,
+                            text = styledDisplayText(
+                                line,
+                                lineProfile.transform,
+                                spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
+                                spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
+                            ),
                             color = if (isLookAheadLine) laColor else lyricsColor,
                             style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
                         )
@@ -849,11 +912,16 @@ fun SongPresenter(
                         Text(
                             modifier = modifier.alpha(visibilityAlpha),
                             textAlign = songNumberHorizontalAlignment,
-                            fontFamily = titleFontFamily,
+                            fontFamily = songNumberFontFamily,
                             fontSize = scaledSongNumberFontSize,
-                            text = section.songNumber.toString(),
-                            color = titleColor,
-                            style = titleTextStyleScaled
+                            text = styledDisplayText(
+                                section.songNumber.toString(),
+                                numberStyleProfile.transform,
+                                spacingEm(numberStyleProfile.letterSpacing, numberStyleProfile.fontSize),
+                                spacingEm(numberStyleProfile.wordSpacing, numberStyleProfile.fontSize),
+                            ),
+                            color = songNumberColor,
+                            style = songNumberTextStyleScaled
                         )
                     }
 
@@ -864,7 +932,12 @@ fun SongPresenter(
                             textAlign = titleHorizontalAlignment,
                             fontFamily = titleFontFamily,
                             fontSize = scaledTitleFontSize,
-                            text = effectiveTitle,
+                            text = styledDisplayText(
+                                effectiveTitle,
+                                titleStyleProfile.transform,
+                                spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize),
+                                spacingEm(titleStyleProfile.wordSpacing, titleStyleProfile.fontSize),
+                            ),
                             color = titleColor,
                             style = titleTextStyleScaled
                         )

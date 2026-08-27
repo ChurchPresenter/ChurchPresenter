@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Sapagkat gayon na lamang ang pag-ibig ng Diyos sa sanlibutan, kaya ibinigay niya ang kanyang bugtong na Anak.</string>
     <string name="bible_preview_sample_book">Juan</string>
     <string name="bible_preview_no_translations">Magdagdag ng salin upang makita ito rito</string>
+    <string name="song_preview_full_screen">Preview ng buong screen</string>
+    <string name="song_preview_lower_third">Preview ng lower third</string>
+    <string name="song_element_number">Numero</string>
+    <string name="song_element_title">Pamagat</string>
+    <string name="song_element_lyrics">Lyrics</string>
+    <string name="song_element_next_section">Susunod na Seksyon</string>
+    <string name="song_chunk_verse">1 Talata</string>
+    <string name="song_chunk_line">1 Linya</string>
+    <string name="song_preview_chords">Mga Chord</string>
+    <string name="song_preview_label">Preview</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Mga wika ng awit</string>
+    <string name="song_language_single">1 · Isa</string>
+    <string name="song_language_bilingual">2 · Dalawang wika</string>
+    <string name="song_lyrics_layout">Ayos ng liriko</string>
+    <string name="song_transition_and_markers">Transisyon at mga marka</string>
+    <string name="song_element_look_ahead">Sulyap sa susunod</string>
+    <string name="song_chunk">Bahagi</string>
+    <string name="song_language_scope">Wika</string>
+    <string name="song_preview_look_ahead">Sulyap sa susunod</string>
 </resources>

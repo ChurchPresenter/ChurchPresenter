@@ -2429,4 +2429,24 @@
     <string name="bible_preview_sample_verse">Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito.</string>
     <string name="bible_preview_sample_book">Juan</string>
     <string name="bible_preview_no_translations">Añada una traducción para verla aquí</string>
+    <string name="song_preview_full_screen">Vista previa de pantalla completa</string>
+    <string name="song_preview_lower_third">Vista previa del tercio inferior</string>
+    <string name="song_element_number">Número</string>
+    <string name="song_element_title">Título</string>
+    <string name="song_element_lyrics">Letra</string>
+    <string name="song_element_next_section">Sección siguiente</string>
+    <string name="song_chunk_verse">1 versículo</string>
+    <string name="song_chunk_line">1 línea</string>
+    <string name="song_preview_chords">Acordes</string>
+    <string name="song_preview_label">Vista previa</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Idiomas de la canción</string>
+    <string name="song_language_single">1 · Uno</string>
+    <string name="song_language_bilingual">2 · Bilingüe</string>
+    <string name="song_lyrics_layout">Diseño de la letra</string>
+    <string name="song_transition_and_markers">Transición y marcas</string>
+    <string name="song_element_look_ahead">Vista previa</string>
+    <string name="song_chunk">Fragmento</string>
+    <string name="song_language_scope">Idioma</string>
+    <string name="song_preview_look_ahead">Vista previa</string>
 </resources>

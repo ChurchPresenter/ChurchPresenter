@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -424,15 +425,17 @@ class PresenterRenderTest {
     }
 
     @Test
-    fun `on default settings the title is never drawn -- known gap`() = runComposeUiTest {
+    fun `on default settings the title is drawn`() = runComposeUiTest {
         setContent {
             Box(screen) { SongPresenter(lyricSection = lyric(), appSettings = AppSettings()) }
         }
 
         onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
-        onNodeWithText("42", substring = true).assertExists("the number does show, which is what hides this")
-        // Current behaviour: titlePosition defaults to a value nothing renders.
-        onAllNodesWithText("Amazing Grace", substring = true).assertCountEquals(0)
+        onNodeWithText("42", substring = true).assertExists()
+        // This was a documented gap: titlePosition defaulted to Middle, which the presenter draws
+        // the title row at neither of -- so titleDisplay said "first page" and nothing appeared.
+        // The default is AboveVerse now, so the setting does what it says out of the box.
+        onAllNodesWithText("Amazing Grace", substring = true).onFirst().assertExists()
     }
 
     @Test

@@ -2431,4 +2431,24 @@
     <string name="bible_preview_sample_verse">Fiindcă atât de mult a iubit Dumnezeu lumea, că a dat pe singurul Lui Fiu.</string>
     <string name="bible_preview_sample_book">Ioan</string>
     <string name="bible_preview_no_translations">Adăugați o traducere pentru a o vedea aici</string>
+    <string name="song_preview_full_screen">Previzualizare ecran complet</string>
+    <string name="song_preview_lower_third">Previzualizare treime inferioară</string>
+    <string name="song_element_number">Număr</string>
+    <string name="song_element_title">Titlu</string>
+    <string name="song_element_lyrics">Versuri</string>
+    <string name="song_element_next_section">Secțiunea Următoare</string>
+    <string name="song_chunk_verse">1 Strofă</string>
+    <string name="song_chunk_line">1 Linie</string>
+    <string name="song_preview_chords">Acorduri</string>
+    <string name="song_preview_label">Previzualizare</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Limbile cântării</string>
+    <string name="song_language_single">1 · Una</string>
+    <string name="song_language_bilingual">2 · Bilingv</string>
+    <string name="song_lyrics_layout">Aranjarea versurilor</string>
+    <string name="song_transition_and_markers">Tranziție și marcaje</string>
+    <string name="song_element_look_ahead">Previzualizare următor</string>
+    <string name="song_chunk">Fragment</string>
+    <string name="song_language_scope">Limbă</string>
+    <string name="song_preview_look_ahead">Previzualizare următor</string>
 </resources>

@@ -45,8 +45,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.bibleTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.bibleDisplayText
+import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
+import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -286,10 +286,10 @@ fun BiblePresenter(
     // What actually goes on screen for each of the four elements: the transform applied and the word
     // breaks widened. Named per element so the call sites below stay one line each, and used for the
     // fit measurements too -- an uppercased verse is wider than the one it came from.
-    fun pText(raw: String) = bibleDisplayText(raw, pTransform, pLsEm, pWsEm)
-    fun prText(raw: String) = bibleDisplayText(raw, prTransform, prLsEm, prWsEm)
-    fun sText(raw: String) = bibleDisplayText(raw, sTransform, sLsEm, sWsEm)
-    fun srText(raw: String) = bibleDisplayText(raw, srTransform, srLsEm, srWsEm)
+    fun pText(raw: String) = styledDisplayText(raw, pTransform, pLsEm, pWsEm)
+    fun prText(raw: String) = styledDisplayText(raw, prTransform, prLsEm, prWsEm)
+    fun sText(raw: String) = styledDisplayText(raw, sTransform, sLsEm, sWsEm)
+    fun srText(raw: String) = styledDisplayText(raw, srTransform, srLsEm, srWsEm)
 
     // Per-element shadow helpers
     fun makeShadow(color: String, size: Int, opacity: Int, alphaScale: Float = 0.78f): Shadow {
@@ -328,28 +328,28 @@ fun BiblePresenter(
     val primaryBibleTextStyle = TextStyle(
         fontWeight = if (pBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (pItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = bibleTextDecoration(pUnderline, pStrike),
+        textDecoration = combinedTextDecoration(pUnderline, pStrike),
         letterSpacing = pLsEm.em,
         shadow = if (pShadow) pBibleShadowVal else null
     )
     val primaryReferenceTextStyle = TextStyle(
         fontWeight = if (prBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (prItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = bibleTextDecoration(prUnderline, prStrike),
+        textDecoration = combinedTextDecoration(prUnderline, prStrike),
         letterSpacing = prLsEm.em,
         shadow = if (prShadow) pRefShadowVal else null
     )
     val secondaryBibleTextStyle = TextStyle(
         fontWeight = if (sBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (sItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = bibleTextDecoration(sUnderline, sStrike),
+        textDecoration = combinedTextDecoration(sUnderline, sStrike),
         letterSpacing = sLsEm.em,
         shadow = if (sShadow) sBibleShadowVal else null
     )
     val secondaryReferenceTextStyle = TextStyle(
         fontWeight = if (srBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (srItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = bibleTextDecoration(srUnderline, srStrike),
+        textDecoration = combinedTextDecoration(srUnderline, srStrike),
         letterSpacing = srLsEm.em,
         shadow = if (srShadow) sRefShadowVal else null
     )
@@ -682,7 +682,7 @@ fun BiblePresenter(
                             return TextStyle(
                                 fontWeight = if (item.textBold) FontWeight.Bold else FontWeight.Normal,
                                 fontStyle = if (item.textItalic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = bibleTextDecoration(item.textUnderline, item.textStrikethrough),
+                                textDecoration = combinedTextDecoration(item.textUnderline, item.textStrikethrough),
                                 letterSpacing = spacingEm(item.textLetterSpacing, item.textFontSize).em,
                                 shadow = shadow,
                             )
@@ -697,7 +697,7 @@ fun BiblePresenter(
                             return TextStyle(
                                 fontWeight = if (item.referenceBold) FontWeight.Bold else FontWeight.Normal,
                                 fontStyle = if (item.referenceItalic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = bibleTextDecoration(
+                                textDecoration = combinedTextDecoration(
                                     item.referenceUnderline,
                                     item.referenceStrikethrough,
                                 ),
@@ -708,13 +708,13 @@ fun BiblePresenter(
                         // The stack's equivalent of the pText/prText helpers above: this path styles
                         // every translation from its own profile rather than from t0/t1, so the
                         // transform and word spacing have to be read per item.
-                        fun itemText(item: BibleTranslationSettings, raw: String) = bibleDisplayText(
+                        fun itemText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
                             raw,
                             item.textTransform,
                             spacingEm(item.textLetterSpacing, item.textFontSize),
                             spacingEm(item.textWordSpacing, item.textFontSize),
                         )
-                        fun itemRefText(item: BibleTranslationSettings, raw: String) = bibleDisplayText(
+                        fun itemRefText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
                             raw,
                             item.referenceTransform,
                             spacingEm(item.referenceLetterSpacing, item.referenceFontSize),

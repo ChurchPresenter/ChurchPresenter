@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Karena begitu besar kasih Allah akan dunia ini, sehingga Ia mengaruniakan Anak-Nya yang tunggal.</string>
     <string name="bible_preview_sample_book">Yohanes</string>
     <string name="bible_preview_no_translations">Tambahkan terjemahan untuk melihatnya di sini</string>
+    <string name="song_preview_full_screen">Pratinjau layar penuh</string>
+    <string name="song_preview_lower_third">Pratinjau sepertiga bawah</string>
+    <string name="song_element_number">Nomor</string>
+    <string name="song_element_title">Judul</string>
+    <string name="song_element_lyrics">Lirik</string>
+    <string name="song_element_next_section">Bagian berikutnya</string>
+    <string name="song_chunk_verse">1 Ayat</string>
+    <string name="song_chunk_line">1 Baris</string>
+    <string name="song_preview_chords">Akor</string>
+    <string name="song_preview_label">Pratinjau</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Bahasa lagu</string>
+    <string name="song_language_single">1 · Satu</string>
+    <string name="song_language_bilingual">2 · Dwibahasa</string>
+    <string name="song_lyrics_layout">Tata letak lirik</string>
+    <string name="song_transition_and_markers">Transisi dan penanda</string>
+    <string name="song_element_look_ahead">Pratinjau berikutnya</string>
+    <string name="song_chunk">Bagian</string>
+    <string name="song_language_scope">Bahasa</string>
+    <string name="song_preview_look_ahead">Pratinjau berikutnya</string>
 </resources>

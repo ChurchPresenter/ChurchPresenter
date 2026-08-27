@@ -2414,4 +2414,24 @@
     <string name="bible_preview_sample_verse">தேவன் தம்முடைய ஒரேபேறான குமாரனைத் தந்தருளும் அளவுக்கு உலகத்தில் அன்பு கூர்ந்தார்.</string>
     <string name="bible_preview_sample_book">யோவான்</string>
     <string name="bible_preview_no_translations">இங்கே காண ஒரு மொழிபெயர்ப்பைச் சேர்க்கவும்</string>
+    <string name="song_preview_full_screen">முழுத்திரை முன்னோட்டம்</string>
+    <string name="song_preview_lower_third">கீழ்ப்பகுதி முன்னோட்டம்</string>
+    <string name="song_element_number">எண்</string>
+    <string name="song_element_title">தலைப்பு</string>
+    <string name="song_element_lyrics">பாடல் வரிகள்</string>
+    <string name="song_element_next_section">அடுத்த பகுதி</string>
+    <string name="song_chunk_verse">1 பத்தி</string>
+    <string name="song_chunk_line">1 வரி</string>
+    <string name="song_preview_chords">நாண்கள்</string>
+    <string name="song_preview_label">முன்னோட்டம்</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">பாடலின் மொழிகள்</string>
+    <string name="song_language_single">1 · ஒன்று</string>
+    <string name="song_language_bilingual">2 · இருமொழி</string>
+    <string name="song_lyrics_layout">வரிகளின் அமைப்பு</string>
+    <string name="song_transition_and_markers">மாற்றம் மற்றும் குறிகள்</string>
+    <string name="song_element_look_ahead">அடுத்ததின் முன்னோட்டம்</string>
+    <string name="song_chunk">பகுதி</string>
+    <string name="song_language_scope">மொழி</string>
+    <string name="song_preview_look_ahead">அடுத்ததின் முன்னோட்டம்</string>
 </resources>

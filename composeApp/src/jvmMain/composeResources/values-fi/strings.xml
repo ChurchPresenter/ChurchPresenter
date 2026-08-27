@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Sillä niin on Jumala maailmaa rakastanut, että hän antoi ainokaisen Poikansa.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Lisää käännös nähdäksesi sen tässä</string>
+    <string name="song_preview_full_screen">Koko näytön esikatselu</string>
+    <string name="song_preview_lower_third">Alakolmanneksen esikatselu</string>
+    <string name="song_element_number">Numero</string>
+    <string name="song_element_title">Otsikko</string>
+    <string name="song_element_lyrics">Sanat</string>
+    <string name="song_element_next_section">Seuraava osa</string>
+    <string name="song_chunk_verse">1 säkeistö</string>
+    <string name="song_chunk_line">1 rivi</string>
+    <string name="song_preview_chords">Soinnut</string>
+    <string name="song_preview_label">Esikatselu</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Laulun kielet</string>
+    <string name="song_language_single">1 · Yksi</string>
+    <string name="song_language_bilingual">2 · Kaksikielinen</string>
+    <string name="song_lyrics_layout">Tekstin asettelu</string>
+    <string name="song_transition_and_markers">Siirtymä ja merkit</string>
+    <string name="song_element_look_ahead">Ennakko</string>
+    <string name="song_chunk">Osa</string>
+    <string name="song_language_scope">Kieli</string>
+    <string name="song_preview_look_ahead">Ennakko</string>
 </resources>
