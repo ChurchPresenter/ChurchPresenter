@@ -101,6 +101,9 @@ import churchpresenter.composeapp.generated.resources.projection_web_decklink_to
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.addNdiOutput
+import org.churchpresenter.settings.removeNdiOutput
+import org.churchpresenter.settings.withNdiOutput
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField

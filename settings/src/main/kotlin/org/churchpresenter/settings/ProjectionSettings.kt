@@ -82,35 +82,4 @@ data class ProjectionSettings(
         mutable[index] = assignment
         return copy(screenAssignments = mutable)
     }
-
-    fun getBrowserSourceOutput(index: Int): ScreenAssignment =
-        browserSourceOutputs.getOrElse(index) { ScreenAssignment() }
-
-    fun withBrowserSourceOutput(index: Int, assignment: ScreenAssignment): ProjectionSettings {
-        val mutable = browserSourceOutputs.toMutableList()
-        while (mutable.size <= index) mutable.add(ScreenAssignment())
-        mutable[index] = assignment
-        return copy(browserSourceOutputs = mutable)
-    }
-
-    fun addBrowserSourceOutput(): ProjectionSettings =
-        copy(browserSourceOutputs = browserSourceOutputs + ScreenAssignment())
-
-    fun removeBrowserSourceOutput(index: Int): ProjectionSettings =
-        copy(browserSourceOutputs = browserSourceOutputs.filterIndexed { i, _ -> i != index })
-
-    fun getNdiOutput(index: Int): ScreenAssignment =
-        ndiOutputs.getOrElse(index) { ScreenAssignment() }
-
-    fun withNdiOutput(index: Int, assignment: ScreenAssignment): ProjectionSettings {
-        val mutable = ndiOutputs.toMutableList()
-        while (mutable.size <= index) mutable.add(ScreenAssignment())
-        mutable[index] = assignment
-        return copy(ndiOutputs = mutable)
-    }
-
-    fun addNdiOutput(): ProjectionSettings = copy(ndiOutputs = ndiOutputs + ScreenAssignment())
-
-    fun removeNdiOutput(index: Int): ProjectionSettings =
-        copy(ndiOutputs = ndiOutputs.filterIndexed { i, _ -> i != index })
 }
