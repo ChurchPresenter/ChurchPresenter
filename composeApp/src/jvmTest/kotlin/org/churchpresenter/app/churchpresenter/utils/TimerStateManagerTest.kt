@@ -109,6 +109,36 @@ class TimerStateManagerTest {
     }
 
     @Test
+    fun `starting a stopwatch records that it counts up`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 0, running = true, countUp = true)
+
+        val state = TimerStateManager.getState(id, 0)
+        assertTrue(state.isRunning)
+        assertTrue(state.countUp, "the direction is settled when it starts, not by whoever is drawing it")
+    }
+
+    @Test
+    fun `a countdown is what starting one without a direction gets`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 60, running = true)
+
+        assertFalse(TimerStateManager.getState(id, 60).countUp)
+    }
+
+    @Test
+    fun `pausing leaves the value where it stood`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 10, running = true)
+        TimerStateManager.tick(id)
+        TimerStateManager.setRunning(id, 10, running = false)
+
+        val state = TimerStateManager.getState(id, 10)
+        assertFalse(state.isRunning)
+        assertEquals(9, state.remainingSeconds)
+    }
+
+    @Test
     fun `timers are isolated per source id`() {
         val a = id()
         val b = id()

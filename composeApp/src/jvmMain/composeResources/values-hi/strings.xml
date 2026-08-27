@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">ब्राउज़र</string>
     <string name="canvas_source_clock">घड़ी</string>
     <string name="canvas_source_timer">घड़ी और टाइमर</string>
+    <string name="canvas_text_curve">वक्र</string>
+    <string name="canvas_letter_spacing">अक्षर अंतराल</string>
     <string name="canvas_source_qrcode">QR कोड</string>
     <string name="canvas_source_camera">कैमरा</string>
     <string name="canvas_source_screen_capture">स्क्रीन कैप्चर</string>

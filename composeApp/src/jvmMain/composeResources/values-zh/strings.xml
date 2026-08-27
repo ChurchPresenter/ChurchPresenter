@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">浏览器</string>
     <string name="canvas_source_clock">时钟</string>
     <string name="canvas_source_timer">时钟与计时器</string>
+    <string name="canvas_text_curve">弧度</string>
+    <string name="canvas_letter_spacing">字间距</string>
     <string name="canvas_source_qrcode">二维码</string>
     <string name="canvas_source_camera">摄像头</string>
     <string name="canvas_source_screen_capture">屏幕捕捉</string>

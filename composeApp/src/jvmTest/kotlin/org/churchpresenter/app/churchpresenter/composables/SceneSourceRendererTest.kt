@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onAllNodesWithText
@@ -457,6 +458,48 @@ class SceneSourceRendererTest {
         onNodeWithTag("renderer").assertExists()
     }
 
+    @Test
+    fun `a straight text source renders its text as one node`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(SceneSource.TextSource(id = "t-straight", name = "T", text = "Welcome"))
+            }
+        }
+        waitForIdle()
+        onNodeWithText("Welcome").assertExists()
+    }
+
+    @Test
+    fun `a curved text source draws its own glyphs, so there is no text node to find`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.TextSource(id = "t-curved", name = "T", text = "Welcome", curve = 60f)
+                )
+            }
+        }
+        waitForIdle()
+        // Curved text is measured and drawn a glyph at a time onto a Canvas — nothing publishes the
+        // whole string, which is the trade the curve asks for.
+        assertEquals(0, countTextNodes("Welcome"), "a bent line is drawn, not laid out")
+    }
+
+    @Test
+    fun `letter spacing does not stop the text being rendered`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.TextSource(
+                        id = "t-tracked", name = "T", text = "Welcome",
+                        letterSpacing = 40f, underline = true, strikethrough = true,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("Welcome").assertExists()
+    }
+
     // ── Clock ──────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -548,8 +591,7 @@ class SceneSourceRendererTest {
         onNodeWithText("00:05").assertExists()
 
         TimerStateManager.setRunning(id, 5, true)
-        waitForIdle()
-        mainClock.advanceTimeBy(1000)
+        TimerStateManager.tick(id)
         waitForIdle()
 
         onNodeWithText("00:04").assertExists("a running countdown must tick down once per second")
@@ -573,8 +615,7 @@ class SceneSourceRendererTest {
         onNodeWithText("00:01").assertExists("before it runs out it is still a countdown")
 
         TimerStateManager.setRunning(id, 1, true)
-        waitForIdle()
-        mainClock.advanceTimeBy(1000)
+        TimerStateManager.tick(id)
         waitForIdle()
 
         onNodeWithText("Time's up!").assertExists()
@@ -595,8 +636,7 @@ class SceneSourceRendererTest {
         }
         waitForIdle()
         TimerStateManager.setRunning(id, 1, true)
-        waitForIdle()
-        mainClock.advanceTimeBy(1000)
+        TimerStateManager.tick(id)
         waitForIdle()
 
         onNodeWithText("00:00").assertExists()
@@ -618,9 +658,8 @@ class SceneSourceRendererTest {
         waitForIdle()
         onNodeWithText("00:00").assertExists("a stopwatch counts from zero, whatever the duration fields say")
 
-        TimerStateManager.setRunning(id, 0, true)
-        waitForIdle()
-        mainClock.advanceTimeBy(1000)
+        TimerStateManager.setRunning(id, 0, true, countUp = true)
+        TimerStateManager.tickUp(id)
         waitForIdle()
 
         onNodeWithText("00:01").assertExists()
@@ -640,7 +679,7 @@ class SceneSourceRendererTest {
             }
         }
         waitForIdle()
-        mainClock.advanceTimeBy(3000)
+        TimerStateManager.tickUp(id)
         waitForIdle()
 
         onNodeWithText("00:00").assertExists()
@@ -1021,4 +1060,8 @@ class SceneSourceRendererTest {
         waitForIdle()
         onNodeWithText("Screen Capture").assertExists()
     }
+
+    /** How many text nodes currently read exactly [text]. */
+    private fun ComposeUiTest.countTextNodes(text: String): Int =
+        onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 }

@@ -1229,6 +1229,8 @@
     <string name="canvas_source_browser">உலாவி</string>
     <string name="canvas_source_clock">கடிகாரம்</string>
     <string name="canvas_source_timer">கடிகாரம் மற்றும் டைமர்</string>
+    <string name="canvas_text_curve">வளைவு</string>
+    <string name="canvas_letter_spacing">எழுத்து இடைவெளி</string>
     <string name="canvas_source_qrcode">QR குறியீடு</string>
     <string name="canvas_source_camera">கேமரா</string>
     <string name="canvas_source_screen_capture">திரைப் பிடிப்பு</string>

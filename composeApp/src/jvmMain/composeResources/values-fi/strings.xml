@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">Selain</string>
     <string name="canvas_source_clock">Kello</string>
     <string name="canvas_source_timer">Kello ja ajastin</string>
+    <string name="canvas_text_curve">Kaarevuus</string>
+    <string name="canvas_letter_spacing">Merkkiväli</string>
     <string name="canvas_source_qrcode">QR-koodi</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Näytön kaappaus</string>
