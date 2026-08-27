@@ -136,8 +136,17 @@ abstract class FileChooser {
      * desktop portal over D-Bus — and none of them failing is a reason for the app to die: without
      * this, a session with no portal takes the whole app down the first time an operator opens a
      * folder. A [CancellationException] is the operator dismissing the dialog, not a fault, so it
-     * is re-thrown untouched and must not latch the platform path off. [context] labels the crash
-     * report the fault path files.
+     * is re-thrown untouched and must not latch the platform path off. [context] labels the report
+     * the fault path files.
+     *
+     * That report is a **warning, not an exception**, because by the time it is written the app has
+     * already recovered: the operator gets the Swing dialog and the interaction completes. Filing it
+     * with [CrashReporter.reportException] said otherwise twice over — it wrote a file into
+     * `crash-reports/`, which is the folder users are told to attach to a bug report, and it reached
+     * Sentry at error level, where `RuntimeException: GetDisplayName failed` from inside FileKit's
+     * Windows shell call reads as a crash the app suffered rather than one it absorbed. Whose
+     * machine it was and that the fallback caught it are the two things a triager needs, so both are
+     * tags.
      */
     internal suspend fun <T> withNativeDialog(
         context: String,
@@ -150,7 +159,15 @@ abstract class FileChooser {
         } catch (e: CancellationException) {
             throw e
         } catch (t: Throwable) {
-            CrashReporter.reportException(t, context = context)
+            CrashReporter.reportWarning(
+                "Native file dialog failed; fell back to the Swing chooser",
+                throwable = t,
+                tags = mapOf(
+                    "subsystem" to "file_chooser",
+                    "chooser.context" to context,
+                    "chooser.recovered" to "true",
+                ),
+            )
             nativeDialogsBroken = true
             fallback()
         }

@@ -168,7 +168,7 @@ import org.churchpresenter.app.churchpresenter.data.VerseKey
 import org.churchpresenter.app.churchpresenter.data.VerseSummary
 import org.churchpresenter.app.churchpresenter.data.availableYears
 import org.churchpresenter.app.churchpresenter.data.resolveDates
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -358,7 +358,7 @@ internal fun CCLIReportContent(
     val xlsChooserTitle = stringResource(Res.string.ccli_file_chooser_xls)
     val xlsFilterDesc = stringResource(Res.string.ccli_file_filter_xls)
 
-    AppThemeWrapper(theme = theme) {
+    AppWindowRoot(theme = theme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
 
