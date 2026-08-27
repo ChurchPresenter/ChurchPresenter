@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">Çünkü Tanrı dünyayı o kadar çok sevdi ki, biricik Oğlu'nu verdi.</string>
     <string name="bible_preview_sample_book">Yuhanna</string>
     <string name="bible_preview_no_translations">Burada görmek için bir çeviri ekleyin</string>
+    <string name="song_preview_full_screen">Tam ekran önizleme</string>
+    <string name="song_preview_lower_third">Alt şerit önizleme</string>
+    <string name="song_element_number">Numara</string>
+    <string name="song_element_title">Başlık</string>
+    <string name="song_element_lyrics">Sözler</string>
+    <string name="song_element_next_section">Sonraki Kısım</string>
+    <string name="song_chunk_verse">1 kıta</string>
+    <string name="song_chunk_line">1 satır</string>
+    <string name="song_preview_chords">Akorlar</string>
+    <string name="song_preview_label">Ön izleme</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Şarkı dilleri</string>
+    <string name="song_language_single">1 · Tek</string>
+    <string name="song_language_bilingual">2 · İki dilli</string>
+    <string name="song_lyrics_layout">Söz düzeni</string>
+    <string name="song_transition_and_markers">Geçiş ve işaretler</string>
+    <string name="song_element_look_ahead">Sonraki önizleme</string>
+    <string name="song_chunk">Bölüm</string>
+    <string name="song_language_scope">Dil</string>
+    <string name="song_preview_look_ahead">Sonraki önizleme</string>
 </resources>

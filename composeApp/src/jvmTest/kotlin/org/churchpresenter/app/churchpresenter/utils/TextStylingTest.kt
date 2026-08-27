@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /** The three per-element settings that reach the text rather than the `TextStyle`. */
-class BibleTextStylingTest {
+class TextStylingTest {
 
     private val verse = "For God so loved the world"
 
@@ -65,7 +65,7 @@ class BibleTextStylingTest {
 
     @Test
     fun `underline and strikethrough combine rather than replacing each other`() {
-        val combined = bibleTextDecoration(underline = true, strikethrough = true)
+        val combined = combinedTextDecoration(underline = true, strikethrough = true)
 
         assertTrue(combined.contains(TextDecoration.Underline))
         assertTrue(combined.contains(TextDecoration.LineThrough))
@@ -73,9 +73,9 @@ class BibleTextStylingTest {
 
     @Test
     fun `each decoration stands alone`() {
-        assertEquals(TextDecoration.Underline, bibleTextDecoration(underline = true, strikethrough = false))
-        assertEquals(TextDecoration.LineThrough, bibleTextDecoration(underline = false, strikethrough = true))
-        assertEquals(TextDecoration.None, bibleTextDecoration(underline = false, strikethrough = false))
+        assertEquals(TextDecoration.Underline, combinedTextDecoration(underline = true, strikethrough = false))
+        assertEquals(TextDecoration.LineThrough, combinedTextDecoration(underline = false, strikethrough = true))
+        assertEquals(TextDecoration.None, combinedTextDecoration(underline = false, strikethrough = false))
     }
 
     @Test
@@ -92,7 +92,7 @@ class BibleTextStylingTest {
 
     @Test
     fun `no word spacing leaves the string unannotated`() {
-        val text = bibleDisplayText(verse, Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0.1f, wordSpacingEm = 0f)
+        val text = styledDisplayText(verse, Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0.1f, wordSpacingEm = 0f)
 
         assertEquals(verse, text.text)
         assertTrue(text.spanStyles.isEmpty(), "nothing to annotate when no word spacing is asked for")
@@ -100,7 +100,7 @@ class BibleTextStylingTest {
 
     @Test
     fun `word spacing widens every space and nothing else`() {
-        val text = bibleDisplayText("a b c", Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0f, wordSpacingEm = 0.5f)
+        val text = styledDisplayText("a b c", Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0f, wordSpacingEm = 0.5f)
 
         assertEquals(listOf(1 to 2, 3 to 4), text.spanStyles.map { it.start to it.end })
     }
@@ -109,14 +109,19 @@ class BibleTextStylingTest {
     fun `a widened space carries the paragraph tracking as well as the extra`() {
         // A span's letterSpacing replaces the style's rather than adding to it, so the paragraph's
         // own tracking has to be folded in or the spaces come out narrower than the letters.
-        val text = bibleDisplayText("a b", Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0.2f, wordSpacingEm = 0.5f)
+        val text = styledDisplayText("a b", Constants.TEXT_TRANSFORM_NONE, letterSpacingEm = 0.2f, wordSpacingEm = 0.5f)
 
         assertEquals(SpanStyle(letterSpacing = 0.7f.em), text.spanStyles.single().item)
     }
 
     @Test
     fun `the transform is applied before the spaces are found`() {
-        val text = bibleDisplayText("a b", Constants.TEXT_TRANSFORM_UPPERCASE, letterSpacingEm = 0f, wordSpacingEm = 1f)
+        val text = styledDisplayText(
+            "a b",
+            Constants.TEXT_TRANSFORM_UPPERCASE,
+            letterSpacingEm = 0f,
+            wordSpacingEm = 1f,
+        )
 
         assertEquals("A B", text.text)
         assertEquals(listOf(1 to 2), text.spanStyles.map { it.start to it.end })

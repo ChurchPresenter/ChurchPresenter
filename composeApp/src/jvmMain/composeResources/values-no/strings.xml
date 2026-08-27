@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">For så høyt har Gud elsket verden at han ga sin Sønn, den enbårne.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Legg til en oversettelse for å se den her</string>
+    <string name="song_preview_full_screen">Forhåndsvisning fullskjerm</string>
+    <string name="song_preview_lower_third">Forhåndsvisning nedre tredjedel</string>
+    <string name="song_element_number">Nummer</string>
+    <string name="song_element_title">Tittel</string>
+    <string name="song_element_lyrics">Sangtekst</string>
+    <string name="song_element_next_section">Neste avsnitt</string>
+    <string name="song_chunk_verse">1 vers</string>
+    <string name="song_chunk_line">1 linje</string>
+    <string name="song_preview_chords">Akkorder</string>
+    <string name="song_preview_label">Forhåndsvisning</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Sangspråk</string>
+    <string name="song_language_single">1 · Ett</string>
+    <string name="song_language_bilingual">2 · Tospråklig</string>
+    <string name="song_lyrics_layout">Tekstoppsett</string>
+    <string name="song_transition_and_markers">Overgang &amp; markører</string>
+    <string name="song_element_look_ahead">Forhåndsvisning</string>
+    <string name="song_chunk">Avsnitt</string>
+    <string name="song_language_scope">Språk</string>
+    <string name="song_preview_look_ahead">Forhåndsvisning</string>
 </resources>

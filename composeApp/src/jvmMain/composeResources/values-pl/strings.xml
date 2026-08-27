@@ -2401,4 +2401,24 @@
     <string name="bible_preview_sample_verse">Tak bowiem Bóg umiłował świat, że Syna swego Jednorodzonego dał.</string>
     <string name="bible_preview_sample_book">Jana</string>
     <string name="bible_preview_no_translations">Dodaj przekład, aby zobaczyć go tutaj</string>
+    <string name="song_preview_full_screen">Podgląd pełnego ekranu</string>
+    <string name="song_preview_lower_third">Podgląd dolnej tercji</string>
+    <string name="song_element_number">Numer</string>
+    <string name="song_element_title">Tytuł</string>
+    <string name="song_element_lyrics">Tekst</string>
+    <string name="song_element_next_section">Następna zwrotka</string>
+    <string name="song_chunk_verse">1 zwrotka</string>
+    <string name="song_chunk_line">1 wiersz</string>
+    <string name="song_preview_chords">Akordy</string>
+    <string name="song_preview_label">Podgląd</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">Języki pieśni</string>
+    <string name="song_language_single">1 · Jeden</string>
+    <string name="song_language_bilingual">2 · Dwujęzycznie</string>
+    <string name="song_lyrics_layout">Układ tekstu</string>
+    <string name="song_transition_and_markers">Przejście i znaczniki</string>
+    <string name="song_element_look_ahead">Zapowiedź</string>
+    <string name="song_chunk">Fragment</string>
+    <string name="song_language_scope">Język</string>
+    <string name="song_preview_look_ahead">Zapowiedź</string>
 </resources>

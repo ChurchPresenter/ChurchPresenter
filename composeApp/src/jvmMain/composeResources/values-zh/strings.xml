@@ -2409,4 +2409,24 @@
     <string name="bible_preview_sample_verse">神爱世人，甚至将他的独生子赐给他们。</string>
     <string name="bible_preview_sample_book">约翰福音</string>
     <string name="bible_preview_no_translations">添加译本后即可在此查看</string>
+    <string name="song_preview_full_screen">全屏预览</string>
+    <string name="song_preview_lower_third">下三分之一预览</string>
+    <string name="song_element_number">编号</string>
+    <string name="song_element_title">标题</string>
+    <string name="song_element_lyrics">歌词</string>
+    <string name="song_element_next_section">下一段</string>
+    <string name="song_chunk_verse">每次 1 段</string>
+    <string name="song_chunk_line">每次 1 行</string>
+    <string name="song_preview_chords">和弦</string>
+    <string name="song_preview_label">预览</string>
+    <string name="song_preview_sample_title">Amazing Grace</string>
+    <string name="song_languages">歌曲语言</string>
+    <string name="song_language_single">1 · 单语</string>
+    <string name="song_language_bilingual">2 · 双语</string>
+    <string name="song_lyrics_layout">歌词版式</string>
+    <string name="song_transition_and_markers">转场与标记</string>
+    <string name="song_element_look_ahead">预览下一段</string>
+    <string name="song_chunk">分段</string>
+    <string name="song_language_scope">语言</string>
+    <string name="song_preview_look_ahead">预览下一段</string>
 </resources>
