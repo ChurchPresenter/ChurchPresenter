@@ -11,6 +11,8 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -172,7 +174,9 @@ class SongPresenterBilingualRenderTest {
     @Test
     fun `secondary only drops the first language`() {
         present(bilingual(), settings(fullscreenLanguage = Constants.SONG_LANG_SECONDARY)) {
-            onNodeWithText("Chudnaya blagodat", substring = true).assertExists()
+            // Twice over, now that the title draws by default: the slide's title switches to the
+            // secondary one too, and the fixture gives both the same words.
+            onAllNodesWithText("Chudnaya blagodat", substring = true).onFirst().assertExists()
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertDoesNotExist()
         }
     }
