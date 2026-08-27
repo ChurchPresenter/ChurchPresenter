@@ -36,6 +36,12 @@ import kotlinx.coroutines.delay
 import java.lang.invoke.MethodHandles
 
 private const val ASCII_MAX = 128
+
+/**
+ * Free space JCEF needs to unpack, with room to spare — the download is a bundled Chromium and runs
+ * to a couple of hundred megabytes.
+ */
+private const val JCEF_REQUIRED_BYTES = 400L * 1024 * 1024
 private const val AUDIO_INIT_DELAY_MS = 2000L
 private const val AUDIO_RETRY_DELAY_MS = 5000L
 
@@ -175,6 +181,24 @@ object CefManager {
         }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
     }
 
+    /**
+     * Why a JCEF install cannot be attempted into a directory in this state, or null to go ahead.
+     *
+     * Both answers are the machine: a directory the user cannot write to (ProgramData ACLs vary,
+     * and a locked-down install is a normal corporate build), and a disk without room for a
+     * bundled Chromium. Neither is a defect and neither becomes an event; what they do is stop the
+     * app spending a download to discover it, and leave a tag saying which one it was.
+     *
+     * Zero is not "full": `File.usableSpace` answers 0 when it cannot determine the figure at all,
+     * so treating it as no space would block the install on every machine whose filesystem does not
+     * report one. An unknown figure goes ahead and lets the real attempt decide.
+     */
+    internal fun jcefInstallBlocker(writable: Boolean, usableSpaceBytes: Long): String? = when {
+        !writable -> "permission_denied"
+        usableSpaceBytes in 1 until JCEF_REQUIRED_BYTES -> "disk_space"
+        else -> null
+    }
+
     fun init() {
         if (initialized) return
         if (isUnsupportedMacOS()) {
@@ -188,6 +212,23 @@ object CefManager {
         val installDir = File(root, "jcef")
         try {
             installDir.mkdirs()
+
+            // Two of the ways this fails are the machine rather than the app, and both are knowable
+            // before the download starts. Asking beforehand keeps them out of the crash reports and
+            // is locale-independent — the exceptions they raise say "Access is denied" and "There is
+            // not enough space on the disk" only on an English Windows, so classifying them after
+            // the fact would work in one language.
+            val blocker = jcefInstallBlocker(installDir.canWrite(), installDir.usableSpace)
+            if (blocker != null) {
+                System.err.println("[JCEF] Not installing to ${installDir.path}: $blocker")
+                cefApp = null
+                initialized = false
+                // No event: web features simply stay unavailable, which jcef.available already
+                // says. The tag rides along on anything else this session reports.
+                runCatching { CrashReporter.setTag("jcef.blocked", blocker) }
+                return
+            }
+
             val cacheDir = File(root, "webview-cache")
             cacheDir.mkdirs()
 
