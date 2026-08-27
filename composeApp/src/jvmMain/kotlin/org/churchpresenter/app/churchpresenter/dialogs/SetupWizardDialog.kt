@@ -166,7 +166,7 @@ import churchpresenter.composeapp.generated.resources.setup_wizard_skip
 import churchpresenter.composeapp.generated.resources.setup_wizard_step
 import churchpresenter.composeapp.generated.resources.setup_wizard_title
 import org.churchpresenter.app.churchpresenter.data.Language
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
@@ -239,7 +239,7 @@ internal fun SetupWizardContent(
     var goingForward by remember { mutableStateOf(true) }
 
     LanguageProvider(language = selectedLanguage) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background

@@ -17,6 +17,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import io.ktor.utils.io.ByteReadChannel
+import java.io.EOFException
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -81,6 +82,14 @@ object BibleInstallSupport {
      *
      * Ktor wraps, so the cause chain is walked — but only as far as [isStall] walks it, for the
      * same reason.
+     *
+     * [EOFException] is here for the connection that stops mid-response — ktor CIO raises it as
+     * "the server prematurely closed the connection", which reached Sentry from a church on a
+     * network that does that to `raw.githubusercontent.com`. It is the same fact as
+     * [TruncatedBodyException], arriving one layer lower: the bytes stopped coming. The cost of
+     * including it is that a genuinely truncated *archive* also stops being reported, which is
+     * accepted — a half-downloaded archive is the same failed download, and the outcome still
+     * reaches the install dialog either way.
      */
     internal fun Throwable.isOperatorEnvironment(depth: Int = 0): Boolean =
         this is UnresolvedAddressException ||
@@ -90,6 +99,7 @@ object BibleInstallSupport {
             this is TruncatedBodyException ||
             this is InsufficientDiskSpaceException ||
             this is SSLException ||
+            this is EOFException ||
             (depth < MAX_CAUSE_DEPTH && cause?.isOperatorEnvironment(depth + 1) == true)
 
     const val COPY_BUFFER_BYTES = 64 * 1024

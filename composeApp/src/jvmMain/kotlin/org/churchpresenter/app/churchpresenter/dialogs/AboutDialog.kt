@@ -56,7 +56,7 @@ import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
@@ -118,7 +118,7 @@ internal fun AboutDialogContent(
      */
     versionDisplay: String = BuildConfig.VERSION_DISPLAY,
 ) {
-    AppThemeWrapper(theme = theme) {
+    AppWindowRoot(theme = theme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -281,7 +281,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             ConverterApp()
         }
     }
@@ -304,7 +304,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1420.dp, height = 880.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
                 onClose = onClose,
@@ -334,7 +334,7 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1200.dp, height = 800.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             // embedded = true regardless of outputDir: opened from the Help menu there is no output
             // folder, but the generator is still inside the app's theme and must follow it.
             LottieGenApp(
@@ -356,7 +356,7 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1500.dp, height = 950.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             StyleEditorApp(standalone = false)
         }
     }

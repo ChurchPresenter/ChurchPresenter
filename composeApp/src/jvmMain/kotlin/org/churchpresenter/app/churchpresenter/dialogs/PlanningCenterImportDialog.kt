@@ -100,7 +100,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.PlanningCenterSettings
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
@@ -149,7 +149,7 @@ fun PlanningCenterImportDialog(
             ),
             title = stringResource(Res.string.planning_center_import_title)
         ) {
-            AppThemeWrapper(theme = theme) {
+            AppWindowRoot(theme = theme) {
                 PlanningCenterConnectDialogContent(
                     isConnecting = isConnecting,
                     connectionError = connectionError,
@@ -199,7 +199,7 @@ fun PlanningCenterImportDialog(
         title = stringResource(Res.string.planning_center_import_title),
         resizable = true
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             PlanningCenterImportDialogContent(
                 viewModel = viewModel,
                 settings = settings,
