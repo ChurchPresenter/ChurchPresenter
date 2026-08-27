@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
 import java.net.ConnectException
@@ -9,6 +10,7 @@ import javax.net.ssl.SSLException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -229,5 +231,42 @@ class InstanceLinkMessageTest {
         val c = clientWith(Recorder())
 
         assertEquals("other", c.classifyConnectFailure(IllegalStateException("something else")))
+    }
+
+    @Test
+    fun `a ktor connect timeout is a timeout and not a refusal`() {
+        val c = clientWith(Recorder())
+
+        // ConnectTimeoutException extends java.net.ConnectException, so an `is ConnectException`
+        // arm placed first swallows it and every timed-out connect is filed as "refused" — the
+        // bucket that means the operator has not started the primary yet. The two point at
+        // different fixes, so the order of the arms is the behaviour here.
+        assertEquals(
+            "timeout",
+            c.classifyConnectFailure(
+                ConnectTimeoutException("Connect timeout has expired [url=ws://host:8763/ws]")
+            )
+        )
+    }
+
+    @Test
+    fun `the benign kinds stay quiet until a run of failures persists`() {
+        val c = clientWith(Recorder())
+
+        // A follower routinely starts before its primary; the first refusals are that ordering.
+        for (kind in listOf("refused", "dns")) {
+            assertFalse(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
+            assertFalse(c.shouldReportConnectFailure(kind, consecutiveFailures = 9), kind)
+            assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 10), kind)
+        }
+    }
+
+    @Test
+    fun `a failure that suggests a regression reports the first time`() {
+        val c = clientWith(Recorder())
+
+        for (kind in listOf("timeout", "tls", "other")) {
+            assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
+        }
     }
 }
