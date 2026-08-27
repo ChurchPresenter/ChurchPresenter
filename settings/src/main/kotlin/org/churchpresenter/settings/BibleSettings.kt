@@ -74,6 +74,36 @@ data class BibleTranslationSettings(
     val lowerThirdReferenceShadowColor: String = "#000000",
     val lowerThirdReferenceShadowSize: Int = 100,
     val lowerThirdReferenceShadowOpacity: Int = 90,
+
+    // Struck-through text, alongside the bold/italic/underline flags above. Stored as its own flag
+    // rather than folded into the underline one because Compose composes the two decorations.
+    val textStrikethrough: Boolean = false,
+    val lowerThirdTextStrikethrough: Boolean = false,
+    val referenceStrikethrough: Boolean = false,
+    val lowerThirdReferenceStrikethrough: Boolean = false,
+
+    // Tracking, in points at the configured font size, added between every character. Negative
+    // tightens. The presenter scales it with the rest of the type, so a value set against one
+    // output resolution still reads the same on another.
+    val textLetterSpacing: Int = 0,
+    val lowerThirdTextLetterSpacing: Int = 0,
+    val referenceLetterSpacing: Int = 0,
+    val lowerThirdReferenceLetterSpacing: Int = 0,
+
+    // Extra space added at each word break, on top of whatever the face's own space glyph is.
+    // Compose has no `wordSpacing`, so it is drawn by widening the spaces themselves -- see
+    // `bibleDisplayText`.
+    val textWordSpacing: Int = 0,
+    val lowerThirdTextWordSpacing: Int = 0,
+    val referenceWordSpacing: Int = 0,
+    val lowerThirdReferenceWordSpacing: Int = 0,
+
+    // One of [Constants.TEXT_TRANSFORM_NONE], `_UPPERCASE`, `_LOWERCASE` or `_CAPITALIZE`, applied
+    // as the text is drawn.
+    val textTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdTextTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val referenceTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdReferenceTransform: String = Constants.TEXT_TRANSFORM_NONE,
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the

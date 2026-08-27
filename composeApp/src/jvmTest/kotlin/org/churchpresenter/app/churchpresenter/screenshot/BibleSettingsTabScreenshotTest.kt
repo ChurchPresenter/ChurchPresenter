@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
@@ -29,13 +31,14 @@ import kotlin.test.Test
 /**
  * The Bible tab of the settings dialog, in both themes.
  *
- * The tab grows with the library: up to [Constants.MAX_BIBLE_TRANSLATIONS] translations can be
- * presented at once, each arriving as a row in the selection list on the left *and* a style block of
- * its own on the right. So the count is the axis worth shooting — reorder controls only appear past
- * two, and the Add button goes away at six — and the states below walk it.
+ * The tab is a rail of stack-wide settings on the left and, on the right, a live preview over one
+ * set of styling controls. That one set stands for four stored profiles — verse and reference,
+ * full screen and lower third — chosen by the two segmented switches above it, so the axes worth
+ * shooting are the translation count (reorder controls appear past two, the Add picker goes at six)
+ * and each position of those switches.
  *
- * Only the first style block is open on arrival; the rest are a header row each until asked for,
- * which is what keeps a six-translation setup readable at all.
+ * The preview renders `BiblePresenter` itself rather than reproducing its layout, so these images
+ * also catch a presenter change that alters what the operator is shown.
  *
  * The font dropdowns are deliberately never opened: their list is whatever `GraphicsEnvironment`
  * reports, so an image of one would differ by the machine that recorded it.
@@ -101,27 +104,42 @@ class BibleSettingsTabScreenshotTest {
     fun `six translations, the most allowed`() =
         shoot("six", settings = withTranslations(Constants.MAX_BIBLE_TRANSLATIONS))
 
-    // ── The style column ────────────────────────────────────────────────────────────────────────
+    // ── What the one control set is pointed at ──────────────────────────────────────────────────
 
-    /** A later block opened: the one that was open closes, so only ever one is expanded. */
+    /** The lower third: a band on the floor of the screen, and its own styling profile. */
     @Test
-    fun `a later style block opened`() = shoot("style_second_open", settings = withTranslations(3)) {
-        accordionHeader(1).performClick()
+    fun `the lower third`() = shoot("lower_third", settings = withTranslations(2)) {
+        onNodeWithText("Lower Third").performClick()
         waitForIdle()
     }
 
-    /**
-     * Every block shut: clicking the one that is open closes it, and nothing opens in its place.
-     *
-     * With six translations this is the whole style column as six header rows — the shape an
-     * operator gets once they have set each one up and stopped editing.
-     */
+    /** The reference, which is the one element with a position of its own to set. */
     @Test
-    fun `all style blocks collapsed`() = shoot(
-        "all_collapsed",
-        settings = withTranslations(Constants.MAX_BIBLE_TRANSLATIONS),
-    ) {
-        accordionHeader(0).performClick()
+    fun `the reference element`() = shoot("element_reference") {
+        onNodeWithText("Reference").performClick()
+        waitForIdle()
+    }
+
+    /** The reference on the lower third — the fourth of the four stored profiles. */
+    @Test
+    fun `the reference on the lower third`() = shoot("element_reference_lower_third") {
+        onNodeWithText("Lower Third").performClick()
+        waitForIdle()
+        onNodeWithText("Reference").performClick()
+        waitForIdle()
+    }
+
+    /** A later translation selected: the chips point the one control set at it. */
+    @Test
+    fun `a later translation selected`() = shoot("translation_second", settings = withTranslations(3)) {
+        onAllNodesWithText("2 · ", substring = true).onFirst().performClick()
+        waitForIdle()
+    }
+
+    /** Shadow on: three more controls fold out beside the checkbox, on the transform's own row. */
+    @Test
+    fun `shadow switched on`() = shoot("shadow_on") {
+        onNodeWithText("Shadow").performClick()
         waitForIdle()
     }
 
@@ -179,15 +197,20 @@ class BibleSettingsTabScreenshotTest {
         },
     )
 
-    /**
-     * The style block's own header row on the right.
-     *
-     * Matched on the dash the header joins its parts with — "Translation 2 — rst" — because the
-     * module's bare name is also the value of that translation's *selector* on the left, and a plain
-     * name match hits the selector first and opens its menu instead of the accordion.
-     */
-    private fun ComposeUiTest.accordionHeader(index: Int) =
-        onAllNodesWithText("— ${displayName(index)}", substring = true)[0]
+    /** The typography the redesign added: tracking, word spacing, a case transform, strikethrough. */
+    @Test
+    fun `a translation using the new typography controls`() = shoot(
+        "styled_typography",
+        settings = withTranslations(1) { _, t ->
+            t.copy(
+                textLetterSpacing = 6,
+                textWordSpacing = 12,
+                textStrikethrough = true,
+                textTransform = Constants.TEXT_TRANSFORM_UPPERCASE,
+                referenceTransform = Constants.TEXT_TRANSFORM_LOWERCASE,
+            )
+        },
+    )
 
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
@@ -211,8 +234,6 @@ class BibleSettingsTabScreenshotTest {
             ),
         )
     }
-
-    private fun displayName(index: Int) = MODULES[index].substringBeforeLast('.')
 
     /**
      * A fixed folder under a neutral root.
