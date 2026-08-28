@@ -1092,6 +1092,8 @@
     <string name="canvas_source_browser">Brauser</string>
     <string name="canvas_source_clock">Kell</string>
     <string name="canvas_source_timer">Kell ja taimer</string>
+    <string name="canvas_text_curve">Kõverus</string>
+    <string name="canvas_letter_spacing">Tähevahe</string>
     <string name="canvas_source_qrcode">QR-kood</string>
     <string name="canvas_source_camera">Kaamera</string>
     <string name="canvas_source_screen_capture">Ekraanihõive</string>

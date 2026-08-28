@@ -1214,6 +1214,8 @@
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Годинник</string>
     <string name="canvas_source_timer">Годинник і таймер</string>
+    <string name="canvas_text_curve">Кривина</string>
+    <string name="canvas_letter_spacing">Міжлітерний інтервал</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захоплення екрана</string>

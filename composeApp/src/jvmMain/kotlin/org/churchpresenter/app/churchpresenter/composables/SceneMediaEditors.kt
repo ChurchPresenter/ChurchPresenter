@@ -51,7 +51,8 @@ import churchpresenter.composeapp.generated.resources.canvas_scale_none
 import churchpresenter.composeapp.generated.resources.canvas_expand_text_field
 import churchpresenter.composeapp.generated.resources.canvas_text_content
 import churchpresenter.composeapp.generated.resources.close
-import churchpresenter.composeapp.generated.resources.canvas_line_spacing
+import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
+import churchpresenter.composeapp.generated.resources.canvas_text_curve
 import churchpresenter.composeapp.generated.resources.canvas_font
 import churchpresenter.composeapp.generated.resources.canvas_align_horizontal
 import churchpresenter.composeapp.generated.resources.canvas_align_vertical
@@ -83,6 +84,13 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
+/** Two full turns of curve either way; past that the line runs into itself. */
+private const val MAX_TEXT_CURVE = 200f
+/** The font name needs the room; its size is three digits. */
+private const val FONT_NAME_WEIGHT = 2f
+/** Tracking, as a percentage of the font size: tight enough to touch, wide enough to space out. */
+private const val MIN_LETTER_SPACING = -20f
+private const val MAX_LETTER_SPACING = 100f
 private const val MAX_ANGLE_DEGREES = 360f
 private const val PERCENT_SCALE = 100f
 private const val MIN_RENDER_WIDTH = 320
@@ -221,27 +229,53 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             }
         }
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        SlimSlider(
-            value = source.lineSpacing / 100f,
-            onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
-            valueRange = 0.5f..3f,
-            trailingLabel = "${source.lineSpacing}%",
-            modifier = Modifier.weight(1f)
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_letter_spacing),
+        source.letterSpacing, MIN_LETTER_SPACING, MAX_LETTER_SPACING, "%"
+    ) { v -> onUpdate(source.copy(letterSpacing = v)) }
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_text_curve),
+        source.curve,
+        -MAX_TEXT_CURVE,
+        MAX_TEXT_CURVE,
+        "%"
+    ) { v ->
+        onUpdate(source.copy(curve = v))
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FontSettingsDropdown(
+            label = stringResource(Res.string.canvas_font),
+            value = source.fontFamily,
+            fonts = availableFonts,
+            fillWidth = true,
+            onValueChange = { onUpdate(source.copy(fontFamily = it)) },
+            modifier = Modifier.weight(FONT_NAME_WEIGHT)
         )
+        PropertyTextField(
+            stringResource(Res.string.canvas_clock_font_size),
+            source.fontSize.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+        }
     }
-    FontSettingsDropdown(
-        label = stringResource(Res.string.canvas_font),
-        value = source.fontFamily,
-        fonts = availableFonts,
-        fillWidth = true,
-        onValueChange = { onUpdate(source.copy(fontFamily = it)) },
-        modifier = Modifier.fillMaxWidth()
+    TextStyleButtons(
+        bold = source.bold,
+        italic = source.italic,
+        underline = source.underline,
+        shadow = false,
+        onBoldChange = { onUpdate(source.copy(bold = it)) },
+        onItalicChange = { onUpdate(source.copy(italic = it)) },
+        onUnderlineChange = { onUpdate(source.copy(underline = it)) },
+        onShadowChange = {},
+        strikethrough = source.strikethrough,
+        onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
+        showShadow = false,
     )
-    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
-        v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
-    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)

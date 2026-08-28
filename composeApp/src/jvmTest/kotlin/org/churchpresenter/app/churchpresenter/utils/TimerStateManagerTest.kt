@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -10,6 +11,10 @@ import kotlin.test.assertTrue
  * properties panel, so each test uses its own sourceId rather than resetting global state.
  */
 class TimerStateManagerTest {
+
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
 
     private var counter = 0
     private fun id() = "test-source-${counter++}-${this.hashCode()}"
@@ -106,6 +111,36 @@ class TimerStateManagerTest {
         val id = id()
         TimerStateManager.tickUp(id)
         assertEquals(0, TimerStateManager.getState(id, 0).remainingSeconds)
+    }
+
+    @Test
+    fun `starting a stopwatch records that it counts up`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 0, running = true, countUp = true)
+
+        val state = TimerStateManager.getState(id, 0)
+        assertTrue(state.isRunning)
+        assertTrue(state.countUp, "the direction is settled when it starts, not by whoever is drawing it")
+    }
+
+    @Test
+    fun `a countdown is what starting one without a direction gets`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 60, running = true)
+
+        assertFalse(TimerStateManager.getState(id, 60).countUp)
+    }
+
+    @Test
+    fun `pausing leaves the value where it stood`() {
+        val id = id()
+        TimerStateManager.setRunning(id, 10, running = true)
+        TimerStateManager.tick(id)
+        TimerStateManager.setRunning(id, 10, running = false)
+
+        val state = TimerStateManager.getState(id, 10)
+        assertFalse(state.isRunning)
+        assertEquals(9, state.remainingSeconds)
     }
 
     @Test

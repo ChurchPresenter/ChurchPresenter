@@ -21,7 +21,12 @@ import kotlin.test.assertTrue
  */
 class StringBundleTest {
 
-    private val locales = listOf("be", "cs", "de", "kk", "pl", "ru", "uk")
+    /** Every language the app itself offers, which is what the converter window has to answer in. */
+    private val locales = listOf(
+        "ar", "be", "cs", "de", "es", "et", "fa", "fi", "fr", "hi", "hr", "id", "ja", "kk", "lo",
+        "lv", "ms", "ne", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "sw", "ta", "th", "tl",
+        "tr", "uk", "uz", "zh",
+    )
 
     private fun load(name: String): Properties {
         val stream = requireNotNull(javaClass.classLoader.getResourceAsStream(name)) { "missing $name" }
@@ -46,7 +51,7 @@ class StringBundleTest {
      * Translations are managed outside this repo, so a string added to English is untranslated until
      * that process runs — and demanding parity here would mean either blocking every new string or
      * writing English into the locale files, which is worse than an obvious gap. What is checked
-     * instead is that the gap is the *same* everywhere: a key missing from all seven locales is
+     * instead is that the gap is the *same* everywhere: a key missing from every locale is
      * awaiting translation, while one missing from only some is a translation that was dropped,
      * which is the case that would otherwise hide behind the English fallback.
      */
@@ -112,10 +117,17 @@ class StringBundleTest {
         assertEquals(load("converter_strings_de.properties").getProperty("tab_bibles"), Strings.tabBibles)
     }
 
+    /**
+     * Greek, because it is not in [locales] and the app does not offer it either. The language
+     * named here has to be one the converter genuinely has no bundle for — this test read `fr` until
+     * French was translated, and then passed for the wrong reason, since "Bibles" is spelled the
+     * same in both.
+     */
     @Test
     fun `a language with no bundle falls back to English, not to the machine's`() {
         Locale.setDefault(Locale.forLanguageTag("ru"))
-        Strings.setLocale(Locale.forLanguageTag("fr"))
+        Strings.setLocale(Locale.forLanguageTag("el"))
         assertEquals(english().getProperty("tab_bibles"), Strings.tabBibles)
+        assertTrue("el" !in locales)
     }
 }

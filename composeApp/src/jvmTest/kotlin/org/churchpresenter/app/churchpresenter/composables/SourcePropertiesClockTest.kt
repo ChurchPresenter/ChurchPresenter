@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,26 +33,31 @@ import kotlin.test.assertEquals
  */
 class SourcePropertiesClockTest {
 
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
+
     /** Ordinals of the clock panel's fields — the header owns the first six. */
     private object Field {
-        const val FONT_SIZE = 6
-        const val TARGET_HOUR = 7
-        const val TARGET_MINUTE = 8
-        const val TARGET_SECOND = 9
-        const val EXPIRED_TEXT = 10
+        const val LETTER_SPACING = 6
+        const val CURVE = 7
+        const val FONT_SIZE = 8
+        const val TARGET_HOUR = 9
+        const val TARGET_MINUTE = 10
+        const val TARGET_SECOND = 11
+        const val EXPIRED_TEXT = 12
 
         // The time of day a Specific Time clock counts to takes the same three slots.
-        const val TIME_HOUR = 7
-        const val TIME_MINUTE = 8
-        const val TIME_SECOND = 9
+        const val TIME_HOUR = 9
+        const val TIME_MINUTE = 10
+        const val TIME_SECOND = 11
     }
 
-    /** Ordinals of the panel's checkboxes, in composition order. */
+    /** Ordinals of the panel's checkboxes, in composition order. Bold is a button now, not a box. */
     private object Check {
         const val SHOW_HOURS = 0
         const val SHOW_SECONDS = 1
-        const val BOLD = 2
-        const val COUNT = 3
+        const val COUNT = 2
     }
 
     private fun countdown(id: String, minutes: Int = 5) =
@@ -62,7 +68,7 @@ class SourcePropertiesClockTest {
     @Test
     fun `the section is headed and every clock control captioned`() = sourcePanel(Fixture.clock("clk-caps")) { _ ->
         listOf(
-            "MODE", "FORMAT", "Show Hours", "Show Seconds", "Bold", "FONT SIZE",
+            "MODE", "FORMAT", "Show Hours", "Show Seconds", "Letter Spacing", "Curve", "FONT SIZE",
             "TEXT COLOR", "BACKGROUND COLOR",
         ).forEach { caption ->
             onNodeWithText(caption).assertExists("\"$caption\" must caption a control on the clock panel")
@@ -72,9 +78,9 @@ class SourcePropertiesClockTest {
     }
 
     @Test
-    fun `a wall clock offers one field, three checkboxes and no timer`() =
+    fun `a wall clock offers three fields, two checkboxes and no timer`() =
         sourcePanel(Fixture.clock("clk-shape")) { _ ->
-            textFields().assertCountEquals(7)
+            textFields().assertCountEquals(9)
             checkboxes().assertCountEquals(Check.COUNT)
             listOf("HR", "MIN", "SEC", "Start", "Reset")
                 .forEach { assertEquals(0, countOf(it), "\"$it\" belongs to the countdown") }
@@ -128,7 +134,7 @@ class SourcePropertiesClockTest {
             onNodeWithText("SEC").assertExists()
             assertEquals(2, countOf(":"), "with a colon between each pair")
             onNodeWithText("TEXT WHEN TIMER EXPIRES").assertExists("and the message shown at zero")
-            textFields().assertCountEquals(11)
+            textFields().assertCountEquals(13)
         }
 
     @Test
@@ -138,7 +144,7 @@ class SourcePropertiesClockTest {
 
             assertEquals("clock", (get() as SceneSource.ClockSource).mode)
             assertEquals(0, countOf("HR"), "the duration fields go with it")
-            textFields().assertCountEquals(7)
+            textFields().assertCountEquals(9)
         }
     }
 
@@ -183,11 +189,12 @@ class SourcePropertiesClockTest {
     // ── The three flags ───────────────────────────────────────────────────────
 
     @Test
-    fun `all three flags are on out of the box`() = sourcePanel(Fixture.clock("clk-flags")) { _ ->
-        checkboxes()[Check.SHOW_HOURS].assertIsOn()
-        checkboxes()[Check.SHOW_SECONDS].assertIsOn()
-        checkboxes()[Check.BOLD].assertIsOn()
-    }
+    fun `both display flags are on out of the box, and the clock starts bold`() =
+        sourcePanel(Fixture.clock("clk-flags")) { get ->
+            checkboxes()[Check.SHOW_HOURS].assertIsOn()
+            checkboxes()[Check.SHOW_SECONDS].assertIsOn()
+            assertEquals(true, (get() as SceneSource.ClockSource).bold, "a read-out is bold by default")
+        }
 
     @Test
     fun `unticking Show Hours flips only that flag`() = sourcePanel(Fixture.clock("clk-hours")) { get ->
@@ -212,15 +219,54 @@ class SourcePropertiesClockTest {
     }
 
     @Test
-    fun `unticking Bold flips only that flag`() = sourcePanel(Fixture.clock("clk-bold")) { get ->
-        toggleCheckbox(Check.BOLD)
+    fun `the Bold button turns the clock's own bold off again`() = sourcePanel(Fixture.clock("clk-bold")) { get ->
+        clickStyleButton("B")
 
         assertEquals(
             Fixture.clock("clk-bold").copy(bold = false), get(),
-            "Bold may write only its own flag",
+            "B may write only the bold flag",
         )
-        checkboxes()[Check.BOLD].assertIsOff()
     }
+
+    @Test
+    fun `Italic, Underline and Strikethrough each store their own face`() {
+        sourcePanel(Fixture.clock("clk-italic")) { get ->
+            clickStyleButton("I")
+            assertEquals(Fixture.clock("clk-italic").copy(italic = true), get())
+        }
+        sourcePanel(Fixture.clock("clk-underline")) { get ->
+            clickStyleButton("U")
+            assertEquals(Fixture.clock("clk-underline").copy(underline = true), get())
+        }
+        sourcePanel(Fixture.clock("clk-strike")) { get ->
+            clickStyleButton("S")
+            assertEquals(Fixture.clock("clk-strike").copy(strikethrough = true), get())
+        }
+    }
+
+    // ── Letter spacing and curve ──────────────────────────────────────────────
+
+    @Test
+    fun `typing a letter spacing stores it`() = sourcePanel(Fixture.clock("clk-tracking")) { get ->
+        commitField(Field.LETTER_SPACING, "30")
+
+        assertEquals(30f, (get() as SceneSource.ClockSource).letterSpacing)
+    }
+
+    @Test
+    fun `dragging the curve arches the read-out`() = sourcePanel(Fixture.clock("clk-curve")) { get ->
+        tapSliderUnder("Curve", fraction = 1f, gapDp = Gap.INPUT)
+
+        assertEquals(200f, (get() as SceneSource.ClockSource).curve)
+    }
+
+    @Test
+    fun `the read-out is straight and evenly spaced out of the box`() =
+        sourcePanel(Fixture.clock("clk-plain")) { get ->
+            val source = get() as SceneSource.ClockSource
+            assertEquals(0f, source.curve)
+            assertEquals(0f, source.letterSpacing)
+        }
 
     @Test
     fun `a flag that was stored off can be turned back on`() {
@@ -474,7 +520,7 @@ class SourcePropertiesClockTest {
             chooseFromDropdown(showing = "Clock", option = "Count Up")
 
             assertEquals("count_up", (get() as SceneSource.ClockSource).mode)
-            textFields().assertCountEquals(7)
+            textFields().assertCountEquals(9)
             assertEquals(0, countOf("HR"), "a stopwatch counts from zero, not from a duration")
             roleButtons().assertCountEquals(2)
             onNodeWithText("00:00:00").assertExists("and it reads out at zero")
@@ -553,7 +599,7 @@ class SourcePropertiesClockTest {
             onNodeWithText("MIN").assertExists()
             onNodeWithText("SEC").assertExists()
             assertEquals(2, countOf(":"), "the time of day reads as one hr:min:sec row too")
-            textFields().assertCountEquals(10)
+            textFields().assertCountEquals(12)
         }
 
     @Test

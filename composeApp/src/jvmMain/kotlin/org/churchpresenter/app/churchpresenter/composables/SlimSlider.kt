@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,10 +73,19 @@ fun SlimSlider(
     // Hoisted for the Canvas below, which cannot read the theme itself.
     val handleColor = MaterialTheme.colorScheme.onPrimary
 
+    // `pointerInput` below keeps the block it was given until one of its keys changes, so the block
+    // holds whichever lambda was passed on the composition that created it. A caller whose lambda
+    // closes over data — the canvas panel's `source.copy(...)`, say — would then have a drag write
+    // back the data as it stood when the slider first appeared: edit a text source, drag any slider,
+    // and the old text comes back. Reading both callbacks through `rememberUpdatedState` keeps the
+    // retained block pointed at the current ones.
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
+
     fun seekToX(x: Float, width: Int) {
         if (!enabled || width <= 0) return
         val f = (x / width).coerceIn(0f, 1f)
-        onValueChange(start + f * span)
+        currentOnValueChange(start + f * span)
     }
 
     Row(
@@ -91,13 +101,13 @@ fun SlimSlider(
                 .pointerInput(enabled, start, end) {
                     detectTapGestures { offset ->
                         seekToX(offset.x, size.width)
-                        onValueChangeFinished?.invoke()
+                        currentOnValueChangeFinished?.invoke()
                     }
                 }
                 .pointerInput(enabled, start, end) {
                     detectHorizontalDragGestures(
                         onDragStart = { offset -> dragging = true; seekToX(offset.x, size.width) },
-                        onDragEnd = { dragging = false; onValueChangeFinished?.invoke() },
+                        onDragEnd = { dragging = false; currentOnValueChangeFinished?.invoke() },
                         onDragCancel = { dragging = false },
                         onHorizontalDrag = { change, _ -> seekToX(change.position.x, size.width) }
                     )

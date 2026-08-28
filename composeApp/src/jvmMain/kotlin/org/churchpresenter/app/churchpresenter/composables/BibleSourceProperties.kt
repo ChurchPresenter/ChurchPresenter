@@ -40,9 +40,8 @@ import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
-import churchpresenter.composeapp.generated.resources.canvas_text_bold
-import churchpresenter.composeapp.generated.resources.canvas_text_italic
-import churchpresenter.composeapp.generated.resources.canvas_line_spacing
+import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
+import churchpresenter.composeapp.generated.resources.canvas_text_curve
 import churchpresenter.composeapp.generated.resources.canvas_font
 import churchpresenter.composeapp.generated.resources.canvas_align_horizontal
 import churchpresenter.composeapp.generated.resources.canvas_align_vertical
@@ -59,6 +58,14 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
+
+/** Two full turns of curve either way; past that the line runs into itself. */
+/** The font name needs the room; its size is three digits. */
+private const val FONT_NAME_WEIGHT = 2f
+private const val MAX_TEXT_CURVE = 200f
+/** Tracking, as a percentage of the font size. */
+private const val MIN_LETTER_SPACING = -20f
+private const val MAX_LETTER_SPACING = 100f
 
 @Composable
 internal fun BibleProperties(
@@ -229,77 +236,109 @@ internal fun BibleProperties(
     Spacer(modifier = Modifier.height(4.dp))
 
     Text(stringResource(Res.string.canvas_verse_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    FontSettingsDropdown(
-        label = stringResource(Res.string.canvas_font),
-        value = source.fontFamily,
-        fonts = availableFonts,
-        fillWidth = true,
-        // This panel loads its own translation, which is the one this source will project — so the
-        // font preview quotes that rather than whatever the main window happens to have open.
-        previewLines = remember(bible) { previewLinesFrom(listOfNotNull(bible)) },
-        onValueChange = { onUpdate(source.copy(fontFamily = it)) },
-        modifier = Modifier.fillMaxWidth()
-    )
-    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
-        v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
-    }
-    ColorPickerField(
-        color = source.fontColor,
-        onColorChange = { onUpdate(source.copy(fontColor = it)) },
-        label = stringResource(Res.string.canvas_font_color)
-    )
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        LabeledCheckbox(
-            checked = source.bold,
-            onCheckedChange = { onUpdate(source.copy(bold = it)) },
-            label = stringResource(Res.string.canvas_text_bold),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FontSettingsDropdown(
+            label = stringResource(Res.string.canvas_font),
+            value = source.fontFamily,
+            fonts = availableFonts,
+            fillWidth = true,
+            // This panel loads its own translation, which is the one this source will project — so
+            // the font preview quotes that rather than whatever the main window happens to have open.
+            previewLines = remember(bible) { previewLinesFrom(listOfNotNull(bible)) },
+            onValueChange = { onUpdate(source.copy(fontFamily = it)) },
+            modifier = Modifier.weight(FONT_NAME_WEIGHT)
         )
-        LabeledCheckbox(
-            checked = source.italic,
-            onCheckedChange = { onUpdate(source.copy(italic = it)) },
-            label = stringResource(Res.string.canvas_text_italic),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        PropertyTextField(
+            stringResource(Res.string.canvas_clock_font_size),
+            source.fontSize.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+        }
+    }
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_letter_spacing),
+        source.letterSpacing, MIN_LETTER_SPACING, MAX_LETTER_SPACING, "%"
+    ) { v -> onUpdate(source.copy(letterSpacing = v)) }
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_text_curve),
+        source.curve, -MAX_TEXT_CURVE, MAX_TEXT_CURVE, "%"
+    ) { v -> onUpdate(source.copy(curve = v)) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ColorPickerField(
+            color = source.fontColor,
+            onColorChange = { onUpdate(source.copy(fontColor = it)) },
+            modifier = Modifier.weight(1f),
+            label = stringResource(Res.string.canvas_font_color)
+        )
+        ColorPickerField(
+            color = source.backgroundColor,
+            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+            modifier = Modifier.weight(1f),
+            label = stringResource(Res.string.canvas_text_bg_color)
         )
     }
+    // The same four faces the Bible settings tab offers, and no shadow button: a canvas source
+    // has no shadow to turn on.
+    TextStyleButtons(
+        bold = source.bold,
+        italic = source.italic,
+        underline = source.underline,
+        shadow = false,
+        onBoldChange = { onUpdate(source.copy(bold = it)) },
+        onItalicChange = { onUpdate(source.copy(italic = it)) },
+        onUnderlineChange = { onUpdate(source.copy(underline = it)) },
+        onShadowChange = {},
+        strikethrough = source.strikethrough,
+        onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
+        showShadow = false,
+    )
 
     Spacer(modifier = Modifier.height(4.dp))
 
     Text(stringResource(Res.string.canvas_reference_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    PropertyTextField(stringResource(Res.string.canvas_bible_ref_font_size), source.referenceFontSize.toString()) { v ->
-        v.toIntOrNull()?.let { onUpdate(source.copy(referenceFontSize = it)) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PropertyTextField(
+            stringResource(Res.string.canvas_bible_ref_font_size),
+            source.referenceFontSize.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(referenceFontSize = it)) }
+        }
+        ColorPickerField(
+            color = source.referenceFontColor,
+            onColorChange = { onUpdate(source.copy(referenceFontColor = it)) },
+            modifier = Modifier.weight(1f),
+            label = stringResource(Res.string.canvas_bible_ref_color)
+        )
     }
-    ColorPickerField(
-        color = source.referenceFontColor,
-        onColorChange = { onUpdate(source.copy(referenceFontColor = it)) },
-        label = stringResource(Res.string.canvas_bible_ref_color)
+    TextStyleButtons(
+        bold = source.referenceBold,
+        italic = source.referenceItalic,
+        underline = source.referenceUnderline,
+        shadow = false,
+        onBoldChange = { onUpdate(source.copy(referenceBold = it)) },
+        onItalicChange = { onUpdate(source.copy(referenceItalic = it)) },
+        onUnderlineChange = { onUpdate(source.copy(referenceUnderline = it)) },
+        onShadowChange = {},
+        strikethrough = source.referenceStrikethrough,
+        onStrikethroughChange = { onUpdate(source.copy(referenceStrikethrough = it)) },
+        showShadow = false,
     )
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        LabeledCheckbox(
-            checked = source.referenceBold,
-            onCheckedChange = { onUpdate(source.copy(referenceBold = it)) },
-            label = stringResource(Res.string.canvas_text_bold),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        LabeledCheckbox(
-            checked = source.referenceItalic,
-            onCheckedChange = { onUpdate(source.copy(referenceItalic = it)) },
-            label = stringResource(Res.string.canvas_text_italic),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 
     Spacer(modifier = Modifier.height(4.dp))
-
-    ColorPickerField(
-        color = source.backgroundColor,
-        onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
-        label = stringResource(Res.string.canvas_text_bg_color)
-    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -325,18 +364,5 @@ internal fun BibleProperties(
                 bottomValue = "bottom"
             )
         }
-    }
-
-    Spacer(modifier = Modifier.height(4.dp))
-
-    Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        SlimSlider(
-            value = source.lineSpacing / 100f,
-            onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
-            valueRange = 0.5f..3f,
-            trailingLabel = "${source.lineSpacing}%",
-            modifier = Modifier.weight(1f)
-        )
     }
 }

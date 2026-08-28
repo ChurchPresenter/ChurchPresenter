@@ -1254,6 +1254,8 @@
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Часы</string>
     <string name="canvas_source_timer">Часы и таймер</string>
+    <string name="canvas_text_curve">Кривизна</string>
+    <string name="canvas_letter_spacing">Межбуквенный интервал</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захват экрана</string>

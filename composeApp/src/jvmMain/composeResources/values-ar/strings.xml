@@ -1226,6 +1226,8 @@
     <string name="canvas_source_browser">متصفح</string>
     <string name="canvas_source_clock">ساعة</string>
     <string name="canvas_source_timer">الساعة والمؤقت</string>
+    <string name="canvas_text_curve">منحنى</string>
+    <string name="canvas_letter_spacing">تباعد الأحرف</string>
     <string name="canvas_source_qrcode">رمز QR</string>
     <string name="canvas_source_camera">كاميرا</string>
     <string name="canvas_source_screen_capture">تصوير الشاشة</string>

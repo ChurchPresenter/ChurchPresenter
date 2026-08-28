@@ -76,6 +76,13 @@ class AppPreviewConverterScreenshotTest {
         format("SoftProjector")
     }
 
+    /** Same shape as SoftProjector — a whole book per file — under a format the rail lists last. */
+    @Test
+    fun `songs video psalm`() = converter("songs_videopsalm") {
+        tab("Songs")
+        format("VideoPsalm")
+    }
+
     @Test
     fun `songs documents`() = converter("songs_documents") {
         tab("Songs")
