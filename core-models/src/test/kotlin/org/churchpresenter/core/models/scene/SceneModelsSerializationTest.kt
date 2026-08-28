@@ -220,6 +220,79 @@ class SceneModelsSerializationTest {
     }
 
     @Test
+    fun `a text source keeps its faces, tracking and curve`() {
+        val text = SceneSource.TextSource(
+            id = "tx1", name = "Title", text = "Welcome",
+            bold = true, italic = true, underline = true, strikethrough = true,
+            letterSpacing = 25f, curve = -80f,
+        )
+
+        val back = roundTrip(text)
+
+        assertEquals(text, back)
+        assertTrue(back.underline && back.strikethrough)
+        assertEquals(25f, back.letterSpacing)
+        assertEquals(-80f, back.curve)
+    }
+
+    @Test
+    fun `a bible source styles its verse and its reference apart`() {
+        val bible = SceneSource.BibleSource(
+            id = "bi1", name = "Verse", verseText = "In the beginning", referenceText = "Genesis 1:1",
+            underline = true, strikethrough = false,
+            referenceUnderline = false, referenceStrikethrough = true,
+            letterSpacing = 10f, curve = 45f,
+        )
+
+        val back = roundTrip(bible)
+
+        assertEquals(bible, back)
+        assertTrue(back.underline, "the verse's own underline")
+        assertTrue(back.referenceStrikethrough, "and the reference's own strike-through")
+        assertEquals(45f, back.curve)
+    }
+
+    @Test
+    fun `a text source saved before tracking and curve existed reads back straight`() {
+        val stored = """{"id":"tx2","name":"Title","text":"Welcome","bold":true}"""
+
+        val back = json.decodeFromString<SceneSource.TextSource>(stored)
+
+        assertEquals(0f, back.letterSpacing)
+        assertEquals(0f, back.curve)
+        assertEquals(false, back.underline)
+    }
+
+    @Test
+    fun `a clock source keeps the time of day it counts to and its expiry message`() {
+        val clock = SceneSource.ClockSource(
+            id = "cl2", name = "Service start", mode = ClockModes.TARGET_TIME,
+            targetTimeHour = 10, targetTimeMinute = 30, targetTimeSecond = 15,
+            expiredText = "Time's up!",
+        )
+
+        val back = roundTrip(clock)
+
+        assertEquals(clock, back)
+        assertEquals(ClockModes.TARGET_TIME, back.mode)
+        assertEquals(10, back.targetTimeHour)
+        assertEquals(30, back.targetTimeMinute)
+        assertEquals(15, back.targetTimeSecond)
+        assertEquals("Time's up!", back.expiredText)
+    }
+
+    @Test
+    fun `a clock source saved before the two new modes existed reads back as a wall clock`() {
+        val stored = """{"id":"cl3","name":"Clock","mode":"clock","targetHour":1}"""
+
+        val back = json.decodeFromString<SceneSource.ClockSource>(stored)
+
+        assertEquals(ClockModes.CLOCK, back.mode)
+        assertEquals(0, back.targetTimeHour, "a time of day the file never carried defaults to midnight")
+        assertEquals("", back.expiredText)
+    }
+
+    @Test
     fun `a QR source keeps wifi credentials and colours`() {
         val qr = SceneSource.QRCodeSource(
             id = "q1", name = "Guest wifi", contentType = "wifi", content = "",

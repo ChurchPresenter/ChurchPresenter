@@ -83,7 +83,7 @@ class CanvasTabTest {
             // driven twice in a single test.
             addSourceOfType(CanvasLabel.CLOCK)
 
-            assertEquals(listOf("Clock"), vm.sourceNames())
+            assertEquals(listOf("Clock & Timer"), vm.sourceNames())
         }
 
     @Test

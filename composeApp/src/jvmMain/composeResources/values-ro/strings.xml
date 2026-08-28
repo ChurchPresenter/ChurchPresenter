@@ -70,6 +70,7 @@
     <string name="shadow_opacity">Intensitate (%)</string>
     <string name="hold_live">Menține Proiectat</string>
     <string name="bible_split_browse_mode">Mod Navigare Divizat</string>
+    <string name="bible_split_long_verses">Împarte versetele lungi pe două diapozitive</string>
     <string name="bible_cross_references">Referințe încrucișate</string>
     <string name="bible_cross_references_title">Referințe</string>
     <string name="bible_cross_references_enable">Afișează referințele încrucișate</string>
@@ -1031,6 +1032,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Ceas</string>
     <string name="canvas_clock_mode_countdown">Numărătoare Inversă</string>
+    <string name="canvas_clock_mode_count_up">Cronometru</string>
     <string name="canvas_decklink_io_warning">Acest dispozitiv este utilizat în prezent pentru ieșire. Intrarea poate să nu fie disponibilă pe dispozitivele care nu suportă I/O simultan.</string>
     <string name="canvas_tool_select">Selectare</string>
     <string name="canvas_tool_rectangle">Dreptunghi</string>
@@ -1042,6 +1044,9 @@
     <string name="canvas_opacity">Opacitate</string>
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Ceas</string>
+    <string name="canvas_source_timer">Ceas și cronometru</string>
+    <string name="canvas_text_curve">Curbă</string>
+    <string name="canvas_letter_spacing">Spațiere litere</string>
     <string name="canvas_source_qrcode">Cod QR</string>
     <string name="canvas_source_camera">Cameră</string>
     <string name="canvas_source_screen_capture">Captură Ecran</string>

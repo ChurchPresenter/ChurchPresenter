@@ -36,6 +36,7 @@ import churchpresenter.composeapp.generated.resources.bible_cross_references_ena
 import churchpresenter.composeapp.generated.resources.bible_editing
 import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_miscellaneous
+import churchpresenter.composeapp.generated.resources.bible_split_long_verses
 import churchpresenter.composeapp.generated.resources.bible_translation
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
@@ -457,6 +458,17 @@ private fun MiscellaneousSection(
             },
             controlModifier = Modifier.size(24.dp),
             label = stringResource(Res.string.bible_split_browse_mode),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        LabeledCheckbox(
+            checked = settings.bibleSettings.splitLongVerses,
+            onCheckedChange = { enabled ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitLongVerses = enabled)) }
+            },
+            controlModifier = Modifier.size(24.dp),
+            label = stringResource(Res.string.bible_split_long_verses),
             modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,

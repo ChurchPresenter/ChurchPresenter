@@ -993,6 +993,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Hodiny</string>
     <string name="canvas_clock_mode_countdown">Odpočítavanie</string>
+    <string name="canvas_clock_mode_count_up">Stopky</string>
     <string name="canvas_decklink_io_warning">Toto zariadenie sa momentálne používa na výstup. Vstup nemusí byť dostupný na zariadeniach, ktoré nepodporujú simultánne I/O.</string>
     <string name="canvas_tool_select">Vybrať</string>
     <string name="canvas_tool_rectangle">Obdĺžnik</string>
@@ -1004,6 +1005,9 @@
     <string name="canvas_opacity">Nepriehľadnosť</string>
     <string name="canvas_source_browser">Prehliadač</string>
     <string name="canvas_source_clock">Hodiny</string>
+    <string name="canvas_source_timer">Hodiny a časovač</string>
+    <string name="canvas_text_curve">Krivka</string>
+    <string name="canvas_letter_spacing">Rozostup písmen</string>
     <string name="canvas_source_qrcode">QR kód</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Snímanie obrazovky</string>
@@ -1790,6 +1794,7 @@
     <string name="copy_verse">Kopírovať verš</string>
     <string name="style">Štýl</string>
     <string name="bible_split_browse_mode">Rozdelený režim prehliadania</string>
+    <string name="bible_split_long_verses">Rozdeliť dlhé verše na dva snímky</string>
     <string name="bible_cross_references">Krížové odkazy</string>
     <string name="bible_cross_references_title">Odkazy</string>
     <string name="bible_cross_references_enable">Zobrazovať krížové odkazy</string>

@@ -38,6 +38,7 @@ object SongSources {
     const val PROPRESENTER = "propresenter"
     const val EASYWORSHIP = "easyworship"
     const val MEDIASHOUT = "mediashout"
+    const val VIDEOPSALM = "videopsalm"
 
     /** Alphabetical, so the rail is scanned by name — the documents group stays last. */
     val all: List<SongSource> = listOf(
@@ -52,6 +53,7 @@ object SongSources {
         SongSource(QUELEA, SourceGroup.SONGS, "Quelea", ".qsp/.xml", "QU"),
         SongSource(SOFTPROJECTOR, SourceGroup.SONGS, "SoftProjector", ".sps", "SP"),
         SongSource(SONGBEAMER, SourceGroup.SONGS, "SongBeamer", ".sng", "SB"),
+        SongSource(VIDEOPSALM, SourceGroup.SONGS, "VideoPsalm", ".json", "VP"),
         SongSource(DOCUMENTS, SourceGroup.DOCUMENTS, "Documents", "pdf/pptx", "DO"),
     )
 

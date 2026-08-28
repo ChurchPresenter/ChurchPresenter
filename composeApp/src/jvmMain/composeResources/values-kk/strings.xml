@@ -1213,6 +1213,9 @@
     <string name="canvas_opacity">Мөлдірлік</string>
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Сағат</string>
+    <string name="canvas_source_timer">Сағат және таймер</string>
+    <string name="canvas_text_curve">Қисық</string>
+    <string name="canvas_letter_spacing">Әріп аралығы</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Экранды жазу</string>
@@ -1304,6 +1307,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Сағат</string>
     <string name="canvas_clock_mode_countdown">Кері санау</string>
+    <string name="canvas_clock_mode_count_up">Секундомер</string>
     <string name="canvas_decklink_io_warning">Бұл құрылғы шығу үшін пайдаланылуда. Бір уақытта кіріс/шығысты қолдамайтын құрылғыларда кіріс қол жетімді болмауы мүмкін.</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1768,6 +1772,7 @@
     <string name="copy_verse">Өлеңді көшіру</string>
     <string name="style">Стиль</string>
     <string name="bible_split_browse_mode">Бөлінген шолу режимі</string>
+    <string name="bible_split_long_verses">Ұзын аяттарды екі слайдқа бөлу</string>
     <string name="bible_cross_references">Айқас сілтемелер</string>
     <string name="bible_cross_references_title">Сілтемелер</string>
     <string name="bible_cross_references_enable">Айқас сілтемелерді көрсету</string>

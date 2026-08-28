@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Intensitāte (%)</string>
     <string name="hold_live">Noturēt ekrānā</string>
     <string name="bible_split_browse_mode">Dalītās pārlūkošanas režīms</string>
+    <string name="bible_split_long_verses">Sadalīt garus pantus divos slaidos</string>
     <string name="bible_cross_references">Paralēlvietas</string>
     <string name="bible_cross_references_title">Paral.</string>
     <string name="bible_cross_references_enable">Rādīt paralēlvietu saites</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Pulkstenis</string>
     <string name="canvas_clock_mode_countdown">Laika atskaite</string>
+    <string name="canvas_clock_mode_count_up">Hronometrs</string>
     <string name="canvas_decklink_io_warning">Šī ierīce pašlaik tiek izmantota izvadei. Ievade var nebūt pieejama ierīcēs, kas neatbalsta vienlaicīgu ievadi un izvadi.</string>
     <string name="canvas_tool_select">Izvēle</string>
     <string name="canvas_tool_rectangle">Taisnstūris</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">Necaurredzamība</string>
     <string name="canvas_source_browser">Pārlūks</string>
     <string name="canvas_source_clock">Pulkstenis</string>
+    <string name="canvas_source_timer">Pulkstenis un taimeris</string>
+    <string name="canvas_text_curve">Līkne</string>
+    <string name="canvas_letter_spacing">Burtu atstarpes</string>
     <string name="canvas_source_qrcode">QR kods</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekrāna tveršana</string>

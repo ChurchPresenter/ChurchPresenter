@@ -82,6 +82,7 @@
     <string name="shadow_opacity">ຄວາມເຂັ້ມ (%)</string>
     <string name="hold_live">ຄ້າງຈໍສົດ</string>
     <string name="bible_split_browse_mode">ໂໝດເບິ່ງແບບແຍກ</string>
+    <string name="bible_split_long_verses">ແບ່ງຂໍ້ພຣະຄຳຍາວອອກເປັນສອງສະໄລ້</string>
     <string name="bible_cross_references">ຂໍ້ອ້າງອີງໂຢງ</string>
     <string name="bible_cross_references_title">ອ້າງອີງ</string>
     <string name="bible_cross_references_enable">ສະແດງລິ້ງຂໍ້ອ້າງອີງໂຢງ</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">ໂມງ</string>
     <string name="canvas_clock_mode_countdown">ນັບຖອຍຫຼັງ</string>
+    <string name="canvas_clock_mode_count_up">ຈັບເວລາຂຶ້ນ</string>
     <string name="canvas_decklink_io_warning">ອຸປະກອນນີ້ກຳລັງໃຊ້ເປັນຊ່ອງອອກ. ຊ່ອງເຂົ້າອາດໃຊ້ບໍ່ໄດ້ໃນອຸປະກອນທີ່ບໍ່ຮອງຮັບການເຂົ້າ-ອອກພ້ອມກັນ.</string>
     <string name="canvas_tool_select">ເລືອກ</string>
     <string name="canvas_tool_rectangle">ສີ່ຫຼ່ຽມ</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">ຄວາມທຶບ</string>
     <string name="canvas_source_browser">ບຣາວເຊີ</string>
     <string name="canvas_source_clock">ໂມງ</string>
+    <string name="canvas_source_timer">ໂມງ ແລະ ຕົວຈັບເວລາ</string>
+    <string name="canvas_text_curve">ເສັ້ນໂຄ້ງ</string>
+    <string name="canvas_letter_spacing">ໄລຍະຫ່າງຕົວອັກສອນ</string>
     <string name="canvas_source_qrcode">ລະຫັດ QR</string>
     <string name="canvas_source_camera">ກ້ອງ</string>
     <string name="canvas_source_screen_capture">ການຈັບພາບໜ້າຈໍ</string>

@@ -993,6 +993,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Relógio</string>
     <string name="canvas_clock_mode_countdown">Contagem Regressiva</string>
+    <string name="canvas_clock_mode_count_up">Cronômetro</string>
     <string name="canvas_decklink_io_warning">Este dispositivo está sendo usado para saída. A entrada pode não estar disponível em dispositivos que não suportam E/S simultânea.</string>
     <string name="canvas_tool_select">Selecionar</string>
     <string name="canvas_tool_rectangle">Retângulo</string>
@@ -1004,6 +1005,9 @@
     <string name="canvas_opacity">Opacidade</string>
     <string name="canvas_source_browser">Navegador</string>
     <string name="canvas_source_clock">Relógio</string>
+    <string name="canvas_source_timer">Relógio e temporizador</string>
+    <string name="canvas_text_curve">Curva</string>
+    <string name="canvas_letter_spacing">Espaçamento entre letras</string>
     <string name="canvas_source_qrcode">Código QR</string>
     <string name="canvas_source_camera">Câmera</string>
     <string name="canvas_source_screen_capture">Captura de Tela</string>
@@ -1790,6 +1794,7 @@
     <string name="copy_verse">Copiar versículo</string>
     <string name="style">Estilo</string>
     <string name="bible_split_browse_mode">Modo de navegação dividida</string>
+    <string name="bible_split_long_verses">Dividir versículos longos em dois slides</string>
     <string name="bible_cross_references">Referências cruzadas</string>
     <string name="bible_cross_references_title">Referências</string>
     <string name="bible_cross_references_enable">Mostrar referências cruzadas</string>

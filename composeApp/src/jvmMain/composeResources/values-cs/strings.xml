@@ -59,6 +59,7 @@
     <string name="shadow_opacity">Intenzita (%)</string>
     <string name="hold_live">Podržet živě</string>
     <string name="bible_split_browse_mode">Režim rozděleného prohlížení</string>
+    <string name="bible_split_long_verses">Rozdělit dlouhé verše na dva snímky</string>
     <string name="bible_cross_references">Křížové odkazy</string>
     <string name="bible_cross_references_title">Odkazy</string>
     <string name="bible_cross_references_enable">Zobrazovat křížové odkazy</string>
@@ -1254,6 +1255,9 @@
     <string name="canvas_opacity">Průhlednost</string>
     <string name="canvas_source_browser">Prohlížeč</string>
     <string name="canvas_source_clock">Hodiny</string>
+    <string name="canvas_source_timer">Hodiny a časovač</string>
+    <string name="canvas_text_curve">Křivka</string>
+    <string name="canvas_letter_spacing">Prostrkání</string>
     <string name="canvas_source_qrcode">QR kód</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Záznam obrazovky</string>
@@ -1345,6 +1349,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Hodiny</string>
     <string name="canvas_clock_mode_countdown">Odpočítávání</string>
+    <string name="canvas_clock_mode_count_up">Stopky</string>
     <string name="canvas_decklink_io_warning">Toto zařízení se aktuálně používá pro výstup. Vstup nemusí být dostupný na zařízeních, která nepodporují současný I/O.</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>

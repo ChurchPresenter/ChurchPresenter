@@ -82,6 +82,7 @@
     <string name="shadow_opacity">செறிவு (%)</string>
     <string name="hold_live">நேரலையில் நிறுத்து</string>
     <string name="bible_split_browse_mode">பிரித்து உலாவும் பயன்முறை</string>
+    <string name="bible_split_long_verses">நீண்ட வசனங்களை இரண்டு ஸ்லைடுகளாகப் பிரிக்கவும்</string>
     <string name="bible_cross_references">குறுக்குக் குறிப்புகள்</string>
     <string name="bible_cross_references_title">குறிப்புகள்</string>
     <string name="bible_cross_references_enable">குறுக்குக் குறிப்பு இணைப்புகளைக் காட்டு</string>
@@ -1216,6 +1217,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">கடிகாரம்</string>
     <string name="canvas_clock_mode_countdown">பின்னோக்கி எண்ணல்</string>
+    <string name="canvas_clock_mode_count_up">ஸ்டாப்வாட்ச்</string>
     <string name="canvas_decklink_io_warning">இந்தச் சாதனம் தற்போது வெளியீட்டிற்குப் பயன்படுத்தப்படுகிறது. ஒரே நேரத்தில் உள்ளீடு/வெளியீட்டை ஆதரிக்காத சாதனங்களில் உள்ளீடு கிடைக்காமல் போகலாம்.</string>
     <string name="canvas_tool_select">தேர்ந்தெடு</string>
     <string name="canvas_tool_rectangle">செவ்வகம்</string>
@@ -1227,6 +1229,9 @@
     <string name="canvas_opacity">ஒளிபுகாநிலை</string>
     <string name="canvas_source_browser">உலாவி</string>
     <string name="canvas_source_clock">கடிகாரம்</string>
+    <string name="canvas_source_timer">கடிகாரம் மற்றும் டைமர்</string>
+    <string name="canvas_text_curve">வளைவு</string>
+    <string name="canvas_letter_spacing">எழுத்து இடைவெளி</string>
     <string name="canvas_source_qrcode">QR குறியீடு</string>
     <string name="canvas_source_camera">கேமரா</string>
     <string name="canvas_source_screen_capture">திரைப் பிடிப்பு</string>

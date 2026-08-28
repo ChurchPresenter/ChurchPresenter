@@ -82,6 +82,7 @@
     <string name="shadow_opacity">濃さ（%）</string>
     <string name="hold_live">ライブを保持</string>
     <string name="bible_split_browse_mode">分割ブラウズモード</string>
+    <string name="bible_split_long_verses">長い聖句を2枚のスライドに分割</string>
     <string name="bible_cross_references">引照</string>
     <string name="bible_cross_references_title">引照</string>
     <string name="bible_cross_references_enable">引照のリンクを表示する</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">時計</string>
     <string name="canvas_clock_mode_countdown">カウントダウン</string>
+    <string name="canvas_clock_mode_count_up">カウントアップ</string>
     <string name="canvas_decklink_io_warning">この機器は現在、出力に使用されています。同時入出力に対応していない機器では、入力を使えないことがあります。</string>
     <string name="canvas_tool_select">選択</string>
     <string name="canvas_tool_rectangle">長方形</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">不透明度</string>
     <string name="canvas_source_browser">ブラウザー</string>
     <string name="canvas_source_clock">時計</string>
+    <string name="canvas_source_timer">時計とタイマー</string>
+    <string name="canvas_text_curve">カーブ</string>
+    <string name="canvas_letter_spacing">文字間隔</string>
     <string name="canvas_source_qrcode">QR コード</string>
     <string name="canvas_source_camera">カメラ</string>
     <string name="canvas_source_screen_capture">画面キャプチャ</string>

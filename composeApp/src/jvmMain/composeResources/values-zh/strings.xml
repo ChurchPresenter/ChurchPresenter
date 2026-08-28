@@ -82,6 +82,7 @@
     <string name="shadow_opacity">强度 (%)</string>
     <string name="hold_live">保持上屏</string>
     <string name="bible_split_browse_mode">分屏浏览模式</string>
+    <string name="bible_split_long_verses">将长经文拆分为两张幻灯片</string>
     <string name="bible_cross_references">串珠</string>
     <string name="bible_cross_references_title">串珠</string>
     <string name="bible_cross_references_enable">显示串珠链接</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">时钟</string>
     <string name="canvas_clock_mode_countdown">倒计时</string>
+    <string name="canvas_clock_mode_count_up">正计时</string>
     <string name="canvas_decklink_io_warning">此设备当前用于输出。不支持同时输入输出的设备可能无法用作输入。</string>
     <string name="canvas_tool_select">选择</string>
     <string name="canvas_tool_rectangle">矩形</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">不透明度</string>
     <string name="canvas_source_browser">浏览器</string>
     <string name="canvas_source_clock">时钟</string>
+    <string name="canvas_source_timer">时钟与计时器</string>
+    <string name="canvas_text_curve">弧度</string>
+    <string name="canvas_letter_spacing">字间距</string>
     <string name="canvas_source_qrcode">二维码</string>
     <string name="canvas_source_camera">摄像头</string>
     <string name="canvas_source_screen_capture">屏幕捕捉</string>

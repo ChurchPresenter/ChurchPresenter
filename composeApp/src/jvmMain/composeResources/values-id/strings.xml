@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Intensitas (%)</string>
     <string name="hold_live">Tahan Tayangan</string>
     <string name="bible_split_browse_mode">Mode Telusur Terpisah</string>
+    <string name="bible_split_long_verses">Bagi ayat panjang menjadi dua slide</string>
     <string name="bible_cross_references">Referensi Silang</string>
     <string name="bible_cross_references_title">Ref</string>
     <string name="bible_cross_references_enable">Tampilkan tautan referensi silang</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Jam</string>
     <string name="canvas_clock_mode_countdown">Hitung Mundur</string>
+    <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Perangkat ini sedang dipakai untuk keluaran. Masukan mungkin tidak tersedia pada perangkat yang tidak mendukung I/O bersamaan.</string>
     <string name="canvas_tool_select">Pilih</string>
     <string name="canvas_tool_rectangle">Persegi Panjang</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">Opasitas</string>
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Jam</string>
+    <string name="canvas_source_timer">Jam &amp; Pengatur Waktu</string>
+    <string name="canvas_text_curve">Lengkung</string>
+    <string name="canvas_letter_spacing">Spasi Huruf</string>
     <string name="canvas_source_qrcode">Kode QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Tangkapan Layar</string>

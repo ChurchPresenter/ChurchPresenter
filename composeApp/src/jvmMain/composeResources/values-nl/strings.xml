@@ -993,6 +993,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Klok</string>
     <string name="canvas_clock_mode_countdown">Aftellen</string>
+    <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Dit apparaat wordt momenteel gebruikt voor uitvoer. Invoer is mogelijk niet beschikbaar op apparaten die geen gelijktijdige I/O ondersteunen.</string>
     <string name="canvas_tool_select">Selecteren</string>
     <string name="canvas_tool_rectangle">Rechthoek</string>
@@ -1004,6 +1005,9 @@
     <string name="canvas_opacity">Dekking</string>
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Klok</string>
+    <string name="canvas_source_timer">Klok en timer</string>
+    <string name="canvas_text_curve">Kromming</string>
+    <string name="canvas_letter_spacing">Letterspatiëring</string>
     <string name="canvas_source_qrcode">QR-code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Schermopname</string>
@@ -1790,6 +1794,7 @@
     <string name="copy_verse">Vers kopiëren</string>
     <string name="style">Stijl</string>
     <string name="bible_split_browse_mode">Gesplitste bladermodus</string>
+    <string name="bible_split_long_verses">Lange verzen over twee dia's verdelen</string>
     <string name="bible_cross_references">Kruisverwijzingen</string>
     <string name="bible_cross_references_title">Verwijzingen</string>
     <string name="bible_cross_references_enable">Kruisverwijzingen tonen</string>

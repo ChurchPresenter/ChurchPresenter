@@ -84,6 +84,7 @@
     <string name="shadow_opacity">Intensity (%)</string>
     <string name="hold_live">Hold Live</string>
     <string name="bible_split_browse_mode">Split Browse Mode</string>
+    <string name="bible_split_long_verses">Split long verses across two slides</string>
     <string name="bible_cross_references">Cross References</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Show cross reference links</string>
@@ -1276,6 +1277,8 @@
     <string name="canvas_text_content">Text</string>
     <string name="canvas_expand_text_field">Edit in larger window</string>
     <string name="canvas_line_spacing">Line Spacing</string>
+    <string name="canvas_text_curve">Curve</string>
+    <string name="canvas_letter_spacing">Letter Spacing</string>
     <string name="canvas_font">Font</string>
     <string name="canvas_align_horizontal">Horizontal</string>
     <string name="canvas_align_vertical">Vertical</string>
@@ -1297,6 +1300,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Clock</string>
     <string name="canvas_clock_mode_countdown">Countdown</string>
+    <string name="canvas_clock_mode_count_up">Count Up</string>
     <string name="canvas_decklink_io_warning">This device is currently used for output. Input may not be available on devices that don't support simultaneous I/O.</string>
     <string name="canvas_tool_select">Select</string>
     <string name="canvas_tool_rectangle">Rectangle</string>
@@ -1308,6 +1312,7 @@
     <string name="canvas_opacity">Opacity</string>
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Clock</string>
+    <string name="canvas_source_timer">Clock &amp; Timer</string>
     <string name="canvas_source_qrcode">QR Code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>

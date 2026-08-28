@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Ukolezi (%)</string>
     <string name="hold_live">Shikilia Live</string>
     <string name="bible_split_browse_mode">Hali ya Kuvinjari Iliyogawanywa</string>
+    <string name="bible_split_long_verses">Gawanya mistari mirefu katika slaidi mbili</string>
     <string name="bible_cross_references">Marejeleo Mtambuka</string>
     <string name="bible_cross_references_title">Marejeleo</string>
     <string name="bible_cross_references_enable">Onyesha viungo vya marejeleo mtambuka</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Saa</string>
     <string name="canvas_clock_mode_countdown">Kuhesabu Kurudi</string>
+    <string name="canvas_clock_mode_count_up">Kipima saa</string>
     <string name="canvas_decklink_io_warning">Kifaa hiki kinatumika kwa utoaji sasa. Ingizo linaweza kutopatikana kwenye vifaa visivyoruhusu ingizo na utoaji kwa wakati mmoja.</string>
     <string name="canvas_tool_select">Chagua</string>
     <string name="canvas_tool_rectangle">Mstatili</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">Ukolezi</string>
     <string name="canvas_source_browser">Kivinjari</string>
     <string name="canvas_source_clock">Saa</string>
+    <string name="canvas_source_timer">Saa na Kipima muda</string>
+    <string name="canvas_text_curve">Mpinde</string>
+    <string name="canvas_letter_spacing">Nafasi ya herufi</string>
     <string name="canvas_source_qrcode">Msimbo wa QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Kunasa Skrini</string>

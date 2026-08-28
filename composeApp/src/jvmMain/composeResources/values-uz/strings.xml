@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Quyuqlik (%)</string>
     <string name="hold_live">Ekranni ushlab turish</string>
     <string name="bible_split_browse_mode">Alohida koʻrib chiqish rejimi</string>
+    <string name="bible_split_long_verses">Uzun oyatlarni ikkita slaydga boʻlish</string>
     <string name="bible_cross_references">Parallel oyatlar</string>
     <string name="bible_cross_references_title">Havolalar</string>
     <string name="bible_cross_references_enable">Parallel oyat havolalarini koʻrsatish</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Soat</string>
     <string name="canvas_clock_mode_countdown">Teskari sanoq</string>
+    <string name="canvas_clock_mode_count_up">Sekundomer</string>
     <string name="canvas_decklink_io_warning">Bu qurilma hozir chiqish uchun ishlatilmoqda. Bir vaqtda kirish/chiqishni qoʻllamaydigan qurilmalarda kirish ishlamasligi mumkin.</string>
     <string name="canvas_tool_select">Tanlash</string>
     <string name="canvas_tool_rectangle">Toʻrtburchak</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">Shaffoflik</string>
     <string name="canvas_source_browser">Brauzer</string>
     <string name="canvas_source_clock">Soat</string>
+    <string name="canvas_source_timer">Soat va taymer</string>
+    <string name="canvas_text_curve">Egrilik</string>
+    <string name="canvas_letter_spacing">Harflar oralig'i</string>
     <string name="canvas_source_qrcode">QR kod</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran tasviri</string>

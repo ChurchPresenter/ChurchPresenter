@@ -1213,6 +1213,9 @@
     <string name="canvas_opacity">Прозорість</string>
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Годинник</string>
+    <string name="canvas_source_timer">Годинник і таймер</string>
+    <string name="canvas_text_curve">Кривина</string>
+    <string name="canvas_letter_spacing">Міжлітерний інтервал</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захоплення екрана</string>
@@ -1304,6 +1307,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Годинник</string>
     <string name="canvas_clock_mode_countdown">Зворотний відлік</string>
+    <string name="canvas_clock_mode_count_up">Секундомір</string>
     <string name="canvas_decklink_io_warning">Цей пристрій використовується для виведення. Введення може бути недоступне на пристроях без одночасного введення-виведення.</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1768,6 +1772,7 @@
     <string name="copy_verse">Копіювати вірш</string>
     <string name="style">Стиль</string>
     <string name="bible_split_browse_mode">Режим розділеного перегляду</string>
+    <string name="bible_split_long_verses">Розділяти довгі вірші на два слайди</string>
     <string name="bible_cross_references">Перехресні посилання</string>
     <string name="bible_cross_references_title">Посилання</string>
     <string name="bible_cross_references_enable">Показувати перехресні посилання</string>

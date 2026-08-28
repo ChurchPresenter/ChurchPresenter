@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Yoğunluk (%)</string>
     <string name="hold_live">Yayında Tut</string>
     <string name="bible_split_browse_mode">Ayrık Gözatma Modu</string>
+    <string name="bible_split_long_verses">Uzun ayetleri iki slayta böl</string>
     <string name="bible_cross_references">Çapraz Referanslar</string>
     <string name="bible_cross_references_title">Ref.</string>
     <string name="bible_cross_references_enable">Çapraz referans bağlantılarını göster</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Saat</string>
     <string name="canvas_clock_mode_countdown">Geri Sayım</string>
+    <string name="canvas_clock_mode_count_up">Kronometre</string>
     <string name="canvas_decklink_io_warning">Bu aygıt şu anda çıkış için kullanılıyor. Eşzamanlı giriş/çıkış desteklemeyen aygıtlarda giriş kullanılamayabilir.</string>
     <string name="canvas_tool_select">Seç</string>
     <string name="canvas_tool_rectangle">Dikdörtgen</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">Opaklık</string>
     <string name="canvas_source_browser">Tarayıcı</string>
     <string name="canvas_source_clock">Saat</string>
+    <string name="canvas_source_timer">Saat ve Zamanlayıcı</string>
+    <string name="canvas_text_curve">Eğri</string>
+    <string name="canvas_letter_spacing">Harf Aralığı</string>
     <string name="canvas_source_qrcode">QR Kodu</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran Yakalama</string>

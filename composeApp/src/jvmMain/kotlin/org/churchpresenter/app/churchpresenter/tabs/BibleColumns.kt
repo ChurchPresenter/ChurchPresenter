@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -50,6 +51,10 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -66,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.search_clear
 import org.churchpresenter.bible.BibleLoadError
+import org.churchpresenter.app.churchpresenter.viewmodel.VerseSplitMark
 import org.churchpresenter.app.churchpresenter.viewmodel.indexOfFirstLiveVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource
@@ -314,6 +320,15 @@ internal fun BibleBrowserColumn(
     }
 }
 
+/**
+ * Which half of a split verse is on screen, for the verse list to mark.
+ *
+ * Ambient rather than a parameter: it is one display hint consumed by a single leaf row, five levels
+ * below the tab that knows it, through composables that have no other interest in it -- and
+ * `BibleBrowserPane` already carries 44 parameters.
+ */
+internal val LocalVerseSplitMark = compositionLocalOf<VerseSplitMark?> { null }
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun BibleVerseColumn(
@@ -367,72 +382,136 @@ internal fun BibleVerseColumn(
                 .padding(start = 4.dp, top = 4.dp, bottom = 4.dp, end = 12.dp)
         ) {
             itemsIndexed(verses) { index, verseStr ->
-                val isSelected = index == selectedIndex || (selectedIndices != null && index in selectedIndices)
-                val refCount = refCountFor(index)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                            else MaterialTheme.colorScheme.surface
-                        ),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Text(
-                        text = verseStr,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.5.sp,
-                            lineHeight = 13.5.sp * 1.6f,
-                            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
-                        ),
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .weight(1f)
-                            .pointerInput(index) {
-                                var lastClickTime = 0L
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent(PointerEventPass.Main)
-                                        if (event.type == PointerEventType.Press) {
-                                            val isRight = event.button?.isSecondary == true
-                                            val mods = event.keyboardModifiers
-                                            val isCtrl = mods.isCtrlPressed || mods.isMetaPressed
-                                            val isShift = mods.isShiftPressed
-                                            when {
-                                                isRight -> onRightClicked(index)
-                                                isCtrl -> onItemCtrlClicked(index)
-                                                isShift -> onItemShiftClicked(index)
-                                                else -> {
-                                                    val now = System.currentTimeMillis()
-                                                    val isDouble = now - lastClickTime < 300L
-                                                    lastClickTime = now
-                                                    if (isDouble) onItemDoubleClicked(index) else onItemSelected(index)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(6.dp)
-                    )
-                    if (refCount > 0) {
-                        Box(modifier = Modifier.padding(top = 6.dp, end = 2.dp)) {
-                            CrossRefChip(
-                                count = refCount,
-                                active = index == openRefIndex,
-                                tooltipText = refCountTooltip(refCount),
-                                onClick = { onRefsClicked(index) },
-                            )
-                            if (index == openRefIndex) refPopover()
+                VerseRow(
+                    verseStr = verseStr,
+                    isSelected = index == selectedIndex ||
+                        (selectedIndices != null && index in selectedIndices),
+                    refCount = refCountFor(index),
+                    refCountTooltip = refCountTooltip,
+                    refsOpen = index == openRefIndex,
+                    onRefsClicked = { onRefsClicked(index) },
+                    refPopover = refPopover,
+                    onPointerAction = { action ->
+                        when (action) {
+                            VerseRowAction.RIGHT -> onRightClicked(index)
+                            VerseRowAction.CTRL -> onItemCtrlClicked(index)
+                            VerseRowAction.SHIFT -> onItemShiftClicked(index)
+                            VerseRowAction.DOUBLE -> onItemDoubleClicked(index)
+                            VerseRowAction.CLICK -> onItemSelected(index)
                         }
-                    }
-                }
+                    },
+                )
             }
         }
         VerticalScrollbar(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             adapter = rememberScrollbarAdapter(listState)
         )
+    }
+}
+
+/** What a press on a verse row turned out to be, resolved by [VerseRow] and acted on by its caller. */
+internal enum class VerseRowAction { CLICK, DOUBLE, CTRL, SHIFT, RIGHT }
+
+private const val DOUBLE_CLICK_MS = 300L
+
+/**
+ * One verse in the browser list.
+ *
+ * Extracted from [BibleVerseColumn] rather than left inline: the row is where the split-verse
+ * marking lands, and the column was already at the length rule's limit without it.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun VerseRow(
+    verseStr: String,
+    isSelected: Boolean,
+    refCount: Int,
+    refCountTooltip: (Int) -> String,
+    refsOpen: Boolean,
+    onRefsClicked: () -> Unit,
+    refPopover: @Composable () -> Unit,
+    onPointerAction: (VerseRowAction) -> Unit,
+) {
+    val mark = LocalVerseSplitMark.current?.takeIf { verseNumberOf(verseStr) == it.verseNumber }
+    val offScreenHalf = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                else MaterialTheme.colorScheme.surface
+            ),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = if (mark == null) AnnotatedString(verseStr)
+                   else verseWithLiveHalf(verseStr, mark, offScreenHalf),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 13.5.sp,
+                lineHeight = 13.5.sp * 1.6f,
+                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+            ),
+            color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .weight(1f)
+                .pointerInput(onPointerAction) {
+                    var lastClickTime = 0L
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Main)
+                            if (event.type != PointerEventType.Press) continue
+                            val mods = event.keyboardModifiers
+                            onPointerAction(
+                                when {
+                                    event.button?.isSecondary == true -> VerseRowAction.RIGHT
+                                    mods.isCtrlPressed || mods.isMetaPressed -> VerseRowAction.CTRL
+                                    mods.isShiftPressed -> VerseRowAction.SHIFT
+                                    else -> {
+                                        val now = System.currentTimeMillis()
+                                        val isDouble = now - lastClickTime < DOUBLE_CLICK_MS
+                                        lastClickTime = now
+                                        if (isDouble) VerseRowAction.DOUBLE else VerseRowAction.CLICK
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                .padding(6.dp)
+        )
+        if (refCount > 0) {
+            Box(modifier = Modifier.padding(top = 6.dp, end = 2.dp)) {
+                CrossRefChip(
+                    count = refCount,
+                    active = refsOpen,
+                    tooltipText = refCountTooltip(refCount),
+                    onClick = onRefsClicked,
+                )
+                if (refsOpen) refPopover()
+            }
+        }
+    }
+}
+
+/**
+ * [line] with the half that is not on screen drawn in [offScreenHalf].
+ *
+ * Dimming rather than a badge: it says *where* the break fell as well as which side is live, which
+ * is the question being asked when the same list row stays highlighted for both halves.
+ */
+private fun verseWithLiveHalf(line: String, mark: VerseSplitMark, offScreenHalf: Color): AnnotatedString {
+    val breakAt = mark.breakOffset.coerceIn(0, line.length)
+    val dimmed = SpanStyle(color = offScreenHalf)
+    return buildAnnotatedString {
+        if (mark.secondHalfLive) {
+            withStyle(dimmed) { append(line.substring(0, breakAt)) }
+            append(line.substring(breakAt))
+        } else {
+            append(line.substring(0, breakAt))
+            withStyle(dimmed) { append(line.substring(breakAt)) }
+        }
     }
 }
 

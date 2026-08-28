@@ -117,7 +117,7 @@ internal object CanvasLabel {
     // what makes `sourceNames()` enough to tell them apart.
     const val IMAGE = "Image"
     const val TEXT = "Text"
-    const val CLOCK = "Clock"
+    const val CLOCK = "Clock & Timer"
     const val COLOR = "Color"
     const val VIDEO = "Video"
     const val BROWSER = "Browser"

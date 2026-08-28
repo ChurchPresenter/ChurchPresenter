@@ -82,6 +82,7 @@
     <string name="shadow_opacity">الشدة (%)</string>
     <string name="hold_live">تثبيت المباشر</string>
     <string name="bible_split_browse_mode">وضع التصفح المنفصل</string>
+    <string name="bible_split_long_verses">تقسيم الآيات الطويلة على شريحتين</string>
     <string name="bible_cross_references">المراجع المتقابلة</string>
     <string name="bible_cross_references_title">مراجع</string>
     <string name="bible_cross_references_enable">عرض روابط المراجع المتقابلة</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">ساعة</string>
     <string name="canvas_clock_mode_countdown">عد تنازلي</string>
+    <string name="canvas_clock_mode_count_up">عد تصاعدي</string>
     <string name="canvas_decklink_io_warning">هذا الجهاز مستخدم حاليًا للإخراج. قد لا يتوفر الإدخال على الأجهزة التي لا تدعم الإدخال والإخراج في الوقت نفسه.</string>
     <string name="canvas_tool_select">تحديد</string>
     <string name="canvas_tool_rectangle">مستطيل</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">العتامة</string>
     <string name="canvas_source_browser">متصفح</string>
     <string name="canvas_source_clock">ساعة</string>
+    <string name="canvas_source_timer">الساعة والمؤقت</string>
+    <string name="canvas_text_curve">منحنى</string>
+    <string name="canvas_letter_spacing">تباعد الأحرف</string>
     <string name="canvas_source_qrcode">رمز QR</string>
     <string name="canvas_source_camera">كاميرا</string>
     <string name="canvas_source_screen_capture">تصوير الشاشة</string>

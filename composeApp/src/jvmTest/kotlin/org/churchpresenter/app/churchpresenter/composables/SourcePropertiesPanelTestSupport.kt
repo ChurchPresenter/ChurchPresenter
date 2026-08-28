@@ -235,7 +235,7 @@ internal object Label {
     const val VIDEO = "Video"
     const val BROWSER = "Browser"
     const val SHAPE = "Shape"
-    const val CLOCK = "Clock"
+    const val CLOCK = "Clock & Timer"
     const val QRCODE = "QR Code"
     const val CAMERA = "Camera"
     const val SCREEN_CAPTURE = "Screen Capture"
@@ -302,6 +302,19 @@ internal fun ComposeUiTest.commitField(ordinal: Int, to: String) {
 /** Types [to] into the field at [ordinal] without confirming it — for the fields that update live. */
 internal fun ComposeUiTest.typeField(ordinal: Int, to: String) {
     textFields()[ordinal].performScrollTo().performTextReplacement(to)
+    waitForIdle()
+}
+
+/**
+ * Clicks one of `TextStyleButtons`' four faces, addressed by the single letter it draws:
+ * "B", "I", "U", "S".
+ *
+ * They are `Surface`s with a `clickable`, not buttons — no role, no toggleable state — so the letter
+ * is the only handle on them, and [index] picks between the rows when a panel has more than one (the
+ * Bible source styles its verse and its reference separately).
+ */
+internal fun ComposeUiTest.clickStyleButton(label: String, index: Int = 0) {
+    onAllNodesWithText(label)[index].performScrollTo().performClick()
     waitForIdle()
 }
 

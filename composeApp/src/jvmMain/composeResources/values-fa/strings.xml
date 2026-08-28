@@ -82,6 +82,7 @@
     <string name="shadow_opacity">شدت (%)</string>
     <string name="hold_live">نگه‌داشتن زنده</string>
     <string name="bible_split_browse_mode">حالت مرور جداگانه</string>
+    <string name="bible_split_long_verses">تقسیم آیات طولانی به دو اسلاید</string>
     <string name="bible_cross_references">ارجاعات متقابل</string>
     <string name="bible_cross_references_title">ارجاعات</string>
     <string name="bible_cross_references_enable">نمایش پیوند ارجاعات متقابل</string>
@@ -1212,6 +1213,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">ساعت</string>
     <string name="canvas_clock_mode_countdown">شمارش معکوس</string>
+    <string name="canvas_clock_mode_count_up">کرنومتر</string>
     <string name="canvas_decklink_io_warning">این دستگاه در حال حاضر برای خروجی استفاده می‌شود. روی دستگاه‌هایی که ورودی و خروجی همزمان را پشتیبانی نمی‌کنند، ممکن است ورودی در دسترس نباشد.</string>
     <string name="canvas_tool_select">انتخاب</string>
     <string name="canvas_tool_rectangle">مستطیل</string>
@@ -1223,6 +1225,9 @@
     <string name="canvas_opacity">شفافیت</string>
     <string name="canvas_source_browser">مرورگر</string>
     <string name="canvas_source_clock">ساعت</string>
+    <string name="canvas_source_timer">ساعت و زمان‌سنج</string>
+    <string name="canvas_text_curve">انحنا</string>
+    <string name="canvas_letter_spacing">فاصله حروف</string>
     <string name="canvas_source_qrcode">کد QR</string>
     <string name="canvas_source_camera">دوربین</string>
     <string name="canvas_source_screen_capture">ضبط صفحه</string>

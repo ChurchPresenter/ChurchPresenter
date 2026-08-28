@@ -124,6 +124,11 @@ class BibleViewModel(
     internal val _multiVerseEnabled = mutableStateOf(false)
     val multiVerseEnabled: State<Boolean> = _multiVerseEnabled
 
+    // Which half of a split verse is showing, and the selection publication it belongs to. Anything
+    // that selects something else bumps the token above and so invalidates it. See VerseSplit.kt.
+    internal val _versePage = mutableStateOf(VERSE_PAGE_FIRST)
+    internal var _versePageToken = -1
+
     internal val _selectedVerseIndices = mutableStateListOf<Int>()
     val selectedVerseIndices: List<Int> get() = _selectedVerseIndices
 
@@ -367,7 +372,7 @@ class BibleViewModel(
                     )
                 }
             }
-            verseList
+            verseList.versePage(currentVersePage(), splitLongVersesEnabled)
         }
     }
 
@@ -698,18 +703,27 @@ class BibleViewModel(
     }
 
     fun navigatePreviousVerse(): Boolean {
+        if (stepSelectedVersePage(forward = false)) return true
         if (_verses.value.isNotEmpty() && _selectedVerseIndex.value > 0) {
             _selectedVerseIndices.clear()
             _multiVerseEnabled.value = false
             _selectedVerseIndex.value--
-            _verseSelectionToken.value++
+            // Backwards through a split verse means its second half first, not its first.
+            publishLandingPage(
+                selectedVersesUnsplit().firstOrNull()?.verseText.orEmpty(), fromBehind = true,
+            )
             return true
         }
         return false
     }
 
+    /** Moves to the other half of the live verse, when it is split and there is a half to move to. */
+    private fun stepSelectedVersePage(forward: Boolean): Boolean =
+        stepVersePage(selectedVersesUnsplit().firstOrNull()?.verseText ?: return false, forward)
+
     fun navigateNextVerse(): Boolean {
         if (_verses.value.isEmpty()) return false
+        if (stepSelectedVersePage(forward = true)) return true
         if (_selectedVerseIndex.value < _verses.value.size - 1) {
             _selectedVerseIndices.clear()
             _multiVerseEnabled.value = false
