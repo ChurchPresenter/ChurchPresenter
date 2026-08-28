@@ -23,6 +23,7 @@ import org.churchpresenter.core.models.scene.PathPoint
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -63,6 +64,10 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalTestApi::class)
 class SceneSourceRendererTest {
+
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
 
     // ── Image ──────────────────────────────────────────────────────────────────────────────────
 

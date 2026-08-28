@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -10,6 +11,10 @@ import kotlin.test.assertTrue
  * properties panel, so each test uses its own sourceId rather than resetting global state.
  */
 class TimerStateManagerTest {
+
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
 
     private var counter = 0
     private fun id() = "test-source-${counter++}-${this.hashCode()}"

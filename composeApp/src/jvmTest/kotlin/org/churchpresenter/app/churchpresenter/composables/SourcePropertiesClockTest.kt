@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -31,6 +32,10 @@ import kotlin.test.assertEquals
  * this build does not know is pinned as well.
  */
 class SourcePropertiesClockTest {
+
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
 
     /** Ordinals of the clock panel's fields — the header owns the first six. */
     private object Field {

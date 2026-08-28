@@ -93,4 +93,21 @@ object TimerStateManager {
     private fun stop(sourceId: String) {
         tickers.remove(sourceId)?.cancel()
     }
+
+    /**
+     * Cancels every ticker and forgets every timer.
+     *
+     * Nothing in the app needs this — a scene's timers are meant to outlive the panel that started
+     * them, which is the whole point of holding them here. Tests do: [setRunning] launches a real
+     * one-second coroutine on a process-wide scope, and nothing else ever stops it, so a test that
+     * starts a countdown leaves it decrementing [_states] for the rest of the JVM. That map is
+     * Compose-observable, so those stray ticks recompose whatever panel the *next* test is driving,
+     * in the middle of a click or an assertion. Calling this between tests is what keeps a timer
+     * inside the test that started it.
+     */
+    internal fun clear() {
+        tickers.values.forEach { it.cancel() }
+        tickers.clear()
+        _states.clear()
+    }
 }
