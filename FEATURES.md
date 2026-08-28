@@ -16,7 +16,7 @@
 - **Bilingual worship** — show two languages at once, side-by-side or stacked, or switch between primary and secondary on the fly.
 - **Look-ahead for the band** — see the current and next section in advance so transitions stay smooth.
 - **Favorites & play counts** — star the songs you use most and see how often each has been sung.
-- **Bring your existing library** — the bundled converter reads SongBeamer, OpenLP (the `songs.sqlite` database itself or an OpenLyrics export), OpenSong, FreeShow, Free Worship, EasySlides, Quelea and SoftProjector libraries, plus lyrics pulled out of PDF, Word and PowerPoint files — several files or a whole folder at a time — and ready-to-use sample songs ship with the app.
+- **Bring your existing library** — the bundled converter reads SongBeamer, OpenLP (the `songs.sqlite` database itself or an OpenLyrics export), OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm and SoftProjector libraries, plus lyrics pulled out of PDF, Word and PowerPoint files — several files or a whole folder at a time — and ready-to-use sample songs ship with the app.
 - **Flexible display** — one verse or one line at a time, optional title slides, and full control over how numbers and titles appear.
 
 **Source locations:**
