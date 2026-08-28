@@ -84,6 +84,7 @@
     <string name="shadow_opacity">Intensity (%)</string>
     <string name="hold_live">Hold Live</string>
     <string name="bible_split_browse_mode">Split Browse Mode</string>
+    <string name="bible_split_long_verses">Split long verses across two slides</string>
     <string name="bible_cross_references">Cross References</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Show cross reference links</string>

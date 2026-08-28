@@ -82,6 +82,7 @@
     <string name="shadow_opacity">濃さ（%）</string>
     <string name="hold_live">ライブを保持</string>
     <string name="bible_split_browse_mode">分割ブラウズモード</string>
+    <string name="bible_split_long_verses">長い聖句を2枚のスライドに分割</string>
     <string name="bible_cross_references">引照</string>
     <string name="bible_cross_references_title">引照</string>
     <string name="bible_cross_references_enable">引照のリンクを表示する</string>

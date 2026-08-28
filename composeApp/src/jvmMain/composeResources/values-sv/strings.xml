@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Intensitet (%)</string>
     <string name="hold_live">Håll live</string>
     <string name="bible_split_browse_mode">Delat bläddringsläge</string>
+    <string name="bible_split_long_verses">Dela långa verser på två bilder</string>
     <string name="bible_cross_references">Korshänvisningar</string>
     <string name="bible_cross_references_title">Hänv.</string>
     <string name="bible_cross_references_enable">Visa korshänvisningar</string>

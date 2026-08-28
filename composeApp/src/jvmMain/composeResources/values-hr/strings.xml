@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Jačina (%)</string>
     <string name="hold_live">Zadrži uživo</string>
     <string name="bible_split_browse_mode">Odvojeno pregledavanje</string>
+    <string name="bible_split_long_verses">Podijeli duge stihove na dva slajda</string>
     <string name="bible_cross_references">Usporedna mjesta</string>
     <string name="bible_cross_references_title">Usp.</string>
     <string name="bible_cross_references_enable">Prikaži veze na usporedna mjesta</string>

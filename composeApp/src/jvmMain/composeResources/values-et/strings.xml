@@ -76,6 +76,7 @@
     <string name="shadow_opacity">Intensiivsus (%)</string>
     <string name="hold_live">Hoia eetris</string>
     <string name="bible_split_browse_mode">Jagatud sirvimisrežiim</string>
+    <string name="bible_split_long_verses">Jaga pikad salmid kahele slaidile</string>
     <string name="bible_cross_references">Ristviited</string>
     <string name="bible_cross_references_title">Viited</string>
     <string name="bible_cross_references_enable">Näita ristviiteid</string>

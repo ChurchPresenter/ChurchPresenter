@@ -262,6 +262,16 @@ data class BibleSettings(
     val splitLivePanelWidth: Int = 300,
     val crossReferencesEnabled: Boolean = true,
     val crossReferencesPanel: Boolean = false,
+
+    /**
+     * Whether a very long verse is shown as two halves rather than shrunk to fit in one.
+     *
+     * The presenter never cuts scripture off -- it scales the whole verse down until it fits -- so
+     * the longest verses arrive on screen too small to read over a background image. With this on,
+     * one past the length threshold is broken at the word boundary nearest its middle and the
+     * next/previous-verse keys step through both halves before moving on.
+     */
+    val splitLongVerses: Boolean = false,
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.

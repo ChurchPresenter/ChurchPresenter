@@ -82,6 +82,7 @@
     <string name="shadow_opacity">强度 (%)</string>
     <string name="hold_live">保持上屏</string>
     <string name="bible_split_browse_mode">分屏浏览模式</string>
+    <string name="bible_split_long_verses">将长经文拆分为两张幻灯片</string>
     <string name="bible_cross_references">串珠</string>
     <string name="bible_cross_references_title">串珠</string>
     <string name="bible_cross_references_enable">显示串珠链接</string>

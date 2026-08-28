@@ -1792,6 +1792,7 @@
     <string name="copy_verse">Kopírovať verš</string>
     <string name="style">Štýl</string>
     <string name="bible_split_browse_mode">Rozdelený režim prehliadania</string>
+    <string name="bible_split_long_verses">Rozdeliť dlhé verše na dva snímky</string>
     <string name="bible_cross_references">Krížové odkazy</string>
     <string name="bible_cross_references_title">Odkazy</string>
     <string name="bible_cross_references_enable">Zobrazovať krížové odkazy</string>
