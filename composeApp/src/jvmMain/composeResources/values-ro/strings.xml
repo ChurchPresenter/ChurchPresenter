@@ -1044,6 +1044,8 @@
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Ceas</string>
     <string name="canvas_source_timer">Ceas și cronometru</string>
+    <string name="canvas_text_curve">Curbă</string>
+    <string name="canvas_letter_spacing">Spațiere litere</string>
     <string name="canvas_source_qrcode">Cod QR</string>
     <string name="canvas_source_camera">Cameră</string>
     <string name="canvas_source_screen_capture">Captură Ecran</string>

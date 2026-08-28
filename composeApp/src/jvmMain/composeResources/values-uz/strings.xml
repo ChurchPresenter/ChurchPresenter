@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">Brauzer</string>
     <string name="canvas_source_clock">Soat</string>
     <string name="canvas_source_timer">Soat va taymer</string>
+    <string name="canvas_text_curve">Egrilik</string>
+    <string name="canvas_letter_spacing">Harflar oralig'i</string>
     <string name="canvas_source_qrcode">QR kod</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran tasviri</string>

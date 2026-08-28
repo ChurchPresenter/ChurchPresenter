@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">ບຣາວເຊີ</string>
     <string name="canvas_source_clock">ໂມງ</string>
     <string name="canvas_source_timer">ໂມງ ແລະ ຕົວຈັບເວລາ</string>
+    <string name="canvas_text_curve">ເສັ້ນໂຄ້ງ</string>
+    <string name="canvas_letter_spacing">ໄລຍະຫ່າງຕົວອັກສອນ</string>
     <string name="canvas_source_qrcode">ລະຫັດ QR</string>
     <string name="canvas_source_camera">ກ້ອງ</string>
     <string name="canvas_source_screen_capture">ການຈັບພາບໜ້າຈໍ</string>

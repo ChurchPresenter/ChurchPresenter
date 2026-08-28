@@ -13,7 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
+import kotlin.math.PI
+import kotlin.math.abs
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -98,6 +109,11 @@ private const val POLL_INTERVAL_MS = 1000L
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_DAY = 86400
+private const val PERCENT_SCALE = 100f
+/** A curve of 100% spends half a circle on the line; more than a full circle would overlap itself. */
+private const val MAX_CURVE_TURNS = 2f
+/** How much room a bent reference line gets: its own height, plus the room the bend needs. */
+private const val REFERENCE_ROWS = 3f
 private const val MIN_CAPTURE_INTERVAL_MS = 33L
 private const val WINDOW_BOUNDS_FIELDS = 4
 private const val BOUNDS_WIDTH_INDEX = 2
@@ -162,6 +178,23 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
     }
 }
 
+/**
+ * Tracking as Compose wants it: [TextUnit.Unspecified] for none at all, rather than a spacing of
+ * zero. The two are not the same to the text shaper — asking for zero re-shapes the line and moves
+ * it by a pixel, which would change every scene that has never touched the setting.
+ */
+private fun trackingOf(percent: Float): TextUnit =
+    if (percent == 0f) TextUnit.Unspecified else (percent / PERCENT_SCALE).em
+
+/** Underline, strike-through, both, or neither — as Compose wants it. */
+private fun textDecorationOf(underline: Boolean, strikethrough: Boolean): TextDecoration? = when {
+    underline && strikethrough ->
+        TextDecoration.combine(listOf(TextDecoration.Underline, TextDecoration.LineThrough))
+    underline -> TextDecoration.Underline
+    strikethrough -> TextDecoration.LineThrough
+    else -> null
+}
+
 @Composable
 private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier, fontScale: Float = 1f) {
     val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
@@ -186,18 +219,77 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
         modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
         contentAlignment = verticalAlign
     ) {
-        Text(
-            text = source.text,
-            color = textColor,
-            fontSize = (source.fontSize * fontScale).sp,
-            fontFamily = fontFamily,
-            fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-            textAlign = align,
-            lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(4.dp)
-        )
+        if (source.curve != 0f) {
+            CurvedText(
+                text = source.text,
+                curve = source.curve,
+                style = TextStyle(
+                    color = textColor,
+                    fontSize = (source.fontSize * fontScale).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
+                modifier = Modifier.fillMaxSize().padding(4.dp)
+            )
+        } else {
+            Text(
+                text = source.text,
+                color = textColor,
+                fontSize = (source.fontSize * fontScale).sp,
+                fontFamily = fontFamily,
+                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                textAlign = align,
+                lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                letterSpacing = trackingOf(source.letterSpacing),
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
+    }
+}
+
+/**
+ * One line of text bent around a circle: [curve] is a percentage, positive arching the line over
+ * the circle and negative cupping it under, and 100 spends a half circle on it.
+ *
+ * Compose has no text-on-a-path, so each glyph is measured and drawn on its own, rotated to the
+ * angle its own centre sits at. That is also why the line cannot wrap — newlines become spaces.
+ */
+@Composable
+internal fun CurvedText(text: String, curve: Float, style: TextStyle, modifier: Modifier = Modifier) {
+    val measurer = rememberTextMeasurer()
+    val glyphs = remember(text, style) {
+        text.replace('\n', ' ').map { measurer.measure(AnnotatedString(it.toString()), style) }
+    }
+    val widths = remember(glyphs) { glyphs.map { it.size.width.toFloat() } }
+    val lineWidth = widths.sum()
+    val lineHeight = remember(glyphs) { glyphs.maxOfOrNull { it.size.height.toFloat() } ?: 0f }
+
+    Canvas(modifier) {
+        if (lineWidth <= 0f) return@Canvas
+        val sweep = (abs(curve) / PERCENT_SCALE).coerceAtMost(MAX_CURVE_TURNS) * PI.toFloat()
+        val radius = lineWidth / sweep
+        // How far the ends fall away from the middle of the arc, which is what it costs in height.
+        val sagitta = radius * (1f - cos(sweep / 2f))
+        val arch = curve > 0f
+        val extentTop = (size.height - (sagitta + lineHeight)) / 2f
+        val apexTop = if (arch) extentTop else extentTop + sagitta
+        val pivot = Offset(size.width / 2f, if (arch) apexTop + radius else apexTop - radius)
+
+        var travelled = 0f
+        glyphs.forEachIndexed { index, glyph ->
+            val centre = travelled + widths[index] / 2f
+            val angle = Math.toDegrees(((centre - lineWidth / 2f) / radius).toDouble()).toFloat()
+            rotate(degrees = if (arch) angle else -angle, pivot = pivot) {
+                drawText(glyph, topLeft = Offset(size.width / 2f - widths[index] / 2f, apexTop))
+            }
+            travelled += widths[index]
+        }
     }
 }
 
@@ -541,17 +633,25 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
         else -> wallClockText(source)
     }
 
+    val style = TextStyle(
+        color = fontColor,
+        fontSize = (source.fontSize * fontScale).sp,
+        fontFamily = fontFamily,
+        fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = textDecorationOf(source.underline, source.strikethrough),
+        letterSpacing = trackingOf(source.letterSpacing)
+    )
+
     Box(
         modifier = modifier.fillMaxSize().background(bgColor),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = displayText,
-            color = fontColor,
-            fontSize = (source.fontSize * fontScale).sp,
-            fontFamily = fontFamily,
-            fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal
-        )
+        if (source.curve != 0f) {
+            CurvedText(displayText, source.curve, style, Modifier.fillMaxSize())
+        } else {
+            Text(text = displayText, style = style)
+        }
     }
 }
 
@@ -572,10 +672,7 @@ private fun secondsUntilTimeOfDay(hour: Int, minute: Int, second: Int): Int {
     return if (diff > 0) diff else diff + SECONDS_PER_DAY
 }
 
-/**
- * The countdown's remaining time, or its expiry message once it has run out. The tick loop lives
- * here rather than in the properties panel so it keeps running while the source is not selected.
- */
+/** The countdown's remaining time, or its expiry message once it has run out. */
 @Composable
 private fun countdownText(source: SceneSource.ClockSource): String {
     val totalSeconds = source.targetHour * SECONDS_PER_HOUR +
@@ -584,14 +681,6 @@ private fun countdownText(source: SceneSource.ClockSource): String {
     // Sync TimerStateManager when duration fields change
     LaunchedEffect(totalSeconds) {
         TimerStateManager.onDurationChanged(source.id, totalSeconds)
-    }
-
-    val timerState = TimerStateManager.getState(source.id, totalSeconds)
-    LaunchedEffect(timerState.isRunning) {
-        while (timerState.isRunning) {
-            delay(POLL_INTERVAL_MS)
-            TimerStateManager.tick(source.id)
-        }
     }
 
     val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
@@ -603,13 +692,6 @@ private fun countdownText(source: SceneSource.ClockSource): String {
 /** A stopwatch: seeded at zero and counted up by the same shared state the countdown uses. */
 @Composable
 private fun countUpText(source: SceneSource.ClockSource): String {
-    val timerState = TimerStateManager.getState(source.id, 0)
-    LaunchedEffect(timerState.isRunning) {
-        while (timerState.isRunning) {
-            delay(POLL_INTERVAL_MS)
-            TimerStateManager.tickUp(source.id)
-        }
-    }
     return formatElapsed(
         TimerStateManager.getState(source.id, 0).remainingSeconds,
         source.showHours,
@@ -654,6 +736,59 @@ private fun wallClockText(source: SceneSource.ClockSource): String {
         }
     }
     return text
+}
+
+/**
+ * The verse over its reference, both bent by [SceneSource.BibleSource.curve].
+ *
+ * A bent line cannot wrap, so the verse is one line however long it is — which is the trade the
+ * curve asks for, and why it is off by default.
+ */
+@Composable
+private fun CurvedBibleText(
+    source: SceneSource.BibleSource,
+    textColor: Color,
+    refColor: Color,
+    fontFamily: FontFamily,
+    fontScale: Float
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        CurvedText(
+            text = source.verseText.ifEmpty { "Select a verse..." },
+            curve = source.curve,
+            style = TextStyle(
+                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
+                fontSize = (source.fontSize * fontScale).sp,
+                fontFamily = fontFamily,
+                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                letterSpacing = trackingOf(source.letterSpacing),
+            ),
+            modifier = Modifier.fillMaxWidth().weight(1f)
+        )
+        if (source.referenceText.isNotEmpty()) {
+            CurvedText(
+                text = source.referenceText,
+                curve = source.curve,
+                style = TextStyle(
+                    color = refColor,
+                    fontSize = (source.referenceFontSize * fontScale).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(
+                        source.referenceUnderline,
+                        source.referenceStrikethrough
+                    ),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height((source.referenceFontSize * fontScale * REFERENCE_ROWS).dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -982,6 +1117,10 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
         modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
         contentAlignment = verticalAlign
     ) {
+        if (source.curve != 0f) {
+            CurvedBibleText(source, textColor, refColor, fontFamily, fontScale)
+            return@Box
+        }
         Column(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalAlignment = when (source.horizontalAlignment) {
@@ -997,8 +1136,10 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 fontFamily = fontFamily,
                 fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
                 textAlign = align,
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -1011,7 +1152,12 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                     fontFamily = fontFamily,
                     fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(
+                        source.referenceUnderline,
+                        source.referenceStrikethrough
+                    ),
                     textAlign = align,
+                    letterSpacing = trackingOf(source.letterSpacing),
                     modifier = Modifier.fillMaxWidth()
                 )
             }

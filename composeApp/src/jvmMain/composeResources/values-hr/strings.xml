@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">Preglednik</string>
     <string name="canvas_source_clock">Sat</string>
     <string name="canvas_source_timer">Sat i mjerač vremena</string>
+    <string name="canvas_text_curve">Krivulja</string>
+    <string name="canvas_letter_spacing">Razmak slova</string>
     <string name="canvas_source_qrcode">QR kod</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Snimka zaslona</string>

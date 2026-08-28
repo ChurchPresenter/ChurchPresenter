@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">ブラウザー</string>
     <string name="canvas_source_clock">時計</string>
     <string name="canvas_source_timer">時計とタイマー</string>
+    <string name="canvas_text_curve">カーブ</string>
+    <string name="canvas_letter_spacing">文字間隔</string>
     <string name="canvas_source_qrcode">QR コード</string>
     <string name="canvas_source_camera">カメラ</string>
     <string name="canvas_source_screen_capture">画面キャプチャ</string>

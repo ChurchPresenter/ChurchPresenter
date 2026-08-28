@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * The Text source: the text itself, its font, size, colour, alignment, line spacing and background.
+ * The Text source: the text itself, its font, size, colour, alignment, spacing, curve and background.
  *
  * Two things here are not like the rest of the panel. The **transparent-background checkbox** is not
  * a boolean in the model at all — it is derived from whether `backgroundColor` reads `#00000000`, and
@@ -38,7 +38,9 @@ class SourcePropertiesTextTest {
     /** Ordinals of the text panel's fields — the header owns the first six. */
     private object Field {
         const val TEXT = 6
-        const val FONT_SIZE = 7
+        const val LETTER_SPACING = 7
+        const val CURVE = 8
+        const val FONT_SIZE = 9
     }
 
     /** Ordinals within the panel's six alignment buttons, in the order the group lays them out. */
@@ -57,7 +59,7 @@ class SourcePropertiesTextTest {
     @Test
     fun `the section is headed and every control captioned`() = sourcePanel(Fixture.text()) { _ ->
         listOf(
-            "TEXT", "Edit in larger window", "Line Spacing", "FONT", "FONT SIZE",
+            "TEXT", "Edit in larger window", "Letter Spacing", "Curve", "FONT", "FONT SIZE",
             "Horizontal", "Vertical", "FONT COLOR", "Transparent background",
         ).forEach { caption ->
             onNodeWithText(caption).assertExists("\"$caption\" must caption a control on the text panel")
@@ -67,26 +69,31 @@ class SourcePropertiesTextTest {
     }
 
     @Test
-    fun `the text panel adds two fields and one checkbox to the header`() = sourcePanel(Fixture.text()) { _ ->
+    fun `the text panel adds four fields and one checkbox to the header`() = sourcePanel(Fixture.text()) { _ ->
         // A transparent background — the default — hides the background colour field, so this is the
-        // panel at its smallest: the text box and the font size.
-        textFields().assertCountEquals(8)
+        // panel at its smallest: the text box, the two sliders' inputs and the font size.
+        textFields().assertCountEquals(10)
         checkboxes().assertCountEquals(1)
+        // The four style buttons publish no role of their own, so this counts the alignment ones.
         roleButtons().assertCountEquals(Align.COUNT)
+        listOf("B", "I", "U", "S").forEach {
+            assertEquals(1, countOf(it), "\"$it\" must be the text panel's own style button")
+        }
     }
 
     @Test
     fun `every stored value is shown by the control that owns it`() {
         val styled = Fixture.text().copy(
             text = "Welcome home", fontFamily = "Verdana", fontSize = 72,
-            fontColor = "#FFCC00", lineSpacing = 140,
+            fontColor = "#FFCC00", letterSpacing = 25f, curve = 40f,
         )
         sourcePanel(styled) { _ ->
             assertFieldShows("Welcome home", "the text box")
             assertFieldShows("72", "the font size field")
+            assertFieldShows("25", "the letter spacing input")
+            assertFieldShows("40", "the curve input")
             onNodeWithText("Verdana").assertExists("the font dropdown names the stored family")
             onNodeWithText("#FFCC00").assertExists("the colour field reads out its stored hex")
-            onNodeWithText("140%").assertExists("the line spacing slider reads out percent")
         }
     }
 
@@ -285,30 +292,106 @@ class SourcePropertiesTextTest {
         }
     }
 
-    // ── Line spacing ──────────────────────────────────────────────────────────
+    // ── Letter spacing and curve ──────────────────────────────────────────────
 
     @Test
-    fun `dragging line spacing to its near end is the tightest setting`() = sourcePanel(Fixture.text()) { get ->
-        tapSliderBeside("Line Spacing", fraction = 0f, gapDp = Gap.READOUT)
+    fun `dragging letter spacing to its far end tracks the text out`() = sourcePanel(Fixture.text()) { get ->
+        tapSliderUnder("Letter Spacing", fraction = 1f, gapDp = Gap.INPUT)
 
-        assertEquals(50, (get() as SceneSource.TextSource).lineSpacing, "the range starts at 50%")
-        onNodeWithText("50%").assertExists("and the read-out follows immediately")
+        assertEquals(100f, (get() as SceneSource.TextSource).letterSpacing, "the range tops out at 100%")
+        assertFieldShows("100", "the letter spacing input follows the track")
     }
 
     @Test
-    fun `dragging line spacing to its far end is the loosest setting`() = sourcePanel(Fixture.text()) { get ->
-        tapSliderBeside("Line Spacing", fraction = 1f, gapDp = Gap.READOUT)
+    fun `dragging letter spacing to its near end tightens it past zero`() = sourcePanel(Fixture.text()) { get ->
+        tapSliderUnder("Letter Spacing", fraction = 0f, gapDp = Gap.INPUT)
 
-        assertEquals(300, (get() as SceneSource.TextSource).lineSpacing, "the range tops out at 300%")
-        onNodeWithText("300%").assertExists()
+        assertEquals(-20f, (get() as SceneSource.TextSource).letterSpacing, "the range starts at -20%")
     }
 
     @Test
-    fun `a mid-track tap on line spacing lands between the ends`() = sourcePanel(Fixture.text()) { get ->
-        tapSliderBeside("Line Spacing", fraction = 0.5f, gapDp = Gap.READOUT)
+    fun `typing a letter spacing stores it`() = sourcePanel(Fixture.text()) { get ->
+        // The slider's own input holds what is typed until Done, like every other numeric field.
+        commitField(Field.LETTER_SPACING, "35")
 
-        val spacing = (get() as SceneSource.TextSource).lineSpacing
-        assertTrue(spacing in 51..299, "a mid-track tap lands inside the range, was $spacing")
-        onNodeWithText("$spacing%").assertExists("the read-out shows exactly what was stored")
+        assertEquals(35f, (get() as SceneSource.TextSource).letterSpacing)
+    }
+
+    @Test
+    fun `dragging the curve to its far end arches the line`() = sourcePanel(Fixture.text()) { get ->
+        tapSliderUnder("Curve", fraction = 1f, gapDp = Gap.INPUT)
+
+        assertEquals(200f, (get() as SceneSource.TextSource).curve, "the curve runs to two full turns")
+    }
+
+    @Test
+    fun `dragging the curve to its near end cups it`() = sourcePanel(Fixture.text()) { get ->
+        tapSliderUnder("Curve", fraction = 0f, gapDp = Gap.INPUT)
+
+        assertEquals(-200f, (get() as SceneSource.TextSource).curve, "and as far the other way")
+    }
+
+    @Test
+    fun `a mid-track tap on the curve lands between the ends`() = sourcePanel(Fixture.text()) { get ->
+        tapSliderUnder("Curve", fraction = 0.5f, gapDp = Gap.INPUT)
+
+        val curve = (get() as SceneSource.TextSource).curve
+        assertTrue(curve > -200f && curve < 200f, "a mid-track tap lands inside the range, was $curve")
+    }
+
+    @Test
+    fun `the text is straight out of the box`() = sourcePanel(Fixture.text()) { get ->
+        assertEquals(0f, (get() as SceneSource.TextSource).curve)
+        assertEquals(0f, (get() as SceneSource.TextSource).letterSpacing)
+    }
+
+    // ── The four style buttons ────────────────────────────────────────────────
+
+    @Test
+    fun `every face is off out of the box`() = sourcePanel(Fixture.text()) { get ->
+        val source = get() as SceneSource.TextSource
+        assertEquals(false, source.bold)
+        assertEquals(false, source.italic)
+        assertEquals(false, source.underline)
+        assertEquals(false, source.strikethrough)
+    }
+
+    @Test
+    fun `Bold stores bold and nothing else`() = sourcePanel(Fixture.text()) { get ->
+        clickStyleButton("B")
+
+        assertEquals(Fixture.text().copy(bold = true), get(), "B may write only the bold flag")
+    }
+
+    @Test
+    fun `Italic stores italic and nothing else`() = sourcePanel(Fixture.text()) { get ->
+        clickStyleButton("I")
+
+        assertEquals(Fixture.text().copy(italic = true), get())
+    }
+
+    @Test
+    fun `Underline stores underline and nothing else`() = sourcePanel(Fixture.text()) { get ->
+        clickStyleButton("U")
+
+        assertEquals(Fixture.text().copy(underline = true), get())
+    }
+
+    @Test
+    fun `Strikethrough stores strikethrough and nothing else`() = sourcePanel(Fixture.text()) { get ->
+        clickStyleButton("S")
+
+        assertEquals(Fixture.text().copy(strikethrough = true), get())
+    }
+
+    @Test
+    fun `a face stored on is turned back off by its own button`() {
+        sourcePanel(Fixture.text().copy(bold = true, italic = true)) { get ->
+            clickStyleButton("B")
+
+            val source = get() as SceneSource.TextSource
+            assertEquals(false, source.bold)
+            assertEquals(true, source.italic, "the other faces are untouched")
+        }
     }
 }

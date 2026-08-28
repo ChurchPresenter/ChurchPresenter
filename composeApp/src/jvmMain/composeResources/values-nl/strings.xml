@@ -1006,6 +1006,8 @@
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Klok</string>
     <string name="canvas_source_timer">Klok en timer</string>
+    <string name="canvas_text_curve">Kromming</string>
+    <string name="canvas_letter_spacing">Letterspatiëring</string>
     <string name="canvas_source_qrcode">QR-code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Schermopname</string>

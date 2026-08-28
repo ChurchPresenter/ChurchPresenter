@@ -11,8 +11,11 @@ import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * What survives a recomposition the operator did not ask for.
@@ -28,6 +31,10 @@ import kotlin.test.assertEquals
  * the source untouched, which is precisely how its real caller behaves.
  */
 class SourcePropertiesRecompositionTest {
+
+    /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
+    @AfterTest
+    fun stopTimers() = TimerStateManager.clear()
 
     // ── Every kind of source ──────────────────────────────────────────────────
 
@@ -97,11 +104,26 @@ class SourcePropertiesRecompositionTest {
         }
     }
 
+    /**
+     * That the redraw leaves the countdown *running* — deliberately not what it reads.
+     *
+     * This asserted `00:02:00` until CI disagreed with it four times: the Start button launches a
+     * real one-second ticker on a background dispatcher, so an absolute read-out only holds while
+     * under a second of wall clock passes between the click and the assertion. That is true on an
+     * idle machine and false on a loaded runner, which is a test that reports how fast the box is.
+     *
+     * The remaining time surviving the redraw is not separately covered, and cannot be without a
+     * clock the test controls: [TimerStateManager]'s interval is a private constant on an object,
+     * and the alternative — a mutable interval the tests reach in and set — is the singleton seam
+     * the repo bans. The gap is small, because every path that would reseed the time (`reset`,
+     * `onDurationChanged`) also clears `isRunning`, so a countdown that came back reseeded would
+     * fail the assertions below anyway.
+     */
     @Test
     fun `a running countdown keeps running across a redraw`() {
         val id = "clk-redraw"
-        val countdown = Fixture.clock(id).copy(mode = "countdown", targetMinute = 2)
-        redrawablePanel(countdown) { _, redraw ->
+        val seedSeconds = 2 * 60
+        redrawablePanel(Fixture.clock(id).copy(mode = "countdown", targetMinute = 2)) { _, redraw ->
             onNodeWithText("Start").performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Pause").assertExists()
@@ -109,7 +131,10 @@ class SourcePropertiesRecompositionTest {
             redraw()
 
             onNodeWithText("Pause").assertExists("the timer must still be running after a redraw")
-            onNodeWithText("00:02:00").assertExists("and still showing the same remaining time")
+            assertTrue(
+                TimerStateManager.getState(id, seedSeconds).isRunning,
+                "and the timer itself must still be running, not just the button that says so",
+            )
         }
     }
 

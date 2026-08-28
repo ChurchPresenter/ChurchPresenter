@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">Webbläsare</string>
     <string name="canvas_source_clock">Klocka</string>
     <string name="canvas_source_timer">Klocka och timer</string>
+    <string name="canvas_text_curve">Kurva</string>
+    <string name="canvas_letter_spacing">Teckenavstånd</string>
     <string name="canvas_source_qrcode">QR-kod</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Skärmupptagning</string>

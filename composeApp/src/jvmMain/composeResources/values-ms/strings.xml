@@ -1225,6 +1225,8 @@
     <string name="canvas_source_browser">Pelayar</string>
     <string name="canvas_source_clock">Jam</string>
     <string name="canvas_source_timer">Jam &amp; Pemasa</string>
+    <string name="canvas_text_curve">Lengkung</string>
+    <string name="canvas_letter_spacing">Jarak Huruf</string>
     <string name="canvas_source_qrcode">Kod QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Tangkapan Skrin</string>
