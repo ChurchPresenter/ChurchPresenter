@@ -1226,6 +1226,8 @@
     <string name="canvas_source_browser">مرورگر</string>
     <string name="canvas_source_clock">ساعت</string>
     <string name="canvas_source_timer">ساعت و زمان‌سنج</string>
+    <string name="canvas_text_curve">انحنا</string>
+    <string name="canvas_letter_spacing">فاصله حروف</string>
     <string name="canvas_source_qrcode">کد QR</string>
     <string name="canvas_source_camera">دوربین</string>
     <string name="canvas_source_screen_capture">ضبط صفحه</string>

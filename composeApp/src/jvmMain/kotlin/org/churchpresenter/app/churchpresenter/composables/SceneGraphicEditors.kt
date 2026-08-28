@@ -48,7 +48,8 @@ import churchpresenter.composeapp.generated.resources.timer_target_time
 import churchpresenter.composeapp.generated.resources.timer_expired_text_label
 import churchpresenter.composeapp.generated.resources.canvas_text_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
-import churchpresenter.composeapp.generated.resources.canvas_text_bold
+import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
+import churchpresenter.composeapp.generated.resources.canvas_text_curve
 import churchpresenter.composeapp.generated.resources.canvas_qr_type
 import churchpresenter.composeapp.generated.resources.canvas_qr_content
 import churchpresenter.composeapp.generated.resources.canvas_qr_foreground
@@ -81,6 +82,11 @@ import androidx.compose.foundation.layout.PaddingValues
 private const val MAX_STROKE_WIDTH = 20f
 private const val MAX_ANGLE_DEGREES = 360f
 private const val PERCENT_SCALE = 100f
+/** Two full turns of curve either way; past that the line runs into itself. */
+private const val MAX_TEXT_CURVE = 200f
+/** Tracking, as a percentage of the font size. */
+private const val MIN_LETTER_SPACING = -20f
+private const val MAX_LETTER_SPACING = 100f
 private const val MIN_FONT_SIZE = 8
 private const val MAX_FONT_SIZE = 500
 private const val MAX_TARGET_HOUR = 99
@@ -192,30 +198,45 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
             onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) }
         )
     }
-    LabeledCheckbox(
-        checked = source.showHours,
-        onCheckedChange = { onUpdate(source.copy(showHours = it)) },
-        label = stringResource(Res.string.canvas_clock_show_hours),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        spacing = 4.dp,
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        LabeledCheckbox(
+            checked = source.showHours,
+            onCheckedChange = { onUpdate(source.copy(showHours = it)) },
+            label = stringResource(Res.string.canvas_clock_show_hours),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            spacing = 4.dp,
+        )
+        LabeledCheckbox(
+            checked = source.showSeconds,
+            onCheckedChange = { onUpdate(source.copy(showSeconds = it)) },
+            label = stringResource(Res.string.canvas_clock_show_seconds),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            spacing = 4.dp,
+        )
+    }
+    TextStyleButtons(
+        bold = source.bold,
+        italic = source.italic,
+        underline = source.underline,
+        shadow = false,
+        onBoldChange = { onUpdate(source.copy(bold = it)) },
+        onItalicChange = { onUpdate(source.copy(italic = it)) },
+        onUnderlineChange = { onUpdate(source.copy(underline = it)) },
+        onShadowChange = {},
+        strikethrough = source.strikethrough,
+        onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
+        showShadow = false,
     )
-    LabeledCheckbox(
-        checked = source.showSeconds,
-        onCheckedChange = { onUpdate(source.copy(showSeconds = it)) },
-        label = stringResource(Res.string.canvas_clock_show_seconds),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        spacing = 4.dp,
-    )
-    LabeledCheckbox(
-        checked = source.bold,
-        onCheckedChange = { onUpdate(source.copy(bold = it)) },
-        label = stringResource(Res.string.canvas_text_bold),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        spacing = 4.dp,
-    )
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_letter_spacing),
+        source.letterSpacing, MIN_LETTER_SPACING, MAX_LETTER_SPACING, "%"
+    ) { v -> onUpdate(source.copy(letterSpacing = v)) }
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_text_curve),
+        source.curve, -MAX_TEXT_CURVE, MAX_TEXT_CURVE, "%"
+    ) { v -> onUpdate(source.copy(curve = v)) }
     // Half a row: a font size is three digits, and the panel is a narrow column.
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         PropertyTextField(
@@ -308,7 +329,7 @@ private fun ClockCountdownControls(source: SceneSource.ClockSource, onUpdate: (S
 /** A stopwatch has nothing to configure, so it is the transport and its read-out alone. */
 @Composable
 private fun ClockCountUpControls(source: SceneSource.ClockSource) {
-    ClockTimerTransport(sourceId = source.id, seedSeconds = 0, canStart = true)
+    ClockTimerTransport(sourceId = source.id, seedSeconds = 0, canStart = true, countUp = true)
 }
 
 /** The time of day counted down to, entered on a 24-hour clock. */
@@ -374,7 +395,12 @@ private fun TimeFieldRow(fields: List<TimeField>) {
  * [TimerStateManager]'s, not the source's, so the panel and the canvas always agree.
  */
 @Composable
-private fun ClockTimerTransport(sourceId: String, seedSeconds: Int, canStart: Boolean) {
+private fun ClockTimerTransport(
+    sourceId: String,
+    seedSeconds: Int,
+    canStart: Boolean,
+    countUp: Boolean = false
+) {
     val timerState = TimerStateManager.getState(sourceId, seedSeconds)
     val isRunning = timerState.isRunning
     val seconds = timerState.remainingSeconds
@@ -397,7 +423,7 @@ private fun ClockTimerTransport(sourceId: String, seedSeconds: Int, canStart: Bo
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Button(
-            onClick = { TimerStateManager.setRunning(sourceId, seedSeconds, !isRunning) },
+            onClick = { TimerStateManager.setRunning(sourceId, seedSeconds, !isRunning, countUp) },
             enabled = canStart || isRunning,
             modifier = Modifier.weight(1f).height(32.dp),
             shape = RoundedCornerShape(8.dp),

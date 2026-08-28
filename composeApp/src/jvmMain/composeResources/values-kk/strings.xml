@@ -1214,6 +1214,8 @@
     <string name="canvas_source_browser">Браузер</string>
     <string name="canvas_source_clock">Сағат</string>
     <string name="canvas_source_timer">Сағат және таймер</string>
+    <string name="canvas_text_curve">Қисық</string>
+    <string name="canvas_letter_spacing">Әріп аралығы</string>
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Экранды жазу</string>

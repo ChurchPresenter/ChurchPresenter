@@ -1256,6 +1256,8 @@
     <string name="canvas_source_browser">Prohlížeč</string>
     <string name="canvas_source_clock">Hodiny</string>
     <string name="canvas_source_timer">Hodiny a časovač</string>
+    <string name="canvas_text_curve">Křivka</string>
+    <string name="canvas_letter_spacing">Prostrkání</string>
     <string name="canvas_source_qrcode">QR kód</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Záznam obrazovky</string>

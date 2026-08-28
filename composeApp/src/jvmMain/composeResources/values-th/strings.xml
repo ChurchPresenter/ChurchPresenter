@@ -1226,6 +1226,8 @@
     <string name="canvas_source_browser">เบราว์เซอร์</string>
     <string name="canvas_source_clock">นาฬิกา</string>
     <string name="canvas_source_timer">นาฬิกาและตัวจับเวลา</string>
+    <string name="canvas_text_curve">ความโค้ง</string>
+    <string name="canvas_letter_spacing">ระยะห่างตัวอักษร</string>
     <string name="canvas_source_qrcode">คิวอาร์โค้ด</string>
     <string name="canvas_source_camera">กล้อง</string>
     <string name="canvas_source_screen_capture">การจับภาพหน้าจอ</string>

@@ -1226,6 +1226,8 @@
     <string name="canvas_source_browser">Browser</string>
     <string name="canvas_source_clock">Orasan</string>
     <string name="canvas_source_timer">Orasan at Timer</string>
+    <string name="canvas_text_curve">Kurba</string>
+    <string name="canvas_letter_spacing">Agwat ng Letra</string>
     <string name="canvas_source_qrcode">QR Code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>

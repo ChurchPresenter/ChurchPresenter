@@ -1226,6 +1226,8 @@
     <string name="canvas_source_browser">Tarayıcı</string>
     <string name="canvas_source_clock">Saat</string>
     <string name="canvas_source_timer">Saat ve Zamanlayıcı</string>
+    <string name="canvas_text_curve">Eğri</string>
+    <string name="canvas_letter_spacing">Harf Aralığı</string>
     <string name="canvas_source_qrcode">QR Kodu</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran Yakalama</string>

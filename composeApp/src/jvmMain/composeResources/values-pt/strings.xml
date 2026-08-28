@@ -1006,6 +1006,8 @@
     <string name="canvas_source_browser">Navegador</string>
     <string name="canvas_source_clock">Relógio</string>
     <string name="canvas_source_timer">Relógio e temporizador</string>
+    <string name="canvas_text_curve">Curva</string>
+    <string name="canvas_letter_spacing">Espaçamento entre letras</string>
     <string name="canvas_source_qrcode">Código QR</string>
     <string name="canvas_source_camera">Câmera</string>
     <string name="canvas_source_screen_capture">Captura de Tela</string>

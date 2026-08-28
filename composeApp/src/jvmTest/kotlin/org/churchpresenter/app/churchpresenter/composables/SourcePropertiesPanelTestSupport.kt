@@ -305,6 +305,19 @@ internal fun ComposeUiTest.typeField(ordinal: Int, to: String) {
     waitForIdle()
 }
 
+/**
+ * Clicks one of `TextStyleButtons`' four faces, addressed by the single letter it draws:
+ * "B", "I", "U", "S".
+ *
+ * They are `Surface`s with a `clickable`, not buttons — no role, no toggleable state — so the letter
+ * is the only handle on them, and [index] picks between the rows when a panel has more than one (the
+ * Bible source styles its verse and its reference separately).
+ */
+internal fun ComposeUiTest.clickStyleButton(label: String, index: Int = 0) {
+    onAllNodesWithText(label)[index].performScrollTo().performClick()
+    waitForIdle()
+}
+
 /** Clicks the checkbox at [ordinal], scrolling it into view first. */
 internal fun ComposeUiTest.toggleCheckbox(ordinal: Int) {
     checkboxes()[ordinal].performScrollTo().performClick()

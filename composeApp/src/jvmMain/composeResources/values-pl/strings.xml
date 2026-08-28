@@ -1213,6 +1213,8 @@
     <string name="canvas_source_browser">Przeglądarka</string>
     <string name="canvas_source_clock">Zegar</string>
     <string name="canvas_source_timer">Zegar i minutnik</string>
+    <string name="canvas_text_curve">Krzywa</string>
+    <string name="canvas_letter_spacing">Odstęp liter</string>
     <string name="canvas_source_qrcode">Kod QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Przechwytywanie ekranu</string>
