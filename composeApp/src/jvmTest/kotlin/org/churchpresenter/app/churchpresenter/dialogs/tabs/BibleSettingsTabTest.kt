@@ -221,12 +221,13 @@ class BibleSettingsTabTest {
     private object Box {
         const val SHOW_IN_LOWER_THIRD = 0
         const val SPLIT_BROWSE = 1
-        const val CROSS_REFERENCES = 2
-        const val FADE_IN = 3
-        const val FADE_OUT = 4
-        const val CROSSFADE = 5
-        const val PRIMARY_ABBREVIATION = 6
-        const val SECONDARY_ABBREVIATION = 7
+        const val SPLIT_LONG_VERSES = 2
+        const val CROSS_REFERENCES = 3
+        const val FADE_IN = 4
+        const val FADE_OUT = 5
+        const val CROSSFADE = 6
+        const val PRIMARY_ABBREVIATION = 7
+        const val SECONDARY_ABBREVIATION = 8
     }
 
     /** Clicks checkbox [index] and returns the bible settings that produced. */
@@ -252,6 +253,19 @@ class BibleSettingsTabTest {
 
         assertEquals(true, after.splitBrowseMode, "split browse starts off and turns on")
         assertEquals(before.copy(splitBrowseMode = true), after)
+    }
+
+    @Test
+    fun `split long verses toggles only its own flag`() = runComposeUiTest {
+        val harness = showTab()
+        val before = harness.current.bibleSettings
+
+        val after = toggle(Box.SPLIT_LONG_VERSES, harness)
+        if (after.splitLongVerses) onAllNodes(isToggleable())[Box.SPLIT_LONG_VERSES].assertIsOn()
+        else onAllNodes(isToggleable())[Box.SPLIT_LONG_VERSES].assertIsOff()
+
+        assertEquals(true, after.splitLongVerses, "splitting starts off and turns on")
+        assertEquals(before.copy(splitLongVerses = true), after)
     }
 
     @Test
