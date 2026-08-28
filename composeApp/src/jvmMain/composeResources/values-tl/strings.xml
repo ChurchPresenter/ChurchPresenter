@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Intensidad (%)</string>
     <string name="hold_live">Panatilihing Live</string>
     <string name="bible_split_browse_mode">Mode ng Split Browse</string>
+    <string name="bible_split_long_verses">Hatiin ang mahahabang talata sa dalawang slide</string>
     <string name="bible_cross_references">Mga Cross Reference</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Ipakita ang mga link ng cross reference</string>

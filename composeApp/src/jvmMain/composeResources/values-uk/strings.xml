@@ -1772,6 +1772,7 @@
     <string name="copy_verse">Копіювати вірш</string>
     <string name="style">Стиль</string>
     <string name="bible_split_browse_mode">Режим розділеного перегляду</string>
+    <string name="bible_split_long_verses">Розділяти довгі вірші на два слайди</string>
     <string name="bible_cross_references">Перехресні посилання</string>
     <string name="bible_cross_references_title">Посилання</string>
     <string name="bible_cross_references_enable">Показувати перехресні посилання</string>

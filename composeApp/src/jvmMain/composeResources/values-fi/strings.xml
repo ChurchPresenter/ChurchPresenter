@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Voimakkuus (%)</string>
     <string name="hold_live">Pidä livenä</string>
     <string name="bible_split_browse_mode">Jaettu selaustila</string>
+    <string name="bible_split_long_verses">Jaa pitkät jakeet kahdelle dialle</string>
     <string name="bible_cross_references">Ristiviitteet</string>
     <string name="bible_cross_references_title">Viitteet</string>
     <string name="bible_cross_references_enable">Näytä ristiviitelinkit</string>

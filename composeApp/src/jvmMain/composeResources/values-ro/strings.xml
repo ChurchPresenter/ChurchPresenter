@@ -70,6 +70,7 @@
     <string name="shadow_opacity">Intensitate (%)</string>
     <string name="hold_live">Menține Proiectat</string>
     <string name="bible_split_browse_mode">Mod Navigare Divizat</string>
+    <string name="bible_split_long_verses">Împarte versetele lungi pe două diapozitive</string>
     <string name="bible_cross_references">Referințe încrucișate</string>
     <string name="bible_cross_references_title">Referințe</string>
     <string name="bible_cross_references_enable">Afișează referințele încrucișate</string>

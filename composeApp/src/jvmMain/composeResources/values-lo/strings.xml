@@ -82,6 +82,7 @@
     <string name="shadow_opacity">ຄວາມເຂັ້ມ (%)</string>
     <string name="hold_live">ຄ້າງຈໍສົດ</string>
     <string name="bible_split_browse_mode">ໂໝດເບິ່ງແບບແຍກ</string>
+    <string name="bible_split_long_verses">ແບ່ງຂໍ້ພຣະຄຳຍາວອອກເປັນສອງສະໄລ້</string>
     <string name="bible_cross_references">ຂໍ້ອ້າງອີງໂຢງ</string>
     <string name="bible_cross_references_title">ອ້າງອີງ</string>
     <string name="bible_cross_references_enable">ສະແດງລິ້ງຂໍ້ອ້າງອີງໂຢງ</string>

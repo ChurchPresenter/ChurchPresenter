@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Keamatan (%)</string>
     <string name="hold_live">Tahan Langsung</string>
     <string name="bible_split_browse_mode">Mod Semak Berasingan</string>
+    <string name="bible_split_long_verses">Bahagikan ayat panjang kepada dua slaid</string>
     <string name="bible_cross_references">Rujukan Silang</string>
     <string name="bible_cross_references_title">Ruj.</string>
     <string name="bible_cross_references_enable">Tunjukkan pautan rujukan silang</string>

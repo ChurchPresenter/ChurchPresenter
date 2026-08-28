@@ -1794,6 +1794,7 @@
     <string name="copy_verse">Copiar versículo</string>
     <string name="style">Estilo</string>
     <string name="bible_split_browse_mode">Modo de navegación dividida</string>
+    <string name="bible_split_long_verses">Dividir versículos largos en dos diapositivas</string>
     <string name="bible_cross_references">Referencias cruzadas</string>
     <string name="bible_cross_references_title">Referencias</string>
     <string name="bible_cross_references_enable">Mostrar referencias cruzadas</string>

@@ -82,6 +82,7 @@
     <string name="shadow_opacity">ความเข้ม (%)</string>
     <string name="hold_live">คงไว้บนจอ</string>
     <string name="bible_split_browse_mode">โหมดดูแยก</string>
+    <string name="bible_split_long_verses">แบ่งข้อพระคัมภีร์ที่ยาวเป็นสองสไลด์</string>
     <string name="bible_cross_references">ข้ออ้างอิงโยง</string>
     <string name="bible_cross_references_title">อ้างอิง</string>
     <string name="bible_cross_references_enable">แสดงลิงก์ข้ออ้างอิงโยง</string>

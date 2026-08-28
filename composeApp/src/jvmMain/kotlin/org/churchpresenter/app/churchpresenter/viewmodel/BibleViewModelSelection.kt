@@ -10,6 +10,11 @@ import org.churchpresenter.core.models.bible.SelectedVerse
  */
 
 internal fun BibleViewModel.getSelectedVerses(): List<SelectedVerse> {
+    return selectedVersesUnsplit().versePage(currentVersePage(), splitLongVersesEnabled)
+}
+
+/** The selection as the modules hold it, before a long verse is broken into pages. */
+internal fun BibleViewModel.selectedVersesUnsplit(): List<SelectedVerse> {
     if (_verses.value.isEmpty()) return emptyList()
 
     val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
@@ -150,6 +155,9 @@ private fun BibleViewModel.singleVerseSelection(bookId: Int): List<SelectedVerse
 internal fun BibleViewModel.getNextVerses(): List<SelectedVerse> {
     if (_verses.value.isEmpty()) return emptyList()
 
+    // The second half of the live verse is what comes next, before the next verse does.
+    secondHalfOfLiveVerse()?.let { return it }
+
     val referenceIndex = if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
         _selectedVerseIndices.max()
     } else {
@@ -158,13 +166,25 @@ internal fun BibleViewModel.getNextVerses(): List<SelectedVerse> {
 
     val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
 
-    if (referenceIndex < _verses.value.size - 1) {
+    val next = if (referenceIndex < _verses.value.size - 1) {
         val verse = _verses.value[referenceIndex + 1]
-        val verseNumber = verseNumberOf(verse) ?: return emptyList()
-        return buildNextVerseList(bookId, _selectedChapter.value, verseNumber, verseTextOf(verse))
+        verseNumberOf(verse)?.let { verseNumber ->
+            buildNextVerseList(bookId, _selectedChapter.value, verseNumber, verseTextOf(verse))
+        }.orEmpty()
+    } else {
+        firstVersesOfNextChapter()
     }
+    // The verse after this one is looked ahead to at its own first half, for the same reason.
+    return next.versePage(VERSE_PAGE_FIRST, splitLongVersesEnabled)
+}
 
-    return firstVersesOfNextChapter()
+/** The other half of the verse on screen, when it is split and its first half is what is showing. */
+private fun BibleViewModel.secondHalfOfLiveVerse(): List<SelectedVerse>? {
+    if (!splitLongVersesEnabled) return null
+    val current = selectedVersesUnsplit()
+    val onFirstHalf = currentVersePage() == VERSE_PAGE_FIRST
+    val splits = current.firstOrNull()?.let { isLongVerse(it.verseText) } == true
+    return if (onFirstHalf && splits) current.versePage(VERSE_PAGE_SECOND, enabled = true) else null
 }
 
 private fun BibleViewModel.firstVersesOfNextChapter(): List<SelectedVerse> {

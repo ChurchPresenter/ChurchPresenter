@@ -32,6 +32,11 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
     }
     applyTranslationOrder()
 
+    // Turning splitting on or off re-cuts whatever is already on screen, from its first half.
+    if (previous.bibleSettings.splitLongVerses != newSettings.bibleSettings.splitLongVerses) {
+        publishVersePage(VERSE_PAGE_FIRST)
+    }
+
     // A rename reads no file, so it is applied to the modules already in memory rather than by
     // re-reading a folder of them for a label. It has to be applied to the *loaded* module and not
     // only to the pickers: the verse on screen carries a copy of the name and abbreviation it was

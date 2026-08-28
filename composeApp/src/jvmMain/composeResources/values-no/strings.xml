@@ -82,6 +82,7 @@
     <string name="shadow_opacity">Intensitet (%)</string>
     <string name="hold_live">Hold live</string>
     <string name="bible_split_browse_mode">Delt visning</string>
+    <string name="bible_split_long_verses">Del lange vers over to lysbilder</string>
     <string name="bible_cross_references">Kryssreferanser</string>
     <string name="bible_cross_references_title">Ref.</string>
     <string name="bible_cross_references_enable">Vis lenker til kryssreferanser</string>
