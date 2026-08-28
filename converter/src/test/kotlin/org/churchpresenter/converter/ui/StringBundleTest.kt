@@ -21,7 +21,12 @@ import kotlin.test.assertTrue
  */
 class StringBundleTest {
 
-    private val locales = listOf("be", "cs", "de", "kk", "pl", "ru", "uk")
+    /** Every language the app itself offers, which is what the converter window has to answer in. */
+    private val locales = listOf(
+        "ar", "be", "cs", "de", "es", "et", "fa", "fi", "fr", "hi", "hr", "id", "ja", "kk", "lo",
+        "lv", "ms", "ne", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "sw", "ta", "th", "tl",
+        "tr", "uk", "uz", "zh",
+    )
 
     private fun load(name: String): Properties {
         val stream = requireNotNull(javaClass.classLoader.getResourceAsStream(name)) { "missing $name" }

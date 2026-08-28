@@ -71,6 +71,7 @@ object SongFormatConverters {
             QueleaFormat,
             SoftProjectorFormat,
             SongBeamerFormat,
+            VideoPsalmFormat,
             DocumentFormat,
         )
 
@@ -348,4 +349,28 @@ object DocumentFormat : SongFormatConverter {
     }
 
     override fun outputNameFor(input: File) = input.nameWithoutExtension
+}
+
+/** VideoPsalm song books — one near-JSON file is a whole numbered book. */
+object VideoPsalmFormat : SongFormatConverter {
+    override val id = "videopsalm"
+    override val extensions = listOf("json")
+    override val needsOutputFolder = true
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        requireNotNull(outputDir) { "VideoPsalm song books need an output folder" }
+        return VideoPsalmConverter.convert(input, outputDir)
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val book = VideoPsalmConverter.parse(input)
+        return SongPreviewInfo(
+            book.title.ifBlank { input.nameWithoutExtension },
+            sectionCount = book.songs.firstOrNull()?.sections?.size ?: 0,
+            songCount = book.songs.size,
+            verseOrder = book.songs.firstOrNull()?.sequence.orEmpty(),
+        )
+    }
+
+    override fun outputNameFor(input: File) = VideoPsalmConverter.targetFolderName(input)
 }
