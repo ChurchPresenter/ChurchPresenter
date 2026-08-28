@@ -35,7 +35,7 @@ does not live here.
 
 | Package | Owns |
 |---|---|
-| `converter/song/` | One converter per source format, plus the shared lyric/section machinery (`LyricBlocks`, `SectionLabel`, `SongOutput`, the `SongFormatConverter` registry) and format helpers (`ParadoxTable`, `ProtoMessage`, `XmlRepair`, `XmlSupport`, `ChordLines`, `DocumentTextExtractor`) |
+| `converter/song/` | One converter per source format, plus the shared lyric/section machinery (`LyricBlocks`, `SectionLabel`, `SongOutput`, the `SongFormatConverter` registry) and format helpers (`ParadoxTable`, `ProtoMessage`, `LooseJson`, `XmlRepair`, `XmlSupport`, `ChordLines`, `DocumentTextExtractor`) |
 | `converter/bible/` | `XmlToSpbConverter` (Zefania/Beblia XML), `UsfxToSpbConverter` (eBible USFX), `BebliaParser`, `BookNames`, `BibleCatalogNaming`, `SpbVersePatcher` + `VersePatches` |
 | `converter/library/` | Library-wide passes: `DuplicateFinder`, `RtfText`, `TextUtils` |
 | `ui/` | The Compose Desktop GUI (`App`, theme, widgets, `Strings`) |
@@ -43,8 +43,8 @@ does not live here.
 
 Source formats currently handled: SongBeamer `.sng`, OpenLP (`songs.sqlite` and OpenLyrics),
 OpenSong, FreeShow, Free Worship, EasySlides, EasyWorship (including schedules), Quelea,
-ProPresenter, MediaShout, SoftProjector `.sps`, Markdown, and lyrics extracted from PDF/Word/
-PowerPoint documents.
+ProPresenter, MediaShout, SoftProjector `.sps`, VideoPsalm `.json` song books, Markdown, and lyrics
+extracted from PDF/Word/PowerPoint documents.
 
 ## Commands
 

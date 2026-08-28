@@ -7,7 +7,8 @@ data class ParsedSong(
     val author: String = "",
     val copyright: String = "",
     val composer: String = "",
-    val sections: List<SongSection> = emptyList()
+    val sections: List<SongSection> = emptyList(),
+    val ccli: String = ""
 )
 
 data class SongSection(
@@ -89,12 +90,14 @@ object MarkdownToSongConverter {
         val sb = StringBuilder()
 
         // Frontmatter
-        val hasMeta = song.author.isNotBlank() || song.copyright.isNotBlank() || song.composer.isNotBlank()
+        val hasMeta = song.author.isNotBlank() || song.copyright.isNotBlank() ||
+            song.composer.isNotBlank() || song.ccli.isNotBlank()
         if (hasMeta) {
             sb.appendLine("---")
             if (song.author.isNotBlank()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotBlank()) sb.appendLine("composer: ${song.composer}")
             if (song.copyright.isNotBlank()) sb.appendLine("copyright: ${song.copyright}")
+            if (song.ccli.isNotBlank()) sb.appendLine("ccli: ${song.ccli}")
             sb.appendLine("---")
             sb.appendLine()
         }
