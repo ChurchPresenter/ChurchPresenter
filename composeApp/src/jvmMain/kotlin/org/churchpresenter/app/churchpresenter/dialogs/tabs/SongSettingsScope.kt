@@ -23,7 +23,7 @@ internal fun songScopeNote(settings: AppSettings, target: SongStyleTarget): Stri
         stringResource(
             Res.string.bible_scope_lower_third,
             size.width,
-            size.height * settings.projectionSettings.lowerThirdHeightPercent / PERCENT,
+            size.height * settings.songSettings.lowerThirdHeightPercent / PERCENT,
         )
     } else {
         stringResource(Res.string.bible_scope_full_screen, size.width, size.height)

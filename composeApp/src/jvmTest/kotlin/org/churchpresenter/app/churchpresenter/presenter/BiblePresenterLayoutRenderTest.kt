@@ -98,14 +98,24 @@ class BiblePresenterLayoutRenderTest {
     //
     // The lower third used to take its sizes, alignments and abbreviation flag from the legacy
     // primary/secondary fields on BibleSettings, which no UI writes any more — so every one of those
-    // controls in Bible settings did nothing at all to the band. Only the abbreviation flag is
-    // observable from a test (a size is not in the semantics tree), and it stands in for the rest.
+    // controls in Bible settings did nothing at all to the band. Only the reference is observable
+    // from a test (a size is not in the semantics tree), and it stands in for the rest.
+    //
+    // The label in front of the reference is `customAbbreviation` where the operator typed one and
+    // the module's own otherwise, gated by `showAbbreviation` -- and the checkbox that gates it is
+    // shown only on the Reference tab, since the reference is the only place it lands.
 
     @Test
-    fun `the band shows an abbreviation when the translation asks for one`() = runComposeUiTest {
+    fun `the band shows the label the operator typed, over the module's own`() = runComposeUiTest {
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
-                listOf(BibleTranslationSettings(fileName = "kjv.spb", showAbbreviation = true)),
+                listOf(
+                    BibleTranslationSettings(
+                        fileName = "kjv.spb",
+                        customAbbreviation = "KJV",
+                        showAbbreviation = true,
+                    ),
+                ),
             ),
         )
         setContent {
@@ -118,15 +128,24 @@ class BiblePresenterLayoutRenderTest {
             }
         }
 
-        onNodeWithText("KJV", substring = true)
+        onNodeWithText("KJV John 3:16", substring = true)
             .assertExists("the band must honour the translation's own abbreviation setting")
     }
 
     @Test
-    fun `the band omits the abbreviation when the translation does not ask for one`() = runComposeUiTest {
+    fun `an empty abbreviation box falls back to the module's own`() = runComposeUiTest {
+        // Blank means "keep using what the module calls itself", which is what the box offers as its
+        // placeholder -- so the two agree rather than the screen showing something the settings do
+        // not.
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
-                listOf(BibleTranslationSettings(fileName = "kjv.spb", showAbbreviation = false)),
+                listOf(
+                    BibleTranslationSettings(
+                        fileName = "kjv.spb",
+                        customAbbreviation = "",
+                        showAbbreviation = true,
+                    ),
+                ),
             ),
         )
         setContent {
@@ -139,15 +158,14 @@ class BiblePresenterLayoutRenderTest {
             }
         }
 
-        onNodeWithText("John 3:16", substring = true).assertExists("the reference itself still shows")
-        onAllNodesWithText("KJV", substring = true).assertCountEquals(0)
+        // "KJV" is what `verse()` gives the verse as the module's own abbreviation.
+        onNodeWithText("KJV John 3:16", substring = true).assertExists()
     }
 
     @Test
-    fun `a translation asking for an abbreviation it does not have shows the reference alone`() = runComposeUiTest {
-        // The abbreviation is derived from the module's title, and a module with a blank title has
-        // none. The flag is still on in settings, so both halves of the condition matter: shown
-        // unguarded this draws "John 3:16 " with a trailing separator and nothing after it.
+    fun `an unlabelled translation shows the reference alone`() = runComposeUiTest {
+        // Shown unguarded this draws " John 3:16" with a leading separator and nothing before it,
+        // which is what the reference builder emitted for years.
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
                 listOf(BibleTranslationSettings(fileName = "untitled.spb", showAbbreviation = true)),
@@ -169,7 +187,7 @@ class BiblePresenterLayoutRenderTest {
     }
 
     @Test
-    fun `a full-screen translation asking for an abbreviation it does not have shows the reference alone`() =
+    fun `an unlabelled full-screen translation shows the reference alone`() =
         runComposeUiTest {
         // Same rule on the full-screen path, which builds its reference in a different place.
         val settings = AppSettings(
@@ -194,14 +212,22 @@ class BiblePresenterLayoutRenderTest {
     @Test
     fun `a bilingual band drops the abbreviation of whichever translation lacks one`() = runComposeUiTest {
         // The band builds its two references independently, so the guard has to hold on each
-        // side. Here the primary has an abbreviation and the secondary does not, and both are
-        // asking for one — the side that has none must fall back to the plain reference rather
-        // than draw a leading separator with nothing before it.
+        // side. Here the primary is labelled and the secondary is not — the side that has no label
+        // must fall back to the plain reference rather than draw a leading separator with nothing
+        // before it.
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
                 listOf(
-                    BibleTranslationSettings(fileName = "kjv.spb", showAbbreviation = true),
-                    BibleTranslationSettings(fileName = "untitled.spb", showAbbreviation = true),
+                    BibleTranslationSettings(
+                        fileName = "kjv.spb",
+                        customAbbreviation = "KJV",
+                        showAbbreviation = true,
+                    ),
+                    BibleTranslationSettings(
+                        fileName = "untitled.spb",
+                        customAbbreviation = "",
+                        showAbbreviation = true,
+                    ),
                 ),
             ),
         )
@@ -276,7 +302,11 @@ class BiblePresenterLayoutRenderTest {
                 listOf(
                     BibleTranslationSettings(fileName = "kjv.spb", showAbbreviation = false),
                     BibleTranslationSettings(fileName = "rst.spb", showAbbreviation = false),
-                    BibleTranslationSettings(fileName = "lut.spb", showAbbreviation = true),
+                    BibleTranslationSettings(
+                        fileName = "lut.spb",
+                        customAbbreviation = "LUT",
+                        showAbbreviation = true,
+                    ),
                 ),
             ),
         )
@@ -516,6 +546,7 @@ class BiblePresenterLayoutRenderTest {
                         fileName = it,
                         textFontSize = 40,
                         referenceFontSize = 24,
+                        customAbbreviation = it.substringBefore('.').uppercase(),
                         showAbbreviation = true,
                     )
                 },

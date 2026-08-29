@@ -81,6 +81,17 @@ private const val SELECTION_BAR_WIDTH = 4f
 private const val PREVIEW_ASPECT_W = 16f
 private const val PREVIEW_ASPECT_H = 9f
 
+/**
+ * The band this tab's diagram draws, as a percentage of the mock screen.
+ *
+ * A drawing convention, not a setting: the Lottie lower third sizes itself by its own aspect ratio
+ * inside the streaming window insets, and [LowerThirdPresenter] has never read a band height at all.
+ * This used to read the projection-wide one, which meant the picture moved when an operator changed
+ * a number that does nothing to this output. Now that the band height belongs to the Bible and Song
+ * tabs -- one value each -- there is no single number to draw here even in principle.
+ */
+private const val MOCK_BAND_PERCENT = 33f
+
 @Composable
 fun LowerThirdSettingsTab(
     settings: AppSettings,
@@ -319,7 +330,7 @@ fun LowerThirdSettingsTab(
                             .height(180.dp)
                     ) {
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                            val bandHeight = maxHeight * (settings.projectionSettings.lowerThirdHeightPercent / 100f)
+                            val bandHeight = maxHeight * (MOCK_BAND_PERCENT / 100f)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()

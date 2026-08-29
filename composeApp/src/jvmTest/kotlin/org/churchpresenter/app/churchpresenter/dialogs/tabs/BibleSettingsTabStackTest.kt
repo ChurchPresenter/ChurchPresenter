@@ -7,7 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -244,6 +246,10 @@ class BibleSettingsTabStackTest {
     private fun ComposeUiTest.emptyFieldOffering(placeholder: String) =
         onNode(hasSetTextAction() and hasText(placeholder))
 
+    /** The abbreviation box, which carries no placeholder for a test to find an empty one by. */
+    private fun ComposeUiTest.abbreviationField() =
+        onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(BIBLE_ABBREVIATION_FIELD_TAG)))
+
     @Test
     fun `the name boxes start empty, offering what the module calls itself`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James Version")
@@ -285,7 +291,7 @@ class BibleSettingsTabStackTest {
         val dir = bibleFolder("kjv.spb" to "King James Version")
         val harness = showTab(stackOf(dir, "kjv.spb"))
 
-        emptyFieldOffering("KJV").performTextReplacement("AV")
+        abbreviationField().performTextReplacement("AV")
         waitForIdle()
 
         val translation = harness.current.bibleSettings.translationList().single()
@@ -321,11 +327,16 @@ class BibleSettingsTabStackTest {
     }
 
     @Test
-    fun `the show-abbreviation switch sits with the abbreviation it governs`() = runComposeUiTest {
+    fun `the show-abbreviation switch appears only on the Reference tab`() = runComposeUiTest {
+        // The header it lives in is shared by both element tabs, but the label only ever lands on
+        // the reference -- so on Verse Text the box was present and completely ineffective.
         val dir = bibleFolder("kjv.spb" to "King James Version")
         val harness = showTab(stackOf(dir, "kjv.spb"))
 
-        onNodeWithText("Show book abbreviation").performClick()
+        onNodeWithText("Show Bible abbreviation").assertDoesNotExist()
+
+        onNodeWithText("Reference").performClick()
+        onNodeWithText("Show Bible abbreviation").performClick()
         waitForIdle()
 
         assertEquals(true, harness.current.bibleSettings.translationList().single().showAbbreviation)

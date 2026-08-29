@@ -145,11 +145,6 @@ class ProjectionSettingsTabStructureTest {
     }
 
     @Test
-    fun `the lower third height field is offered once`() = projectionTab { _ ->
-        onNodeWithText("Lower Third Height % (for Bible and Songs)").assertExists()
-    }
-
-    @Test
     fun `the browser source card explains itself and offers to add an output`() = projectionTab { _ ->
         onNodeWithText(
             "Virtual outputs served as a web page — paste the URL into a Browser Source to overlay " +
@@ -186,14 +181,15 @@ class ProjectionSettingsTabStructureTest {
 
     @Test
     fun `the tab offers one stepper field per numeric setting`() = projectionTab { _ ->
-        // Lower-third height plus the four window-position offsets.
-        numberFields().assertCountEquals(5)
+        // The four window-position offsets, and nothing else. The band height used to make a fifth;
+        // it now lives on the Bible and Song tabs, one value each, since only those two draw a band.
+        numberFields().assertCountEquals(4)
     }
 
     @Test
     fun `the dev fallback adds the simulate stepper to the numeric fields`() {
         projectionTab(screens = noExternalScreens()) { _ ->
-            numberFields().assertCountEquals(6)
+            numberFields().assertCountEquals(5)
         }
     }
 

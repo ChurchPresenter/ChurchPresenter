@@ -38,7 +38,7 @@ internal fun scopeNote(settings: AppSettings, target: BibleStyleTarget): String 
         stringResource(
             Res.string.bible_scope_lower_third,
             size.width,
-            size.height * settings.projectionSettings.lowerThirdHeightPercent / PERCENT,
+            size.height * settings.bibleSettings.lowerThirdHeightPercent / PERCENT,
         )
     } else {
         stringResource(Res.string.bible_scope_full_screen, size.width, size.height)
@@ -91,7 +91,7 @@ internal fun autoFitFontSize(
     // Full screen splits the height between two languages when a second one is live; the lower
     // third gets whatever fraction of the output its band is configured to take.
     val boxHeight = if (target.isLowerThird) {
-        availableHeight * projection.lowerThirdHeightPercent / 100
+        availableHeight * settings.bibleSettings.lowerThirdHeightPercent / 100
     } else if (parallel) {
         availableHeight / 2
     } else {

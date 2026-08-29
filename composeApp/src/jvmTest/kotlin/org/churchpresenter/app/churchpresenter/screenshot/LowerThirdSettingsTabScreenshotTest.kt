@@ -18,7 +18,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.StreamingSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -84,19 +83,10 @@ class LowerThirdSettingsTabScreenshotTest {
         ),
     )
 
-    /**
-     * A taller lower third.
-     *
-     * The band in the mock is `lowerThirdHeightPercent`, which lives on the Projection tab rather
-     * than this one — so this image is here to show what that setting does to the placement mock,
-     * and where the Top field ends up once the band it sits above grows.
-     */
-    @Test
-    fun `a taller band`() = shoot(
-        "band_60_percent",
-        settings =
-            withPresets(PRESETS.size).copy(projectionSettings = ProjectionSettings(lowerThirdHeightPercent = 60)),
-    )
+    // The `band_60_percent` shot was here: the mock's band used to be drawn from the
+    // projection-wide `lowerThirdHeightPercent`, and the image showed what a taller one did to the
+    // placement of the Top field above it. That setting now belongs to the Bible and Song tabs, one
+    // value each, and this mock draws a fixed band instead -- so there is no second height to shoot.
 
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────
 

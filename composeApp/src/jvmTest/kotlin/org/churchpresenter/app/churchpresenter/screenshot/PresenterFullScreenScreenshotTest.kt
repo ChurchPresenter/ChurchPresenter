@@ -1057,6 +1057,7 @@ class PresenterFullScreenScreenshotTest {
         ),
     )
 
+
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
     private fun translations(count: Int) = AppSettings(
         bibleSettings = BibleSettings(

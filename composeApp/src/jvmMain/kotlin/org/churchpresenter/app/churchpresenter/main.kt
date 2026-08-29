@@ -537,8 +537,13 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
         mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
     }
-    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings) {
-        withMirroredBackgrounds(appSettings, mirroredBackgroundSettings)
+    // The settings dialog's on-screen preview edits a draft copy that does not reach `appSettings`
+    // until Apply or OK, so while it is running the outputs render that draft instead -- otherwise
+    // the preview would show the sample in the styling the operator is in the middle of replacing.
+    // Null whenever no preview is running, which is every other moment of the app's life.
+    val previewSettingsOverride by presenterManager.previewSettingsOverride
+    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings, previewSettingsOverride) {
+        withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings)
     }
     val screenCountForUsage = remember { LiveMapReporter.detectScreenCount() }
     val deckLinkCountForUsage = remember {

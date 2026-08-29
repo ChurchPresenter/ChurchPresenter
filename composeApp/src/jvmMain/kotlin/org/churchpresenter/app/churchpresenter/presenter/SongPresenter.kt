@@ -412,7 +412,7 @@ fun SongPresenter(
                 // In side-by-side bilingual mode, each column gets half the width
                 val refWidth = if (sideBySide) fullWidth / 2 else fullWidth
                 val fullHeight = if (isLowerThird) {
-                    (1080 * appSettings.projectionSettings.lowerThirdHeightPercent / 100) -
+                    (1080 * appSettings.songSettings.lowerThirdHeightPercent / 100) -
                             appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 } else {
@@ -524,7 +524,7 @@ fun SongPresenter(
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
-            val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
+            val lowerThirdFraction = appSettings.songSettings.lowerThirdHeightPercent / 100f
             // Background stretches full width at bottom third, text respects padding on top —
             // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
             // bilingual content to stack instead of side-by-side, see TextContent below.
@@ -579,7 +579,7 @@ fun SongPresenter(
             val innerModifier = if (isLowerThird)
                 Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(appSettings.projectionSettings.lowerThirdHeightPercent / 100f)
+                    .fillMaxHeight(appSettings.songSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
             else
                 Modifier

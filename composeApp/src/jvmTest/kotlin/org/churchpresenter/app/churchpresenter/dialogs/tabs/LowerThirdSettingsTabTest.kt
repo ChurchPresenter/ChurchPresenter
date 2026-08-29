@@ -336,15 +336,14 @@ class LowerThirdSettingsTabTest {
     // ── The lower-third band diagram ────────────────────────────────────────────────────────────
 
     @Test
-    fun `the band diagram renders whatever height is configured`() {
-        for (percent in listOf(10, 33, 60)) {
-            val settings = AppSettings().let {
-                it.copy(projectionSettings = it.projectionSettings.copy(lowerThirdHeightPercent = percent))
-            }
-            lowerThirdTab(initial = settings) { _ ->
-                onNodeWithText("Lower Third")
-                    .assertExists("the band must be drawn and labelled at $percent%")
-            }
+    fun `the band diagram is drawn at its own fixed height`() {
+        // It used to be drawn from the projection-wide band height, so the picture moved when an
+        // operator changed a number that does nothing to this output -- the Lottie presenter sizes
+        // itself by its own aspect ratio and has never read a band height at all. That number now
+        // belongs to the Bible and Song tabs, one value each, so there is no single one to draw here
+        // even in principle, and the diagram uses a fixed drawing convention instead.
+        lowerThirdTab { _ ->
+            onNodeWithText("Lower Third").assertExists("the band must still be drawn and labelled")
         }
     }
 }

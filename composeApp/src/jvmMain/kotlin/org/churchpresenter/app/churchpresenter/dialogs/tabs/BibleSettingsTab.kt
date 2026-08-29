@@ -78,6 +78,7 @@ import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderLi
 import org.churchpresenter.app.churchpresenter.composables.rememberBiblePreviewVerses
 import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -227,6 +228,12 @@ private fun LeftRail(
     )
     MiscellaneousSection(settings, onSettingsChange)
     BlockAndTransitionSection(settings, onSettingsChange)
+    LowerThirdHeightSection(
+        percent = settings.bibleSettings.lowerThirdHeightPercent,
+        onPercentChange = { percent ->
+            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdHeightPercent = percent)) }
+        },
+    )
     MarginsSection(settings, onSettingsChange)
 }
 
@@ -646,11 +653,31 @@ private fun StylePane(
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
-    // One real verse per module, so each block of the preview quotes its own translation.
+    // Three real verses per module, in one scan each, so every block of the preview quotes its own
+    // translation at whichever of the three sample lengths is selected.
     val previewVerses = rememberBiblePreviewVerses(
         settings.bibleSettings.storageDirectory,
         translations.map { it.fileName },
+        BIBLE_PREVIEW_TARGETS.values.toList(),
     )
+    var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
+    var previewOnScreen by remember { mutableStateOf(false) }
+    val sampleVerses = bibleSampleVerses(translations, previewVerses, sampleSlot, moduleTitles)
+    // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
+    // one to whichever the tab is styling for its duration, so a hall with a single full-screen
+    // projector can still be shown what its lower third would look like.
+    val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    OnScreenPreviewEffect(
+        active = previewOnScreen && sampleVerses.isNotEmpty(),
+        settings = settings,
+        presenterManager = presenterManager,
+        outputs = PreviewOutputState(lowerThird = target.isLowerThird),
+        contentKey = sampleVerses,
+    ) { manager ->
+        manager.setSelectedVerses(sampleVerses)
+        manager.setDisplayedVerses(sampleVerses)
+        manager.setPresentingMode(Presenting.BIBLE)
+    }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         TargetSwitchRow(
             settings = settings,
@@ -661,18 +688,27 @@ private fun StylePane(
             onTargetChange = onTargetChange,
             moduleTitles = moduleTitles,
         )
-        // Centred and capped rather than filling the pane: see PREVIEW_MAX_HEIGHT.
+        // Centred and capped rather than filling the pane: see SETTINGS_PREVIEW_MAX_HEIGHT.
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             BiblePreviewPanel(
                 settings = settings,
-                translations = translations,
                 target = target,
-                verses = previewVerses,
+                selectedVerses = sampleVerses,
                 modifier = Modifier.width(
-                    minOf(maxWidth, PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio),
+                    minOf(
+                        maxWidth,
+                        SETTINGS_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio,
+                    ),
                 ),
             )
         }
+        SettingsPreviewSampleRow(
+            slot = sampleSlot,
+            onSlotChange = { sampleSlot = it },
+            onScreen = previewOnScreen,
+            onScreenChange = { previewOnScreen = it },
+            onScreenEnabled = presenterManager != null && hasOutputForTarget && sampleVerses.isNotEmpty(),
+        )
         // An `if`, not an early `return@Column`. Returning out of a composable content lambda skips
         // the rest of its group without closing it, and the slot table then carries state across
         // into whatever composes there next -- which is how the controls below ended up wired to a
