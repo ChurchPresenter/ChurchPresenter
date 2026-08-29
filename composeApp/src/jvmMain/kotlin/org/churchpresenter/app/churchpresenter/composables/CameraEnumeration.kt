@@ -92,6 +92,9 @@ internal data class CameraFormat(
     val encodedValue: String = "${width}x${height}@${fps}"
 )
 
+/** What a camera runs at when its listing names a size but no rate. Every capture device does 30. */
+private const val DEFAULT_CAMERA_FPS = 30
+
 private fun Set<Triple<Int, Int, Int>>.toSortedFormats(): List<CameraFormat> =
     sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
         .map { (w, h, fps) -> CameraFormat(w, h, fps) }
@@ -165,7 +168,7 @@ internal fun parseV4l2Formats(output: String): List<CameraFormat> {
         val w = sizeMatch?.groupValues?.get(1)?.toIntOrNull()
         val h = sizeMatch?.groupValues?.get(2)?.toIntOrNull()
         if (w == null || h == null) continue
-        val fps = fpsPattern.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
+        val fps = fpsPattern.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: DEFAULT_CAMERA_FPS
         formats.add(Triple(w, h, fps))
     }
     return formats.toSortedFormats()
@@ -185,32 +188,74 @@ internal fun parseV4l2CtlFormats(output: String): List<CameraFormat> {
         }
         val fpsMatch = fpsPattern.find(line)
         if (fpsMatch != null && lastW > 0 && lastH > 0) {
-            val fps = fpsMatch.groupValues[1].toDoubleOrNull()?.toInt() ?: 30
+            val fps = fpsMatch.groupValues[1].toDoubleOrNull()?.toInt() ?: DEFAULT_CAMERA_FPS
             formats.add(Triple(lastW, lastH, fps))
         }
     }
     return formats.toSortedFormats()
 }
 
+/** How long to wait for the format probe. It answers in well under a second or it is not going to. */
+private const val AVF_FORMAT_PROBE_TIMEOUT_S = 5L
+
+/**
+ * Asks a device what it supports, by asking it for a frame size nothing can produce.
+ *
+ * **AVFoundation has no `-list_formats`** — that is a v4l2 option, and ffmpeg rejects the whole
+ * command line with `Unrecognized option 'list_formats'` before it opens anything. So this ran on
+ * every Mac and returned nothing every time, which is why the Video Format menu only ever offered
+ * "Auto", and why the "choose a specific one under Video Format" the unsupported-format error tells
+ * the operator to do pointed at an empty menu.
+ *
+ * A camera constrained to a fixed set of modes answers `1x1` by refusing it and printing
+ * `Supported modes:` followed by every mode it has. A screen-capture pseudo-device instead accepts
+ * any size and reports nothing — correctly, since it has no mode list to give.
+ *
+ * **No output file is named on purpose.** ffmpeg opens the input, discovers it has nowhere to write,
+ * says `At least one output file must be specified` and exits — measured at 0.34s — so the probe
+ * cannot turn into a capture session that never ends.
+ */
 internal fun avfoundationFormatsFrom(deviceIndex: String, run: CommandRunner): List<CameraFormat> =
     parseAvfoundationFormats(
         run(
-            listOf(FfmpegBinary.path, "-f", "avfoundation", "-list_formats", "all", "-i", "$deviceIndex:none"),
-            0L,
+            listOf(
+                FfmpegBinary.path, "-f", "avfoundation",
+                "-video_size", "1x1", "-i", "$deviceIndex:none",
+            ),
+            AVF_FORMAT_PROBE_TIMEOUT_S,
         ).output
     )
+
+/**
+ * Frame rates as avfoundation prints them, which is not how ffmpeg prints them anywhere else.
+ *
+ * A mode line reads `1920x1080@[30.000030 30.000030]fps` — a *range*, whose upper bound is the
+ * rate worth asking for — while every other listing this file parses writes a plain `60 fps`. Both
+ * are matched here; the bracketed form is tried first because its own closing bracket is what stops
+ * the plain form from matching it.
+ */
+private val AVF_BRACKETED_FPS = Regex("""\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s*]\s*fps""")
+private val AVF_PLAIN_FPS = Regex("""(\d+(?:\.\d+)?)\s*fps""")
+
+private fun avfoundationFpsIn(line: String): Int? {
+    AVF_BRACKETED_FPS.find(line)?.let { match ->
+        val low = match.groupValues[1].toDoubleOrNull()
+        val high = match.groupValues[2].toDoubleOrNull()
+        val best = listOfNotNull(low, high).maxOrNull()
+        if (best != null) return best.toInt()
+    }
+    return AVF_PLAIN_FPS.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.toInt()
+}
 
 internal fun parseAvfoundationFormats(output: String): List<CameraFormat> {
     val formats = mutableSetOf<Triple<Int, Int, Int>>()
     val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
-    val fpsPattern = Regex("""(\d+(?:\.\d+)?)\s*fps""")
     for (line in output.lines()) {
         val sizeMatch = sizePattern.find(line)
         val w = sizeMatch?.groupValues?.get(1)?.toIntOrNull()
         val h = sizeMatch?.groupValues?.get(2)?.toIntOrNull()
         if (w == null || h == null) continue
-        val fps = fpsPattern.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
-        formats.add(Triple(w, h, fps))
+        formats.add(Triple(w, h, avfoundationFpsIn(line) ?: DEFAULT_CAMERA_FPS))
     }
     return formats.toSortedFormats()
 }
@@ -319,29 +364,33 @@ private fun addIndexedAvfDevice(
     seenNames.add(name.lowercase())
 }
 
-internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String): List<CameraDevice> {
+/**
+ * The AVFoundation video devices ffmpeg listed, addressed by **the index ffmpeg itself printed**.
+ *
+ * The bracketed index is the only address AVFoundation accepts, and it counts every video device —
+ * virtual cameras and screen captures included. Nothing else can reconstruct it: a machine with
+ * OBS, NDI and a capture card installed numbers that card 2 while `system_profiler`, which sees
+ * only real hardware, would call it 0. That was issue #431 — the app opened a virtual camera
+ * nobody was feeding and drew a grey box.
+ *
+ * The quoted `"Name" (video)` branch is the older listing shape, which prints no index. There the
+ * position within this section is the address, which is correct precisely because the section
+ * enumerates the same devices in the same order.
+ */
+private fun avfoundationCamerasFrom(ffmpegOutput: String): List<CameraDevice> {
     val devices = mutableListOf<CameraDevice>()
     val seenNames = mutableSetOf<String>()
-
-    systemProfilerOutput.lines()
-        .filter { it.contains(":") && !it.trim().startsWith("Camera") && it.trim().endsWith(":") }
-        .map { it.trim().removeSuffix(":") }
-        .forEachIndexed { index, name ->
-            devices.add(CameraDevice(name = name, path = "avfoundation://$index", displayName = name))
-            seenNames.add(name.lowercase())
-        }
-
     var isVideo = false
-    var deviceIndex = devices.size
-    for (line in ffmpegOutput.lines()) {
 
-        val newMatch = Regex("\"(.+?)\"\\s+\\(video\\)").find(line)
-        if (newMatch != null) {
-            val name = newMatch.groupValues[1]
+    for (line in ffmpegOutput.lines()) {
+        val quotedMatch = Regex("\"(.+?)\"\\s+\\(video\\)").find(line)
+        if (quotedMatch != null) {
+            val name = quotedMatch.groupValues[1]
             if (name.lowercase() !in seenNames) {
-                devices.add(CameraDevice(name = name, path = "avfoundation://$deviceIndex", displayName = name))
+                devices.add(
+                    CameraDevice(name = name, path = "avfoundation://${devices.size}", displayName = name)
+                )
                 seenNames.add(name.lowercase())
-                deviceIndex++
             }
             continue
         }
@@ -352,4 +401,33 @@ internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String)
     }
 
     return devices
+}
+
+/** The camera names `system_profiler` reports, in the order it reports them. */
+private fun systemProfilerCameraNames(systemProfilerOutput: String): List<String> =
+    systemProfilerOutput.lines()
+        .filter { it.contains(":") && !it.trim().startsWith("Camera") && it.trim().endsWith(":") }
+        .map { it.trim().removeSuffix(":") }
+
+/**
+ * The Mac's cameras, preferring ffmpeg's listing outright over `system_profiler`'s.
+ *
+ * **These two tools do not share an index space, so their results must never be merged.** ffmpeg
+ * enumerates everything AVFoundation will open and prints the index needed to open it;
+ * `system_profiler` enumerates physical hardware and prints no index at all. Numbering the latter
+ * by position invents an address, and an invented address opens the wrong device rather than
+ * failing — see [avfoundationCamerasFrom].
+ *
+ * `system_profiler` is therefore only a fallback for when ffmpeg listed nothing, which in practice
+ * means ffmpeg is not installed. Capture needs ffmpeg too, so those entries can never be opened;
+ * they exist so the operator still sees their camera named beside the `canvas_camera_ffmpeg_hint`
+ * telling them what to install, rather than an empty list.
+ */
+internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String): List<CameraDevice> {
+    val fromFfmpeg = avfoundationCamerasFrom(ffmpegOutput)
+    if (fromFfmpeg.isNotEmpty()) return fromFfmpeg
+
+    return systemProfilerCameraNames(systemProfilerOutput).mapIndexed { index, name ->
+        CameraDevice(name = name, path = "avfoundation://$index", displayName = name)
+    }
 }
