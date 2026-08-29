@@ -169,9 +169,9 @@ fun BackgroundSettingsTab(
     val viewModel = remember { BackgroundSettingsViewModel() }
     var scope by remember { mutableStateOf(BackgroundScope.DEFAULT) }
     val backgrounds = settings.backgroundSettings
-    // The band the presenters actually draw, from Projection settings — a preview that assumed a
-    // third would disagree with the output and with the desktop tab's live preview.
-    val bandFraction = settings.projectionSettings.lowerThirdHeightPercent / PERCENT
+    // The band each surface's own content type draws, so the preview and the output agree. Bible
+    // and Songs carry separate heights, which is why this is asked per surface rather than once.
+    val bandFraction = settings.bandFractionFor(scope)
     val onConfigChange: (BackgroundConfig) -> Unit = { config ->
         viewModel.updateBackground(scope, config, onSettingsChange)
     }
@@ -180,7 +180,7 @@ fun BackgroundSettingsTab(
         BackgroundScopeRail(
             backgrounds = backgrounds,
             selected = scope,
-            bandFraction = bandFraction,
+            bandFractionFor = settings::bandFractionFor,
             onSelect = { scope = it },
             modifier = Modifier.width(SCOPE_RAIL_WIDTH).fillMaxHeight()
         )
@@ -231,7 +231,7 @@ fun BackgroundSettingsTab(
 private fun BackgroundScopeRail(
     backgrounds: BackgroundSettings,
     selected: BackgroundScope,
-    bandFraction: Float,
+    bandFractionFor: (BackgroundScope) -> Float,
     onSelect: (BackgroundScope) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -258,7 +258,7 @@ private fun BackgroundScopeRail(
                             scope = scope,
                             backgrounds = backgrounds,
                             selected = scope == selected,
-                            bandFraction = bandFraction,
+                            bandFraction = bandFractionFor(scope),
                             onClick = { onSelect(scope) }
                         )
                     }

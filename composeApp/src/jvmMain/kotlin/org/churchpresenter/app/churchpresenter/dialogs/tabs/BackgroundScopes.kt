@@ -8,6 +8,7 @@
  */
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
@@ -138,6 +139,23 @@ internal fun BackgroundSettings.resolvedConfigFor(scope: BackgroundScope): Backg
     val parent = scope.inheritsFrom ?: return config
     return if (config.backgroundType == scope.inheritType) resolvedConfigFor(parent) else config
 }
+
+/**
+ * How tall the band is for [scope], as a fraction of the output.
+ *
+ * Bible and Songs each carry their own lower-third height, so a preview has to ask the one whose
+ * surface it is drawing rather than assume a single number. The two Defaults sit behind both bands
+ * at once and have no height of their own; they take the taller of the two, which is the only part
+ * of the screen a default is certain to be showing through.
+ */
+internal fun AppSettings.bandFractionFor(scope: BackgroundScope): Float = when (scope.group) {
+    BackgroundScopeGroup.BIBLE -> bibleSettings.lowerThirdHeightPercent
+    BackgroundScopeGroup.SONGS -> songSettings.lowerThirdHeightPercent
+    BackgroundScopeGroup.DEFAULTS ->
+        maxOf(bibleSettings.lowerThirdHeightPercent, songSettings.lowerThirdHeightPercent)
+}.toFloat() / BAND_PERCENT
+
+private const val BAND_PERCENT = 100f
 
 /**
  * How much of the output a surface's background actually paints.
