@@ -436,7 +436,13 @@ fun EmbeddedWebView(
 
     val client = remember { CefManager.createClient() } ?: return
     val initialUrl = remember { url }
-    val browser = remember { client.createBrowser(initialUrl, false, false) }
+    // createBrowser asks JCEF for the global CefRequestContext, which answers null once the native
+    // side is down — and the caller then reads a field off it, so this arrived as
+    // `NullPointerException: Cannot read field "N_CefHandle" because "result" is null`, thrown in
+    // composition. There is no state to ask beforehand (CefApp's own state is not exposed here),
+    // so the attempt is the check; drawing nothing is what every other unavailable path does.
+    val browser = remember { runCatching { client.createBrowser(initialUrl, false, false) }.getOrNull() }
+        ?: return
 
     LaunchedEffect(browser) {
         navController?.browser = browser
@@ -511,8 +517,13 @@ fun EmbeddedWebView(
                 comp.isVisible = false
                 comp.parent?.remove(comp)
             } catch (_: Exception) {}
-            browser.close(true)
-            client.dispose()
+            // JCEF tears its native context down from its own shutdown hook, which races composable
+            // disposal on the way out of the app: both of these then throw
+            // `IllegalStateException: CefApp was terminated` out of onDispose. There is nothing left
+            // to release at that point — the process is going away — so failing to release it is not
+            // a fault, and letting the throw escape disposal is.
+            runCatching { browser.close(true) }
+            runCatching { client.dispose() }
         }
     }
 

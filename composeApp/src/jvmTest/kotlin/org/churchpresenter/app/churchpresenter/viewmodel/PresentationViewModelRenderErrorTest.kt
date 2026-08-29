@@ -174,4 +174,14 @@ class PresentationViewModelRenderErrorTest {
         assertEquals(PresentationLoadError.RENDER_FAILED, vm.loadError)
         assertFalse(vm.isLoading, "an error thrown mid-render must still clear the loading flag")
     }
+    @Test
+    fun `a locked or empty deck is the operator's file, not a defect to report`() {
+        // Both already have their own message on screen, so there is nothing here to fix — and
+        // reported anyway they were indistinguishable from a parse regression: one issue, five
+        // churches, no way to tell "someone opened a protected deck" from "the parser broke".
+        assertTrue(DeckLoadError.PASSWORD_PROTECTED.isOperatorFile())
+        assertTrue(DeckLoadError.EMPTY_DOCUMENT.isOperatorFile())
+        assertFalse(DeckLoadError.PARSE_FAILED.isOperatorFile(), "a parser regression still has to surface")
+        assertFalse(DeckLoadError.UNSUPPORTED_FORMAT.isOperatorFile())
+    }
 }

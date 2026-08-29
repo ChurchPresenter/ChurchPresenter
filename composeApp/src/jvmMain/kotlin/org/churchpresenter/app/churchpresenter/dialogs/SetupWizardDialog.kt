@@ -54,8 +54,6 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
-import java.awt.Desktop
-import java.net.URI
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -171,6 +169,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val STEP_BIBLE = 3
 private const val STEP_SONGS = 4
@@ -837,7 +836,7 @@ internal fun VlcStep(
     osName: String = System.getProperty("os.name", "").lowercase(),
     arch: String = System.getProperty("os.arch", "").lowercase(),
     onRecheck: suspend () -> VlcCheckResult = { vlcCheckResultFromRecheck() },
-    onOpenDownloadPage: (String) -> Unit = { runCatching { Desktop.getDesktop().browse(URI(it)) } }
+    onOpenDownloadPage: (String) -> Unit = { UrlOpener.open(it) }
 ) {
     val isMac = remember { "mac" in osName || "darwin" in osName }
     val isWin = remember { "win" in osName }

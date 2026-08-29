@@ -77,6 +77,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val GRADIENT_DARKEN = 0.45f
 
@@ -185,7 +186,10 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
+                            UrlOpener.open(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
+                                    "?template=bug_report.md"
+                            )
                         }
                     ) {
                         Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
@@ -194,7 +198,10 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
+                            UrlOpener.open(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
+                                    "?template=feature_request.md"
+                            )
                         }
                     ) {
                         Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)

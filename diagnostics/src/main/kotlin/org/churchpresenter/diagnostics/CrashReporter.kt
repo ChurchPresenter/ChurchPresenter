@@ -443,8 +443,24 @@ object CrashReporter {
         return props.getProperty("dsn", "").trim()
     }
 
+    /**
+     * The system property that switches telemetry off outright, whatever else is configured.
+     *
+     * The test tasks set `sentry.dsn=""`, which turns out not to be enough: that only disables the
+     * SDK's own external configuration, while [configureOptions] assigns the DSN this reads off the
+     * classpath. `sentry.properties` lives in `jvmMain/resources`, which is on the *test* runtime
+     * classpath, so a suite that initialised the reporter published straight into the production
+     * project — "kaboom", "boom" and "nowhere to write" are all in Sentry, filed under a test class.
+     */
+    internal const val DISABLE_PROPERTY = "churchpresenter.telemetry.disabled"
+
+    /** Whether telemetry is switched off for this JVM regardless of settings. */
+    internal fun telemetryDisabled(value: String? = System.getProperty(DISABLE_PROPERTY)): Boolean =
+        value?.trim()?.lowercase() in setOf("1", "true", "yes")
+
     private fun initSentry() {
         try {
+            if (telemetryDisabled()) return
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             Sentry.init { options -> configureOptions(options, dsn) }

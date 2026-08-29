@@ -37,6 +37,11 @@ tasks.withType<Test>().configureEach {
     // empty DSN leaves it permanently disabled.
     systemProperty("sentry.dsn", "")
     systemProperty("sentry.enable-external-configuration", "false")
+    // Neither of the two above actually stops CrashReporter: they disable the SDK's own external
+    // configuration, while initSentry reads sentry.properties off the classpath and hands the DSN
+    // to Sentry.init directly. This is the switch initSentry itself honours, and it is what keeps
+    // a suite that calls CrashReporter.initialize out of the production project.
+    systemProperty("churchpresenter.telemetry.disabled", "true")
 }
 
 detekt {

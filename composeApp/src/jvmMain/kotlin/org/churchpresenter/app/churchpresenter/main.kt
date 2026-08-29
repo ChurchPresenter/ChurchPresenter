@@ -142,11 +142,9 @@ import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
 import java.io.File
-import java.net.URI
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.server.applyRemoteLiveState
@@ -165,6 +163,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
@@ -244,6 +243,14 @@ fun main() {
         System.exit(0)
         return
     }
+
+    // ImageIO caches its output stream in a temp file by default, so every slide JPEG the
+    // presentation cache writes depended on java.io.tmpdir being writable — and where it was not,
+    // ImageIO.write failed with the useless "Can't create an ImageOutputStream!" rather than
+    // anything naming a temp directory. That was 75 reports across four churches. The images this
+    // app writes are single slides and thumbnails, small enough to stage in memory, so the temp
+    // file buys nothing and costs a dependency on a directory the app does not control.
+    javax.imageio.ImageIO.setUseCache(false)
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
@@ -1221,14 +1228,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 ),
                                 onConverter = { showConverterWindow = true },
                                 onSongLibrary = { showSongLibraryWindow = true },
-                                onHelp = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/wiki"))
-                                },
-                                onHowToBlog = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/blog"))
-                                },
+                                onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
+                                onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
                                 onCheckForUpdates = {
                                     coroutineScope.launch {
                                         pendingUpdateResult = UpdateChecker.checkForUpdate(
