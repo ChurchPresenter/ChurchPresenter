@@ -24,6 +24,22 @@ import kotlin.io.use
 private const val HEX_RADIX = 16
 
 /**
+ * The XDG desktop portal is not reachable on this machine.
+ *
+ * A distinct type rather than a message, because that is what a caller can act on: the wording
+ * would have to be matched to be recognised, and the same reasoning is already written down for
+ * the Bible installer's environment classifier — matching on text works in one locale and quietly
+ * stops working in the other thirty-three the app ships.
+ *
+ * A Linux desktop with no `xdg-desktop-portal` running is a configuration, not a defect: the
+ * chooser falls back to Swing and the operator picks their file. It reached Sentry as an
+ * `IllegalStateException` anyway, which said the app had broken when it had not.
+ */
+internal class PortalUnavailableException : IllegalStateException(
+    "The D-Bus session connection has no unique name; the desktop portal is unreachable"
+)
+
+/**
  * A [FileChooser] implementation that uses DBus to communicate with the XDG Desktop Portal's File Chooser API on Linux.
  *
  * Everything here depends on someone else's process: a session bus, and a desktop portal that
@@ -125,7 +141,7 @@ object XdgFileChooser : FileChooser() {
             null
         }
         return name?.takeIf { it.isNotBlank() }
-            ?: error("The D-Bus session connection has no unique name; the desktop portal is unreachable")
+            ?: throw PortalUnavailableException()
     }
 
     /**

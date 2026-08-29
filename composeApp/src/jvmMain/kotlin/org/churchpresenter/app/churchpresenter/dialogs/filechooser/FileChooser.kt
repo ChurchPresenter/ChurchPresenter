@@ -158,6 +158,12 @@ abstract class FileChooser {
             attempt()
         } catch (e: CancellationException) {
             throw e
+        } catch (_: PortalUnavailableException) {
+            // A desktop with no portal running is the machine, not the app. Still latched, so the
+            // process asks once and every later dialog goes straight to Swing — but not reported:
+            // there is nothing here to fix, and the operator already has a working chooser.
+            nativeDialogsBroken = true
+            return fallback()
         } catch (t: Throwable) {
             CrashReporter.reportWarning(
                 "Native file dialog failed; fell back to the Swing chooser",

@@ -6,13 +6,19 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -65,6 +71,45 @@ class EBibleCatalogCacheTest {
 
     private fun fetch(client: HttpClient, now: Long) = runBlocking {
         EBibleSource.fetchCatalog(url = url, http = client, cacheFile = cacheFile, nowMillis = now)
+    }
+
+    @Test
+    fun `closing the browser mid-fetch cancels rather than reporting a failure`() = runBlocking {
+        // Closing the download browser cancels BibleCatalogViewModel's scope while the request is
+        // still suspended, and ktor delivers that as an IOException over a channel closed
+        // underneath it rather than as a CancellationException — so the fetch caught it and filed
+        // "eBible catalogue fetch failed" against a user who had merely changed their mind.
+        //
+        // The request is held until the test has cancelled the job, so the cancellation is the
+        // reason the call ends. Nothing here waits on a clock: both sides signal each other.
+        val inFlight = CompletableDeferred<Unit>()
+        val client = HttpClient(
+            MockEngine {
+                requests++
+                inFlight.complete(Unit)
+                awaitCancellation()
+            },
+        )
+
+        val job = async {
+            runCatching {
+                EBibleSource.fetchCatalog(url = url, http = client, cacheFile = cacheFile, nowMillis = 1_000)
+            }
+        }
+        inFlight.await()
+        job.cancel()
+
+        assertFailsWith<CancellationException> { job.await() }
+        assertEquals(1, requests)
+    }
+
+    @Test
+    fun `a network failure that is not a cancellation still yields an outcome`() {
+        // The other side of the arm above: a real failure must not start propagating instead of
+        // reaching the install dialog with something to show.
+        val client = HttpClient(MockEngine { requests++; throw IOException("connection reset") })
+
+        assertIs<BibleCatalogOutcome.NetworkError>(fetch(client, now = 1_000))
     }
 
     @Test

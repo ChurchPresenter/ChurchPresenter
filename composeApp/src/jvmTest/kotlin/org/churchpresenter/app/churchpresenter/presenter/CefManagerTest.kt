@@ -287,4 +287,16 @@ class CefManagerTest {
         )
     }
 
+    @Test
+    fun `no CefApp means no client, and no throw`() {
+        // The suite never initialises JCEF, so this is the uninitialised branch — the one that has
+        // to answer null rather than dereference. The failed-native branch beside it cannot be
+        // reached without a real CefApp whose native side has died, which is exactly the state a
+        // test cannot construct; the guarantee that matters is shared and asserted here: every
+        // caller sees null, never an exception, because the only call site is inside a `remember`.
+        assertFalse(CefManager.initialized)
+        assertNull(CefManager.createClient())
+        assertFalse(CefManager.initialized, "answering null must not flip the flag on")
+    }
+
 }

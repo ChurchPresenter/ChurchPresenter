@@ -7,6 +7,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -119,7 +121,17 @@ object EBibleSource : BibleSource {
                 File(cacheFile.parentFile, cacheFile.name + ".meta").writeText(nowMillis.toString())
             }
             BibleCatalogOutcome.Success(modules)
+        } catch (e: CancellationException) {
+            // Closing the download browser cancels the fetch. That is the user's doing, not a fault.
+            throw e
         } catch (e: IOException) {
+            // ktor does not always deliver that cancellation as a CancellationException: a request
+            // suspended when the scope dies surfaces as an IOException over a channel closed
+            // underneath it, and the arm above never sees it. Asking the context whether it is
+            // still alive is what tells "the user closed the dialog" from "the network failed" —
+            // without it, closing the browser filed "eBible catalogue fetch failed" against
+            // someone who had merely changed their mind.
+            currentCoroutineContext().ensureActive()
             BibleInstallSupport.reported(
                 "eBible catalogue fetch failed",
                 e,
@@ -127,6 +139,7 @@ object EBibleSource : BibleSource {
                 cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
             )
         } catch (e: UnresolvedAddressException) {
+            currentCoroutineContext().ensureActive()
             BibleInstallSupport.reported(
                 "eBible catalogue fetch failed",
                 e,
