@@ -13,9 +13,11 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.settings.utils.Constants
@@ -435,7 +437,7 @@ class SongsViewModel(
             lines = song.lyrics,
             secondaryLines = song.secondaryLyrics,
             type = Constants.SECTION_TYPE_SONG
-        )
+        ).withBackgroundsOf(song)
     }
 
     fun getLyricSections(): List<LyricSection> {
@@ -467,9 +469,11 @@ class SongsViewModel(
             )
         }
 
-        // Mark the very last section so the presenter can show end-of-song indicator
+        // Mark the very last section so the presenter can show end-of-song indicator, and stamp the
+        // song's own background onto every section — the presenter only ever sees a section.
         return sections.mapIndexed { index, section ->
-            if (index == sections.lastIndex) section.copy(isLastSection = true) else section
+            (if (index == sections.lastIndex) section.copy(isLastSection = true) else section)
+                .withBackgroundsOf(song)
         }
     }
 
@@ -878,6 +882,39 @@ class SongsViewModel(
         } catch (_: Exception) {
             return false
         }
+    }
+
+    /**
+     * Gives every song in [songbook] the same pair of backgrounds, rewriting each `.song` file.
+     * Returns how many were written — 0 when nothing matched or the library is remote.
+     *
+     * A song whose file has gone missing is skipped rather than recreated: the library on disk is
+     * the record, and this must not resurrect a song someone deleted outside the app.
+     */
+    fun applyBackgroundToSongbook(
+        songbook: String,
+        background: SongBackground,
+        lowerThirdBackground: SongBackground,
+    ): Int {
+        if (remoteModeActive || songbook.isBlank()) return 0
+        val parser = SongFileParser()
+        var written = 0
+        _allSongItems.value
+            .filter { it.songbook == songbook && it.sourceFile.isNotBlank() }
+            .forEach { song ->
+                if (!File(song.sourceFile).exists()) return@forEach
+                try {
+                    parser.writeSongFile(
+                        song.copy(background = background, lowerThirdBackground = lowerThirdBackground),
+                        song.sourceFile,
+                    )
+                    written++
+                } catch (_: Exception) {
+                    // One unwritable file must not abandon the rest of the book.
+                }
+            }
+        if (written > 0) loadSongs()
+        return written
     }
 
     fun createSong(song: SongItem): Boolean {

@@ -21,4 +21,16 @@ data class LyricSection(
      * words to present but is exactly what the band needs.
      */
     val chordLines: List<String> = emptyList(),
+    /**
+     * The song's own full-screen background, carried here for the same reason [bpm] and [capo] are:
+     * the presenter is handed a section, never the [SongItem] it came from. Inheriting by default,
+     * in which case the global Background settings decide.
+     */
+    val background: SongBackground = SongBackground(),
+    /** The same for the lower-third band. */
+    val lowerThirdBackground: SongBackground = SongBackground(),
 )
+
+/** [section] with [song]'s own backgrounds stamped on, so the presenter can draw them. */
+fun LyricSection.withBackgroundsOf(song: SongItem): LyricSection =
+    copy(background = song.background, lowerThirdBackground = song.lowerThirdBackground)
