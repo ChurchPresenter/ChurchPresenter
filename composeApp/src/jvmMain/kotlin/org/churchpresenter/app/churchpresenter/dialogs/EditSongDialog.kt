@@ -121,6 +121,7 @@ import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.songchords.ChordSheetImporter
@@ -147,6 +148,8 @@ fun EditSongDialog(
     showTuningFields: Boolean = false,
     chordsVisible: Boolean = true,
     onChordsVisibleChange: (Boolean) -> Unit = {},
+    onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
+                                  lowerThirdBackground: SongBackground) -> Unit)? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit
 ) {
@@ -174,6 +177,7 @@ fun EditSongDialog(
             chordsVisible = chordsVisible,
             onChordsVisibleChange = onChordsVisibleChange,
             isVisible = isVisible,
+            onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
             onDismiss = onDismiss,
             onSave = onSave
         )
@@ -239,6 +243,8 @@ internal fun EditSongContent(
     chordsVisible: Boolean = true,
     onChordsVisibleChange: (Boolean) -> Unit = {},
     isVisible: Boolean = true,
+    onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
+                                  lowerThirdBackground: SongBackground) -> Unit)? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit
 ) {
@@ -265,6 +271,10 @@ internal fun EditSongContent(
     var editedSecondaryLyrics by remember(isVisible, song) {
         mutableStateOf(TextFieldValue(song.secondaryLyrics.joinToString("\n")))
     }
+
+    var editedBackground by remember(isVisible, song) { mutableStateOf(song.background) }
+    var editedLowerThirdBackground by remember(isVisible, song) { mutableStateOf(song.lowerThirdBackground) }
+    var backgroundPanelOpen by remember(isVisible, song) { mutableStateOf(false) }
 
     var pane by remember(isVisible, song) { mutableStateOf(LyricPane.PRIMARY) }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
@@ -415,6 +425,20 @@ internal fun EditSongContent(
                                 }
                             }
                             Spacer(Modifier.weight(1f))
+                            SongBackgroundButton(
+                                background = editedBackground,
+                                lowerThirdBackground = editedLowerThirdBackground,
+                                expanded = backgroundPanelOpen,
+                                onExpandedChange = { backgroundPanelOpen = it },
+                                onBackgroundChange = { editedBackground = it },
+                                onLowerThirdBackgroundChange = { editedLowerThirdBackground = it },
+                                sampleLine = firstLyricLine(editedLyrics.text),
+                                onApplyToSongbook = onApplyBackgroundToSongbook
+                                    ?.takeIf { editedSongbook.isNotBlank() }
+                                    ?.let { apply ->
+                                        { apply(editedSongbook, editedBackground, editedLowerThirdBackground) }
+                                    },
+                            )
                             ChordsToggle(on = showChords) {
                                 showChords = !showChords
                                 onChordsVisibleChange(showChords)
@@ -520,7 +544,9 @@ internal fun EditSongContent(
                                     if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList() else it
                                 },
                                 sourceFile = song.sourceFile,
-                                ccliNumber = editedCcli
+                                ccliNumber = editedCcli,
+                                background = editedBackground,
+                                lowerThirdBackground = editedLowerThirdBackground
                             )
                             onSave(
                                 updatedSong,
@@ -537,10 +563,29 @@ internal fun EditSongContent(
                         Text(stringResource(Res.string.save))
                     }
                 }
+
             }
         }
     }
 }
+
+/**
+ * The first line the audience would actually read, for the background preview to sit behind.
+ *
+ * Only a line that is *entirely* a marker is a section header — `[Verse 1]`, `{Chorus}`. A line
+ * merely starting with one is a lyric carrying its first chord, and skipping it would leave the
+ * preview showing the second line of the song.
+ */
+internal fun firstLyricLine(lyrics: String): String =
+    lyrics.lines()
+        .map { it.trim() }
+        .firstOrNull { it.isNotBlank() && !SECTION_MARKER_LINE.matches(it) }
+        ?.replace(CHORD_MARKER, "")
+        ?.trim()
+        .orEmpty()
+
+private val SECTION_MARKER_LINE = Regex("""^[\[{][^\]}]*[\]}]$""")
+private val CHORD_MARKER = Regex("""\[[^\]]*]""")
 
 private val CardShape = RoundedCornerShape(9.dp)
 

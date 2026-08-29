@@ -14,7 +14,11 @@ data class SongItem(
     val secondaryTitle: String = "",
     val secondaryLyrics: List<String> = emptyList(),
     val sourceFile: String = "",
-    val ccliNumber: String = ""
+    val ccliNumber: String = "",
+    /** This song's own full-screen background, or an inheriting one when it has none. */
+    val background: SongBackground = SongBackground(),
+    /** This song's own lower-third background, or an inheriting one when it has none. */
+    val lowerThirdBackground: SongBackground = SongBackground()
 ) {
     /** Stable unique ID across songbooks: "songbook::number" or "songbook::title" when no number */
     val songId: String get() = if (number.isNotBlank()) "$songbook::$number" else "$songbook::$title"
