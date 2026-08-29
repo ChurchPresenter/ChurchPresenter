@@ -85,6 +85,7 @@ import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 /**
  * The temp-file suffix for a downloaded installer, inferred from the release asset's URL so the
@@ -327,7 +328,7 @@ fun UpdateAvailableDialog(
                     downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
                 }
             },
-            onOpenReleasePage = { Desktop.getDesktop().browse(URI(it)) },
+            onOpenReleasePage = { UrlOpener.open(it) },
             onDismiss = onDismiss
         )
     }
@@ -576,7 +577,7 @@ internal fun UpdateAvailableContent(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
-                            Desktop.getDesktop().browse(URI(UpdateChecker.RELEASES_URL))
+                            UrlOpener.open(UpdateChecker.RELEASES_URL)
                             onDismiss()
                         }
                     ) {

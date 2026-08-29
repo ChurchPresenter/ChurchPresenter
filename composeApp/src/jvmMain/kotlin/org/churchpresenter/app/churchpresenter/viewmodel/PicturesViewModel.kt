@@ -23,6 +23,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
+import java.util.UUID
 import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.WatchEvent
@@ -216,6 +217,15 @@ class PicturesViewModel(
     private var watchJob: Job? = null
 
     /**
+     * The in-flight [loadPictureFromRemote] download, so [clearImages] can stop it.
+     *
+     * Without this, re-selecting the same mirrored picture item started a second loop over the same
+     * cache directory while the first was still running, and both appended the identical file — a
+     * duplicate `absolutePath` in [_images], which is a fatal crash in the grid that keys on it.
+     */
+    private var remoteLoadJob: Job? = null
+
+    /**
      * Guards every structural change to [_images], and any index read taken in order to make one.
      *
      * The list is a [androidx.compose.runtime.snapshots.SnapshotStateList], which makes a write
@@ -269,7 +279,7 @@ class PicturesViewModel(
         // Add only files not already present so a re-entrant/repeated load stays idempotent — a
         // duplicate path in _images would crash the LazyVerticalGrid keyed by absolutePath.
         synchronized(imagesLock) {
-            _images.addAll(imageFiles.filter { it !in _images })
+            imageFiles.forEach { addUniqueLocked(it) }
         }
 
         // Load thumbnails in background
@@ -303,23 +313,34 @@ class PicturesViewModel(
         _selectedFolder.value = File(folderPath)
         val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
         cacheDir.mkdirs()
-        scope.launch {
+        remoteLoadJob = scope.launch {
             for (index in 0 until imageCount) {
+                // Cancellation is cooperative and most of this loop is blocking I/O, so a
+                // superseded download runs on unless it is asked to stop. Checking here stops it
+                // fetching and writing for a folder nobody is looking at any more.
+                if (!isActive) return@launch
                 val cacheFile = File(cacheDir, "image_%04d.jpg".format(index))
                 var cached = cacheFile.exists()
                 if (!cached) {
                     val bytes = fetchBytes(index)
                     if (bytes != null) {
-                        val tmp = File(cacheDir, "${cacheFile.name}.tmp")
+                        // Unique per attempt. Two loads of the same folder overlap whenever the
+                        // operator re-selects a mirrored item, and a shared "image_0000.jpg.tmp"
+                        // made them fight over one path: whichever renamed second found its temp
+                        // file already moved, treated the download as failed and dropped the image,
+                        // so the folder came up short a picture for no stated reason.
+                        val tmp = File(cacheDir, "${cacheFile.name}.${UUID.randomUUID()}.tmp")
                         tmp.writeBytes(bytes)
-                        cached = tmp.renameTo(cacheFile)
-                        if (!cached) tmp.delete()
+                        cached = tmp.renameTo(cacheFile) || cacheFile.exists()
+                        if (tmp.exists()) tmp.delete()
                     }
                 }
                 if (cached) {
-                    synchronized(imagesLock) { _images.add(cacheFile) }
-                    reportThumbnailFailures(listOfNotNull(decodeThumbnail(cacheFile)))
-                    presenterManager?.let { syncWithPresenter(it) }
+                    val added = isActive && synchronized(imagesLock) { addUniqueLocked(cacheFile) }
+                    if (added) {
+                        reportThumbnailFailures(listOfNotNull(decodeThumbnail(cacheFile)))
+                        presenterManager?.let { syncWithPresenter(it) }
+                    }
                 }
             }
         }
@@ -328,6 +349,8 @@ class PicturesViewModel(
     fun clearImages() {
         watchJob?.cancel()
         watchJob = null
+        remoteLoadJob?.cancel()
+        remoteLoadJob = null
         synchronized(imagesLock) { _images.clear() }
         _thumbnails.clear()
         _thumbnailFailures.clear()
@@ -566,6 +589,21 @@ class PicturesViewModel(
         else -> false
     }
 
+    /**
+     * Adds [file] unless its path is already listed, answering whether it went in. Caller holds
+     * [imagesLock].
+     *
+     * Compared by `absolutePath` — the exact string [PicturesTab]'s grid uses as its item key —
+     * rather than by [File.equals], which compares the *unnormalised* path. Two `File`s naming one
+     * picture, one relative and one absolute, are unequal to `equals` and identical as keys, so the
+     * membership tests passed and the grid still threw "Key ... was already used".
+     */
+    private fun addUniqueLocked(file: File, index: Int? = null): Boolean {
+        if (_images.any { it.absolutePath == file.absolutePath }) return false
+        if (index != null) _images.add(index, file) else _images.add(file)
+        return true
+    }
+
     internal fun CoroutineScope.addWatchedImage(file: File): Boolean {
         // isActive gates the add: cancellation is cooperative, so a watcher cancelled by
         // clearImages() can still be mid-pollEvents() here — an add now would land in _images
@@ -575,7 +613,7 @@ class PicturesViewModel(
         // the same lock as the insert: apart, it is a check-then-act, and a duplicate path in
         // _images crashes the LazyVerticalGrid keyed by absolutePath. Null means "already there".
         val insertedAt: Int = synchronized(imagesLock) {
-            if (file in _images) {
+            if (_images.any { it.absolutePath == file.absolutePath }) {
                 null
             } else {
                 val insertIndex = _images.indexOfFirst { it.name > file.name }

@@ -113,6 +113,50 @@ class PicturesViewModelRemoteTest {
     }
 
     @Test
+    fun `re-selecting the same mirrored folder cannot list an image twice`() {
+        // PicturesTab restarts the load whenever the selected item or its version changes, so the
+        // same folder is loaded again while the first download may still be running. Both loops
+        // walked the same cache directory and appended the same files, and a duplicate path is
+        // fatal in the grid, which keys on absolutePath: "Key ... was already used".
+        //
+        // The first fetch is held open so the overlap is arranged rather than raced for: the second
+        // load is started while the first is provably still in flight, which is the interleaving
+        // that used to duplicate. Both waits end on a signal, never on the deadline.
+        val vm = vm()
+        val firstFetchStarted = java.util.concurrent.CountDownLatch(1)
+        val releaseFirstFetch = java.util.concurrent.CountDownLatch(1)
+
+        vm.loadPictureFromRemote(
+            folderId = "folder-twice",
+            folderPath = "/Volumes/primary-only/Twice",
+            imageCount = 3,
+        ) {
+            firstFetchStarted.countDown()
+            releaseFirstFetch.await()
+            pngBytes()
+        }
+        assertTrue(
+            firstFetchStarted.await(5, java.util.concurrent.TimeUnit.SECONDS),
+            "the first load has to be in flight for this to be the reported race",
+        )
+
+        vm.loadPictureFromRemote(
+            folderId = "folder-twice",
+            folderPath = "/Volumes/primary-only/Twice",
+            imageCount = 3,
+        ) { pngBytes() }
+        releaseFirstFetch.countDown()
+
+        awaitUntil("three mirrored images") { vm.images.size == 3 }
+        assertEquals(
+            vm.images.map { it.absolutePath }.distinct().size,
+            vm.images.size,
+            "a path listed twice is what crashes the grid",
+        )
+        assertEquals(listOf("image_0000.jpg", "image_0001.jpg", "image_0002.jpg"), vm.names)
+    }
+
+    @Test
     fun `an image the primary cannot supply is skipped rather than left broken`() {
         val vm = vm()
 

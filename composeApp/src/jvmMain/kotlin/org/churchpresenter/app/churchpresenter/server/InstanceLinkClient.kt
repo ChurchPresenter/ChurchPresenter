@@ -45,13 +45,14 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.io.IOException
 import javax.net.ssl.SSLException
 import kotlin.random.Random
 
 private const val FAILURE_LOG_INTERVAL = 10
 
 /** The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke". */
-private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns")
+private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout")
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 
@@ -261,7 +262,16 @@ class InstanceLinkClient(
      * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
      * that crashed mid-session, or a protocol/certificate bug).
      */
-    internal fun classifyConnectFailure(e: Exception): String = when (e) {
+    internal fun classifyConnectFailure(e: Exception): String = when {
+        // ktor's own pinger raises this when the primary misses the keepalive window, which is what
+        // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the
+        // status change. On a hall's wifi that is ordinary churn — five churches filed it — so it
+        // belongs with "refused" and "dns" rather than being reported the first time it happens.
+        e is IOException && e.message?.contains("Ping timeout", ignoreCase = true) == true -> "ping_timeout"
+        else -> classifyConnectFailureByType(e)
+    }
+
+    private fun classifyConnectFailureByType(e: Exception): String = when (e) {
         // Ktor's ConnectTimeoutException extends java.net.ConnectException, so it must be matched
         // first or every connect timeout is filed as "refused" — the one bucket that says the
         // operator simply has not started the primary yet.

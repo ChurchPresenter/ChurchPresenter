@@ -110,6 +110,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
@@ -720,5 +721,5 @@ private fun NdiDropdownCell(
 
 /** Opens the NDI download page in the operator's browser. */
 private fun openNdiRuntimePage() {
-    runCatching { java.awt.Desktop.getDesktop().browse(java.net.URI(NDI_RUNTIME_URL)) }
+    UrlOpener.open(NDI_RUNTIME_URL)
 }

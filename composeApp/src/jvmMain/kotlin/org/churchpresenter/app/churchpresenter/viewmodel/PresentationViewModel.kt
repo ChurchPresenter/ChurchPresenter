@@ -470,6 +470,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     }
 
     private fun reportLoadFailure(file: File, failure: LoadResult.Failure) {
+        if (failure.error.isOperatorFile()) return
         CrashReporter.reportWarning(
             "Presentation: Failed to load ${file.extension.lowercase()} file",
             tags = mapOf(
@@ -489,3 +490,16 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     private fun isValidPresentationFile(file: File): Boolean =
         file.extension.lowercase() in PresentationLoader.SUPPORTED_EXTENSIONS
 }
+
+/**
+ * Which load failures are a fact about the operator's file rather than about this code.
+ *
+ * A deck the app cannot open because it is locked, or because it has no slides in it, is
+ * answered by the dialog — [DeckLoadError.PASSWORD_PROTECTED] and [DeckLoadError.EMPTY_DOCUMENT]
+ * both have their own message on screen — and there is nothing here to fix. Reported anyway,
+ * they were indistinguishable from a parse regression: one issue, five churches, and no way to
+ * tell "someone opened a protected deck" from "the parser broke". The same reasoning, and the
+ * same classify-by-type shape, as the Bible installer's `isOperatorEnvironment`.
+ */
+internal fun DeckLoadError.isOperatorFile(): Boolean =
+    this == DeckLoadError.PASSWORD_PROTECTED || this == DeckLoadError.EMPTY_DOCUMENT

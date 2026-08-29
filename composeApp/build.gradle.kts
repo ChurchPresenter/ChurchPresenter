@@ -799,6 +799,11 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // as if it were a real install. An empty DSN leaves the SDK permanently disabled.
     systemProperty("sentry.dsn", "")
     systemProperty("sentry.enable-external-configuration", "false")
+    // Neither of the two above actually stops CrashReporter: they disable the SDK's own external
+    // configuration, while initSentry reads sentry.properties off the classpath and hands the DSN
+    // to Sentry.init directly. This is the switch initSentry itself honours, and it is what keeps
+    // a suite that calls CrashReporter.initialize out of the production project.
+    systemProperty("churchpresenter.telemetry.disabled", "true")
 
     // Opt-in gate for DeckLinkHardwareTest, which drives a real Blackmagic card: it opens the
     // output (pushing a frame to whatever that card is wired to), installs a JVM shutdown hook and

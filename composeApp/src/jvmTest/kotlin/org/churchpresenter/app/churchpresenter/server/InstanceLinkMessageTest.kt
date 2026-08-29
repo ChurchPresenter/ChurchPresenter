@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
+import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -224,6 +225,36 @@ class InstanceLinkMessageTest {
         assertEquals("dns", c.classifyConnectFailure(UnknownHostException("no")))
         assertEquals("timeout", c.classifyConnectFailure(SocketTimeoutException("no")))
         assertEquals("tls", c.classifyConnectFailure(SSLException("no")))
+    }
+
+    @Test
+    fun `a ping timeout is classified and rate-limited like a refused connection`() {
+        val c = clientWith(Recorder())
+
+        // ktor's own pinger raises this when the primary misses the keepalive window. That is what
+        // the heartbeat exists to notice: the link drops, the backoff reconnects, the operator sees
+        // the status change. Five churches filed it as a defect because "other" reports the first
+        // time it ever happens.
+        val kind = c.classifyConnectFailure(IOException("Ping timeout"))
+
+        assertEquals("ping_timeout", kind)
+        assertFalse(
+            c.shouldReportConnectFailure(kind, consecutiveFailures = 1),
+            "one dropped keepalive on a hall's wifi is not worth an issue",
+        )
+        assertTrue(
+            c.shouldReportConnectFailure(kind, consecutiveFailures = 10),
+            "a link that keeps dropping still has to surface",
+        )
+    }
+
+    @Test
+    fun `an IOException that is not a ping timeout is still reported the first time`() {
+        val c = clientWith(Recorder())
+        val kind = c.classifyConnectFailure(IOException("broken pipe"))
+
+        assertEquals("other", kind)
+        assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1))
     }
 
     @Test
