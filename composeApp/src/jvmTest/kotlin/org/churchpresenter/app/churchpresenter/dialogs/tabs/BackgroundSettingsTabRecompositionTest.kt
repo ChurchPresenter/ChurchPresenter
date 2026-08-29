@@ -157,7 +157,9 @@ class BackgroundSettingsTabRecompositionTest {
         waitForIdle()
         onAllNodesWithText("Top Opacity").assertCountEquals(1)
         onAllNodesWithText("TOP COLOR:").assertCountEquals(1)
-        percentReadouts().assertCountEquals(TypeDropdown.COUNT - 1 + 3)
+        // Every slot shows an opacity and a dim readout; the gradient slot trades its two
+        // for the gradient's own three.
+        percentReadouts().assertCountEquals(TypeDropdown.COUNT * 2 - 2 + 3)
 
         runOnIdle {
             settings = settings.copy(

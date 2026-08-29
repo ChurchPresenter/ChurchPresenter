@@ -102,7 +102,8 @@ class BackgroundSettingsTabStructureTest {
     fun `every slot on Color shows a colour field and an opacity slider`() = backgroundTab { _ ->
         colorFields().assertCountEquals(TypeDropdown.COUNT)
         onAllNodesWithText("Background Opacity").assertCountEquals(TypeDropdown.COUNT)
-        percentReadouts().assertCountEquals(TypeDropdown.COUNT)
+        // One opacity readout and one dim readout per slot.
+        percentReadouts().assertCountEquals(TypeDropdown.COUNT * 2)
         onNodeWithTag("bg_defaultColor").assertExists("the default colour field carries the tab's only tag")
     }
 
@@ -156,7 +157,9 @@ class BackgroundSettingsTabStructureTest {
             onAllNodesWithText("Transition Position").assertCountEquals(1)
             // Gradient replaces the colour field but adds two of its own, and three sliders.
             colorFields().assertCountEquals(TypeDropdown.COUNT - 1 + 2)
-            percentReadouts().assertCountEquals(TypeDropdown.COUNT - 1 + 3)
+            // Every slot now shows an opacity readout and a dim one; the gradient slot trades
+            // its two for the gradient's own three.
+            percentReadouts().assertCountEquals(TypeDropdown.COUNT * 2 - 2 + 3)
         }
     }
 
@@ -209,6 +212,10 @@ class BackgroundSettingsTabStructureTest {
             "Used when 'Default' is selected for Bible or Songs in lower third display mode",
             "Full Screen", "Lower Third", "Background Type:", "Background Opacity",
             "Color", "COLOR:", "BACKGROUND COLOR:", "#000000", "100%",
+            "Dim", "Blur", "0%", "0px",
+            // The Quick backgrounds card. Its tiles carry no text until one is configured.
+            "Quick backgrounds", "Add a background",
+            QUICK_BACKGROUNDS_HELP,
         )
         val rendered = mutableSetOf<String>()
         onAllNodesWithText("", substring = true).fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -223,3 +230,9 @@ class BackgroundSettingsTabStructureTest {
         )
     }
 }
+
+/** The Quick backgrounds card's help line, too long for one source line. */
+private const val QUICK_BACKGROUNDS_HELP =
+    "Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, " +
+        "drag it to change which key reaches it. Picking one during a service overrides every " +
+        "screen until you go back to normal — it changes nothing here."

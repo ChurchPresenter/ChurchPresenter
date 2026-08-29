@@ -69,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.unlock_screen
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -271,6 +272,12 @@ private fun SingleDisplayPreview(
     val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
     val isLowerThird = screenAssignment.isLowerThird
 
+    // The same background switches every real output obeys — this layout's own
+    // (Projection settings' Fullscreen/Lower Third Background columns) and the per-content-type
+    // one beside it. Without them the preview draws a background the output is suppressing, and
+    // the two disagree on screen for the rest of the service.
+    val showsBackground = showsOutputBackground(screenAssignment)
+
     // Determine if this screen shows the current content
     val showsContent = when (effectiveMode) {
         Presenting.BIBLE -> screenAssignment.showBible
@@ -369,7 +376,12 @@ private fun SingleDisplayPreview(
         // so WEBSITE is handled separately below at native size.
         if (effectiveMode != Presenting.WEBSITE) {
             ScaledPresenterContent {
-                PresenterScreen(appSettings = appSettings, outputRole = primaryRole, isLowerThird = isLowerThird) {
+                PresenterScreen(
+                    appSettings = appSettings,
+                    outputRole = primaryRole,
+                    isLowerThird = isLowerThird,
+                    showBackground = showsBackground,
+                ) {
                     if (effectiveMode != Presenting.NONE && showsContent) {
                         val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
                         val modeCrossfadeDur = maxOf(
@@ -386,6 +398,7 @@ private fun SingleDisplayPreview(
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
+                                    showBackground = showsBackground && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations
                                 )
@@ -401,9 +414,10 @@ private fun SingleDisplayPreview(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
+                                    showBackground = showsBackground && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
-                    showChords = screenAssignment.showChords,
+                                    showChords = screenAssignment.showChords,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(

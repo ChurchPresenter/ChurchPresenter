@@ -53,6 +53,18 @@ class BackgroundSettingsTabLabelsTest {
         "#000000" to TypeDropdown.COUNT,
         "Background Opacity" to TypeDropdown.COUNT,
         "100%" to TypeDropdown.COUNT,
+
+        // Dim and blur, added so every background has the controls a song's own background has.
+        "Dim" to TypeDropdown.COUNT,
+        "Blur" to TypeDropdown.COUNT,
+        "0%" to TypeDropdown.COUNT,
+        "0px" to TypeDropdown.COUNT,
+
+        // The Quick backgrounds card. Out of the box the tray is empty, so the only tile is the
+        // one that adds the first background — a configured tray adds a name under each tile.
+        "Quick backgrounds" to 1,
+        QUICK_BACKGROUNDS_HELP to 1,
+        "Add a background" to 1,
     )
 
     @Test
@@ -132,7 +144,9 @@ class BackgroundSettingsTabLabelsTest {
             onAllNodesWithText("Top Opacity").assertCountEquals(1)
             onAllNodesWithText("Bottom Opacity").assertCountEquals(1)
             onAllNodesWithText("Transition Position").assertCountEquals(1)
-            onAllNodesWithText("0%").assertCountEquals(1)   // gradientTopOpacity   = 0.0
+            // gradientTopOpacity = 0.0, plus the dim readout on each of the three slots that show
+            // sliders at all — Image, Video and Color. Transparent, Gradient and Default show none.
+            onAllNodesWithText("0%").assertCountEquals(1 + 3)
             onAllNodesWithText("80%").assertCountEquals(1)  // gradientBottomOpacity = 0.8
             onAllNodesWithText("50%").assertCountEquals(1)  // gradientPosition      = 0.5
         }
@@ -175,3 +189,9 @@ class BackgroundSettingsTabLabelsTest {
         }
     }
 }
+
+/** The Quick backgrounds card's help line, too long for one source line. */
+private const val QUICK_BACKGROUNDS_HELP =
+    "Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, " +
+        "drag it to change which key reaches it. Picking one during a service overrides every " +
+        "screen until you go back to normal — it changes nothing here."

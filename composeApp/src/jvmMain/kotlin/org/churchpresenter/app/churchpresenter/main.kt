@@ -57,6 +57,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.ResolvedDisplay
@@ -537,8 +538,19 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
         mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
     }
-    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings) {
-        withMirroredBackgrounds(appSettings, mirroredBackgroundSettings)
+    // A quick-tray pick lives only as long as the app is open: it is a live control, not a setting,
+    // so it is held here rather than written back through onSettingsChange.
+    var activeQuickBackground by remember { mutableStateOf<QuickBackground?>(null) }
+    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings, activeQuickBackground) {
+        withQuickBackground(
+            withMirroredBackgrounds(appSettings, mirroredBackgroundSettings),
+            activeQuickBackground,
+        )
+    }
+    // A tile removed from the tray, or a whole settings import, must not leave a stale override live.
+    LaunchedEffect(appSettings.quickBackgrounds) {
+        val stillThere = activeQuickBackground?.id?.let { id -> appSettings.quickBackgrounds.any { it.id == id } }
+        if (stillThere == false) activeQuickBackground = null
     }
     val screenCountForUsage = remember { LiveMapReporter.detectScreenCount() }
     val deckLinkCountForUsage = remember {
@@ -1424,6 +1436,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 livePreviewAppSettings = effectiveAppSettings,
+                                activeQuickBackground = activeQuickBackground,
+                                onQuickBackgroundPicked = { activeQuickBackground = it },
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
                                 verseSequenceLog = verseSequenceLog,

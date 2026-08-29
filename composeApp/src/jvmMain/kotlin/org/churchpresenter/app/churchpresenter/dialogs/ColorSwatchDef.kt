@@ -30,9 +30,23 @@ internal data class ColorSwatchDef(
 ) {
     val gradient: Boolean get() = colorEnd != null
 
-    /** [background] switched to this tile, keeping its dim and blur. */
-    fun applyTo(background: SongBackground): SongBackground = when {
-        own -> background.copy(type = SongBackgroundType.COLOR)
+    /**
+     * [background] switched to this tile, keeping its dim, blur and opacity.
+     *
+     * The custom tile has to land on a colour that is **not** one of [namedColors]: both its own
+     * selected state and the hex field in the Look column key on the colour not being one of the
+     * palette's, so keeping a named solid left the tile the user had just clicked reporting itself
+     * unselected with no hex field — "Custom color" appeared to do nothing at all. It only appeared
+     * to work after a *gradient* tile, whose near colour is not in the named set.
+     */
+    fun applyTo(
+        background: SongBackground,
+        namedColors: Set<String> = SONG_BACKGROUND_NAMED_COLORS,
+    ): SongBackground = when {
+        own -> background.copy(
+            type = SongBackgroundType.COLOR,
+            color = if (background.color.lowercase() in namedColors) color else background.color,
+        )
         gradient -> background.copy(
             type = SongBackgroundType.GRADIENT,
             color = color,

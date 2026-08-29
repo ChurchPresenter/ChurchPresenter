@@ -158,7 +158,7 @@ private fun BackgroundChipSwatch(background: SongBackground) {
  * not room, and lifted to sit above the chip when there is no room below — the same rules the
  * design's own positioning code applies.
  */
-private object SongBackgroundPanelPosition : PopupPositionProvider {
+internal object SongBackgroundPanelPosition : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,

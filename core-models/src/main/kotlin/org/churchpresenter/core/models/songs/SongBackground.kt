@@ -16,6 +16,9 @@ object SongBackgroundType {
 /** The widest blur the editor offers, in reference pixels. */
 const val SONG_BACKGROUND_MAX_BLUR = 24
 
+/** A fully opaque background — what one is drawn at unless the operator says otherwise. */
+const val SONG_BACKGROUND_FULL_OPACITY = 100
+
 /**
  * A background a single song brings with it, overriding the global Background settings while that
  * song is live.
@@ -39,6 +42,8 @@ data class SongBackground(
     val dim: Int = 0,
     /** Blur radius in reference pixels, 0–[SONG_BACKGROUND_MAX_BLUR]. */
     val blur: Int = 0,
+    /** How opaque the background is drawn, 0–100. 100 is the ordinary case. */
+    val opacity: Int = SONG_BACKGROUND_FULL_OPACITY,
 ) {
     /** True when this song overrides the global background rather than inheriting it. */
     val isCustom: Boolean get() = type in SongBackgroundType.ALL

@@ -86,6 +86,9 @@ import kotlinx.coroutines.withContext
 
 import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
+import org.churchpresenter.settings.QuickBackground
+import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
+import org.churchpresenter.app.churchpresenter.composables.quickBackgroundSlotFor
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
@@ -186,6 +189,8 @@ fun MainDesktop(
     // (Instance Link) — used ONLY at the live-preview render call site below, never for editing/
     // persistence, so the Options dialog still shows this instance's own local background settings.
     livePreviewAppSettings: AppSettings = appSettings,
+    activeQuickBackground: QuickBackground? = null,
+    onQuickBackgroundPicked: (QuickBackground?) -> Unit = {},
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
     verseSequenceLog: VerseSequenceLog? = null,
@@ -868,12 +873,23 @@ fun MainDesktop(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
+                    val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
                     when {
                         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {
                             scheduleViewModel.redo(); true
                         }
                         shortcuts.matches(ShortcutAction.UNDO, keyEvent) -> {
                             scheduleViewModel.undo(); true
+                        }
+                        shortcuts.matches(ShortcutAction.QUICK_BACKGROUND_RESET, keyEvent) -> {
+                            onQuickBackgroundPicked(null); true
+                        }
+                        quickBackgroundSlot != null -> {
+                            appSettings.quickBackgrounds.getOrNull(quickBackgroundSlot - 1)
+                                ?.let(onQuickBackgroundPicked)
+                            // Swallowed whether or not that slot is filled: a tray of three must
+                            // not let Ctrl+4 fall through to whatever else would answer it.
+                            true
                         }
                         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) -> {
                             mediaViewModel?.pause()
@@ -1778,6 +1794,9 @@ fun MainDesktop(
                     mediaViewModel = mediaViewModel,
                     instanceLinkSendClear = instanceLinkSendClear,
                     livePreviewAppSettings = livePreviewAppSettings,
+                    activeQuickBackground = activeQuickBackground,
+                    onQuickBackgroundPicked = onQuickBackgroundPicked,
+                    onSettingsChange = onSettingsChange,
                     appSettings = appSettings,
                     serverUrl = serverUrl,
                     qaDisplayUrl = qaDisplayUrl,
@@ -1862,6 +1881,9 @@ private fun PreviewSidebar(
     instanceLinkSendClear: (() -> Unit)?,
     livePreviewAppSettings: AppSettings,
     appSettings: AppSettings,
+    activeQuickBackground: QuickBackground?,
+    onQuickBackgroundPicked: (QuickBackground?) -> Unit,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     serverUrl: String,
     qaDisplayUrl: String,
     sttManager: STTManager?,
@@ -1910,6 +1932,16 @@ private fun PreviewSidebar(
                 serverUrl = serverUrl,
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
+            )
+            QuickBackgroundTray(
+                backgrounds = appSettings.quickBackgrounds,
+                activeId = activeQuickBackground?.id,
+                expanded = appSettings.quickBackgroundsExpanded,
+                onExpandedChange = { open ->
+                    onSettingsChange { s -> s.copy(quickBackgroundsExpanded = open) }
+                },
+                onPick = onQuickBackgroundPicked,
+                modifier = Modifier.padding(top = 8.dp),
             )
             val rightSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInRightSidebar && it.host.isNotBlank() }
             if (rightSidebarConnections.isNotEmpty()) {
