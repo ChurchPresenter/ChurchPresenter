@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import java.io.ByteArrayOutputStream
+import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -127,9 +128,16 @@ object HeicDecoder {
      *
      * `-frames:v 1` matters: a HEIC can hold a burst or a Live Photo's video track, and without it
      * ffmpeg writes a numbered sequence and leaves [output] empty.
+     *
+     * [executable] defaults to the resolved binary rather than the bare name because a desktop app
+     * does not inherit the shell's `PATH` — see [FfmpegBinary].
      */
-    internal fun ffmpegHeicCommand(input: File, output: File): List<String> = listOf(
-        "ffmpeg", "-y", "-loglevel", "error",
+    internal fun ffmpegHeicCommand(
+        input: File,
+        output: File,
+        executable: String = FfmpegBinary.path,
+    ): List<String> = listOf(
+        executable, "-y", "-loglevel", "error",
         "-i", input.absolutePath,
         "-frames:v", "1",
         output.absolutePath

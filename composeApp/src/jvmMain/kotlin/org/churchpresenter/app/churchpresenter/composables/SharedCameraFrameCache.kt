@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -27,6 +28,7 @@ private const val RESTART_DELAY_MS = 1000L
 private const val DIMENSION_POLL_ATTEMPTS = 50
 private const val DIMENSION_POLL_INTERVAL_MS = 100L
 private const val PROCESS_KILL_TIMEOUT_S = 3L
+private const val IMMEDIATE_EXIT_WINDOW_MS = 2000L
 private const val ALPHA_SHIFT = 24
 private const val RED_SHIFT = 16
 private const val GREEN_SHIFT = 8
@@ -42,14 +44,6 @@ object SharedCameraFrameCache {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
 
-    private class CacheEntry(
-        val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
-        val error: MutableStateFlow<String?> = MutableStateFlow(null),
-        var refCount: Int = 0,
-        var captureJob: Job? = null,
-        var ffmpegProcess: Process? = null
-    )
-
     /** Build a unique key for a camera source. */
     internal fun keyFor(source: SceneSource.CameraSource): String {
         return if (source.isDeckLink && source.deckLinkIndex >= 0) {
@@ -59,9 +53,9 @@ object SharedCameraFrameCache {
         }
     }
 
-    data class CameraFlows(
+    internal data class CameraFlows(
         val frame: StateFlow<ImageBitmap?>,
-        val error: StateFlow<String?>
+        val error: StateFlow<CameraFailure?>
     )
 
     /**
@@ -69,7 +63,7 @@ object SharedCameraFrameCache {
      * First subscriber starts the capture; subsequent subscribers share it.
      */
     @Synchronized
-    fun acquire(source: SceneSource.CameraSource): CameraFlows {
+    internal fun acquire(source: SceneSource.CameraSource): CameraFlows {
         val key = keyFor(source)
         val entry = entries.getOrPut(key) { CacheEntry() }
         entry.refCount++
@@ -163,10 +157,13 @@ object SharedCameraFrameCache {
         if (!opened) {
             System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
             CrashReporter.reportWarning(
-                "DeckLink: Failed to open input on device ${source.deckLinkIndex}",
-                tags = mapOf("subsystem" to "decklink")
+                "DeckLink: Failed to open input on device",
+                tags = mapOf(
+                    "subsystem" to "decklink",
+                    "decklink_index" to source.deckLinkIndex.toString()
+                )
             )
-            entry.error.value = "Cannot open input — device may already be in use for output"
+            entry.error.value = CameraFailure.DECKLINK_INPUT_IN_USE
             return
         }
         entry.error.value = null
@@ -197,47 +194,26 @@ object SharedCameraFrameCache {
     // ── FFmpeg capture ──────────────────────────────────────────────
 
 
-    /**
-     * Reads raw BGRA frames off a running ffmpeg into [entry] until the stream ends. True when at
-     * least one frame arrived, which is what tells a dropped stream apart from a device that never
-     * opened.
-     */
-    private suspend fun streamFrames(process: Process, entry: CacheEntry): Boolean {
+    /** Reads raw BGRA frames off an already-draining ffmpeg into [entry] until the stream ends. */
+    private suspend fun streamFrames(process: Process, entry: CacheEntry, drain: StderrDrain): FfmpegAttempt {
         entry.ffmpegProcess = process
 
-        // Drain stderr and extract video dimensions from ffmpeg output
-        val stderrLines = mutableListOf<String>()
-        val videoDims = java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>(null)
-        val stderrJob = CoroutineScope(currentCoroutineContext()).launch(Dispatchers.IO) {
-            try {
-                process.errorStream.bufferedReader().useLines { lines ->
-                    lines.forEach { line ->
-                        synchronized(stderrLines) {
-                            stderrLines.add(line)
-                            if (stderrLines.size > STDERR_TAIL_LINES) stderrLines.removeAt(0)
-                        }
-                        if (videoDims.get() == null) {
-                            parseFfmpegVideoDimensions(line)?.let { videoDims.set(it) }
-                        }
-                    }
-                }
-            } catch (_: Throwable) {}
-        }
-
-        val resolved = awaitVideoDimensions(videoDims)
+        val resolved = awaitVideoDimensions(drain.videoDims)
         if (resolved == null) {
             System.err.println("[Camera] Could not determine video dimensions from ffmpeg")
-            stderrJob.cancel()
+            val tail = drain.tail()
+            drain.job.cancel()
             withContext(Dispatchers.IO) { killFfmpegProcess(process) }
             entry.ffmpegProcess = null
-            return false
+            return FfmpegAttempt(framesProduced = false, exitCode = -1, stderrTail = tail)
         }
 
         val (videoW, videoH) = resolved
         val frameCount = readFramesInto(process, entry, videoW, videoH)
 
         // Stream ended — clean up this process
-        stderrJob.cancel()
+        val tail = drain.tail()
+        drain.job.cancel()
         val exitCode = withContext(Dispatchers.IO) {
             try {
                 killFfmpegProcess(process)
@@ -250,22 +226,9 @@ object SharedCameraFrameCache {
             System.err.println("[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting...")
         } else {
             System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
-            synchronized(stderrLines) {
-                stderrLines.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
-            }
+            tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
         }
-        return frameCount > 0
-    }
-
-    /** Waits up to five seconds for ffmpeg to announce the stream's size. */
-    private suspend fun awaitVideoDimensions(
-        videoDims: java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>,
-    ): Pair<Int, Int>? {
-        repeat(DIMENSION_POLL_ATTEMPTS) {
-            videoDims.get()?.let { return it }
-            delay(DIMENSION_POLL_INTERVAL_MS)
-        }
-        return videoDims.get()
+        return FfmpegAttempt(frameCount > 0, exitCode, tail)
     }
 
     /** Frames read into [entry] until the stream stops; the count is the caller's success signal. */
@@ -308,13 +271,47 @@ object SharedCameraFrameCache {
             false
         }
 
+    /**
+     * Runs [command] once, returning what it observed — or `null` when the process never started.
+     *
+     * Its stderr is drained from the first instant, before the two-second window that decides
+     * whether the device opened at all, so an attempt that exits straight back out still carries
+     * the reason it exited.
+     */
+    private suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
+        coroutineScope {
+            val process = withContext(Dispatchers.IO) {
+                try {
+                    ProcessBuilder(command).redirectErrorStream(false).start()
+                } catch (e: Throwable) {
+                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+                    null
+                }
+            } ?: return@coroutineScope null
+
+            val drain = startStderrDrain(process)
+            val exitedImmediately = withContext(Dispatchers.IO) {
+                process.waitFor(IMMEDIATE_EXIT_WINDOW_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            } && process.exitValue() != 0
+
+            if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
+
+            val exitCode = process.exitValue()
+            System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
+            val tail = drain.tail()
+            tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+            drain.job.cancel()
+            withContext(Dispatchers.IO) { killFfmpegProcess(process) }
+            FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail)
+        }
+
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
         val path = source.devicePath
         System.err.println(
             "[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
         )
 
-        val command = buildFfmpegCommand(source) ?: run {
+        if (buildFfmpegCommand(source) == null) {
             System.err.println("[Camera] Unknown device path scheme: $path")
             return
         }
@@ -329,63 +326,194 @@ object SharedCameraFrameCache {
             return
         }
 
-        var consecutiveFailures = 0
-        var everStarted = false
-        var sawImmediateExit = false
-        while (currentCoroutineContext().isActive && consecutiveFailures < MAX_CONSECUTIVE_FAILURES) {
-            // Kill any lingering process and wait for the OS to release the device
-            val old = entry.ffmpegProcess
-            if (old != null) {
-                withContext(Dispatchers.IO) { killFfmpegProcess(old) }
-                entry.ffmpegProcess = null
-                delay(DEVICE_RELEASE_DELAY_MS)
-            }
+        val loop = CaptureLoop(source, entry)
+        loop.run()
+        loop.reportIfGaveUp()
+    }
 
-            System.err.println(
-                "[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}"
-            )
-            val process = withContext(Dispatchers.IO) {
-                try {
-                    ProcessBuilder(command).redirectErrorStream(false).start()
-                } catch (e: Throwable) {
-                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
-                    null
+    /**
+     * One device's retry loop, and what it learned on the way.
+     *
+     * This is a class rather than a long function because the give-up report needs everything the
+     * attempts saw — the last failure, the last command, the last stderr — and threading six
+     * accumulating locals out of a `while` is what makes such a loop unreadable.
+     */
+    private class CaptureLoop(
+        private val source: SceneSource.CameraSource,
+        private val entry: CacheEntry,
+    ) {
+        private var consecutiveFailures = 0
+        private var everStarted = false
+        private var sawImmediateExit = false
+        private var stoppedEarly = false
+
+        private var override = CaptureOverride.NONE
+        private val tried = mutableSetOf(CaptureOverride.NONE)
+        private var knownFormats: List<CameraFormat>? = null
+
+        private var lastFailure = CameraFailure.UNKNOWN
+        private var lastCommand: List<String> = emptyList()
+        private var lastStderr: List<String> = emptyList()
+        private var lastExitCode = -1
+
+        suspend fun run() {
+            while (currentCoroutineContext().isActive && !stoppedEarly &&
+                consecutiveFailures < MAX_CONSECUTIVE_FAILURES
+            ) {
+                releaseLingeringProcess(entry)
+                val command = buildFfmpegCommand(source, override) ?: return
+                lastCommand = command
+                System.err.println(
+                    "[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}"
+                )
+
+                val attempt = attemptCapture(command, entry)
+                if (attempt != null) everStarted = true
+                if (attempt != null && attempt.exitCode > 0 && !attempt.framesProduced) sawImmediateExit = true
+
+                if (attempt?.framesProduced == true) {
+                    entry.error.value = null
+                    consecutiveFailures = 0
+                    delay(RESTART_DELAY_MS)
+                } else {
+                    consecutiveFailures++
+                    recordFailure(attempt)
+                    if (!stoppedEarly) delay(RETRY_DELAY_MS)
                 }
-            }
-            // Check whether ffmpeg managed to open the device
-            val exitedImmediately = process != null && withContext(Dispatchers.IO) {
-                process.waitFor(2000, java.util.concurrent.TimeUnit.MILLISECONDS)
-            } && process.exitValue() != 0
-            if (process != null) everStarted = true
-            if (exitedImmediately) {
-                sawImmediateExit = true
-                System.err.println("[Camera] ffmpeg exited immediately with code ${process.exitValue()}")
-                withContext(Dispatchers.IO) { killFfmpegProcess(process) }
-            }
-            val framesProduced =
-                if (process != null && !exitedImmediately) streamFrames(process, entry) else false
-            if (framesProduced) {
-                consecutiveFailures = 0
-                delay(RESTART_DELAY_MS)
-            } else {
-                consecutiveFailures++
-                delay(RETRY_DELAY_MS)
             }
         }
 
-        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+        /** Classifies a failed attempt, shows it to the operator, and picks what to try next. */
+        private suspend fun recordFailure(attempt: FfmpegAttempt?) {
+            lastStderr = attempt?.stderrTail.orEmpty()
+            lastExitCode = attempt?.exitCode ?: -1
+            lastFailure = when {
+                attempt == null -> CameraFailure.UNKNOWN
+                lastStderr.isEmpty() -> CameraFailure.NO_FRAMES
+                else -> classifyCameraFfmpegStderr(lastStderr)
+                    .takeIf { it != CameraFailure.UNKNOWN } ?: CameraFailure.NO_FRAMES
+            }
+            entry.error.value = lastFailure
+
+            // A privacy refusal is the operator's to resolve in System Settings; four more attempts
+            // over eight seconds change nothing and only delay telling them so.
+            if (lastFailure == CameraFailure.PERMISSION_DENIED) {
+                stoppedEarly = true
+                return
+            }
+
+            val formats = knownFormats ?: withContext(Dispatchers.IO) {
+                listCameraFormats(source.devicePath, source.deviceName)
+            }.also { knownFormats = it }
+
+            nextCaptureOverride(lastFailure, lastStderr, formats, tried)?.let {
+                System.err.println("[Camera] Device refused the defaults; retrying with $it")
+                override = it
+                tried += it
+            }
+        }
+
+        fun reportIfGaveUp() {
+            if (consecutiveFailures < MAX_CONSECUTIVE_FAILURES && !stoppedEarly) return
             val reason = cameraGiveUpReason(everStarted, sawImmediateExit)
-            System.err.println("[Camera] Giving up after $consecutiveFailures consecutive failures ($reason)")
+            System.err.println("[Camera] Giving up after $consecutiveFailures failures ($reason/$lastFailure)")
             CrashReporter.reportWarning(
-                "Camera: Giving up on device after $consecutiveFailures consecutive ffmpeg failures",
+                "Camera: Giving up on device after repeated ffmpeg failures",
                 tags = mapOf(
                     "subsystem" to "camera",
                     "give_up_reason" to reason,
-                    "device_scheme" to deviceScheme(path)
+                    "device_scheme" to deviceScheme(source.devicePath),
+                    "failure_cause" to lastFailure.name.lowercase(),
+                    "attempts" to consecutiveFailures.toString()
+                ),
+                extras = mapOf(
+                    "ffmpeg_stderr_tail" to redactedFfmpegStderr(lastStderr, source.deviceName),
+                    "ffmpeg_command" to redactedFfmpegCommand(lastCommand),
+                    "exit_code" to lastExitCode.toString()
                 )
             )
         }
     }
+}
+
+/** One camera's shared state: the frames on screen, why they stopped, and who is still watching. */
+private class CacheEntry(
+    val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
+    val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
+    var refCount: Int = 0,
+    var captureJob: Job? = null,
+    var ffmpegProcess: Process? = null
+)
+
+/**
+ * What one attempt at opening the device observed.
+ *
+ * [framesProduced] is what tells a dropped stream apart from a device that never opened, and
+ * [stderrTail] is why it never opened — ffmpeg says so itself, in the output this used to print to
+ * `System.err` and discard. A packaged `.app` has no stderr to print to, which is how 43 Sentry
+ * warnings arrived carrying nothing but the fact of the failure.
+ */
+private class FfmpegAttempt(
+    val framesProduced: Boolean,
+    val exitCode: Int,
+    val stderrTail: List<String>,
+)
+
+/** ffmpeg's stderr as it arrives: the retained tail, and the first frame size announced in it. */
+private class StderrDrain(
+    val job: Job,
+    private val lines: MutableList<String>,
+    val videoDims: java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>,
+) {
+    fun tail(): List<String> = synchronized(lines) { lines.toList() }
+}
+
+/**
+ * Starts draining [process]'s stderr immediately, keeping the last [STDERR_TAIL_LINES] lines.
+ *
+ * This must run from the moment the process starts rather than only once frames are expected. A
+ * process nobody is reading fills its stderr pipe and then blocks forever, and — the reason this
+ * was moved — the attempts that exit straight back out are exactly the ones whose stderr names the
+ * cause, so the old code threw away its own diagnosis on the one path that had one.
+ */
+private fun CoroutineScope.startStderrDrain(process: Process): StderrDrain {
+    val lines = mutableListOf<String>()
+    val videoDims = java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>(null)
+    val job = launch(Dispatchers.IO) {
+        try {
+            process.errorStream.bufferedReader().useLines { stream ->
+                stream.forEach { line ->
+                    synchronized(lines) {
+                        lines.add(line)
+                        if (lines.size > STDERR_TAIL_LINES) lines.removeAt(0)
+                    }
+                    if (videoDims.get() == null) {
+                        parseFfmpegVideoDimensions(line)?.let { videoDims.set(it) }
+                    }
+                }
+            }
+        } catch (_: Throwable) {}
+    }
+    return StderrDrain(job, lines, videoDims)
+}
+
+/** Waits up to five seconds for ffmpeg to announce the stream's size. */
+private suspend fun awaitVideoDimensions(
+    videoDims: java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>,
+): Pair<Int, Int>? {
+    repeat(DIMENSION_POLL_ATTEMPTS) {
+        videoDims.get()?.let { return it }
+        delay(DIMENSION_POLL_INTERVAL_MS)
+    }
+    return videoDims.get()
+}
+
+/** Kills whatever is left of the previous attempt and lets the OS hand the device back. */
+private suspend fun releaseLingeringProcess(entry: CacheEntry) {
+    val old = entry.ffmpegProcess ?: return
+    withContext(Dispatchers.IO) { killFfmpegProcess(old) }
+    entry.ffmpegProcess = null
+    delay(DEVICE_RELEASE_DELAY_MS)
 }
 
 /**
@@ -418,15 +546,42 @@ internal fun deviceScheme(devicePath: String): String =
     devicePath.substringBefore("://", missingDelimiterValue = "").ifEmpty { "unknown" }
 
 /**
+ * Merges [override] into the `-video_size`/`-framerate` args [requested] by the chosen format.
+ *
+ * `-framerate` is replaced rather than appended: ffmpeg takes the last occurrence of an input
+ * option, but two of them in one argv is a command nobody can read in a bug report. `-pixel_format`
+ * has no counterpart in the requested args, so it is simply added.
+ */
+internal fun applyCaptureOverride(requested: List<String>, override: CaptureOverride): List<String> {
+    val withoutFramerate = if (override.framerate == null) requested else buildList {
+        var i = 0
+        while (i < requested.size) {
+            if (requested[i] == "-framerate") i += 2 else add(requested[i++])
+        }
+    }
+    return withoutFramerate +
+        (override.framerate?.let { listOf("-framerate", it) } ?: emptyList()) +
+        (override.pixelFormat?.let { listOf("-pixel_format", it) } ?: emptyList())
+}
+
+/**
  * Builds the ffmpeg command line for capturing [source]'s device as raw BGRA video, or `null` when
  * [SceneSource.CameraSource.devicePath] doesn't match a recognized OS capture scheme
  * (`dshow://`, `v4l2://`, `avfoundation://`).
+ *
+ * [override] carries the input flags a previous attempt learned the device actually wants, and
+ * wins over what [SceneSource.CameraSource.videoFormat] asked for: the device rejecting a frame
+ * rate is better evidence than the format list that suggested it. [CaptureOverride.NONE] — the
+ * default, and every attempt before a device has complained — leaves the argv exactly as it was.
  */
-internal fun buildFfmpegCommand(source: SceneSource.CameraSource): List<String>? {
+internal fun buildFfmpegCommand(
+    source: SceneSource.CameraSource,
+    override: CaptureOverride = CaptureOverride.NONE,
+): List<String>? {
     val path = source.devicePath
 
     // Parse video format into ffmpeg input args (must come before -i)
-    val formatArgs = if (source.videoFormat.isNotEmpty()) {
+    val requested = if (source.videoFormat.isNotEmpty()) {
         val match = Regex("""(\d+)x(\d+)@(\d+)""").find(source.videoFormat)
         if (match != null) {
             val (w, h, fps) = match.destructured
@@ -434,22 +589,24 @@ internal fun buildFfmpegCommand(source: SceneSource.CameraSource): List<String>?
         } else emptyList()
     } else emptyList()
 
+    val formatArgs = applyCaptureOverride(requested, override)
+
     return when {
         path.startsWith("dshow://") -> {
             val deviceName = path.removePrefix("dshow://").removePrefix(":dshow-vdev=")
-            listOf("ffmpeg", "-f", "dshow") + formatArgs + listOf("-i", "video=$deviceName",
+            listOf(FfmpegBinary.path, "-f", "dshow") + formatArgs + listOf("-i", "video=$deviceName",
                 "-an", "-vf", "fps=30", "-pix_fmt", "bgra",
                 "-f", "rawvideo", "-")
         }
         path.startsWith("v4l2://") -> {
             val device = path.removePrefix("v4l2://")
-            listOf("ffmpeg", "-f", "v4l2") + formatArgs + listOf("-i", device,
+            listOf(FfmpegBinary.path, "-f", "v4l2") + formatArgs + listOf("-i", device,
                 "-an", "-vf", "fps=30", "-pix_fmt", "bgra",
                 "-f", "rawvideo", "-")
         }
         path.startsWith("avfoundation://") -> {
             val index = path.removePrefix("avfoundation://")
-            listOf("ffmpeg", "-f", "avfoundation") + formatArgs + listOf("-i", "$index:none",
+            listOf(FfmpegBinary.path, "-f", "avfoundation") + formatArgs + listOf("-i", "$index:none",
                 "-an", "-vf", "fps=30", "-pix_fmt", "bgra",
                 "-f", "rawvideo", "-")
         }

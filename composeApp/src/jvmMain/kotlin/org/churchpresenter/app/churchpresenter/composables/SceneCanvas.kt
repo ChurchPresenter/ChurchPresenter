@@ -267,7 +267,8 @@ fun SceneCanvas(
             ) {
                 SceneSourceRenderer(
                     source = source,
-                    fontScale = fontScale
+                    fontScale = fontScale,
+                    showDiagnostics = isInteractive
                 )
             }
 
