@@ -158,7 +158,6 @@ class AppPreviewOutputScreenshotTest {
             LowerThirdPresenter(
                 composition = null,
                 progress = { LOWER_THIRD_PROGRESS },
-                appSettings = appSettings,
                 frame = frame,
             )
         }

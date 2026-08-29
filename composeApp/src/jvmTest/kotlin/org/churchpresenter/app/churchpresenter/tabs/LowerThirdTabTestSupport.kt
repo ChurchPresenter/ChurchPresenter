@@ -185,6 +185,7 @@ internal fun lowerThirdTab(
                     }
                 }
             }
+            awaitPresetScan()
             block(reports)
         }
     } finally {
@@ -192,10 +193,30 @@ internal fun lowerThirdTab(
     }
 }
 
+/**
+ * Waits for the tab's folder read to land before a test asserts on the list.
+ *
+ * The listing runs on `Dispatchers.IO` — deciding whether a `.json` is a Lottie means reading the
+ * whole of it, so it cannot happen in composition. That work is off the test clock, so `waitForIdle`
+ * does not cover it: without this, every test that names a preset raced a list that was still empty,
+ * and the tab's own "Scanning folder…" caption is the positive signal that it is no longer reading.
+ */
+internal fun ComposeUiTest.awaitPresetScan() {
+    waitUntil("the preset folder scan finished") {
+        onAllNodesWithText(LowerThirdLabel.SCANNING, substring = true)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+    }
+}
+
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────
 
 internal object LowerThirdLabel {
-    const val NO_PRESETS = "No presets saved yet"
+    // Three messages where there used to be one. "No presets saved yet" covered a folder that was
+    // never chosen, one still being read and one with nothing in it — three different things to be
+    // told, and an operator with a mistyped path was looking for files that were never coming.
+    const val NO_FOLDER = "No directory selected"
+    const val NO_FILES = "No JSON files found"
+    const val SCANNING = "Scanning folder…"
     const val SELECT_PRESET = "Select a preset to preview"
     const val GO_LIVE = "Go Live"
     const val ADD_TO_SCHEDULE = "Add to Schedule"

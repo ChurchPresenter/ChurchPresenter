@@ -95,9 +95,7 @@ class SettingsSerializationTest {
     }
 
     @Test
-    fun `lower-third and bookmark settings round-trip`() {
-        assertRoundTrips(LottiePreset())
-        assertRoundTrips(LottieSearchReplacePair())
+    fun `bookmark and story settings round-trip`() {
         assertRoundTrips(WebBookmark())
         assertRoundTrips(StoryPromptState())
     }
@@ -114,8 +112,6 @@ class SettingsSerializationTest {
         assertNotEquals(CompanionSatelliteSettings(), CompanionSatelliteSettings().copy(name = "changed"))
         assertNotEquals(DictionarySettings(), DictionarySettings().copy(wordColor = "#123456"))
         assertNotEquals(InstanceLinkSettings(), InstanceLinkSettings().copy(enabled = true))
-        assertNotEquals(LottiePreset(), LottiePreset().copy(id = "fixed-xyz"))
-        assertNotEquals(LottieSearchReplacePair(), LottieSearchReplacePair().copy(search = "changed"))
         assertNotEquals(OBSSettings(), OBSSettings().copy(enabled = true))
         assertNotEquals(PictureSettings(), PictureSettings().copy(storageDirectory = "changed"))
         assertNotEquals(PlanningCenterSettings(), PlanningCenterSettings().copy(accessToken = "changed"))
@@ -174,8 +170,6 @@ class SettingsSerializationTest {
         assertDecodesFromEmptyObject<StageMonitorZoneStyle>()
         assertDecodesFromEmptyObject<WindowLayoutSettings>()
         assertDecodesFromEmptyObject<StockPhotoSettings>()
-        assertDecodesFromEmptyObject<LottiePreset>()
-        assertDecodesFromEmptyObject<LottieSearchReplacePair>()
         assertDecodesFromEmptyObject<WebBookmark>()
         assertDecodesFromEmptyObject<StoryPromptState>()
     }
@@ -240,7 +234,7 @@ class SettingsSerializationTest {
         val all = listOf<Any>(
             AnnouncementsSettings(), AppSettings(), AtemSettings(), BackgroundConfig(), BackgroundSettings(),
             BibleEngineSettings(), BibleSettings(), CompanionSatelliteSettings(), DictionarySettings(),
-            InstanceLinkSettings(), LottiePreset(), LottieSearchReplacePair(), OBSSettings(), PictureSettings(),
+            InstanceLinkSettings(), OBSSettings(), PictureSettings(),
             PlanningCenterSettings(), PresentationRemoteSettings(), PresentationSettings(), ProjectionSettings(),
             QASettings(), ScreenAssignment(), ServerSettings(), SongSettings(), StageMonitorSettings(),
             StageMonitorZoneStyle(), StockPhotoSettings(), StreamingSettings(), STTSettings(), WebBookmark(),
@@ -324,7 +318,6 @@ class SettingsSerializationTest {
         assertEqualsAccountsForEveryPrimitiveField(StageMonitorZoneStyle())
         assertEqualsAccountsForEveryPrimitiveField(WindowLayoutSettings())
         assertEqualsAccountsForEveryPrimitiveField(StockPhotoSettings())
-        assertEqualsAccountsForEveryPrimitiveField(LottieSearchReplacePair())
         assertEqualsAccountsForEveryPrimitiveField(WebBookmark())
         assertEqualsAccountsForEveryPrimitiveField(AppSettings())
     }

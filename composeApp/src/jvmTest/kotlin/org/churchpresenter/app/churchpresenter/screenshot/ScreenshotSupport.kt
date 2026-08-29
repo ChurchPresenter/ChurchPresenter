@@ -189,12 +189,19 @@ internal fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
  * this function, and a new suite gets the behaviour without knowing to ask for it.
  */
 private fun ComposeUiTest.dismissHover() {
-    val roots = onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).size
-    repeat(roots) { index ->
+    fun rootCount() = onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).size
+    var index = 0
+    // Re-counted every time round rather than once at the top: leaving a root can *close* it -- a
+    // menu that dismisses on exit takes its own compose root with it -- and a count taken before the
+    // first move then indexes past the end. That failed as "Can't retrieve node at index 2, there
+    // are 2 nodes only" from inside a capture, which reads like a fault in the tab being shot rather
+    // than in the helper shooting it.
+    while (index < rootCount()) {
         // Moved out of bounds rather than `exit()`, which throws when nothing is hovering: the
         // dispatcher exits hover by itself on a move that leaves the root, and does nothing when
         // the pointer was never in it. So this is a no-op for the states nobody clicked.
         onAllNodes(isRoot())[index].performMouseInput { moveTo(OFF_SCREEN) }
+        index++
     }
     waitForIdle()
 }

@@ -175,7 +175,15 @@ class BibleSettingsTabTest {
 
     @Test
     fun `the four margin fields render`() = runComposeUiTest {
-        showBibleTab(BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44))
+        showBibleTab(
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            ),
+        )
 
         listOf("11", "22", "33", "44").forEach { value ->
             onAllNodesWithText(value).onFirst().assertExists("the margin field showing $value must render")
@@ -407,9 +415,16 @@ class BibleSettingsTabTest {
 
     @Test
     fun `the top margin field writes the top margin`() = runComposeUiTest {
-        // Distinct starting values so every field is findable by what it is showing.
+        // Distinct starting values so every field is findable by what it is showing -- the band
+        // height included, since it shares the rail with these and defaults to 33.
         val harness = showBibleTab(
-            BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44)
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            )
         )
 
         onNodeWithText("11").performScrollTo().performTextReplacement("60")
@@ -422,9 +437,16 @@ class BibleSettingsTabTest {
 
     @Test
     fun `the left margin field writes the left margin`() = runComposeUiTest {
-        // Distinct starting values so every field is findable by what it is showing.
+        // Distinct starting values so every field is findable by what it is showing -- the band
+        // height included, since it shares the rail with these and defaults to 33.
         val harness = showBibleTab(
-            BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44)
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            )
         )
 
         onNodeWithText("22").performScrollTo().performTextReplacement("70")
@@ -437,9 +459,16 @@ class BibleSettingsTabTest {
 
     @Test
     fun `the right margin field writes the right margin`() = runComposeUiTest {
-        // Distinct starting values so every field is findable by what it is showing.
+        // Distinct starting values so every field is findable by what it is showing -- the band
+        // height included, since it shares the rail with these and defaults to 33.
         val harness = showBibleTab(
-            BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44)
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            )
         )
 
         onNodeWithText("33").performScrollTo().performTextReplacement("80")
@@ -452,9 +481,16 @@ class BibleSettingsTabTest {
 
     @Test
     fun `the bottom margin field writes the bottom margin`() = runComposeUiTest {
-        // Distinct starting values so every field is findable by what it is showing.
+        // Distinct starting values so every field is findable by what it is showing -- the band
+        // height included, since it shares the rail with these and defaults to 33.
         val harness = showBibleTab(
-            BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44)
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            )
         )
 
         onNodeWithText("44").performScrollTo().performTextReplacement("90")
@@ -467,7 +503,15 @@ class BibleSettingsTabTest {
 
     @Test
     fun `a margin beyond the allowed range is not stored`() = runComposeUiTest {
-        val harness = showBibleTab(BibleSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44))
+        val harness = showBibleTab(
+            BibleSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            ),
+        )
 
         onNodeWithText("11").performScrollTo().performTextReplacement("900")
         waitForIdle()

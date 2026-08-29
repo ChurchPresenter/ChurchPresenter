@@ -46,8 +46,15 @@ import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.right
+import churchpresenter.composeapp.generated.resources.number_before_title
+import churchpresenter.composeapp.generated.resources.show_title
+import churchpresenter.composeapp.generated.resources.show_number
+import churchpresenter.composeapp.generated.resources.every_page
+import churchpresenter.composeapp.generated.resources.first_page
+import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
 import churchpresenter.composeapp.generated.resources.song_chunk
+import churchpresenter.composeapp.generated.resources.song_preview_chords
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead
@@ -81,6 +88,8 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutt
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
@@ -122,12 +131,13 @@ private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
 fun SongSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    @Suppress("UNUSED_PARAMETER") presenterManager: PresenterManager? = null,
+    presenterManager: PresenterManager? = null,
 ) {
     val availableFonts = rememberSystemFonts()
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
     var showLookAhead by remember { mutableStateOf(false) }
+    var showChords by remember { mutableStateOf(false) }
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
@@ -148,6 +158,14 @@ fun SongSettingsTab(
                     SongTitleSlideSection(settings, onSettingsChange)
                     SongLyricsLayoutSection(settings, onSettingsChange)
                     SongTransitionSection(settings, onSettingsChange)
+                    LowerThirdHeightSection(
+                        percent = settings.songSettings.lowerThirdHeightPercent,
+                        onPercentChange = { percent ->
+                            onSettingsChange { s ->
+                                s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent))
+                            }
+                        },
+                    )
                     SongMarginsSection(settings, onSettingsChange)
                 }
                 SettingsScrollbar(scrollState)
@@ -161,7 +179,10 @@ fun SongSettingsTab(
                 onElementChange = { element = it },
                 showLookAhead = showLookAhead,
                 onShowLookAheadChange = { showLookAhead = it },
+                showChords = showChords,
+                onShowChordsChange = { showChords = it },
                 availableFonts = availableFonts,
+                presenterManager = presenterManager,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }
@@ -418,16 +439,44 @@ private fun SongStylePane(
     onElementChange: (SongStyleElement) -> Unit,
     showLookAhead: Boolean,
     onShowLookAheadChange: (Boolean) -> Unit,
+    showChords: Boolean,
+    onShowChordsChange: (Boolean) -> Unit,
     availableFonts: List<String>,
+    presenterManager: PresenterManager?,
     modifier: Modifier = Modifier,
 ) {
+    var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
+    var previewOnScreen by remember { mutableStateOf(false) }
+    val sampleSections = songSampleSections(sampleSlot)
+    // The look-ahead and next-section elements only appear on a look-ahead slide, so selecting one
+    // turns the preview's look-ahead on whatever the checkbox says. Editing a control whose effect
+    // is not on screen is the thing this tab exists to stop.
+    val previewLookAhead = showLookAhead ||
+        element == SongStyleElement.LOOK_AHEAD ||
+        element == SongStyleElement.NEXT_SECTION
+    // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
+    // one to whichever the tab is styling for its duration, so a hall with a single full-screen
+    // projector can still be shown what its lower third would look like.
+    val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    OnScreenPreviewEffect(
+        active = previewOnScreen,
+        settings = settings,
+        presenterManager = presenterManager,
+        outputs = PreviewOutputState(
+            lowerThird = target.isLowerThird,
+            songLookAhead = previewLookAhead,
+            showChords = showChords,
+        ),
+        contentKey = sampleSections,
+    ) { manager ->
+        manager.setAllLyricSections(sampleSections)
+        manager.setSongDisplaySectionIndex(0)
+        manager.setSongDisplayLineIndex(-1)
+        manager.setLyricSection(sampleSections.first())
+        manager.setDisplayedLyricSection(sampleSections.first())
+        manager.setPresentingMode(Presenting.LYRICS)
+    }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // The look-ahead and next-section elements only appear on a look-ahead slide, so selecting
-        // one turns the preview's look-ahead on whatever the checkbox says. Editing a control whose
-        // effect is not on screen is the thing this tab exists to stop.
-        val previewLookAhead = showLookAhead ||
-            element == SongStyleElement.LOOK_AHEAD ||
-            element == SongStyleElement.NEXT_SECTION
         SongTargetSwitchRow(
             settings = settings,
             target = target,
@@ -435,17 +484,31 @@ private fun SongStylePane(
             showLookAhead = previewLookAhead,
             onShowLookAheadChange = onShowLookAheadChange,
             lookAheadForced = previewLookAhead && !showLookAhead,
+            showChords = showChords,
+            onShowChordsChange = onShowChordsChange,
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             SongPreviewPanel(
                 settings = settings,
                 target = target,
                 showLookAhead = previewLookAhead,
+                showChords = showChords,
+                sections = sampleSections,
                 modifier = Modifier.width(
-                    minOf(maxWidth, SONG_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio),
+                    minOf(
+                        maxWidth,
+                        SETTINGS_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio,
+                    ),
                 ),
             )
         }
+        SettingsPreviewSampleRow(
+            slot = sampleSlot,
+            onSlotChange = { sampleSlot = it },
+            onScreen = previewOnScreen,
+            onScreenChange = { previewOnScreen = it },
+            onScreenEnabled = presenterManager != null && hasOutputForTarget,
+        )
         val style = settings.songSettings.elementStyle(element, target)
         SettingsSection(title = stringResource(Res.string.bible_editing)) {
             SongElementRow(
@@ -495,6 +558,8 @@ private fun SongTargetSwitchRow(
     onShowLookAheadChange: (Boolean) -> Unit,
     /** On because the selected element needs it, so the box is shown ticked and left alone. */
     lookAheadForced: Boolean,
+    showChords: Boolean,
+    onShowChordsChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -524,6 +589,17 @@ private fun SongTargetSwitchRow(
             onCheckedChange = onShowLookAheadChange,
             enabled = !lookAheadForced,
             label = stringResource(Res.string.song_preview_look_ahead),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        // Also for the picture only. An output draws a chorded song as a chart when its own
+        // `showChords` says so (`ScreenAssignment.showChords`), which is a property of the screen
+        // rather than of this styling -- but the chords take the lyrics' font, size and margins, so
+        // whether a chart still fits is a question about the settings on this tab, and until now
+        // there was no way to ask it.
+        LabeledCheckbox(
+            checked = showChords,
+            onCheckedChange = onShowChordsChange,
+            label = stringResource(Res.string.song_preview_chords),
             style = MaterialTheme.typography.bodySmall,
         )
         Spacer(Modifier.weight(1f))
@@ -617,6 +693,72 @@ private fun SongElementRow(
             buttonHeight = 30.dp,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
         )
+    }
+    SongAppearanceRow(settings, onSettingsChange, element, target)
+}
+
+/**
+ * When the number or the title appears on [target]'s output, and which of the two leads.
+ *
+ * Absent for the other three elements: the lyrics *are* the slide, and the look-ahead lines follow
+ * whether the output has a look-ahead at all -- so there is nothing here for them to answer, and a
+ * control that writes nowhere is worse than no control.
+ *
+ * This is the pair of settings the tab's rewrite dropped. The columns that used to hold them were
+ * left in the tree unreferenced, so the song number kept appearing on the lower third with nothing
+ * anywhere in settings to turn it off.
+ */
+@Composable
+private fun SongAppearanceRow(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+) {
+    val show = settings.songSettings.showFor(element, target) ?: return
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = stringResource(
+                if (element == SongStyleElement.NUMBER) Res.string.show_number else Res.string.show_title,
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SegmentedButton(
+            items = listOf(
+                SegmentedButtonItem(Constants.NONE, stringResource(Res.string.none)),
+                SegmentedButtonItem(Constants.FIRST_PAGE, stringResource(Res.string.first_page)),
+                SegmentedButtonItem(Constants.EVERY_PAGE, stringResource(Res.string.every_page)),
+            ),
+            selectedValue = show,
+            onValueChange = { value ->
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.withShow(element, target, value))
+                }
+            },
+            buttonWidth = SCOPE_BUTTON_WIDTH,
+            buttonHeight = 30.dp,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.testTag("song_show_${element.name.lowercase()}"),
+        )
+        // Only where the two share a position, which is the only case in which their order is a
+        // question at all -- elsewhere the slide's own layout already answers it.
+        if (element == SongStyleElement.NUMBER && settings.songSettings.numberSharesTitlePosition(target)) {
+            LabeledCheckbox(
+                checked = settings.songSettings.songNumberBeforeTitle,
+                onCheckedChange = { on ->
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = on)) }
+                },
+                label = stringResource(Res.string.number_before_title),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.testTag("song_songNumberBeforeTitle"),
+            )
+        }
+        Spacer(Modifier.weight(1f))
     }
 }
 

@@ -11,7 +11,6 @@ data class ProjectionSettings(
     val screenAssignments: List<ScreenAssignment> = listOf(ScreenAssignment()),
     val audioOutputDeviceId: String = "", // empty = system default
     val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
-    val lowerThirdHeightPercent: Int = 33, // 10-60, used by Bible & Song presenters
     // Browser Source outputs are virtual (no physical display/DeckLink device), so unlike
     // screenAssignments they are not auto-synced to detected hardware — added/removed freely.
     val browserSourceOutputs: List<ScreenAssignment> = emptyList(),

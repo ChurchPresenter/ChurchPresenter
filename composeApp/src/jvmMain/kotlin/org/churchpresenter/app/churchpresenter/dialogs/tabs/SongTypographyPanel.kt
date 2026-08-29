@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +47,7 @@ import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRowHeight
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.settings.utils.Constants
@@ -158,8 +160,12 @@ internal fun SongTypographyPanel(
             verticalAlignment = Alignment.Bottom,
         ) {
             SongTransformControl(style, onStyleChange)
-            SongShadowControl(style, onStyleChange)
-            Spacer(Modifier.weight(1f))
+            // Weighted, and the Reset button unweighted beside it: ShadowDetailRow fills the width
+            // it is given, and given the row's own constraints it took all of it -- Compose measures
+            // unweighted children against the full width first -- which squeezed the Reset button to
+            // zero the moment the shadow checkbox was ticked. The Bible panel already bounds its
+            // copy this way; a Spacer cannot substitute, because the greedy child is measured first.
+            SongShadowControl(style, onStyleChange, Modifier.weight(1f))
             TextButton(
                 onClick = onReset,
                 shape = RoundedCornerShape(6.dp),
@@ -324,9 +330,14 @@ private fun SongShadowControl(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.widthIn(min = SHADOW_ROW_MIN_WIDTH),
+        // The detail controls fold out beside the checkbox rather than under it, so the row is held
+        // at their height whether they are showing or not -- see [ShadowDetailRowHeight].
+        modifier = modifier.widthIn(min = SHADOW_ROW_MIN_WIDTH).heightIn(min = ShadowDetailRowHeight),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        // Bottom, not centre. The controls this row sits beside are bottom-aligned, and the row is
+        // held taller than the checkbox by the reservation above -- so centring it left the box
+        // floating nine pixels above the buttons next to it whenever the details were folded away.
+        verticalAlignment = Alignment.Bottom,
     ) {
         LabeledCheckbox(
             checked = style.shadow,
