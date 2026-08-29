@@ -83,6 +83,13 @@ object BibleInstallSupport {
      * Ktor wraps, so the cause chain is walked — but only as far as [isStall] walks it, for the
      * same reason.
      *
+     * [CancellationException] is here because closing a dialog cancels whatever it started, and
+     * ktor delivers that to the request's own catch as an ordinary [IOException] over a channel
+     * that has been closed underneath it. Every site that re-throws cancellation before its
+     * reporting catch is doing the right thing; this is the backstop for the one that forgets, and
+     * one of them did — a closed Bible download browser filed "eBible catalogue fetch failed"
+     * against a user who had merely changed their mind.
+     *
      * [EOFException] is here for the connection that stops mid-response — ktor CIO raises it as
      * "the server prematurely closed the connection", which reached Sentry from a church on a
      * network that does that to `raw.githubusercontent.com`. It is the same fact as
@@ -92,7 +99,8 @@ object BibleInstallSupport {
      * reaches the install dialog either way.
      */
     internal fun Throwable.isOperatorEnvironment(depth: Int = 0): Boolean =
-        this is UnresolvedAddressException ||
+        this is CancellationException ||
+            this is UnresolvedAddressException ||
             this is ConnectException ||
             this is SocketTimeoutException ||
             this is HttpRequestTimeoutException ||

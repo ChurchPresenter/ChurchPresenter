@@ -121,12 +121,58 @@ class LottieFrameStreamTest {
     }
 
     @Test
-    fun `open returns false for a mostly blank cache but still reports the frame count`() {
+    fun `open returns false for a wholly blank cache but still reports the frame count`() {
         val file = writeCacheFile(2, 2, List(4) { encodeLiteral(solidFrame(2, 2, transparent)) })
         val stream = LottieFrameStream(file, newScope()) {}
 
         assertFalse(runBlocking { stream.open() })
         assertEquals(4, stream.frameCount)
+        assertEquals(stream.blankSampleCount, stream.blankFrameCount)
+    }
+
+    @Test
+    fun `a clip that fades out still opens`() {
+        // The shape the bundled generator writes: visible at the start, transparent for the whole
+        // back half. Under the old majority rule the 50, 75 and 100 percent samples were all blank
+        // and the render was deleted as a failed capture, which is what put 14 warnings and 3
+        // churches on one Sentry issue.
+        val opaque = List(10) { encodeLiteral(solidFrame(2, 2, opaqueRed)) }
+        val faded = List(10) { encodeLiteral(solidFrame(2, 2, transparent)) }
+        val stream = LottieFrameStream(writeCacheFile(2, 2, opaque + faded), newScope()) {}
+
+        assertTrue(runBlocking { stream.open() })
+        assertTrue(stream.blankFrameCount > 0, "the tail should still read as blank")
+        assertTrue(stream.blankFrameCount < stream.blankSampleCount)
+    }
+
+    @Test
+    fun `the samples span the clip and include an early frame`() {
+        val stream = LottieFrameStream(writeCacheFile(1, 1, emptyList()), newScope()) {}
+        val samples = stream.blankSampleIndices(100)
+
+        // An early sample is the whole point: a set drawn only from the second half cannot tell
+        // "nothing rendered" from "the animation ended".
+        assertTrue(samples.first() < 100 / 4, "expected a sample before the first quarter: $samples")
+        assertEquals(99, samples.last())
+        assertEquals(samples.distinct(), samples)
+    }
+
+    @Test
+    fun `a cache whose every frame is corrupt is rejected rather than thrown out of`() {
+        // open() decodes its samples, so a truncated cache used to throw straight out of the
+        // pre-render coroutine instead of answering the question it exists to answer.
+        val file = writeCacheFile(2, 2, List(5) { encodeTruncated(solidFrame(2, 2, opaqueRed)) })
+        val stream = LottieFrameStream(file, newScope()) {}
+
+        assertFalse(runBlocking { stream.open() })
+    }
+
+    @Test
+    fun `a one frame clip samples that frame once`() {
+        val stream = LottieFrameStream(writeCacheFile(1, 1, emptyList()), newScope()) {}
+        assertEquals(listOf(0), stream.blankSampleIndices(1))
+        // A cache with no frames at all must not index out of bounds while deciding it is blank.
+        assertEquals(listOf(0), stream.blankSampleIndices(0))
     }
 
     @Test

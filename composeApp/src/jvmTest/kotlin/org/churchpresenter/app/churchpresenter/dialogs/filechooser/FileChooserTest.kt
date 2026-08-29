@@ -595,8 +595,10 @@ class XdgPortalRequestTest {
 
     @Test
     fun `a missing or blank unique name is refused too`() {
-        assertFailsWith<IllegalStateException> { XdgFileChooser.uniqueNameOf { null } }
-        assertFailsWith<IllegalStateException> { XdgFileChooser.uniqueNameOf { "  " } }
+        // The type is what withNativeDialog recognises, so it is part of the contract: matching on
+        // the message would work in one locale and quietly stop working in the rest.
+        assertFailsWith<PortalUnavailableException> { XdgFileChooser.uniqueNameOf { null } }
+        assertFailsWith<PortalUnavailableException> { XdgFileChooser.uniqueNameOf { "  " } }
     }
 
     // ── The path the portal will answer on ──────────────────────────────────────
@@ -881,6 +883,30 @@ class XdgPortalRequestTest {
             assertEquals("swing", result, "no portal must still leave the operator a dialog")
             assertEquals(true, fellBack)
             assertEquals(true, XdgFileChooser.nativeDialogsBroken, "a desktop with no portal is not asked again")
+        } finally {
+            XdgFileChooser.nativeDialogsBroken = false
+        }
+    }
+
+    @Test
+    fun `a desktop with no portal falls back without reporting it`() = runBlocking {
+        // A Linux desktop with no xdg-desktop-portal running is a configuration, not a defect, and
+        // the operator gets a working Swing chooser either way — but it filed a Sentry warning
+        // saying the app had broken. The latch still has to hold, or every later dialog pays for
+        // the same absent portal again.
+        XdgFileChooser.nativeDialogsBroken = false
+        try {
+            var fellBack = false
+
+            val result = XdgFileChooser.withNativeDialog(
+                context = "test",
+                attempt = { throw PortalUnavailableException() },
+                fallback = { fellBack = true; "swing" },
+            )
+
+            assertEquals("swing", result)
+            assertEquals(true, fellBack)
+            assertEquals(true, XdgFileChooser.nativeDialogsBroken, "the process must only ask once")
         } finally {
             XdgFileChooser.nativeDialogsBroken = false
         }

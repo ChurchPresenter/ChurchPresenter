@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.AfterTest
@@ -204,6 +205,43 @@ class ComposeScenePumpTest {
         assertEquals(1000L / 1, ComposeScenePump(W, H, 0) {}.tickDelayMs)
         assertEquals(1000L / 1, ComposeScenePump(W, H, -5) {}.tickDelayMs)
         assertEquals(1000L / 60, ComposeScenePump(W, H, 240) {}.tickDelayMs)
+    }
+
+    @Test
+    fun `many pumps starting at once all reach a frame`() {
+        // ImageComposeScene's constructor touches Compose state that is global to the JVM, and
+        // there is a pump per Browser Source output and per NDI output, every one of them started
+        // from its own LaunchedEffect on the multi-threaded default dispatcher. Building two at
+        // the same time raced a shared map inside the constructor and threw
+        // ArrayIndexOutOfBoundsException out of its own resizeStorage, killing the app for an
+        // operator with two outputs configured. Construction is serialised now; this is the shape
+        // that used to break, driven wider than any real configuration.
+        val pumps = List(8) { redPump() }
+        val firstFrames = AtomicInteger(0)
+        pumps.forEach { pump -> pump.start(scope) { _, _, _, _ -> firstFrames.incrementAndGet() } }
+
+        waitFor("every pump's first frame") { firstFrames.get() >= pumps.size }
+        pumps.forEach { it.stop() }
+    }
+
+    @Test
+    fun `a pump whose content cannot compose does not take the app down, and can start again`() {
+        val explode = AtomicBoolean(true)
+        val pump = ComposeScenePump(width = W, height = H, fps = 60) {
+            if (explode.get()) error("no scene for you")
+            Box(modifier = Modifier.fillMaxSize().background(Color.Red))
+        }
+
+        pump.start(scope) { _, _, _, _ -> }
+        // The failure clears the job rather than leaving the pump wedged for the rest of the
+        // session, which is what "can start again" below actually proves.
+        waitFor("the failed start to release the pump") { !pump.isRunning }
+
+        explode.set(false)
+        val frames = AtomicInteger(0)
+        pump.start(scope) { _, _, _, _ -> frames.incrementAndGet() }
+        waitFor("a frame from the restarted pump") { frames.get() > 0 }
+        pump.stop()
     }
 
     @Test

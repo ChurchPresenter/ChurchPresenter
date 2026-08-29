@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
@@ -51,7 +54,15 @@ private const val AUDIO_RETRY_DELAY_MS = 5000L
  */
 object CefManager {
     private var cefApp: CefApp? = null
-    var initialized = false
+
+    /**
+     * Whether a usable [CefApp] exists right now.
+     *
+     * Compose-backed rather than a plain `var` because it can go from true to false mid-session:
+     * [createClient] clears it when the native side turns out to be dead, and the tab's
+     * "web engine unavailable" panel is only reached if that write recomposes its reader.
+     */
+    var initialized by mutableStateOf(false)
         private set
 
     /** True when [init] was skipped because the running macOS version is below [MIN_MACOS_MAJOR]. */
@@ -273,7 +284,36 @@ object CefManager {
         }
     }
 
-    fun createClient(): CefClient? = cefApp?.createClient()
+    /**
+     * A client for a new browser, or null when the web engine cannot provide one.
+     *
+     * [CefAppBuilder.build] returning normally is not a promise that the native side came up:
+     * jcefmaven hands back the process-wide singleton, whose startup can fail afterwards and
+     * asynchronously, leaving it in `INITIALIZATION_FAILED`. `CefApp.createClient()` then throws —
+     * and the only caller is [EmbeddedWebView], inside a `remember`, so the throw landed in
+     * composition on the UI thread and took the whole app down.
+     *
+     * Recovering is simply returning null, which every caller already handles by drawing nothing.
+     * [initialized] is cleared with it so the tab falls back to its explanatory panel and nothing
+     * asks a second time. Filed as a warning, not an exception: the condition is recovered, and an
+     * exception here would write a `crash-reports/` file for a session that carries on.
+     */
+    fun createClient(): CefClient? {
+        val app = cefApp ?: return null
+        return try {
+            app.createClient()
+        } catch (t: Throwable) {
+            cefApp = null
+            initialized = false
+            runCatching { CrashReporter.setTag("jcef.blocked", "client_creation_failed") }
+            CrashReporter.reportWarning(
+                "JCEF client creation failed; web features disabled for this session",
+                throwable = t,
+                tags = mapOf("subsystem" to "webview", "jcef.recovered" to "true"),
+            )
+            null
+        }
+    }
 
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown
