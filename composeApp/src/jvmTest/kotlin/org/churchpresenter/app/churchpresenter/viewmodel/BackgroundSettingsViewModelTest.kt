@@ -1,15 +1,16 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundScope
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * [BackgroundSettingsViewModel] is a set of pure settings transforms: each one hands the caller a
- * function that returns an updated [AppSettings]. The property that matters is that every update
- * touches exactly the slot it names and leaves the other four alone — the panes edit all five
- * backgrounds side by side, so a copy-paste error between them silently overwrites the wrong one.
+ * [BackgroundSettingsViewModel] is a pure settings transform: it hands the caller a function that
+ * returns an updated [AppSettings]. The property that matters is that an update touches exactly
+ * the surface it names and leaves the other five alone — the tab writes all six through this one
+ * method, so a wrong scope silently overwrites the wrong surface.
  */
 class BackgroundSettingsViewModelTest {
 
@@ -28,8 +29,10 @@ class BackgroundSettingsViewModelTest {
     private fun config(color: String) = BackgroundConfig(backgroundColor = color)
 
     @Test
-    fun `the default colour is updated`() {
-        val result = apply { onChange -> vm.updateDefaultColor("#123456", onChange) }
+    fun `the default color is updated`() {
+        val result = apply { onChange ->
+            vm.updateBackground(BackgroundScope.DEFAULT, config("#123456"), onChange)
+        }
         assertEquals("#123456", result.backgroundSettings.defaultBackgroundColor)
     }
 
@@ -41,10 +44,18 @@ class BackgroundSettingsViewModelTest {
         val songLower = config("#444444")
 
         var settings = AppSettings()
-        settings = apply(settings) { onChange -> vm.updateBibleBackground(bible, onChange) }
-        settings = apply(settings) { onChange -> vm.updateBibleLowerThirdBackground(bibleLower, onChange) }
-        settings = apply(settings) { onChange -> vm.updateSongBackground(song, onChange) }
-        settings = apply(settings) { onChange -> vm.updateSongLowerThirdBackground(songLower, onChange) }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.BIBLE, bible, onChange)
+        }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.BIBLE_LOWER_THIRD, bibleLower, onChange)
+        }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.SONG, song, onChange)
+        }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.SONG_LOWER_THIRD, songLower, onChange)
+        }
 
         with(settings.backgroundSettings) {
             assertEquals(bible, bibleBackground)
@@ -64,7 +75,9 @@ class BackgroundSettingsViewModelTest {
                 ),
             )
         }
-        val result = apply(start) { onChange -> vm.updateBibleBackground(config("#BIBLE"), onChange) }
+        val result = apply(start) { onChange ->
+            vm.updateBackground(BackgroundScope.BIBLE, config("#BIBLE"), onChange)
+        }
 
         assertEquals("#BIBLE", result.backgroundSettings.bibleBackground.backgroundColor)
         assertEquals("#SONG", result.backgroundSettings.songBackground.backgroundColor)
@@ -74,8 +87,12 @@ class BackgroundSettingsViewModelTest {
     @Test
     fun `full-screen and lower-third slots are distinct for the same content type`() {
         // These two are the easiest pair to confuse — same content, different presentation mode.
-        var settings = apply { onChange -> vm.updateSongBackground(config("#FULL"), onChange) }
-        settings = apply(settings) { onChange -> vm.updateSongLowerThirdBackground(config("#LOWER"), onChange) }
+        var settings = apply { onChange ->
+            vm.updateBackground(BackgroundScope.SONG, config("#FULL"), onChange)
+        }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.SONG_LOWER_THIRD, config("#LOWER"), onChange)
+        }
 
         assertEquals("#FULL", settings.backgroundSettings.songBackground.backgroundColor)
         assertEquals("#LOWER", settings.backgroundSettings.songLowerThirdBackground.backgroundColor)
@@ -84,7 +101,9 @@ class BackgroundSettingsViewModelTest {
     @Test
     fun `updates leave the rest of the settings object alone`() {
         val start = AppSettings(theme = "dark", language = "ru", windowWidth = 1600)
-        val result = apply(start) { onChange -> vm.updateDefaultColor("#000000", onChange) }
+        val result = apply(start) { onChange ->
+            vm.updateBackground(BackgroundScope.DEFAULT, config("#000000"), onChange)
+        }
 
         assertEquals("dark", result.theme)
         assertEquals("ru", result.language)
@@ -93,8 +112,12 @@ class BackgroundSettingsViewModelTest {
 
     @Test
     fun `updates compose so a later one does not undo an earlier one`() {
-        var settings = apply { onChange -> vm.updateDefaultColor("#AAAAAA", onChange) }
-        settings = apply(settings) { onChange -> vm.updateBibleBackground(config("#BBBBBB"), onChange) }
+        var settings = apply { onChange ->
+            vm.updateBackground(BackgroundScope.DEFAULT, config("#AAAAAA"), onChange)
+        }
+        settings = apply(settings) { onChange ->
+            vm.updateBackground(BackgroundScope.BIBLE, config("#BBBBBB"), onChange)
+        }
 
         assertEquals("#AAAAAA", settings.backgroundSettings.defaultBackgroundColor)
         assertEquals("#BBBBBB", settings.backgroundSettings.bibleBackground.backgroundColor)

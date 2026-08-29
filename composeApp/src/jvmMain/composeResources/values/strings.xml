@@ -985,6 +985,24 @@
     <string name="default_background_color_help">Used when 'Default' is selected for Bible or Songs</string>
     <string name="default_lower_third_background">Default Lower Third Background</string>
     <string name="default_lower_third_background_help">Used when 'Default' is selected for Bible or Songs in lower third display mode</string>
+    <!-- Background Settings Tab: the surface rail and the editor beside it -->
+    <string name="background_surfaces">Backgrounds</string>
+    <string name="background_group_defaults">Defaults</string>
+    <string name="background_scope_default">Default</string>
+    <string name="background_scope_default_lower_third">Default Lower Third</string>
+    <string name="background_scope_default_meta">Bible or Songs set to Default</string>
+    <string name="background_scope_default_lower_third_meta">Lower third set to Default</string>
+    <string name="background_scope_title">%1$s · %2$s</string>
+    <string name="background_follows_default">Follows the default</string>
+    <string name="background_following_default">Following Default</string>
+    <string name="background_use_default">Use Default</string>
+    <string name="background_set_explicitly">Set explicitly for this surface</string>
+    <string name="background_copy_look_to">Copy This Look To</string>
+    <string name="background_type_caption">Type</string>
+    <string name="background_color_caption">Color</string>
+    <string name="background_image_file">Image File</string>
+    <string name="background_video_file">Video File</string>
+    <string name="background_opacity_caption">Opacity</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>
@@ -2529,4 +2547,23 @@
     <string name="song_background_color_slate">Slate</string>
     <string name="song_background_video_loop">video loop</string>
     <string name="unit_px">px</string>
+    <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
+    <string name="quick_background_title">Quick backgrounds</string>
+    <string name="quick_background_reset">Back to normal</string>
+    <string name="quick_background_slot_hint">%1$s · %2$s</string>
+    <string name="quick_background_hint">%1$s–%2$s · manage in Settings</string>
+    <string name="quick_backgrounds">Quick backgrounds</string>
+    <string name="quick_backgrounds_help">Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, drag it to change which key reaches it. Picking one during a service overrides every screen until you go back to normal — it changes nothing here.</string>
+    <string name="quick_background_add">Add a background</string>
+    <string name="shortcut_description_quick_background_reset">Quick background: back to normal</string>
+    <string name="shortcut_description_quick_background_1">Quick background 1</string>
+    <string name="shortcut_description_quick_background_2">Quick background 2</string>
+    <string name="shortcut_description_quick_background_3">Quick background 3</string>
+    <string name="shortcut_description_quick_background_4">Quick background 4</string>
+    <string name="shortcut_description_quick_background_5">Quick background 5</string>
+    <string name="shortcut_description_quick_background_6">Quick background 6</string>
+    <string name="shortcut_description_quick_background_7">Quick background 7</string>
+    <string name="shortcut_description_quick_background_8">Quick background 8</string>
+    <string name="shortcut_description_quick_background_9">Quick background 9</string>
+    <string name="shortcut_description_quick_background_10">Quick background 10</string>
 </resources>

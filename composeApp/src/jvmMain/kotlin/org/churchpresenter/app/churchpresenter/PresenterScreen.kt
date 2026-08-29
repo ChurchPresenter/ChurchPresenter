@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -12,10 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
+import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
+import org.churchpresenter.app.churchpresenter.presenter.PERCENT
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -51,6 +57,14 @@ fun PresenterScreen(
     val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
     val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
     val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
+    // The look the two Default cards carry. This layer is what the output shows whenever nothing
+    // is drawing a background of its own — nothing live, or Pictures/Media/Canvas, none of which
+    // resolve a background — so without these the dim and blur an operator set only appeared while
+    // a verse or a lyric happened to be on screen.
+    val bgDim = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundDim
+    else bgSettings.defaultBackgroundDim
+    val bgBlur = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundBlur
+    else bgSettings.defaultBackgroundBlur
     val backgroundColor = if (!showBackground) Color.Black else parseHexColor(bgColorHex)
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {
@@ -63,7 +77,19 @@ fun PresenterScreen(
         } else null
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val isBlurred = showBackground && bgBlur > 0
+        Box(
+            modifier = Modifier.fillMaxSize().then(
+                // Overscanned so the blur's own faded edge falls outside the screen rather than
+                // showing as a light border down each side — the same 8% PresenterBackgroundLayers
+                // uses, so a background looks the same here as it does under a verse.
+                if (isBlurred) Modifier
+                    .graphicsLayer { scaleX = BACKGROUND_BLUR_OVERSCAN; scaleY = BACKGROUND_BLUR_OVERSCAN }
+                    .blur(backgroundBlurRadius(bgBlur, maxWidth))
+                else Modifier
+            )
+        ) {
         // Background layer — black when backgrounds disabled (transparent in Browser Source scenes)
         if (!showBackground) {
             if (!transparentBlanking) {
@@ -106,6 +132,10 @@ fun PresenterScreen(
                     Box(modifier = Modifier.fillMaxSize().background(backgroundColor.copy(alpha = bgOpacity)))
                 }
             }
+        }
+        }
+        if (showBackground && bgDim > 0) {
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = bgDim / PERCENT)))
         }
         // Content layer — apply key modifier if key mode
         if (isKey) {

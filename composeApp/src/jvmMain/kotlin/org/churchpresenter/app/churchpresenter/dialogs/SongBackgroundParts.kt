@@ -24,8 +24,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -63,13 +66,14 @@ internal fun SegmentedRow(content: @Composable RowScope.() -> Unit) {
 }
 
 @Composable
-internal fun Segment(label: String, selected: Boolean, onClick: () -> Unit) {
+internal fun Segment(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .height(24.dp)
+            .alpha(if (enabled) 1f else DISABLED_SEGMENT_ALPHA)
             .clip(RoundedCornerShape(6.dp))
             .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 11.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -83,6 +87,9 @@ internal fun Segment(label: String, selected: Boolean, onClick: () -> Unit) {
         )
     }
 }
+
+/** A segment the machine cannot offer — a video background with no VLC installed, say. */
+private const val DISABLED_SEGMENT_ALPHA = 0.45f
 
 /** A category pill: outlined, tinted when it is the one showing. */
 @Composable
@@ -218,6 +225,12 @@ private fun GlyphBadge(glyph: String) {
  */
 @Composable
 internal fun PanelSlider(label: String, readout: String, value: Int, max: Int, onChange: (Int) -> Unit) {
+    // `pointerInput` keeps the block it was given until one of its keys changes, and `max` is a
+    // constant per slider — so without this the block would hold the lambda from the composition
+    // that created it, and that lambda closes over the whole background. Every drag would then
+    // write back the background as it stood when the panel opened: set the dim, then the blur, and
+    // the blur's write puts the old dim back. SlimSlider carries the same fix for the same reason.
+    val currentOnChange by rememberUpdatedState(onChange)
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             PanelCaption(label, Modifier.weight(1f))
@@ -232,7 +245,7 @@ internal fun PanelSlider(label: String, readout: String, value: Int, max: Int, o
             modifier = Modifier.fillMaxWidth().height(13.dp)
                 .pointerInput(max) {
                     detectTapGestures { offset ->
-                        onChange((offset.x / size.width * max).toInt().coerceIn(0, max))
+                        currentOnChange((offset.x / size.width * max).toInt().coerceIn(0, max))
                     }
                 },
             contentAlignment = Alignment.CenterStart,

@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.core.models.songs.SongBackgroundType
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.SongSettings
@@ -348,6 +351,58 @@ class MainLogicTest {
         // The follower must never persist the primary's backgrounds over its own configuration.
         val own = AppSettings()
         assertEquals(own, withMirroredBackgrounds(own, null))
+    }
+
+    // ── The quick tray's live override ──────────────────────────────────────────
+
+    private fun trayEntry(color: String) = QuickBackground(
+        id = "tile",
+        background = SongBackground(type = SongBackgroundType.COLOR, color = color),
+        lowerThirdBackground = SongBackground(type = SongBackgroundType.COLOR, color = "#ffffff"),
+    )
+
+    @Test
+    fun `a picked quick background stands in front of every configured one`() {
+        val picked = trayEntry("#abcdef")
+        val effective = withQuickBackground(AppSettings(), picked)
+
+        assertEquals(picked.background, effective.backgroundSettings.quickBackground)
+        assertEquals(
+            picked.lowerThirdBackground,
+            effective.backgroundSettings.quickLowerThirdBackground,
+            "the two halves travel separately, exactly as a song's pair does",
+        )
+    }
+
+    @Test
+    fun `picking nothing leaves the configured backgrounds exactly as they were`() {
+        val own = AppSettings()
+        assertEquals(own, withQuickBackground(own, null))
+        assertNull(withQuickBackground(own, null).backgroundSettings.quickBackground)
+    }
+
+    @Test
+    fun `an override changes nothing else about the settings`() {
+        val own = AppSettings(backgroundSettings = BackgroundSettings(defaultBackgroundColor = "#123456"))
+        val effective = withQuickBackground(own, trayEntry("#abcdef"))
+
+        assertEquals(
+            "#123456",
+            effective.backgroundSettings.defaultBackgroundColor,
+            "the configured background is overridden for rendering, never rewritten",
+        )
+    }
+
+    @Test
+    fun `dropping the override puts the configured backgrounds back`() {
+        val own = AppSettings()
+        val overridden = withQuickBackground(own, trayEntry("#abcdef"))
+        assertEquals(own, withQuickBackground(overridden, null).copy(
+            backgroundSettings = overridden.backgroundSettings.copy(
+                quickBackground = null,
+                quickLowerThirdBackground = null,
+            ),
+        ))
     }
 
     // ── Update checks ───────────────────────────────────────────────────────────

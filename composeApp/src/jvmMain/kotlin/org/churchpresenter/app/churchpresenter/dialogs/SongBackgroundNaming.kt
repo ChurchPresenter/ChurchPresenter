@@ -7,6 +7,9 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_background_category_colors
 import churchpresenter.composeapp.generated.resources.song_background_category_images
@@ -34,6 +36,8 @@ import churchpresenter.composeapp.generated.resources.unit_px
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import androidx.compose.ui.draw.alpha
+import org.churchpresenter.core.models.songs.SONG_BACKGROUND_FULL_OPACITY
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.stringResource
@@ -83,25 +87,44 @@ private fun songBackgroundCategoryLabel(type: String) = when (type) {
  */
 @Composable
 internal fun SongBackgroundFill(background: SongBackground, modifier: Modifier) {
-    val shaped = if (background.blur > 0) {
-        modifier.graphicsLayer { scaleX = BLUR_OVERSCAN; scaleY = BLUR_OVERSCAN }.blur(background.blur.dp)
-    } else {
-        modifier
-    }
-    when {
-        !background.isCustom -> Box(shaped.background(Color.Black))
-        background.type == SongBackgroundType.GRADIENT -> Box(
-            shaped.background(
-                Brush.verticalGradient(
-                    listOf(parseHexColor(background.color), parseHexColor(background.colorEnd))
+    // Measured, because a blur is stored against a 1920-wide output and this draws a tile a
+    // fraction of that. Passing the stored radius straight to Modifier.blur made a tile roughly
+    // twelve times softer than the screen it stands for.
+    BoxWithConstraints(modifier) {
+        val fill = Modifier.fillMaxSize()
+        val blurred = if (background.blur > 0) {
+            fill.graphicsLayer { scaleX = BLUR_OVERSCAN; scaleY = BLUR_OVERSCAN }
+                .blur(backgroundBlurRadius(background.blur, maxWidth))
+        } else {
+            fill
+        }
+        // The presenter fades the background itself and then washes black over it; a preview that
+        // skipped either would show a look the screen never produces.
+        val shaped =
+            if (background.opacity < SONG_BACKGROUND_FULL_OPACITY) blurred.alpha(background.opacity / PERCENT)
+            else blurred
+        when {
+            !background.isCustom -> Box(shaped.background(Color.Black))
+            background.type == SongBackgroundType.GRADIENT -> Box(
+                shaped.background(
+                    Brush.verticalGradient(
+                        listOf(parseHexColor(background.color), parseHexColor(background.colorEnd))
+                    )
                 )
             )
-        )
-        background.type == SongBackgroundType.IMAGE -> ImageFill(background.image, shaped)
-        background.type == SongBackgroundType.VIDEO -> Box(shaped.background(Color.Black))
-        else -> Box(shaped.background(parseHexColor(background.color)))
+            background.type == SongBackgroundType.IMAGE -> ImageFill(background.image, shaped)
+            background.type == SongBackgroundType.VIDEO -> Box(shaped.background(Color.Black))
+            else -> Box(shaped.background(parseHexColor(background.color)))
+        }
+        // The wash the comment above promises, which was never actually drawn.
+        if (background.dim > 0) {
+            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = background.dim / PERCENT)))
+        }
     }
 }
+
+/** A percentage as a fraction. */
+private const val PERCENT = 100f
 
 @Composable
 private fun ImageFill(path: String, modifier: Modifier) {

@@ -57,6 +57,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.ResolvedDisplay
@@ -544,13 +545,33 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
         mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
     }
+    // A quick-tray pick lives only as long as the app is open: it is a live control, not a setting,
+    // so it is held here rather than written back through onSettingsChange.
+    var activeQuickBackground by remember { mutableStateOf<QuickBackground?>(null) }
     // The settings dialog's on-screen preview edits a draft copy that does not reach `appSettings`
     // until Apply or OK, so while it is running the outputs render that draft instead -- otherwise
     // the preview would show the sample in the styling the operator is in the middle of replacing.
     // Null whenever no preview is running, which is every other moment of the app's life.
     val previewSettingsOverride by presenterManager.previewSettingsOverride
-    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings, previewSettingsOverride) {
-        withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings)
+    val effectiveAppSettings = remember(
+        appSettings,
+        mirroredBackgroundSettings,
+        previewSettingsOverride,
+        activeQuickBackground,
+    ) {
+        // Three layers, innermost first: the settings dialog's draft stands in for the saved
+        // settings while a preview is running, Instance Link swaps the backgrounds inside whichever
+        // of the two that is, and the quick tray's pick goes in front of the lot — it is what an
+        // operator reaches for mid-service to override what is on screen right now.
+        withQuickBackground(
+            withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings),
+            activeQuickBackground,
+        )
+    }
+    // A tile removed from the tray, or a whole settings import, must not leave a stale override live.
+    LaunchedEffect(appSettings.quickBackgrounds) {
+        val stillThere = activeQuickBackground?.id?.let { id -> appSettings.quickBackgrounds.any { it.id == id } }
+        if (stillThere == false) activeQuickBackground = null
     }
     val screenCountForUsage = remember { LiveMapReporter.detectScreenCount() }
     val deckLinkCountForUsage = remember {
@@ -1430,6 +1451,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 livePreviewAppSettings = effectiveAppSettings,
+                                activeQuickBackground = activeQuickBackground,
+                                onQuickBackgroundPicked = { activeQuickBackground = it },
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
                                 verseSequenceLog = verseSequenceLog,
