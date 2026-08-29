@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
@@ -22,10 +24,18 @@ class SongPresenterPushTest {
         secondaryTitle: String = "",
         lyrics: List<String> = emptyList(),
         secondaryLyrics: List<String> = emptyList(),
+        background: SongBackground = SongBackground(),
+        lowerThirdBackground: SongBackground = SongBackground(),
     ) = SongItem(
         number = number, title = title, author = author, composer = composer,
         secondaryTitle = secondaryTitle, lyrics = lyrics, secondaryLyrics = secondaryLyrics,
+        background = background, lowerThirdBackground = lowerThirdBackground,
     )
+
+    private val dusk = SongBackground(
+        type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25,
+    )
+    private val band = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
 
     // ── title / credit lines ──────────────────────────────────────────────────
 
@@ -132,5 +142,44 @@ class SongPresenterPushTest {
         assertEquals(listOf("line one", "line two"), push.section.lines)
         assertEquals(1, push.lineIndex, "clamped into the fallback section's line range")
         assertEquals(70, push.section.bpm)
+    }
+
+    // ── the song's own background ─────────────────────────────────────────────
+
+    @Test fun `a title slide carries the song's own backgrounds`() {
+        val slide = titleSlideSection(song(background = dusk, lowerThirdBackground = band), SongTuning())
+
+        assertEquals(dusk, slide.background)
+        assertEquals(band, slide.lowerThirdBackground)
+    }
+
+    @Test fun `a title slide for a song that inherits carries an inheriting background`() =
+        assertEquals(false, titleSlideSection(song(), SongTuning()).background.isCustom)
+
+    @Test fun `an edit stamps the edited song's backgrounds onto the section that goes out`() {
+        val sections = listOf(LyricSection(lines = listOf("a", "b")))
+        val edited = song(background = dusk, lowerThirdBackground = band)
+
+        val push = resolveEditedSongPush(sections, 0, 0, edited, SongTuning(bpm = 70))
+
+        assertEquals(dusk, push.section.background)
+        assertEquals(band, push.section.lowerThirdBackground)
+        assertEquals(70, push.section.bpm, "the tuning is still stamped alongside it")
+    }
+
+    @Test fun `the fallback section built from the edited song carries its backgrounds too`() {
+        val edited = song(lyrics = listOf("line one"), background = dusk)
+
+        val push = resolveEditedSongPush(emptyList(), 0, 0, edited, SongTuning())
+
+        assertEquals(dusk, push.section.background)
+    }
+
+    @Test fun `a background set on the edited song replaces whatever the live section held`() {
+        val sections = listOf(LyricSection(lines = listOf("a"), background = band))
+
+        val push = resolveEditedSongPush(sections, 0, 0, song(background = dusk), SongTuning())
+
+        assertEquals(dusk, push.section.background, "the section follows the song, not the other way round")
     }
 }

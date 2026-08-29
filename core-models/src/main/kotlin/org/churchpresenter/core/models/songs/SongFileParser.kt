@@ -36,6 +36,20 @@ private const val TITLE_KEY_LENGTH = 6
 /** The extension every song in a library carries. */
 const val SONG_EXTENSION = "song"
 
+/** The header key a song's full-screen background is written under, and the root of its siblings. */
+internal const val BACKGROUND_PREFIX = "background"
+
+/** The same for the lower-third band. */
+internal const val LOWER_THIRD_BACKGROUND_PREFIX = "lower-third-background"
+
+private val BACKGROUND_PREFIXES = listOf(BACKGROUND_PREFIX, LOWER_THIRD_BACKGROUND_PREFIX)
+
+private const val PERCENT_MAX = 100
+
+/** Every header key one background occupies: the type itself plus its five value keys. */
+private fun backgroundKeys(prefix: String): List<String> =
+    listOf(prefix) + listOf("color", "color-end", "image", "video", "dim", "blur").map { "$prefix-$it" }
+
 class SongFileParser {
 
     fun parseSongFile(filePath: String, songbook: String = ""): SongItem? {
@@ -52,7 +66,7 @@ class SongFileParser {
 
     /** The `key: value` lines of a .song header, lowercased keys, unknown keys kept out. */
     private fun parseHeaderFields(headerBody: List<String>): Map<String, String> {
-        val known = setOf("author", "composer", "tune", "ccli")
+        val known = setOf("author", "composer", "tune", "ccli") + BACKGROUND_PREFIXES.flatMap(::backgroundKeys)
         return headerBody.mapNotNull { raw ->
             val line = raw.trim()
             val colonIndex = line.indexOf(':')
@@ -104,6 +118,8 @@ class SongFileParser {
             var composer = ""
             var tune = ""
             var ccli = ""
+            var background = SongBackground()
+            var lowerThirdBackground = SongBackground()
             val headerStart = lines.indexOfFirst { it.trim() == "---" }
             val headerClose = if (headerStart < 0) -1 else
                 lines.subList(headerStart + 1, lines.size).indexOfFirst { it.trim() == "---" }
@@ -117,6 +133,8 @@ class SongFileParser {
                 composer = header["composer"].orEmpty()
                 tune = header["tune"].orEmpty()
                 ccli = header["ccli"].orEmpty()
+                background = backgroundFrom(header, BACKGROUND_PREFIX)
+                lowerThirdBackground = backgroundFrom(header, LOWER_THIRD_BACKGROUND_PREFIX)
             }
 
             // Parse body after header
@@ -154,24 +172,64 @@ class SongFileParser {
                 secondaryTitle = secondaryTitle,
                 secondaryLyrics = secondaryLyrics,
                 sourceFile = filePath,
-                ccliNumber = ccli
+                ccliNumber = ccli,
+                background = background,
+                lowerThirdBackground = lowerThirdBackground
             )
         } catch (_: Exception) {
             return null
         }
     }
 
+    /**
+     * The [SongBackground] held under [prefix] in a parsed header, or an inheriting one when the
+     * header names no type or names one this build does not know.
+     */
+    private fun backgroundFrom(header: Map<String, String>, prefix: String): SongBackground {
+        val type = header[prefix].orEmpty().trim().lowercase()
+        if (type !in SongBackgroundType.ALL) return SongBackground()
+        return SongBackground(
+            type = type,
+            color = header["$prefix-color"]?.takeIf { it.isNotBlank() } ?: "#000000",
+            colorEnd = header["$prefix-color-end"]?.takeIf { it.isNotBlank() } ?: "#000000",
+            image = header["$prefix-image"].orEmpty(),
+            video = header["$prefix-video"].orEmpty(),
+            dim = header["$prefix-dim"]?.toIntOrNull()?.coerceIn(0, PERCENT_MAX) ?: 0,
+            blur = header["$prefix-blur"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_MAX_BLUR) ?: 0,
+        )
+    }
+
+    /** Writes [background] under [prefix], or nothing at all when the song inherits. */
+    private fun appendBackground(sb: StringBuilder, prefix: String, background: SongBackground) {
+        if (!background.isCustom) return
+        sb.appendLine("$prefix: ${background.type}")
+        when (background.type) {
+            SongBackgroundType.COLOR -> sb.appendLine("$prefix-color: ${background.color}")
+            SongBackgroundType.GRADIENT -> {
+                sb.appendLine("$prefix-color: ${background.color}")
+                sb.appendLine("$prefix-color-end: ${background.colorEnd}")
+            }
+            SongBackgroundType.IMAGE -> sb.appendLine("$prefix-image: ${background.image}")
+            SongBackgroundType.VIDEO -> sb.appendLine("$prefix-video: ${background.video}")
+        }
+        if (background.dim > 0) sb.appendLine("$prefix-dim: ${background.dim}")
+        if (background.blur > 0) sb.appendLine("$prefix-blur: ${background.blur}")
+    }
+
     fun writeSongFile(song: SongItem, filePath: String) {
         val sb = StringBuilder()
 
         // Write header if any metadata exists
-        val hasCredits = song.author.isNotEmpty() || song.composer.isNotEmpty()
-        if (hasCredits || song.tune.isNotEmpty() || song.ccliNumber.isNotEmpty()) {
+        val credits = listOf(song.author, song.composer, song.tune, song.ccliNumber)
+        val hasBackground = song.background.isCustom || song.lowerThirdBackground.isCustom
+        if (credits.any { it.isNotEmpty() } || hasBackground) {
             sb.appendLine("---")
             if (song.author.isNotEmpty()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotEmpty()) sb.appendLine("composer: ${song.composer}")
             if (song.tune.isNotEmpty()) sb.appendLine("tune: ${song.tune}")
             if (song.ccliNumber.isNotEmpty()) sb.appendLine("ccli: ${song.ccliNumber}")
+            appendBackground(sb, BACKGROUND_PREFIX, song.background)
+            appendBackground(sb, LOWER_THIRD_BACKGROUND_PREFIX, song.lowerThirdBackground)
             sb.appendLine("---")
             sb.appendLine()
         }
