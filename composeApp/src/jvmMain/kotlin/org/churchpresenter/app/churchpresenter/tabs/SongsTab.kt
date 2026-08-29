@@ -562,6 +562,9 @@ fun SongsTab(
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },
+        onApplyBackgroundToSongbook = { songbook, background, lowerThirdBackground ->
+            viewModel.applyBackgroundToSongbook(songbook, background, lowerThirdBackground)
+        },
         onDismiss = { dialogs.closeEditor() },
         onSave = { updatedSong, tuning ->
             dialogs.editing?.let { oldSong ->
