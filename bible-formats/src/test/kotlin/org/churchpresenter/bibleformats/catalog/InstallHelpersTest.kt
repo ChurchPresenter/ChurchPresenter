@@ -1,5 +1,6 @@
 package org.churchpresenter.bibleformats.catalog
 
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.CancellationException
 import java.io.File
 import java.nio.file.Files
@@ -217,6 +218,19 @@ class InstallHelpersTest {
         // bytes stop arriving. Reported once from a church whose network does that to
         // raw.githubusercontent.com; it is TruncatedBodyException's fact, one layer lower.
         assertTrue(isEnvironment(java.io.EOFException("the server prematurely closed the connection")))
+    }
+
+    @Test
+    fun `a request that timed out is the operator's line, not a defect`() {
+        // ktor raises this rather than SocketTimeoutException when its own request timeout fires,
+        // and it is a different type entirely — so the two have to be listed separately. A church
+        // in Jamaica on a slow line filed "Holy Bible XML catalogue fetch failed" against a
+        // 30-second timeout to raw.githubusercontent.com, which is a fact about the line.
+        assertTrue(isEnvironment(HttpRequestTimeoutException("https://example.invalid", 30_000)))
+        assertTrue(
+            isEnvironment(IOException("fetch failed", HttpRequestTimeoutException("https://example.invalid", 30_000))),
+            "ktor wraps, so the cause chain has to find it too",
+        )
     }
 
     @Test
