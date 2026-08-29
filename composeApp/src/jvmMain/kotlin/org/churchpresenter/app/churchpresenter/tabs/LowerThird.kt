@@ -129,7 +129,10 @@ import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_key
 import churchpresenter.composeapp.generated.resources.ic_upload
-import churchpresenter.composeapp.generated.resources.lottie_no_presets
+import churchpresenter.composeapp.generated.resources.scanning_directory
+import churchpresenter.composeapp.generated.resources.no_lottie_files
+import churchpresenter.composeapp.generated.resources.no_directory_selected
+import androidx.compose.runtime.produceState
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
@@ -254,13 +257,26 @@ fun LowerThirdTab(
         }
     }
 
-    // Build file list from user-chosen folder
-    val lottieFiles = remember(lottieFolder, refreshKey) {
-        if (lottieFolder.isEmpty()) emptyList()
-        else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
-            ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
+    // Build file list from user-chosen folder.
+    //
+    // Off the composition thread, and null while it is still reading: deciding whether a .json is a
+    // Lottie means reading the whole of it, so this is the folder's full weight in bytes. It used to
+    // be a plain `remember`, which did all of that inline on every folder change. Null is also what
+    // makes "still looking" tellable from "nothing there" in the list below -- "no lower thirds" is
+    // a verdict about the folder, and until the read finishes it would be an unearned one.
+    val lottieFilesOrNull by produceState<List<File>?>(null, lottieFolder, refreshKey) {
+        value = null
+        value = withContext(Dispatchers.IO) {
+            if (lottieFolder.isEmpty()) {
+                emptyList()
+            } else {
+                File(lottieFolder).takeIf { it.exists() && it.isDirectory }
+                    ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
+                    ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
+            }
+        }
     }
+    val lottieFiles = lottieFilesOrNull.orEmpty()
 
     // Pre-render ATEM uploads in the background for every lottie file as soon as it
     // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
@@ -349,18 +365,34 @@ fun LowerThirdTab(
         }
     }
 
-    // When a schedule item is clicked, find the matching file by name
-    LaunchedEffect(selectedLowerThirdItem, selectedLowerThirdItemVersion) {
+    // When a schedule item is clicked, find the matching file by name.
+    //
+    // Keyed on the file list as well as the item, because the list arrives *after* the first
+    // composition -- it is read off the UI thread. Without that key this ran once against an empty
+    // list and never again, so an operator clicking a queued lower third got whatever was already
+    // selected and went live with the wrong graphic.
+    //
+    // Resolved at most once per item, which is what the key alone would not give: the folder is
+    // watched and rescanned whenever a file is added or removed, and re-running then would drag the
+    // selection back onto the scheduled item after the operator had clicked something else. Clicking
+    // the same schedule row again bumps `selectedLowerThirdItemVersion`, which is a new key and
+    // deliberately does resolve again.
+    var resolvedSelection by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    LaunchedEffect(selectedLowerThirdItem, selectedLowerThirdItemVersion, lottieFiles) {
         val item = selectedLowerThirdItem ?: return@LaunchedEffect
+        val resolveKey = item.id to selectedLowerThirdItemVersion
+        if (resolvedSelection == resolveKey) return@LaunchedEffect
         val file = lottieFiles.find { it.nameWithoutExtension == item.presetLabel || it.name == item.presetLabel }
             ?: lottieFiles.find { it.nameWithoutExtension == item.presetId }
-        if (file != null) {
-            selectedFile = file
-            animJob?.cancel()
-            animJob = null
-            animatedProgress.snapTo(0f)
-            isPlaying = false
-        }
+            // Not resolvable yet, or not at all -- either way leave the selection alone and let the
+            // next list arrival try again.
+            ?: return@LaunchedEffect
+        resolvedSelection = resolveKey
+        selectedFile = file
+        animJob?.cancel()
+        animJob = null
+        animatedProgress.snapTo(0f)
+        isPlaying = false
     }
 
     val jsonContent = remember(selectedFile) {
@@ -767,8 +799,19 @@ fun LowerThirdTab(
                                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
+                                // Three states, not one. A folder that was never chosen, a folder
+                                // still being read and a folder with nothing in it are three
+                                // different things to be told, and saying the same words for all of
+                                // them leaves an operator with a mistyped path looking for files
+                                // that were never going to appear.
                                 Text(
-                                    text = stringResource(Res.string.lottie_no_presets),
+                                    text = when {
+                                        lottieFolder.isEmpty() ->
+                                            stringResource(Res.string.no_directory_selected)
+                                        lottieFilesOrNull == null ->
+                                            stringResource(Res.string.scanning_directory)
+                                        else -> stringResource(Res.string.no_lottie_files)
+                                    },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )

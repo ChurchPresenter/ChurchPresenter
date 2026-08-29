@@ -59,7 +59,6 @@ import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.key_output
 import churchpresenter.composeapp.generated.resources.key_output_none
-import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
 import churchpresenter.composeapp.generated.resources.projection_simulate_outputs
@@ -623,29 +622,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
         }
     }
 
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // Lower third height
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = stringResource(Res.string.lower_third_height),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        NumberSettingsTextField(
-            initialText = proj.lowerThirdHeightPercent,
-            onValueChange = { value ->
-                onSettingsChange { s ->
-                    s.copy(projectionSettings = s.projectionSettings.copy(lowerThirdHeightPercent = value))
-                }
-            },
-            range = 10..60
-        )
-    }
-
+    // The band height used to sit here, below the table. It never governed this card -- only the
+    // Bible and song presenters read it -- and being here it reached only screen outputs, so an
+    // operator sending an NDI or Browser Source lower third could see the band and find nothing that
+    // moved it. It now lives on the Bible and Song tabs, one value each, beside their own margins.
 }
 }
 

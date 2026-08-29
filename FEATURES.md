@@ -95,14 +95,13 @@
 
 ## Lower Thirds & Graphics
 - **Animated lower thirds** — display polished Lottie animations for names, titles and welcomes.
-- **Reusable presets** — save lower thirds with editable text fields and recall them instantly.
+- **Drop in a folder, ready to send** — point the app at a folder of Lottie files and every one of them is listed, ready to go live, trigger from Companion or upload to an ATEM media pool.
 - **Built-in generator** — design your own animated lower thirds with the included Lottie generator — no After Effects needed.
 - **Fine timing control** — pause on a frame, hold, and play through with smooth fade in/out.
 
 **Source locations:**
 - `tabs/LowerThird.kt` — main UI
 - `viewmodel/LowerThirdSettingsViewModel.kt`
-- `data/settings/LottiePreset.kt`, `data/settings/LottieSearchReplacePair.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `server/LowerThirdSequencer.kt`
 - `dialogs/tabs/LowerThirdSettingsTab.kt`

@@ -15,6 +15,19 @@ import churchpresenter.composeapp.generated.resources.shadow_opacity
 import org.jetbrains.compose.resources.stringResource
 
 /**
+ * The height this row occupies, which its callers reserve whether or not it is showing.
+ *
+ * The row folds out beside a "Shadow" checkbox that is a third its height, so a row sized to its
+ * contents grows by 18dp the moment the box is ticked -- and because the controls it sits among are
+ * bottom-aligned, the checkbox the operator just clicked jumps upwards under the cursor. Reserving
+ * the space means ticking it changes what is drawn and nothing about where anything sits.
+ *
+ * Measured rather than derived, so `ShadowDetailRowHeightTest` pins it: it fails if this row grows
+ * past the reservation, which would bring the jump straight back.
+ */
+val ShadowDetailRowHeight = 42.dp
+
+/**
  * Shadow detail controls: color, size, and opacity — labels inside each field.
  * Appears below the shadow SettingRow when shadow is enabled.
  */

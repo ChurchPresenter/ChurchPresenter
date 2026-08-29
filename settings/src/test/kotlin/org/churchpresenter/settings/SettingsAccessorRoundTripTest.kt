@@ -113,7 +113,10 @@ class SettingsAccessorRoundTripTest {
 
     @Test
     fun `every streaming setting is readable and unchanged after a reload`() {
-        assertEveryAccessorSurvives(StreamingSettings.serializer(), StreamingSettings(), expectedAtLeast = 3)
+        // One field, and deliberately: the four window insets went when the Lottie lower third
+        // became self-contained, and four more were the remains of a preset feature the app no
+        // longer has. `lowerThirdFolder` is what is left.
+        assertEveryAccessorSurvives(StreamingSettings.serializer(), StreamingSettings(), expectedAtLeast = 1)
     }
 
     @Test

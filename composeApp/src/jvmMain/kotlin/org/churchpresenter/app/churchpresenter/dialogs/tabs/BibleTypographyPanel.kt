@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRowHeight
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -342,9 +344,14 @@ private fun ShadowControl(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
+        // The detail controls fold out beside the checkbox rather than under it, so the row is held
+        // at their height whether they are showing or not -- see [ShadowDetailRowHeight].
+        modifier = modifier.heightIn(min = ShadowDetailRowHeight),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        // Bottom, not centre. The controls this row sits beside are bottom-aligned, and the row is
+        // held taller than the checkbox by the reservation above -- so centring it left the box
+        // floating nine pixels above the buttons next to it whenever the details were folded away.
+        verticalAlignment = Alignment.Bottom,
     ) {
         LabeledCheckbox(
             checked = style.shadow,

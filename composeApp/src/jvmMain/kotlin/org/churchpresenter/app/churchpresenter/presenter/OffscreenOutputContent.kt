@@ -223,7 +223,6 @@ internal fun OffscreenOutputContent(
                                     LowerThirdPresenter(
                                         composition = lottieComposition,
                                         progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings,
                                         outputRole = outputRole,
                                         frame = presenterManager.lottieFrame.value
                                     )

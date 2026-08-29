@@ -535,7 +535,7 @@
     <string name="secondary_bible_text">Secondary Bible Text</string>
     <string name="show_in_lower_third">Show in Lower Third</string>
     <string name="secondary_bible_reference">Secondary Bible Book Reference</string>
-    <string name="show_abbreviation">Show book abbreviation</string>
+    <string name="show_abbreviation">Show Bible abbreviation</string>
     <string name="bible_custom_name">Name</string>
     <string name="bible_custom_abbreviation">Abbreviation</string>
     <string name="bible_custom_name_hint">Leave blank to use the name the module gives itself</string>
@@ -797,6 +797,33 @@
     <string name="bible_preview_sample_verse">For God so loved the world, that he gave his only begotten Son.</string>
     <string name="bible_preview_sample_book">John</string>
     <string name="bible_preview_no_translations">Add a translation to see it here</string>
+    <!-- Defined but unused: the Lottie preset editor and the Lower Third settings tab that
+         held these were removed. They stay because ~33 locale files still translate them,
+         and a key a locale defines but the default folder does not is text nothing can
+         ever read - see LocaleStringsTest. Removing them here means removing them there,
+         and non-English locales are managed separately. -->
+    <string name="lottie_presets">Lower Third Presets</string>
+    <string name="lottie_preset_import_file">Import Lottie File</string>
+    <string name="lottie_select_json_file">Select Lottie JSON File</string>
+    <string name="lottie_preset_label">Preset Label</string>
+    <string name="lottie_preset_label_hint">Enter preset name...</string>
+    <string name="lottie_preset_save">Save Preset</string>
+    <string name="lottie_preset_delete">Delete Preset</string>
+    <string name="lottie_preset_no_file">No file selected</string>
+    <string name="lottie_preset_add_pair">+ Add Pair</string>
+    <string name="lottie_preset_saved">Preset saved</string>
+    <string name="lottie_presets_list">Saved Presets</string>
+    <string name="lottie_no_presets">No presets saved yet</string>
+    <string name="lottie_files">Lottie Files</string>
+    <string name="remove_lottie_file">Remove File</string>
+    <string name="bible_preview_sample_verse_short">Jesus wept.</string>
+    <string name="bible_preview_sample_verse_long">Then Jesus said unto them, Verily, verily, I say unto you, Except ye eat the flesh of the Son of man, and drink his blood, ye have no life in you.</string>
+    <string name="preview_sample">Sample</string>
+    <string name="preview_sample_short">Short</string>
+    <string name="preview_sample_medium">Medium</string>
+    <string name="preview_sample_long">Long</string>
+    <string name="preview_on_screen">Preview on screen</string>
+    <string name="preview_on_screen_stop">Stop preview</string>
     <string name="song_preview_full_screen">Full screen preview</string>
     <string name="song_preview_lower_third">Lower third preview</string>
     <string name="song_preview_sample_title">Amazing Grace</string>
@@ -868,7 +895,8 @@
     <string name="display_lower_third">Lower Third</string>
     <string name="display_lower_third_horizontal">Horizontal Lower Third</string>
     <string name="display_lower_third_vertical">Vertical Lower Third</string>
-    <string name="lower_third_height">Lower Third Height % (for Bible and Songs)</string>
+    <string name="lower_third_height">Band height %</string>
+    <string name="lower_third_band">Lower Third Band</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
@@ -1059,18 +1087,6 @@
     <string name="delete_saved_string">Delete</string>
 
     <!-- Lottie Preset Management -->
-    <string name="lottie_presets">Lower Third Presets</string>
-    <string name="lottie_preset_import_file">Import Lottie File</string>
-    <string name="lottie_select_json_file">Select Lottie JSON File</string>
-    <string name="lottie_preset_label">Preset Label</string>
-    <string name="lottie_preset_label_hint">Enter preset name...</string>
-    <string name="lottie_preset_save">Save Preset</string>
-    <string name="lottie_preset_delete">Delete Preset</string>
-    <string name="lottie_preset_no_file">No file selected</string>
-    <string name="lottie_preset_add_pair">+ Add Pair</string>
-    <string name="lottie_preset_saved">Preset saved</string>
-    <string name="lottie_presets_list">Saved Presets</string>
-    <string name="lottie_no_presets">No presets saved yet</string>
     <string name="lottie_select_preset">Select a preset to preview</string>
     <string name="lottie_pause_frame">Pause Frame</string>
     <string name="lottie_pause_frame_none">None</string>
@@ -1079,10 +1095,8 @@
     <string name="lottie_play_next">Play Next</string>
     <string name="lottie_run_to_end">Run to End</string>
     <string name="lottie_files_folder">Lottie Files Folder</string>
-    <string name="lottie_files">Lottie Files</string>
     <string name="no_lottie_files">No JSON files found</string>
     <string name="import_lottie_file">Import File</string>
-    <string name="remove_lottie_file">Remove File</string>
     <string name="generate_lower_third">Generate</string>
     <string name="song_transition_settings">Transition</string>
     <string name="bible_transition_settings">Transition</string>

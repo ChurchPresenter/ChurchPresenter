@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.skia.Bitmap
 import java.nio.ByteBuffer
@@ -52,7 +51,6 @@ class LowerThirdPresenterRenderTest {
                     LowerThirdPresenter(
                         composition = composition,
                         progress = { 0f },
-                        appSettings = AppSettings(),
                         outputRole = outputRole,
                         frame = frame,
                     )
@@ -94,7 +92,6 @@ class LowerThirdPresenterRenderTest {
                 LowerThirdPresenter(
                     composition = emptyComposition,
                     progress = { 0f },
-                    appSettings = AppSettings(),
                     frame = null,
                 )
             }
@@ -119,5 +116,46 @@ class LowerThirdPresenterRenderTest {
         assertEquals(1f, pixel.red)
         assertEquals(0f, pixel.green)
         assertEquals(0f, pixel.blue)
+    }
+
+    // ── Edge to edge ────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * The animation reaches every corner of its output, with no inset of the presenter's own.
+     *
+     * This is the whole of "a Lottie file is self-contained". Four settings insets used to pad it,
+     * and only three of the four output paths honoured them: the ATEM media pool renders through
+     * [LowerThirdOffscreenRenderer], which takes no settings at all, so the same animation was
+     * framed one way over NDI and another through the switcher. They were raw dp on top of that,
+     * unscaled, while every other presenter scales its insets against a 1920x1080 reference — so the
+     * same number meant a different inset on a 4K screen than on a 1920 feed.
+     *
+     * Sampled at the corners rather than the centre, because the centre was covered either way; it
+     * is the corners an inset used to take away.
+     */
+    @Test
+    fun `the animation fills its output to the corners`() {
+        val corners = mutableListOf<Color>()
+        runComposeUiTest {
+            setContent {
+                Box(Modifier.testTag("lt").size(40.dp).background(Color.Black)) {
+                    LowerThirdPresenter(
+                        composition = null,
+                        progress = { 0f },
+                        frame = solidFrame(0xFF00FF00.toInt()),
+                    )
+                }
+            }
+            val map = onNodeWithTag("lt").captureToImage().toPixelMap()
+            val last = 40 - 1
+            corners += listOf(map[0, 0], map[last, 0], map[0, last], map[last, last])
+        }
+
+        // A square frame in a square box: `ContentScale.Fit` covers it completely, so any black
+        // corner would be padding rather than letterboxing.
+        corners.forEachIndexed { index, pixel ->
+            assertEquals(1f, pixel.green, "corner $index must be covered by the animation")
+            assertEquals(0f, pixel.red, "corner $index must be covered by the animation")
+        }
     }
 }

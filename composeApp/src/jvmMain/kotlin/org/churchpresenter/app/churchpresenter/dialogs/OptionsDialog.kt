@@ -42,7 +42,6 @@ import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.symbol_cancel
 import churchpresenter.composeapp.generated.resources.symbol_ok
-import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
@@ -70,7 +69,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
@@ -83,12 +81,11 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val TAB_BACKGROUND = 3
 private const val TAB_PROJECTION = 4
-private const val TAB_LOWER_THIRD = 5
-private const val TAB_SERVER = 6
-private const val TAB_STAGE_MONITOR = 7
-private const val TAB_ATEM = 8
-private const val TAB_DICTIONARY = 9
-private const val TAB_INTEGRATIONS = 10
+private const val TAB_SERVER = 5
+private const val TAB_STAGE_MONITOR = 6
+private const val TAB_ATEM = 7
+private const val TAB_DICTIONARY = 8
+private const val TAB_INTEGRATIONS = 9
 
 @Composable
 fun OptionsDialog(
@@ -104,7 +101,6 @@ fun OptionsDialog(
     onIdentifyBrowserSource: (Int) -> Unit = {},
     onIdentifyNdi: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
-    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
     companionSatelliteViewModel: CompanionSatelliteViewModel? = null,
     initialTab: Int = 0,
@@ -143,7 +139,6 @@ fun OptionsDialog(
             onIdentifyBrowserSource = onIdentifyBrowserSource,
             onIdentifyNdi = onIdentifyNdi,
             scenes = scenes,
-            onOpenLottieGen = onOpenLottieGen,
             obsManager = obsManager,
             companionSatelliteViewModel = companionSatelliteViewModel,
             initialTab = initialTab,
@@ -165,7 +160,6 @@ internal fun OptionsDialogContent(
     onIdentifyBrowserSource: (Int) -> Unit = {},
     onIdentifyNdi: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
-    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
     companionSatelliteViewModel: CompanionSatelliteViewModel? = null,
     initialTab: Int = 0,
@@ -173,7 +167,7 @@ internal fun OptionsDialogContent(
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt
 ) {
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val companionSatelliteTabIndex = if (obsManager != null) 11 else 10
+    val companionSatelliteTabIndex = if (obsManager != null) 10 else 9
     val tabCount = companionSatelliteTabIndex + 1
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
@@ -230,32 +224,27 @@ internal fun OptionsDialogContent(
                             Tab(
                                 selected = safeTabIndex == 5,
                                 onClick = { selectedTabIndex = 5 },
-                                text = { Text(stringResource(Res.string.display_lower_third)) }
+                                text = { Text(stringResource(Res.string.server_settings)) }
                             )
                             Tab(
                                 selected = safeTabIndex == 6,
                                 onClick = { selectedTabIndex = 6 },
-                                text = { Text(stringResource(Res.string.server_settings)) }
+                                text = { Text(stringResource(Res.string.stage_monitor)) }
                             )
                             Tab(
                                 selected = safeTabIndex == 7,
                                 onClick = { selectedTabIndex = 7 },
-                                text = { Text(stringResource(Res.string.stage_monitor)) }
+                                text = { Text(stringResource(Res.string.atem_settings)) }
                             )
                             Tab(
                                 selected = safeTabIndex == 8,
                                 onClick = { selectedTabIndex = 8 },
-                                text = { Text(stringResource(Res.string.atem_settings)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 9,
-                                onClick = { selectedTabIndex = 9 },
                                 text = { Text(stringResource(Res.string.tab_dictionary)) }
                             )
                             if (obsManager != null) {
                                 Tab(
-                                    selected = safeTabIndex == 10,
-                                    onClick = { selectedTabIndex = 10 },
+                                    selected = safeTabIndex == 9,
+                                    onClick = { selectedTabIndex = 9 },
                                     text = { Text(stringResource(Res.string.obs_settings)) }
                                 )
                             }
@@ -314,13 +303,6 @@ internal fun OptionsDialogContent(
                                 onIdentifyNdi = { index -> onIdentifyNdi(index) },
                                 scenes = scenes,
                                 detectScreens = detectScreens
-                            )
-                            TAB_LOWER_THIRD -> LowerThirdSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                onOpenLottieGen = onOpenLottieGen
                             )
                             TAB_SERVER -> ServerSettingsTab(
                                 settings = currentSettings,

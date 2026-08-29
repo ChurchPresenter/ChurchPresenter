@@ -431,7 +431,6 @@ private fun SingleDisplayPreview(
                                 LowerThirdPresenter(
                                     composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
-                                    appSettings = appSettings,
                                     frame = presenterManager.lottieFrame.value
                                 )
                             Presenting.ANNOUNCEMENTS ->

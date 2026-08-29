@@ -3,16 +3,13 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
-import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 
@@ -31,22 +28,19 @@ import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 fun LowerThirdPresenter(
     composition: LottieComposition?,
     progress: () -> Float,
-    appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     frame: LottieFrame? = null
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     if (frame == null && composition == null) return
 
-    val s = appSettings.streamingSettings
-    val contentModifier = Modifier
-        .padding(
-            start = s.windowLeft.dp,
-            end = s.windowRight.dp,
-            top = s.windowTop.dp,
-            bottom = s.windowBottom.dp
-        )
-        .fillMaxSize()
+    // Edge to edge, with no inset of our own: a Lottie file is self-contained, and its margins
+    // belong inside the file where whoever designed it put them. Four settings insets used to pad
+    // this, and only three of the four output paths honoured them -- the ATEM media pool renders
+    // through LowerThirdOffscreenRenderer, which takes no settings at all, so the same animation was
+    // framed one way over NDI and another through the switcher. This is now that renderer's geometry
+    // exactly, which is what makes an animation look the same wherever it is sent.
+    val contentModifier = Modifier.fillMaxSize()
 
     Box(
         modifier = Modifier.fillMaxSize(),

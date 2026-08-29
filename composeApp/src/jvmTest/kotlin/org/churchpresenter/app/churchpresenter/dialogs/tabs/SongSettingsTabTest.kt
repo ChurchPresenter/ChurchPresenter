@@ -118,7 +118,13 @@ class SongSettingsTabTest {
     fun `each margin field writes its own margin`() {
         // Distinct starting values so every field is findable by what it is showing.
         val distinct = AppSettings(
-            songSettings = SongSettings(marginTop = 11, marginLeft = 22, marginRight = 33, marginBottom = 44),
+            songSettings = SongSettings(
+                marginTop = 11,
+                marginLeft = 22,
+                marginRight = 33,
+                marginBottom = 44,
+                lowerThirdHeightPercent = 55,
+            ),
         )
         listOf(
             "11" to { s: SongSettings -> s.marginTop },

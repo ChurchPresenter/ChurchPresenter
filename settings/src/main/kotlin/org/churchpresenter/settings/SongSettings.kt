@@ -124,6 +124,24 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    /**
+     * How much of the output's height the lower-third band takes, as a whole percentage. 10..60.
+     *
+     * Per content type rather than global. It used to be one number on `ProjectionSettings`, and
+     * two things were wrong with that. Only the Bible and song presenters ever read it -- the Lottie
+     * lower third, announcements, captions and Q&A all size themselves -- so it was never a property
+     * of the projection window; and being single, it forced scripture and lyrics into the same band,
+     * when wanting a shallow one for a verse and a deeper one for two lines of a chorus is the usual
+     * reason to reach for the number at all.
+     *
+     * This one is lyrics'. Every output kind honours it without knowing it exists: a screen
+     * window, a Browser Source and an NDI sender all render the same presenter with the same
+     * `AppSettings`. The control it replaced reached only the first of those -- it lived on the
+     * Screen Assignment card, so an operator sending an NDI lower third could see the band on air
+     * and find nothing in settings that moved it.
+     */
+    val lowerThirdHeightPercent: Int = 33,
+
     // Shadow customization — per-element (title)
     val titleShadowColor: String = "#000000",
     val titleShadowSize: Int = 100,

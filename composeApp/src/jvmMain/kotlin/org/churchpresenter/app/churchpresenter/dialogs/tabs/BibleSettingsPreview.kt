@@ -1,27 +1,18 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_preview_full_screen
@@ -29,75 +20,88 @@ import churchpresenter.composeapp.generated.resources.bible_preview_lower_third
 import churchpresenter.composeapp.generated.resources.bible_preview_no_translations
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_book
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse
+import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_long
+import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_short
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
+import org.churchpresenter.bible.VerseTarget
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.stringResource
 
-/** The reference the sample verse carries when a module could not be read. */
-private const val SAMPLE_CHAPTER = 3
-private const val SAMPLE_VERSE = 16
-
-/** Fallback geometry for an output that has not reported its own bounds. */
-private const val DEFAULT_OUTPUT_WIDTH = 1920
-private const val DEFAULT_OUTPUT_HEIGHT = 1080
-
-/**
- * How tall the preview is allowed to get.
- *
- * The dialog is at most 1400x900 and rather less on a 1366x768 laptop, and the typography panel
- * under the preview needs roughly 250dp of it. Left to fill the pane's width the preview would take
- * more than the whole remainder, so it is capped here and centred in the space instead.
- */
-internal val PREVIEW_MAX_HEIGHT = 260.dp
-
-private const val PREVIEW_BACKGROUND = 0xFF08090B
 private const val EMPTY_NOTE_ALPHA = 0.45f
-private const val BADGE_ALPHA = 0.55f
-private const val BADGE_TEXT_ALPHA = 0.75f
 
-/** The band's height is stored as a whole percentage of the output. */
-private const val PERCENT = 100f
-
-private const val MARGIN_GUIDE_ALPHA = 0.5f
-private const val GUIDE_STROKE_PX = 1f
-private const val GUIDE_DASH_PX = 4f
-
-/** The resolution the styling is being designed against, in the output's own pixels. */
-internal data class PreviewOutputSize(val width: Int, val height: Int) {
-    val aspectRatio: Float get() = width.toFloat() / height.toFloat()
-}
+/** John, in the internal numbering every `.spb` is keyed by. */
+private const val JOHN = 43
 
 /**
- * The screen this styling actually lands on.
+ * The three verses the sample selector switches between, all in John.
  *
- * The first assigned output that has reported its bounds, so a 4:3 projector or a 2560x1080
- * ultrawide is previewed at its own shape rather than assumed to be 16:9. With nothing assigned
- * yet, or nothing that has reported, 1920x1080 stands in.
+ * One book, so [org.churchpresenter.bible.readPreviewVerses] reaches all three in a single forward
+ * scan, and the New Testament, so any module with one carries them. The lengths are the point:
+ * "Jesus wept." proves auto-fit does not blow two words up past the margins, and John 6:53 proves a
+ * long verse still fits the band. A module that has none of them falls back to its own first verse
+ * for all three, which is the honest report for an Old-Testament-only shelf.
  */
-internal fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
-    val assigned = settings.projectionSettings.screenAssignments
-        .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
-    return if (assigned != null) {
-        PreviewOutputSize(assigned.targetBoundsW, assigned.targetBoundsH)
-    } else {
-        PreviewOutputSize(DEFAULT_OUTPUT_WIDTH, DEFAULT_OUTPUT_HEIGHT)
+internal val BIBLE_PREVIEW_TARGETS: Map<PreviewSampleSlot, VerseTarget> = mapOf(
+    PreviewSampleSlot.SHORT to VerseTarget(JOHN, 11, 35),
+    PreviewSampleSlot.MEDIUM to VerseTarget(JOHN, 3, 16),
+    PreviewSampleSlot.LONG to VerseTarget(JOHN, 6, 53),
+)
+
+/**
+ * What each translation's preview quotes, at [slot]'s length -- the module's own text where it has
+ * the verse, and an English sample where it does not.
+ *
+ * `internal` and separate from the panel because the on-screen preview pushes exactly this list at
+ * the real outputs: one definition of "the sample", so the picture in the dialog and the picture on
+ * the screen cannot drift apart.
+ */
+@Composable
+internal fun bibleSampleVerses(
+    translations: List<BibleTranslationSettings>,
+    verses: Map<String, Map<VerseTarget, PreviewVerse>>,
+    slot: PreviewSampleSlot,
+    /** Each module's own title, keyed by file name -- what an un-renamed abbreviation comes from. */
+    moduleTitles: Map<String, String>,
+): List<SelectedVerse> {
+    val target = BIBLE_PREVIEW_TARGETS.getValue(slot)
+    val sampleBook = stringResource(Res.string.bible_preview_sample_book)
+    val sampleVerse = stringResource(
+        when (slot) {
+            PreviewSampleSlot.SHORT -> Res.string.bible_preview_sample_verse_short
+            PreviewSampleSlot.MEDIUM -> Res.string.bible_preview_sample_verse
+            PreviewSampleSlot.LONG -> Res.string.bible_preview_sample_verse_long
+        },
+    )
+    return translations.map { translation ->
+        val verse = verses[translation.fileName]?.get(target)
+        val moduleTitle = moduleTitles[translation.fileName].orEmpty()
+        SelectedVerse(
+            translationFileName = translation.fileName,
+            // What a blank abbreviation box falls back to, which is what the presenter draws and
+            // what the box offers as its placeholder. Derived from the module title where it has
+            // one, and only then from the file name.
+            bibleAbbreviation = defaultTranslationAbbreviation(moduleTitle, translation.fileName),
+            bookName = verse?.bookName?.takeIf { it.isNotBlank() } ?: sampleBook,
+            chapter = verse?.chapter ?: target.chapter,
+            verseNumber = verse?.verseNumber ?: target.verse,
+            verseText = verse?.text ?: sampleVerse,
+        )
     }
 }
 
 /**
  * What the configured styling puts on screen -- drawn by [BiblePresenter] itself.
  *
- * This composes the **real presenter** at the output's own logical size and scales the result down,
- * exactly as the live preview panel beside the tabs does. It does not reproduce the presenter's
- * layout, and that is the point: an earlier version of this file recomputed the scale factor, the
- * margins, the auto-fit and the band arithmetic by hand, and every one of them was a separate
- * opportunity to disagree with the output. They all did, in different ways and on different
- * screens. Rendering the presenter means the preview is right by construction, and stays right when
- * the presenter changes.
+ * This composes the **real presenter** at the output's own size and scales the result down. It does
+ * not reproduce the presenter's layout, and that is the point: an earlier version of this file
+ * recomputed the scale factor, the margins, the auto-fit and the band arithmetic by hand, and every
+ * one of them was a separate opportunity to disagree with the output. They all did, in different
+ * ways and on different screens. Rendering the presenter means the preview is right by
+ * construction, and stays right when the presenter changes.
  *
  * Backgrounds are left off: the presenter would decode an image or start a video for a picture a
  * few hundred dp wide, and what is being previewed here is the type.
@@ -105,28 +109,13 @@ internal fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
 @Composable
 internal fun BiblePreviewPanel(
     settings: AppSettings,
-    translations: List<BibleTranslationSettings>,
     target: BibleStyleTarget,
-    /** A verse read out of each module, keyed by file name; a missing one falls back to the sample. */
-    verses: Map<String, PreviewVerse>,
+    /** What each translation quotes -- see [bibleSampleVerses]. */
+    selectedVerses: List<SelectedVerse>,
     modifier: Modifier = Modifier,
 ) {
     val output = previewOutputSize(settings)
-    val sampleVerse = stringResource(Res.string.bible_preview_sample_verse)
-    val sampleBook = stringResource(Res.string.bible_preview_sample_book)
-    val selectedVerses = translations.map { translation ->
-        val verse = verses[translation.fileName]
-        SelectedVerse(
-            translationFileName = translation.fileName,
-            bibleAbbreviation = translation.customAbbreviation.ifBlank {
-                defaultTranslationAbbreviation(translation.customName, translation.fileName)
-            },
-            bookName = verse?.bookName?.takeIf { it.isNotBlank() } ?: sampleBook,
-            chapter = verse?.chapter ?: SAMPLE_CHAPTER,
-            verseNumber = verse?.verseNumber ?: SAMPLE_VERSE,
-            verseText = verse?.text ?: sampleVerse,
-        )
-    }
+    val bible = settings.bibleSettings
     // Which lower third the outputs are actually set up for: the bottom band and the right-hand
     // strip are different shapes, and previewing the wrong one misreports where the text sits.
     val vertical = settings.projectionSettings.screenAssignments.any { it.isLowerThirdVertical }
@@ -146,7 +135,7 @@ internal fun BiblePreviewPanel(
                 modifier = Modifier.align(Alignment.Center),
             )
         } else {
-            ScaledPresenterBox {
+            ScaledPresenterBox(output) {
                 BiblePresenter(
                     selectedVerses = selectedVerses,
                     appSettings = settings,
@@ -156,15 +145,17 @@ internal fun BiblePreviewPanel(
                 )
             }
         }
-        // Drawn outside the scaled layer, not inside it: within the layer a 1dp line is scaled
-        // down with everything else and comes out a quarter of a pixel wide, which is to say
-        // invisible. Expressed as fractions of the output instead, which the box matches exactly
-        // because it carries the output's own aspect ratio.
         MarginGuide(
             output = output,
             settings = settings,
+            margins = PreviewMargins(
+                left = bible.marginLeft,
+                right = bible.marginRight,
+                top = bible.marginTop,
+                bottom = bible.marginBottom,
+            ),
+            bandPercent = bible.lowerThirdHeightPercent,
             lowerThird = target.isLowerThird,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = MARGIN_GUIDE_ALPHA),
         )
         PreviewBadge(
             label = stringResource(
@@ -175,90 +166,6 @@ internal fun BiblePreviewPanel(
                 },
             ),
             modifier = Modifier.align(Alignment.TopStart).padding(6.dp),
-        )
-    }
-}
-
-/**
- * Hands [content] the preview box at density 1, which is all the scaling it needs.
- *
- * Both presenters derive their own scale from `maxWidth.toPx()` against 1920x1080 and then emit
- * sizes in `sp`, so density is applied twice and a preview on a Retina screen came out about
- * 1.6x too large. Pinning [LocalDensity] to 1 makes a unit a pixel and cancels the second
- * application, and the presenter's own scale factor then does the rest -- it is built to fill
- * whatever box it is given.
- *
- * Deliberately *not* the graphics-layer trick `LivePreviewPanel` uses. Measuring the presenter at
- * the output's full 1920x1080 and scaling the drawn result leaves a node that size in the layout
- * tree, which reads as a settings tab overflowing its dialog by 1600dp.
- */
-@Composable
-private fun ScaledPresenterBox(content: @Composable () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalDensity provides Density(1f)) {
-            content()
-        }
-    }
-}
-
-/**
- * The dashed rectangle marking where text is actually allowed to go.
- *
- * The presenter respects the projection window insets and the Bible margins but draws nothing to
- * show them, so the guide is the preview's own -- and it has to agree with the presenter's geometry
- * exactly or it marks a boundary nothing observes. On the lower third that boundary is the band:
- * the presenter takes [ProjectionSettings.lowerThirdHeightPercent] of the *inset* height and sits it
- * on the floor of that area, so the guide follows the band rather than the whole screen.
- */
-@Composable
-private fun MarginGuide(
-    output: PreviewOutputSize,
-    settings: AppSettings,
-    lowerThird: Boolean,
-    color: Color,
-) {
-    val projection = settings.projectionSettings
-    val bible = settings.bibleSettings
-    val leftFraction = (projection.windowLeft + bible.marginLeft).toFloat() / output.width
-    val rightFraction = (projection.windowRight + bible.marginRight).toFloat() / output.width
-    val topFraction = (projection.windowTop + bible.marginTop).toFloat() / output.height
-    val bottomFraction = (projection.windowBottom + bible.marginBottom).toFloat() / output.height
-    val insetHeightFraction = (1f - topFraction - bottomFraction).coerceAtLeast(0f)
-    val guideTopFraction = if (lowerThird) {
-        1f - bottomFraction - insetHeightFraction * projection.lowerThirdHeightPercent / PERCENT
-    } else {
-        topFraction
-    }
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val left = size.width * leftFraction
-        val top = size.height * guideTopFraction
-        val width = size.width * (1f - leftFraction - rightFraction)
-        val height = size.height * (1f - guideTopFraction - bottomFraction)
-        if (width <= 0f || height <= 0f) return@Canvas
-        drawRect(
-            color = color,
-            topLeft = Offset(left, top),
-            size = Size(width, height),
-            style = Stroke(
-                width = GUIDE_STROKE_PX,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(GUIDE_DASH_PX, GUIDE_DASH_PX)),
-            ),
-        )
-    }
-}
-
-/** Which of the two outputs this picture is of, said in the corner rather than only in the switch. */
-@Composable
-private fun PreviewBadge(label: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color.Black.copy(alpha = BADGE_ALPHA), RoundedCornerShape(4.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = BADGE_TEXT_ALPHA),
         )
     }
 }

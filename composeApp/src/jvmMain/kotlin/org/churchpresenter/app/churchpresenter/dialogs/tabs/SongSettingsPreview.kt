@@ -1,27 +1,17 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_preview_full_screen
@@ -32,35 +22,16 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
-/** The band's height is stored as a whole percentage of the output. */
-private const val PERCENT = 100f
-
-private const val PREVIEW_BACKGROUND = 0xFF08090B
-private const val MARGIN_GUIDE_ALPHA = 0.5f
-private const val GUIDE_STROKE_PX = 1f
-private const val GUIDE_DASH_PX = 4f
-private const val BADGE_ALPHA = 0.55f
-private const val BADGE_TEXT_ALPHA = 0.75f
-
-/**
- * How tall the preview is allowed to get.
- *
- * The dialog is at most 1400x900 and rather less on a 1366x768 laptop, and the controls under the
- * preview need roughly 250dp of it. Left to fill the pane's width the preview would take more than
- * the whole remainder, so it is capped here and centred in the space instead.
- */
-internal val SONG_PREVIEW_MAX_HEIGHT = 260.dp
-
-/** The song number the sample slide carries, chosen to be four digits like a real songbook. */
+/** The song number the sample slide carries, chosen to be three digits like a real songbook. */
 private const val SAMPLE_SONG_NUMBER = 427
 
 /**
  * What the configured styling puts on screen -- drawn by [SongPresenter] itself.
  *
- * This composes the **real presenter** at the output's own logical size and scales the result down,
- * exactly as the live preview panel beside the tabs does, rather than reproducing its layout. Every
- * rule the presenter applies -- the auto-fit, the bilingual split, the look-ahead band, the
- * end-of-song marker, the margins -- therefore lands here without being written twice.
+ * This composes the **real presenter** at the output's own size and scales the result down, exactly
+ * as the live preview panel beside the tabs does, rather than reproducing its layout. Every rule the
+ * presenter applies -- the auto-fit, the bilingual split, the look-ahead band, the end-of-song
+ * marker, the margins -- therefore lands here without being written twice.
  *
  * Backgrounds are left off: the presenter would decode an image or start a video for a picture a
  * few hundred dp wide, and what is being previewed here is the type.
@@ -71,10 +42,14 @@ internal fun SongPreviewPanel(
     target: SongStyleTarget,
     /** The look-ahead is shown on demand: a preview switch, not a setting. */
     showLookAhead: Boolean,
+    /** Likewise the chord chart, which the output decides per screen and the styling has to fit. */
+    showChords: Boolean,
+    /** The two sections the preview draws -- see [songSampleSections]. */
+    sections: List<LyricSection>,
     modifier: Modifier = Modifier,
 ) {
     val output = previewOutputSize(settings)
-    val sections = sampleSections()
+    val song = settings.songSettings
     val vertical = settings.projectionSettings.screenAssignments.any { it.isLowerThirdVertical }
 
     Box(
@@ -84,7 +59,7 @@ internal fun SongPreviewPanel(
             .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
     ) {
-        ScaledPresenterBox {
+        ScaledPresenterBox(output) {
             SongPresenter(
                 lyricSection = sections.first(),
                 appSettings = settings,
@@ -94,11 +69,7 @@ internal fun SongPreviewPanel(
                 allLyricSections = sections,
                 displaySectionIndex = 0,
                 showBackground = false,
-                // Chords belong to the stage monitor, not to what the congregation reads. The
-                // presenter can be asked for them -- `ScreenAssignment.showChords` -- but neither
-                // of the outputs this tab styles is where a chart goes, so the preview never
-                // pretends otherwise.
-                showChords = false,
+                showChords = showChords,
                 // The one thing every other caller of SongPresenter passes and this did not. The
                 // output's own song mode overrides the song-level language setting wherever it is
                 // set -- and it always is -- so without this the preview showed a language the
@@ -106,13 +77,19 @@ internal fun SongPreviewPanel(
                 languageOverride = settings.songLanguageFor(target),
             )
         }
-        SongMarginGuide(
+        MarginGuide(
             output = output,
             settings = settings,
+            margins = PreviewMargins(
+                left = song.marginLeft,
+                right = song.marginRight,
+                top = song.marginTop,
+                bottom = song.marginBottom,
+            ),
+            bandPercent = song.lowerThirdHeightPercent,
             lowerThird = target.isLowerThird,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = MARGIN_GUIDE_ALPHA),
         )
-        SongPreviewBadge(
+        PreviewBadge(
             label = stringResource(
                 if (target.isLowerThird) {
                     Res.string.song_preview_lower_third
@@ -126,15 +103,22 @@ internal fun SongPreviewPanel(
 }
 
 /**
- * A verse and the chorus behind it, bilingual and with chords.
+ * A verse and the chorus behind it, bilingual and with chords, at [slot]'s length.
  *
- * Two sections rather than one, because the look-ahead line and the next-section marker have
- * nothing to show without something to look ahead *to* -- with a single section those two element
- * tabs would preview a blank.
- * two languages so the bilingual layout controls show what they do.
+ * Two sections rather than one at every length, because the look-ahead line and the next-section
+ * marker have nothing to show without something to look ahead *to* -- with a single section those
+ * two element tabs would preview a blank. Both languages at every length too, so the bilingual
+ * layout controls keep showing what they do.
+ *
+ * The three lengths are what makes auto-fit visible: a one-line slide and a six-line one are the
+ * two ends the same font size has to serve, and a preview that only ever draws the middle case
+ * answers neither question.
+ *
+ * `internal` because the on-screen preview pushes exactly these sections at the real outputs -- one
+ * definition of "the sample", so the two pictures cannot drift apart.
  */
 @Composable
-private fun sampleSections(): List<LyricSection> {
+internal fun songSampleSections(slot: PreviewSampleSlot): List<LyricSection> {
     val title = stringResource(Res.string.song_preview_sample_title)
     val verse = LyricSection(
         title = title,
@@ -142,6 +126,40 @@ private fun sampleSections(): List<LyricSection> {
         songNumber = SAMPLE_SONG_NUMBER,
         type = "verse",
         labelName = "Verse 1",
+    )
+    val chorus = verse.copy(type = "chorus", labelName = "Chorus", isLastSection = true)
+    return when (slot) {
+        PreviewSampleSlot.SHORT -> shortSample(verse, chorus)
+        PreviewSampleSlot.MEDIUM -> mediumSample(verse, chorus)
+        PreviewSampleSlot.LONG -> longSample(verse, chorus)
+    }
+}
+
+/**
+ * One short line a side.
+ *
+ * Short in **both** senses, and it has to be: with the display mode set to line -- which is the
+ * lower third's default -- only the first line of a section is ever drawn, so three samples that
+ * differed only in how many lines they had were byte-identical on that output and the selector
+ * appeared to do nothing at all. Each slot therefore changes the length of the first line as well
+ * as the number of them.
+ */
+private fun shortSample(verse: LyricSection, chorus: LyricSection) = listOf(
+    verse.copy(
+        lines = listOf("How sweet the sound"),
+        secondaryLines = listOf("О, благодать!"),
+        chordLines = listOf("[C]How sweet the [G]sound"),
+    ),
+    chorus.copy(
+        lines = listOf("That saved a wretch"),
+        secondaryLines = listOf("Спасён я Богом"),
+        chordLines = listOf("[Em]That saved a [D]wretch"),
+    ),
+)
+
+/** Two lines a side, of ordinary length -- a normal slide, and what the preview opens on. */
+private fun mediumSample(verse: LyricSection, chorus: LyricSection) = listOf(
+    verse.copy(
         lines = listOf(
             "Amazing grace! How sweet the sound",
             "That saved a wretch like me",
@@ -154,98 +172,80 @@ private fun sampleSections(): List<LyricSection> {
             "[G]Amazing [G7]grace! How [C]sweet the [G]sound",
             "[G]That saved a [Em]wretch [D]like [G]me",
         ),
-    )
-    return listOf(
-        verse,
-        verse.copy(
-            type = "chorus",
-            labelName = "Chorus",
-            lines = listOf("Twas grace that taught my heart to fear"),
-            secondaryLines = listOf("И благодать научит нас"),
-            chordLines = listOf("[C]Twas grace that [G]taught my heart to [D]fear"),
-            isLastSection = true,
+    ),
+    chorus.copy(
+        lines = listOf(
+            "Twas grace that taught my heart to fear",
+            "And grace my fears relieved",
         ),
-    )
-}
+        secondaryLines = listOf(
+            "И благодать научит нас",
+            "Страх сердца побеждать",
+        ),
+        chordLines = listOf(
+            "[C]Twas grace that [G]taught my heart to [D]fear",
+            "[G]And grace my [D]fears re[G]lieved",
+        ),
+    ),
+)
 
 /**
- * Hands [content] the preview box at density 1, which is all the scaling it needs.
+ * Six long lines a side: what auto-fit has to shrink, and what finds a margin that is too generous.
  *
- * Both presenters derive their own scale from `maxWidth.toPx()` against 1920x1080 and then emit
- * sizes in `sp`, so density is applied twice and a preview on a Retina screen came out about
- * 1.6x too large. Pinning [LocalDensity] to 1 makes a unit a pixel and cancels the second
- * application, and the presenter's own scale factor then does the rest -- it is built to fill
- * whatever box it is given.
- *
- * Deliberately *not* the graphics-layer trick `LivePreviewPanel` uses. Measuring the presenter at
- * the output's full 1920x1080 and scaling the drawn result leaves a node that size in the layout
- * tree, which reads as a settings tab overflowing its dialog by 1600dp.
+ * The first line is the longest of the three slots as well, so this slot still says something on a
+ * line-mode output where the other five lines are never drawn.
  */
-@Composable
-private fun ScaledPresenterBox(content: @Composable () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalDensity provides Density(1f)) {
-            content()
-        }
-    }
-}
-
-/**
- * The dashed rectangle marking where text is actually allowed to go.
- *
- * Drawn outside the scaled layer: inside it a 1dp line is scaled down with everything else and
- * comes out a quarter of a pixel wide. Expressed as fractions of the output instead, which the box
- * matches exactly because it carries the output's own aspect ratio.
- */
-@Composable
-private fun SongMarginGuide(
-    output: PreviewOutputSize,
-    settings: AppSettings,
-    lowerThird: Boolean,
-    color: Color,
-) {
-    val projection = settings.projectionSettings
-    val song = settings.songSettings
-    val leftFraction = (projection.windowLeft + song.marginLeft).toFloat() / output.width
-    val rightFraction = (projection.windowRight + song.marginRight).toFloat() / output.width
-    val topFraction = (projection.windowTop + song.marginTop).toFloat() / output.height
-    val bottomFraction = (projection.windowBottom + song.marginBottom).toFloat() / output.height
-    val insetHeightFraction = (1f - topFraction - bottomFraction).coerceAtLeast(0f)
-    val guideTopFraction = if (lowerThird) {
-        1f - bottomFraction - insetHeightFraction * projection.lowerThirdHeightPercent / PERCENT
-    } else {
-        topFraction
-    }
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val left = size.width * leftFraction
-        val top = size.height * guideTopFraction
-        val width = size.width * (1f - leftFraction - rightFraction)
-        val height = size.height * (1f - guideTopFraction - bottomFraction)
-        if (width <= 0f || height <= 0f) return@Canvas
-        drawRect(
-            color = color,
-            topLeft = Offset(left, top),
-            size = Size(width, height),
-            style = Stroke(
-                width = GUIDE_STROKE_PX,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(GUIDE_DASH_PX, GUIDE_DASH_PX)),
-            ),
-        )
-    }
-}
-
-/** Which of the two outputs this picture is of, said in the corner rather than only in the switch. */
-@Composable
-private fun SongPreviewBadge(label: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color.Black.copy(alpha = BADGE_ALPHA), RoundedCornerShape(4.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = BADGE_TEXT_ALPHA),
-        )
-    }
-}
+private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
+    verse.copy(
+        lines = listOf(
+            "Through many dangers, toils and snares I have already come",
+            "Tis grace hath brought me safe thus far, and grace will lead me home",
+            "Amazing grace! How sweet the sound that saved a wretch like me",
+            "I once was lost, but now am found, was blind but now I see",
+            "Twas grace that taught my heart to fear, and grace my fears relieved",
+            "How precious did that grace appear the hour I first believed",
+        ),
+        secondaryLines = listOf(
+            "Сквозь много бед, трудов и сетей я уже прошёл",
+            "Меня хранила благодать, она домой введёт",
+            "О, благодать! Спасён я был Тобой из бездны зла",
+            "Был мёртв и чудом ожил я, был слеп и вижу свет",
+            "И благодать научит нас страх сердца побеждать",
+            "Как драгоценна благодать в тот час, когда я верил",
+        ),
+        chordLines = listOf(
+            "[G]Through many [G7]dangers, [C]toils and snares I have al[G]ready come",
+            "[G]Tis grace hath [Em]brought me safe thus far, and [D]grace will lead me [G]home",
+            "[G]Amazing [G7]grace! How [C]sweet the sound that saved a [G]wretch like me",
+            "[G]I once was [Em]lost, but now am found, was [D]blind but now I [G]see",
+            "[C]Twas grace that [G]taught my heart to fear, and [D]grace my fears re[G]lieved",
+            "[G]How precious [G7]did that [C]grace appear the hour I [G]first believed",
+        ),
+    ),
+    chorus.copy(
+        lines = listOf(
+            "Tis grace hath brought me safe thus far, and grace will lead me home",
+            "Through many dangers, toils and snares I have already come",
+            "When we've been there ten thousand years, bright shining as the sun",
+            "We've no less days to sing God's praise than when we first begun",
+            "My chains are gone, I've been set free, my God my Saviour has ransomed me",
+            "And like a flood His mercy reigns, unending love, amazing grace",
+        ),
+        secondaryLines = listOf(
+            "Меня хранила благодать, она домой введёт",
+            "Сквозь много бед, трудов и сетей я уже прошёл",
+            "Когда пройдёт десять тысяч лет, сияющих как солнце",
+            "У нас не меньше дней хвалить, чем в самый первый день",
+            "Оковы пали, я свободен, мой Бог, Спаситель, искупил",
+            "И как поток течёт Его любовь, о, благодать!",
+        ),
+        chordLines = listOf(
+            "[G]Tis grace hath [Em]brought me safe thus far, and [D]grace will lead me [G]home",
+            "[G]Through many [G7]dangers, [C]toils and snares I have al[G]ready come",
+            "[G]When we've been [G7]there ten [C]thousand years, bright shining as the [G]sun",
+            "[G]We've no less [Em]days to sing God's praise than [D]when we first be[G]gun",
+            "[C]My chains are [G]gone, I've been set free, my [D]God my Saviour has ransomed [G]me",
+            "[G]And like a [G7]flood His [C]mercy reigns, unending love, a[G]mazing grace",
+        ),
+    ),
+)
