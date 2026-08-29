@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- ── Compose's own default-entitlements.plist, restated verbatim ──────────────────────
+         Setting `entitlementsFile` REPLACES the plugin's defaults outright rather than adding
+         to them, so these three have to be here. Without disable-library-validation, JCEF, VLC
+         and the DeckLink JNI library all fail to load, and they fail silently at launch. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!-- Camera and capture-card sources on the canvas. macOS lets an app read capture-device
+         *names* without this and refuses to deliver *frames* — which is a device that appears
+         in the dropdown and then shows nothing. See issue #431. -->
+    <key>com.apple.security.device.camera</key>
+    <true/>
+
+    <!-- NOT app-sandboxed, deliberately. This is a Developer ID build, and the sandbox would cut
+         off spawning ffmpeg, VLC and system_profiler, and the Companion server's sockets — i.e.
+         it would turn one broken feature into ten. The Mac App Store variant is a separate file
+         if that is ever wanted. -->
+</dict>
+</plist>

@@ -240,7 +240,7 @@ class HeicDecoderTest {
         val input = File("in.heic")
         val output = File("out.jpg")
 
-        val command = HeicDecoder.ffmpegHeicCommand(input, output)
+        val command = HeicDecoder.ffmpegHeicCommand(input, output, executable = "ffmpeg")
 
         assertEquals("ffmpeg", command.first())
         assertEquals(output.absolutePath, command.last())
