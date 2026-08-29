@@ -128,12 +128,22 @@ object CrashReporter {
         buildIdentity: BuildIdentity,
         setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit,
         addShutdownHook: (Runnable) -> Unit,
+        telemetryOff: Boolean = telemetryDisabled(),
+        initTelemetry: () -> Unit = ::initSentry,
     ) {
         build = buildIdentity
         crashDir.mkdirs()
 
+        // [telemetryOff] is read here rather than inside [initSentry] because this is where
+        // "should telemetry run at all" is already decided, and because a branch inside initSentry
+        // is one no test can reach — that function ends in Sentry.init. Both it and the init step
+        // are defaulted parameters so the suite can drive the decision and see which way it went;
+        // only the real Sentry.init stays uncovered.
+        //
+        // The install id is deliberately outside the switch: it identifies the install for the
+        // local crash log too, and minting it has never depended on Sentry being reachable.
         if (analyticsReportingEnabled) {
-            initSentry()
+            if (!telemetryOff) initTelemetry()
             setUser(getOrCreateInstallId())
         }
 
@@ -460,7 +470,6 @@ object CrashReporter {
 
     private fun initSentry() {
         try {
-            if (telemetryDisabled()) return
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             Sentry.init { options -> configureOptions(options, dsn) }
