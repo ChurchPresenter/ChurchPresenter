@@ -2,56 +2,26 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import androidx.compose.ui.test.ExperimentalTestApi
 import java.io.File
 
 /**
- * Harness and fixtures shared by the `LowerThirdSettingsTab` test classes.
+ * Fixtures for anything that reads a folder of Lottie animations.
  *
- * The tab lists the Lottie animations in a folder, so its behaviour depends on what is actually on
- * disk. Every test that needs files gets its **own temporary folder**, created and deleted around
- * it, so nothing leaks between tests or touches the developer's real animation library.
+ * These outlived the Lower Third *settings* tab they were written for: that tab duplicated the Lower
+ * Third content tab and was removed, but the Server tab's trigger list, the offscreen renderer, the
+ * Bible tab's folder scan and the output screenshots all still need a folder with known contents in
+ * it. Every test that needs files gets its **own temporary folder**, created and deleted around it,
+ * so nothing leaks between tests or touches the developer's real animation library.
  *
- * A file counts as a Lottie animation to this tab when it is a `.json` whose text contains both a
- * `"v"` and a `"layers"` key — [lottieJson] produces the smallest thing that satisfies that, and
+ * A file counts as a Lottie animation when it is a `.json` whose text contains both a `"v"` and a
+ * `"layers"` key — [lottieJson] produces the smallest thing that satisfies that, and
  * [NOT_LOTTIE_JSON] the smallest thing that does not.
  */
-@OptIn(ExperimentalTestApi::class)
-internal fun lowerThirdTab(
-    initial: AppSettings = AppSettings(),
-    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
-    block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
-) = runComposeUiTest {
-    var current = initial
-    setContent {
-        MaterialTheme {
-            var state by remember { mutableStateOf(current) }
-            LowerThirdSettingsTab(
-                settings = state,
-                onSettingsChange = { transform -> state = transform(state); current = state },
-                onOpenLottieGen = onOpenLottieGen,
-            )
-        }
-    }
-    awaitFolderScan()
-    block { current }
-}
-
-/** Settings pointing the tab at [folder] as its animation library. */
-internal fun settingsForFolder(folder: File): AppSettings = AppSettings().let {
-    it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
-}
-
-/** The smallest JSON this tab accepts as a Lottie animation. */
+/** The smallest JSON that counts as a Lottie animation. */
 internal fun lottieJson(name: String = "clip"): String =
     """{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"nm":"$name","layers":[]}"""
 

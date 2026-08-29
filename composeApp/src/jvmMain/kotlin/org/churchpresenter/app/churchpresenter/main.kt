@@ -1594,20 +1594,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onIdentifyNdi = { index ->
                                     presenterManager.identifyNdiOutput(index)
                                 },
-                                onOpenLottieGen = { outputDir, onSaved ->
-                                    if (isUsableOutputDir(outputDir)) {
-                                        lottieGenOutputDir = File(outputDir)
-                                        lottieGenOnFileSaved = onSaved
-                                        showLottieGenWindow = true
-                                    } else {
-                                        javax.swing.JOptionPane.showMessageDialog(
-                                            null,
-                                            "Please set a Lower Third folder in Settings first.",
-                                            "No Folder Configured",
-                                            javax.swing.JOptionPane.WARNING_MESSAGE
-                                        )
-                                    }
-                                },
                                 obsManager = obsManager,
                                 companionSatelliteViewModel = companionSatelliteViewModel
                             )

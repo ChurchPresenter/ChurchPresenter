@@ -118,4 +118,37 @@ class LowerThirdHeightMigrationTest {
         assertEquals(once.bibleSettings.lowerThirdHeightPercent, twice.bibleSettings.lowerThirdHeightPercent)
         assertEquals(once.songSettings.lowerThirdHeightPercent, twice.songSettings.lowerThirdHeightPercent)
     }
+
+    // ── The fields the Lottie lower third stopped honouring ─────────────────────────────────────
+
+    @Test
+    fun `a file still carrying the old lower-third insets opens without them`() {
+        // The four `streamingSettings.window*` insets went when the Lottie lower third became
+        // self-contained. No migration step: there is nothing to migrate them *to*, and every
+        // settings file in the wild still has them. What has to hold is that such a file opens at
+        // all, keeps the one field that survived, and does not resurrect the insets on the way out.
+        val settings = decode(
+            """
+            {"settingsVersion":7,
+             "streamingSettings":{
+               "lowerThirdFolder":"/srv/lower-thirds",
+               "windowTop":40,"windowLeft":40,"windowRight":40,"windowBottom":120,
+               "savedSearchStrings":["NAME"],"savedReplaceStrings":["Pastor"],
+               "lottiePresets":[{"id":"a","label":"Welcome"}],
+               "lowerThirdListWidthDp":320}}
+            """.trimIndent(),
+        )
+
+        assertEquals("/srv/lower-thirds", settings.streamingSettings.lowerThirdFolder)
+
+        val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+        val written = json.encodeToString(AppSettings.serializer(), settings)
+        listOf("windowTop", "savedSearchStrings", "lottiePresets", "lowerThirdListWidthDp").forEach {
+            assertEquals(
+                false,
+                written.substringAfter("\"streamingSettings\"").substringBefore("}").contains(it),
+                "$it must not be written back into streamingSettings",
+            )
+        }
+    }
 }
