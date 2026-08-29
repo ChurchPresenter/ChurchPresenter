@@ -5,6 +5,8 @@ import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
+import io.sentry.SentryLevel
+import org.churchpresenter.diagnostics.CrashReporter
 import java.util.concurrent.ConcurrentHashMap
 
 private const val PROGRESSIVE = 1
@@ -97,13 +99,31 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
          * `UnsatisfiedLinkError` rather than an exception, which is why that is caught by name
          * rather than as `Throwable`.
          */
+        /**
+         * The runtime at [libraryPath], or null when it will not load.
+         *
+         * A load failure is not reported. The NDI Runtime is an optional download the operator
+         * installs themselves — the same standing as VLC and ffmpeg — and
+         * [NdiRuntimeStatus.LoadFailed] already carries the path to the settings card, which says
+         * it "may be for a different processor architecture, or too old" and links to the
+         * download. An event on top of that told us nothing the operator was not already being
+         * told, and it arrived once per attempt: the card's "look again" button made a single
+         * unusable install into eight reports from one church.
+         *
+         * The fact still rides along as a tag and a breadcrumb, so if something else in the
+         * session does report, the failed runtime is visible in it. Same shape as `jcef.blocked`.
+         */
         fun load(libraryPath: String): JnaNdiLibrary? = try {
             JnaNdiLibrary(Native.load(libraryPath, NdiLibC::class.java))
         } catch (e: UnsatisfiedLinkError) {
-            org.churchpresenter.diagnostics.CrashReporter.reportException(
-                RuntimeException("NDI runtime at $libraryPath could not be loaded", e),
-                "Loading the NDI runtime",
-            )
+            runCatching {
+                CrashReporter.setTag("ndi.load_failed", "true")
+                CrashReporter.breadcrumb(
+                    "NDI runtime at $libraryPath could not be loaded: ${e.message}",
+                    category = "ndi",
+                    level = SentryLevel.WARNING,
+                )
+            }
             null
         }
     }
