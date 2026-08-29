@@ -60,13 +60,23 @@ class DeviceEnumerationParsingTest {
     }
 
     @Test
-    fun `ffmpeg's bracketed rate list is not read, so the size comes back at the default rate`() {
+    fun `ffmpeg's bracketed rate range is read at its upper bound`() {
         val output = "[avfoundation] 1280x720@[30.000030 60.000000]fps"
 
         val format = parseAvfoundationFormats(output).single()
 
         assertEquals(1280, format.width)
         assertEquals(720, format.height)
+        assertEquals(
+            60, format.fps,
+            "the range's top is the fastest the device will run, which is the rate worth asking for",
+        )
+    }
+
+    @Test
+    fun `a bracketed range with one rate reads as that rate`() {
+        val format = parseAvfoundationFormats("  1920x1080@[30.000030 30.000030]fps").single()
+
         assertEquals(30, format.fps)
     }
 

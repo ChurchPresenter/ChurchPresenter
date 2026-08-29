@@ -212,6 +212,10 @@ class SourcePropertiesDeviceListingTest {
         )
 
         assertEquals(listOf(1920, 1280), formats.map { it.width })
+        assertEquals(
+            listOf(60, 30), formats.map { it.fps },
+            "each mode runs at the top of the range ffmpeg printed for it",
+        )
     }
 
     @Test
@@ -309,7 +313,7 @@ class SourcePropertiesDeviceListingTest {
     // ── macOS cameras ─────────────────────────────────────────────────────────
 
     @Test
-    fun `system_profiler cameras are read and addressed by index`() {
+    fun `system_profiler names the cameras when ffmpeg is not installed to list them`() {
         val devices = parseMacCameras(
             systemProfilerOutput = """
                 Camera:
@@ -327,8 +331,56 @@ class SourcePropertiesDeviceListingTest {
         assertEquals(listOf("FaceTime HD Camera", "Studio Display Camera"), devices.map { it.name })
         assertEquals(
             listOf("avfoundation://0", "avfoundation://1"), devices.map { it.path },
-            "AVFoundation addresses cameras by position, so the order is the address",
+            "with no ffmpeg there is no index to read, and no capture either — these entries exist " +
+                "so the operator sees their camera named beside the hint telling them to install it",
         )
+    }
+
+    @Test
+    fun `a capture card is addressed by ffmpeg's index, not its position among physical cameras`() {
+        // The device listing from issue #431, where three virtual cameras precede the real card.
+        val devices = parseMacCameras(
+            systemProfilerOutput = "    USB3. 0 capture:\n",
+            ffmpegOutput = """
+                [AVFoundation indev @ 0x1] AVFoundation video devices:
+                [AVFoundation indev @ 0x1] [0] Meld Studio Virtual Camera
+                [AVFoundation indev @ 0x1] [1] OBS Virtual Camera
+                [AVFoundation indev @ 0x1] [2] USB3 Video
+                [AVFoundation indev @ 0x1] [3] NDI Virtual Camera
+                [AVFoundation indev @ 0x1] [4] Capture screen 0
+                [AVFoundation indev @ 0x1] AVFoundation audio devices:
+                [AVFoundation indev @ 0x1] [0] USB3 Digital Audio
+            """.trimIndent(),
+        )
+
+        assertEquals(
+            "avfoundation://2", devices.single { it.name == "USB3 Video" }.path,
+            "numbering the card by its position in system_profiler would address it as 0, " +
+                "which is a virtual camera nobody is feeding — that is issue #431",
+        )
+        assertEquals(
+            listOf("avfoundation://0", "avfoundation://1", "avfoundation://2", "avfoundation://3", "avfoundation://4"),
+            devices.map { it.path },
+        )
+        assertTrue(
+            devices.none { it.name == "USB3. 0 capture" },
+            "system_profiler's name for the same card must not be offered as a second, unopenable device",
+        )
+    }
+
+    @Test
+    fun `an audio device sharing a video device's index is never offered as a camera`() {
+        val devices = parseMacCameras(
+            systemProfilerOutput = "",
+            ffmpegOutput = """
+                [AVFoundation indev @ 0x1] AVFoundation video devices:
+                [AVFoundation indev @ 0x1] [0] FaceTime HD Camera
+                [AVFoundation indev @ 0x1] AVFoundation audio devices:
+                [AVFoundation indev @ 0x1] [0] MacBook Pro Microphone
+            """.trimIndent(),
+        )
+
+        assertEquals(listOf("FaceTime HD Camera"), devices.map { it.name })
     }
 
     @Test
@@ -339,16 +391,20 @@ class SourcePropertiesDeviceListingTest {
     }
 
     @Test
-    fun `ffmpeg adds virtual cameras after the physical ones`() {
+    fun `the newer unindexed listing is numbered by its own order, not system_profiler's count`() {
         val devices = parseMacCameras(
             systemProfilerOutput = "    FaceTime HD Camera:\n",
-            ffmpegOutput = "[AVFoundation indev @ 0x1] \"OBS Virtual Camera\" (video)",
+            ffmpegOutput = """
+                [AVFoundation indev @ 0x1] "FaceTime HD Camera" (video)
+                [AVFoundation indev @ 0x1] "OBS Virtual Camera" (video)
+            """.trimIndent(),
         )
 
         assertEquals(listOf("FaceTime HD Camera", "OBS Virtual Camera"), devices.map { it.name })
         assertEquals(
-            "avfoundation://1", devices.last().path,
-            "the newer ffmpeg output carries no index, so numbering continues from the physical ones",
+            listOf("avfoundation://0", "avfoundation://1"), devices.map { it.path },
+            "this listing prints no index, so position within it is the address — " +
+                "counting on from system_profiler's total would offset every device",
         )
     }
 
@@ -373,14 +429,31 @@ class SourcePropertiesDeviceListingTest {
     }
 
     @Test
-    fun `a camera both tools report is offered once`() {
+    fun `a camera both tools report is offered once, on ffmpeg's terms`() {
         val devices = parseMacCameras(
             systemProfilerOutput = "    FaceTime HD Camera:\n",
             ffmpegOutput = "\"FaceTime HD Camera\" (video)",
         )
 
-        assertEquals(1, devices.size, "system_profiler saw it first, so ffmpeg must not add it again")
+        assertEquals(1, devices.size, "the two tools describe one camera, not two")
         assertEquals("avfoundation://0", devices.single().path)
+    }
+
+    @Test
+    fun `a camera only system_profiler can see is dropped once ffmpeg has spoken`() {
+        val devices = parseMacCameras(
+            systemProfilerOutput = "    Studio Display Camera:\n",
+            ffmpegOutput = """
+                [AVFoundation indev @ 0x1] AVFoundation video devices:
+                [AVFoundation indev @ 0x1] [0] FaceTime HD Camera
+            """.trimIndent(),
+        )
+
+        assertEquals(
+            listOf("FaceTime HD Camera"), devices.map { it.name },
+            "ffmpeg lists everything AVFoundation will open, so a name it omits has no address " +
+                "and could only be offered with an invented one",
+        )
     }
 
     @Test
