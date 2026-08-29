@@ -2,451 +2,263 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Drives the Bible and Songs cards — four `BackgroundColumn`s, one per content type per output —
- * asserting the [BackgroundConfig] each writes and what it puts on screen.
+ * Each of the four content surfaces, and the gradient only two of them offer.
  *
- * All four columns are the same composable with different callbacks, and every one of them keeps a
- * complete config of its own. The risk this class is really guarding against is a column writing
- * into a neighbour's settings, so each test also asserts the other three were left alone.
+ * The editor is one set of controls serving six surfaces, so what these prove is that a write lands
+ * on the surface the rail has open and on no other — the thing a shared editor can most easily get
+ * wrong.
  */
 class BackgroundSettingsTabColumnsTest {
 
-    private fun settingsWith(change: BackgroundSettings.() -> BackgroundSettings): AppSettings =
-        AppSettings().let { it.copy(backgroundSettings = it.backgroundSettings.change()) }
-
-    /** Puts every slot on a type that is not [Constants.BACKGROUND_COLOR], freeing "Color" to be picked. */
-    private fun allTransparent(): AppSettings = settingsWith {
-        copy(
-            defaultBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-            defaultLowerThirdBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-            bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-            bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-            songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-            songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-        )
+    private fun scopeOf(surface: Surface): BackgroundScope = when (surface) {
+        Surface.DEFAULT -> BackgroundScope.DEFAULT
+        Surface.DEFAULT_LOWER_THIRD -> BackgroundScope.DEFAULT_LOWER_THIRD
+        Surface.BIBLE -> BackgroundScope.BIBLE
+        Surface.BIBLE_LOWER_THIRD -> BackgroundScope.BIBLE_LOWER_THIRD
+        Surface.SONG -> BackgroundScope.SONG
+        Surface.SONG_LOWER_THIRD -> BackgroundScope.SONG_LOWER_THIRD
     }
 
-    // ── Type selection, per column ──────────────────────────────────────────────────────────────
+    private fun configOf(settings: AppSettings, surface: Surface): BackgroundConfig =
+        settings.backgroundSettings.configFor(scopeOf(surface))
 
     @Test
-    fun `the Bible full-screen column stores the type it is given`() = backgroundTab { get ->
-        chooseBackgroundType(TypeDropdown.BIBLE_FULLSCREEN, TypeLabel.IMAGE)
-        assertEquals(
-            Constants.BACKGROUND_IMAGE,
-            get().backgroundSettings.bibleBackground.backgroundType,
-            "the Bible full-screen type must be stored",
-        )
-        assertEquals(
-            Constants.BACKGROUND_COLOR,
-            get().backgroundSettings.bibleLowerThirdBackground.backgroundType,
-            "the Bible lower-third column must be untouched",
-        )
-        assertEquals(
-            Constants.BACKGROUND_COLOR,
-            get().backgroundSettings.songBackground.backgroundType,
-            "the Songs full-screen column must be untouched",
-        )
-    }
-
-    @Test
-    fun `the Bible lower-third column stores the type it is given`() = backgroundTab { get ->
-        chooseBackgroundType(TypeDropdown.BIBLE_LOWER_THIRD, TypeLabel.TRANSPARENT)
-        assertEquals(
-            Constants.BACKGROUND_TRANSPARENT,
-            get().backgroundSettings.bibleLowerThirdBackground.backgroundType,
-            "the Bible lower-third type must be stored",
-        )
-        assertEquals(
-            Constants.BACKGROUND_COLOR,
-            get().backgroundSettings.bibleBackground.backgroundType,
-            "the Bible full-screen column must be untouched",
-        )
-    }
-
-    @Test
-    fun `the Songs full-screen column stores the type it is given`() = backgroundTab { get ->
-        // Deliberately not Video: that option is disabled where VLC is missing, so it cannot be
-        // picked on every machine. A column's video row is covered from a fixture instead, below.
-        // Gradient is not an option here either — the tab offers it to lower-third slots only.
-        chooseBackgroundType(TypeDropdown.SONG_FULLSCREEN, TypeLabel.IMAGE)
-        assertEquals(
-            Constants.BACKGROUND_IMAGE,
-            get().backgroundSettings.songBackground.backgroundType,
-            "the Songs full-screen type must be stored",
-        )
-        assertEquals(
-            Constants.BACKGROUND_COLOR,
-            get().backgroundSettings.songLowerThirdBackground.backgroundType,
-            "the Songs lower-third column must be untouched",
-        )
-    }
-
-    /** A column set to Video renders the same picker row the default cards do. */
-    @Test
-    fun `a column set to Video shows the video picker`() {
-        val songVideo = settingsWith {
-            copy(
-                songBackground = BackgroundConfig(
-                    backgroundType = Constants.BACKGROUND_VIDEO,
-                    backgroundVideo = "/tmp/backdrops/column.mp4",
-                ),
-            )
-        }
-        backgroundTab(initial = songVideo) { _ ->
-            typeDropdowns()[TypeDropdown.SONG_FULLSCREEN].assertTextEquals(TypeLabel.VIDEO)
-            onAllNodesWithText("Background Video:").assertCountEquals(1)
-            onNodeWithText("column.mp4").assertExists("the column's picker must name the stored file")
-        }
-    }
-
-    @Test
-    fun `the Songs lower-third column stores the type it is given`() = backgroundTab { get ->
-        chooseBackgroundType(TypeDropdown.SONG_LOWER_THIRD, TypeLabel.DEFAULT)
-        assertEquals(
-            Constants.BACKGROUND_DEFAULT,
-            get().backgroundSettings.songLowerThirdBackground.backgroundType,
-            "the Songs lower-third type must be stored",
-        )
-        assertEquals(
-            Constants.BACKGROUND_COLOR,
-            get().backgroundSettings.songBackground.backgroundType,
-            "the Songs full-screen column must be untouched",
-        )
-    }
-
-    @Test
-    fun `a column can be put back on Color`() {
-        backgroundTab(initial = allTransparent()) { get ->
-            chooseBackgroundType(TypeDropdown.BIBLE_FULLSCREEN, TypeLabel.COLOR)
-            assertEquals(
-                Constants.BACKGROUND_COLOR,
-                get().backgroundSettings.bibleBackground.backgroundType,
-                "picking Color must be stored",
-            )
-            onNodeWithText("BACKGROUND COLOR:").assertExists("the colour field must appear")
-        }
-    }
-
-    // ── Gradient ────────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Gradient is the one type that carries a second flag: picking it also sets `gradientEnabled`,
-     * and picking anything else clears it again. The renderer reads that flag rather than the type,
-     * so a column left with the flag set on a non-gradient type would draw the wrong thing.
-     */
-    @Test
-    fun `choosing Gradient also raises the gradientEnabled flag`() = backgroundTab { get ->
-        assertEquals(false, get().backgroundSettings.bibleLowerThirdBackground.gradientEnabled, "starts clear")
-        chooseBackgroundType(TypeDropdown.BIBLE_LOWER_THIRD, TypeLabel.GRADIENT)
-        assertEquals(
-            Constants.BACKGROUND_GRADIENT,
-            get().backgroundSettings.bibleLowerThirdBackground.backgroundType,
-            "Gradient must be stored as the type",
-        )
-        assertEquals(
-            true,
-            get().backgroundSettings.bibleLowerThirdBackground.gradientEnabled,
-            "Gradient must also raise the flag the renderer reads",
-        )
-        onNodeWithText("Top Opacity").assertExists("the gradient controls must appear")
-    }
-
-    @Test
-    fun `leaving Gradient for another type clears the gradientEnabled flag`() {
-        val gradient = settingsWith {
-            copy(
-                songLowerThirdBackground = BackgroundConfig(
-                    backgroundType = Constants.BACKGROUND_GRADIENT,
-                    gradientEnabled = true,
-                ),
-            )
-        }
-        backgroundTab(initial = gradient) { get ->
-            chooseBackgroundType(TypeDropdown.SONG_LOWER_THIRD, TypeLabel.TRANSPARENT)
+    fun `every surface stores the type it is given`() = backgroundTab { settings ->
+        Surface.entries.forEach { surface ->
+            setSurfaceType(surface, TypeLabel.TRANSPARENT)
             assertEquals(
                 Constants.BACKGROUND_TRANSPARENT,
-                get().backgroundSettings.songLowerThirdBackground.backgroundType,
-                "the new type must be stored",
+                configOf(settings(), surface).backgroundType,
+                "${surface.name} must store what it was given",
             )
+        }
+    }
+
+    @Test
+    fun `a type written to one surface reaches no other`() = backgroundTab { settings ->
+        setSurfaceType(Surface.BIBLE_LOWER_THIRD, TypeLabel.TRANSPARENT)
+        assertEquals(
+            Constants.BACKGROUND_TRANSPARENT,
+            configOf(settings(), Surface.BIBLE_LOWER_THIRD).backgroundType,
+        )
+        listOf(Surface.BIBLE, Surface.SONG, Surface.SONG_LOWER_THIRD).forEach {
             assertEquals(
-                false,
-                get().backgroundSettings.songLowerThirdBackground.gradientEnabled,
-                "leaving Gradient must clear the flag",
+                Constants.BACKGROUND_COLOR,
+                configOf(settings(), it).backgroundType,
+                "${it.name} must be left as it was",
             )
-            onAllNodesWithText("Top Opacity").assertCountEquals(0)
         }
     }
 
-    private fun withGradient(topColor: String = "#000000", bottomColor: String = "#000000"): AppSettings =
-        settingsWith {
-            copy(
-                bibleLowerThirdBackground = BackgroundConfig(
-                    backgroundType = Constants.BACKGROUND_GRADIENT,
-                    gradientEnabled = true,
-                    gradientTopColor = topColor,
-                    gradientBottomColor = bottomColor,
-                ),
-            )
-        }
+    @Test
+    fun `a surface can be put back on Color`() = backgroundTab { settings ->
+        setSurfaceType(Surface.SONG, TypeLabel.TRANSPARENT)
+        chooseBackgroundType(TypeLabel.COLOR)
+        assertEquals(Constants.BACKGROUND_COLOR, configOf(settings(), Surface.SONG).backgroundType)
+    }
 
     @Test
-    fun `the gradient top colour field stores the confirmed hex`() {
-        backgroundTab(initial = withGradient(topColor = "#212223")) { get ->
-            recolor(fromHex = "#212223", toHex = "#40C0D0")
-            assertTrue(
-                get().backgroundSettings.bibleLowerThirdBackground.gradientTopColor
-                    .equals("#40C0D0", ignoreCase = true),
-                "the top colour must be stored",
-            )
+    fun `the inherit button takes a surface off its own look and back on again`() =
+        backgroundTab { settings ->
+            openSurface(Surface.BIBLE)
+            assertEquals(Constants.BACKGROUND_COLOR, configOf(settings(), Surface.BIBLE).backgroundType)
+
+            onNodeWithText("Use Default").performClick()
+            waitForIdle()
             assertEquals(
-                "#000000",
-                get().backgroundSettings.bibleLowerThirdBackground.gradientBottomColor,
-                "the bottom colour must be untouched",
+                Constants.BACKGROUND_DEFAULT,
+                configOf(settings(), Surface.BIBLE).backgroundType,
+                "the button must put it back to inheriting",
             )
-        }
-    }
+            onNodeWithText("Following Default").assertIsDisplayed()
 
-    @Test
-    fun `the gradient bottom colour field stores the confirmed hex`() {
-        backgroundTab(initial = withGradient(bottomColor = "#242526")) { get ->
-            recolor(fromHex = "#242526", toHex = "#50D0E0")
-            assertTrue(
-                get().backgroundSettings.bibleLowerThirdBackground.gradientBottomColor
-                    .equals("#50D0E0", ignoreCase = true),
-                "the bottom colour must be stored",
-            )
+            onNodeWithText("Following Default").performClick()
+            waitForIdle()
             assertEquals(
-                "#000000",
-                get().backgroundSettings.bibleLowerThirdBackground.gradientTopColor,
-                "the top colour must be untouched",
+                Constants.BACKGROUND_COLOR,
+                configOf(settings(), Surface.BIBLE).backgroundType,
+                "and pressing it again gives it a look of its own",
             )
         }
+
+    @Test
+    fun `choosing Gradient also raises the gradientEnabled flag`() = backgroundTab { settings ->
+        setSurfaceType(Surface.BIBLE_LOWER_THIRD, TypeLabel.GRADIENT)
+        val config = configOf(settings(), Surface.BIBLE_LOWER_THIRD)
+        assertEquals(Constants.BACKGROUND_GRADIENT, config.backgroundType)
+        assertTrue(config.gradientEnabled, "the presenters draw the overlay off this flag")
     }
 
     @Test
-    fun `the gradient sliders read back what is stored`() {
-        backgroundTab(initial = withGradient()) { get ->
-            val config = get().backgroundSettings.bibleLowerThirdBackground
-            assertSliderShows("Top Opacity", config.gradientTopOpacity, "the top opacity")
-            assertSliderShows("Bottom Opacity", config.gradientBottomOpacity, "the bottom opacity")
-            assertSliderShows("Transition Position", config.gradientPosition, "the transition position")
-        }
+    fun `leaving Gradient for another type clears the flag`() = backgroundTab { settings ->
+        setSurfaceType(Surface.SONG_LOWER_THIRD, TypeLabel.GRADIENT)
+        chooseBackgroundType(TypeLabel.COLOR)
+        val config = configOf(settings(), Surface.SONG_LOWER_THIRD)
+        assertEquals(Constants.BACKGROUND_COLOR, config.backgroundType)
+        assertFalse(config.gradientEnabled, "a colour must not keep drawing a gradient over itself")
     }
 
     @Test
-    fun `the gradient top opacity slider stores a new value`() {
-        backgroundTab(initial = withGradient()) { get ->
-            val reading = dragSlider("Top Opacity", fraction = 0.6f)
-            val stored = get().backgroundSettings.bibleLowerThirdBackground.gradientTopOpacity
-            assertTrue(stored > 0f, "dragging right of zero must raise the top opacity, was $stored")
-            assertBetween("the top opacity", stored, 0f, 1f)
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored value")
-            assertEquals(
-                0.8f,
-                get().backgroundSettings.bibleLowerThirdBackground.gradientBottomOpacity,
-                "the bottom opacity must be untouched",
-            )
-        }
+    fun `the inherit button clears the gradient flag too`() = backgroundTab { settings ->
+        setSurfaceType(Surface.BIBLE_LOWER_THIRD, TypeLabel.GRADIENT)
+        onNodeWithText("Use Default").performClick()
+        waitForIdle()
+        assertFalse(
+            configOf(settings(), Surface.BIBLE_LOWER_THIRD).gradientEnabled,
+            "an inheriting surface must not carry a gradient of its own",
+        )
+    }
+
+    private fun gradientFixture() = AppSettings(
+        backgroundSettings = BackgroundSettings(
+            bibleLowerThirdBackground = BackgroundConfig(
+                backgroundType = Constants.BACKGROUND_GRADIENT,
+                gradientEnabled = true,
+                gradientTopColor = "#212223",
+                gradientTopOpacity = 0.2f,
+                gradientBottomColor = "#242526",
+                gradientBottomOpacity = 0.7f,
+                gradientPosition = 0.4f,
+            ),
+        ),
+    )
+
+    @Test
+    fun `the gradient sliders read back what is stored`() = backgroundTab(gradientFixture()) { _ ->
+        openSurface(Surface.BIBLE_LOWER_THIRD)
+        assertSliderShows("TOP OPACITY", 20, "the top opacity slider")
+        assertSliderShows("BOTTOM OPACITY", 70, "the bottom opacity slider")
+        assertSliderShows("TRANSITION POSITION", 40, "the transition position slider")
     }
 
     @Test
-    fun `the gradient bottom opacity slider stores a new value`() {
-        backgroundTab(initial = withGradient()) { get ->
-            val reading = dragSlider("Bottom Opacity", fraction = 0.2f)
-            val stored = get().backgroundSettings.bibleLowerThirdBackground.gradientBottomOpacity
-            assertTrue(stored < 0.8f, "dragging left must lower the bottom opacity, was $stored")
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored value")
-        }
+    fun `the gradient colour fields store the confirmed hex`() = backgroundTab(gradientFixture()) { settings ->
+        openSurface(Surface.BIBLE_LOWER_THIRD)
+        // The picker normalises what it stores to upper case, so compare on that footing.
+        recolor("#212223", "#aabbcc")
+        assertEquals(
+            "#aabbcc",
+            settings().backgroundSettings.bibleLowerThirdBackground.gradientTopColor.lowercase(),
+        )
+        recolor("#242526", "#ddeeff")
+        assertEquals(
+            "#ddeeff",
+            settings().backgroundSettings.bibleLowerThirdBackground.gradientBottomColor.lowercase(),
+        )
     }
 
     @Test
-    fun `the gradient position slider stores a new value`() {
-        backgroundTab(initial = withGradient()) { get ->
-            val reading = dragSlider("Transition Position", fraction = 0.8f)
-            val stored = get().backgroundSettings.bibleLowerThirdBackground.gradientPosition
-            assertTrue(stored > 0.5f, "dragging right must move the transition down, was $stored")
-            assertBetween("the transition position", stored, 0f, 1f)
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored value")
-        }
-    }
-
-    // ── Colour and opacity, per column ──────────────────────────────────────────────────────────
-
-    @Test
-    fun `a column's colour field stores the confirmed hex against that column only`() {
-        backgroundTab(
-            initial = settingsWith { copy(songBackground = BackgroundConfig(backgroundColor = "#272829")) },
-        ) { get ->
-            recolor(fromHex = "#272829", toHex = "#60E0F0")
-            assertTrue(
-                get().backgroundSettings.songBackground.backgroundColor.equals("#60E0F0", ignoreCase = true),
-                "the Songs full-screen colour must be stored",
-            )
-            assertEquals(
-                "#000000",
-                get().backgroundSettings.bibleBackground.backgroundColor,
-                "the Bible colour must be untouched",
-            )
-        }
+    fun `the gradient sliders store new values`() = backgroundTab(gradientFixture()) { settings ->
+        openSurface(Surface.BIBLE_LOWER_THIRD)
+        val top = dragSlider("TOP OPACITY", 0.5f)
+        assertEquals(
+            top,
+            (settings().backgroundSettings.bibleLowerThirdBackground.gradientTopOpacity * 100).toInt(),
+        )
+        val position = dragSlider("TRANSITION POSITION", 0.75f)
+        assertEquals(
+            position,
+            (settings().backgroundSettings.bibleLowerThirdBackground.gradientPosition * 100).toInt(),
+        )
     }
 
     @Test
-    fun `a column's opacity slider stores a new opacity against that column only`() {
-        // Only the Bible full-screen column keeps a slider, so its caption is unambiguous.
-        val onlyBible = settingsWith {
-            copy(
-                defaultBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                defaultLowerThirdBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-            )
-        }
-        backgroundTab(initial = onlyBible) { get ->
-            onAllNodesWithText("Background Opacity").assertCountEquals(1)
-            val reading = dragSlider("Background Opacity", fraction = 0.35f)
-            val stored = get().backgroundSettings.bibleBackground.backgroundOpacity
-            assertTrue(stored < 1f, "dragging must lower the opacity, was $stored")
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored opacity")
-            assertEquals(
-                1.0f,
-                get().backgroundSettings.songBackground.backgroundOpacity,
-                "the Songs opacity must be untouched",
-            )
-        }
+    fun `a surface's colour is stored against that surface only`() = backgroundTab { settings ->
+        setSurfaceType(Surface.SONG, TypeLabel.COLOR)
+        recolor(BackgroundConfig().backgroundColor, "#272829")
+        assertEquals("#272829", settings().backgroundSettings.songBackground.backgroundColor.lowercase())
+        assertEquals(
+            BackgroundConfig().backgroundColor,
+            settings().backgroundSettings.bibleBackground.backgroundColor,
+            "the Bible surface must be untouched",
+        )
     }
 
     @Test
-    fun `a column's opacity slider works while the column is on Image`() {
-        val onlyBible = settingsWith {
-            copy(
-                defaultBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                defaultLowerThirdBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE),
-                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-            )
-        }
-        backgroundTab(initial = onlyBible) { get ->
-            onAllNodesWithText("Background Opacity").assertCountEquals(1)
-            val reading = dragSlider("Background Opacity", fraction = 0.55f)
-            val stored = get().backgroundSettings.bibleBackground.backgroundOpacity
-            assertTrue(stored < 1f, "the Image branch's slider must store a lower opacity, was $stored")
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored opacity")
-        }
+    fun `a surface's look sliders are stored against that surface only`() = backgroundTab { settings ->
+        setSurfaceType(Surface.SONG_LOWER_THIRD, TypeLabel.COLOR)
+        val dim = dragSlider(SliderCaption.DIM, 0.5f)
+        assertEquals(dim, settings().backgroundSettings.songLowerThirdBackground.dim)
+        assertEquals(0, settings().backgroundSettings.bibleLowerThirdBackground.dim)
+        assertEquals(0, settings().backgroundSettings.defaultBackgroundDim)
     }
 
     @Test
-    fun `a column's opacity slider works while the column is on Video Loop`() {
-        val onlySong = settingsWith {
-            copy(
-                defaultBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                defaultLowerThirdBackgroundType = Constants.BACKGROUND_TRANSPARENT,
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO),
-            )
-        }
-        backgroundTab(initial = onlySong) { get ->
-            onAllNodesWithText("Background Opacity").assertCountEquals(1)
-            val reading = dragSlider("Background Opacity", fraction = 0.25f)
-            val stored = get().backgroundSettings.songLowerThirdBackground.backgroundOpacity
-            assertTrue(stored < 1f, "the Video branch's slider must store a lower opacity, was $stored")
-            assertEquals((stored * 100).toInt(), reading, "the readout must follow the stored opacity")
-        }
+    fun `copying a look puts it on the other surface of the same shape`() = backgroundTab { settings ->
+        setSurfaceType(Surface.BIBLE, TypeLabel.COLOR)
+        recolor(BackgroundConfig().backgroundColor, "#334455")
+        val dim = dragSlider(SliderCaption.DIM, 0.5f)
+
+        // Copy targets are named by the group they belong to.
+        inControls("Songs").performClick()
+        waitForIdle()
+        val song = settings().backgroundSettings.songBackground
+        assertEquals("#334455", song.backgroundColor.lowercase(), "the colour must travel")
+        assertEquals(dim, song.dim, "and so must the look")
+        assertEquals(Constants.BACKGROUND_COLOR, song.backgroundType)
     }
 
-    /**
-     * A settings file can hold a background type this build does not know — written by a newer
-     * version, or hand-edited. The dropdown falls back to showing the stored value verbatim rather
-     * than rendering blank, so the operator can see what it is set to and pick something valid.
-     */
     @Test
-    fun `an unrecognised stored type is displayed as it was stored`() {
-        backgroundTab(
-            initial = settingsWith { copy(bibleBackground = BackgroundConfig(backgroundType = "Hologram")) },
-        ) { get ->
-            // typeDropdowns() matches the labels this build knows, so an unknown one is found by text.
-            onNodeWithText("Hologram").assertExists("the dropdown must show the stored value verbatim")
-            typeDropdowns().assertCountEquals(TypeDropdown.COUNT - 1)
+    fun `an unrecognised stored type is left alone rather than rewritten`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                bibleBackground = BackgroundConfig(backgroundType = "Hologram"),
+            ),
+        )
+        backgroundTab(settings) { current ->
+            openSurface(Surface.BIBLE)
             assertEquals(
                 "Hologram",
-                get().backgroundSettings.bibleBackground.backgroundType,
-                "the stored value itself must be left alone",
+                current().backgroundSettings.bibleBackground.backgroundType,
+                "opening a surface must never rewrite what it holds",
             )
         }
     }
 
-    // ── Picker rows ─────────────────────────────────────────────────────────────────────────────
-
     @Test
-    fun `a column on Image shows its stored file and its browse buttons`() {
-        backgroundTab(
-            initial = settingsWith {
-                copy(
-                    songLowerThirdBackground = BackgroundConfig(
-                        backgroundType = Constants.BACKGROUND_IMAGE,
-                        backgroundImage = "/tmp/backdrops/stage.jpg",
-                    ),
-                )
-            },
-        ) { _ ->
-            onNodeWithText("stage.jpg").assertExists("the picker must name the stored file")
-            onNodeWithContentDescription("Browse downloaded library").assertExists()
-            onNodeWithContentDescription("Browse stock photos/videos").assertExists()
-        }
-    }
-
-    @Test
-    fun `a column on Video Loop shows its stored clip`() {
-        backgroundTab(
-            initial = settingsWith {
-                copy(
-                    bibleBackground = BackgroundConfig(
-                        backgroundType = Constants.BACKGROUND_VIDEO,
-                        backgroundVideo = "/tmp/backdrops/waves.mov",
-                    ),
-                )
-            },
-        ) { _ ->
-            onNodeWithText("waves.mov").assertExists("the picker must name the stored clip")
-            onAllNodesWithText("No video selected").assertCountEquals(0)
-        }
-    }
-
-    @Test
-    fun `a column on Image offers its ATEM uploads once a host is configured`() {
-        val configured = AppSettings().let {
-            it.copy(
-                backgroundSettings = it.backgroundSettings.copy(
-                    bibleBackground = BackgroundConfig(
-                        backgroundType = Constants.BACKGROUND_IMAGE,
-                        backgroundImage = "/tmp/a.png",
-                    ),
+    fun `a surface set to a picture shows its file and its opacity`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                songBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = "/library/stage.jpg",
+                    backgroundOpacity = 0.5f,
                 ),
-                atemSettings = it.atemSettings.copy(host = "10.0.0.5"),
-            )
+            ),
+        )
+        backgroundTab(settings) { _ ->
+            openSurface(Surface.SONG)
+            onNodeWithText("stage.jpg", substring = true).assertIsDisplayed()
+            assertSliderShows(SliderCaption.OPACITY, 50, "the opacity slider")
         }
-        backgroundTab(initial = configured) { _ ->
-            onAllNodesWithContentDescription("Upload to Background Slot 1").assertCountEquals(1)
-            onAllNodesWithContentDescription("Upload to Background Slot 2").assertCountEquals(1)
+    }
+
+    @Test
+    fun `a surface set to a clip shows it`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                songLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_VIDEO,
+                    backgroundVideo = "/library/waves.mov",
+                ),
+            ),
+        )
+        backgroundTab(settings) { _ ->
+            openSurface(Surface.SONG_LOWER_THIRD)
+            onNodeWithText("waves.mov", substring = true).assertIsDisplayed()
         }
     }
 }

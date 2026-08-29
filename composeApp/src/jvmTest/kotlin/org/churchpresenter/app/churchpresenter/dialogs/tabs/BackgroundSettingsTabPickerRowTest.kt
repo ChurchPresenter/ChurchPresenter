@@ -2,177 +2,142 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
- * Covers the picker rows that appear under a slot set to Image or Video Loop: the file field itself,
- * the two browse buttons beside it, and the two ATEM upload buttons that join them once a switcher
- * is configured.
+ * The image and video picker rows, and the two ATEM upload buttons that hang off an image one.
  *
- * **Nothing in these rows is clicked**, and each button is out of reach for its own reason:
- *
- *  * The file field opens a **native** file chooser, which would block the run.
- *  * "Browse downloaded library" and "Browse stock photos/videos" open `DialogWindow`s — real AWT
- *    windows — which throw `HeadlessException` under the suite's headless JVM. (The colour picker's
- *    dialog is testable because it uses the in-composition `Dialog` instead, and it is driven in
- *    `BackgroundSettingsTabTest`.) Reaching these two would mean either running the suite with a
- *    display or moving them to `Dialog`; neither is in scope here, so the gap is recorded rather
- *    than papered over with a test that cannot run.
- *  * The ATEM upload buttons open a TCP connection to the configured switcher.
- *
- * What is left, and what this class asserts, is that each row is assembled correctly and that every
- * button is present, enabled and clickable for the configuration that should show it.
+ * Only the open surface has a picker row now, so where the old tab had one row per slot on screen
+ * at once these count what a *single* surface shows.
  */
 class BackgroundSettingsTabPickerRowTest {
 
-    private fun settingsWith(change: BackgroundSettings.() -> BackgroundSettings): AppSettings =
-        AppSettings().let { it.copy(backgroundSettings = it.backgroundSettings.change()) }
+    private val slot1 = "Upload to Background Slot 1"
+    private val slot2 = "Upload to Background Slot 2"
 
-    private fun withAtem(host: String, settings: AppSettings): AppSettings =
-        settings.copy(atemSettings = settings.atemSettings.copy(host = host))
+    private fun imageSettings(
+        path: String = "/library/backdrops/stage.jpg",
+        atemHost: String = "",
+    ) = AppSettings(
+        atemSettings = AtemSettings(host = atemHost),
+        backgroundSettings = BackgroundSettings(
+            defaultBackgroundType = Constants.BACKGROUND_IMAGE,
+            defaultBackgroundImage = path,
+        ),
+    )
 
-    // ── Image rows ──────────────────────────────────────────────────────────────────────────────
+    private fun videoSettings(path: String = "/library/clips/loop.mp4") = AppSettings(
+        backgroundSettings = BackgroundSettings(
+            defaultBackgroundType = Constants.BACKGROUND_VIDEO,
+            defaultBackgroundVideo = path,
+        ),
+    )
 
     @Test
-    fun `an image row offers a file field and both browse buttons`() {
-        backgroundTab(initial = settingsWith { copy(defaultBackgroundType = Constants.BACKGROUND_IMAGE) }) { _ ->
-            onNodeWithText("Background Image:").assertExists("the row must be captioned")
-            onNodeWithText("No image selected").assertHasClickAction()
-            onNodeWithContentDescription("Browse downloaded library").assertIsEnabled().assertHasClickAction()
-            onNodeWithContentDescription("Browse stock photos/videos").assertIsEnabled().assertHasClickAction()
-        }
+    fun `an image row is captioned and names its file`() = backgroundTab(imageSettings()) { _ ->
+        assertEquals(1, controlsCount("IMAGE FILE"), "the row must be captioned")
+        onNodeWithText("stage.jpg", substring = true).assertIsDisplayed()
     }
 
     @Test
-    fun `each image slot gets its own picker row`() {
-        val threeImageSlots = settingsWith {
-            copy(
-                defaultBackgroundType = Constants.BACKGROUND_IMAGE,
-                defaultLowerThirdBackgroundType = Constants.BACKGROUND_IMAGE,
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE),
+    fun `an image row names the stored file rather than its whole path`() =
+        backgroundTab(imageSettings()) { _ ->
+            onNodeWithText("stage.jpg", substring = true).assertIsDisplayed()
+            assertEquals(
+                0,
+                onAllNodesWithText("/library/backdrops/stage.jpg")
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false).size,
+                "the field shows a name, not a path",
             )
         }
-        backgroundTab(initial = threeImageSlots) { _ ->
-            onAllNodesWithText("Background Image:").assertCountEquals(3)
-            onAllNodesWithContentDescription("Browse downloaded library").assertCountEquals(3)
-            onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(3)
+
+    @Test
+    fun `a video row is captioned and names its clip`() = backgroundTab(videoSettings()) { _ ->
+        assertEquals(1, controlsCount("VIDEO FILE"), "the row must be captioned")
+        onNodeWithText("loop.mp4", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `only the open surface gets a picker row`() = backgroundTab(imageSettings()) { _ ->
+        assertEquals(1, controlsCount("IMAGE FILE"), "the Default surface has one")
+        openSurface(Surface.BIBLE)
+        assertEquals(0, controlsCount("IMAGE FILE"), "an inheriting surface has none")
+    }
+
+    @Test
+    fun `the ATEM uploads appear once a switcher is configured`() =
+        backgroundTab(imageSettings(atemHost = "10.0.0.5")) { _ ->
+            onNodeWithContentDescription(slot1).assertIsDisplayed()
+            onNodeWithContentDescription(slot2).assertIsDisplayed()
+        }
+
+    @Test
+    fun `an image row with no file offers no ATEM upload`() =
+        backgroundTab(imageSettings(path = "", atemHost = "10.0.0.5")) { _ ->
+            assertEquals(0, uploadButtonCount(), "there is nothing to send")
+        }
+
+    @Test
+    fun `a blank switcher host offers no ATEM upload`() = backgroundTab(imageSettings()) { _ ->
+        assertEquals(0, uploadButtonCount(), "there is nowhere to send it")
+    }
+
+    @Test
+    fun `a video row offers no ATEM upload, since a clip cannot be a still`() {
+        val settings = videoSettings().copy(atemSettings = AtemSettings(host = "10.0.0.5"))
+        backgroundTab(settings) { _ ->
+            assertEquals(0, uploadButtonCount(), "the media pool takes a frame, not a clip")
         }
     }
 
     @Test
-    fun `an image row names the stored file rather than its whole path`() {
-        backgroundTab(
-            initial = settingsWith {
-                copy(
-                    defaultBackgroundType = Constants.BACKGROUND_IMAGE,
-                    defaultBackgroundImage = "/Users/someone/Pictures/backdrops/mountain view.jpeg",
-                )
-            },
-        ) { _ ->
-            onNodeWithText("mountain view.jpeg").assertExists("the row must show just the file name")
-            onAllNodesWithText("No image selected").assertCountEquals(0)
+    fun `the ATEM upload buttons are enabled and clickable when shown`() =
+        backgroundTab(imageSettings(atemHost = "10.0.0.5")) { _ ->
+            onNodeWithContentDescription(slot1).assertIsEnabled()
+            onNodeWithContentDescription(slot2).assertIsEnabled()
+            assertEquals(
+                2,
+                onAllNodesWithContentDescription(slot1).fetchSemanticsNodes(atLeastOneRootRequired = false).size +
+                    onAllNodesWithContentDescription(slot2).fetchSemanticsNodes(atLeastOneRootRequired = false).size,
+                "one button per slot",
+            )
         }
-    }
-
-    // ── Video rows ──────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `a video row offers a file field and both browse buttons`() {
-        backgroundTab(initial = settingsWith { copy(defaultBackgroundType = Constants.BACKGROUND_VIDEO) }) { _ ->
-            onNodeWithText("Background Video:").assertExists("the row must be captioned")
-            onNodeWithText("No video selected").assertHasClickAction()
-            onNodeWithContentDescription("Browse downloaded library").assertIsEnabled().assertHasClickAction()
-            onNodeWithContentDescription("Browse stock photos/videos").assertIsEnabled().assertHasClickAction()
-        }
+    fun `a colour surface has no picker row at all`() = backgroundTab { _ ->
+        assertEquals(0, controlsCount("IMAGE FILE"), "a colour needs no file")
+        assertEquals(0, controlsCount("VIDEO FILE"), "nor a clip")
     }
 
     @Test
-    fun `a video row names the stored clip rather than its whole path`() {
-        backgroundTab(
-            initial = settingsWith {
-                copy(
-                    defaultBackgroundType = Constants.BACKGROUND_VIDEO,
-                    defaultBackgroundVideo = "/Users/someone/Movies/loops/slow clouds.mp4",
-                )
-            },
-        ) { _ ->
-            onNodeWithText("slow clouds.mp4").assertExists("the row must show just the file name")
-            onAllNodesWithText("No video selected").assertCountEquals(0)
-        }
-    }
-
-    // ── ATEM upload buttons ─────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the ATEM uploads appear per image row once a switcher is configured`() {
-        val twoImageSlots = withAtem(
-            host = "10.0.0.5",
-            settings = settingsWith {
-                copy(
-                    defaultBackgroundType = Constants.BACKGROUND_IMAGE,
-                    defaultBackgroundImage = "/tmp/a.png",
-                    bibleBackground = BackgroundConfig(
-                        backgroundType = Constants.BACKGROUND_IMAGE,
-                        backgroundImage = "/tmp/b.png",
-                    ),
-                )
-            },
+    fun `a gradient surface has no picker row either`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_GRADIENT,
+                    gradientEnabled = true,
+                ),
+            ),
         )
-        backgroundTab(initial = twoImageSlots) { _ ->
-            onAllNodesWithContentDescription("Upload to Background Slot 1").assertCountEquals(2)
-            onAllNodesWithContentDescription("Upload to Background Slot 2").assertCountEquals(2)
-            onAllNodesWithText("1").assertCountEquals(2)
-            onAllNodesWithText("2").assertCountEquals(2)
+        backgroundTab(settings) { _ ->
+            openSurface(Surface.BIBLE_LOWER_THIRD)
+            assertEquals(0, controlsCount("IMAGE FILE"), "a gradient is drawn, not loaded")
         }
     }
 
-    @Test
-    fun `an image row with no file offers no ATEM upload even with a switcher configured`() {
-        val noFile = withAtem(
-            host = "10.0.0.5",
-            settings = settingsWith { copy(defaultBackgroundType = Constants.BACKGROUND_IMAGE) },
-        )
-        backgroundTab(initial = noFile) { _ ->
-            onAllNodesWithContentDescription("Upload to Background Slot 1").assertCountEquals(0)
-            onNodeWithText("No image selected").assertExists("the row is otherwise complete")
-        }
-    }
-
-    @Test
-    fun `a blank switcher host offers no ATEM upload even with a file chosen`() {
-        val blankHost = withAtem(
-            host = "   ",
-            settings = settingsWith {
-                copy(defaultBackgroundType = Constants.BACKGROUND_IMAGE, defaultBackgroundImage = "/tmp/a.png")
-            },
-        )
-        backgroundTab(initial = blankHost) { _ ->
-            onAllNodesWithContentDescription("Upload to Background Slot 1").assertCountEquals(0)
-        }
-    }
-
-    @Test
-    fun `the ATEM upload buttons are enabled and clickable when shown`() {
-        val configured = withAtem(
-            host = "10.0.0.5",
-            settings = settingsWith {
-                copy(defaultBackgroundType = Constants.BACKGROUND_IMAGE, defaultBackgroundImage = "/tmp/a.png")
-            },
-        )
-        backgroundTab(initial = configured) { _ ->
-            onNodeWithContentDescription("Upload to Background Slot 1").assertIsEnabled().assertHasClickAction()
-            onNodeWithContentDescription("Upload to Background Slot 2").assertIsEnabled().assertHasClickAction()
-        }
-    }
+    private fun androidx.compose.ui.test.ComposeUiTest.uploadButtonCount(): Int =
+        onAllNodesWithContentDescription(slot1).fetchSemanticsNodes(atLeastOneRootRequired = false).size +
+            onAllNodesWithContentDescription(slot2).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 }

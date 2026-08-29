@@ -17,6 +17,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QuickBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
+import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -32,16 +35,18 @@ import kotlin.test.Test
 /**
  * The Background tab of the settings dialog, in both themes.
  *
- * **The background *type* is the axis.** Each slot is a type dropdown with a different set of
- * controls underneath it — a colour swatch and an opacity slider for Color, a path row with browse
- * and stock-search buttons for Image and Video, nothing at all for Transparent, and a block of
- * two-colour gradient controls for Gradient. Shooting one type would leave the rest of the tab
- * unseen, so each gets its own image.
+ * **The background *type* is the axis.** The tab is a rail of six surfaces beside one editor, and
+ * the editor's shape is decided by the type the open surface is set to — a colour swatch and the
+ * six one-click solids for Color, a path row with browse and stock-search buttons for Image and
+ * Video, nothing at all for Transparent, and a block of two-colour controls for Gradient. Shooting
+ * one type would leave the rest of the editor unseen, so each gets its own image.
  *
- * The slots are not interchangeable either: the two default slots offer four types, the lower-third
- * ones add *Follow Default*, and only a lower-third slot offers *Gradient*. Video is offered
- * everywhere but is disabled without VLC — which is how a test machine runs, so that is the state
- * the dropdown images show.
+ * **The rail is the second axis.** Which surface is open decides which types are offered — the
+ * full-screen default inherits from nothing, the default lower third adds *Follow Default*, a
+ * content surface says *Default*, and only a content lower third offers *Gradient* — and it decides
+ * what the stage preview draws, since the three surfaces paint different parts of the output.
+ *
+ * Video is offered everywhere but is disabled without VLC, which is how a test machine runs.
  */
 class BackgroundSettingsTabScreenshotTest {
 
@@ -136,7 +141,7 @@ class BackgroundSettingsTabScreenshotTest {
                 defaultLowerThirdBackgroundType = Constants.BACKGROUND_FOLLOW_DEFAULT,
             )
         ),
-    )
+    ) { openRailRow(DEFAULT_LOWER_THIRD, nth = 0) }
 
     /** Gradient, which only a lower-third slot offers: two colours, their opacities and a position. */
     @Test
@@ -155,34 +160,77 @@ class BackgroundSettingsTabScreenshotTest {
                 ),
             )
         ),
-    ) { scrollTo(BIBLE) }
+    ) { openRailRow(LOWER_THIRD, nth = 0) }
 
-    // ── The type dropdown itself ────────────────────────────────────────────────────────────────
-
-    /** What a full-screen slot offers: four types, with Video disabled where VLC is absent. */
-    @Test
-    fun `the type menu on a full screen slot`() = shoot("type_menu", rootIndex = 1) {
-        onAllNodesWithText(COLOUR_OPTION)[0].performClick()
-        waitForIdle()
-    }
-
-    /** What a lower-third slot offers instead: Follow Default first, and Gradient at the end. */
-    @Test
-    fun `the type menu on a lower third slot`() = shoot("type_menu_lower_third", rootIndex = 1) {
-        onAllNodesWithText(COLOUR_OPTION)[1].performClick()
-        waitForIdle()
-    }
-
-    // ── The per-content slots ───────────────────────────────────────────────────────────────────
+    // ── The look, which every surface now carries ───────────────────────────────────────────────
 
     /**
-     * Bible and Songs, each with a full-screen slot and a lower-third one.
+     * A dimmed and blurred picture.
      *
-     * One image, not two: the pair sit side by side in the same row, so a shot of either is a shot
-     * of both.
+     * The one state where the stage preview earns its place: dim and blur are invisible in the
+     * controls and obvious in the picture, and they are drawn here with the same arithmetic the
+     * presenters use, so this image is what the output looks like.
      */
     @Test
-    fun `the per-content slots`() = shoot("per_content", settings = perContent()) { scrollTo(BIBLE) }
+    fun `a look applied to a picture`() = shoot(
+        "look_dim_blur",
+        settings = defaults(Constants.BACKGROUND_IMAGE).let {
+            it.copy(
+                backgroundSettings = it.backgroundSettings.copy(
+                    defaultBackgroundImage = photo().absolutePath,
+                    defaultBackgroundDim = 45,
+                    defaultBackgroundBlur = 12,
+                )
+            )
+        },
+    )
+
+    // ── The rail ────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * A content surface open, with its own look.
+     *
+     * Also the only image showing the header's *Use Default* button and the Copy This Look To row,
+     * both of which exist only for a surface that can inherit and does not.
+     */
+    @Test
+    fun `a content surface open`() = shoot("per_content", settings = perContent()) {
+        openRailRow(FULL_SCREEN, nth = 0)
+    }
+
+    /** The same surface put back on Default: the rail's meta lines change with it. */
+    @Test
+    fun `a content surface following the default`() = shoot("scope_inheriting") {
+        openRailRow(FULL_SCREEN, nth = 0)
+        onAllNodesWithText(USE_DEFAULT)[0].performClick()
+        waitForIdle()
+    }
+
+    /**
+     * The default lower third open, which is the one surface that paints *above* the band rather
+     * than the band itself — so its stage preview is the odd one out.
+     */
+    @Test
+    fun `the default lower third open`() = shoot("scope_default_lower_third") {
+        openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
+    }
+
+    // ── The quick backgrounds shelf ─────────────────────────────────────────────────────────────
+
+    /** The shelf with a tray configured, which is where the tiles are made. */
+    @Test
+    fun `the quick backgrounds shelf`() = shoot("quick_backgrounds", settings = withQuickTray())
+
+    /** A tile's panel open over the tab — the same editor a song's own background gets. */
+    @Test
+    fun `a quick background panel`() = shoot(
+        "quick_background_panel",
+        settings = withQuickTray(),
+        rootIndex = 1,
+    ) {
+        onAllNodesWithText("1")[0].performClick()
+        waitForIdle()
+    }
 
     // Not shot: stock-search API keys saved. They change nothing on this tab — the picker row looks
     // the same with and without them, because the keys are asked for inside the stock browser the
@@ -190,8 +238,11 @@ class BackgroundSettingsTabScreenshotTest {
 
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────
 
-    private fun ComposeUiTest.scrollTo(label: String) {
-        onAllNodesWithText(label)[0].performScrollTo()
+    /** Opens the [nth] rail row reading [label] — the rail is the leftmost column. */
+    private fun ComposeUiTest.openRailRow(label: String, nth: Int) {
+        val matches = onAllNodesWithText(label).fetchSemanticsNodes(atLeastOneRootRequired = false)
+        val inRail = matches.indices.filter { matches[it].boundsInRoot.left < RAIL_RIGHT_EDGE }
+        onAllNodesWithText(label)[inRail[nth]].performScrollTo().performClick()
         waitForIdle()
     }
 
@@ -245,15 +296,35 @@ class BackgroundSettingsTabScreenshotTest {
         return file
     }
 
+    /** A tray of three, so the shelf shows tiles, their names and the slot each answers to. */
+    private fun withQuickTray() = AppSettings(
+        quickBackgrounds = listOf(
+            quickTile("tile1", "#1B2A5B"),
+            quickTile("tile2", "#7B3FA6"),
+            quickTile("tile3", "#2E6B4F"),
+        ),
+    )
+
+    private fun quickTile(id: String, hex: String) = QuickBackground(
+        id = id,
+        background = SongBackground(type = SongBackgroundType.COLOR, color = hex),
+        lowerThirdBackground = SongBackground(type = SongBackgroundType.COLOR, color = hex),
+    )
+
     private companion object {
         const val SECTION = "backgroundSettingsTab"
+
+        /** Where the surface rail ends, in px — these run at density 1. */
+        const val RAIL_RIGHT_EDGE = 232f
 
         val FIXTURES: File = File("/tmp")
             .takeIf { it.isDirectory }
             ?.let { File(it, "churchpresenter-screenshots/backgrounds") }
             ?: File(System.getProperty("java.io.tmpdir"), "churchpresenter-screenshots/backgrounds")
 
-        const val COLOUR_OPTION = "Color"
-        const val BIBLE = "Bible"
+        const val FULL_SCREEN = "Full Screen"
+        const val LOWER_THIRD = "Lower Third"
+        const val DEFAULT_LOWER_THIRD = "Default Lower Third"
+        const val USE_DEFAULT = "Use Default"
     }
 }

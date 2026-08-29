@@ -15,11 +15,9 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -34,42 +32,41 @@ import kotlin.test.assertTrue
 /**
  * Harness and node locators shared by the `BackgroundSettingsTab` test classes.
  *
- * The tab is six copies of the same widget set — a background-type dropdown whose choice decides
- * what appears beneath it (a colour field, an image picker, a video picker, gradient controls, or
- * nothing) — arranged as two "default" cards on top and Bible/Songs full-screen and lower-third
- * columns below. Nothing is refactored for testability and the tab carries exactly one `testTag`,
- * so the locators here work from what the tree already publishes: the dropdown's current label, the
- * `#RRGGBB` a colour field displays, and the content descriptions on the picker icon buttons.
+ * The tab is a **rail of six surfaces beside one editor**: the rail lists Default and Default Lower
+ * Third, then a full-screen and a lower-third row under each of Bible and Songs, and the editor to
+ * its right belongs to whichever row is selected. Only one surface's controls exist at a time, so a
+ * test that wants to write to a surface selects it first — [openSurface] — and everything after
+ * that addresses a single set of controls rather than one of six copies.
  *
- * Locating is **by value** wherever possible — the fixture gives the control under test a value no
- * other control on the tab holds, then finds it by that value. The type dropdowns are the exception
- * and are addressed by ordinal, named through [TypeDropdown]; `BackgroundSettingsTabStructureTest`
- * pins their count so a reordering fails there first.
+ * Locating leans on **which column a node sits in**, because the rail and the editor deliberately
+ * share words: "Full Screen" names two rail rows, "Default" names both a rail row and a type
+ * segment, and "Color" is both a type segment and the caption above the colour field. [inRail] and
+ * [inControls] cut a set of same-named nodes down by x-position, using the two column widths the
+ * tab lays out with. Everything else is found by a value no other control holds.
  *
- * Known gaps — everything in `BackgroundSettingsTab.kt` these tests do not reach, and why. All of
- * them are blocked by what the code does when clicked, not by the tests being thin:
+ * Known gaps — what these tests do not reach, and why. All are blocked by what the code does when
+ * clicked, not by the tests being thin:
  *
  *  * **The file field** (`FileImagePicker`/`FileVideoPicker`) opens a **native** file chooser, which
- *    would block the run. Its displayed filename is asserted instead. The `onImagePathChange` /
- *    `onVideoPathChange` callbacks are only ever invoked by it or by the dialogs below, so those go
- *    uncovered with it.
+ *    would block the run. Its displayed filename is asserted instead, so `onImagePathChange` /
+ *    `onVideoPathChange` go uncovered with it.
  *  * **The two browse buttons** open `DialogWindow`s — real AWT windows — which throw
- *    `HeadlessException` under the suite's headless JVM. (The colour picker's dialog *is* driven,
- *    because it uses the in-composition `Dialog` instead.) The Pexels/Pixabay API-key callbacks
- *    hang off those dialogs and are unreachable for the same reason.
+ *    `HeadlessException` under the suite's headless JVM. The Pexels/Pixabay API-key callbacks hang
+ *    off those dialogs and are unreachable for the same reason. (The colour picker's dialog *is*
+ *    driven: it uses the in-composition `Dialog`.)
  *  * **The ATEM upload buttons** open a TCP connection to the configured switcher, so
  *    `uploadBackgroundToAtem` and the button's busy/error states are not driven. Its one piece of
- *    pure logic, `coverCropArgb`, is tested directly in `CoverCropArgbTest`. Their visibility rules
+ *    pure logic, `coverCropArgb`, is tested in `CoverCropArgbTest`; the buttons' visibility rules
  *    are covered in `BackgroundSettingsTabPickerRowTest`.
- *  * **Tooltip contents.** Every icon button's tooltip composes only after `TooltipArea`'s own
- *    500 ms hover delay. That delay is the test's whole cost and is not injectable, which
- *    `AGENT.md` says to note rather than test. The tooltips' text is still asserted — it doubles as
- *    each button's content description, which is how the buttons are located here.
- *  * **The "(Install VLC)" labelling** of the Video option only renders where VLC is absent, and
- *    that item is disabled there — so a machine without VLC (CI) cannot *pick* Video at all. Tests
- *    address the item through [videoMenuLabel] and take video-dependent rows from a fixture rather
- *    than from a click, which keeps them true on both kinds of machine; only the enabled/disabled
- *    branch itself differs, and just the one matching the running machine is exercised.
+ *  * **The stage preview's picture.** `BackgroundConfigFill` decodes off the main dispatcher and
+ *    draws to a `Canvas`; there is no node to assert on. The preview's *arrangement* — which badge
+ *    it shows and where the sample line sits — is covered in `BackgroundSettingsTabStructureTest`.
+ *  * **Tooltip contents.** Every tooltip composes only after `TooltipArea`'s own 500 ms hover
+ *    delay, which is the test's whole cost and is not injectable — `AGENT.md` says to note that
+ *    rather than test it.
+ *  * **The "(Install VLC)" branch.** The Video segment is disabled where VLC is absent, so a
+ *    machine without it cannot pick Video at all. Video-dependent state is taken from a fixture
+ *    rather than a click, which keeps the tests true on both kinds of machine.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun backgroundTab(
@@ -89,18 +86,23 @@ internal fun backgroundTab(
     block { current }
 }
 
-/** Ordinal of each background-type dropdown, in composition order. */
-internal object TypeDropdown {
-    const val DEFAULT = 0
-    const val DEFAULT_LOWER_THIRD = 1
-    const val BIBLE_FULLSCREEN = 2
-    const val BIBLE_LOWER_THIRD = 3
-    const val SONG_FULLSCREEN = 4
-    const val SONG_LOWER_THIRD = 5
-    const val COUNT = 6
+/**
+ * The six rows of the rail, in the order it lists them.
+ *
+ * [row] is the row's own name and [nth] which of the rows carrying that name this is — the two
+ * content groups both call their rows "Full Screen" and "Lower Third". [title] is what the editor
+ * header shows once the row is open, which is how a test proves the right surface was opened.
+ */
+internal enum class Surface(val row: String, val nth: Int, val title: String) {
+    DEFAULT("Default", 0, "Default"),
+    DEFAULT_LOWER_THIRD("Default Lower Third", 0, "Default Lower Third"),
+    BIBLE("Full Screen", 0, "Bible · Full Screen"),
+    BIBLE_LOWER_THIRD("Lower Third", 0, "Bible · Lower Third"),
+    SONG("Full Screen", 1, "Songs · Full Screen"),
+    SONG_LOWER_THIRD("Lower Third", 1, "Songs · Lower Third"),
 }
 
-/** Every label a background-type dropdown can display. */
+/** Every label a background-type segment can carry. */
 internal object TypeLabel {
     const val FOLLOW_DEFAULT = "Follow Default"
     const val DEFAULT = "Default"
@@ -109,120 +111,164 @@ internal object TypeLabel {
     const val VIDEO = "Video Loop"
     const val TRANSPARENT = "Transparent"
     const val GRADIENT = "Gradient"
-    val all = listOf(FOLLOW_DEFAULT, DEFAULT, COLOR, IMAGE, VIDEO, TRANSPARENT, GRADIENT)
+}
+
+/** Captions of the three sliders the editor offers, as `PanelCaption` renders them. */
+internal object SliderCaption {
+    const val OPACITY = "OPACITY"
+    const val DIM = "DIM"
+    const val BLUR = "BLUR"
 }
 
 /**
- * The text the Video option carries **inside an open menu**.
+ * Where the tab's three columns sit, in px — the test density is 1.
  *
- * Where VLC is missing — a CI runner, typically — the tab appends "(Install VLC)" to that one menu
- * item and disables it, so neither its label nor its clickability can be assumed. A dropdown that is
- * *closed* on Video still shows the plain [TypeLabel.VIDEO] either way; this is only for menu items.
+ * [EDITOR_HEADER_BOTTOM] matters as much as the two x edges: the header spans the whole editor, so
+ * the surface's title shares the controls column's x range and would otherwise be counted as one of
+ * its controls — which is how "Default" managed to be both a rail row and a type segment at once.
  */
-internal val videoMenuLabel: String
-    get() = if (isVlcAvailable) TypeLabel.VIDEO else "${TypeLabel.VIDEO} (Install VLC)"
+private const val RAIL_RIGHT_EDGE = 232f
+private const val CONTROLS_RIGHT_EDGE = RAIL_RIGHT_EDGE + 336f
+private const val EDITOR_HEADER_BOTTOM = 47f
 
 // ── Locators ────────────────────────────────────────────────────────────────────────────────────
 
-/**
- * Every background-type dropdown. Each publishes exactly its current label, which distinguishes it
- * from the colour fields (label plus `#RRGGBB`) and the file pickers (a filename).
- */
-internal fun ComposeUiTest.typeDropdowns(): SemanticsNodeInteractionCollection =
-    onAllNodes(hasClickAction() and TypeLabel.all.map { hasTextExactly(it) }.reduce { a, b -> a or b })
+/** Indices of [nodes] whose left edge puts them in the surface rail. */
+private fun railIndices(bounds: List<Rect>): List<Int> =
+    bounds.indices.filter { bounds[it].left < RAIL_RIGHT_EDGE }
 
-/** The trailing "NN%" readouts, one per slider. */
-internal fun ComposeUiTest.percentReadouts(): SemanticsNodeInteractionCollection =
-    onAllNodes(hasText("%", substring = true) and !hasClickAction())
+/** Indices of [nodes] whose left edge puts them in the editor's controls column. */
+private fun controlIndices(bounds: List<Rect>): List<Int> =
+    bounds.indices.filter {
+        bounds[it].left in RAIL_RIGHT_EDGE..CONTROLS_RIGHT_EDGE && bounds[it].top >= EDITOR_HEADER_BOTTOM
+    }
+
+/**
+ * Bounds of every node carrying [text] as one of its own text values.
+ *
+ * `hasText` and not `hasTextExactly`: a rail row merges its name with the meta line underneath it,
+ * so the row that *is* "Default" publishes two strings and an exact match finds nothing.
+ */
+private fun ComposeUiTest.nodesReading(text: String): List<Rect> =
+    onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false)
+        .map { it.boundsInRoot }
+
+/** The [nth] node reading exactly [text] that sits in the surface rail. */
+internal fun ComposeUiTest.inRail(text: String, nth: Int = 0): SemanticsNodeInteraction {
+    val indices = railIndices(nodesReading(text))
+    check(nth in indices.indices) { "wanted rail node #$nth reading \"$text\" but ${indices.size} exist" }
+    return onAllNodes(hasText(text))[indices[nth]]
+}
+
+/** The [nth] node reading exactly [text] that sits in the editor's controls column. */
+internal fun ComposeUiTest.inControls(text: String, nth: Int = 0): SemanticsNodeInteraction {
+    val indices = controlIndices(nodesReading(text))
+    check(nth in indices.indices) { "wanted control #$nth reading \"$text\" but ${indices.size} exist" }
+    return onAllNodes(hasText(text))[indices[nth]]
+}
+
+/** How many nodes read exactly [text] anywhere in the editor's controls column. */
+internal fun ComposeUiTest.controlsCount(text: String): Int = controlIndices(nodesReading(text)).size
+
+/** How many rail rows carry [text]. */
+internal fun ComposeUiTest.railCount(text: String): Int = railIndices(nodesReading(text)).size
+
+/** How many nodes carrying [text] sit in the editor's header band. */
+internal fun ComposeUiTest.headerCount(text: String): Int =
+    nodesReading(text).count { it.left >= RAIL_RIGHT_EDGE && it.top < EDITOR_HEADER_BOTTOM }
+
+/** The trailing readouts of the three sliders — "80%", "45%", "6px". */
+internal fun ComposeUiTest.sliderReadouts(): SemanticsNodeInteractionCollection =
+    onAllNodes((hasText("%", substring = true) or hasText("px", substring = true)) and !hasClickAction())
+
+/**
+ * The text the Video segment carries where VLC is missing.
+ *
+ * The segment is always present; without VLC it is disabled and a tooltip says why. The label
+ * itself does not change, unlike the old dropdown's menu item, so this is only about clickability.
+ */
+internal val videoSegmentEnabled: Boolean get() = isVlcAvailable
 
 // ── Actions ─────────────────────────────────────────────────────────────────────────────────────
 
-/**
- * Opens the [ordinal]-th type dropdown and picks [label] from its menu.
- *
- * The open menu's item and any closed dropdown already showing [label] are indistinguishable — both
- * are clickable nodes whose only text is that label — so the fixture must be arranged such that no
- * other dropdown is currently on [label]. That is asserted here rather than left to chance.
- */
-internal fun ComposeUiTest.chooseBackgroundType(ordinal: Int, label: String) {
-    val alreadyShowing = onAllNodes(hasClickAction() and hasTextExactly(label))
-        .fetchSemanticsNodes(atLeastOneRootRequired = false).size
-    assertEquals(
-        0,
-        alreadyShowing,
-        "fixture error: \"$label\" is already displayed by $alreadyShowing dropdown(s), so the menu " +
-            "item cannot be told apart from them — start the other dropdowns on a different type",
-    )
-    typeDropdowns()[ordinal].performScrollTo().performClick()
+/** Selects [surface] in the rail and waits for its editor, proving it by the header's title. */
+internal fun ComposeUiTest.openSurface(surface: Surface) {
+    inRail(surface.row, surface.nth).performScrollTo().performClick()
     waitForIdle()
-    onNode(hasClickAction() and hasTextExactly(label)).performClick()
+    onAllNodesWithText(surface.title).fetchSemanticsNodes(atLeastOneRootRequired = false)
+        .ifEmpty { error("opening ${surface.name} did not put \"${surface.title}\" in the editor header") }
+}
+
+/** Clicks the type segment labelled [label] in the open editor. */
+internal fun ComposeUiTest.chooseBackgroundType(label: String) {
+    inControls(label).performScrollTo().performClick()
     waitForIdle()
-    typeDropdowns()[ordinal].assertTextEquals(label)
+}
+
+/** Opens [surface] and puts it on [label] in one step, which is what most fixtures want. */
+internal fun ComposeUiTest.setSurfaceType(surface: Surface, label: String) {
+    openSurface(surface)
+    chooseBackgroundType(label)
 }
 
 /**
- * Bounds of the [ordinal]-th slider captioned [caption], and of the readout that belongs to it.
+ * Bounds of the slider captioned [caption], and of the readout that belongs to it.
  *
- * `SlimSlider` draws its track on a bare `Canvas` and publishes no semantics for it, so there is no
- * node to address; the caption above it and the readout to its right are all there is to go on.
- *
- * Picking the right readout takes both axes. "Background Opacity" captions one slider per background
- * slot and the slots sit in two rows of columns, so a readout belonging to a *neighbouring* column
- * can be nearer in `top` than the caption's own. The readout that belongs to a caption is the first
- * one that starts **below the caption's baseline** and **no further left than the caption** — the
- * slider row sits directly underneath, and the readout is at its right-hand end.
+ * `SlimSlider` draws its track on a bare `Canvas` and publishes no semantics, so there is no node
+ * to address; the caption above it and the readout to its right are all there is. Only one surface
+ * is open at a time now, so each caption is unique and the readout that belongs to it is simply the
+ * nearest one at or below the caption's own top edge.
  */
-private fun ComposeUiTest.sliderGeometry(caption: String, ordinal: Int): Pair<Rect, Rect> {
-    // Traversal order, deliberately not sorted by position: a card whose type adds a picker row
-    // grows taller, so its slider can sit *below* the one in the card beside it while still coming
-    // first in composition. Ordinals here line up with TypeDropdown either way.
-    val captions = onAllNodesWithText(caption).fetchSemanticsNodes(atLeastOneRootRequired = false)
+private fun ComposeUiTest.sliderGeometry(caption: String): Pair<Rect, Rect> {
+    val captionBounds = nodesReading(caption).firstOrNull()
+        ?: error("no slider captioned \"$caption\" is on screen")
+    val readout = sliderReadouts().fetchSemanticsNodes(atLeastOneRootRequired = false)
         .map { it.boundsInRoot }
-    check(ordinal in captions.indices) {
-        "wanted slider #$ordinal captioned \"$caption\" but only ${captions.size} exist"
-    }
-    val captionBounds = captions[ordinal]
-    val readout = percentReadouts().fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .map { it.boundsInRoot }
-        .filter { it.top >= captionBounds.bottom && it.left >= captionBounds.left }
+        .filter { it.top >= captionBounds.top - 1f && it.left >= captionBounds.left }
         .minWithOrNull(compareBy({ it.top }, { it.left }))
-        ?: error("no percentage readout found under \"$caption\" #$ordinal")
+        ?: error("no readout found beside \"$caption\"")
     return captionBounds to readout
 }
 
+/** How far under its caption a slider's track is drawn. */
+private const val SLIDER_TRACK_DROP = 15f
+
 /**
- * Clicks the [ordinal]-th slider captioned [caption] at [fraction] along its track and returns the
- * percentage its readout then shows.
+ * Clicks the slider captioned [caption] at [fraction] along its track and returns what its readout
+ * then shows, as a bare number — "45%" and "6px" both come back as their digits.
  */
-internal fun ComposeUiTest.dragSlider(caption: String, fraction: Float, ordinal: Int = 0): Int {
-    onAllNodesWithText(caption)[ordinal].performScrollTo()
+internal fun ComposeUiTest.dragSlider(caption: String, fraction: Float): Int {
+    inControls(caption).performScrollTo()
     waitForIdle()
-    val (captionBounds, readoutBounds) = sliderGeometry(caption, ordinal)
+    val (captionBounds, readoutBounds) = sliderGeometry(caption)
+    // The caption carries `weight(1f)`, so it starts where the track starts; the readout beside it
+    // ends where the track ends. The track itself is the row underneath the two of them.
     val trackStart = captionBounds.left
-    val trackEnd = readoutBounds.left - 10f // Arrangement.spacedBy(10.dp), density 1 under test
+    val trackEnd = readoutBounds.right
     onRoot().performMouseInput {
-        click(Offset(trackStart + (trackEnd - trackStart) * fraction, readoutBounds.center.y))
+        click(Offset(trackStart + (trackEnd - trackStart) * fraction, captionBounds.bottom + SLIDER_TRACK_DROP))
     }
     waitForIdle()
-    return readingOf(caption, ordinal)
+    return readingOf(caption)
 }
 
-/** The percentage shown by the readout belonging to the [ordinal]-th slider captioned [caption]. */
-internal fun ComposeUiTest.readingOf(caption: String, ordinal: Int = 0): Int {
-    val (_, readoutBounds) = sliderGeometry(caption, ordinal)
-    val readout = percentReadouts().fetchSemanticsNodes(atLeastOneRootRequired = false)
+/** The number shown by the readout belonging to the slider captioned [caption]. */
+internal fun ComposeUiTest.readingOf(caption: String): Int {
+    val (_, readoutBounds) = sliderGeometry(caption)
+    val readout = sliderReadouts().fetchSemanticsNodes(atLeastOneRootRequired = false)
         .first { it.boundsInRoot == readoutBounds }
     val shown = readout.config.getOrNull(SemanticsProperties.Text)?.firstOrNull()?.text
-        ?: error("\"$caption\" #$ordinal published no readout text")
-    return shown.removeSuffix("%").toIntOrNull() ?: error("could not read a percentage out of \"$shown\"")
+        ?: error("\"$caption\" published no readout text")
+    return shown.removeSuffix("%").removeSuffix("px").toIntOrNull()
+        ?: error("could not read a number out of \"$shown\"")
 }
 
 /** Asserts a slider's stored value and its on-screen readout agree. */
-internal fun ComposeUiTest.assertSliderShows(caption: String, stored: Float, what: String, ordinal: Int = 0) {
-    assertEquals((stored * 100).toInt(), readingOf(caption, ordinal), "$what must read back the stored value")
+internal fun ComposeUiTest.assertSliderShows(caption: String, stored: Int, what: String) {
+    assertEquals(stored, readingOf(caption), "$what must read back the stored value")
 }
 
-internal fun assertBetween(what: String, value: Float, min: Float, max: Float) {
+internal fun assertBetween(what: String, value: Int, min: Int, max: Int) {
     assertTrue(value in min..max, "$what must land inside $min..$max, was $value")
 }
 

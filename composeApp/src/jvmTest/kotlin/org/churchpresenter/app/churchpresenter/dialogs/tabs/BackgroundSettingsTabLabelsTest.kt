@@ -14,55 +14,75 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * A complete inventory of what the tab puts on screen: every heading, caption, button label, content
+ * A complete inventory of what the tab puts on screen: every heading, caption, label, content
  * description and stored value it displays, with the exact number of times each appears.
  *
  * The behaviour tests drive the controls; this asserts the words around them are actually there. A
  * caption is as much a part of the tab as the control it names — a `stringResource` pointed at the
  * wrong key, or a row quietly dropped in a refactor, changes nothing a behaviour test would notice,
- * because those find their targets by tag, ordinal or displayed value rather than by caption.
+ * because those find their targets by position or by displayed value rather than by caption.
  *
- * The counts carry as much weight as the strings. "Background Type:" appearing four times is what
- * says all four Bible/Songs columns rendered; the two default cards head their own dropdown with a
- * help line instead, which is why they do not add to it. Both lists below were generated from the
- * rendered semantics tree, so they are exhaustive by construction rather than by memory.
+ * The counts carry as much weight as the strings. "Color" appearing five times is what says all
+ * four content surfaces start out with a look of their own and the open one offers the segment; and
+ * "Default" appearing twice is the rail row and the editor heading, which is the pair a locator
+ * has to tell apart. The list was generated from the rendered semantics tree.
  */
 class BackgroundSettingsTabLabelsTest {
 
     /** Every string the tab renders out of the box, and how many times it must appear. */
     private val outOfTheBox = mapOf(
-        // Card headings and the two help lines.
-        "Default Background" to 1,
-        "Default Lower Third Background" to 1,
-        "Bible" to 1,
-        "Songs" to 1,
-        "Used when 'Default' is selected for Bible or Songs" to 1,
-        "Used when 'Default' is selected for Bible or Songs in lower third display mode" to 1,
-
-        // Column subtitles — one Full Screen and one Lower Third per content card.
+        // The rail: its own heading, the three group headings, and the six rows with their metas.
+        "BACKGROUNDS" to 1,
+        "DEFAULTS" to 1,
+        "BIBLE" to 1,
+        "SONGS" to 1,
+        "Default Lower Third" to 1,
         "Full Screen" to 2,
         "Lower Third" to 2,
+        "Bible or Songs set to Default" to 1,
+        "Lower third set to Default" to 1,
 
-        // One "Background Type:" per Bible/Songs column; the default cards label theirs differently.
-        "Background Type:" to 4,
+        // The rail row that is open, plus the editor heading that names it — the pair every
+        // locator in this package has to keep apart.
+        "Default" to 2,
+        "Set explicitly for this surface" to 1,
 
-        // Six slots, each on Color out of the box: a dropdown, a colour field and an opacity slider.
-        "Color" to TypeDropdown.COUNT,
-        "COLOR:" to 2,               // the two default cards' colour fields
-        "BACKGROUND COLOR:" to 4,    // the four Bible/Songs columns' colour fields
-        "#000000" to TypeDropdown.COUNT,
-        "Background Opacity" to TypeDropdown.COUNT,
-        "100%" to TypeDropdown.COUNT,
+        // The type segments the Default surface offers. It inherits from nothing, so there are
+        // four; "Color" is also the meta on each of the four content rows, hence five in all.
+        "TYPE" to 1,
+        "Color" to 5,
+        "Image" to 1,
+        "Video Loop" to 1,
+        "Transparent" to 1,
 
-        // Dim and blur, added so every background has the controls a song's own background has.
-        "Dim" to TypeDropdown.COUNT,
-        "Blur" to TypeDropdown.COUNT,
-        "0%" to TypeDropdown.COUNT,
-        "0px" to TypeDropdown.COUNT,
+        // On Color: the field, its stored value, and the look controls under it.
+        "COLOR" to 1,
+        "#000000" to 1,
+        "LOOK" to 1,
+        "None" to 1,
+        "Soft" to 1,
+        "Legible" to 1,
+        "Cinema" to 1,
+        "OPACITY" to 1,
+        "100%" to 1,
+        "DIM" to 1,
+        "0%" to 1,
+        "BLUR" to 1,
+        "0px" to 1,
 
-        // The Quick backgrounds card. Out of the box the tray is empty, so the only tile is the
-        // one that adds the first background — a configured tray adds a name under each tile.
-        "Quick backgrounds" to 1,
+        // Copying this look onto the two content full screens, each named by its group.
+        "COPY THIS LOOK TO" to 1,
+        "Bible" to 1,
+        "Songs" to 1,
+
+        // The stage preview: which part of the output this surface paints, and the sample line.
+        "FULL SCREEN" to 1,
+        "Amazing grace! How sweet the sound" to 1,
+
+        // The Quick backgrounds shelf. Out of the box the tray is empty, so the only tile is the
+        // one that adds the first background.
+        "QUICK BACKGROUNDS" to 1,
+        "0 / 10" to 1,
         QUICK_BACKGROUNDS_HELP to 1,
         "Add a background" to 1,
     )
@@ -91,106 +111,90 @@ class BackgroundSettingsTabLabelsTest {
     }
 
     /**
-     * The rest of the tab's vocabulary only appears once a slot is set to something other than Color:
-     * the picker rows, their icon buttons, the ATEM badges and the gradient controls. This puts every
-     * one of them on screen at once and checks the lot, including each slider's starting readout.
+     * The rest of the tab's vocabulary appears only once a surface is set to something else: the
+     * picker rows, their icon buttons, the ATEM badges and the gradient controls. Each is put on
+     * screen by opening the surface that shows it.
      */
     @Test
-    fun `every label the conditional rows render is on screen`() {
-        val everyKind = AppSettings().let {
+    fun `the image picker row and its buttons are labelled`() {
+        val settings = AppSettings().let {
             it.copy(
                 backgroundSettings = it.backgroundSettings.copy(
                     defaultBackgroundType = Constants.BACKGROUND_IMAGE,
                     defaultBackgroundImage = "/tmp/backdrops/still.png",
-                    defaultLowerThirdBackgroundType = Constants.BACKGROUND_VIDEO,
-                    defaultLowerThirdBackgroundVideo = "/tmp/backdrops/loop.mp4",
-                    bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
-                    bibleLowerThirdBackground = BackgroundConfig(
-                        backgroundType = Constants.BACKGROUND_GRADIENT,
-                        gradientEnabled = true,
-                    ),
-                    songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR),
-                    songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_DEFAULT),
                 ),
                 atemSettings = it.atemSettings.copy(host = "10.0.0.5"),
             )
         }
-        backgroundTab(initial = everyKind) { _ ->
-            // Picker rows and the file names they show.
-            onAllNodesWithText("Background Image:").assertCountEquals(1)
-            onAllNodesWithText("Background Video:").assertCountEquals(1)
+        backgroundTab(settings) { _ ->
+            onAllNodesWithText("IMAGE FILE").assertCountEquals(1)
             onAllNodesWithText("still.png").assertCountEquals(1)
-            onAllNodesWithText("loop.mp4").assertCountEquals(1)
-
-            // The icon buttons in those rows, named by the tooltip each also publishes.
-            onAllNodesWithContentDescription("Browse downloaded library").assertCountEquals(2)
-            onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(2)
+            onAllNodesWithContentDescription("Browse downloaded library").assertCountEquals(1)
+            onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(1)
             onAllNodesWithContentDescription("Upload to Background Slot 1").assertCountEquals(1)
             onAllNodesWithContentDescription("Upload to Background Slot 2").assertCountEquals(1)
-            onAllNodesWithText("1").assertCountEquals(1) // the upload buttons' slot badges
-            onAllNodesWithText("2").assertCountEquals(1)
-
-            // The type labels this configuration puts on the dropdowns.
-            onAllNodesWithText(TypeLabel.IMAGE).assertCountEquals(1)
-            onAllNodesWithText(TypeLabel.VIDEO).assertCountEquals(1)
-            onAllNodesWithText(TypeLabel.TRANSPARENT).assertCountEquals(1)
-            onAllNodesWithText(TypeLabel.GRADIENT).assertCountEquals(1)
-            onAllNodesWithText(TypeLabel.DEFAULT).assertCountEquals(1)
-            onAllNodesWithText(TypeLabel.COLOR).assertCountEquals(1)
-
-            // The gradient controls, with the readouts their stored defaults produce.
-            onAllNodesWithText("TOP COLOR:").assertCountEquals(1)
-            onAllNodesWithText("BOTTOM COLOR:").assertCountEquals(1)
-            onAllNodesWithText("Top Opacity").assertCountEquals(1)
-            onAllNodesWithText("Bottom Opacity").assertCountEquals(1)
-            onAllNodesWithText("Transition Position").assertCountEquals(1)
-            // gradientTopOpacity = 0.0, plus the dim readout on each of the three slots that show
-            // sliders at all — Image, Video and Color. Transparent, Gradient and Default show none.
-            onAllNodesWithText("0%").assertCountEquals(1 + 3)
-            onAllNodesWithText("80%").assertCountEquals(1)  // gradientBottomOpacity = 0.8
-            onAllNodesWithText("50%").assertCountEquals(1)  // gradientPosition      = 0.5
         }
     }
 
-    /** Every option each dropdown offers, checked against the slot it belongs to. */
     @Test
-    fun `each dropdown menu offers exactly the types its slot supports`() {
-        val menus = mapOf(
-            TypeDropdown.DEFAULT to listOf(
-                TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.TRANSPARENT,
-            ),
-            TypeDropdown.DEFAULT_LOWER_THIRD to listOf(
-                TypeLabel.FOLLOW_DEFAULT, TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO,
-                TypeLabel.TRANSPARENT,
-            ),
-            TypeDropdown.BIBLE_FULLSCREEN to listOf(
-                TypeLabel.DEFAULT, TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.TRANSPARENT,
-            ),
-            TypeDropdown.SONG_LOWER_THIRD to listOf(
-                TypeLabel.DEFAULT, TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.TRANSPARENT,
-                TypeLabel.GRADIENT,
-            ),
-        )
-        for ((ordinal, options) in menus) {
-            // One composition per menu: closing one would mean clicking something else on the tab,
-            // and nothing outside an open menu is unambiguously clickable.
-            backgroundTab { _ ->
-                typeDropdowns()[ordinal].scrollThenClick()
-                waitForIdle()
-                for (option in TypeLabel.all) {
-                    val expected = if (option in options) 1 else 0
-                    val onScreenAlready = if (option == TypeLabel.COLOR) TypeDropdown.COUNT else 0
-                    // Video is the one item whose menu text depends on the machine: without VLC the
-                    // tab appends "(Install VLC)" to it. It is still offered, under that label.
-                    val menuText = if (option == TypeLabel.VIDEO) videoMenuLabel else option
-                    onAllNodesWithText(menuText).assertCountEquals(expected + onScreenAlready)
-                }
-            }
+    fun `the video picker row is labelled`() {
+        val settings = AppSettings().let {
+            it.copy(
+                backgroundSettings = it.backgroundSettings.copy(
+                    defaultBackgroundType = Constants.BACKGROUND_VIDEO,
+                    defaultBackgroundVideo = "/tmp/backdrops/loop.mp4",
+                ),
+            )
         }
+        backgroundTab(settings) { _ ->
+            onAllNodesWithText("VIDEO FILE").assertCountEquals(1)
+            onAllNodesWithText("loop.mp4").assertCountEquals(1)
+            onAllNodesWithContentDescription("Browse downloaded library").assertCountEquals(1)
+            onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(1)
+        }
+    }
+
+    @Test
+    fun `the gradient controls are labelled`() {
+        val settings = AppSettings().let {
+            it.copy(
+                backgroundSettings = it.backgroundSettings.copy(
+                    bibleLowerThirdBackground = BackgroundConfig(
+                        backgroundType = Constants.BACKGROUND_GRADIENT,
+                        gradientEnabled = true,
+                    ),
+                ),
+            )
+        }
+        backgroundTab(settings) { _ ->
+            openSurface(Surface.BIBLE_LOWER_THIRD)
+            onAllNodesWithText("TOP COLOR:").assertCountEquals(1)
+            onAllNodesWithText("BOTTOM COLOR:").assertCountEquals(1)
+            onAllNodesWithText("TOP OPACITY").assertCountEquals(1)
+            onAllNodesWithText("BOTTOM OPACITY").assertCountEquals(1)
+            onAllNodesWithText("TRANSITION POSITION").assertCountEquals(1)
+            onAllNodesWithText("80%").assertCountEquals(1)
+            onAllNodesWithText("50%").assertCountEquals(1)
+        }
+    }
+
+    @Test
+    fun `a lower-third surface names its heading and its badge`() = backgroundTab { _ ->
+        openSurface(Surface.BIBLE_LOWER_THIRD)
+        onAllNodesWithText("Bible · Lower Third").assertCountEquals(1)
+        onAllNodesWithText("LOWER THIRD").assertCountEquals(1)
+        onAllNodesWithText("Use Default").assertCountEquals(1)
+    }
+
+    @Test
+    fun `an inheriting surface says so in both places`() = backgroundTab { _ ->
+        setSurfaceType(Surface.BIBLE, TypeLabel.DEFAULT)
+        onAllNodesWithText("Following Default").assertCountEquals(1)
+        onAllNodesWithText("Follows the default").assertCountEquals(2)
     }
 }
 
-/** The Quick backgrounds card's help line, too long for one source line. */
+/** The Quick backgrounds shelf's help line, too long for one source line. */
 private const val QUICK_BACKGROUNDS_HELP =
     "Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, " +
         "drag it to change which key reaches it. Picking one during a service overrides every " +
