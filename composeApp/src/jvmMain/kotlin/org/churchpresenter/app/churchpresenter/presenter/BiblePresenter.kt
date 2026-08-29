@@ -27,17 +27,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -55,10 +54,8 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import java.io.File
 import kotlin.math.min
 
 private const val SHADOW_OFFSET_PX = 6f
@@ -426,68 +423,19 @@ fun BiblePresenter(
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
     else appSettings.backgroundSettings.bibleBackground
 
-    // Resolve effective background type/paths (handle Default → inherit from global)
-    // For fill/key output: force black background, skip images/videos
-    val effectiveType: String
-    val effectiveImagePath: String
-    val effectiveVideoPath: String
-    var backgroundColor: Color
-    val effectiveOpacity: Float
-
-    if (!showBackground) {
-        // Browser Source scenes blank to transparent (OBS keying); projector windows to black
-        effectiveType = if (LocalTransparentBlanking.current) Constants.BACKGROUND_TRANSPARENT
-        else Constants.BACKGROUND_COLOR
-        effectiveImagePath = ""
-        effectiveVideoPath = ""
-        backgroundColor = Color.Black
-        effectiveOpacity = 1.0f
-    } else if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
-        val defaults = appSettings.backgroundSettings
-        if (isLowerThird) {
-            effectiveType = defaults.defaultLowerThirdBackgroundType
-            effectiveImagePath = defaults.defaultLowerThirdBackgroundImage
-            effectiveVideoPath = defaults.defaultLowerThirdBackgroundVideo
-            backgroundColor = parseHexColor(defaults.defaultLowerThirdBackgroundColor)
-            effectiveOpacity = defaults.defaultLowerThirdBackgroundOpacity
-        } else {
-            effectiveType = defaults.defaultBackgroundType
-            effectiveImagePath = defaults.defaultBackgroundImage
-            effectiveVideoPath = defaults.defaultBackgroundVideo
-            backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
-            effectiveOpacity = defaults.defaultBackgroundOpacity
-        }
-    } else {
-        effectiveType = bgConfig.backgroundType
-        effectiveImagePath = bgConfig.backgroundImage
-        effectiveVideoPath = bgConfig.backgroundVideo
-        backgroundColor = parseHexColor(bgConfig.backgroundColor)
-        effectiveOpacity = bgConfig.backgroundOpacity
-    }
-
-    val backgroundImageBitmap = remember(effectiveType, effectiveImagePath, isLowerThird) {
-        if (effectiveType == Constants.BACKGROUND_IMAGE && effectiveImagePath.isNotEmpty()) {
-            // PictureDecoder, not Skia directly — see PresenterScreen for why.
-            val file = File(effectiveImagePath)
-            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-        } else null
-    }
-
-    val useVideoBackground = effectiveType == Constants.BACKGROUND_VIDEO && effectiveVideoPath.isNotEmpty()
-
-    val bgModifier: Modifier = when {
-        effectiveType == Constants.BACKGROUND_TRANSPARENT -> Modifier
-        effectiveType == Constants.BACKGROUND_GRADIENT -> Modifier
-        useVideoBackground -> Modifier.background(Color.Black) // video rendered as overlay
-        effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
-            Modifier.alpha(effectiveOpacity).paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
-
-        effectiveType == Constants.BACKGROUND_IMAGE ->
-            Modifier.background(Color.Black)
-
-        else ->
-            Modifier.background(backgroundColor.copy(alpha = effectiveOpacity))
-    }
+    // A verse carries no background of its own, so this is the quick tray's pick, then the Bible
+    // background, then the defaults — the same order and the same resolver songs go through.
+    val resolvedBg = resolveBackground(
+        settings = appSettings.backgroundSettings,
+        config = bgConfig,
+        isLowerThird = isLowerThird,
+        showBackground = showBackground,
+        transparentWhenBlank = LocalTransparentBlanking.current,
+    )
+    val backgroundImageBitmap = rememberBackgroundBitmap(resolvedBg, isLowerThird)
+    val useVideoBackground = resolvedBg.usesVideo
+    val effectiveOpacity = resolvedBg.opacity
+    val bgModifier: Modifier = backgroundModifier(resolvedBg, backgroundImageBitmap)
 
     // Fade-in on first appearance (covers background + text)
     val fadeInDuration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
@@ -505,18 +453,19 @@ fun BiblePresenter(
     BoxWithConstraints(
         modifier.fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
-            .then(if (!isLowerThird) bgModifier else Modifier)
+            .then(if (!isLowerThird && !resolvedBg.isBlurred) bgModifier else Modifier)
     ) {
-        if (useVideoBackground && !isLowerThird) {
-            LoopingVideoBackground(
-                videoPath = effectiveVideoPath,
-                modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
-            )
-        }
         val density = LocalDensity.current
         val widthScale = with(density) { maxWidth.toPx() / 1920f }
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
+        PresenterBackgroundLayers(
+            background = resolvedBg,
+            backgroundModifier = bgModifier,
+            isLowerThird = isLowerThird,
+            blurRadius = blurRadius,
+        )
 
         // Scale shadow to be visible at projection resolution
         fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
@@ -581,9 +530,10 @@ fun BiblePresenter(
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .then(if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+                    .then(if (resolvedBg.isBlurred) Modifier.blur(blurRadius) else Modifier)
+                    .then(if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
             ) {
-                if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
+                if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
                     Image(
                         painter = BitmapPainter(backgroundImageBitmap),
                         contentDescription = null,
@@ -593,8 +543,20 @@ fun BiblePresenter(
                     )
                 }
                 if (useVideoBackground) {
-                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize().alpha(effectiveOpacity))
+                    LoopingVideoBackground(
+                        videoPath = resolvedBg.videoPath,
+                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
+                    )
                 }
+            }
+            if (resolvedBg.dimPercent > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(lowerThirdFraction)
+                        .align(Alignment.BottomCenter)
+                        .background(Color.Black.copy(alpha = resolvedBg.dimPercent / PERCENT))
+                )
             }
             // Gradient overlay
             if (bgConfig.gradientEnabled) {

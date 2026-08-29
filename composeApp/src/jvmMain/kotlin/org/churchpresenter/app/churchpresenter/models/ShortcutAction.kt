@@ -58,6 +58,17 @@ import churchpresenter.composeapp.generated.resources.shortcut_description_remov
 import churchpresenter.composeapp.generated.resources.shortcut_description_save_schedule
 import churchpresenter.composeapp.generated.resources.shortcut_description_save_schedule_as
 import churchpresenter.composeapp.generated.resources.shortcut_description_settings
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_1
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_2
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_3
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_4
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_5
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_6
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_7
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_8
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_9
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_10
+import churchpresenter.composeapp.generated.resources.shortcut_description_quick_background_reset
 import churchpresenter.composeapp.generated.resources.shortcut_description_undo
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.core.models.shortcuts.KeyChord
@@ -217,4 +228,40 @@ enum class ShortcutAction(
     // ── Canvas tab ───────────────────────────────────────────────────────────
     CANVAS_DELETE_SOURCE(ShortcutScope.CANVAS, Res.string.shortcut_description_delete_source,
         listOf(KeyChord.of(Key.Delete), KeyChord.of(Key.Backspace))),
+
+    /**
+     * The quick-background tray's slots.
+     *
+     * Ctrl/Cmd rather than a bare digit: nothing in the app binds a digit today, but a bare one
+     * would collide with typing in the song and Bible search fields, and a live control should not
+     * depend on the focus stand-down behaving.
+     */
+    QUICK_BACKGROUND_RESET(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_reset,
+        listOf(KeyChord.of(Key.Zero, ctrl = true))),
+    QUICK_BACKGROUND_1(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_1,
+        listOf(KeyChord.of(Key.One, ctrl = true))),
+    QUICK_BACKGROUND_2(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_2,
+        listOf(KeyChord.of(Key.Two, ctrl = true))),
+    QUICK_BACKGROUND_3(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_3,
+        listOf(KeyChord.of(Key.Three, ctrl = true))),
+    QUICK_BACKGROUND_4(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_4,
+        listOf(KeyChord.of(Key.Four, ctrl = true))),
+    QUICK_BACKGROUND_5(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_5,
+        listOf(KeyChord.of(Key.Five, ctrl = true))),
+    QUICK_BACKGROUND_6(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_6,
+        listOf(KeyChord.of(Key.Six, ctrl = true))),
+    QUICK_BACKGROUND_7(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_7,
+        listOf(KeyChord.of(Key.Seven, ctrl = true))),
+    QUICK_BACKGROUND_8(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_8,
+        listOf(KeyChord.of(Key.Eight, ctrl = true))),
+    QUICK_BACKGROUND_9(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_9,
+        listOf(KeyChord.of(Key.Nine, ctrl = true))),
+
+    /**
+     * The tenth slot ships unbound: the digits are spent — one to eight and nine above, with
+     * Ctrl+0 on the reset — and inventing a two-handed chord for it would be worse than letting
+     * whoever wants it choose their own in the shortcuts dialog.
+     */
+    QUICK_BACKGROUND_10(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_10,
+        emptyList()),
 }

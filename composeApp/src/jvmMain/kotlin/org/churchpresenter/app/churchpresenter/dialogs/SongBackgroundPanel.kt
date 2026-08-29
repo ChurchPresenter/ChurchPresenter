@@ -88,6 +88,17 @@ internal fun SongBackgroundPanel(
     onApplyToSongbook: (() -> Unit)?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * Whether "Inherit" is on offer. False for a quick background, which exists only to override —
+     * an inheriting one would be a tray tile that does nothing.
+     */
+    allowInherit: Boolean = true,
+    /**
+     * An optional row along the bottom of the panel. Null for a song, whose background is edited
+     * in place and saved with the song; the quick tray passes its OK/Cancel through here so a
+     * tray tile can be edited and then abandoned.
+     */
+    footer: (@Composable () -> Unit)? = null,
 ) {
     var target by remember { mutableStateOf(SongBackgroundTarget.FULL_SCREEN) }
     val current = if (target == SongBackgroundTarget.FULL_SCREEN) background else lowerThirdBackground
@@ -112,6 +123,7 @@ internal fun SongBackgroundPanel(
             PanelHeader(
                 target = target,
                 onTarget = { target = it },
+                allowInherit = allowInherit,
                 custom = current.isCustom,
                 onMode = { custom ->
                     update(
@@ -127,7 +139,7 @@ internal fun SongBackgroundPanel(
                     background = current,
                     onChange = ::update,
                     modifier = Modifier.weight(1f).fillMaxHeight()
-                        .alpha(if (current.isCustom) 1f else INHERIT_ALPHA),
+                        .alpha(if (current.isCustom || !allowInherit) 1f else INHERIT_ALPHA),
                 )
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SongBackgroundLookColumn(
@@ -138,6 +150,10 @@ internal fun SongBackgroundPanel(
                     modifier = Modifier.width(LOOK_COLUMN_WIDTH).fillMaxHeight(),
                 )
             }
+            if (footer != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                footer()
+            }
         }
     }
 }
@@ -146,6 +162,7 @@ internal fun SongBackgroundPanel(
 private fun PanelHeader(
     target: SongBackgroundTarget,
     onTarget: (SongBackgroundTarget) -> Unit,
+    allowInherit: Boolean,
     custom: Boolean,
     onMode: (Boolean) -> Unit,
     onDismiss: () -> Unit,
@@ -165,9 +182,11 @@ private fun PanelHeader(
             maxLines = 1,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        SegmentedRow {
-            Segment(stringResource(Res.string.song_background_inherit), !custom) { onMode(false) }
-            Segment(stringResource(Res.string.song_background_own), custom) { onMode(true) }
+        if (allowInherit) {
+            SegmentedRow {
+                Segment(stringResource(Res.string.song_background_inherit), !custom) { onMode(false) }
+                Segment(stringResource(Res.string.song_background_own), custom) { onMode(true) }
+            }
         }
         SegmentedRow {
             Segment(

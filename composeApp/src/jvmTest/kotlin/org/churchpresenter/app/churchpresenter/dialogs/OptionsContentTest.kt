@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -195,10 +196,10 @@ class OptionsContentTest {
     @Test
     fun `changing the background type dropdown on the Background tab feeds back into saved settings`() =
         dialog(initialTab = 3) { result ->
-        // Both the full-screen and lower-third cards default to "Color" — the full-screen one composes first.
-        onAllNodes(hasText("Color") and hasClickAction())[0].performScrollTo().performClick()
-        waitForIdle()
-        onNode(hasText("Image") and hasClickAction()).performScrollTo().performClick()
+        // The tab opens on the Default surface, whose type segments sit in the editor beside the
+        // rail. "Image" names exactly one of them; the rail rows carry their own type as a meta
+        // line, so the segment is the only *clickable* node reading it on its own.
+        onNode(hasTextExactly("Image") and hasClickAction()).performScrollTo().performClick()
         waitForIdle()
         onNodeWithText("Apply").performClick()
 

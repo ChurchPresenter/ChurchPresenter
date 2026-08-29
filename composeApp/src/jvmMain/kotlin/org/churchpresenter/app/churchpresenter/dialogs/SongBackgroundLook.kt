@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background_opacity
 import churchpresenter.composeapp.generated.resources.song_background_apply_to_songbook
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
@@ -107,6 +108,12 @@ internal fun SongBackgroundLookColumn(
                     value = background.blur,
                     max = SONG_BACKGROUND_MAX_BLUR,
                 ) { onChange(background.copy(blur = it)) }
+                PanelSlider(
+                    label = stringResource(Res.string.background_opacity),
+                    readout = "${background.opacity}%",
+                    value = background.opacity,
+                    max = PERCENT_MAX,
+                ) { onChange(background.copy(opacity = it)) }
             }
         }
         if (onApplyToSongbook != null) {
