@@ -67,8 +67,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Desktop
-import java.net.URI
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val SENT_CONFIRMATION_MS = 1500L
 
@@ -334,7 +333,7 @@ internal fun ContactUsDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             runCatching {
-                                Desktop.getDesktop().browse(URI(ContactReporter.WEB_CONTACT_URL))
+                                UrlOpener.open(ContactReporter.WEB_CONTACT_URL)
                             }
                         }
                     ) {

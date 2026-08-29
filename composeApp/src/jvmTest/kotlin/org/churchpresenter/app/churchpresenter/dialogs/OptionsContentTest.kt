@@ -97,7 +97,7 @@ class OptionsContentTest {
     @Test
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
-            "System", "Bible", "Song", "Background", "Projection", "Lower Third",
+            "System", "Bible", "Song", "Background", "Projection",
             "Server", "Stage Monitor", "ATEM", "Dictionary", "Companion Satellite",
         ).forEach { onNodeWithText(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
@@ -154,7 +154,7 @@ class OptionsContentTest {
     @Test
     fun `every tab renders its own settings content when selected`() = dialog {
         listOf(
-            "System", "Song", "Background", "Projection", "Lower Third", "Server",
+            "System", "Song", "Background", "Projection", "Server",
             "Stage Monitor", "ATEM", "Dictionary",
         ).forEach { label ->
             onNode(hasText(label) and hasClickAction()).performClick()
@@ -206,18 +206,14 @@ class OptionsContentTest {
         assertEquals(Constants.BACKGROUND_IMAGE, result.saved?.backgroundSettings?.defaultBackgroundType)
     }
 
-    @Test
-    fun `editing the window-left field on the Lower Third tab feeds back into saved settings`() =
-        dialog(initialTab = 5) { result ->
-        onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("77")
-        onNodeWithText("Apply").performClick()
-
-        assertEquals(77, result.saved?.streamingSettings?.windowLeft)
-    }
+    // The Lower Third tab's window-left field was exercised here, as this suite's proof that a tab
+    // with only number fields feeds Apply. The insets went first -- a Lottie file is self-contained
+    // -- and then the tab itself, which duplicated the Lower Third content tab. The Background tab
+    // above and the Server tab below carry the same proof for their own control types.
 
     @Test
     fun `toggling API Key Protection on the Server tab feeds back into saved settings`() =
-        dialog(initialTab = 6) { result ->
+        dialog(initialTab = 5) { result ->
         // Ordinal 0 is Enable Server, which starts a real server on a real port — never touch it.
         onAllNodes(isToggleable())[1].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
@@ -227,7 +223,7 @@ class OptionsContentTest {
 
     @Test
     fun `picking the metronome position on the Stage Monitor tab feeds back into saved settings`() =
-        dialog(initialTab = 7) { result ->
+        dialog(initialTab = 6) { result ->
         chooseRouting(ContentLabel.METRONOME, MetronomeLabel.CENTER)
         onNodeWithText("Apply").performClick()
 
@@ -235,7 +231,7 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 8) { result ->
+    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("test-atem-host")
         onNodeWithText("Apply").performClick()
 
@@ -243,7 +239,7 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `toggling Show Word on the Dictionary tab feeds back into saved settings`() = dialog(initialTab = 9) { result ->
+    fun `toggling Show Word on the Dictionary tab feeds back into saved settings`() = dialog(initialTab = 8) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -252,7 +248,7 @@ class OptionsContentTest {
 
     @Test
     fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
-        dialog(initialTab = 10) { result ->
+        dialog(initialTab = 9) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -261,7 +257,7 @@ class OptionsContentTest {
 
     @Test
     fun `the OBS and Companion Satellite tabs feed control changes back into saved settings`() = dialog(
-        initialTab = 10,
+        initialTab = 9,
         obsManager = OBSWebSocketManager(),
     ) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick() // OBS tab: "Connect to OBS Studio"
@@ -338,7 +334,6 @@ class OptionsContentTest {
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
                 scenes = emptyList(),
-                onOpenLottieGen = { _, _ -> },
                 obsManager = null,
                 companionSatelliteViewModel = null,
                 initialTab = 0,
@@ -362,7 +357,6 @@ class OptionsContentTest {
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
                 scenes = emptyList(),
-                onOpenLottieGen = { _, _ -> },
                 obsManager = null,
                 companionSatelliteViewModel = null,
                 initialTab = 0,

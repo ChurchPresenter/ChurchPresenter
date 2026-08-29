@@ -242,18 +242,11 @@ class ProjectionSettingsTabAudioAndLabelsTest {
         }
     }
 
-    // ── Stepper arrows ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Every stepper field publishes increment/decrement arrows — one per stepper field: lower-third
-     * height plus four window offsets — and each is laid out at a size a click can reach.
-     *
-     * These arrows used to collapse to zero pixels wide on every tab in the app — a defect in the
-     * shared `NumberSettingsTextField`, which this test pinned as present-but-unusable while it
-     * stood. Now that it is fixed, the same test guards the fix.
-     */
-    @Test
-    fun `the stepper arrows are laid out where they can be clicked`() = projectionTab { _ ->
-        assertStepperArrowsUsable(expected = 5)
-    }
+    // The stepper-arrow guard was here. It asserted that every increment/decrement arrow on this
+    // tab is laid out at a clickable size — a defect in the shared `NumberSettingsTextField` once
+    // collapsed them all to zero pixels wide. It could only ever say that about the band-height
+    // field: this harness lays the four window offsets out at zero width, so that field was the one
+    // drawn number field the tab had, and it has moved to the Bible and Song tabs. The guard follows
+    // it there (`LowerThirdHeightFieldTest`), and `StageMonitorSettingsTabStructureTest` and
+    // `DictionarySettingsTabStructureTest` still hold their own copies of it.
 }

@@ -128,12 +128,22 @@ object CrashReporter {
         buildIdentity: BuildIdentity,
         setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit,
         addShutdownHook: (Runnable) -> Unit,
+        telemetryOff: Boolean = telemetryDisabled(),
+        initTelemetry: () -> Unit = ::initSentry,
     ) {
         build = buildIdentity
         crashDir.mkdirs()
 
+        // [telemetryOff] is read here rather than inside [initSentry] because this is where
+        // "should telemetry run at all" is already decided, and because a branch inside initSentry
+        // is one no test can reach — that function ends in Sentry.init. Both it and the init step
+        // are defaulted parameters so the suite can drive the decision and see which way it went;
+        // only the real Sentry.init stays uncovered.
+        //
+        // The install id is deliberately outside the switch: it identifies the install for the
+        // local crash log too, and minting it has never depended on Sentry being reachable.
         if (analyticsReportingEnabled) {
-            initSentry()
+            if (!telemetryOff) initTelemetry()
             setUser(getOrCreateInstallId())
         }
 
@@ -442,6 +452,21 @@ object CrashReporter {
         stream?.use { props.load(it) }
         return props.getProperty("dsn", "").trim()
     }
+
+    /**
+     * The system property that switches telemetry off outright, whatever else is configured.
+     *
+     * The test tasks set `sentry.dsn=""`, which turns out not to be enough: that only disables the
+     * SDK's own external configuration, while [configureOptions] assigns the DSN this reads off the
+     * classpath. `sentry.properties` lives in `jvmMain/resources`, which is on the *test* runtime
+     * classpath, so a suite that initialised the reporter published straight into the production
+     * project — "kaboom", "boom" and "nowhere to write" are all in Sentry, filed under a test class.
+     */
+    internal const val DISABLE_PROPERTY = "churchpresenter.telemetry.disabled"
+
+    /** Whether telemetry is switched off for this JVM regardless of settings. */
+    internal fun telemetryDisabled(value: String? = System.getProperty(DISABLE_PROPERTY)): Boolean =
+        value?.trim()?.lowercase() in setOf("1", "true", "yes")
 
     private fun initSentry() {
         try {

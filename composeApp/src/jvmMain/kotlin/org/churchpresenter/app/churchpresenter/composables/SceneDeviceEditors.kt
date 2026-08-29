@@ -15,8 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.awt.Desktop
-import java.net.URI
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
@@ -47,6 +45,7 @@ import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f
@@ -227,7 +226,7 @@ internal const val MAC_CAMERA_PRIVACY_URI =
  */
 @Composable
 private fun MacCameraPrivacyHint(
-    onOpenPrivacySettings: () -> Unit = { runCatching { Desktop.getDesktop().browse(URI(MAC_CAMERA_PRIVACY_URI)) } }
+    onOpenPrivacySettings: () -> Unit = { UrlOpener.open(MAC_CAMERA_PRIVACY_URI) }
 ) {
     Button(onClick = onOpenPrivacySettings, modifier = Modifier.fillMaxWidth()) {
         Text(stringResource(Res.string.canvas_camera_open_privacy_settings), fontSize = 12.sp)

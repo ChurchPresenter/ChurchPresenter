@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
@@ -41,6 +42,14 @@ private val HEADER_ONE_ROW_WIDTH = 820.dp
 /** Enough for the box's own "NAME" caption, which is what truncated first when it was weighted alone. */
 private val NAME_FIELD_MIN_WIDTH = 150.dp
 private val ABBREVIATION_FIELD_WIDTH = 104.dp
+
+/**
+ * Test tag on the abbreviation box.
+ *
+ * It carries no placeholder -- see the call site -- so unlike the name box beside it there is no
+ * text on an empty one for a test to find it by, and the caption is not in its semantics.
+ */
+internal const val BIBLE_ABBREVIATION_FIELD_TAG = "bibleCustomAbbreviationField"
 
 /**
  * The element tabs, what this church calls the translation, and the way back to the defaults.
@@ -93,7 +102,7 @@ internal fun ElementHeaderRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 tabs()
-                TranslationIdentityFields(translation, moduleTitle, onTranslationChange, Modifier.weight(1f))
+                TranslationIdentityFields(translation, moduleTitle, element, onTranslationChange, Modifier.weight(1f))
                 reset()
             }
         } else {
@@ -107,7 +116,13 @@ internal fun ElementHeaderRow(
                     Spacer(Modifier.weight(1f))
                     reset()
                 }
-                TranslationIdentityFields(translation, moduleTitle, onTranslationChange, Modifier.fillMaxWidth())
+                TranslationIdentityFields(
+                    translation,
+                    moduleTitle,
+                    element,
+                    onTranslationChange,
+                    Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -118,7 +133,7 @@ internal fun ElementHeaderRow(
  *
  * Both boxes stand empty until the operator types in one, and both show what the module gives
  * itself as their placeholder: blank means "keep using that", so the placeholder is the live value
- * rather than a hint about one. The abbreviation is the string that labels every verse on screen,
+ * rather than a hint about one. The abbreviation is the string that labels the reference on screen,
  * which is why it is editable separately -- a module titled "King James Version" abbreviates itself
  * to "KJV" whatever the church actually puts under its scripture.
  */
@@ -126,6 +141,7 @@ internal fun ElementHeaderRow(
 private fun TranslationIdentityFields(
     translation: BibleTranslationSettings,
     moduleTitle: String,
+    element: BibleStyleElement,
     onTranslationChange: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -147,15 +163,23 @@ private fun TranslationIdentityFields(
             value = translation.customAbbreviation,
             onValueChange = { typed -> onTranslationChange { it.copy(customAbbreviation = typed) } },
             label = stringResource(Res.string.bible_custom_abbreviation),
+            // The module's own abbreviation, which is exactly what a blank box falls back to on
+            // screen -- so the placeholder is the live value rather than a hint about one.
             placeholder = { PanelPlaceholder(defaultTranslationAbbreviation(moduleTitle, translation.fileName)) },
-            modifier = Modifier.width(ABBREVIATION_FIELD_WIDTH),
+            modifier = Modifier.width(ABBREVIATION_FIELD_WIDTH).testTag(BIBLE_ABBREVIATION_FIELD_TAG),
             fillWidth = true,
         )
-        LabeledCheckbox(
-            checked = translation.showAbbreviation,
-            onCheckedChange = { on -> onTranslationChange { it.copy(showAbbreviation = on) } },
-            label = stringResource(Res.string.show_abbreviation),
-            style = MaterialTheme.typography.bodySmall,
-        )
+        // Only on the Reference tab. The label goes on the reference and nowhere else, and this row
+        // is the header of both element tabs -- so on Verse Text the box was present and completely
+        // ineffective, which is the same rule the typography grid follows for a control whose
+        // profile has nowhere to keep the value.
+        if (element == BibleStyleElement.REFERENCE) {
+            LabeledCheckbox(
+                checked = translation.showAbbreviation,
+                onCheckedChange = { on -> onTranslationChange { it.copy(showAbbreviation = on) } },
+                label = stringResource(Res.string.show_abbreviation),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }

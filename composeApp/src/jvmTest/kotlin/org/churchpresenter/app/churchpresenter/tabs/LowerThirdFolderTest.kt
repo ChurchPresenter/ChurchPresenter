@@ -18,8 +18,10 @@ import kotlin.test.Test
  * common case in the field, since the path is typed or picked once and then the folder gets moved,
  * renamed or deleted.
  *
- * All of them have to land on the same "no presets" panel rather than an empty list that looks like
- * a working folder, or an exception on a tab the operator opens mid-service.
+ * All of them have to land on the same "no JSON files found" panel rather than an empty list that
+ * looks like a working folder, or an exception on a tab the operator opens mid-service. That message
+ * is distinct from the one for a folder that was never configured at all — a path that is set but
+ * wrong is a different problem from a path that is missing, and the tab now says which.
  */
 class LowerThirdFolderTest {
 
@@ -40,7 +42,7 @@ class LowerThirdFolderTest {
         val gone = tempDir().also { it.deleteRecursively() }
 
         lowerThirdTab(folder = gone) { _ ->
-            onNodeWithText(LowerThirdLabel.NO_PRESETS).assertExists()
+            onNodeWithText(LowerThirdLabel.NO_FILES).assertExists()
         }
     }
 
@@ -51,7 +53,7 @@ class LowerThirdFolderTest {
         val notADirectory = File(dir, "lower-thirds.json").apply { writeText(LOWER_THIRD_LOTTIE) }
 
         lowerThirdTab(folder = notADirectory) { _ ->
-            onNodeWithText(LowerThirdLabel.NO_PRESETS).assertExists()
+            onNodeWithText(LowerThirdLabel.NO_FILES).assertExists()
         }
     }
 
@@ -63,7 +65,7 @@ class LowerThirdFolderTest {
         }
 
         lowerThirdTab(folder = dir) { _ ->
-            onNodeWithText(LowerThirdLabel.NO_PRESETS).assertExists()
+            onNodeWithText(LowerThirdLabel.NO_FILES).assertExists()
         }
     }
 
@@ -76,7 +78,7 @@ class LowerThirdFolderTest {
         }
 
         lowerThirdTab(folder = dir) { _ ->
-            onNodeWithText(LowerThirdLabel.NO_PRESETS).assertExists()
+            onNodeWithText(LowerThirdLabel.NO_FILES).assertExists()
         }
     }
 

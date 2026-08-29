@@ -73,14 +73,17 @@ class DeviceEnumerationTest {
     }
 
     @Test
-    fun `the dshow format query is the only one given a timeout`() {
-        // -list_options opens the device to interrogate it, and a camera already held by another
+    fun `a format query that opens the device is given a timeout`() {
+        // These probes open the device to interrogate it, and a camera already held by another
         // application never answers. Without the bound the properties panel would hang on selection.
-        val runner = FakeCommandRunner.alwaysReturning("")
+        val dshow = FakeCommandRunner.alwaysReturning("")
+        val avfoundation = FakeCommandRunner.alwaysReturning("")
 
-        dshowFormatsFrom("Cam", runner::run)
+        dshowFormatsFrom("Cam", dshow::run)
+        avfoundationFormatsFrom("0", avfoundation::run)
 
-        assertEquals(5L, runner.timeouts.single())
+        assertEquals(5L, dshow.timeouts.single())
+        assertEquals(5L, avfoundation.timeouts.single())
     }
 
     @Test
@@ -119,14 +122,15 @@ class DeviceEnumerationTest {
     }
 
     @Test
-    fun `an avfoundation format query asks for the video device with no audio`() {
+    fun `an avfoundation format query asks for an impossible size, not the v4l2 list option`() {
         val runner = FakeCommandRunner.alwaysReturning("")
 
         avfoundationFormatsFrom("0", runner::run)
 
         assertEquals(
-            listOf("ffmpeg", "-f", "avfoundation", "-list_formats", "all", "-i", "0:none"),
+            listOf("ffmpeg", "-f", "avfoundation", "-video_size", "1x1", "-i", "0:none"),
             runner.calls.single(),
+            "avfoundation has no -list_formats; ffmpeg rejects the whole command line if it is passed",
         )
     }
 

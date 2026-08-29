@@ -106,6 +106,29 @@ internal fun binarySearchFitScale(
     return lo
 }
 
+/**
+ * The line under (or over) a verse: "KJV John 3:16".
+ *
+ * The label is [BibleTranslationSettings.customAbbreviation] where the operator typed one, and the
+ * module's own otherwise -- which is what the abbreviation box offers as its placeholder, so the two
+ * agree about what a blank box means.
+ *
+ * Parts are joined rather than interpolated so an absent label costs no separator; the form this
+ * replaced always emitted its leading space, so a translation with no abbreviation drew
+ * " John 3:16".
+ */
+internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
+    val label = if (translation.showAbbreviation) {
+        translation.customAbbreviation.trim().ifBlank { verse.bibleAbbreviation.trim() }
+    } else {
+        ""
+    }
+    val verseRef = if (verse.verseRange.isNotEmpty()) verse.verseRange else verse.verseNumber.toString()
+    return listOf(label, verse.bookName, "${verse.chapter}:$verseRef")
+        .filter { it.isNotEmpty() }
+        .joinToString(" ")
+}
+
 @Composable
 fun BiblePresenter(
     modifier: Modifier = Modifier,
@@ -498,7 +521,7 @@ fun BiblePresenter(
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.bibleSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
-            val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
+            val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / 100f
             // Background stretches full width at bottom third, text respects padding on top —
             // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
             // bilingual content to stack instead of side-by-side, see TextContent below.
@@ -567,7 +590,7 @@ fun BiblePresenter(
             val innerModifier = if (isLowerThird)
                 Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(appSettings.projectionSettings.lowerThirdHeightPercent / 100f)
+                    .fillMaxHeight(appSettings.bibleSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
                     .clipToBounds()
             else
@@ -575,20 +598,12 @@ fun BiblePresenter(
 
             val textMeasurer = rememberTextMeasurer()
 
-            // Helper: build reference text for a verse
-            fun buildRefText(verse: SelectedVerse, showAbbr: Boolean): String {
-                val abbr = if (showAbbr && verse.bibleAbbreviation.isNotEmpty()) verse.bibleAbbreviation else ""
-                val verseRef = if (verse.verseRange.isNotEmpty()) verse.verseRange else verse.verseNumber.toString()
-                return "$abbr ${verse.bookName} ${verse.chapter}:$verseRef"
-            }
 
             // Only animate the text content — background is never inside this block
             @Composable
             fun TextContent(verses: List<SelectedVerse>) {
                 val primary = verses.first()
                 val secondary = verses.getOrNull(1)
-                val primaryVerseRef = if (primary.verseRange.isNotEmpty()) primary.verseRange else primary.verseNumber.toString()
-                val secondaryVerseRef = secondary?.let { if (it.verseRange.isNotEmpty()) it.verseRange else it.verseNumber.toString() } ?: ""
                 // A settings file that names only a secondary bible still means "bilingual" -- the
                 // condition this replaced keyed off exactly that, and dropping it stopped the second
                 // language rendering for those files.
@@ -689,7 +704,7 @@ fun BiblePresenter(
                             val refFont = systemFontFamilyOrDefault(item.referenceFontType)
                             return textMeasurer.measure(itemText(item, verse.verseText), textStyle(item).copy(fontFamily = textFont, fontSize = textSize), constraints = widthConstraint).size.height +
                                 textMeasurer.measure(
-                                    itemRefText(item, buildRefText(verse, item.showAbbreviation)),
+                                    itemRefText(item, buildRefText(verse, item)),
                                     referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
                                     constraints = widthConstraint,
                                 ).size.height
@@ -742,7 +757,7 @@ fun BiblePresenter(
                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                         if (refPosition == Constants.POSITION_ABOVE) {
                                             Text(
-                                                itemRefText(item, buildRefText(verse, item.showAbbreviation)),
+                                                itemRefText(item, buildRefText(verse, item)),
                                                 Modifier.fillMaxWidth(),
                                                 color = refColor,
                                                 fontFamily = refFont,
@@ -762,7 +777,7 @@ fun BiblePresenter(
                                         )
                                         if (refPosition == Constants.POSITION_BELOW) {
                                             Text(
-                                                itemRefText(item, buildRefText(verse, item.showAbbreviation)),
+                                                itemRefText(item, buildRefText(verse, item)),
                                                 Modifier.fillMaxWidth(),
                                                 color = refColor,
                                                 fontFamily = refFont,
@@ -817,8 +832,8 @@ fun BiblePresenter(
                         // Use 90% of available height as safety margin for line spacing/shadow/padding offsets
                         val availH = (constraints.maxHeight * 0.90f).toInt()
 
-                        val primaryRefText = buildRefText(primary, t0.showAbbreviation)
-                        val secondaryRefText = buildRefText(sec, t1.showAbbreviation)
+                        val primaryRefText = buildRefText(primary, t0)
+                        val secondaryRefText = buildRefText(sec, t1)
 
                         // Binary search for the largest scale where both primary and secondary fit
                         // Scale both verse AND reference text together so everything shrinks proportionally
@@ -984,10 +999,10 @@ fun BiblePresenter(
                     ) {
                         // Auto-scale bible text if it overflows the available height
                         val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
-                        val primaryRefText = buildRefText(primary, t0.showAbbreviation)
+                        val primaryRefText = buildRefText(primary, t0)
                         // Empty when there is no second language, which is the same as the zero height
                         // that branch contributes.
-                        val secondaryRefText = secondary?.let { buildRefText(it, t1.showAbbreviation) } ?: ""
+                        val secondaryRefText = secondary?.let { buildRefText(it, t1) } ?: ""
 
                         val maxH = constraints.maxHeight
                         // The reference lines scale with the verse rather than staying at full size.
@@ -1049,16 +1064,12 @@ fun BiblePresenter(
                             verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                         ) {
                             if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                val bookNameOrAbbr = if (t0.showAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
-                                    text = prText(
-                                        "$bookNameOrAbbr ${primary.bookName} " +
-                                            "${primary.chapter}:$primaryVerseRef",
-                                    ),
+                                    text = prText(buildRefText(primary, t0)),
                                     color = primaryBibleReferenceTextColor,
                                     style = primaryReferenceTextStyleScaled,
                                 )
@@ -1073,32 +1084,24 @@ fun BiblePresenter(
                                 style = primaryBibleTextStyleScaled,
                             )
                             if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                val bookNameOrAbbr = if (t0.showAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
-                                    text = prText(
-                                        "$bookNameOrAbbr ${primary.bookName} " +
-                                            "${primary.chapter}:$primaryVerseRef",
-                                    ),
+                                    text = prText(buildRefText(primary, t0)),
                                     color = primaryBibleReferenceTextColor,
                                     style = primaryReferenceTextStyleScaled,
                                 )
                             }
                             if (showSecondary) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    val bookNameOrAbbr = if (t1.showAbbreviation && secondary.bibleAbbreviation.isNotEmpty()) secondary.bibleAbbreviation else ""
                                     Text(
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
-                                        text = srText(
-                                            "$bookNameOrAbbr ${secondary.bookName} " +
-                                                "${secondary.chapter}:$secondaryVerseRef",
-                                        ),
+                                        text = srText(buildRefText(secondary, t1)),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
                                     )
@@ -1113,16 +1116,12 @@ fun BiblePresenter(
                                     style = secondaryBibleTextStyleScaled,
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    val bookNameOrAbbr = if (t1.showAbbreviation && secondary.bibleAbbreviation.isNotEmpty()) secondary.bibleAbbreviation else ""
                                     Text(
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
-                                        text = srText(
-                                            "$bookNameOrAbbr ${secondary.bookName} " +
-                                                "${secondary.chapter}:$secondaryVerseRef",
-                                        ),
+                                        text = srText(buildRefText(secondary, t1)),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
                                     )

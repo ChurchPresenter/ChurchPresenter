@@ -131,4 +131,92 @@ class PreviewVerseTest {
         assertEquals(4, verse?.chapter)
         assertEquals(17, verse?.verseNumber)
     }
+
+    // ── Several targets, one scan ───────────────────────────────────────────────
+
+    @Test
+    fun `reads every target it is given in one pass`() {
+        val path = module(
+            """
+            $johnHeader
+            -----
+            B043C003V016 43 3 16 For God so loved the world.
+            B043C006V053 43 6 53 Except ye eat the flesh.
+            B043C011V035 43 11 35 Jesus wept.
+            """.trimIndent(),
+        )
+
+        val read = readPreviewVerses(
+            path,
+            listOf(VerseTarget(43, 3, 16), VerseTarget(43, 11, 35)),
+        )
+
+        assertEquals("For God so loved the world.", read[VerseTarget(43, 3, 16)]?.text)
+        assertEquals("Jesus wept.", read[VerseTarget(43, 11, 35)]?.text)
+        assertEquals(2, read.size, "a target that was not asked for is not returned")
+    }
+
+    @Test
+    fun `a target the module lacks is simply absent`() {
+        val path = module(
+            """
+            $johnHeader
+            -----
+            B043C003V016 43 3 16 For God so loved the world.
+            """.trimIndent(),
+        )
+
+        val read = readPreviewVerses(
+            path,
+            listOf(VerseTarget(43, 3, 16), VerseTarget(43, 11, 35)),
+        )
+
+        assertEquals(1, read.size)
+        assertNull(read[VerseTarget(43, 11, 35)])
+    }
+
+    @Test
+    fun `a module with none of the targets falls back to its first verse for all of them`() {
+        val path = module(
+            """
+            1 Genesis 50
+            -----
+            B001C001V001 1 1 1 In the beginning God created.
+            B001C001V002 1 1 2 And the earth was without form.
+            """.trimIndent(),
+        )
+
+        val targets = listOf(VerseTarget(43, 3, 16), VerseTarget(43, 11, 35))
+        val read = readPreviewVerses(path, targets)
+
+        assertEquals(targets.toSet(), read.keys)
+        assertEquals(
+            listOf("In the beginning God created.", "In the beginning God created."),
+            targets.map { read[it]?.text },
+            "an Old-Testament-only shelf still shows something at every sample length",
+        )
+    }
+
+    @Test
+    fun `asking for nothing reads nothing`() {
+        assertEquals(emptyMap(), readPreviewVerses(module("B001C001V001 1 1 1 A verse."), emptyList()))
+    }
+
+    @Test
+    fun `targets are matched on the internal code, not on the displayed numbering`() {
+        // Column 5 and 6 are the module's own numbering, which for some translations differs from
+        // the BxxxCxxxVxxx code the file is keyed by. A target is written in the code.
+        val path = module(
+            """
+            43 John 21
+            -----
+            B043C003V016 43 4 17 Shifted numbering.
+            """.trimIndent(),
+        )
+
+        val read = readPreviewVerses(path, listOf(VerseTarget(43, 3, 16)))
+
+        assertEquals("Shifted numbering.", read[VerseTarget(43, 3, 16)]?.text)
+        assertEquals(4, read[VerseTarget(43, 3, 16)]?.chapter, "the reference still reports the display numbering")
+    }
 }

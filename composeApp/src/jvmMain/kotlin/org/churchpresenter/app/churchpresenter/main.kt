@@ -143,11 +143,9 @@ import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
 import java.io.File
-import java.net.URI
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.server.applyRemoteLiveState
@@ -166,6 +164,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
@@ -245,6 +244,14 @@ fun main() {
         System.exit(0)
         return
     }
+
+    // ImageIO caches its output stream in a temp file by default, so every slide JPEG the
+    // presentation cache writes depended on java.io.tmpdir being writable — and where it was not,
+    // ImageIO.write failed with the useless "Can't create an ImageOutputStream!" rather than
+    // anything naming a temp directory. That was 75 reports across four churches. The images this
+    // app writes are single slides and thumbnails, small enough to stage in memory, so the temp
+    // file buys nothing and costs a dependency on a directory the app does not control.
+    javax.imageio.ImageIO.setUseCache(false)
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
@@ -541,9 +548,23 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     // A quick-tray pick lives only as long as the app is open: it is a live control, not a setting,
     // so it is held here rather than written back through onSettingsChange.
     var activeQuickBackground by remember { mutableStateOf<QuickBackground?>(null) }
-    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings, activeQuickBackground) {
+    // The settings dialog's on-screen preview edits a draft copy that does not reach `appSettings`
+    // until Apply or OK, so while it is running the outputs render that draft instead -- otherwise
+    // the preview would show the sample in the styling the operator is in the middle of replacing.
+    // Null whenever no preview is running, which is every other moment of the app's life.
+    val previewSettingsOverride by presenterManager.previewSettingsOverride
+    val effectiveAppSettings = remember(
+        appSettings,
+        mirroredBackgroundSettings,
+        previewSettingsOverride,
+        activeQuickBackground,
+    ) {
+        // Three layers, innermost first: the settings dialog's draft stands in for the saved
+        // settings while a preview is running, Instance Link swaps the backgrounds inside whichever
+        // of the two that is, and the quick tray's pick goes in front of the lot — it is what an
+        // operator reaches for mid-service to override what is on screen right now.
         withQuickBackground(
-            withMirroredBackgrounds(appSettings, mirroredBackgroundSettings),
+            withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings),
             activeQuickBackground,
         )
     }
@@ -1228,14 +1249,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 ),
                                 onConverter = { showConverterWindow = true },
                                 onSongLibrary = { showSongLibraryWindow = true },
-                                onHelp = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/wiki"))
-                                },
-                                onHowToBlog = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/blog"))
-                                },
+                                onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
+                                onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
                                 onCheckForUpdates = {
                                     coroutineScope.launch {
                                         pendingUpdateResult = UpdateChecker.checkForUpdate(
@@ -1602,20 +1617,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 },
                                 onIdentifyNdi = { index ->
                                     presenterManager.identifyNdiOutput(index)
-                                },
-                                onOpenLottieGen = { outputDir, onSaved ->
-                                    if (isUsableOutputDir(outputDir)) {
-                                        lottieGenOutputDir = File(outputDir)
-                                        lottieGenOnFileSaved = onSaved
-                                        showLottieGenWindow = true
-                                    } else {
-                                        javax.swing.JOptionPane.showMessageDialog(
-                                            null,
-                                            "Please set a Lower Third folder in Settings first.",
-                                            "No Folder Configured",
-                                            javax.swing.JOptionPane.WARNING_MESSAGE
-                                        )
-                                    }
                                 },
                                 obsManager = obsManager,
                                 companionSatelliteViewModel = companionSatelliteViewModel

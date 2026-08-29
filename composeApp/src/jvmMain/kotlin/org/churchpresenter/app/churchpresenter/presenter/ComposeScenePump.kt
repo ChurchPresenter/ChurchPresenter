@@ -9,8 +9,12 @@ import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.churchpresenter.diagnostics.CrashReporter
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MIN_FPS = 1
@@ -76,6 +80,22 @@ class ComposeScenePump(
          * frame. Deliberately slower than any tick rate.
          */
         internal const val IDLE_POLL_MS = 250L
+
+        /**
+         * Serialises [ImageComposeScene] construction across every pump in the process.
+         *
+         * Building one touches Compose state that is global to the JVM rather than local to the
+         * scene, and there is a pump per Browser Source output and per NDI output — all started
+         * from their own `LaunchedEffect`, all on the multi-threaded [Dispatchers.Default]. Two
+         * starting at once raced a shared `MutableObjectIntMap` inside the constructor and threw
+         * `ArrayIndexOutOfBoundsException` out of its own `resizeStorage`, which reached an
+         * operator with two outputs configured.
+         *
+         * Only the constructor is held: [runLoop] runs outside the lock, so N outputs still
+         * render in parallel and a slow one cannot stall another's startup for more than one
+         * scene creation.
+         */
+        private val sceneCreation = Mutex()
     }
 
     private var job: Job? = null
@@ -95,7 +115,29 @@ class ComposeScenePump(
     fun start(scope: CoroutineScope, onFrame: OnFrame) {
         if (job != null) return
         job = scope.launch(Dispatchers.Default) {
-            val scene = ImageComposeScene(width, height, Density(1f)) { content() }
+            val scene = try {
+                sceneCreation.withLock { ImageComposeScene(width, height, Density(1f)) { content() } }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
+                // Throwable, not Exception: the reported failure was an ArrayIndexOutOfBounds from
+                // inside a Compose collection, and a scene that fails to build can equally raise an
+                // Error out of native graphics. Narrowing this would let exactly the crash it
+                // exists for straight back through.
+                //
+                // An output that cannot build its scene is one dark output, not a dead app: this
+                // runs on a launched coroutine, so anything escaping here is an uncaught throw.
+                // Clearing the job is what lets the caller start again — a pump that failed once
+                // used to be permanently wedged, because `job` stayed non-null.
+                job = null
+                CrashReporter.reportWarning(
+                    "Off-screen output scene could not be created",
+                    throwable = t,
+                    tags = mapOf("subsystem" to "offscreen_output"),
+                    extras = mapOf("width" to width.toString(), "height" to height.toString()),
+                )
+                return@launch
+            }
             try {
                 runLoop(scene, onFrame)
             } finally {

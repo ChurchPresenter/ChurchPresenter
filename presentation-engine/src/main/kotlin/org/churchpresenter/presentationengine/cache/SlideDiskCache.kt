@@ -135,8 +135,13 @@ class SlideDiskCache(
         if (renderWidthPx != null && manifest.renderWidthPx != renderWidthPx) return null
         val slideFiles = (0 until manifest.slideCount).map { File(dir, slideName(it)) }
         if (slideFiles.any { !it.isFile }) return null
+        // exists() then readText() is a check-then-act, and the prune can delete this directory
+        // between the two: on Windows that surfaced as "Access is denied" and "The system cannot
+        // find the path specified" for a note file the check had just seen. A cache entry that
+        // vanishes mid-read is a miss, not a failure — the caller re-renders — so the read decides,
+        // not the check.
         val notes = (0 until manifest.slideCount).map { i ->
-            File(dir, noteName(i)).takeIf { it.exists() }?.readText() ?: ""
+            runCatching { File(dir, noteName(i)).readText() }.getOrDefault("")
         }
         return CachedSlides(manifest, slideFiles, notes)
     }

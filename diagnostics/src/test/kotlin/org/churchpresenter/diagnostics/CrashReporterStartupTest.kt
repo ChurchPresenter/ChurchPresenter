@@ -138,6 +138,53 @@ class CrashReporterStartupTest {
         assertFalse(runningFile.exists())
     }
 
+    /** [startUp] with the telemetry decision driven, recording whether the init step ran. */
+    private fun startUpRecordingTelemetry(
+        analyticsReportingEnabled: Boolean,
+        telemetryOff: Boolean,
+    ): Boolean {
+        var started = false
+        CrashReporter.startUp(
+            analyticsReportingEnabled,
+            BuildIdentity(),
+            setUncaughtHandler = { handler = it },
+            addShutdownHook = { onExit = it },
+            telemetryOff = telemetryOff,
+            initTelemetry = { started = true },
+        )
+        return started
+    }
+
+    @Test
+    fun `the telemetry switch stops Sentry starting even when analytics is on`() {
+        // sentry.properties carries a real DSN and sits on the test runtime classpath, so without
+        // this the suite reports into the production project — which it did, filing "kaboom" and
+        // "nowhere to write" against a test class. The build sets the switch for every test task.
+        assertFalse(startUpRecordingTelemetry(analyticsReportingEnabled = true, telemetryOff = true))
+    }
+
+    @Test
+    fun `with the switch off, enabling analytics starts telemetry`() {
+        // The shipping case: an operator who opted in must still be reported for.
+        assertTrue(startUpRecordingTelemetry(analyticsReportingEnabled = true, telemetryOff = false))
+    }
+
+    @Test
+    fun `opting out of analytics starts telemetry regardless of the switch`() {
+        assertFalse(startUpRecordingTelemetry(analyticsReportingEnabled = false, telemetryOff = false))
+        assertFalse(startUpRecordingTelemetry(analyticsReportingEnabled = false, telemetryOff = true))
+    }
+
+    @Test
+    fun `the switch does not stop the install id being minted`() {
+        // It identifies the install for the local crash log too, which is written whether or not
+        // anything is sent — so gating it on the switch would change behaviour this fix has no
+        // business changing.
+        startUpRecordingTelemetry(analyticsReportingEnabled = true, telemetryOff = true)
+
+        assertTrue(installIdFile.exists())
+    }
+
     @Test
     fun `enabling analytics stamps the install id, disabling it does not`() {
         startUp(analyticsReportingEnabled = false)

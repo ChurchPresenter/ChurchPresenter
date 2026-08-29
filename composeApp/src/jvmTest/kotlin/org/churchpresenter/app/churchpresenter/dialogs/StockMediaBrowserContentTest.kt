@@ -101,6 +101,11 @@ class StockMediaBrowserContentTest {
         every { fakeDesktop.browse(any()) } answers { browsed = firstArg(); Unit }
         mockkStatic(Desktop::class)
         every { Desktop.getDesktop() } returns fakeDesktop
+        // UrlOpener asks whether AWT can browse before asking it to, because on a desktop that
+        // says no it throws instead — so a stub that only answers getDesktop() sends the click
+        // down the shell fallback and this test would see nothing browsed.
+        every { Desktop.isDesktopSupported() } returns true
+        every { fakeDesktop.isSupported(Desktop.Action.BROWSE) } returns true
         return { browsed }
     }
 

@@ -6,11 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
@@ -18,6 +21,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * What a Browser Source output actually draws.
@@ -262,5 +266,106 @@ class OffscreenOutputContentRenderTest {
         },
     ) {
         onNodeWithText("elohim", substring = true).assertExists()
+    }
+
+    // ── The band height, on the outputs that had no control for it ──────────────────────────────
+    //
+    // A Browser Source and an NDI sender draw the lower third through this composable and the same
+    // presenters a screen window uses, so the band height reaches them the moment a presenter reads
+    // it. That was already true of the projection-wide value it replaced — what was never true is
+    // that anyone could change it: the only control lived on the Screen Assignment card, so an
+    // operator sending a lower third over NDI could see the band on air and find nothing in settings
+    // that moved it. Now that the number belongs to the Bible and Song tabs, these pin the half that
+    // has to keep working — that both virtual outputs still honour it, each from its own content's
+    // settings.
+    //
+    // 10% against 40%, and text that fills the band, because the band is a *ceiling*: it is
+    // bottom-aligned, so content that already fits sits on its floor and draws identically however
+    // deep the band is. Only content the band has to squeeze reports the band's own height back.
+
+    private val longVerse =
+        "For God so loved the world, that he gave his only begotten Son, that whosoever " +
+            "believeth in him should not perish, but have everlasting life."
+
+    private val sixLines = List(6) { "Amazing grace how sweet the sound that saved a wretch like me" }
+
+    /** Where the verse block starts on [kind]'s output, with [percent] configured for the Bible. */
+    private fun bibleTextTop(kind: OffscreenOutputKind, percent: Int): Float {
+        var top = 0f
+        render(
+            mode = Presenting.BIBLE,
+            assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
+            settings = AppSettings(bibleSettings = BibleSettings(lowerThirdHeightPercent = percent)),
+            kind = kind,
+            seed = { setDisplayedVerses(listOf(verse("$longVerse $longVerse $longVerse"))) },
+        ) {
+            top = onAllNodesWithText("For God so loved", substring = true)
+                .fetchSemanticsNodes().first().boundsInRoot.top
+        }
+        return top
+    }
+
+    /** The same for lyrics, whose lower third defaults to one line at a time — so verse mode. */
+    private fun songTextTop(kind: OffscreenOutputKind, percent: Int, biblePercent: Int = 33): Float {
+        var top = 0f
+        render(
+            mode = Presenting.LYRICS,
+            assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
+            settings = AppSettings(
+                bibleSettings = BibleSettings(lowerThirdHeightPercent = biblePercent),
+                songSettings = SongSettings(
+                    lowerThirdHeightPercent = percent,
+                    lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE,
+                ),
+            ),
+            kind = kind,
+            seed = { setDisplayedLyricSection(LyricSection(type = "verse", lines = sixLines)) },
+        ) {
+            top = onAllNodesWithText(sixLines.first(), substring = true)
+                .fetchSemanticsNodes().first().boundsInRoot.top
+        }
+        return top
+    }
+
+    @Test
+    fun `a browser source honours the bible band height`() {
+        val shallow = bibleTextTop(OffscreenOutputKind.BROWSER_SOURCE, percent = 10)
+        val deep = bibleTextTop(OffscreenOutputKind.BROWSER_SOURCE, percent = 40)
+
+        assertTrue(deep < shallow, "a deeper band starts higher up the frame, got $deep against $shallow")
+    }
+
+    @Test
+    fun `an ndi output honours the bible band height`() {
+        val shallow = bibleTextTop(OffscreenOutputKind.NDI, percent = 10)
+        val deep = bibleTextTop(OffscreenOutputKind.NDI, percent = 40)
+
+        assertTrue(deep < shallow, "a deeper band starts higher up the frame, got $deep against $shallow")
+    }
+
+    @Test
+    fun `a browser source honours the song band height`() {
+        val shallow = songTextTop(OffscreenOutputKind.BROWSER_SOURCE, percent = 10)
+        val deep = songTextTop(OffscreenOutputKind.BROWSER_SOURCE, percent = 40)
+
+        assertTrue(deep < shallow, "a deeper band starts higher up the frame, got $deep against $shallow")
+    }
+
+    @Test
+    fun `an ndi output honours the song band height`() {
+        val shallow = songTextTop(OffscreenOutputKind.NDI, percent = 10)
+        val deep = songTextTop(OffscreenOutputKind.NDI, percent = 40)
+
+        assertTrue(deep < shallow, "a deeper band starts higher up the frame, got $deep against $shallow")
+    }
+
+    @Test
+    fun `lyrics follow the song band height whatever the bible's is set to`() {
+        // The two used to be one number. A song output has to read songSettings even when the Bible
+        // is set to the opposite, or splitting them is a setting that writes nowhere.
+        val shallow = songTextTop(OffscreenOutputKind.NDI, percent = 10, biblePercent = 40)
+        val deep = songTextTop(OffscreenOutputKind.NDI, percent = 40, biblePercent = 10)
+
+        assertTrue(deep < shallow, "the song band has to win on a song output, got $deep against $shallow")
     }
 }
