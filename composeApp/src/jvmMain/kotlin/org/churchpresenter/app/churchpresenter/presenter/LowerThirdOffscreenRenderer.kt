@@ -6,7 +6,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -16,7 +15,9 @@ import androidx.compose.ui.unit.Density
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
@@ -36,7 +37,14 @@ private const val FRAME_INTERVAL_MS = 16L
 @OptIn(ExperimentalComposeUiApi::class)
 class LowerThirdOffscreenRenderer(
     private val width: Int,
-    private val height: Int
+    private val height: Int,
+    /**
+     * Where the scene is built, rendered and closed — see [withSession] for why that is one thread.
+     *
+     * A parameter only so a test can see which thread the scene operations actually land on;
+     * nothing in the app passes anything but the default.
+     */
+    private val sceneDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
     private companion object {
         const val FRAME_NANOS = 16_666_667L            // scene clock step per render
@@ -88,30 +96,53 @@ class LowerThirdOffscreenRenderer(
         var currentProgress by mutableStateOf(initialProgress)
         var compositionLoaded by mutableStateOf(false)
 
-        val scene = ImageComposeScene(width, height, Density(1f)) {
-            val composition by rememberLottieComposition {
-                LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
+        // Everything that touches the scene -- constructing it, rendering it, closing it -- runs on
+        // the event queue; only the pixels come back here.
+        //
+        // `ComposeScene.render` advances the global snapshot, and `advanceGlobalSnapshot` runs
+        // *every* registered apply observer, this scene's and the on-screen AWT scene's alike. Two
+        // threads doing that at once take those two observers' locks in opposite orders, which is a
+        // deadlock, and on 2026-08-29 it was one: CI run 33269248282 halted a fork after 159s with
+        // an explicit two-thread cycle -- `AWT-EventQueue-0` inside a desktop scrollbar's derived
+        // state, this renderer's worker inside `sendApplyNotifications`, each holding the lock the
+        // other wanted. The same cycle can freeze the app itself, since `LottieRenderCache`
+        // pre-renders for the ATEM media pool on `Dispatchers.Default` while the UI is live.
+        //
+        // Confining the Compose half to one thread removes the second lock order, which is the only
+        // fix available: there is no way to opt a scene out of the global observer list. The draw
+        // stays cheap enough for the event queue because this renders a bounded pre-render, not a
+        // live feed -- `ComposeScenePump`, which does drive a live feed, has the same hazard and is
+        // deliberately left for a change that can measure the cost.
+        val scene = withContext(sceneDispatcher) {
+            ImageComposeScene(width, height, Density(1f)) {
+                val composition by rememberLottieComposition {
+                    LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
+                }
+                val loaded = composition != null
+                SideEffect { if (loaded) compositionLoaded = true }
+                Image(
+                    painter = rememberLottiePainter(
+                        composition = composition,
+                        progress = { currentProgress },
+                        fontManager = LottieFonts
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
-            val loaded = composition != null
-            SideEffect { if (loaded) compositionLoaded = true }
-            Image(
-                painter = rememberLottiePainter(
-                    composition = composition,
-                    progress = { currentProgress },
-                    fontManager = LottieFonts
-                ),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize()
-            )
         }
 
         try {
             var timeNanos = 0L
-            fun renderOnce(): org.jetbrains.skia.Image {
-                timeNanos += FRAME_NANOS
-                return scene.render(timeNanos)
-            }
+            // Takes the progress write with it: `render` advances the snapshot itself, so the value
+            // is applied before the scene recomposes without a separate `sendApplyNotifications`.
+            suspend fun renderOnce(progress: Float? = null): org.jetbrains.skia.Image =
+                withContext(sceneDispatcher) {
+                    if (progress != null) currentProgress = progress
+                    timeNanos += FRAME_NANOS
+                    scene.render(timeNanos)
+                }
 
             // Pump the scene until the async Lottie parse finishes
             val deadline = System.currentTimeMillis() + COMPOSITION_LOAD_TIMEOUT_MS
@@ -123,11 +154,7 @@ class LowerThirdOffscreenRenderer(
 
             val intBuf = IntArray(width * height)
             block { progress ->
-                currentProgress = progress
-                // Progress is written from a background thread — make sure the
-                // snapshot change is applied before the scene recomposes and draws
-                Snapshot.sendApplyNotifications()
-                val img = renderOnce()
+                val img = renderOnce(progress)
                 try {
                     img.toComposeImageBitmap().readPixels(intBuf)
                 } finally {
@@ -136,7 +163,7 @@ class LowerThirdOffscreenRenderer(
                 intBuf
             }
         } finally {
-            scene.close()
+            withContext(NonCancellable + sceneDispatcher) { scene.close() }
         }
     }
 }

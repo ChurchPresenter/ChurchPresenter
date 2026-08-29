@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +16,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -45,16 +47,6 @@ private const val THUMBNAIL_RETRY_MS = 120L
 private const val THUMBNAIL_RETRY_ATTEMPTS = 3
 
 /**
- * How many times a decoded thumbnail is written into the state maps before giving up on it, and how
- * long between tries.
- *
- * The write races the thread advancing the global snapshot and can lose; the window is momentary, so
- * a handful of tries a few milliseconds apart clears it without costing anything measurable.
- */
-private const val PUBLISH_ATTEMPTS = 4
-private const val PUBLISH_RETRY_MS = 20L
-
-/**
  * How many unreadable files one warning describes in full.
  *
  * A folder where everything failed is one problem, not a hundred, and the first handful of lines
@@ -63,7 +55,22 @@ private const val PUBLISH_RETRY_MS = 20L
 private const val MAX_REPORTED_FAILURES = 20
 
 class PicturesViewModel(
-    appSettings: AppSettings? = null
+    appSettings: AppSettings? = null,
+    /**
+     * Where every write to this class's snapshot state is made.
+     *
+     * `Dispatchers.Main` is the Swing event queue, which is the thread that advances the global
+     * snapshot — in the app because that is where composition runs, and under
+     * `runComposeUiTest` because `SkikoComposeUiTest` routes `setContent`/`render`/`closeScene`
+     * through `SwingUtilities.invokeAndWait`. Confining the writes to it is what stops a write
+     * from the folder watcher racing the composition; see [startWatching] and [publishThumbnail].
+     *
+     * A parameter so a test can watch where the writes land. Note that `kotlinx-coroutines-test`
+     * is on the test classpath, so this resolves to `TestMainDispatcher` delegating to the Swing
+     * one — still the event queue. Nothing calls `Dispatchers.setMain` today; anything that did
+     * would quietly take this confinement away.
+     */
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
     private val defaultDirectory = appSettings?.pictureSettings?.storageDirectory ?: ""
 
@@ -121,7 +128,9 @@ class PicturesViewModel(
             }
         }
         val reason = lastError?.message ?: lastError?.toString() ?: "unknown"
-        _thumbnailFailures[file] = reason
+        // Snapshot state, written from whichever thread decoded — same confinement as
+        // [publishThumbnail].
+        withContext(mainDispatcher) { _thumbnailFailures[file] = reason }
         if (file.length() == 0L) return null
         // The reason names the file — the tile and the local log want that, a report does not, so
         // the name comes out here rather than at the reporting end, where the exception's own
@@ -149,29 +158,26 @@ class PicturesViewModel(
     }
 
     /**
-     * Writes a decoded thumbnail into the state maps, from the background thread that decoded it.
+     * Writes a decoded thumbnail into the state maps, on the thread that owns them.
      *
      * Both maps are snapshot state, and a write from a thread other than the one advancing the
      * global snapshot can lose that race — the *write* throws `Reading a state that was created
-     * after the snapshot was taken or in a snapshot that has not yet been applied`. The image is
-     * fine; only the moment it was published in was wrong, so the write is simply made again.
+     * after the snapshot was taken or in a snapshot that has not yet been applied`. The decode
+     * itself belongs on a background thread and stays there; only the publish hops.
      *
-     * Writing inside `Snapshot.withMutableSnapshot` instead is not the fix — it moves the identical
+     * This used to retry the write four times instead, which cleared the window often enough to
+     * look fixed. It was a retry around a race, it left the two other background writers
+     * ([decodeThumbnail]'s failure record and the folder watcher) unprotected, and the watcher is
+     * the one that took CI red. Confining every write to [mainDispatcher] removes the race rather
+     * than out-waiting it.
+     *
+     * Writing inside `Snapshot.withMutableSnapshot` is still not the fix — that moves the identical
      * failure onto the readers, where the grid throws it out of composition.
-     *
-     * Whatever the last attempt throws is left to [decodeThumbnail] to record, so a write that never
-     * lands still resolves the file instead of leaving its tile on "Loading…" for ever.
      */
     private suspend fun publishThumbnail(file: File, bitmap: ImageBitmap) {
-        repeat(PUBLISH_ATTEMPTS) { attempt ->
-            try {
-                _thumbnails[file] = bitmap
-                _thumbnailFailures.remove(file)
-                return
-            } catch (e: IllegalStateException) {
-                if (attempt == PUBLISH_ATTEMPTS - 1) throw e
-                delay(PUBLISH_RETRY_MS)
-            }
+        withContext(mainDispatcher) {
+            _thumbnails[file] = bitmap
+            _thumbnailFailures.remove(file)
         }
     }
 
@@ -549,11 +555,34 @@ class PicturesViewModel(
                         }
                     }
                 }
+                // The watch job's own scope, so it can be put back inside the hop below.
+                val watcher = this
                 while (isActive) {
                     val key = watchService.take()
                     for (event in key.pollEvents()) {
                         val fileName = watchedImageName(event) ?: continue
-                        applyWatchEvent(event.kind(), File(folder, fileName))
+                        // Every state this touches — `_images`, both thumbnail maps and the
+                        // selected index — is snapshot state, and this coroutine runs on IO. A
+                        // write from here races the thread advancing the global snapshot and
+                        // throws `Reading a state that was created after the snapshot was taken`
+                        // out of the watcher, where nothing catches it. It took CI red on
+                        // `PicturesTabExtraTest`, blamed on whichever test was running when a
+                        // previous folder's watcher woke up.
+                        //
+                        // Hopped here rather than inside `addWatchedImage`/`removeWatchedImage`
+                        // for two reasons: one hop covers the list, both maps and the index
+                        // together, and `PicturesViewModelWatchRaceTest` drives those two
+                        // functions from raw threads on purpose — confining them would serialise
+                        // its lanes and leave it passing while racing nothing.
+                        //
+                        // `with(watcher)` is load-bearing: without it the receiver inside
+                        // `withContext` is the hop's own scope, and `addWatchedImage`'s
+                        // `launch { decodeThumbnail(...) }` would decode images on the event
+                        // queue. Putting the outer scope back keeps both the `isActive` gates and
+                        // the decode's parentage exactly as they were.
+                        withContext(mainDispatcher) {
+                            with(watcher) { applyWatchEvent(event.kind(), File(folder, fileName)) }
+                        }
                     }
                     if (!key.reset()) break
                 }
