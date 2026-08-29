@@ -1358,6 +1358,15 @@
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
+    <string name="canvas_camera_error_permission_denied">macOS is blocking camera access for ChurchPresenter. Open System Settings → Privacy &amp; Security → Camera, switch ChurchPresenter on, then select the camera again.</string>
+    <string name="canvas_camera_error_unsupported_format">This device does not accept the video format that was requested. Choose a specific one under Video Format.</string>
+    <string name="canvas_camera_error_unsupported_framerate">This device does not accept the frame rate that was requested. Choose a specific format under Video Format.</string>
+    <string name="canvas_camera_error_device_busy">This camera is already in use by another application.</string>
+    <string name="canvas_camera_error_device_not_found">This camera is no longer connected.</string>
+    <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
+    <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
+    <string name="canvas_camera_error_decklink_in_use">Cannot open input — the device may already be in use for output.</string>
+    <string name="canvas_camera_open_privacy_settings">Open Camera Privacy Settings</string>
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>
     <string name="canvas_camera_connection">Video Connection</string>

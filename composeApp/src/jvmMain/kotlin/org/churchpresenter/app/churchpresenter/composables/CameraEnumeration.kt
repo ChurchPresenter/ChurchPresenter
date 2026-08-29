@@ -126,7 +126,7 @@ internal fun cameraFormatsFor(
 
 internal fun dshowFormatsFrom(deviceName: String, run: CommandRunner): List<CameraFormat> {
     val name = deviceName.removePrefix(":dshow-vdev=")
-    val result = run(listOf("ffmpeg", "-f", "dshow", "-list_options", "true", "-i", "video=$name"), 5L)
+    val result = run(listOf(FfmpegBinary.path, "-f", "dshow", "-list_options", "true", "-i", "video=$name"), 5L)
     return parseDshowFormats(result.output)
 }
 
@@ -148,7 +148,7 @@ internal fun parseDshowFormats(output: String): List<CameraFormat> {
 
 internal fun v4l2FormatsFrom(device: String, run: CommandRunner): List<CameraFormat> {
     val fromFfmpeg = parseV4l2Formats(
-        run(listOf("ffmpeg", "-f", "v4l2", "-list_formats", "all", "-i", device), 0L).output
+        run(listOf(FfmpegBinary.path, "-f", "v4l2", "-list_formats", "all", "-i", device), 0L).output
     )
     if (fromFfmpeg.isNotEmpty()) return fromFfmpeg
     return parseV4l2CtlFormats(
@@ -195,7 +195,7 @@ internal fun parseV4l2CtlFormats(output: String): List<CameraFormat> {
 internal fun avfoundationFormatsFrom(deviceIndex: String, run: CommandRunner): List<CameraFormat> =
     parseAvfoundationFormats(
         run(
-            listOf("ffmpeg", "-f", "avfoundation", "-list_formats", "all", "-i", "$deviceIndex:none"),
+            listOf(FfmpegBinary.path, "-f", "avfoundation", "-list_formats", "all", "-i", "$deviceIndex:none"),
             0L,
         ).output
     )
@@ -215,13 +215,7 @@ internal fun parseAvfoundationFormats(output: String): List<CameraFormat> {
     return formats.toSortedFormats()
 }
 
-internal fun isFfmpegAvailable(): Boolean {
-    return try {
-        val process = ProcessBuilder("ffmpeg", "-version").redirectErrorStream(true).start()
-        process.inputStream.bufferedReader().readText()
-        process.waitFor() == 0
-    } catch (_: Exception) { false }
-}
+internal fun isFfmpegAvailable(): Boolean = FfmpegBinary.isAvailable
 
 private fun listCameraDevices(): List<CameraDevice> {
     val devices = cameraDevicesFor(System.getProperty("os.name", "").lowercase(), ::readCommandOutput)
@@ -263,7 +257,7 @@ private const val PNP_CAMERA_QUERY =
         "\$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name"
 
 internal fun windowsCamerasFrom(run: CommandRunner): List<CameraDevice> {
-    val dshowOutput = run(listOf("ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"), 0L).output
+    val dshowOutput = run(listOf(FfmpegBinary.path, "-list_devices", "true", "-f", "dshow", "-i", "dummy"), 0L).output
     val pnpOutput = run(listOf("powershell", "-NoProfile", "-Command", PNP_CAMERA_QUERY), 0L).output
     return parseWindowsCameras(dshowOutput, pnpOutput)
 }
@@ -306,7 +300,8 @@ internal fun parseWindowsCameras(dshowOutput: String, pnpOutput: String): List<C
 
 internal fun macCamerasFrom(run: CommandRunner): List<CameraDevice> {
     val profilerOutput = run(listOf("system_profiler", "SPCameraDataType", "-detailLevel", "mini"), 0L).output
-    val ffmpegOutput = run(listOf("ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", ""), 0L).output
+    val listDevices = listOf(FfmpegBinary.path, "-f", "avfoundation", "-list_devices", "true", "-i", "")
+    val ffmpegOutput = run(listDevices, 0L).output
     return parseMacCameras(profilerOutput, ffmpegOutput)
 }
 

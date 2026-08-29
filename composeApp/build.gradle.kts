@@ -576,6 +576,26 @@ compose.desktop {
                 jvmArgs(*commonJvmArgs.toTypedArray())
                 jvmArgs("-Dskiko.renderApi=METAL")
 
+                // ── macOS Privacy ─────────────────────────────────────────────
+                // macOS attributes a spawned child process's privacy requests to the app bundle
+                // that spawned it, so the ffmpeg the camera source runs asks on ChurchPresenter's
+                // behalf — and without a usage description here the request is denied outright,
+                // with no prompt. Capture-device *names* stay readable either way, which is why a
+                // missing key looks like "the card is detected but shows nothing" (issue #431)
+                // rather than like a permissions problem.
+                infoPlist {
+                    extraKeysRawXml = """
+                        <key>NSCameraUsageDescription</key>
+                        <string>ChurchPresenter needs camera access to show cameras and capture cards on the canvas and the presenter output.</string>
+                    """.trimIndent()
+                }
+
+                // These REPLACE the Compose plugin's default-entitlements.plist rather than adding
+                // to it — the files restate its three keys for that reason. Read the comments in
+                // them before editing either.
+                entitlementsFile.set(rootProject.file("desktop/macos/churchpresenter.entitlements"))
+                runtimeEntitlementsFile.set(rootProject.file("desktop/macos/churchpresenter-runtime.entitlements"))
+
                 // ── macOS Code Signing ────────────────────────────────────────
                 val macIdentity = macSigningProps.getProperty("identityName", "")
                 if (macIdentity.isConfigured()) {

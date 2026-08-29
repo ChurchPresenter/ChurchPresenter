@@ -125,11 +125,20 @@ private const val BOUNDS_HEIGHT_INDEX = 3
 private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
 private const val VLC_OPT_LOOP = ":input-repeat=65535"
 
+/**
+ * Draws one scene source.
+ *
+ * [showDiagnostics] is what separates the editor from the audience: a camera that will not open
+ * says so in red on the canvas the operator is working in, and shows the ordinary placeholder on
+ * the presenter output, where a troubleshooting sentence in front of a congregation would be worse
+ * than the missing picture it explains.
+ */
 @Composable
 fun SceneSourceRenderer(
     source: SceneSource,
     modifier: Modifier = Modifier,
-    fontScale: Float = 1f
+    fontScale: Float = 1f,
+    showDiagnostics: Boolean = true
 ) {
     when (source) {
         is SceneSource.ImageSource -> ImageSourceContent(source, modifier)
@@ -140,7 +149,7 @@ fun SceneSourceRenderer(
         is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier, fontScale)
         is SceneSource.ClockSource -> ClockSourceContent(source, modifier, fontScale)
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
-        is SceneSource.CameraSource -> CameraSourceContent(source, modifier)
+        is SceneSource.CameraSource -> CameraSourceContent(source, modifier, showDiagnostics)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
         is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
@@ -876,6 +885,7 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
 private fun CameraSourceContent(
     source: SceneSource.CameraSource,
     modifier: Modifier,
+    showDiagnostics: Boolean,
 ) {
     if (source.devicePath.isBlank()) {
         Box(
@@ -917,11 +927,12 @@ private fun CameraSourceContent(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
+            val shownError = error?.takeIf { showDiagnostics }
             Text(
-                text = error
+                text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
                     ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
-                color = if (error != null) Color(ERROR_TEXT_COLOR) else Color.White,
+                color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
