@@ -96,4 +96,32 @@ class SongHeaderParsingTest {
             assertTrue(isHeaderLine(line), "isChorusHeader implies isHeaderLine, broken by \"$line\"")
         }
     }
+
+    @Test
+    fun `a numbered verse, an unnamed section and body text are all verses`() {
+        for (header in listOf("[Verse 1]", "[Verse]", "[V2]", "[]", "   ", null)) {
+            assertTrue(isVerseHeader(header), "should be a verse: \"$header\"")
+        }
+    }
+
+    @Test
+    fun `the sections that merely share the verse's bracket are not verses`() {
+        for (header in listOf("[Intro]", "[Outro]", "[Bridge]", "[Bridge 2]", "[Tag]", "[Ending]", "[Interlude]")) {
+            assertFalse(isVerseHeader(header), "should not be a verse: \"$header\"")
+        }
+    }
+
+    @Test
+    fun `the name is matched ignoring case, spaces and hyphens`() {
+        for (header in listOf("[Pre-Chorus]", "[pre chorus]", "[PRECHORUS]", "  [ Pre - Chorus ]  ")) {
+            assertFalse(isVerseHeader(header), "should not be a verse: \"$header\"")
+        }
+    }
+
+    @Test
+    fun `a translated section name falls through as a verse`() {
+        // The list is English-only by design: falling through is what the app did before there was
+        // a list at all, so it can never be a regression.
+        assertTrue(isVerseHeader("[Мост]"))
+    }
 }

@@ -84,6 +84,18 @@ class SongSettingsTabTest {
     }
 
     @Test
+    fun `the chorus auto-repeat checkbox toggles only its own flag`() = songTab { get ->
+        val before = song(get)
+        assertTrue(before.autoRepeatChorus, "it ships on, so existing songs present as they always did")
+
+        onNodeWithTag("song_autoRepeatChorus").performClick()
+        waitForIdle()
+
+        assertEquals(before.copy(autoRepeatChorus = false), song(get))
+        assertEquals(false, persisted(get()).songSettings.autoRepeatChorus)
+    }
+
+    @Test
     fun `each vertical alignment button selects its own alignment`() = songTab { get ->
         listOf("Align Top" to Constants.TOP, "Align Middle" to Constants.MIDDLE, "Align Bottom" to Constants.BOTTOM)
             .forEach { (description, expected) ->

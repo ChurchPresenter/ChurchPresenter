@@ -26,6 +26,7 @@ import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
+import org.churchpresenter.app.churchpresenter.utils.isVerseHeader
 import java.io.File
 
 private const val SONG_NUMBER_DIGITS = 4
@@ -529,28 +530,59 @@ class SongsViewModel(
 
         flushSection()
 
-        val sections = foldChordOnlySections(rawSections)
+        return repeatChorusAfterVerses(foldChordOnlySections(rawSections))
+    }
 
-        // Second pass: auto-repeat chorus after each verse
-        val chorusSection = sections.firstOrNull { it.type == Constants.SECTION_TYPE_CHORUS }
-        if (chorusSection == null) return sections
-        // With no verse there is nothing to repeat the chorus after, and the loop below — which
-        // drops every original chorus and re-adds it only behind a verse — would return an empty
-        // list. A chorus-only song (a short refrain, or a choruses-only songbook) would then put
-        // nothing on screen at all.
-        if (sections.none { it.type == Constants.SECTION_TYPE_VERSE }) return sections
+    /**
+     * Repeats the chorus after each verse that is not already followed by one, leaving every
+     * section that was written exactly where it was written.
+     *
+     * A hymnal writes the chorus once and expects it sung after every verse, which is what
+     * `SongSettings.autoRepeatChorus` turns on and why it defaults on. With it off the sections are
+     * presented as authored -- the only way to express a chorus placed before verse 1, or after
+     * verse 2 only, or written out in full at each repeat.
+     *
+     * What this must never do, in either mode, is lose words. The pass this replaced dropped every
+     * authored chorus and re-inserted `firstOrNull { chorus }` behind each verse, so a song with a
+     * second, different chorus presented the first one twice and the second one never (#403). Here
+     * the repeat after a verse is the nearest chorus written at or before it -- the one that verse
+     * is sung with -- falling back to the first chorus that follows, for a song whose chorus is
+     * written after all its verses.
+     *
+     * Two guards survive from that pass, and one is added:
+     *  - a song with **no chorus** is returned untouched;
+     *  - a song with **no verse** is returned untouched, so a chorus-only song -- a short refrain,
+     *    a choruses-only songbook -- still puts something on screen rather than coming out empty;
+     *  - a `[Bridge]`, `[Intro]` or `[Tag]` no longer collects a chorus of its own. Only `{}` marks
+     *    a chorus, so those parse as verses; [isVerseHeader] is what separates them.
+     *
+     * [foldChordOnlySections] runs first, so a chord-only intro has already been folded into the
+     * section it leads into and cannot trigger a repeat of its own.
+     */
+    internal fun repeatChorusAfterVerses(sections: List<LyricSection>): List<LyricSection> {
+        if (!appSettings.songSettings.autoRepeatChorus) return sections
+        if (sections.none { it.type == Constants.SECTION_TYPE_CHORUS }) return sections
+        if (sections.none { it.singsTheChorusAfterwards() }) return sections
 
         val result = mutableListOf<LyricSection>()
-        for (section in sections) {
-            if (section.type == Constants.SECTION_TYPE_CHORUS) continue // skip original, will be inserted after verses
+        var precedingChorus: LyricSection? = null
+        sections.forEachIndexed { index, section ->
+            if (section.type == Constants.SECTION_TYPE_CHORUS) precedingChorus = section
             result.add(section)
-            if (section.type == Constants.SECTION_TYPE_VERSE) {
-                result.add(chorusSection)
-            }
+            if (!section.singsTheChorusAfterwards()) return@forEachIndexed
+            // Already followed by a chorus as written — repeating it here would show it twice.
+            if (sections.getOrNull(index + 1)?.type == Constants.SECTION_TYPE_CHORUS) return@forEachIndexed
+            val chorus = precedingChorus
+                ?: sections.drop(index + 1).firstOrNull { it.type == Constants.SECTION_TYPE_CHORUS }
+            if (chorus != null) result.add(chorus)
         }
 
         return result
     }
+
+    /** A verse is sung with the chorus after it; a bridge, an intro or a tag is not. */
+    private fun LyricSection.singsTheChorusAfterwards(): Boolean =
+        type == Constants.SECTION_TYPE_VERSE && isVerseHeader(header)
 
     /**
      * Folds a section that is nothing but chords into the one it leads into.
