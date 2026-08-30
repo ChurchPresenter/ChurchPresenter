@@ -254,20 +254,6 @@ data class SongSettings(
     val lowerThirdLookAheadShadowSize: Int = 100,
     val lowerThirdLookAheadShadowOpacity: Int = 90,
 
-    /**
-     * Letter and word spacing, in hundredths of an em, and how the lyrics are re-cased.
-     *
-     * One set per style profile, like every other lyric styling field. Spacing is an em fraction
-     * rather than pixels so it tracks the font size, including the size auto-fit lands on, and the
-     * transform is applied on the way to the screen so the song's own words keep their case.
-     */
-    val lyricsLetterSpacing: Int = 0,
-    val lyricsWordSpacing: Int = 0,
-    val lyricsTextTransform: String = Constants.TEXT_TRANSFORM_NONE,
-    val lyricsLowerThirdLetterSpacing: Int = 0,
-    val lyricsLowerThirdWordSpacing: Int = 0,
-    val lyricsLowerThirdTextTransform: String = Constants.TEXT_TRANSFORM_NONE,
-
     // Look-ahead next section preview styling — lower third
     val lowerThirdLookAheadNextFontSize: Int = 28,
     val lowerThirdLookAheadNextFontSizeAutoFit: Boolean = true,

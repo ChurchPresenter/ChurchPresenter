@@ -69,7 +69,8 @@ class ProjectionSettingsTabCustomizeTest {
             openCustomize(row = 0)
             onNodeWithText("Stage Monitor").assertExists("its own settings must be the first pane")
             onNodeWithText("Dictionary").assertExists("a stage monitor draws the dictionary card too")
-            onNodeWithText("Bible").assertDoesNotExist("a stage monitor draws its zones, not the Bible profile")
+            // A stage monitor draws its zones, not the Bible profile.
+            onNodeWithText("Bible").assertDoesNotExist()
             onNodeWithText("Songs").assertDoesNotExist()
         }
     }
@@ -95,9 +96,8 @@ class ProjectionSettingsTabCustomizeTest {
             waitForIdle()
 
             onNodeWithText("Fullscreen Display").assertExists()
-            onNodeWithText("Lower Third Display").assertDoesNotExist(
-                "a fullscreen output cannot obey a lower-third setting, so it must not be offered",
-            )
+            // A fullscreen output cannot obey a lower-third setting, so it must not be offered.
+            onNodeWithText("Lower Third Display").assertDoesNotExist()
             onAllNodesWithText("Lower Third Size").assertCountEquals(0)
         }
     }
@@ -178,7 +178,6 @@ class ProjectionSettingsTabCustomizeTest {
             assertNull(reset.bibleOverride)
             assertNull(reset.songOverride)
             assertNull(reset.stageMonitorOverride)
-            assertNull(reset.streamingOverride)
             assertNull(reset.dictionaryOverride)
             assertFalse(reset.isCustomized)
         }
@@ -210,8 +209,8 @@ class ProjectionSettingsTabCustomizeTest {
             onNodeWithText("Lower Third").performClick()
             waitForIdle()
 
-            onNodeWithText("Window Position").assertExists("the padding still applies")
-            onNodeWithText("Orientation").assertDoesNotExist("but a fullscreen output has no band to turn")
+            // A fullscreen output has no band to turn, so the pane offers nothing.
+            onNodeWithText("Orientation").assertDoesNotExist()
         }
     }
 }

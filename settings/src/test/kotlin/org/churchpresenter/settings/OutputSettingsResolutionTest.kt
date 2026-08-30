@@ -43,7 +43,6 @@ class OutputSettingsResolutionTest {
             ScreenAssignment(stageMonitorOverride = StageMonitorSettings()),
             ScreenAssignment(bibleOverride = BibleSettings()),
             ScreenAssignment(songOverride = SongSettings()),
-            ScreenAssignment(streamingOverride = StreamingSettings()),
             ScreenAssignment(dictionaryOverride = DictionarySettings()),
         )
         for (assignment in each) assertTrue(assignment.isCustomized)
@@ -223,36 +222,6 @@ class OutputSettingsResolutionTest {
         assertEquals("PEW", resolved.translationList()[0].customAbbreviation)
     }
 
-    // ── Lower third: the four insets and nothing else ───────────────────────────────────────────
-
-    @Test
-    fun `a streaming override supplies the insets and keeps the global lottie library`() {
-        val global = StreamingSettings(
-            lowerThirdFolder = "/church/lottie",
-            savedSearchStrings = listOf("name"),
-            lottiePresets = listOf(LottiePreset(id = "keep")),
-            lowerThirdListWidthDp = 300,
-            windowLeft = 0,
-        )
-        val override = StreamingSettings(
-            lowerThirdFolder = "/stale",
-            savedSearchStrings = emptyList(),
-            lottiePresets = emptyList(),
-            lowerThirdListWidthDp = 1,
-            windowLeft = 40, windowTop = 41, windowRight = 42, windowBottom = 43,
-        )
-        val resolved = global.withAppearanceOf(override)
-
-        assertEquals(40, resolved.windowLeft)
-        assertEquals(41, resolved.windowTop)
-        assertEquals(42, resolved.windowRight)
-        assertEquals(43, resolved.windowBottom)
-        assertEquals("/church/lottie", resolved.lowerThirdFolder)
-        assertEquals(listOf("name"), resolved.savedSearchStrings)
-        assertEquals(listOf(LottiePreset(id = "keep")), resolved.lottiePresets)
-        assertEquals(300, resolved.lowerThirdListWidthDp)
-    }
-
     // ── Persistence ─────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -263,7 +232,6 @@ class OutputSettingsResolutionTest {
         assertNull(decoded.stageMonitorOverride)
         assertNull(decoded.bibleOverride)
         assertNull(decoded.songOverride)
-        assertNull(decoded.streamingOverride)
         assertNull(decoded.dictionaryOverride)
         assertFalse(decoded.isCustomized, "an old document must keep following the global settings")
     }

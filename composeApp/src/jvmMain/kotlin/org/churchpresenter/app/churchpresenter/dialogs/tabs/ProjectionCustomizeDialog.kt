@@ -66,6 +66,7 @@ import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
 import churchpresenter.composeapp.generated.resources.customize_done
+import churchpresenter.composeapp.generated.resources.customize_hint_lower_third
 import churchpresenter.composeapp.generated.resources.customize_hint_off
 import churchpresenter.composeapp.generated.resources.customize_hint_on
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
@@ -101,11 +102,11 @@ private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
  * each is switched on and off independently: a screen may want its own stage-monitor zones while
  * still following everyone else's Bible styling.
  */
-private enum class CustomizePane(val icon: ImageVector) {
+private enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean = true) {
     STAGE_MONITOR(Icons.Filled.Tv),
     BIBLE(Icons.Filled.MenuBook),
     SONGS(Icons.Filled.MusicNote),
-    LOWER_THIRD(Icons.Filled.Subtitles),
+    LOWER_THIRD(Icons.Filled.Subtitles, hasOverride = false),
     BACKGROUND(Icons.Filled.Wallpaper),
     DICTIONARY(Icons.Filled.Book);
 
@@ -114,7 +115,7 @@ private enum class CustomizePane(val icon: ImageVector) {
         STAGE_MONITOR -> assignment.stageMonitorOverride != null
         BIBLE -> assignment.bibleOverride != null
         SONGS -> assignment.songOverride != null
-        LOWER_THIRD -> assignment.streamingOverride != null
+        LOWER_THIRD -> false
         BACKGROUND -> assignment.backgroundOverride != null
         DICTIONARY -> assignment.dictionaryOverride != null
     }
@@ -127,7 +128,7 @@ private enum class CustomizePane(val icon: ImageVector) {
             )
             BIBLE -> assignment.copy(bibleOverride = if (on) edited.bibleSettings else null)
             SONGS -> assignment.copy(songOverride = if (on) edited.songSettings else null)
-            LOWER_THIRD -> assignment.copy(streamingOverride = if (on) edited.streamingSettings else null)
+            LOWER_THIRD -> assignment
             BACKGROUND -> assignment.copy(backgroundOverride = if (on) edited.backgroundSettings else null)
             DICTIONARY -> assignment.copy(dictionaryOverride = if (on) edited.dictionarySettings else null)
         }
@@ -219,7 +220,7 @@ internal fun OutputCustomizeDialog(
             CustomizeDialogHeader(
                 screenLabel = screenLabel,
                 customized = panes.count { it.isOverridden(assignment) },
-                total = panes.size,
+                total = panes.count { it.hasOverride },
                 onDismiss = onDismiss,
             )
         },
@@ -412,22 +413,25 @@ private fun CustomizePaneBody(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Switch(
-                checked = overridden,
-                onCheckedChange = onOverriddenChange,
-                modifier = Modifier.testTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG),
-            )
+            if (pane.hasOverride) {
+                Switch(
+                    checked = overridden,
+                    onCheckedChange = onOverriddenChange,
+                    modifier = Modifier.testTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG),
+                )
+            }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        val live = overridden || !pane.hasOverride
         Box(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize().alpha(if (overridden) 1f else FOLLOWING_GLOBAL_ALPHA)) {
+            Box(modifier = Modifier.fillMaxSize().alpha(if (live) 1f else FOLLOWING_GLOBAL_ALPHA)) {
                 CompositionLocalProvider(
                     LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
                 ) {
                     CustomizePaneContent(pane, draft, assignment, onSettingsChange, onAssignmentChange)
                 }
             }
-            if (!overridden) {
+            if (!live) {
                 // Swallows clicks rather than disabling each control: the panes are whole settings
                 // tabs, and there is no `enabled` to thread through a hundred of them.
                 Box(
@@ -446,7 +450,9 @@ private fun CustomizePaneBody(
 
 @Composable
 private fun paneHint(pane: CustomizePane, overridden: Boolean): String =
-    if (pane == CustomizePane.STAGE_MONITOR) {
+    if (pane == CustomizePane.LOWER_THIRD) {
+        stringResource(Res.string.customize_hint_lower_third)
+    } else if (pane == CustomizePane.STAGE_MONITOR) {
         if (overridden) stringResource(Res.string.customize_hint_stage_on)
         else stringResource(Res.string.customize_hint_stage_off)
     } else {
@@ -485,7 +491,6 @@ private fun CustomizePaneContent(
                     onDisplayModeChange = { mode -> onAssignmentChange(assignment.copy(displayMode = mode)) },
                 )
             }
-            LowerThirdWindowPositionSection(settings = draft, onSettingsChange = onSettingsChange)
         }
     }
 }

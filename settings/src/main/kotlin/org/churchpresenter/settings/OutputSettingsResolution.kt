@@ -62,19 +62,6 @@ fun SongSettings.withAppearanceOf(override: SongSettings): SongSettings = overri
 )
 
 /**
- * [override]'s lower-third window padding on top of this document's Lottie library.
- *
- * The four insets are the only appearance in [StreamingSettings]; everything else names a folder,
- * a preset or a saved search, and stays one per install.
- */
-fun StreamingSettings.withAppearanceOf(override: StreamingSettings): StreamingSettings = copy(
-    windowTop = override.windowTop,
-    windowLeft = override.windowLeft,
-    windowRight = override.windowRight,
-    windowBottom = override.windowBottom,
-)
-
-/**
  * The settings [assignment]'s output should actually render with.
  *
  * Only the rendering paths see these; editing and persistence keep using the global document, so a
@@ -93,8 +80,6 @@ fun AppSettings.resolvedFor(assignment: ScreenAssignment): AppSettings {
             ?.let { bibleSettings.withAppearanceOf(it) } ?: bibleSettings,
         songSettings = assignment.songOverride
             ?.let { songSettings.withAppearanceOf(it) } ?: songSettings,
-        streamingSettings = assignment.streamingOverride
-            ?.let { streamingSettings.withAppearanceOf(it) } ?: streamingSettings,
         dictionarySettings = assignment.dictionaryOverride ?: dictionarySettings,
         backgroundSettings = assignment.backgroundOverride ?: backgroundSettings,
     )

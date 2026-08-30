@@ -941,6 +941,7 @@
     <string name="customize_hint_off">Following the global settings — turn on to customize</string>
     <string name="customize_hint_stage_on">This screen has its own zone layout</string>
     <string name="customize_hint_stage_off">Turn on to give this screen a zone layout</string>
+    <string name="customize_hint_lower_third">The shape of this screen's lower third band</string>
     <string name="customize_reset_to_global">Reset to global</string>
     <string name="customize_done">Done</string>
     <string name="customize_bible">Bible</string>

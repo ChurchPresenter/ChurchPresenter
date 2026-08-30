@@ -104,14 +104,6 @@ data class ScreenAssignment(
      *  [bibleOverride], including that only its appearance is read. */
     val songOverride: SongSettings? = null,
     /**
-     * This output's own lower-third window padding, or null to follow the global settings.
-     *
-     * Only the four `window*` insets are read from it — the Lottie folder, the presets and the
-     * saved search/replace pairs stay global, the same way [bibleOverride] leaves the Bible library
-     * alone. See `StreamingSettings.withAppearanceOf`.
-     */
-    val streamingOverride: StreamingSettings? = null,
-    /**
      * This output's own Strong's dictionary appearance, or null to follow the global settings.
      *
      * Replaced whole rather than merged: unlike Bible and Song, [DictionarySettings] is nothing but
@@ -181,7 +173,7 @@ data class ScreenAssignment(
      */
     val isCustomized: Boolean
         get() = stageMonitorOverride != null || bibleOverride != null || songOverride != null ||
-            streamingOverride != null || dictionaryOverride != null || backgroundOverride != null
+            dictionaryOverride != null || backgroundOverride != null
 
     /** Primary window role: "fill" if key output is configured, "normal" otherwise */
     val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL

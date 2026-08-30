@@ -420,7 +420,7 @@ internal fun SongCustomizePane(
         TypographyGroup(
             letterSpacing = if (lowerThird) ss.lyricsLowerThirdLetterSpacing else ss.lyricsLetterSpacing,
             wordSpacing = if (lowerThird) ss.lyricsLowerThirdWordSpacing else ss.lyricsWordSpacing,
-            transform = if (lowerThird) ss.lyricsLowerThirdTextTransform else ss.lyricsTextTransform,
+            transform = if (lowerThird) ss.lyricsLowerThirdTransform else ss.lyricsTransform,
             onLetterSpacing = { v ->
                 update {
                     if (lowerThird) it.copy(lyricsLowerThirdLetterSpacing = v) else it.copy(lyricsLetterSpacing = v)
@@ -431,7 +431,7 @@ internal fun SongCustomizePane(
             },
             onTransform = { v ->
                 update {
-                    if (lowerThird) it.copy(lyricsLowerThirdTextTransform = v) else it.copy(lyricsTextTransform = v)
+                    if (lowerThird) it.copy(lyricsLowerThirdTransform = v) else it.copy(lyricsTransform = v)
                 }
             },
         )
