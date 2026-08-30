@@ -58,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val SENT_CONFIRMATION_MS = 1500L
@@ -211,7 +212,9 @@ internal fun ContactUsDialogContent(
     sentText: String,
     // A parameter so a test can watch it rather than launch the machine's browser -- UrlOpener
     // falls back to the OS's own open command, which a headless test JVM does not stop.
-    openUrl: (String) -> Unit = { UrlOpener.open(it) }
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    // Same reason as openUrl: a test watches the copy instead of taking the real clipboard.
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -311,6 +314,7 @@ internal fun ContactUsDialogContent(
                 ContactUsActions(
                     canSend = name.isNotBlank() && message.isNotBlank() && status != SendStatus.Sending,
                     onOpenInBrowser = { runCatching { openUrl(ContactReporter.WEB_CONTACT_URL) } },
+                    onCopyLink = copyText,
                     onDismiss = onDismiss,
                     onSend = onSend,
                 )

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -25,6 +26,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ContactUsContentTest {
@@ -56,6 +58,8 @@ class ContactUsContentTest {
         // Defaulted to a no-op, never to the real opener: a click that reached UrlOpener would
         // launch the machine's browser, which the headless JVM does not prevent.
         openUrl: (String) -> Unit = {},
+        // Same reason as openUrl: a real copy would take the developer's own clipboard.
+        copyText: (String) -> Unit = {},
         block: ComposeUiTest.(Result) -> Unit,
     ) {
         val result = Result()
@@ -68,6 +72,7 @@ class ContactUsContentTest {
                     var message by remember { mutableStateOf("") }
                     ContactUsDialogContent(
                         openUrl = openUrl,
+                        copyText = copyText,
                         onDismiss = { result.dismissed++ },
                         types = types,
                         selectedType = selectedType,
@@ -178,6 +183,23 @@ class ContactUsContentTest {
         }
 
         assertEquals(ContactReporter.WEB_CONTACT_URL, opened)
+    }
+
+    /**
+     * The copy button beside it exists because the browser opens on whichever display the operating
+     * system picks — on a two-screen setup, regularly the projection output. It must reach the same
+     * address without launching anything.
+     */
+    @Test
+    fun `clicking Copy link copies the web contact form and opens no browser`() {
+        var opened: String? = null
+        var copied: String? = null
+        dialog(openUrl = { opened = it }, copyText = { copied = it }) {
+            onNodeWithContentDescription("Copy link").performClick()
+        }
+
+        assertEquals(ContactReporter.WEB_CONTACT_URL, copied)
+        assertNull(opened, "copying must not also launch a browser")
     }
 
     @Test

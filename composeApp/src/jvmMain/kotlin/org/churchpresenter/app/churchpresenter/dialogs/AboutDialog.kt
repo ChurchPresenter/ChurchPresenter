@@ -77,6 +77,8 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val GRADIENT_DARKEN = 0.45f
@@ -105,6 +107,37 @@ fun AboutDialog(
     }
 }
 
+/** The GitHub issue template the "Report a Bug" button opens, and its copy button copies. */
+internal const val BUG_REPORT_URL =
+    "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"
+
+/** The GitHub issue template behind "Feature Request". */
+internal const val FEATURE_REQUEST_URL =
+    "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"
+
+/** One GitHub issue template: a full-width button that opens it, and a button that copies it. */
+@Composable
+private fun IssueLinkRow(
+    label: String,
+    url: String,
+    onOpen: (String) -> Unit,
+    onCopy: (String) -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedButton(
+            shape = RoundedCornerShape(6.dp),
+            modifier = Modifier.weight(1f),
+            onClick = { onOpen(url) }
+        ) {
+            Text(label, maxLines = 2, textAlign = TextAlign.Center)
+        }
+        CopyLinkIconButton(url = url, onCopy = onCopy)
+    }
+}
+
 @Composable
 internal fun AboutDialogContent(
     onDismiss: () -> Unit,
@@ -118,6 +151,10 @@ internal fun AboutDialogContent(
      * would fail `verifyRoborazziJvm` for ever after. Nothing but the test passes anything here.
      */
     versionDisplay: String = BuildConfig.VERSION_DISPLAY,
+    /** How an issue template is opened. A parameter so a test does not launch a real browser. */
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    /** How an issue-template address is copied, for when the browser opens on the wrong screen. */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {
     AppWindowRoot(theme = theme) {
         Surface(
@@ -178,35 +215,23 @@ internal fun AboutDialogContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedButton(
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            UrlOpener.open(
-                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
-                                    "?template=bug_report.md"
-                            )
-                        }
-                    ) {
-                        Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
-                    }
-                    OutlinedButton(
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            UrlOpener.open(
-                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
-                                    "?template=feature_request.md"
-                            )
-                        }
-                    ) {
-                        Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)
-                    }
-                }
+                // One link per row rather than two side by side. Side by side, the copy buttons
+                // took enough width that "Feature Request" wrapped to two lines and its button
+                // grew taller than the one beside it; a row each matches the full-width buttons
+                // below and leaves every label on one line.
+                IssueLinkRow(
+                    label = stringResource(Res.string.report_bug),
+                    url = BUG_REPORT_URL,
+                    onOpen = openUrl,
+                    onCopy = copyText,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                IssueLinkRow(
+                    label = stringResource(Res.string.submit_feature_request),
+                    url = FEATURE_REQUEST_URL,
+                    onOpen = openUrl,
+                    onCopy = copyText,
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     shape = RoundedCornerShape(6.dp),

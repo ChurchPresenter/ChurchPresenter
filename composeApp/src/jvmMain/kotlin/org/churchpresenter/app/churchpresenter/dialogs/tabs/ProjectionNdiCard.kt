@@ -110,6 +110,8 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val DISABLED_ALPHA = 0.5f
@@ -170,6 +172,10 @@ internal fun NdiOutputsCard(
      * from a broken one — which is the whole reason it is shown.
      */
     receiverCount: (Int) -> Int = NdiManager::connectionCount,
+    /** How the runtime download page is opened. A parameter so a test does not launch a browser. */
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    /** How the runtime download address is copied. A parameter so a test does not take the clipboard. */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {
     val proj = settings.projectionSettings
 
@@ -181,7 +187,13 @@ internal fun NdiOutputsCard(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        NdiRuntimeRow(status = status, path = proj.ndiRuntimePath, onSettingsChange = onSettingsChange)
+        NdiRuntimeRow(
+            status = status,
+            path = proj.ndiRuntimePath,
+            onSettingsChange = onSettingsChange,
+            openUrl = openUrl,
+            copyText = copyText,
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         if (status.isReady) {
@@ -231,6 +243,8 @@ private fun NdiRuntimeRow(
     status: NdiRuntimeStatus,
     path: String,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    openUrl: (String) -> Unit,
+    copyText: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -295,7 +309,7 @@ private fun NdiRuntimeRow(
             if (!status.isReady) {
                 Button(
                     shape = RoundedCornerShape(6.dp),
-                    onClick = { openNdiRuntimePage() },
+                    onClick = { openUrl(NDI_RUNTIME_URL) },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Text(
@@ -303,6 +317,7 @@ private fun NdiRuntimeRow(
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
+                CopyLinkIconButton(url = NDI_RUNTIME_URL, onCopy = copyText)
             }
         }
         Text(
@@ -717,9 +732,4 @@ private fun NdiDropdownCell(
             }
         }
     }
-}
-
-/** Opens the NDI download page in the operator's browser. */
-private fun openNdiRuntimePage() {
-    UrlOpener.open(NDI_RUNTIME_URL)
 }

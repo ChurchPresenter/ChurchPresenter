@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -39,6 +40,7 @@ class VlcStepTest {
         const val DOWNLOAD_INTEL = "Download VLC (Intel)"
         const val RECHECK = "Recheck"
         const val LINUX_TIP = "On Linux, install VLC via your package manager"
+        const val COPY_LINK = "Copy link"
     }
 
     private fun ok() = VlcCheckResult(available = true, archMismatch = false, loadFailed = false)
@@ -51,9 +53,9 @@ class VlcStepTest {
         osName: String = "mac os x",
         arch: String = "x86_64",
         onRecheck: suspend () -> VlcCheckResult = { initial },
-        block: ComposeUiTest.(openedUrl: () -> String?) -> Unit,
+        block: ComposeUiTest.(Captured) -> Unit,
     ) {
-        var openedUrl: String? = null
+        val captured = Captured()
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -62,13 +64,20 @@ class VlcStepTest {
                         osName = osName,
                         arch = arch,
                         onRecheck = onRecheck,
-                        onOpenDownloadPage = { openedUrl = it },
+                        onOpenDownloadPage = { captured.openedUrl = it },
+                        copyText = { captured.copiedUrl = it },
                     )
                 }
             }
             waitForIdle()
-            block({ openedUrl })
+            block(captured)
         }
+    }
+
+    /** What the step handed to its two outward actions, if anything. */
+    private class Captured {
+        var openedUrl: String? = null
+        var copiedUrl: String? = null
     }
 
     // ── Status card ──────────────────────────────────────────────────────────────
@@ -142,11 +151,30 @@ class VlcStepTest {
 
     @Test
     fun `Download opens the download page for the current platform`() =
-        vlcStep(initial = missing(), osName = "windows 11", arch = "amd64") { openedUrl ->
+        vlcStep(initial = missing(), osName = "windows 11", arch = "amd64") { captured ->
             onNodeWithText(Label.DOWNLOAD).performClick()
             waitForIdle()
-            assertEquals("https://www.videolan.org/vlc/download-windows.html", openedUrl())
+            assertEquals("https://www.videolan.org/vlc/download-windows.html", captured.openedUrl)
         }
+
+    /**
+     * The copy button is the way out of a browser that opens on the wrong display — the operating
+     * system chooses that, and on a two-screen setup it is regularly the projection output. So it
+     * must hand over the same address the Download button would, and open nothing itself.
+     */
+    @Test
+    fun `Copy link copies the platform download page without opening a browser`() =
+        vlcStep(initial = missing(), osName = "mac os x", arch = "aarch64") { captured ->
+            onNodeWithContentDescription(Label.COPY_LINK).performClick()
+            waitForIdle()
+            assertEquals("https://www.videolan.org/vlc/download-macosx.html", captured.copiedUrl)
+            assertNull(captured.openedUrl, "copying must not also launch a browser")
+        }
+
+    @Test
+    fun `an installed VLC offers neither a download nor a copy`() = vlcStep(initial = ok()) { _ ->
+        onNodeWithContentDescription(Label.COPY_LINK).assertDoesNotExist()
+    }
 
     @Test
     fun `Recheck applies the fresh result including it clearing to ok`() =
@@ -179,6 +207,7 @@ class VlcStepTest {
                     arch = "x86_64",
                     onRecheck = { gate.await() },
                     onOpenDownloadPage = { openedUrl = it },
+                    copyText = {},
                 )
             }
         }

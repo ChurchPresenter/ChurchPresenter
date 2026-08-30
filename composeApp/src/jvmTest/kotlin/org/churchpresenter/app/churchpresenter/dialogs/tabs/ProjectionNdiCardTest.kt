@@ -15,6 +15,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.semantics.SemanticsActions
@@ -52,6 +53,11 @@ class ProjectionNdiCardTest {
         status: NdiRuntimeStatus = READY,
         receivers: Int = 0,
         identified: MutableList<Int> = mutableListOf(),
+        // Both defaulted to a no-op, never to the real implementations: a click reaching UrlOpener
+        // would launch this machine's browser, and one reaching SystemClipboard would take its
+        // clipboard. The headless JVM stops neither.
+        openUrl: (String) -> Unit = {},
+        copyText: (String) -> Unit = {},
         body: ComposeUiTest.(read: () -> AppSettings) -> Unit,
     ) = runComposeUiTest {
         var current = initial
@@ -74,12 +80,46 @@ class ProjectionNdiCardTest {
                         status = status,
                         receiverCount = { receivers },
                         onIdentifyNdi = { identified += it },
+                        openUrl = openUrl,
+                        copyText = copyText,
                     )
                 }
             }
         }
         waitForIdle()
         body { current }
+    }
+
+    /**
+     * Where the download page opens is the operating system's choice, and on the two-screen setup
+     * this app is run on that is regularly the projection output — so the address must also be
+     * reachable without launching anything. Both buttons carry the same one.
+     */
+    @Test
+    fun `the download page can be copied as well as opened`() {
+        var opened: String? = null
+        var copied: String? = null
+        card(
+            status = NdiRuntimeStatus.NotInstalled,
+            openUrl = { opened = it },
+            copyText = { copied = it },
+        ) { _ ->
+            onNodeWithText("Get the NDI Runtime").performClick()
+            waitForIdle()
+            assertEquals(NDI_RUNTIME_URL, opened)
+
+            onNodeWithContentDescription("Copy link").performClick()
+            waitForIdle()
+            assertEquals(NDI_RUNTIME_URL, copied)
+        }
+    }
+
+    @Test
+    fun `an installed runtime offers neither the download nor its copy`() {
+        card(status = READY) { _ ->
+            onNodeWithText("Get the NDI Runtime").assertDoesNotExist()
+            onNodeWithContentDescription("Copy link").assertDoesNotExist()
+        }
     }
 
     private fun oneOutput(output: ScreenAssignment = ScreenAssignment()) =
@@ -92,6 +132,7 @@ class ProjectionNdiCardTest {
         card(status = NdiRuntimeStatus.NotInstalled) { _ ->
             onNodeWithText("NDI Runtime not installed").assertExists()
             onNodeWithText("Get the NDI Runtime").assertExists()
+            onNodeWithContentDescription("Copy link").assertExists()
             onAllNodesWithText("Add Output").fetchSemanticsNodes().let {
                 assertTrue(it.isEmpty(), "there is no point adding an output with no runtime to send it")
             }
