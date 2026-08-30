@@ -99,15 +99,23 @@ class QATabFileChooserTest {
     @Test
     fun `exporting history writes every question to the chosen file`() {
         val dest = File(Files.createTempDirectory("cp-qa-export").toFile(), "questions.txt")
+        val question = "Exported question"
         givenChooserReturns(dest.absolutePath)
 
-        qaTab(seed = { askAll("Exported question"); toggleSession() }) { _, _, _ ->
+        qaTab(seed = { askAll(question); toggleSession() }) { _, _, _ ->
             openHistory()
             clickQaLabel(QALabel.EXPORT_TO_FILE)
             waitForIdle()
-            waitUntil(timeoutMillis = 2_000) { dest.exists() }
+            // The content, not `exists()`. The export is a `withContext(Dispatchers.IO)
+            // { writeText(...) }`, and `writeText` creates the file before it fills it — so
+            // waiting on existence returns the instant it is created and the read below can get an
+            // empty file. It did, on CI, as an `AssertionError` whose message was the empty string
+            // it had just read.
+            waitUntil("the export to have been written", 2_000) {
+                dest.exists() && dest.readText().contains(question)
+            }
 
-            assertTrue(dest.readText().contains("Exported question"), dest.readText())
+            assertTrue(dest.readText().contains(question), dest.readText())
         }
     }
 
