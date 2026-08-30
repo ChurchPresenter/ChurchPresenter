@@ -23,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,23 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/**
+ * How a [SegmentedButton] paints the segment that is selected.
+ *
+ * [NEUTRAL] is the long-standing look and the default, so nothing changes where this is not asked
+ * for. [ACCENT] fills the selected segment with the theme's accent, the way the song editor's own
+ * pane tabs do -- readable at a glance rather than inferred from a small difference in surface tint.
+ *
+ * Ambient rather than a parameter because the Bible and Song settings tabs reach a segmented button
+ * from nineteen call sites spread over seven files, several of them behind `LongMethod` entries in
+ * `config/detekt/baseline.xml` that are keyed by signature. One provider at the top of each tab
+ * carries the choice to all of them, including the shared preview rows they compose.
+ */
+enum class SegmentedButtonTone { NEUTRAL, ACCENT }
+
+/** The tone segmented buttons in this subtree paint with. See [SegmentedButtonTone]. */
+val LocalSegmentedButtonTone = staticCompositionLocalOf { SegmentedButtonTone.NEUTRAL }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -101,6 +119,7 @@ private fun <T> SegmentedButtonGrid(
             ) {
                 rowItems.forEachIndexed { index, item ->
                     val isSelected = selectedValue == item.value
+                    val accent = LocalSegmentedButtonTone.current == SegmentedButtonTone.ACCENT
                     val shape = when {
                         rowItems.size == 1 -> RoundedCornerShape(4.dp)
                         index == 0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)
@@ -121,11 +140,15 @@ private fun <T> SegmentedButtonGrid(
                                     MaterialTheme.colorScheme.outline
                                 ),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (isSelected)
-                                        MaterialTheme.colorScheme.onSecondary
+                                    containerColor = when {
+                                        !isSelected -> Color.Transparent
+                                        accent -> MaterialTheme.colorScheme.primary
+                                        else -> MaterialTheme.colorScheme.onSecondary
+                                    },
+                                    contentColor = if (isSelected && accent)
+                                        MaterialTheme.colorScheme.onPrimary
                                     else
-                                        Color.Transparent,
-                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                        MaterialTheme.colorScheme.onSurface
                                 ),
                                 contentPadding = contentPadding
                             ) {

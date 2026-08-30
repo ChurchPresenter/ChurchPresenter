@@ -79,15 +79,25 @@ internal fun contentOutputsEnabledCount(
     var n = 0
     if (a.bibleMode != Constants.SONG_LANG_OFF) n++
     if (a.songMode != Constants.SONG_LANG_OFF) n++
-    (contentGroup + backgroundGroup).forEach { if (it.getter(a)) n++ }
+    (contentGroup + backgroundGroup).offeredTo(a).forEach { if (it.getter(a)) n++ }
     return n
 }
 
-/** Denominator for the same summary: Bible and Songs plus every toggle. */
+/** Denominator for the same summary: Bible and Songs plus every toggle [a] is offered. */
 internal fun contentOutputsTotalCount(
+    a: ScreenAssignment,
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>
-): Int = 2 + contentGroup.size + backgroundGroup.size
+): Int = 2 + contentGroup.offeredTo(a).size + backgroundGroup.offeredTo(a).size
+
+/**
+ * The columns [a] can actually obey -- see [ContentCol.visible].
+ *
+ * Every reading of the group goes through this, so the dialog, its Select All / Clear All, its
+ * preview and the row's "N of M enabled" button all describe the same set. A column filtered out
+ * here keeps whatever it was last set to; nothing writes to it while it is out of scope.
+ */
+internal fun List<ContentCol>.offeredTo(a: ScreenAssignment): List<ContentCol> = filter { it.visible(a) }
 
 @Composable
 internal fun ContentOutputsSectionHeader(text: String, modifier: Modifier = Modifier) {
@@ -135,7 +145,8 @@ internal fun ContentOutputsMonitorPreview(
             val mode = songLangModes.find { it.first == assignment.songMode }?.second
             add(if (mode != null) "$songsLabel · $mode" else songsLabel)
         }
-        (contentGroup + backgroundGroup).forEach { if (it.getter(assignment)) add(it.label) }
+        (contentGroup + backgroundGroup).offeredTo(assignment)
+            .forEach { if (it.getter(assignment)) add(it.label) }
     }
 
     Column(
@@ -270,7 +281,9 @@ internal fun ContentOutputsDialog(
     onApply: (ScreenAssignment) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val total = contentOutputsTotalCount(contentGroup, backgroundGroup)
+    val shownContent = contentGroup.offeredTo(assignment)
+    val shownBackgrounds = backgroundGroup.offeredTo(assignment)
+    val total = contentOutputsTotalCount(assignment, contentGroup, backgroundGroup)
     val enabled = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
 
     AlertDialog(
@@ -328,7 +341,7 @@ internal fun ContentOutputsDialog(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             var a = assignment
-                            (contentGroup + backgroundGroup).forEach { a = it.setter(a, true) }
+                            (shownContent + shownBackgrounds).forEach { a = it.setter(a, true) }
                             a = a.copy(
                                 bibleMode = Constants.SONG_LANG_BOTH,
                                 // An empty list means "every translation" -- Select All must reset
@@ -346,7 +359,7 @@ internal fun ContentOutputsDialog(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             var a = assignment
-                            (contentGroup + backgroundGroup).forEach { a = it.setter(a, false) }
+                            (shownContent + shownBackgrounds).forEach { a = it.setter(a, false) }
                             a = a.copy(
                                 bibleMode = Constants.SONG_LANG_OFF,
                                 songMode = Constants.SONG_LANG_OFF,
@@ -398,7 +411,7 @@ internal fun ContentOutputsDialog(
                         }
                     )
                 }
-                contentGroup.chunked(2).forEach { pair ->
+                shownContent.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
                             ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
@@ -409,7 +422,7 @@ internal fun ContentOutputsDialog(
 
                 // Backgrounds
                 ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_section_backgrounds))
-                backgroundGroup.chunked(2).forEach { pair ->
+                shownBackgrounds.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
                             ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)

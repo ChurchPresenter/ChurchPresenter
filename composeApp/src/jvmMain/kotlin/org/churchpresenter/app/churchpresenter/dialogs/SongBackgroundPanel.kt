@@ -60,9 +60,21 @@ internal const val SONG_BACKGROUND_PANEL_TAG = "song_background_panel"
 /** The scope selector inside the panel — which of the song's backgrounds is being edited. */
 internal const val SONG_BACKGROUND_SCOPE_TAG = "song_background_scope"
 
-/** The design's panel size. */
+/**
+ * The design's panel size, plus the room a third slider needs.
+ *
+ * The design was drawn with two sliders under the Look presets, and 424 fitted them exactly. A
+ * third -- Opacity -- was added afterwards and had nowhere to go: the look column scrolls, so it
+ * did not clip visibly, it simply sat below the fold with nothing to say it was there.
+ *
+ * 560 is 424 plus three slider blocks, each a label row, a 3dp gap, a track and the 6dp above it.
+ * One is for Opacity itself; the other two are for the Custom color tile, which inserts a hex
+ * field and a recents strip above the sliders and pushed Blur and Opacity out of sight as well.
+ * Sized to that worst case rather than to the ordinary one, so no state of the panel scrolls --
+ * a named colour simply leaves the slack under its last slider.
+ */
 internal val SONG_BACKGROUND_PANEL_WIDTH = 660.dp
-internal val SONG_BACKGROUND_PANEL_HEIGHT = 424.dp
+internal val SONG_BACKGROUND_PANEL_HEIGHT = 560.dp
 
 /**
  * What the scope row adds when it is drawn.
@@ -71,6 +83,15 @@ internal val SONG_BACKGROUND_PANEL_HEIGHT = 424.dp
  * sized to the design, and squeezing a row in above them clipped the blur slider off the bottom.
  */
 internal val SONG_BACKGROUND_SCOPE_ROW_HEIGHT = 48.dp
+
+/**
+ * What the Save/Cancel footer adds when it is drawn.
+ *
+ * Added to the panel's height for the same reason the scope row is: the library and the look
+ * column are sized to fit their own controls, and taking a strip out from under them would put
+ * the last slider back below the fold.
+ */
+internal val SONG_BACKGROUND_FOOTER_HEIGHT = 44.dp
 
 /** Which of a song's two backgrounds the panel is editing. */
 internal enum class SongBackgroundTarget { FULL_SCREEN, LOWER_THIRD }

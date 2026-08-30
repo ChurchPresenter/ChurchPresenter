@@ -565,7 +565,7 @@ private fun NdiOutputRow(
                     }
                     var showContentDialog by remember { mutableStateOf(false) }
                     val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
-                    val totalCount = contentOutputsTotalCount(contentGroup, backgroundGroup)
+                    val totalCount = contentOutputsTotalCount(output, contentGroup, backgroundGroup)
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = { showContentDialog = true },
