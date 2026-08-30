@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
@@ -397,6 +398,73 @@ class LyricSectionsTest {
         )
         assertEquals(listOf(listOf("[G]one"), listOf("[C]two")), sections.map { it.chordLines })
         assertEquals(listOf(listOf("one"), listOf("two")), sections.map { it.lines })
+    }
+
+    // ── Per-section backgrounds ─────────────────────────────────────────────────
+
+    @Test
+    fun `a section's own background reaches the section, and only that one`() {
+        val sections = asWritten.getLyricSections(
+            song(
+                listOf(
+                    "[Verse 1]", "v1",
+                    "{Chorus}",
+                    "[background: color]",
+                    "[background-color: #2a1130]",
+                    "[background-dim: 65]",
+                    "c",
+                ),
+            ),
+        )
+
+        assertEquals(2, sections.size)
+        assertFalse(sections[0].background.isCustom, "the verse said nothing, so it inherits")
+        assertEquals(SongBackgroundType.COLOR, sections[1].background.type)
+        assertEquals("#2a1130", sections[1].background.color)
+        assertEquals(65, sections[1].background.dim)
+    }
+
+    @Test
+    fun `a directive is never a lyric, a chart line or a section`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "[background: color]", "[background-color: #101010]", "a line")),
+        )
+
+        assertEquals(1, sections.size, "got ${sections.map { it.header }}")
+        assertEquals(listOf("a line"), sections.single().lines)
+        assertTrue(sections.single().chordLines.isEmpty())
+    }
+
+    @Test
+    fun `a section background covers every slide of that section`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("{Chorus}", "[background: color]", "[background-color: #101010]", "c1", "[---]", "c2")),
+        )
+
+        assertEquals(2, sections.size)
+        assertTrue(sections.all { it.background.color == "#101010" })
+    }
+
+    @Test
+    fun `a directive written after a break styles the slides from there on`() {
+        // Written mid-section it applies from where it is, which is the only reading that lets one
+        // slide of a section differ from the one before it.
+        val sections = asWritten.getLyricSections(
+            song(listOf("{Chorus}", "c1", "[---]", "[background: color]", "[background-color: #101010]", "c2")),
+        )
+
+        assertFalse(sections[0].background.isCustom)
+        assertEquals("#101010", sections[1].background.color)
+    }
+
+    @Test
+    fun `a background does not leak into the section after it`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "[background: color]", "[background-color: #101010]", "a", "[Verse 2]", "b")),
+        )
+
+        assertEquals("#101010", sections[0].background.color)
+        assertFalse(sections[1].background.isCustom, "each section states its own or inherits")
     }
 
     // ── End-of-song marker ──────────────────────────────────────────────────────

@@ -16,6 +16,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -275,6 +277,39 @@ class EditSongContentTest {
         // Spaced like the section chips it sits beside — the blank lines are separators the
         // splitter drops, so what matters is that the marker is alone on its line.
         assertEquals(listOf("{Chorus}", "first half", "", "[---]", ""), saved.song?.lyrics)
+    }
+
+    /**
+     * The background panel is pointed at one section, and what it writes lands in that section's
+     * lyrics rather than on the song.
+     *
+     * The whole chain in one test on purpose: choosing a scope, editing through the panel, the
+     * rewrite of the lyrics text, and the save. Each half of it is pinned on its own elsewhere —
+     * `SectionBackgroundSlotTest` for the rewrite, `LyricSectionsTest` for what the splitter then
+     * makes of it — so what this adds is that the editor joins them up.
+     */
+    @Test
+    fun `a background chosen for one section is written into that section`() = editor { saved ->
+        type(Field.LYRICS, "[Verse 1]\nfirst verse\n{Chorus}\nthe chorus")
+        onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(SONG_BACKGROUND_SCOPE_TAG).performClick()
+        waitForIdle()
+        onAllNodesWithText("Chorus").onLast().performClick()
+        waitForIdle()
+        onNodeWithText("Custom").performClick()
+        waitForIdle()
+        // The panel is a focusable popup over the dialog, so it is closed before Save is reached.
+        onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+        waitForIdle()
+        save()
+
+        assertEquals(
+            listOf("[Verse 1]", "first verse", "{Chorus}", "[background: color]", "[background-color: #000000]",
+                "the chorus"),
+            saved.song?.lyrics,
+        )
+        assertEquals(false, saved.song?.background?.isCustom, "the song itself still inherits")
     }
 
     @Test

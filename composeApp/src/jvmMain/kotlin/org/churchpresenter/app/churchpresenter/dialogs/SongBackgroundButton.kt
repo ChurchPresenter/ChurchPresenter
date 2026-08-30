@@ -62,6 +62,10 @@ internal fun SongBackgroundButton(
     onLowerThirdBackgroundChange: (SongBackground) -> Unit,
     sampleLine: String,
     onApplyToSongbook: (() -> Unit)?,
+    /** Passed through to [SongBackgroundPanel]; empty leaves the panel song-wide as it was. */
+    scopes: List<String> = emptyList(),
+    scopeIndex: Int = 0,
+    onScopeChange: (Int) -> Unit = {},
 ) {
     val custom = background.isCustom || lowerThirdBackground.isCustom
     val shown = if (background.isCustom || !lowerThirdBackground.isCustom) background else lowerThirdBackground
@@ -111,7 +115,9 @@ internal fun SongBackgroundButton(
                 onDismissRequest = { onExpandedChange(false) },
                 properties = PopupProperties(focusable = true),
             ) {
-                Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, SONG_BACKGROUND_PANEL_HEIGHT)) {
+                val panelHeight = SONG_BACKGROUND_PANEL_HEIGHT +
+                    if (scopes.size > 1) SONG_BACKGROUND_SCOPE_ROW_HEIGHT else 0.dp
+                Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, panelHeight)) {
                     SongBackgroundPanel(
                         background = background,
                         lowerThirdBackground = lowerThirdBackground,
@@ -120,6 +126,9 @@ internal fun SongBackgroundButton(
                         sampleLine = sampleLine,
                         onApplyToSongbook = onApplyToSongbook,
                         onDismiss = { onExpandedChange(false) },
+                        scopes = scopes,
+                        scopeIndex = scopeIndex,
+                        onScopeChange = onScopeChange,
                     )
                 }
             }

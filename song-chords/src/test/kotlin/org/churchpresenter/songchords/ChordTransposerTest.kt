@@ -79,6 +79,42 @@ class ChordTransposerTest {
         assertFalse(ChordTransposer.isSlideBreak("[G]one - two"))
     }
 
+    // ── Background directives ───────────────────────────────────────────────────
+
+    @Test
+    fun `a background directive is read as a key and a value`() {
+        assertEquals("background" to "gradient", ChordTransposer.backgroundDirectiveOf("[background: gradient]"))
+        assertEquals(
+            "lower-third-background-dim" to "25",
+            ChordTransposer.backgroundDirectiveOf("  [Lower-Third-Background-Dim: 25]  "),
+        )
+    }
+
+    @Test
+    fun `a background directive is not a section header`() {
+        for (line in listOf("[background: color]", "[background-color: #101010]", "[background: ]")) {
+            assertTrue(ChordTransposer.isBackgroundDirective(line), "should be a directive: \"$line\"")
+            assertFalse(ChordTransposer.isSectionHeader(line), "and so not a header: \"$line\"")
+        }
+    }
+
+    @Test
+    fun `a value keeps every colon after the first`() {
+        // A Windows path is the reason: the key stops at the first colon and the rest is the value.
+        assertEquals(
+            "background-image" to "C:\\pics\\dusk.jpg",
+            ChordTransposer.backgroundDirectiveOf("[background-image: C:\\pics\\dusk.jpg]"),
+        )
+    }
+
+    @Test
+    fun `a line that is not a background key is left as it was`() {
+        for (line in listOf("[Verse 1]", "[Chorus: loud]", "[G]he said: hello", "background: color", "[]")) {
+            assertNull(ChordTransposer.backgroundDirectiveOf(line), "should not be a directive: \"$line\"")
+        }
+        assertTrue(ChordTransposer.isSectionHeader("[Chorus: loud]"), "a named section keeps its colon")
+    }
+
     @Test
     fun `stripping leaves a slide break alone`() {
         // It is not a chord, so it survives to the splitter that consumes it.

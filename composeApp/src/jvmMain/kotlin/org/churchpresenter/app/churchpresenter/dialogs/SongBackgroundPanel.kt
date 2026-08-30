@@ -40,10 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_background
+import churchpresenter.composeapp.generated.resources.song_background_applies_to
 import churchpresenter.composeapp.generated.resources.song_background_full_screen
 import churchpresenter.composeapp.generated.resources.song_background_inherit
 import churchpresenter.composeapp.generated.resources.song_background_lower_third
 import churchpresenter.composeapp.generated.resources.song_background_own
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.StringResource
@@ -55,9 +57,20 @@ import churchpresenter.composeapp.generated.resources.song_background_preset_sof
 
 internal const val SONG_BACKGROUND_PANEL_TAG = "song_background_panel"
 
+/** The scope selector inside the panel — which of the song's backgrounds is being edited. */
+internal const val SONG_BACKGROUND_SCOPE_TAG = "song_background_scope"
+
 /** The design's panel size. */
 internal val SONG_BACKGROUND_PANEL_WIDTH = 660.dp
 internal val SONG_BACKGROUND_PANEL_HEIGHT = 424.dp
+
+/**
+ * What the scope row adds when it is drawn.
+ *
+ * Added to the panel's height rather than taken out of it: the library and the look column are
+ * sized to the design, and squeezing a row in above them clipped the blur slider off the bottom.
+ */
+internal val SONG_BACKGROUND_SCOPE_ROW_HEIGHT = 48.dp
 
 /** Which of a song's two backgrounds the panel is editing. */
 internal enum class SongBackgroundTarget { FULL_SCREEN, LOWER_THIRD }
@@ -99,6 +112,14 @@ internal fun SongBackgroundPanel(
      * tray tile can be edited and then abandoned.
      */
     footer: (@Composable () -> Unit)? = null,
+    /**
+     * What the panel can be pointed at, as display names — the whole song first, then each of its
+     * sections. Empty for a background that has only one scope, such as a quick-tray tile, and then
+     * no selector is drawn at all.
+     */
+    scopes: List<String> = emptyList(),
+    scopeIndex: Int = 0,
+    onScopeChange: (Int) -> Unit = {},
 ) {
     var target by remember { mutableStateOf(SongBackgroundTarget.FULL_SCREEN) }
     val current = if (target == SongBackgroundTarget.FULL_SCREEN) background else lowerThirdBackground
@@ -133,6 +154,10 @@ internal fun SongBackgroundPanel(
                 },
                 onDismiss = onDismiss,
             )
+            if (scopes.size > 1) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ScopeRow(scopes = scopes, scopeIndex = scopeIndex, onScopeChange = onScopeChange)
+            }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(Modifier.weight(1f).fillMaxWidth()) {
                 SongBackgroundLibrary(
@@ -155,6 +180,40 @@ internal fun SongBackgroundPanel(
                 footer()
             }
         }
+    }
+}
+
+/**
+ * Which of the song's backgrounds is being edited: the song's own, or one section's.
+ *
+ * A row of its own rather than another control in the header, which already carries three. The
+ * section names are the operator's own headings, so the row reads as the song does.
+ */
+@Composable
+private fun ScopeRow(scopes: List<String>, scopeIndex: Int, onScopeChange: (Int) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.song_background_applies_to).uppercase(),
+            fontSize = 10.5.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.05.sp,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        DropdownSelector(
+            label = "",
+            value = scopeIndex.toString(),
+            options = scopes.mapIndexed { index, name -> index.toString() to name },
+            onValueChange = { onScopeChange(it.toIntOrNull() ?: 0) },
+            compact = true,
+            modifier = Modifier.width(SCOPE_SELECTOR_WIDTH).testTag(SONG_BACKGROUND_SCOPE_TAG),
+        )
     }
 }
 
@@ -213,3 +272,6 @@ private val LOOK_COLUMN_WIDTH = 212.dp
 
 /** How far the library fades while the song is inheriting. */
 private const val INHERIT_ALPHA = 0.4f
+
+/** The scope selector's width — wide enough for a section name without crowding the row. */
+private val SCOPE_SELECTOR_WIDTH = 240.dp

@@ -175,11 +175,28 @@ class SongPresenterPushTest {
         assertEquals(dusk, push.section.background)
     }
 
-    @Test fun `a background set on the edited song replaces whatever the live section held`() {
+    /**
+     * The section's own background wins, and it did not used to.
+     *
+     * `withBackgroundsOf` overwrote whatever the section held, which made the field pure transport
+     * for the song's value — a section that says "not the one the rest of this song uses" had no way
+     * to be heard. It now fills in only where the section has none, which is what makes a
+     * per-section background expressible at all (issue #441). The song's value still reaches every
+     * section that does not override it, which the two tests above pin.
+     */
+    @Test fun `a background written on the section beats the song's`() {
         val sections = listOf(LyricSection(lines = listOf("a"), background = band))
 
         val push = resolveEditedSongPush(sections, 0, 0, song(background = dusk), SongTuning())
 
-        assertEquals(dusk, push.section.background, "the section follows the song, not the other way round")
+        assertEquals(band, push.section.background, "the more specific of the two is the section's")
+    }
+
+    @Test fun `a directive is configuration and never reaches the fallback slide's words`() {
+        val edited = song(lyrics = listOf("[background: color]", "[background-color: #101010]", "line one"))
+
+        val push = resolveEditedSongPush(emptyList(), 0, 0, edited, SongTuning())
+
+        assertEquals(listOf("line one"), push.section.lines)
     }
 }

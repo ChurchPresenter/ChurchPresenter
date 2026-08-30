@@ -144,6 +144,8 @@ fun buildPreviewSections(
             label = line.trim().let { it.substring(1, it.length - 1) }.trim()
         } else if (ChordTransposer.isSlideBreak(line)) {
             if (body.isNotEmpty()) flush()
+        } else if (ChordTransposer.isBackgroundDirective(line)) {
+            // Configuration, not words — the panel above shows what it says.
         } else if (line.isNotBlank()) {
             body.add(line)
         }

@@ -90,6 +90,40 @@ object ChordTransposer {
     fun isSlideBreak(line: String): Boolean = SLIDE_BREAK_LINE.matches(line.trim())
 
     /**
+     * A whole line of `[key: value]`. The key stops at the first colon, so the value may hold as
+     * many more as a Windows path needs; it may not hold a bracket, which is what keeps the line
+     * distinguishable from a lyric with a chord in it.
+     */
+    private val DIRECTIVE_LINE = Regex("^\\[([^:\\[\\]]+):([^\\[\\]]*)]$")
+
+    /**
+     * The keys a background directive may carry -- `background`, `background-color`,
+     * `lower-third-background-dim` and their siblings. Matched by shape rather than against a list,
+     * so the vocabulary stays owned by the model that defines it (`songBackgroundKeys`) and this
+     * module keeps depending on nothing.
+     */
+    private val BACKGROUND_KEY = Regex("^(lower-third-)?background(-[a-z-]+)?$")
+
+    /**
+     * The key and value of a background directive -- a section's own background, written into the
+     * lyrics as `[background: gradient]` — or null when [line] is not one.
+     *
+     * It lives in the section body rather than in the file header because it belongs to the section
+     * and not to the section's position: the operator can insert a verse above it, reorder the song
+     * or paste the section into another one, and the background goes with the words. A header key
+     * would have had to name a section ordinal, and ordinals move.
+     */
+    fun backgroundDirectiveOf(line: String): Pair<String, String>? {
+        val match = DIRECTIVE_LINE.matchEntire(line.trim()) ?: return null
+        val key = match.groupValues[1].trim().lowercase()
+        if (!BACKGROUND_KEY.matches(key)) return null
+        return key to match.groupValues[2].trim()
+    }
+
+    /** True when [line] is a background directive -- see [backgroundDirectiveOf]. */
+    fun isBackgroundDirective(line: String): Boolean = backgroundDirectiveOf(line) != null
+
+    /**
      * True when [line] is a section header — a whole line wrapped in `[]` or `{}`.
      *
      * Two bracketed lines are not headers. One holding a single chord, as an instrumental writes
@@ -97,14 +131,17 @@ object ChordTransposer {
      * also opens with `[` and closes with `]`, but what sits between them is further brackets, not
      * a name, so it is a chord line and has to be read as one.
      *
-     * Nor is a slide break — see [isSlideBreak]. It ends a slide, not a section.
+     * Nor is a slide break — see [isSlideBreak]. It ends a slide, not a section. Nor is a
+     * background directive — see [backgroundDirectiveOf]. It styles a section rather than starting
+     * one.
      */
     fun isSectionHeader(line: String): Boolean {
         val t = line.trim()
         val bracketed = (t.startsWith("[") && t.endsWith("]")) || (t.startsWith("{") && t.endsWith("}"))
         // A slide break is bracketed and is not a chord, so it would otherwise parse as a section
-        // named "---" -- which is what it did, and what put a `---` badge on half a chorus.
-        if (!bracketed || isSlideBreak(t)) return false
+        // named "---" -- which is what it did, and what put a `---` badge on half a chorus. A
+        // background directive is bracketed for the same reason and is no more a section than it is.
+        if (!bracketed || isSlideBreak(t) || isBackgroundDirective(t)) return false
         val inner = t.substring(1, t.length - 1)
         if (inner.any { it in "[]{}" }) return false
         return !isChord(inner)

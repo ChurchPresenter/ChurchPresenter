@@ -189,3 +189,12 @@ fun isVerseHeader(header: String?): Boolean {
  * the app-side name, matching [isHeaderLine].
  */
 fun isSlideBreak(line: String): Boolean = ChordTransposer.isSlideBreak(line)
+
+/**
+ * The key and value of a background directive — `[background: gradient]` and its siblings, which a
+ * section writes into the lyrics to give itself a background — or null when [line] is not one. See
+ * [ChordTransposer.backgroundDirectiveOf], which owns the grammar; this is the app-side name,
+ * matching [isHeaderLine] and [isSlideBreak].
+ */
+fun songBackgroundDirectiveOf(line: String): Pair<String, String>? =
+    ChordTransposer.backgroundDirectiveOf(line)

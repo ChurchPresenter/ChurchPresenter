@@ -55,3 +55,64 @@ data class SongBackground(
         else -> ""
     }
 }
+
+/** The header key a song's full-screen background is written under, and the root of its siblings. */
+const val SONG_BACKGROUND_PREFIX = "background"
+
+/** The same for the lower-third band. */
+const val SONG_LOWER_THIRD_BACKGROUND_PREFIX = "lower-third-background"
+
+private const val SONG_BACKGROUND_PERCENT_MAX = 100
+
+/**
+ * Every key one background occupies under [prefix]: the type itself plus its value keys.
+ *
+ * The same vocabulary serves the `.song` header, where it is written `key: value` a line apart, and
+ * a per-section directive in the lyrics, where it is written `[key: value]` — one grammar rather
+ * than two, so a background reads the same wherever it is stored.
+ */
+fun songBackgroundKeys(prefix: String): List<String> =
+    listOf(prefix) + listOf("color", "color-end", "image", "video", "dim", "blur").map { "$prefix-$it" }
+
+/**
+ * The [SongBackground] held under [prefix] in [fields], or an inheriting one when nothing there
+ * names a type this build knows.
+ */
+fun songBackgroundFrom(fields: Map<String, String>, prefix: String): SongBackground {
+    val type = fields[prefix].orEmpty().trim().lowercase()
+    if (type !in SongBackgroundType.ALL) return SongBackground()
+    return SongBackground(
+        type = type,
+        color = fields["$prefix-color"]?.takeIf { it.isNotBlank() } ?: "#000000",
+        colorEnd = fields["$prefix-color-end"]?.takeIf { it.isNotBlank() } ?: "#000000",
+        image = fields["$prefix-image"].orEmpty(),
+        video = fields["$prefix-video"].orEmpty(),
+        dim = fields["$prefix-dim"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_PERCENT_MAX) ?: 0,
+        blur = fields["$prefix-blur"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_MAX_BLUR) ?: 0,
+    )
+}
+
+/**
+ * [background] as the key/value pairs that record it under [prefix], in writing order — empty when
+ * it inherits, since an inherited background is stored by writing nothing at all.
+ *
+ * Only what the type actually reads is written: a colour background records no gradient end, and
+ * dim and blur appear only when they are set to something.
+ */
+fun songBackgroundFields(background: SongBackground, prefix: String): List<Pair<String, String>> {
+    if (!background.isCustom) return emptyList()
+    return buildList {
+        add(prefix to background.type)
+        when (background.type) {
+            SongBackgroundType.COLOR -> add("$prefix-color" to background.color)
+            SongBackgroundType.GRADIENT -> {
+                add("$prefix-color" to background.color)
+                add("$prefix-color-end" to background.colorEnd)
+            }
+            SongBackgroundType.IMAGE -> add("$prefix-image" to background.image)
+            SongBackgroundType.VIDEO -> add("$prefix-video" to background.video)
+        }
+        if (background.dim > 0) add("$prefix-dim" to background.dim.toString())
+        if (background.blur > 0) add("$prefix-blur" to background.blur.toString())
+    }
+}

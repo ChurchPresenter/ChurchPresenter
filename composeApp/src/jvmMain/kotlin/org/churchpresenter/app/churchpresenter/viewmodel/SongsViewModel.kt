@@ -17,6 +17,9 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
+import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
+import org.churchpresenter.core.models.songs.songBackgroundFrom
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
@@ -27,6 +30,7 @@ import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import org.churchpresenter.app.churchpresenter.utils.isSlideBreak
+import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.app.churchpresenter.utils.isVerseHeader
 import java.io.File
 
@@ -436,8 +440,10 @@ class SongsViewModel(
             title = song.title,
             secondaryTitle = song.secondaryTitle,
             songNumber = song.number.toIntOrNull() ?: 0,
-            lines = song.lyrics,
-            secondaryLines = song.secondaryLyrics,
+            // The whole-song slide is the lyrics verbatim, headers and all — but a directive is
+            // configuration rather than words, and putting one on screen is never right.
+            lines = song.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+            secondaryLines = song.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
             type = Constants.SECTION_TYPE_SONG
         ).withBackgroundsOf(song)
     }
@@ -498,6 +504,12 @@ class SongsViewModel(
         // ending the section, so this counts up while the header and type stay put.
         var slideOfSection = 0
 
+        // The background this section writes for itself, gathered from its `[background: …]`
+        // directives. Cleared at each header, so a section that writes none inherits the song's;
+        // applied from where it is written onward, so a directive after a slide break can even give
+        // one slide of a section a background of its own.
+        val backgroundFields = mutableMapOf<String, String>()
+
         // A header with no body under it is still a section — navigation steps over it and the
         // editor shows it — but only once. Past the first slide the header has already been
         // presented, so a trailing or doubled break must not add an empty slide behind it.
@@ -511,6 +523,9 @@ class SongsViewModel(
                         lines = currentLines.toList(),
                         type = sectionType,
                         slideIndex = slideOfSection++,
+                        background = songBackgroundFrom(backgroundFields, SONG_BACKGROUND_PREFIX),
+                        lowerThirdBackground =
+                            songBackgroundFrom(backgroundFields, SONG_LOWER_THIRD_BACKGROUND_PREFIX),
                         // Only when the section actually carries chords — otherwise the stage
                         // monitor's chord zone would just repeat the lyrics zone.
                         chordLines = if (currentChordLines.any { ChordTransposer.hasChords(it) }) {
@@ -526,11 +541,15 @@ class SongsViewModel(
         }
 
         lyrics.forEach { line ->
+            val directive = songBackgroundDirectiveOf(line)
             if (isHeaderLine(line)) {
                 flushSection()
                 slideOfSection = 0
+                backgroundFields.clear()
                 currentHeader = line
                 sectionType = if (isChorusHeader(line)) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+            } else if (directive != null) {
+                backgroundFields[directive.first] = directive.second
             } else if (isSlideBreak(line)) {
                 // Ends the slide, not the section: the header and type carry on, so both halves of
                 // a chorus still read "Chorus". Nothing is emitted for a break with no words behind

@@ -44,6 +44,15 @@ data class LyricSection(
     val lowerThirdBackground: SongBackground = SongBackground(),
 )
 
-/** [section] with [song]'s own backgrounds stamped on, so the presenter can draw them. */
-fun LyricSection.withBackgroundsOf(song: SongItem): LyricSection =
-    copy(background = song.background, lowerThirdBackground = song.lowerThirdBackground)
+/**
+ * [section] with [song]'s own backgrounds filled in, so the presenter can draw them.
+ *
+ * Only where the section has none of its own. A section can carry a background written into the
+ * lyrics beside it, and that is the more specific of the two — it exists precisely to say "not the
+ * one the rest of this song uses". This used to overwrite it, which made the section field pure
+ * transport for the song's value and left a per-section background impossible to express.
+ */
+fun LyricSection.withBackgroundsOf(song: SongItem): LyricSection = copy(
+    background = if (background.isCustom) background else song.background,
+    lowerThirdBackground = if (lowerThirdBackground.isCustom) lowerThirdBackground else song.lowerThirdBackground,
+)
