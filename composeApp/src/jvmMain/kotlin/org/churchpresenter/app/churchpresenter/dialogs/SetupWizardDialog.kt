@@ -50,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
@@ -169,6 +170,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val STEP_BIBLE = 3
@@ -836,7 +838,16 @@ internal fun VlcStep(
     osName: String = System.getProperty("os.name", "").lowercase(),
     arch: String = System.getProperty("os.arch", "").lowercase(),
     onRecheck: suspend () -> VlcCheckResult = { vlcCheckResultFromRecheck() },
-    onOpenDownloadPage: (String) -> Unit = { UrlOpener.open(it) }
+    onOpenDownloadPage: (String) -> Unit = { UrlOpener.open(it) },
+    /**
+     * How the download address is copied.
+     *
+     * The wizard is where a machine whose browser cannot be reached is most likely to be met — and
+     * where it opens is the operating system's choice, not the app's, so on a two-screen setup the
+     * page can land on the projection output. A parameter for the same reason
+     * [onOpenDownloadPage] is one: a test observes the copy rather than taking the real clipboard.
+     */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
     val isMac = remember { "mac" in osName || "darwin" in osName }
     val isWin = remember { "win" in osName }
@@ -959,6 +970,7 @@ internal fun VlcStep(
                             ) {
                                 Text(stringResource(Res.string.setup_step5_recheck))
                             }
+                            CopyLinkIconButton(url = downloadUrl, onCopy = copyText)
                         }
                     }
                 }

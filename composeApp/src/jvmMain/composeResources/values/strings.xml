@@ -654,6 +654,7 @@
     <string name="tooltip_redo">Redo (%1$s)</string>
     <string name="tooltip_undo_unbound">Undo</string>
     <string name="tooltip_redo_unbound">Redo</string>
+    <string name="tooltip_copy_link">Copy link</string>
     <string name="tooltip_note">Note</string>
     <string name="tooltip_note_done">Save note</string>
     <string name="tooltip_note_clear">Clear note</string>

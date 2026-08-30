@@ -9,21 +9,15 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
-import java.awt.Desktop
 import java.io.File
-import java.net.URI
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -47,6 +41,7 @@ class UpdateAvailableContentTest {
         var downloads = 0
         var installed: File? = null
         var openedPage: String? = null
+        var copiedLink: String? = null
         var dismissed = 0
         var prereleases: Boolean? = null
         var interval: UpdateCheckInterval? = null
@@ -91,6 +86,7 @@ class UpdateAvailableContentTest {
                         onInstall = { actions.installed = it },
                         onOpenReleasePage = { actions.openedPage = it },
                         onDismiss = { actions.dismissed++ },
+                        copyText = { actions.copiedLink = it },
                     )
                 }
             }
@@ -100,26 +96,6 @@ class UpdateAvailableContentTest {
 
     private fun ComposeUiTest.shows(text: String): Boolean =
         onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-
-    @AfterTest
-    fun cleanUp() {
-        unmockkStatic(Desktop::class)
-    }
-
-    /** Makes `Desktop.getDesktop()` resolve to a fake that records what it was asked to browse. */
-    private fun stubDesktop(): () -> URI? {
-        var browsed: URI? = null
-        val fakeDesktop = mockk<Desktop>()
-        every { fakeDesktop.browse(any()) } answers { browsed = firstArg(); Unit }
-        mockkStatic(Desktop::class)
-        every { Desktop.getDesktop() } returns fakeDesktop
-        // UrlOpener asks whether AWT can browse before asking it to, because on a desktop that
-        // says no it throws instead — so a stub that only answers getDesktop() sends the click
-        // down the shell fallback and this test would see nothing browsed.
-        every { Desktop.isDesktopSupported() } returns true
-        every { fakeDesktop.isSupported(Desktop.Action.BROWSE) } returns true
-        return { browsed }
-    }
 
     // ── An update is available ──────────────────────────────────────────────────
 
@@ -231,25 +207,50 @@ class UpdateAvailableContentTest {
 
     @Test
     fun `up to date View on GitHub browses to the releases page and dismisses`() {
-        val browsed = stubDesktop()
         updateDialog(UpdateCheckResult.UpToDate) { actions ->
             onNodeWithText("View on GitHub").performClick()
             waitForIdle()
 
-            assertEquals(URI(UpdateChecker.RELEASES_URL), browsed())
+            assertEquals(UpdateChecker.RELEASES_URL, actions.openedPage)
             assertEquals(1, actions.dismissed)
         }
     }
 
+    /**
+     * The browser opens on whichever display the operating system picks — on a two-screen setup,
+     * regularly the projection output. The copy button is how the address is reached instead, and
+     * unlike the button beside it, it leaves the dialog open.
+     */
+    @Test
+    fun `up to date Copy link copies the releases page without browsing or dismissing`() {
+        updateDialog(UpdateCheckResult.UpToDate) { actions ->
+            onNodeWithContentDescription("Copy link").performClick()
+            waitForIdle()
+
+            assertEquals(UpdateChecker.RELEASES_URL, actions.copiedLink)
+            assertNull(actions.openedPage, "copying must not also launch a browser")
+            assertEquals(0, actions.dismissed, "the dialog stays up so the address can be used")
+        }
+    }
+
+    @Test
+    fun `a failed download offers the release address to copy as well as to open`() =
+        updateDialog(downloadState = DownloadState.Error("Connection reset")) { actions ->
+            onNodeWithContentDescription("Copy link").performClick()
+            waitForIdle()
+
+            assertEquals("https://example.invalid/releases/2.5.0", actions.copiedLink)
+            assertNull(actions.openedPage)
+        }
+
     @Test
     fun `up to date OK just dismisses without browsing anywhere`() {
-        val browsed = stubDesktop()
         updateDialog(UpdateCheckResult.UpToDate) { actions ->
             onNodeWithText("OK").performClick()
             waitForIdle()
 
             assertEquals(1, actions.dismissed)
-            assertNull(browsed(), "OK must not open a browser")
+            assertNull(actions.openedPage, "OK must not open a browser")
         }
     }
 

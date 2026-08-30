@@ -37,6 +37,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class StockMediaBrowserContentTest {
@@ -92,6 +93,8 @@ class StockMediaBrowserContentTest {
         // Defaulted to a no-op, never to the real opener: a click that reached UrlOpener would
         // launch the machine's browser, which the headless JVM does not prevent.
         openUrl: (String) -> Unit = {},
+        // Same reason as openUrl: a real copy would take the developer's own clipboard.
+        copyText: (String) -> Unit = {},
         block: ComposeUiTest.(dismissed: () -> Int, downloaded: () -> String?) -> Unit,
     ) {
         var dismissed = 0
@@ -111,6 +114,7 @@ class StockMediaBrowserContentTest {
                     ) }
                     StockMediaBrowserDialogContent(
                         openUrl = openUrl,
+                        copyText = copyText,
                         titleRes = Res.string.stock_photo_browse_photos_title,
                         searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
                         pexelsViewModel = pexelsVm,
@@ -441,6 +445,27 @@ class StockMediaBrowserContentTest {
         }
 
         assertEquals("https://pixabay.com/api/docs/", opened)
+    }
+
+    /**
+     * The copy button beside the link is for a browser that opens on the wrong display — which
+     * screen it lands on is the operating system's choice, and on a two-screen setup that is
+     * regularly the projection output. It carries the tab's own signup address, and opens nothing.
+     */
+    @Test
+    fun `Copy link copies the signup page of whichever tab is showing`() {
+        var opened: String? = null
+        var copied: String? = null
+        dialog(openUrl = { opened = it }, copyText = { copied = it }) { _, _ ->
+            onNodeWithContentDescription("Copy link").performClick()
+            assertEquals("https://www.pexels.com/api/", copied)
+
+            onNodeWithText("Pixabay").performClick()
+            onNodeWithContentDescription("Copy link").performClick()
+        }
+
+        assertEquals("https://pixabay.com/api/docs/", copied)
+        assertNull(opened, "copying must not also launch a browser")
     }
 
     // "Clicking with no desktop available does not crash" used to live here. It exercised

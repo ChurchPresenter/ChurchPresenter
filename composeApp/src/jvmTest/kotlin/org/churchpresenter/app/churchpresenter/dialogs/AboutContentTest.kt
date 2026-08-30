@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -17,7 +18,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.ThemeMode
 import java.awt.Desktop
 import java.io.File
-import java.net.URI
 import java.nio.file.Files
 import javax.swing.JOptionPane
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -25,6 +25,7 @@ import kotlin.io.path.Path
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import java.nio.file.Path as NioPath
 
@@ -35,11 +36,24 @@ class AboutContentTest {
         unmockkAll()
     }
 
-    private fun dialog(block: ComposeUiTest.(dismissed: () -> Int) -> Unit) {
+    private fun dialog(
+        // Both defaulted to a no-op, never to the real implementations: a click that reached
+        // UrlOpener would launch the machine's browser, and one that reached SystemClipboard would
+        // take the developer's own clipboard. Neither is stopped by the headless JVM.
+        openUrl: (String) -> Unit = {},
+        copyText: (String) -> Unit = {},
+        block: ComposeUiTest.(dismissed: () -> Int) -> Unit,
+    ) {
         var dismissed = 0
         runComposeUiTest {
             setContent {
-                AboutDialogContent(onDismiss = { dismissed++ }, appSettings = AppSettings(), theme = ThemeMode.LIGHT)
+                AboutDialogContent(
+                    onDismiss = { dismissed++ },
+                    appSettings = AppSettings(),
+                    theme = ThemeMode.LIGHT,
+                    openUrl = openUrl,
+                    copyText = copyText,
+                )
             }
             block { dismissed }
         }
@@ -67,47 +81,55 @@ class AboutContentTest {
 
     // ── Standing in for Desktop.getDesktop() ────────────────────────────────────
 
-    private var browsedUri: URI? = null
     private var openedFile: File? = null
 
-    /** Makes `Desktop.getDesktop()` resolve to a fake that records what it was asked to do. */
+    /**
+     * Makes `Desktop.getDesktop()` resolve to a fake that records the folder it was asked to open.
+     *
+     * Only `open` is stubbed: the two link buttons take their action as a parameter now, so nothing
+     * in this dialog reaches `browse` any more.
+     */
     private fun stubDesktop() {
-        browsedUri = null
         openedFile = null
         val fakeDesktop = mockk<Desktop>()
-        every { fakeDesktop.browse(any()) } answers { browsedUri = firstArg(); Unit }
         every { fakeDesktop.open(any()) } answers { openedFile = firstArg(); Unit }
         mockkStatic(Desktop::class)
         every { Desktop.getDesktop() } returns fakeDesktop
-        // UrlOpener asks whether AWT can browse before asking it to, because on a desktop that
-        // says no it throws instead — so a stub that only answers getDesktop() sends the click
-        // down the shell fallback and this test would see nothing browsed.
-        every { Desktop.isDesktopSupported() } returns true
-        every { fakeDesktop.isSupported(Desktop.Action.BROWSE) } returns true
     }
 
     @Test
     fun `clicking Report a Bug opens the GitHub bug report template`() {
-        stubDesktop()
-        dialog {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) {
             onNodeWithText("Report a Bug").performClick()
         }
-        assertEquals(
-            "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md",
-            browsedUri.toString(),
-        )
+        assertEquals(BUG_REPORT_URL, opened)
     }
 
     @Test
     fun `clicking Feature Request opens the GitHub feature request template`() {
-        stubDesktop()
-        dialog {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) {
             onNodeWithText("Feature Request").performClick()
         }
-        assertEquals(
-            "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md",
-            browsedUri.toString(),
-        )
+        assertEquals(FEATURE_REQUEST_URL, opened)
+    }
+
+    /**
+     * Each issue link carries a copy button because the browser opens on whichever display the
+     * operating system picks — on a two-screen setup, regularly the projection output. There are
+     * two of them, in the order the buttons appear.
+     */
+    @Test
+    fun `each issue template can be copied instead of opened`() {
+        val copied = mutableListOf<String>()
+        var opened: String? = null
+        dialog(openUrl = { opened = it }, copyText = { copied += it }) {
+            onAllNodesWithContentDescription("Copy link")[0].performClick()
+            onAllNodesWithContentDescription("Copy link")[1].performClick()
+        }
+        assertEquals(listOf(BUG_REPORT_URL, FEATURE_REQUEST_URL), copied)
+        assertNull(opened, "copying must not also launch a browser")
     }
 
     @Test

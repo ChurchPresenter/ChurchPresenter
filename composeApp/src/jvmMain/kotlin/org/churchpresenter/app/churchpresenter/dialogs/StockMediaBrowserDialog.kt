@@ -94,6 +94,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.StockSearchError
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val HALF_WIDTH = 0.5f
@@ -193,7 +195,9 @@ internal fun StockMediaBrowserDialogContent(
      * when AWT declines, which a headless test JVM does not stop -- clicking the link under test
      * really did open pexels.com on macOS.
      */
-    openUrl: (String) -> Unit = { UrlOpener.open(it) }
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    /** How the signup address is copied, for the same reason [openUrl] is a parameter. */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
@@ -230,6 +234,7 @@ internal fun StockMediaBrowserDialogContent(
                             signupUrl = "https://www.pexels.com/api/",
                             searchPlaceholder = stringResource(searchPlaceholderRes),
                             openUrl = openUrl,
+                            copyText = copyText,
                             onMediaDownloaded = onDownloadedAndClose
                         )
                     } else {
@@ -242,6 +247,7 @@ internal fun StockMediaBrowserDialogContent(
                             signupUrl = "https://pixabay.com/api/docs/",
                             searchPlaceholder = stringResource(searchPlaceholderRes),
                             openUrl = openUrl,
+                            copyText = copyText,
                             onMediaDownloaded = onDownloadedAndClose
                         )
                     }
@@ -269,6 +275,7 @@ private fun StockSourcePane(
     signupUrl: String,
     searchPlaceholder: String,
     openUrl: (String) -> Unit,
+    copyText: (String) -> Unit,
     onMediaDownloaded: (filePath: String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -279,6 +286,7 @@ private fun StockSourcePane(
             onValueChange = onApiKeyChange,
             signupUrl = signupUrl,
             openUrl = openUrl,
+            copyText = copyText,
         )
         Spacer(Modifier.height(12.dp))
 
@@ -470,6 +478,7 @@ private fun ApiKeyField(
     onValueChange: (String) -> Unit,
     signupUrl: String,
     openUrl: (String) -> Unit,
+    copyText: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showKey by remember { mutableStateOf(false) }
@@ -517,5 +526,8 @@ private fun ApiKeyField(
                 Text(getKeyStr, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }
+        // The browser opens on whichever display the OS picks, which on a two-screen setup can be
+        // the live output -- so the address is also reachable without it.
+        CopyLinkIconButton(url = signupUrl, onCopy = copyText)
     }
 }

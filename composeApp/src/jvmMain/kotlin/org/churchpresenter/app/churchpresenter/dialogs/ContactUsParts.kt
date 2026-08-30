@@ -25,6 +25,8 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.contact_open_browser
 import churchpresenter.composeapp.generated.resources.contact_send
 import churchpresenter.composeapp.generated.resources.contact_sending
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -51,6 +53,7 @@ internal fun ContactUsStatus(status: SendStatus, sentText: String) {
 internal fun ContactUsActions(
     canSend: Boolean,
     onOpenInBrowser: () -> Unit,
+    onCopyLink: (String) -> Unit,
     onDismiss: () -> Unit,
     onSend: () -> Unit,
 ) {
@@ -59,6 +62,9 @@ internal fun ContactUsActions(
         TextButton(shape = RoundedCornerShape(6.dp), onClick = onOpenInBrowser) {
             Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)
         }
+        // And a way out when that browser opens where the operator cannot reach it: the operating
+        // system picks the display, which on a two-screen setup is regularly the live output.
+        CopyLinkIconButton(url = ContactReporter.WEB_CONTACT_URL, onCopy = onCopyLink)
 
         Spacer(modifier = Modifier.weight(1f))
 

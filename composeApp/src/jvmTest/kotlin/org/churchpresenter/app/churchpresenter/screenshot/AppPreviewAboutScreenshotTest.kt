@@ -8,8 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.dialogs.ABOUT_DIALOG_HEIGHT
+import org.churchpresenter.app.churchpresenter.dialogs.ABOUT_DIALOG_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialogContent
 import java.io.File
 import kotlin.test.Test
@@ -22,9 +23,15 @@ class AppPreviewAboutScreenshotTest {
         TestSingletons.latchToTestHome()
         val appSettings = library()
         THEMES.forEach { (suffix, mode) ->
-            runSkikoComposeUiTest(size = Size(420f, 490f), density = Density(1f)) {
+            // The real window's own size, not a copy of it: the literals here said 420x490 long
+            // after ABOUT_DIALOG_HEIGHT went to 560, so the image cropped the OK button off a
+            // dialog that has room for it and made a fitting layout look broken.
+            runSkikoComposeUiTest(
+                size = Size(ABOUT_DIALOG_WIDTH.value, ABOUT_DIALOG_HEIGHT.value),
+                density = Density(1f),
+            ) {
                 setContent {
-                    Box(Modifier.size(420.dp, 490.dp)) {
+                    Box(Modifier.size(ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT)) {
                         AboutDialogContent(
                             onDismiss = {},
                             appSettings = appSettings,
