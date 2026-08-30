@@ -84,7 +84,9 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 /**
@@ -361,7 +363,9 @@ internal fun UpdateAvailableContent(
     onDownload: () -> Unit,
     onInstall: (File) -> Unit,
     onOpenReleasePage: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** How the release address is copied, for when the browser opens somewhere unhelpful. */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
     val updateInfo = (result as? UpdateCheckResult.Available)?.info
 
@@ -560,6 +564,7 @@ internal fun UpdateAvailableContent(
                             ) {
                                 Text(stringResource(Res.string.update_dialog_open_page))
                             }
+                            CopyLinkIconButton(url = updateInfo.releaseUrl, onCopy = copyText)
                         }
                         else -> {
                             Button(shape = RoundedCornerShape(6.dp), onClick = onDownload) {
@@ -577,12 +582,13 @@ internal fun UpdateAvailableContent(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
-                            UrlOpener.open(UpdateChecker.RELEASES_URL)
+                            onOpenReleasePage(UpdateChecker.RELEASES_URL)
                             onDismiss()
                         }
                     ) {
                         Text(stringResource(Res.string.update_dialog_view_on_github))
                     }
+                    CopyLinkIconButton(url = UpdateChecker.RELEASES_URL, onCopy = copyText)
                     Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.ok))
                     }

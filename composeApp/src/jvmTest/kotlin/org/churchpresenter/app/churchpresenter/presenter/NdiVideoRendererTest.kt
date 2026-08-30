@@ -27,8 +27,11 @@ private const val H = 4
 private const val POLL_MS = 2L
 private const val WAIT_MS = 4_000L
 
-/** Enough frames at the 60fps the tests build to cross several one-second poll ticks. */
-private const val FRAMES_OVER_SEVERAL_SECONDS = 200
+/** Enough polls at [NdiVideoRenderer.RECEIVER_POLL_MS] apart to cross several seconds. */
+private const val POLLS_OVER_SEVERAL_SECONDS = 20
+
+/** Idle ticks to watch go by before believing a parked renderer is really sending nothing. */
+private const val PARKED_POLLS = 2
 
 /**
  * The NDI output's app-side renderer: what reaches the wire, and when it does not.
@@ -58,12 +61,19 @@ class NdiVideoRendererTest {
         }
     }
 
+    /**
+     * [receivers] defaults to one because the interesting case for almost every test here is an
+     * output someone is actually watching — with nobody watching, the renderer parks and the wire
+     * stays empty, which is its own handful of tests below.
+     */
     private fun renderer(
         lib: FakeNdiLibrary,
         mode: NdiOutputMode = NdiOutputMode.ALPHA,
         enabled: Boolean = true,
+        receivers: Int = 1,
         onReceiverSeen: () -> Unit = {},
     ): Pair<NdiVideoRenderer, NdiSender> {
+        lib.connections = receivers
         val sender = NdiSender(lib, OUTPUT_NAME, mode, fps = 60)
         val assignment = mutableStateOf(ScreenAssignment(ndiEnabled = enabled))
         val context = OffscreenOutputContext(
@@ -182,17 +192,19 @@ class NdiVideoRendererTest {
 
     @Test
     fun `nothing is rendered unless the output is on and the sender is open`() {
-        assertTrue(NdiVideoRenderer.shouldSend(enabled = true, senderOpen = true))
-        assertFalse(NdiVideoRenderer.shouldSend(enabled = false, senderOpen = true))
-        assertFalse(NdiVideoRenderer.shouldSend(enabled = true, senderOpen = false))
-        assertFalse(NdiVideoRenderer.shouldSend(enabled = false, senderOpen = false))
+        assertTrue(NdiVideoRenderer.shouldSend(enabled = true, senderOpen = true, receivers = 1))
+        assertFalse(NdiVideoRenderer.shouldSend(enabled = false, senderOpen = true, receivers = 1))
+        assertFalse(NdiVideoRenderer.shouldSend(enabled = true, senderOpen = false, receivers = 1))
+        assertFalse(NdiVideoRenderer.shouldSend(enabled = false, senderOpen = false, receivers = 1))
+
+        // The addition: rendering 1080p30 for nobody is the whole cost this gate exists to remove.
+        assertFalse(NdiVideoRenderer.shouldSend(enabled = true, senderOpen = true, receivers = 0))
     }
 
     @Test
     fun `the receiver count comes from the sender`() {
         val lib = FakeNdiLibrary()
-        lib.connections = 2
-        val (r, _) = renderer(lib)
+        val (r, _) = renderer(lib, receivers = 2)
         assertEquals(0, r.connectionCount(), "nothing is watching a source that is not on the network")
         r.start(scope)
         assertEquals(2, r.connectionCount())
@@ -232,61 +244,97 @@ class NdiVideoRendererTest {
     // ── Noticing that someone is actually watching ──────────────────────────────
 
     @Test
-    fun `isReceiverPollTick asks once per second and then stops`() {
-        // The first frame asks, the rest of that second does not: an unwatched source would
-        // otherwise make a native call on every one of its 60 frames, for ever.
-        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 0, fps = 60, alreadySeen = false))
-        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 1, fps = 60, alreadySeen = false))
-        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 59, fps = 60, alreadySeen = false))
-        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 60, fps = 60, alreadySeen = false))
+    fun `the runtime is asked at most once per poll interval`() {
+        // Without the interval this is a native call on every frame of an unwatched source, for
+        // ever — and the pump asks on every tick now that the answer decides whether to render.
+        val lib = FakeNdiLibrary()
+        val (r, sender) = renderer(lib, receivers = 0)
+        sender.open()
+        val before = lib.connectionQueries
 
-        // Once the answer is known there is nothing left to ask.
-        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 0, fps = 60, alreadySeen = true))
-        assertFalse(NdiVideoRenderer.isReceiverPollTick(frame = 120, fps = 60, alreadySeen = true))
+        r.refreshReceivers(nowMs = 1_000)
+        r.refreshReceivers(nowMs = 1_000 + NdiVideoRenderer.RECEIVER_POLL_MS - 1)
+        assertEquals(1, lib.connectionQueries - before, "the second ask is inside the interval")
 
-        // A renderer built with no cadence polls every frame rather than dividing by zero.
-        assertTrue(NdiVideoRenderer.isReceiverPollTick(frame = 7, fps = 0, alreadySeen = false))
+        r.refreshReceivers(nowMs = 1_000 + NdiVideoRenderer.RECEIVER_POLL_MS)
+        assertEquals(2, lib.connectionQueries - before)
+    }
+
+    @Test
+    fun `the count between polls is the one already known`() {
+        val lib = FakeNdiLibrary()
+        val (r, sender) = renderer(lib, receivers = 2)
+        sender.open()
+
+        assertEquals(2, r.refreshReceivers(nowMs = 0))
+
+        // A receiver leaving mid-interval is not noticed until the interval is up, which is the
+        // point: the answer is worth a native call five times a second, not sixty.
+        lib.connections = 0
+        assertEquals(2, r.refreshReceivers(nowMs = NdiVideoRenderer.RECEIVER_POLL_MS - 1))
+        assertEquals(0, r.refreshReceivers(nowMs = NdiVideoRenderer.RECEIVER_POLL_MS))
     }
 
     @Test
     fun `a source nobody is watching reports no usage`() {
-        val lib = FakeNdiLibrary().apply { connections = 0 }
+        val lib = FakeNdiLibrary()
         var seen = 0
-        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        val (r, sender) = renderer(lib, receivers = 0, onReceiverSeen = { seen++ })
         sender.open()
 
-        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+        repeat(POLLS_OVER_SEVERAL_SECONDS) { r.refreshReceivers(nowMs = it * NdiVideoRenderer.RECEIVER_POLL_MS) }
 
         // NDI keeps announcing an unwatched source, so "the output is on" must not count as usage.
         assertEquals(0, seen)
     }
 
     @Test
-    fun `a receiver tuning in is reported once, not once per frame`() {
-        val lib = FakeNdiLibrary().apply { connections = 2 }
+    fun `a receiver tuning in is reported once, not once per poll`() {
+        val lib = FakeNdiLibrary()
         var seen = 0
-        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        val (r, sender) = renderer(lib, receivers = 2, onReceiverSeen = { seen++ })
         sender.open()
 
-        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+        repeat(POLLS_OVER_SEVERAL_SECONDS) { r.refreshReceivers(nowMs = it * NdiVideoRenderer.RECEIVER_POLL_MS) }
 
-        // Two receivers over several seconds of frames is still one service with NDI in use.
+        // Two receivers over several seconds is still one service with NDI in use.
         assertEquals(1, seen)
     }
 
     @Test
     fun `a receiver that arrives mid-service is still noticed`() {
-        val lib = FakeNdiLibrary().apply { connections = 0 }
+        val lib = FakeNdiLibrary()
         var seen = 0
-        val (r, sender) = renderer(lib, onReceiverSeen = { seen++ })
+        val (r, sender) = renderer(lib, receivers = 0, onReceiverSeen = { seen++ })
         sender.open()
-        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+        var now = 0L
+        repeat(POLLS_OVER_SEVERAL_SECONDS) { r.refreshReceivers(nowMs = now); now += NdiVideoRenderer.RECEIVER_POLL_MS }
         assertEquals(0, seen)
 
         // The OBS operator opens the source ten minutes in, which is the normal case.
         lib.connections = 1
-        repeat(FRAMES_OVER_SEVERAL_SECONDS) { r.observeReceivers() }
+        repeat(POLLS_OVER_SEVERAL_SECONDS) { r.refreshReceivers(nowMs = now); now += NdiVideoRenderer.RECEIVER_POLL_MS }
 
         assertEquals(1, seen)
+    }
+
+    @Test
+    fun `an output nobody is watching puts nothing on the wire`() {
+        // The regression this gate exists for: a reported machine rendered 1080p30 for a whole
+        // service with its NDI accept thread never once waking up.
+        val lib = FakeNdiLibrary()
+        val (r, sender) = renderer(lib, receivers = 0)
+        r.start(scope)
+        waitFor("the sender to be open") { sender.isOpen }
+
+        // The positive signal is the pump asking again — each ask is one idle tick on which it
+        // looked and decided not to render. An ungated renderer would have sent 60fps by now.
+        waitFor("the pump to reach its decision several times") { lib.connectionQueries >= PARKED_POLLS }
+        assertTrue(lib.sent.isEmpty(), "nobody is watching, so there is nothing to render")
+
+        // And it wakes when someone tunes in.
+        lib.connections = 1
+        waitFor("a frame once a receiver arrives") { lib.sent.isNotEmpty() }
+        r.stop()
     }
 }

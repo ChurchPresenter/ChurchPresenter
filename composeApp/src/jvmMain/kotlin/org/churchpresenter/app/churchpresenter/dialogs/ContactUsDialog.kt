@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,20 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -43,16 +38,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.contact_email_label
 import churchpresenter.composeapp.generated.resources.contact_error
 import churchpresenter.composeapp.generated.resources.contact_message_label
 import churchpresenter.composeapp.generated.resources.contact_name_label
 import churchpresenter.composeapp.generated.resources.contact_network_error
-import churchpresenter.composeapp.generated.resources.contact_open_browser
 import churchpresenter.composeapp.generated.resources.contact_rate_limited_browser
-import churchpresenter.composeapp.generated.resources.contact_send
-import churchpresenter.composeapp.generated.resources.contact_sending
 import churchpresenter.composeapp.generated.resources.contact_sent
 import churchpresenter.composeapp.generated.resources.contact_type_bug
 import churchpresenter.composeapp.generated.resources.contact_type_feature
@@ -67,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val SENT_CONFIRMATION_MS = 1500L
@@ -218,6 +210,11 @@ internal fun ContactUsDialogContent(
     status: SendStatus,
     onSend: () -> Unit,
     sentText: String,
+    // A parameter so a test can watch it rather than launch the machine's browser -- UrlOpener
+    // falls back to the OS's own open command, which a headless test JVM does not stop.
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    // Same reason as openUrl: a test watches the copy instead of taking the real clipboard.
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -308,60 +305,23 @@ internal fun ContactUsDialogContent(
                     }
                 }
 
-                // Status — kept outside the scrolling field area above so it is always
-                // visible (an error sentence can wrap to two lines and must never clip).
-                when (val s = status) {
-                    is SendStatus.Sending -> StatusLine(
-                        stringResource(Res.string.contact_sending),
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    is SendStatus.Sent -> StatusLine(sentText, MaterialTheme.colorScheme.primary)
-                    is SendStatus.Error -> StatusLine(s.message, MaterialTheme.colorScheme.error)
-                    SendStatus.Idle -> {}
-                }
+                ContactUsStatus(status, sentText)
 
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Always available: fall back to the full web contact form in a browser.
-                    TextButton(
-                        shape = RoundedCornerShape(6.dp),
-                        onClick = {
-                            runCatching {
-                                UrlOpener.open(ContactReporter.WEB_CONTACT_URL)
-                            }
-                        }
-                    ) {
-                        Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
-                        Text(stringResource(Res.string.cancel), style = MaterialTheme.typography.labelLarge)
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(
-                        shape = RoundedCornerShape(6.dp),
-                        enabled = name.isNotBlank() && message.isNotBlank() && status != SendStatus.Sending,
-                        onClick = onSend,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(stringResource(Res.string.contact_send), style = MaterialTheme.typography.labelLarge)
-                    }
-                }
+                ContactUsActions(
+                    canSend = name.isNotBlank() && message.isNotBlank() && status != SendStatus.Sending,
+                    onOpenInBrowser = { runCatching { openUrl(ContactReporter.WEB_CONTACT_URL) } },
+                    onCopyLink = copyText,
+                    onDismiss = onDismiss,
+                    onSend = onSend,
+                )
             }
         }
     }
+
 
 @Composable
 private fun FieldLabel(text: String) {
@@ -395,12 +355,3 @@ private fun TypePill(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun StatusLine(text: String, color: Color) {
-    Text(
-        text = text,
-        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-        style = MaterialTheme.typography.bodySmall,
-        color = color
-    )
-}

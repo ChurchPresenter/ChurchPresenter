@@ -58,7 +58,6 @@ import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
 import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
 import churchpresenter.composeapp.generated.resources.song_chunk
-import churchpresenter.composeapp.generated.resources.song_preview_chords
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead
@@ -143,7 +142,6 @@ fun SongSettingsTab(
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
     var showLookAhead by remember { mutableStateOf(false) }
-    var showChords by remember { mutableStateOf(false) }
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
@@ -189,8 +187,6 @@ fun SongSettingsTab(
                     onElementChange = { element = it },
                     showLookAhead = showLookAhead,
                     onShowLookAheadChange = { showLookAhead = it },
-                    showChords = showChords,
-                    onShowChordsChange = { showChords = it },
                     availableFonts = availableFonts,
                     presenterManager = presenterManager,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -472,8 +468,6 @@ private fun SongStylePane(
     onElementChange: (SongStyleElement) -> Unit,
     showLookAhead: Boolean,
     onShowLookAheadChange: (Boolean) -> Unit,
-    showChords: Boolean,
-    onShowChordsChange: (Boolean) -> Unit,
     availableFonts: List<String>,
     presenterManager: PresenterManager?,
     modifier: Modifier = Modifier,
@@ -498,7 +492,8 @@ private fun SongStylePane(
         outputs = PreviewOutputState(
             lowerThird = target.isLowerThird,
             songLookAhead = previewLookAhead,
-            showChords = showChords,
+            // No chart: only a stage monitor draws one, and this preview is a projection output.
+            showChords = false,
         ),
         contentKey = sampleSections,
     ) { manager ->
@@ -517,15 +512,13 @@ private fun SongStylePane(
             showLookAhead = previewLookAhead,
             onShowLookAheadChange = onShowLookAheadChange,
             lookAheadForced = previewLookAhead && !showLookAhead,
-            showChords = showChords,
-            onShowChordsChange = onShowChordsChange,
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             SongPreviewPanel(
                 settings = settings,
                 target = target,
                 showLookAhead = previewLookAhead,
-                showChords = showChords,
+                showChords = false,
                 sections = sampleSections,
                 modifier = Modifier.width(
                     minOf(
@@ -591,8 +584,6 @@ private fun SongTargetSwitchRow(
     onShowLookAheadChange: (Boolean) -> Unit,
     /** On because the selected element needs it, so the box is shown ticked and left alone. */
     lookAheadForced: Boolean,
-    showChords: Boolean,
-    onShowChordsChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -622,17 +613,6 @@ private fun SongTargetSwitchRow(
             onCheckedChange = onShowLookAheadChange,
             enabled = !lookAheadForced,
             label = stringResource(Res.string.song_preview_look_ahead),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        // Also for the picture only. An output draws a chorded song as a chart when its own
-        // `showChords` says so (`ScreenAssignment.showChords`), which is a property of the screen
-        // rather than of this styling -- but the chords take the lyrics' font, size and margins, so
-        // whether a chart still fits is a question about the settings on this tab, and until now
-        // there was no way to ask it.
-        LabeledCheckbox(
-            checked = showChords,
-            onCheckedChange = onShowChordsChange,
-            label = stringResource(Res.string.song_preview_chords),
             style = MaterialTheme.typography.bodySmall,
         )
         Spacer(Modifier.weight(1f))

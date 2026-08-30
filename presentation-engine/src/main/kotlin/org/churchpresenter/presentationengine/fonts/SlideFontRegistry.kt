@@ -213,8 +213,15 @@ object SlideFontRegistry {
      * POI builds its AWT font. Everything else defers to POI's default behavior.
      */
     private class SubstitutingFontManager : DrawFontManagerDefault() {
-        override fun getMappedFont(graphics: Graphics2D, fontInfo: FontInfo): FontInfo {
-            val mapped = super.getMappedFont(graphics, fontInfo)
+        /**
+         * [fontInfo] is nullable on purpose: POI's own callers hand this handler a null for a run
+         * that names no font of its own, and the Kotlin non-null check on the parameter then threw
+         * before a single line of this method ran — taking the whole slide render down rather than
+         * falling back. A run with no font asked for nothing in particular, so it gets
+         * [DEFAULT_FAMILY] and goes through the same substitution path as everything else.
+         */
+        override fun getMappedFont(graphics: Graphics2D, fontInfo: FontInfo?): FontInfo {
+            val mapped = super.getMappedFont(graphics, fontInfo ?: FontInfo { DEFAULT_FAMILY })
             val typeface = mapped.typeface ?: return mapped
             if (isFamilyAvailable(typeface)) return mapped
             val substitute = resolveFamily(typeface)

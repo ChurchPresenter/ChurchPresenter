@@ -94,6 +94,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.StockSearchError
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
+import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val HALF_WIDTH = 0.5f
@@ -187,6 +189,15 @@ internal fun StockMediaBrowserDialogContent(
     onSelectedTabChange: (Int) -> Unit,
     onDismiss: () -> Unit,
     onDownloadedAndClose: (String) -> Unit,
+    /**
+     * How the "Get a free key" link is opened. A parameter so a test can watch it instead of
+     * launching the machine's browser: [UrlOpener.open] falls back to the OS's own open command
+     * when AWT declines, which a headless test JVM does not stop -- clicking the link under test
+     * really did open pexels.com on macOS.
+     */
+    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    /** How the signup address is copied, for the same reason [openUrl] is a parameter. */
+    copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
@@ -222,6 +233,8 @@ internal fun StockMediaBrowserDialogContent(
                             sourceLabel = stringResource(Res.string.stock_photo_source_pexels),
                             signupUrl = "https://www.pexels.com/api/",
                             searchPlaceholder = stringResource(searchPlaceholderRes),
+                            openUrl = openUrl,
+                            copyText = copyText,
                             onMediaDownloaded = onDownloadedAndClose
                         )
                     } else {
@@ -233,6 +246,8 @@ internal fun StockMediaBrowserDialogContent(
                             sourceLabel = stringResource(Res.string.stock_photo_source_pixabay),
                             signupUrl = "https://pixabay.com/api/docs/",
                             searchPlaceholder = stringResource(searchPlaceholderRes),
+                            openUrl = openUrl,
+                            copyText = copyText,
                             onMediaDownloaded = onDownloadedAndClose
                         )
                     }
@@ -259,6 +274,8 @@ private fun StockSourcePane(
     sourceLabel: String,
     signupUrl: String,
     searchPlaceholder: String,
+    openUrl: (String) -> Unit,
+    copyText: (String) -> Unit,
     onMediaDownloaded: (filePath: String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -267,7 +284,9 @@ private fun StockSourcePane(
             label = keyLabel,
             value = apiKey,
             onValueChange = onApiKeyChange,
-            signupUrl = signupUrl
+            signupUrl = signupUrl,
+            openUrl = openUrl,
+            copyText = copyText,
         )
         Spacer(Modifier.height(12.dp))
 
@@ -297,27 +316,7 @@ private fun StockSourcePane(
             }
             Spacer(Modifier.height(12.dp))
 
-            viewModel.searchError?.let { error ->
-                Text(
-                    text = stringResource(searchErrorStringRes(error)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-            viewModel.downloadError?.let { error ->
-                val res = if (error == StockDownloadError.NETWORK_ERROR) {
-                    Res.string.stock_photo_download_error_network
-                } else {
-                    Res.string.stock_photo_download_error_generic
-                }
-                Text(
-                    text = stringResource(res),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Spacer(Modifier.height(8.dp))
-            }
+            StockPaneErrors(viewModel)
 
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when {
@@ -368,6 +367,32 @@ private fun StockSourcePane(
                 }
             }
         }
+    }
+}
+
+/** Whatever the last search or download had to say for itself, in the pane's error colour. */
+@Composable
+private fun StockPaneErrors(viewModel: StockMediaViewModel) {
+    viewModel.searchError?.let { error ->
+        Text(
+            text = stringResource(searchErrorStringRes(error)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+    viewModel.downloadError?.let { error ->
+        val res = if (error == StockDownloadError.NETWORK_ERROR) {
+            Res.string.stock_photo_download_error_network
+        } else {
+            Res.string.stock_photo_download_error_generic
+        }
+        Text(
+            text = stringResource(res),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -452,6 +477,8 @@ private fun ApiKeyField(
     value: String,
     onValueChange: (String) -> Unit,
     signupUrl: String,
+    openUrl: (String) -> Unit,
+    copyText: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showKey by remember { mutableStateOf(false) }
@@ -495,9 +522,12 @@ private fun ApiKeyField(
                 }
             }
         ) {
-            TextButton(onClick = { UrlOpener.open(signupUrl) }) {
+            TextButton(onClick = { openUrl(signupUrl) }) {
                 Text(getKeyStr, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }
+        // The browser opens on whichever display the OS picks, which on a two-screen setup can be
+        // the live output -- so the address is also reachable without it.
+        CopyLinkIconButton(url = signupUrl, onCopy = copyText)
     }
 }

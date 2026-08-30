@@ -11,12 +11,18 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,11 +47,17 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.song_background
 import org.churchpresenter.core.models.songs.SongBackground
 import org.jetbrains.compose.resources.stringResource
 
 internal const val SONG_BACKGROUND_BUTTON_TAG = "song_background_button"
+
+/** The panel footer's two buttons. Tagged because the dialog behind the panel has a Save of its own. */
+internal const val SONG_BACKGROUND_SAVE_TAG = "song_background_save"
+internal const val SONG_BACKGROUND_CANCEL_TAG = "song_background_cancel"
 
 /**
  * The chip and its panel together. [expanded] is held by the caller so the editor decides when the
@@ -115,8 +127,25 @@ internal fun SongBackgroundButton(
                 onDismissRequest = { onExpandedChange(false) },
                 properties = PopupProperties(focusable = true),
             ) {
-                val panelHeight = SONG_BACKGROUND_PANEL_HEIGHT +
-                    if (scopes.size > 1) SONG_BACKGROUND_SCOPE_ROW_HEIGHT else 0.dp
+                val panelHeight = songBackgroundPanelHeight(
+                    SONG_BACKGROUND_PANEL_HEIGHT + SONG_BACKGROUND_FOOTER_HEIGHT +
+                        if (scopes.size > 1) SONG_BACKGROUND_SCOPE_ROW_HEIGHT else 0.dp
+                )
+                // What the panel was opened on, so Cancel can put it back.
+                //
+                // The edits themselves stay live rather than being held in a draft: the preview
+                // behind the panel follows them, and "Apply to song book" reads the song's own
+                // values, which a draft would leave a frame behind. Re-captured when the scope
+                // changes, because the two change callbacks are bound by the caller to whichever
+                // scope is selected -- so a revert can only undo the scope being edited, and
+                // moving to another section keeps what was done to the last one.
+                val opened = remember(scopeIndex) { background to lowerThirdBackground }
+                fun revert() {
+                    if (background != opened.first) onBackgroundChange(opened.first)
+                    if (lowerThirdBackground != opened.second) {
+                        onLowerThirdBackgroundChange(opened.second)
+                    }
+                }
                 Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, panelHeight)) {
                     SongBackgroundPanel(
                         background = background,
@@ -125,13 +154,55 @@ internal fun SongBackgroundButton(
                         onLowerThirdBackgroundChange = onLowerThirdBackgroundChange,
                         sampleLine = sampleLine,
                         onApplyToSongbook = onApplyToSongbook,
-                        onDismiss = { onExpandedChange(false) },
+                        // Closing by the X or by clicking away is a cancel, as it is for a quick
+                        // tray tile: Save is the only route that keeps an edit.
+                        onDismiss = { revert(); onExpandedChange(false) },
                         scopes = scopes,
                         scopeIndex = scopeIndex,
                         onScopeChange = onScopeChange,
+                        footer = {
+                            SongBackgroundPanelFooter(
+                                onCancel = { revert(); onExpandedChange(false) },
+                                onSave = { onExpandedChange(false) },
+                            )
+                        },
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Save and Cancel for a song's background panel.
+ *
+ * The same pair the quick tray's tiles carry, and for the same reason: the panel writes into the
+ * song as you go, so without a way to abandon an edit the only route back was cancelling the whole
+ * Edit Song dialog. Save merely closes -- the change is already in the song being edited, and the
+ * song itself is still saved or dropped by the dialog's own buttons.
+ */
+@Composable
+private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onCancel,
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            modifier = Modifier.testTag(SONG_BACKGROUND_CANCEL_TAG),
+        ) {
+            Text(stringResource(Res.string.cancel))
+        }
+        Spacer(Modifier.width(8.dp))
+        Button(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onSave,
+            modifier = Modifier.testTag(SONG_BACKGROUND_SAVE_TAG),
+        ) {
+            Text(stringResource(Res.string.save))
         }
     }
 }

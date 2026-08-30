@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.Density
+import com.sun.jna.Pointer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,11 +15,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.diagnostics.CrashReporter
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorInfo
+import org.jetbrains.skia.ColorSpace
+import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.Data
+import org.jetbrains.skia.Image
+import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.Pixmap
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MIN_FPS = 1
 private const val MAX_FPS = 60
 private const val MILLIS_PER_SECOND = 1000L
+private const val BYTES_PER_PIXEL = 4
 
 /**
  * What [ComposeScenePump] does with a rendered frame: its pixels in row-major ARGB, its dimensions,
@@ -147,6 +156,15 @@ class ComposeScenePump(
     }
 
     private suspend fun runLoop(scene: ImageComposeScene, onFrame: OnFrame) {
+        val frame = FrameBuffer(width, height)
+        try {
+            renderFrames(scene, frame, onFrame)
+        } finally {
+            frame.close()
+        }
+    }
+
+    private suspend fun renderFrames(scene: ImageComposeScene, frame: FrameBuffer, onFrame: OnFrame) {
         var timeNanos = 0L
         val intBuf = IntArray(width * height)
         var parked = false
@@ -167,18 +185,102 @@ class ComposeScenePump(
             timeNanos += frameNanos
             Snapshot.sendApplyNotifications()
             val img = scene.render(timeNanos)
-            try {
-                img.toComposeImageBitmap().readPixels(intBuf)
+            val read = try {
+                frame.readInto(img, intBuf)
             } finally {
                 img.close()
             }
-            onFrame(intBuf, width, height, timeNanos / NANOS_PER_MILLI)
+            // A frame that could not be read back is skipped rather than sent: the buffer still
+            // holds the previous one, and re-sending it would read as live content that has frozen.
+            if (read) {
+                onFrame(intBuf, width, height, timeNanos / NANOS_PER_MILLI)
+            } else {
+                reportUnreadableFrame()
+            }
             delay(tickDelayMs)
         }
+    }
+
+    private var reportedUnreadableFrame = false
+
+    /**
+     * Says once that the frame could not be read back, and then stops saying it.
+     *
+     * The conversion [FrameBuffer] asks for is one every raster image supports, so a refusal is a
+     * standing condition rather than a bad frame — it would repeat at the tick rate and bury
+     * everything else in the report. What the operator sees either way is an output that has gone
+     * dark, and one report is what makes that traceable.
+     */
+    private fun reportUnreadableFrame() {
+        if (reportedUnreadableFrame) return
+        reportedUnreadableFrame = true
+        CrashReporter.reportWarning(
+            "Off-screen output frame could not be read back",
+            tags = mapOf("subsystem" to "offscreen_output"),
+            extras = mapOf("width" to width.toString(), "height" to height.toString()),
+        )
     }
 
     fun stop() {
         job?.cancel()
         job = null
+    }
+}
+
+/**
+ * The one destination a [ComposeScenePump] reads its frames back into: native pixel memory
+ * allocated when the pump starts, and a [Pixmap] describing it.
+ *
+ * Exists because the obvious spelling of this — `img.toComposeImageBitmap().readPixels(intBuf)` —
+ * moves the whole frame four times over. `toComposeImageBitmap` allocates a raster bitmap and
+ * software-blits the image into it; Compose's `readPixels` then allocates a byte array the size of
+ * the frame, converts into it, and copies it twice more (out of JNI, then into the caller's
+ * `IntArray`). At 1080p30 that is ~25 MB of humongous-region garbage and ~33 MB of `memcpy` every
+ * frame, which showed up on an operator's machine as 44% of a core and 15.9 million page faults for
+ * a single NDI output.
+ *
+ * `SkImage::readPixels` into a pre-allocated pixmap does the same conversion once, into memory that
+ * outlives the frame. What is left per frame is that conversion and one copy into [IntArray].
+ *
+ * **Not thread-safe**, and does not need to be: there is one per pump and only the pump's own
+ * coroutine touches it.
+ */
+private class FrameBuffer(width: Int, height: Int) : AutoCloseable {
+
+    /**
+     * BGRA, unpremultiplied, sRGB — the same destination format Compose's own `readPixels` asks
+     * for, so what a renderer receives is unchanged by this class existing.
+     */
+    private val info = ImageInfo(
+        ColorInfo(ColorType.BGRA_8888, ColorAlphaType.UNPREMUL, ColorSpace.sRGB),
+        width,
+        height,
+    )
+
+    private val data = Data.makeUninitialized(width * height * BYTES_PER_PIXEL)
+    private val pixmap = Pixmap.make(info, data, width * BYTES_PER_PIXEL)
+
+    /** The pixels' address, resolved once: reading it is a native call of its own. */
+    private val addr = Pointer(pixmap.addr)
+
+    /**
+     * Converts [image] into this buffer and copies it into [dst] as packed ARGB, or returns false
+     * without touching [dst] if the conversion was refused.
+     *
+     * BGRA bytes read back as native-endian ints are `0xAARRGGBB`, which is the packed ARGB
+     * [OnFrame] is defined in. That identity holds on every platform this app targets and is the
+     * same one Compose's `readPixels` relies on; it would not hold on a big-endian JVM, and there
+     * is no such target here.
+     */
+    fun readInto(image: Image, dst: IntArray): Boolean {
+        if (!image.readPixels(pixmap, 0, 0, false)) return false
+        addr.read(0L, dst, 0, dst.size)
+        return true
+    }
+
+    /** Pixmap first: it describes memory that [data] owns. */
+    override fun close() {
+        pixmap.close()
+        data.close()
     }
 }

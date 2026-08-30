@@ -118,7 +118,7 @@ class ProjectionSettingsTabBrowserSourceTest {
         }) { _ ->
             onNodeWithText("Browser Source 1").assertDoesNotExist()
 
-            onAllNodesWithText("16 of 17 enabled").onLast().performScrollTo().performClick()
+            onAllNodesWithText("15 of 16 enabled").onLast().performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Content Outputs — Stage")
                 .assertExists("the content dialog must name the output the operator named")
@@ -259,7 +259,7 @@ class ProjectionSettingsTabBrowserSourceTest {
     fun `a browser source has its own content outputs`() {
         projectionTab(initial = withOutputs(1)) { get ->
             // Three summary buttons read the same; the browser source's is the last.
-            onAllNodesWithText("16 of 17 enabled").onLast().performScrollTo().performClick()
+            onAllNodesWithText("15 of 16 enabled").onLast().performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Content Outputs — Browser Source 1")
                 .assertExists("the dialog must name the browser source")
@@ -275,7 +275,7 @@ class ProjectionSettingsTabBrowserSourceTest {
 
             onNodeWithText("Done").performClick()
             waitForIdle()
-            onAllNodesWithText("15 of 17 enabled").assertCountEquals(1)
+            onAllNodesWithText("14 of 16 enabled").assertCountEquals(1)
         }
     }
 

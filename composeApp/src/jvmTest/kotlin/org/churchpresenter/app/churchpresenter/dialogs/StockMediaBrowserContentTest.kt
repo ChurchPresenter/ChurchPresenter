@@ -23,26 +23,21 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.stock_photo_browse_photos_title
 import churchpresenter.composeapp.generated.resources.stock_photo_search_placeholder_photo
 import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.CompletableDeferred
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.viewmodel.StockMediaViewModel
-import java.awt.Desktop
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.net.URI
 import javax.imageio.ImageIO
 import javax.swing.SwingUtilities
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class StockMediaBrowserContentTest {
@@ -56,7 +51,6 @@ class StockMediaBrowserContentTest {
     @AfterTest
     fun cleanUp() {
         unmockkObject(StockMediaClient)
-        unmockkStatic(Desktop::class)
     }
 
     private fun settle() = repeat(2) { SwingUtilities.invokeAndWait { } }
@@ -94,23 +88,13 @@ class StockMediaBrowserContentTest {
 
     private val progressSpinner = SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
 
-    /** Makes `Desktop.getDesktop()` resolve to a fake that records what it was asked to browse. */
-    private fun stubDesktop(): () -> URI? {
-        var browsed: URI? = null
-        val fakeDesktop = mockk<Desktop>()
-        every { fakeDesktop.browse(any()) } answers { browsed = firstArg(); Unit }
-        mockkStatic(Desktop::class)
-        every { Desktop.getDesktop() } returns fakeDesktop
-        // UrlOpener asks whether AWT can browse before asking it to, because on a desktop that
-        // says no it throws instead — so a stub that only answers getDesktop() sends the click
-        // down the shell fallback and this test would see nothing browsed.
-        every { Desktop.isDesktopSupported() } returns true
-        every { fakeDesktop.isSupported(Desktop.Action.BROWSE) } returns true
-        return { browsed }
-    }
-
     private fun dialog(
         pexelsApiKey: String = "",
+        // Defaulted to a no-op, never to the real opener: a click that reached UrlOpener would
+        // launch the machine's browser, which the headless JVM does not prevent.
+        openUrl: (String) -> Unit = {},
+        // Same reason as openUrl: a real copy would take the developer's own clipboard.
+        copyText: (String) -> Unit = {},
         block: ComposeUiTest.(dismissed: () -> Int, downloaded: () -> String?) -> Unit,
     ) {
         var dismissed = 0
@@ -129,6 +113,8 @@ class StockMediaBrowserContentTest {
                         StockMediaClient.StockSource.PIXABAY,
                     ) }
                     StockMediaBrowserDialogContent(
+                        openUrl = openUrl,
+                        copyText = copyText,
                         titleRes = Res.string.stock_photo_browse_photos_title,
                         searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
                         pexelsViewModel = pexelsVm,
@@ -440,32 +426,51 @@ class StockMediaBrowserContentTest {
     // ── Get-a-key link ────────────────────────────────────────────────────────────
 
     @Test
-    fun `clicking Get a free key browses to the Pexels signup page`() = dialog { _, _ ->
-        val browsed = stubDesktop()
+    fun `clicking Get a free key browses to the Pexels signup page`() {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) { _, _ ->
+            onNodeWithText("Get a free key →").performClick()
+        }
 
-        onNodeWithText("Get a free key →").performClick()
-
-        assertEquals(URI("https://www.pexels.com/api/"), browsed())
+        assertEquals("https://www.pexels.com/api/", opened)
     }
 
     @Test
-    fun `clicking Get a free key on the Pixabay tab browses to the Pixabay signup page`() = dialog { _, _ ->
-        val browsed = stubDesktop()
-        onNodeWithText("Pixabay").performClick()
+    fun `clicking Get a free key on the Pixabay tab browses to the Pixabay signup page`() {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) { _, _ ->
+            onNodeWithText("Pixabay").performClick()
 
-        onNodeWithText("Get a free key →").performClick()
+            onNodeWithText("Get a free key →").performClick()
+        }
 
-        assertEquals(URI("https://pixabay.com/api/docs/"), browsed())
+        assertEquals("https://pixabay.com/api/docs/", opened)
     }
 
+    /**
+     * The copy button beside the link is for a browser that opens on the wrong display — which
+     * screen it lands on is the operating system's choice, and on a two-screen setup that is
+     * regularly the projection output. It carries the tab's own signup address, and opens nothing.
+     */
     @Test
-    fun `clicking Get a free key without desktop support does not crash`() = dialog { _, _ ->
-        // No stubDesktop() here — the JVM runs headless, so Desktop.getDesktop() throws for real,
-        // exercising the runCatching around it rather than a happy-path browse.
-        onNodeWithText("Get a free key →").performClick()
-        settle()
-        waitForIdle()
+    fun `Copy link copies the signup page of whichever tab is showing`() {
+        var opened: String? = null
+        var copied: String? = null
+        dialog(openUrl = { opened = it }, copyText = { copied = it }) { _, _ ->
+            onNodeWithContentDescription("Copy link").performClick()
+            assertEquals("https://www.pexels.com/api/", copied)
 
-        onNodeWithText("Get a free key →").assertExists()
+            onNodeWithText("Pixabay").performClick()
+            onNodeWithContentDescription("Copy link").performClick()
+        }
+
+        assertEquals("https://pixabay.com/api/docs/", copied)
+        assertNull(opened, "copying must not also launch a browser")
     }
+
+    // "Clicking with no desktop available does not crash" used to live here. It exercised
+    // UrlOpener's own swallowing of an unsupported BROWSE, and did it by clicking the real link
+    // with nothing stubbed -- which on macOS fell through to the shell fallback and opened
+    // pexels.com in the developer's browser on every run. UrlOpenerTest covers that contract
+    // directly, without a composition or a browser.
 }

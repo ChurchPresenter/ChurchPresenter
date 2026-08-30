@@ -3,6 +3,7 @@ package org.churchpresenter.presentationengine
 import org.junit.jupiter.api.Test
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import java.awt.Font
+import java.awt.image.BufferedImage
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -91,6 +92,45 @@ class SlideFontRegistryTest {
                 "$family has a regular cut, so a bold request must not come back empty-handed",
             )
             return
+        }
+    }
+
+    // ── The POI font handler ────────────────────────────────────────────────────
+
+    /**
+     * A run that names no font arrives at the handler as a null [FontInfo]. That used to be fatal:
+     * Kotlin's non-null check on the parameter threw before the method body ran, and the whole
+     * slide render died rather than falling back to a face. Reported from the field against
+     * `In Christus ist mein ganzer Halt.pptx`.
+     */
+    @Test
+    fun `a run with no font of its own is given one instead of throwing`() {
+        val image = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+        val graphics = image.createGraphics()
+        try {
+            val mapped = SlideFontRegistry.drawFontManager.getMappedFont(graphics, null)
+            assertNotNull(mapped, "a null font must be answered with a real one")
+            assertTrue(
+                mapped.typeface?.isNotBlank() == true,
+                "the fallback must name a family, not an empty string",
+            )
+        } finally {
+            graphics.dispose()
+        }
+    }
+
+    @Test
+    fun `a named font still comes back with a usable family`() {
+        val image = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+        val graphics = image.createGraphics()
+        try {
+            val mapped = SlideFontRegistry.drawFontManager.getMappedFont(graphics) { "Calibri" }
+            assertTrue(
+                mapped.typeface?.isNotBlank() == true,
+                "an unavailable family must be substituted, never blanked",
+            )
+        } finally {
+            graphics.dispose()
         }
     }
 }

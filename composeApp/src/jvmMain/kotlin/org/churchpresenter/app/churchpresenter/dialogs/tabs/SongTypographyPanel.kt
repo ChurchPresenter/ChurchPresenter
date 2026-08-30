@@ -183,9 +183,10 @@ private fun SongColorControl(
     style: SongElementStyle,
     onStyleChange: (SongElementStyle) -> Unit,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.color), modifier) {
+) = ControlColumn(stringResource(Res.string.color), modifier, labelInsideControl = true) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
+            label = stringResource(Res.string.color),
             color = style.color,
             onColorChange = { onStyleChange(style.copy(color = it)) },
             modifier = Modifier.width(COLOR_SWATCH_WIDTH),

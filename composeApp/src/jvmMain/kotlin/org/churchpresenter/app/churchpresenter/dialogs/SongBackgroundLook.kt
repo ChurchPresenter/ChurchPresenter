@@ -144,8 +144,9 @@ internal fun SongBackgroundLookColumn(
 private fun SongBackgroundStage(background: SongBackground, sampleLine: String) {
     Box(
         // 16:9 capped in height, which is what the design's `aspect-ratio` plus `max-height` does:
-        // the tile keeps the column's width and stops growing. 92 rather than the design's 110 is
-        // what keeps the Blur track above the footer at the panel's own 424 height.
+        // the tile keeps the column's width and stops growing. 92 rather than the design's 110
+        // buys the column 18dp; the panel's height was raised for the third slider rather than
+        // taken back from here, so the preview keeps the size the sliders were fitted around.
         modifier = Modifier.fillMaxWidth().heightIn(max = STAGE_MAX_HEIGHT)
             .aspectRatio(STAGE_ASPECT, matchHeightConstraintsFirst = true)
             .clip(RoundedCornerShape(8.dp))
