@@ -31,6 +31,22 @@ class SongsTabScreenshotTest {
         ),
     )
 
+    private val splitChorus = listOf(
+        SongFixture(
+            number = "1",
+            title = "Amazing Grace",
+            author = "John Newton",
+            lyrics = listOf(
+                "[Verse 1]",
+                "Amazing grace how sweet the sound",
+                "{Chorus}",
+                "Praise the Lord, praise the Lord",
+                "[---]",
+                "Let the earth hear His voice",
+            ),
+        ),
+    )
+
     private fun shoot(
         name: String,
         songSettings: SongSettings = SongSettings(),
@@ -166,6 +182,15 @@ class SongsTabScreenshotTest {
     @Test
     fun `a song in two languages`() = stackedThemes(SECTION, "song_two_languages") { mode, file ->
         songsTab(songs = bilingual, themeMode = mode) { _, _ ->
+            clickSong("Amazing Grace")
+            captureTo(file)
+        }
+    }
+
+    /** A chorus broken across two slides, both still badged CHORUS and numbered 1/2 and 2/2. */
+    @Test
+    fun `a section split across slides`() = stackedThemes(SECTION, "section_split_slides") { mode, file ->
+        songsTab(songs = splitChorus, themeMode = mode) { _, _ ->
             clickSong("Amazing Grace")
             captureTo(file)
         }

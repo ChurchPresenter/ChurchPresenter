@@ -274,4 +274,66 @@ class SongBackgroundFormatTest {
         assertEquals("#0d1b2a", section.background.color)
         assertEquals("#2a1130", section.lowerThirdBackground.color)
     }
+
+    /**
+     * A section that states its own background keeps it. This used to be overwritten, which made
+     * `LyricSection.background` transport for the song's value rather than storage for the
+     * section's, and a per-section background impossible to express at all (issue #441).
+     */
+    @Test
+    fun `withBackgroundsOf leaves a section that has one of its own`() {
+        val song = blank().copy(background = SongBackground(type = SongBackgroundType.COLOR, color = "#0d1b2a"))
+        val own = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130")
+
+        val section = LyricSection(title = "Amazing Grace", background = own).withBackgroundsOf(song)
+
+        assertEquals("#2a1130", section.background.color, "the section's own is the more specific")
+        assertEquals(
+            song.lowerThirdBackground,
+            section.lowerThirdBackground,
+            "the band, which the section said nothing about, still follows the song",
+        )
+    }
+
+    // ── The per-section directive ───────────────────────────────────────────────
+
+    @Test
+    fun `the header and a section directive are written in one vocabulary`() {
+        val background = SongBackground(
+            type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25, blur = 3,
+        )
+
+        val fields = songBackgroundFields(background, SONG_BACKGROUND_PREFIX)
+
+        // The same pairs the header writes `key: value`, which a section writes `[key: value]`.
+        assertEquals(
+            listOf(
+                "background" to "gradient",
+                "background-color" to "#131a3a",
+                "background-color-end" to "#3a2352",
+                "background-dim" to "25",
+                "background-blur" to "3",
+            ),
+            fields,
+        )
+        assertEquals(background, songBackgroundFrom(fields.toMap(), SONG_BACKGROUND_PREFIX))
+    }
+
+    @Test
+    fun `an inheriting background records nothing at all`() {
+        assertTrue(songBackgroundFields(SongBackground(), SONG_BACKGROUND_PREFIX).isEmpty())
+    }
+
+    @Test
+    fun `a section directive survives the file round trip`() {
+        // It rides in the lyrics, which are written verbatim — but "for free" is worth proving,
+        // because the writer trims blank lines around them and a marker line must not be one.
+        val song = blank().copy(
+            lyrics = listOf("{Chorus}", "[background: color]", "[background-color: #2a1130]", "a line"),
+        )
+
+        val reread = parser.parseSongContent(written(song))
+
+        assertEquals(song.lyrics, reread?.lyrics)
+    }
 }

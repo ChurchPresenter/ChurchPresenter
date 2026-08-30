@@ -39,6 +39,33 @@ class SongChartTest {
     }
 
     @Test
+    fun `a manual break splits the section without renaming it`() {
+        val sections = buildPreviewSections("{Chorus}\nfirst half\n[---]\nsecond half")
+
+        assertEquals(listOf("Chorus", "Chorus"), sections.map { it.label })
+        assertEquals(listOf(0, 1), sections.map { it.slideIndex })
+        assertTrue(sections.all { it.slideCount == 2 })
+        assertTrue(
+            sections.none { section -> section.lines.any { line -> line.any { "-" in it.text } } },
+            "the marker itself is consumed, never drawn as a lyric",
+        )
+    }
+
+    @Test
+    fun `an unsplit section is one slide of one`() {
+        val sections = buildPreviewSections("[Verse 1]\na\n[Verse 2]\nb")
+        assertTrue(sections.all { it.slideIndex == 0 && it.slideCount == 1 })
+    }
+
+    @Test
+    fun `each section counts its own slides`() {
+        val sections = buildPreviewSections("[Verse 1]\na\n[---]\nb\n[---]\nc\n[Verse 2]\nd")
+
+        assertEquals(listOf(3, 3, 3, 1), sections.map { it.slideCount })
+        assertEquals(listOf(0, 1, 2, 0), sections.map { it.slideIndex })
+    }
+
+    @Test
     fun `a section is coloured by what its name says it is`() {
         assertEquals(SongSectionKind.VERSE, sectionKindOf("Verse 2"))
         assertEquals(SongSectionKind.CHORUS, sectionKindOf("Chorus"))
@@ -75,6 +102,14 @@ class SongChartTest {
     @Test
     fun `an empty song counts nothing`() {
         assertEquals(SongStats(0, 0, 0), songStatsOf(buildPreviewSections("")))
+    }
+
+    @Test
+    fun `a section split across slides is still counted as one section`() {
+        val stats = songStatsOf(buildPreviewSections("[Verse 1]\none\n{Chorus}\ntwo\n[---]\nthree"))
+
+        assertEquals(2, stats.sections, "one verse and one chorus, whatever the chorus is split into")
+        assertEquals(3, stats.lines)
     }
 
     // ── Trailing chords ─────────────────────────────────────────────────────────

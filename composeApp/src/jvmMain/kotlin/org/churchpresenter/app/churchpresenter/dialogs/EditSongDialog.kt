@@ -97,7 +97,10 @@ import churchpresenter.composeapp.generated.resources.song_book
 import churchpresenter.composeapp.generated.resources.song_capo
 import churchpresenter.composeapp.generated.resources.song_chords
 import churchpresenter.composeapp.generated.resources.song_chords_toggle
+import churchpresenter.composeapp.generated.resources.song_background_untitled_section
+import churchpresenter.composeapp.generated.resources.song_background_whole_song
 import churchpresenter.composeapp.generated.resources.song_insert_section
+import churchpresenter.composeapp.generated.resources.song_insert_slide_break
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
@@ -124,6 +127,11 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.data.SectionBackgroundSlot
+import org.churchpresenter.app.churchpresenter.data.sectionBackgroundSlots
+import org.churchpresenter.app.churchpresenter.data.withSectionBackground
+import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
+import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.songchords.ChordSheetImporter
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
@@ -275,12 +283,27 @@ internal fun EditSongContent(
     var editedBackground by remember(isVisible, song) { mutableStateOf(song.background) }
     var editedLowerThirdBackground by remember(isVisible, song) { mutableStateOf(song.lowerThirdBackground) }
     var backgroundPanelOpen by remember(isVisible, song) { mutableStateOf(false) }
+    // 0 is the song's own background; 1.. are its sections, in the order they are written. Held as
+    // an index rather than a name because two sections may share one, and clamped on every read
+    // because the sections come from the lyrics box and can be deleted while the panel is open.
+    var backgroundScope by remember(isVisible, song) { mutableStateOf(0) }
 
     var pane by remember(isVisible, song) { mutableStateOf(LyricPane.PRIMARY) }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
     var steps by remember(isVisible, song) { mutableStateOf(0) }
+
+    // The sections a background can be pinned to, read back out of the lyrics box on every edit so
+    // the list follows what is written there. Only the primary lyrics: a section is one section in
+    // both languages, and its background belongs to the section rather than to a translation.
+    val sectionSlots = remember(editedLyrics.text) { sectionBackgroundSlots(editedLyrics.text.split("\n")) }
+    val scope = backgroundScope.coerceIn(0, sectionSlots.size)
+    val untitledSection = stringResource(Res.string.song_background_untitled_section)
+    val scopeNames = listOf(stringResource(Res.string.song_background_whole_song)) +
+        sectionSlots.map { it.label.ifBlank { untitledSection } }
+    val scopedBackground = sectionSlots.getOrNull(scope - 1)
+        ?: SectionBackgroundSlot("", -1, editedBackground, editedLowerThirdBackground)
 
     val paneValue = if (pane == LyricPane.PRIMARY) editedLyrics else editedSecondaryLyrics
     fun setPaneValue(v: TextFieldValue) {
@@ -426,18 +449,33 @@ internal fun EditSongContent(
                             }
                             Spacer(Modifier.weight(1f))
                             SongBackgroundButton(
-                                background = editedBackground,
-                                lowerThirdBackground = editedLowerThirdBackground,
+                                background = scopedBackground.background,
+                                lowerThirdBackground = scopedBackground.lowerThirdBackground,
                                 expanded = backgroundPanelOpen,
                                 onExpandedChange = { backgroundPanelOpen = it },
-                                onBackgroundChange = { editedBackground = it },
-                                onLowerThirdBackgroundChange = { editedLowerThirdBackground = it },
+                                onBackgroundChange = { next ->
+                                    if (scope == 0) editedBackground = next
+                                    else editedLyrics = editedLyrics.withSectionBackgroundAt(
+                                        scope - 1, SONG_BACKGROUND_PREFIX, next,
+                                    )
+                                },
+                                onLowerThirdBackgroundChange = { next ->
+                                    if (scope == 0) editedLowerThirdBackground = next
+                                    else editedLyrics = editedLyrics.withSectionBackgroundAt(
+                                        scope - 1, SONG_LOWER_THIRD_BACKGROUND_PREFIX, next,
+                                    )
+                                },
                                 sampleLine = firstLyricLine(editedLyrics.text),
+                                // Applying to a songbook is a song-wide act, so it is offered only
+                                // while the song itself is what is being edited.
                                 onApplyToSongbook = onApplyBackgroundToSongbook
-                                    ?.takeIf { editedSongbook.isNotBlank() }
+                                    ?.takeIf { editedSongbook.isNotBlank() && scope == 0 }
                                     ?.let { apply ->
                                         { apply(editedSongbook, editedBackground, editedLowerThirdBackground) }
                                     },
+                                scopes = scopeNames,
+                                scopeIndex = scope,
+                                onScopeChange = { backgroundScope = it },
                             )
                             ChordsToggle(on = showChords) {
                                 showChords = !showChords
@@ -463,6 +501,13 @@ internal fun EditSongContent(
                                 InsertChip(marker.trim('[', ']', '{', '}')) {
                                     setPaneValue(insertSnippet(paneValue, marker, ownLine = true))
                                 }
+                            }
+                            // Deliberately not in SONG_SECTION_MARKERS: that list is what the app
+                            // treats as a section, and a break is the opposite of one.
+                            InsertChip(stringResource(Res.string.song_insert_slide_break)) {
+                                setPaneValue(
+                                    insertSnippet(paneValue, ChordTransposer.SLIDE_BREAK, ownLine = true),
+                                )
                             }
                         }
 
@@ -886,12 +931,20 @@ private fun rememberLyricsHighlight(): VisualTransformation {
     val verse = SectionInk.of(SongSectionKind.VERSE)
     val chorus = SectionInk.of(SongSectionKind.CHORUS)
     val chord = MaterialTheme.colorScheme.primary
-    return remember(verse, chorus, chord) {
+    val divider = MaterialTheme.colorScheme.onSurfaceVariant
+    return remember(verse, chorus, chord, divider) {
         VisualTransformation { text ->
             val annotated = buildAnnotatedString {
                 text.text.split("\n").forEachIndexed { i, line ->
                     if (i > 0) append("\n")
-                    if (ChordTransposer.isSectionHeader(line)) {
+                    if (ChordTransposer.isSlideBreak(line) || ChordTransposer.isBackgroundDirective(line)) {
+                        // Neither a section nor a chord: a slide break is a rule drawn through the
+                        // words and a background directive is configuration sitting among them.
+                        // Both read as what they are rather than as a line someone will sing.
+                        pushStyle(SpanStyle(color = divider, fontWeight = FontWeight.Bold))
+                        append(line)
+                        pop()
+                    } else if (ChordTransposer.isSectionHeader(line)) {
                         val ink = if (sectionKindOf(line.trim().trim('[', ']', '{', '}')) == SongSectionKind.CHORUS) {
                             chorus
                         } else {
@@ -1008,4 +1061,20 @@ private fun LyricsTextField(
             adapter = rememberScrollbarAdapter(scrollState)
         )
     }
+}
+
+/**
+ * This value with the section at [slot] carrying [background] under [prefix].
+ *
+ * The caret is kept where it was, clamped into the rewritten text: the panel writes into the lyrics
+ * box while the operator is looking at the panel, and a caret that jumped to the top every time
+ * would move the next thing they type.
+ */
+internal fun TextFieldValue.withSectionBackgroundAt(
+    slot: Int,
+    prefix: String,
+    background: SongBackground,
+): TextFieldValue {
+    val next = withSectionBackground(text.split("\n"), slot, prefix, background).joinToString("\n")
+    return TextFieldValue(next, TextRange(selection.min.coerceAtMost(next.length)))
 }

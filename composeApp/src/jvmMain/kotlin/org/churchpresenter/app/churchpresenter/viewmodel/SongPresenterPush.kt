@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withBackgroundsOf
@@ -65,8 +66,8 @@ internal fun resolveEditedSongPush(
         title = editedSong.title,
         secondaryTitle = editedSong.secondaryTitle,
         songNumber = editedSong.number.toIntOrNull() ?: 0,
-        lines = editedSong.lyrics,
-        secondaryLines = editedSong.secondaryLyrics,
+        lines = editedSong.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+        secondaryLines = editedSong.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
         type = Constants.SECTION_TYPE_SONG,
     )
     val lineIndex = liveLineIndex.coerceIn(0, (section.lines.size - 1).coerceAtLeast(0))

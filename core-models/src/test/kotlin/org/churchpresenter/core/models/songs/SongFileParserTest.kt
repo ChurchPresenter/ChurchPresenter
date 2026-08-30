@@ -112,6 +112,19 @@ class SongFileParserTest {
     }
 
     @Test
+    fun `a manual slide break survives the round trip`() {
+        // The splitter consumes `[---]` from the stored lines, so the file has to keep it — and it
+        // sits in the middle of a section, exactly where the end-trimming above must not reach.
+        val original = SongItem(
+            number = "0001",
+            title = "T",
+            lyrics = listOf("{Chorus}", "first half", "[---]", "second half"),
+        )
+
+        assertEquals(original.lyrics, roundTrip(original)?.lyrics)
+    }
+
+    @Test
     fun `the number comes off the file name in each of its spellings`() {
         fun numberOf(fileName: String) =
             parser.parseSongContent("[Primary]\ntitle: T\n", filePath = "/lib/$fileName.song")?.number
