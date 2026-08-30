@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -555,6 +556,9 @@ private fun BackgroundCoverageFill(
                         BackgroundCoverage.BAND -> bandFraction
                     }
                 )
+                // Clipped for the same reason the presenter clips its band: a blurred fill is
+                // overscanned, and without this it spills above the band line.
+                .clipToBounds()
         ) {
             BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
             if (config.dim > 0) {

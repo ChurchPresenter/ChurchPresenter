@@ -525,28 +525,53 @@ fun BiblePresenter(
             // Background stretches full width at bottom third, text respects padding on top —
             // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
             // bilingual content to stack instead of side-by-side, see TextContent below.
+            // Clipped to the band, with the blurred fill overscanned inside it. `Modifier.blur`
+            // fades a layer's own edge to transparent, so blurring the band itself let whatever is
+            // behind show through along its top as a hairline the width of the blur — and simply
+            // overscanning the band would have spilled the picture above the band line instead.
+            // Clipping outside and overscanning inside puts the faded edge out of sight entirely.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .then(if (resolvedBg.isBlurred) Modifier.blur(blurRadius) else Modifier)
-                    .then(if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+                    .clipToBounds()
             ) {
-                if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
-                    Image(
-                        painter = BitmapPainter(backgroundImageBitmap),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.BottomCenter,
-                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
-                    )
-                }
-                if (useVideoBackground) {
-                    LoopingVideoBackground(
-                        videoPath = resolvedBg.videoPath,
-                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (resolvedBg.isBlurred) Modifier
+                                .graphicsLayer {
+                                    scaleX = BACKGROUND_BLUR_OVERSCAN
+                                    scaleY = BACKGROUND_BLUR_OVERSCAN
+                                }
+                                .blur(blurRadius)
+                            else Modifier
+                        )
+                        .then(if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+                ) {
+                    if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
+                        Image(
+                            painter = BitmapPainter(backgroundImageBitmap),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            // Cropped from the middle of the picture, not its bottom edge. Scaled
+                            // to the band's width a photo is several times the band's height, so
+                            // anchoring it to the bottom showed the strip below the subject — the
+                            // desk under a photo of someone reading — and never the photo itself.
+                            // The Background tab's preview crops from the center; this is what
+                            // makes the two agree.
+                            alignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
+                        )
+                    }
+                    if (useVideoBackground) {
+                        LoopingVideoBackground(
+                            videoPath = resolvedBg.videoPath,
+                            modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
+                        )
+                    }
                 }
             }
             if (resolvedBg.dimPercent > 0) {
