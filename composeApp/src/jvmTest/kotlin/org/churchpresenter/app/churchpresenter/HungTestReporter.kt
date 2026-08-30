@@ -58,15 +58,36 @@ import java.util.concurrent.atomic.AtomicReference
  * **earlier** test is still running during a later one -- which is why an isolated `--tests` run is
  * green (nothing started the pre-render) and why the hanging class keeps changing.
  *
- * **This is a hypothesis, not a finding.** `Thread.getAllStackTraces` carries no monitor ownership,
- * so two threads blocked in one method is consistent with a lock-order inversion and does not
- * demonstrate one. Do not re-architect off-screen rendering on the strength of it. [appendLockInfo]
- * was added for exactly this: the next occurrence prints the deadlock cycle and the lock owners, and
- * that either proves the inversion or kills it. Fix what that dump shows.
+ * ## Occurrence five (2026-08-29) proved it, and it is fixed
  *
- * The same shape is worth holding in mind while reading it: `ComposeScenePump` builds its
- * `ImageComposeScene` and calls `sendApplyNotifications` on `Dispatchers.Default` too, and
- * `BrowserSourceVideoRenderer` -- which rides that pump -- is the culprit on an open production
+ * [appendLockInfo] did what it was added for. Run 33269248282 halted `jvmTestSerial` after 159s in
+ * `AppPreviewLowerThirdScreenshotTest` and printed `=== DEADLOCK CYCLE: 2 threads ===` **with lock
+ * owners**, which is the ownership evidence `getAllStackTraces` could not give:
+ *
+ * - `DefaultDispatcher-worker-3` waiting on `SynchronizedObject@16e079a8` **held by**
+ *   `AWT-EventQueue-0`, inside `sendApplyNotifications` at `LowerThirdOffscreenRenderer.kt:129`.
+ * - `AWT-EventQueue-0` waiting on `SynchronizedObject@8cd911d` **held by**
+ *   `DefaultDispatcher-worker-3`, inside the desktop scrollbar's `DerivedSnapshotState` read.
+ *
+ * So the inversion above was real, and the hypothesis is now a finding. The fix confines
+ * `LowerThirdOffscreenRenderer`'s scene -- construction, every render, and close -- to the event
+ * queue, leaving the pixel copy and file I/O on `Dispatchers.Default`. One thread in Compose's
+ * snapshot machinery means no second lock order to invert against; there is no way to opt a scene
+ * out of the global observer list, so single-threading is the available answer.
+ * `LowerThirdOffscreenRendererConfinementTest` pins that property, and fails if any of it moves
+ * back onto a worker.
+ *
+ * Note it was *not* enough to move the explicit `sendApplyNotifications` call the dump names:
+ * `javap -c` on `BaseComposeScene` (ui-desktop 1.10.3) shows `render` entering the same fan-out
+ * three more times per frame on its own, so hopping only that one line would have closed the door
+ * the dump happened to record and left three open.
+ *
+ * **`ComposeScenePump` still has the identical hazard** and is deliberately unfixed: it builds its
+ * `ImageComposeScene` and advances the snapshot on `Dispatchers.Default` too, driving Browser
+ * Source and NDI at 30-60fps, where confining the draw to the event queue costs real UI budget
+ * whenever an output is live. That wants its own change, with a measurement attached. Until then a
+ * narrower form of this deadlock remains reachable while a virtual output is running --
+ * `BrowserSourceVideoRenderer`, which rides that pump, is already the culprit on an open production
  * `ArrayIndexOutOfBoundsException` raised inside a hash-map resize during scene construction.
  */
 class HungTestReporter internal constructor(

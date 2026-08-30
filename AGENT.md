@@ -402,8 +402,12 @@ produces a failure that only appears under load and only sometimes:
   `TestExecutionListener`, watches whichever test is running and, once one has been running past its
   threshold (five minutes by default, **150s in CI** — far past anything this suite legitimately
   does; the slowest class is 37.1s for all of its tests together), dumps every thread in the fork
-  and `halt`s it with exit code 93. **The hang it exists for is still unexplained**; that class's
-  KDoc records what has been ruled out, so the next attempt does not repeat it. The dump goes to stderr *and* to
+  and `halt`s it with exit code 93. **The hang it exists for was a deadlock, and the fifth
+  occurrence's dump proved it** — an ABBA lock inversion between the on-screen AWT scene's
+  `SnapshotStateObserver` and an off-screen one's, because `advanceGlobalSnapshot` fans out to every
+  registered observer. `LowerThirdOffscreenRenderer` now confines its scene to the event queue, and
+  `ComposeScenePump` still does not: a narrower form stays reachable while a Browser Source or NDI
+  output is live. That class's KDoc carries the cycle and what was ruled out first. The dump goes to stderr *and* to
   `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
   as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
   it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has
