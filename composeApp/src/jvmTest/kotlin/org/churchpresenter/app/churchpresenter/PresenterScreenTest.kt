@@ -314,27 +314,14 @@ class PresenterScreenTest {
         onNodeWithText("SLIDE").assertExists()
     }
 
-    // ── Lower third vs full-screen background selection ─────────────────────────
+    // ── Lower third outputs draw no background of their own ─────────────────────
+    //
+    // The band belongs to the content presenter, which resolves the Default Lower Third card
+    // itself when its surface says Default. Painting that card here as well could only ever show
+    // at the band's edges — as a hairline of the default's color along a blurred band's top.
 
     @Test
-    fun `a lower third with FollowDefault uses the full-screen background settings`() {
-        val settings = AppSettings(
-            backgroundSettings = BackgroundSettings(
-                defaultBackgroundType = Constants.BACKGROUND_COLOR,
-                defaultBackgroundColor = "#123456",
-                defaultLowerThirdBackgroundType = Constants.BACKGROUND_FOLLOW_DEFAULT,
-                defaultLowerThirdBackgroundColor = "#FFFFFF",
-                defaultBackgroundOpacity = 1f,
-            ),
-        )
-        val pixel = sample(settings, isLowerThird = true)
-        assertEquals(0x12 / 255f, pixel.red, 0.02f)
-        assertEquals(0x34 / 255f, pixel.green, 0.02f)
-        assertEquals(0x56 / 255f, pixel.blue, 0.02f)
-    }
-
-    @Test
-    fun `a lower third with its own type uses the lower third background settings`() {
+    fun `a lower third paints black rather than its own default card`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
                 defaultBackgroundType = Constants.BACKGROUND_COLOR,
@@ -344,10 +331,64 @@ class PresenterScreenTest {
                 defaultLowerThirdBackgroundOpacity = 1f,
             ),
         )
-        val pixel = sample(settings, isLowerThird = true)
-        assertEquals(0xAA / 255f, pixel.red, 0.02f)
-        assertEquals(0xBB / 255f, pixel.green, 0.02f)
-        assertEquals(0xCC / 255f, pixel.blue, 0.02f)
+        val pixel = sample(settings, isLowerThird = true, underneath = Color.Red)
+        assertEquals(0f, pixel.red, 0.02f)
+        assertEquals(0f, pixel.green, 0.02f)
+        assertEquals(0f, pixel.blue, 0.02f)
+    }
+
+    @Test
+    fun `a lower third paints black rather than the full-screen card FollowDefault points at`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                defaultBackgroundType = Constants.BACKGROUND_COLOR,
+                defaultBackgroundColor = "#123456",
+                defaultLowerThirdBackgroundType = Constants.BACKGROUND_FOLLOW_DEFAULT,
+                defaultLowerThirdBackgroundColor = "#FFFFFF",
+                defaultBackgroundOpacity = 1f,
+            ),
+        )
+        val pixel = sample(settings, isLowerThird = true, underneath = Color.Red)
+        assertEquals(0f, pixel.red, 0.02f)
+        assertEquals(0f, pixel.green, 0.02f)
+        assertEquals(0f, pixel.blue, 0.02f)
+    }
+
+    @Test
+    fun `a lower third stays transparent for a Browser Source scene`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                defaultLowerThirdBackgroundType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdBackgroundColor = "#AABBCC",
+                defaultLowerThirdBackgroundOpacity = 1f,
+            ),
+        )
+        val pixel = sample(settings, isLowerThird = true, transparentBlanking = true, underneath = Color.Red)
+        assertTrue(pixel.red > 0.9f, "an alpha lower third must key through to what is beneath, got $pixel")
+    }
+
+    @Test
+    fun `a lower third still shows the caller's content`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                PresenterScreen(appSettings = AppSettings(), isLowerThird = true) { Text("BAND TEXT") }
+            }
+        }
+        onNodeWithText("BAND TEXT").assertExists()
+    }
+
+    @Test
+    fun `a lower third in the key role still shows the caller's content`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                PresenterScreen(
+                    appSettings = AppSettings(),
+                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                    isLowerThird = true,
+                ) { Text("KEYED BAND") }
+            }
+        }
+        onNodeWithText("KEYED BAND").assertExists()
     }
 
     @Test

@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -497,9 +498,8 @@ private fun BackgroundStagePreview(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    // By the surface, not by the area it paints. Every lower-third surface puts
-                    // its text in the band, the default lower third included — that one paints
-                    // above the band but the output it belongs to still reads from the bottom.
+                    // Every lower-third surface puts its text in the band it paints, the default
+                    // lower third included.
                     .align(
                         if (coverage == BackgroundCoverage.FULL_SCREEN) Alignment.Center
                         else Alignment.BottomCenter
@@ -530,9 +530,10 @@ private fun BackgroundStagePreview(
  * A background drawn over exactly the part of the output its surface paints, with the rest of the
  * screen left dark and a hairline showing where the lower-third band starts.
  *
- * A content type's lower-third background *is* the band; the default lower-third background is
- * what the band is drawn over. Filling the whole screen for either would show the operator a look
- * the output never produces — which is what the four coverage badges on the old cards were for.
+ * Every lower-third background *is* the band — the default one included, since the output draws
+ * that one over the band and nothing above it either. Filling the whole screen for a lower third
+ * would show the operator a look the output never produces, which is what the four coverage badges
+ * on the old cards were for.
  */
 @Composable
 private fun BackgroundCoverageFill(
@@ -552,10 +553,12 @@ private fun BackgroundCoverageFill(
                 .weight(
                     when (coverage) {
                         BackgroundCoverage.FULL_SCREEN -> 1f
-                        BackgroundCoverage.ABOVE_BAND -> 1f - bandFraction
                         BackgroundCoverage.BAND -> bandFraction
                     }
                 )
+                // Clipped for the same reason the presenter clips its band: a blurred fill is
+                // overscanned, and without this it spills above the band line.
+                .clipToBounds()
         ) {
             BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
             if (config.dim > 0) {
@@ -564,21 +567,15 @@ private fun BackgroundCoverageFill(
             // Drawn over the fill rather than between the two boxes: a divider in the layout would
             // take a device-independent pixel out of the weights, and the band would come out
             // fractionally short of the percentage the presenters draw it at.
-            if (coverage != BackgroundCoverage.FULL_SCREEN) {
+            if (coverage == BackgroundCoverage.BAND) {
                 Box(
                     Modifier
-                        .align(
-                            if (coverage == BackgroundCoverage.BAND) Alignment.TopCenter
-                            else Alignment.BottomCenter
-                        )
+                        .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .height(1.dp)
                         .background(MaterialTheme.colorScheme.outlineVariant)
                 )
             }
-        }
-        if (coverage == BackgroundCoverage.ABOVE_BAND) {
-            Box(Modifier.fillMaxWidth().weight(bandFraction))
         }
     }
 }
