@@ -42,6 +42,19 @@ class FakeNdiLibrary(
         private set
     var connections = 0
 
+    /**
+     * How many times the receiver count has been asked for.
+     *
+     * The renderer decides whether to render at all from this answer, so how often it asks is
+     * behaviour worth asserting — and a test that waits for it to rise has a positive signal that
+     * the pump reached its decision, rather than a pause hoping it did.
+     *
+     * Volatile: written on the renderer's pump coroutine, read from the test thread.
+     */
+    @Volatile
+    var connectionQueries = 0
+        private set
+
     private var nextHandle = 1L
     private val handleNames = java.util.concurrent.ConcurrentHashMap<Long, String>()
 
@@ -77,7 +90,10 @@ class FakeNdiLibrary(
         )
     }
 
-    override fun connectionCount(sender: Long, timeoutMs: Int): Int = connections
+    override fun connectionCount(sender: Long, timeoutMs: Int): Int {
+        connectionQueries++
+        return connections
+    }
 
     override fun sendDestroy(sender: Long) {
         destroyed += sender
