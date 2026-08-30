@@ -41,6 +41,56 @@ settings module to do so.
   that was later deleted. The doc comment at the declaration says this too; leave it alone.
 - **Anything `:composeApp` calls has to be public here.** `internal` no longer reaches the app.
 
+## Triaging what this module sends
+
+The project is **`church-projector` / `church-presenter-desktop`** (the slugs are in the `sentry`
+block of `composeApp/build.gradle.kts`). Reach it through the Sentry MCP server:
+
+```bash
+claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp
+```
+
+**Always filter `environment:production` first.** Dev builds report into the same project —
+`configureOptions` picks the environment from `BuildIdentity.isRelease` and nothing suppresses a
+dev build — so an unfiltered issue list mixes real user crashes with whatever a developer's machine
+did that afternoon. A stale Gradle build is the loud one: it produces `NoClassDefFoundError` and
+`NoSuchMethodError` on `:settings` classes, and `Base64` failures inside `decodeAsString` of the
+generated Compose resources. Those are one `./gradlew clean`, not ten bugs.
+
+**Not every issue is a crash.** `logback.xml` forwards every `ERROR` log line to Sentry as its own
+issue and every `WARN` as a breadcrumb, so an issue whose only frame is a log call came from
+logging, not from throwing — the fault is usually a frame or two up from the log site.
+
+**What arrives with an event**, worth knowing before asking for more: `os.family` and `os.arch`
+(both — arch alone cannot separate Apple Silicon from ARM Linux), `build.type`, `active_tab`,
+`presenting`, the availability tags (`vlc`, `jcef`, `javafx`), an anonymous install id, ≤50
+breadcrumbs, and the newest local `crash_*.txt` on ERROR and FATAL. Threads are **not** attached, so
+a deadlock arrives with one stack.
+
+Stack traces are **pre-scrubbed** — `scrubPii` rewrites home-directory paths and the OS username, so
+`<user>` in a frame is redaction rather than corruption.
+
+### Rules for what gets reported
+
+- **A fixed issue gets a test**, in the suite that owns the code. A Sentry issue is a bug report
+  with a stack trace attached; per the root `AGENT.md`, past bugs live in commits and tests, never
+  in a write-up.
+- **The operator's environment is not a defect.** A missing optional tool, a disk with no room, a
+  directory the user cannot write to, a network that will not resolve — none of these is actionable
+  here, and reporting them files one issue per underlying exception type for what is a single fact
+  about someone's machine. Return the outcome so the UI can say what happened, and leave a tag
+  rather than send an event. `BibleInstallSupport.reported` and `CefManager.jcefInstallBlocker` are
+  the worked examples.
+- **Classify by exception type, never by message.** The disk-full and access-denied cases identify
+  themselves in the OS's language, so matching on wording works in English and silently stops
+  working in the other thirty-three locales the app ships.
+- **Match a subclass before its superclass.** `io.ktor.client.network.sockets.ConnectTimeoutException`
+  extends `java.net.ConnectException`, which had every connect timeout filed as a refusal.
+- **Keep the message constant and put what varies in tags** — `reportWarning`'s own KDoc. A message
+  carrying a file name or a size splits one fault across dozens of issues.
+- **A report nobody can act on is a bug in the report.** If triage stalls because the event does not
+  say which branch was taken, add the tag or breadcrumb; do not guess.
+
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test both in scope.

@@ -39,6 +39,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.about_copyright
+import churchpresenter.composeapp.generated.resources.ndi_trademark
 import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
@@ -55,7 +56,7 @@ import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
@@ -76,6 +77,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val GRADIENT_DARKEN = 0.45f
 
@@ -117,7 +119,7 @@ internal fun AboutDialogContent(
      */
     versionDisplay: String = BuildConfig.VERSION_DISPLAY,
 ) {
-    AppThemeWrapper(theme = theme) {
+    AppWindowRoot(theme = theme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -166,6 +168,15 @@ internal fun AboutDialogContent(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                // Required by NDI's licence terms wherever the app offers NDI, alongside the same
+                // line on the Projection settings card. Not optional, and not conditional on a
+                // runtime being installed: the app offers the feature either way.
+                Text(
+                    text = stringResource(Res.string.ndi_trademark),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -175,7 +186,10 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
+                            UrlOpener.open(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
+                                    "?template=bug_report.md"
+                            )
                         }
                     ) {
                         Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
@@ -184,7 +198,10 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
+                            UrlOpener.open(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new" +
+                                    "?template=feature_request.md"
+                            )
                         }
                     ) {
                         Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)
@@ -271,7 +288,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             ConverterApp()
         }
     }
@@ -294,7 +311,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1420.dp, height = 880.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
                 onClose = onClose,
@@ -324,7 +341,7 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1200.dp, height = 800.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             // embedded = true regardless of outputDir: opened from the Help menu there is no output
             // folder, but the generator is still inside the app's theme and must follow it.
             LottieGenApp(
@@ -346,7 +363,7 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1500.dp, height = 950.dp)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             StyleEditorApp(standalone = false)
         }
     }

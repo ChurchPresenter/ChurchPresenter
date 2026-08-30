@@ -70,6 +70,11 @@ include(":atem")
 // The Planning Center Online client: the OAuth conversation, the Services REST calls and the
 // loopback listener that catches the consent redirect. Depended on by :composeApp, which wraps it
 // in PlanningCenterImportViewModel.
+// NDI (Network Device Interface): the send half of Vizrt's IP video protocol, over the NDI Runtime
+// the user installs separately — this module ships no NDI binaries. Plain Kotlin over JNA, with
+// every native call behind one interface. Depended on by :composeApp, which wires it to settings
+// and the presenters in NdiVideoRenderer.
+include(":ndi")
 include(":planning-center")
 // Bible formats: the .spb converters (USFX, Zefania XML, Beblia) and the catalogues the app
 // downloads modules from. Depended on by :composeApp for the in-app browser and by :converter,

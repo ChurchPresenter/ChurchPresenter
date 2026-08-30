@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
@@ -22,10 +24,18 @@ class SongPresenterPushTest {
         secondaryTitle: String = "",
         lyrics: List<String> = emptyList(),
         secondaryLyrics: List<String> = emptyList(),
+        background: SongBackground = SongBackground(),
+        lowerThirdBackground: SongBackground = SongBackground(),
     ) = SongItem(
         number = number, title = title, author = author, composer = composer,
         secondaryTitle = secondaryTitle, lyrics = lyrics, secondaryLyrics = secondaryLyrics,
+        background = background, lowerThirdBackground = lowerThirdBackground,
     )
+
+    private val dusk = SongBackground(
+        type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25,
+    )
+    private val band = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
 
     // ── title / credit lines ──────────────────────────────────────────────────
 
@@ -132,5 +142,61 @@ class SongPresenterPushTest {
         assertEquals(listOf("line one", "line two"), push.section.lines)
         assertEquals(1, push.lineIndex, "clamped into the fallback section's line range")
         assertEquals(70, push.section.bpm)
+    }
+
+    // ── the song's own background ─────────────────────────────────────────────
+
+    @Test fun `a title slide carries the song's own backgrounds`() {
+        val slide = titleSlideSection(song(background = dusk, lowerThirdBackground = band), SongTuning())
+
+        assertEquals(dusk, slide.background)
+        assertEquals(band, slide.lowerThirdBackground)
+    }
+
+    @Test fun `a title slide for a song that inherits carries an inheriting background`() =
+        assertEquals(false, titleSlideSection(song(), SongTuning()).background.isCustom)
+
+    @Test fun `an edit stamps the edited song's backgrounds onto the section that goes out`() {
+        val sections = listOf(LyricSection(lines = listOf("a", "b")))
+        val edited = song(background = dusk, lowerThirdBackground = band)
+
+        val push = resolveEditedSongPush(sections, 0, 0, edited, SongTuning(bpm = 70))
+
+        assertEquals(dusk, push.section.background)
+        assertEquals(band, push.section.lowerThirdBackground)
+        assertEquals(70, push.section.bpm, "the tuning is still stamped alongside it")
+    }
+
+    @Test fun `the fallback section built from the edited song carries its backgrounds too`() {
+        val edited = song(lyrics = listOf("line one"), background = dusk)
+
+        val push = resolveEditedSongPush(emptyList(), 0, 0, edited, SongTuning())
+
+        assertEquals(dusk, push.section.background)
+    }
+
+    /**
+     * The section's own background wins, and it did not used to.
+     *
+     * `withBackgroundsOf` overwrote whatever the section held, which made the field pure transport
+     * for the song's value — a section that says "not the one the rest of this song uses" had no way
+     * to be heard. It now fills in only where the section has none, which is what makes a
+     * per-section background expressible at all (issue #441). The song's value still reaches every
+     * section that does not override it, which the two tests above pin.
+     */
+    @Test fun `a background written on the section beats the song's`() {
+        val sections = listOf(LyricSection(lines = listOf("a"), background = band))
+
+        val push = resolveEditedSongPush(sections, 0, 0, song(background = dusk), SongTuning())
+
+        assertEquals(band, push.section.background, "the more specific of the two is the section's")
+    }
+
+    @Test fun `a directive is configuration and never reaches the fallback slide's words`() {
+        val edited = song(lyrics = listOf("[background: color]", "[background-color: #101010]", "line one"))
+
+        val push = resolveEditedSongPush(emptyList(), 0, 0, edited, SongTuning())
+
+        assertEquals(listOf("line one"), push.section.lines)
     }
 }

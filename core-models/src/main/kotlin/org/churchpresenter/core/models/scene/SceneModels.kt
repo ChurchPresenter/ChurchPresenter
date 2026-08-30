@@ -4,6 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
+/**
+ * Where a layer sits and how it is composited — the properties every kind of [SceneSource] has,
+ * applied once by the canvas rather than re-implemented per source type.
+ *
+ * [x], [y], [width] and [height] are fractions of the canvas.
+ */
 @Serializable
 data class SourceTransform(
     val x: Float = 0f,
@@ -49,9 +55,22 @@ sealed class SceneSource {
         val backgroundColor: String = "#00000000",
         val bold: Boolean = false,
         val italic: Boolean = false,
+        val underline: Boolean = false,
+        val strikethrough: Boolean = false,
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
-        val lineSpacing: Int = 100
+        val lineSpacing: Int = 100,
+        /**
+         * Space added between letters, as a percentage of the font size: 0 is the font's own
+         * spacing, positive tracks it out, negative tightens it.
+         */
+        val letterSpacing: Float = 0f,
+        /**
+         * How far the line is bent, as a percentage: 0 is straight, 100 arches it over a half
+         * circle, -100 cups it under one. A bent line is drawn a glyph at a time, so it is always
+         * one line — any newlines in [text] are drawn as spaces.
+         */
+        val curve: Float = 0f
     ) : SceneSource()
 
     @Serializable
@@ -132,7 +151,7 @@ sealed class SceneSource {
         override val transform: SourceTransform = SourceTransform(),
         override val visible: Boolean = true,
         override val locked: Boolean = false,
-        val mode: String = "clock",
+        val mode: String = ClockModes.CLOCK,
         val timeFormat: String = "24h",
         val showHours: Boolean = true,
         val showSeconds: Boolean = true,
@@ -141,9 +160,23 @@ sealed class SceneSource {
         val fontColor: String = "#FFFFFF",
         val backgroundColor: String = "#00000000",
         val bold: Boolean = true,
+        val italic: Boolean = false,
+        val underline: Boolean = false,
+        val strikethrough: Boolean = false,
+        /** The length a [ClockModes.COUNTDOWN] counts down from. Not a time of day. */
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
-        val targetSecond: Int = 0
+        val targetSecond: Int = 0,
+        /** The time of day a [ClockModes.TARGET_TIME] counts down to, on a 24-hour clock. */
+        val targetTimeHour: Int = 0,
+        val targetTimeMinute: Int = 0,
+        val targetTimeSecond: Int = 0,
+        /** Shown in place of 00:00 once a [ClockModes.COUNTDOWN] runs out. Blank keeps the zeroes. */
+        val expiredText: String = "",
+        /** Space added between letters, as on [TextSource.letterSpacing]. */
+        val letterSpacing: Float = 0f,
+        /** Bends the read-out around a circle, as on [TextSource.curve]. */
+        val curve: Float = 0f
     ) : SceneSource()
 
     @Serializable
@@ -218,11 +251,19 @@ sealed class SceneSource {
         val backgroundColor: String = "#00000000",
         val bold: Boolean = false,
         val italic: Boolean = false,
+        val underline: Boolean = false,
+        val strikethrough: Boolean = false,
         val referenceBold: Boolean = false,
         val referenceItalic: Boolean = false,
+        val referenceUnderline: Boolean = false,
+        val referenceStrikethrough: Boolean = false,
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
-        val lineSpacing: Int = 100
+        val lineSpacing: Int = 100,
+        /** Space added between letters, as on [TextSource.letterSpacing]. */
+        val letterSpacing: Float = 0f,
+        /** Bends the verse and its reference around a circle, as on [TextSource.curve]. */
+        val curve: Float = 0f
     ) : SceneSource()
 }
 

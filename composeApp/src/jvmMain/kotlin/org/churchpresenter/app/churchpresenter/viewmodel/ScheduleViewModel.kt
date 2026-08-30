@@ -30,6 +30,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -385,6 +386,9 @@ class ScheduleViewModel(
             clearAutoSave()
             notifyChanged()
             CrashReporter.breadcrumb("Schedule opened (${file.fileName}, ${items.size} items)", category = "schedule")
+        } catch (e: CancellationException) {
+            // The file dialog this runs behind is cancellable; abandoning it is not a fault.
+            throw e
         } catch (e: Exception) {
             CrashReporter.reportException(e, "Opening schedule file")
         }

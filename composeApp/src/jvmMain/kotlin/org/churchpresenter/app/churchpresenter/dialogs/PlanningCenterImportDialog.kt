@@ -85,7 +85,6 @@ import churchpresenter.composeapp.generated.resources.planning_center_import_tit
 import churchpresenter.composeapp.generated.resources.planning_center_status_connected
 import churchpresenter.composeapp.generated.resources.planning_center_status_connecting
 import churchpresenter.composeapp.generated.resources.planning_center_status_error
-import java.awt.Desktop
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -100,11 +99,12 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.PlanningCenterSettings
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val PILL_CORNER_PERCENT = 50
 
@@ -149,7 +149,7 @@ fun PlanningCenterImportDialog(
             ),
             title = stringResource(Res.string.planning_center_import_title)
         ) {
-            AppThemeWrapper(theme = theme) {
+            AppWindowRoot(theme = theme) {
                 PlanningCenterConnectDialogContent(
                     isConnecting = isConnecting,
                     connectionError = connectionError,
@@ -199,7 +199,7 @@ fun PlanningCenterImportDialog(
         title = stringResource(Res.string.planning_center_import_title),
         resizable = true
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             PlanningCenterImportDialogContent(
                 viewModel = viewModel,
                 settings = settings,
@@ -247,11 +247,12 @@ fun PlanningCenterImportDialog(
 /**
  * Runs the Planning Center OAuth round trip: opens the consent page, waits for the local
  * loopback callback, and exchanges the code for tokens. [browse] stands in for
- * `Desktop.getDesktop().browse` (which throws under `java.awt.headless=true`) so this can run
+ * [UrlOpener.open], which falls back to the OS's own open command where AWT declines the BROWSE
+ * action — a Linux desktop without a freedesktop.org helper, or a headless JVM — so this can run
  * headless in tests.
  */
 internal suspend fun connectToPlanningCenter(
-    browse: (java.net.URI) -> Unit = { Desktop.getDesktop().browse(it) },
+    browse: (java.net.URI) -> Unit = { UrlOpener.open(it.toString()) },
     onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
     onError: (String) -> Unit
 ) {

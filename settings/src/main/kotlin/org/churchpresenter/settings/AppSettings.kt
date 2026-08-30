@@ -79,7 +79,11 @@ data class AppSettings(
     val participateInPrereleases: Boolean = false,
     val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
     val lastUpdateCheckTimestamp: Long = 0L,
-    val storyPrompt: StoryPromptState = StoryPromptState()
+    val storyPrompt: StoryPromptState = StoryPromptState(),
+    /** The backgrounds the preview panel's quick tray offers, in the order it shows them. */
+    val quickBackgrounds: List<QuickBackground> = emptyList(),
+    /** Whether that tray is open or shut — a panel-local choice, switched from the panel itself. */
+    val quickBackgroundsExpanded: Boolean = true
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =
@@ -100,6 +104,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 7
+        const val CURRENT_SETTINGS_VERSION = 8
     }
 }

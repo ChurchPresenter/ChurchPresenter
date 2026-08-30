@@ -67,10 +67,8 @@ internal fun LookAheadColumn(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
-    // BOTH in the Options tab; one profile only when the Customize dialog is editing one output.
-    val scope = LocalOutputStyleScope.current
 
-    if (scope.showsFullScreen) SettingsSection(title = stringResource(Res.string.look_ahead_fullscreen)) {
+    SettingsSection(title = stringResource(Res.string.look_ahead_fullscreen)) {
     val laFsDisplayMode = settings.songSettings.lookAheadDisplayMode
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
@@ -181,7 +179,7 @@ internal fun LookAheadColumn(
 
     }
 
-    if (scope.showsFullScreen) SettingsSection(title = stringResource(Res.string.look_ahead_next_fullscreen)) {
+    SettingsSection(title = stringResource(Res.string.look_ahead_next_fullscreen)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(
@@ -242,7 +240,7 @@ internal fun LookAheadColumn(
 
     }
 
-    if (scope.showsLowerThird) SettingsSection(title = stringResource(Res.string.look_ahead_lower_third)) {
+    SettingsSection(title = stringResource(Res.string.look_ahead_lower_third)) {
     val laLtDisplayMode = settings.songSettings.lowerThirdLookAheadDisplayMode
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
@@ -353,7 +351,7 @@ internal fun LookAheadColumn(
 
     }
 
-    if (scope.showsLowerThird) SettingsSection(title = stringResource(Res.string.look_ahead_next_lower_third)) {
+    SettingsSection(title = stringResource(Res.string.look_ahead_next_lower_third)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(

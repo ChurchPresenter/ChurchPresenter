@@ -234,12 +234,29 @@ class BibleEngineClientLinkTest {
         c.connect()
         nextFrame()
 
+        // Measured against what was already there, never against the literal 2. `connectionCount`
+        // is a running total and a *retried* connect bumps it too — this class sets a 25ms retry
+        // floor precisely so a connect that loses a race retries rather than fails — so `== 2` held
+        // only when the first link happened to come up first time. When it did not, the total was
+        // already 2 before this test acted, the condition could never become true, and the test sat
+        // out its whole 15s budget and failed. That is what made it flaky on CI.
+        //
+        // Identity, not just the count: "dropped the previous link" is a claim about *which* link
+        // survives, and a size of 1 alone is equally true of a client that kept the old one.
+        val beforeSessions = engine.sessions.toList()
+        val beforeCount = engine.connectionCount.get()
+
         c.start(
             sttUrl = "http://127.0.0.1:1", bibleRoot = "", bibleFiles = emptyList(),
             runLocal = false, host = "127.0.0.1", port = engine.port, level = "off"
         )
-        awaitUntil("the second link to come up") { c.connected.value && engine.connectionCount.get() == 2 }
-        awaitUntil("the first connection to be dropped") { engine.sessions.size == 1 }
+        awaitUntil("the second link to come up") {
+            engine.connectionCount.get() > beforeCount && c.connected.value
+        }
+        awaitUntil("the previous link to be dropped, leaving only the new one") {
+            val held = engine.sessions.toList()
+            held.size == 1 && held.single() !in beforeSessions
+        }
     }
 
     // ── Pushing tuning changes ──────────────────────────────────────────────────
@@ -349,11 +366,18 @@ class BibleEngineClientLinkTest {
         c.connect()
         nextFrame()
 
+        // Captured before the drop, because the count is a running total: a first connect that had
+        // to retry already left it above 1, and `== 2` then never came true. See the baseline
+        // comment in `starting again drops the previous link`.
+        val beforeCount = engine.connectionCount.get()
+
         engine.dropConnections()
 
         // Not waiting on the link going *down* first: the reconnect floor here is milliseconds, so
         // the down state can come and go between two polls. The connection count only ever climbs.
-        awaitUntil("the client to reconnect unaided") { engine.connectionCount.get() == 2 && c.connected.value }
+        awaitUntil("the client to reconnect unaided") {
+            engine.connectionCount.get() > beforeCount && c.connected.value
+        }
         assertEquals(
             """{"type":"set_tuning","level":"balanced","continuationSpeed":"balanced"}""",
             nextFrame(),

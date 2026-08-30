@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -57,6 +58,12 @@ import kotlin.test.assertEquals
 internal fun projectionTab(
     initial: AppSettings = AppSettings(),
     screens: List<DetectedScreen> = twoExternalScreens(),
+    /**
+     * Pinned, never read from the machine. Left on the live [NdiManager] the NDI card would render
+     * differently depending on whether the machine running the suite has an NDI Runtime installed —
+     * and these tests count the tab's controls, so that would decide whether they pass.
+     */
+    ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -69,6 +76,8 @@ internal fun projectionTab(
                 onSettingsChange = { transform -> state = transform(state); current = state },
                 companionServer = server,
                 detectScreens = { screens },
+                ndiStatus = { ndiStatus },
+                ndiReceiverCount = { 0 },
             )
         }
     }
@@ -186,7 +195,13 @@ internal object Grid {
      * between them is not: the tab composes the whole device row only when VLC is present, and
      * shows an "install VLC" message in its place otherwise — the state on a CI runner.
      */
-    val trailing: Int get() = if (isVlcAvailable) 3 else 2
+    /**
+     * [NDI_BUTTONS] is the NDI card's contribution with no runtime installed, which is what
+     * [projectionTab] pins: "Check again", its own "Choose Folder", and "Get the NDI Runtime".
+     */
+    const val NDI_BUTTONS = 3
+
+    val trailing: Int get() = (if (isVlcAvailable) 3 else 2) + NDI_BUTTONS
 }
 
 /**

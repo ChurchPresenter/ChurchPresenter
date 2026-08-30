@@ -25,13 +25,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -40,7 +39,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,20 +48,44 @@ import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackgroun
 import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.utils.letterSpacingEm
-import org.churchpresenter.app.churchpresenter.utils.presentedText
+import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
+import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
+import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f
 private const val INDICATOR_REPEAT_COUNT = 3
+
+/** The app's own background-type name for one of [SongBackgroundType]'s. */
+internal fun songBackgroundTypeConstant(type: String): String = when (type) {
+    SongBackgroundType.IMAGE -> Constants.BACKGROUND_IMAGE
+    SongBackgroundType.VIDEO -> Constants.BACKGROUND_VIDEO
+    else -> Constants.BACKGROUND_COLOR
+}
+
+/**
+ * Whether [background] can actually be drawn: a colour always can, a picture or a clip only while
+ * the file it names is still on this machine. A song travels; the media it points at may not.
+ */
+internal fun songBackgroundResolves(background: SongBackground): Boolean = when (background.type) {
+    SongBackgroundType.COLOR, SongBackgroundType.GRADIENT -> true
+    SongBackgroundType.IMAGE, SongBackgroundType.VIDEO ->
+        background.mediaPath.isNotBlank() && File(background.mediaPath).exists()
+    else -> false
+}
 
 @Composable
 fun SongPresenter(
@@ -167,16 +189,41 @@ fun SongPresenter(
         if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
     )
 
+    val songTarget = if (isLowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
+
     // Text styles derived from settings (resolved per fullscreen / lower third)
     val effectiveTitleBold = if (isLowerThird) ss.titleLowerThirdBold else ss.titleBold
     val effectiveTitleItalic = if (isLowerThird) ss.titleLowerThirdItalic else ss.titleItalic
     val effectiveTitleUnderline = if (isLowerThird) ss.titleLowerThirdUnderline else ss.titleUnderline
     val effectiveTitleShadow = if (isLowerThird) ss.titleLowerThirdShadow else ss.titleShadow
+    val titleStyleProfile = ss.elementStyle(SongStyleElement.TITLE, songTarget)
     val titleTextStyle = TextStyle(
         fontWeight = if (effectiveTitleBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveTitleItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (effectiveTitleUnderline) TextDecoration.Underline else TextDecoration.None,
+        textDecoration = combinedTextDecoration(effectiveTitleUnderline, titleStyleProfile.strikethrough),
+        letterSpacing = spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize).em,
         shadow = if (effectiveTitleShadow) titleBaseShadow else null
+    )
+
+    // The song number is drawn from its own profile now. It used to borrow the title's font, colour
+    // and face, which left its own stored fields unread -- see `SongSettings.migrateSongNumberStyle`,
+    // which carries a styled title across so a settings file written then still looks the same.
+    val numberStyleProfile = ss.elementStyle(SongStyleElement.NUMBER, songTarget)
+    val songNumberBaseShadow = makeSongShadow(
+        numberStyleProfile.shadowColor,
+        numberStyleProfile.shadowSize,
+        numberStyleProfile.shadowOpacity,
+    )
+    val songNumberTextStyle = TextStyle(
+        fontWeight = if (numberStyleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (numberStyleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(numberStyleProfile.underline, numberStyleProfile.strikethrough),
+        letterSpacing = spacingEm(numberStyleProfile.letterSpacing, numberStyleProfile.fontSize).em,
+        shadow = if (numberStyleProfile.shadow) songNumberBaseShadow else null,
+    )
+    val songNumberColor = if (isKey) Color.White else parseHexColor(numberStyleProfile.color)
+    val songNumberFontFamily = systemFontFamilyOrDefault(
+        numberStyleProfile.fontType.ifBlank { if (isLowerThird) ss.titleLowerThirdFontType else ss.titleFontType },
     )
     val effectiveLyricsBold = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold
@@ -190,16 +237,17 @@ fun SongPresenter(
     val effectiveLyricsShadow = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow
     } else if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
-    // Letters, words and case: one profile's worth, picked the same way every other lyric style is.
-    val lyricsLetterSpacing = if (isLowerThird) ss.lyricsLowerThirdLetterSpacing else ss.lyricsLetterSpacing
-    val lyricsWordSpacing = if (isLowerThird) ss.lyricsLowerThirdWordSpacing else ss.lyricsWordSpacing
-    val lyricsTransform = if (isLowerThird) ss.lyricsLowerThirdTextTransform else ss.lyricsTextTransform
+    // Which profile the body text is drawn from: the look-ahead slide styles its lines separately.
+    val lyricsStyleProfile = ss.elementStyle(
+        if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
+        songTarget,
+    )
     val lyricsTextStyle = TextStyle(
         fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null,
-        letterSpacing = letterSpacingEm(lyricsLetterSpacing),
+        textDecoration = combinedTextDecoration(effectiveLyricsUnderline, lyricsStyleProfile.strikethrough),
+        letterSpacing = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize).em,
+        shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
     val chartHorizontalAlignment = when (
         if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
@@ -229,68 +277,25 @@ fun SongPresenter(
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.songLowerThirdBackground
     else appSettings.backgroundSettings.songBackground
 
-    // Resolve effective background type/paths (handle Default → inherit from global)
-    // For fill/key output: force black background, skip images/videos
-    val effectiveType: String
-    val effectiveImagePath: String
-    val effectiveVideoPath: String
-    var backgroundColor: Color
-    val effectiveOpacity: Float
+    // A song can carry its own background in its .song file; while that song is live it wins over
+    // the Background settings tab, and the quick tray's live pick wins over both. A media path that
+    // no longer resolves falls back exactly as an unset one does — a song file is portable, the
+    // picture it names is not. See resolveBackground for the whole order.
+    val resolvedBg = resolveBackground(
+        settings = appSettings.backgroundSettings,
+        config = bgConfig,
+        isLowerThird = isLowerThird,
+        showBackground = showBackground,
+        transparentWhenBlank = LocalTransparentBlanking.current,
+        ownBackground = if (isLowerThird) lyricSection.lowerThirdBackground else lyricSection.background,
+    )
+    val bgDimPercent = resolvedBg.dimPercent
+    val bgBlurReferencePx = resolvedBg.blurReferencePx
 
-    if (!showBackground) {
-        // Browser Source scenes blank to transparent (OBS keying); projector windows to black
-        effectiveType = if (LocalTransparentBlanking.current) Constants.BACKGROUND_TRANSPARENT
-        else Constants.BACKGROUND_COLOR
-        effectiveImagePath = ""
-        effectiveVideoPath = ""
-        backgroundColor = Color.Black
-        effectiveOpacity = 1.0f
-    } else if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
-        val defaults = appSettings.backgroundSettings
-        if (isLowerThird) {
-            effectiveType = defaults.defaultLowerThirdBackgroundType
-            effectiveImagePath = defaults.defaultLowerThirdBackgroundImage
-            effectiveVideoPath = defaults.defaultLowerThirdBackgroundVideo
-            backgroundColor = parseHexColor(defaults.defaultLowerThirdBackgroundColor)
-            effectiveOpacity = defaults.defaultLowerThirdBackgroundOpacity
-        } else {
-            effectiveType = defaults.defaultBackgroundType
-            effectiveImagePath = defaults.defaultBackgroundImage
-            effectiveVideoPath = defaults.defaultBackgroundVideo
-            backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
-            effectiveOpacity = defaults.defaultBackgroundOpacity
-        }
-    } else {
-        effectiveType = bgConfig.backgroundType
-        effectiveImagePath = bgConfig.backgroundImage
-        effectiveVideoPath = bgConfig.backgroundVideo
-        backgroundColor = parseHexColor(bgConfig.backgroundColor)
-        effectiveOpacity = bgConfig.backgroundOpacity
-    }
-
-    val backgroundImageBitmap = remember(effectiveType, effectiveImagePath, isLowerThird) {
-        if (effectiveType == Constants.BACKGROUND_IMAGE && effectiveImagePath.isNotEmpty()) {
-            // PictureDecoder, not Skia directly — see PresenterScreen for why.
-            val file = File(effectiveImagePath)
-            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-        } else null
-    }
-
-    val useVideoBackground = effectiveType == Constants.BACKGROUND_VIDEO && effectiveVideoPath.isNotEmpty()
-
-    val bgModifier: Modifier = when {
-        effectiveType == Constants.BACKGROUND_TRANSPARENT -> Modifier
-        effectiveType == Constants.BACKGROUND_GRADIENT -> Modifier
-        useVideoBackground -> Modifier.background(Color.Black)
-        effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
-            Modifier.alpha(effectiveOpacity).paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
-
-        effectiveType == Constants.BACKGROUND_IMAGE ->
-            Modifier.background(Color.Black)
-
-        else ->
-            Modifier.background(backgroundColor.copy(alpha = effectiveOpacity))
-    }
+    val backgroundImageBitmap = rememberBackgroundBitmap(resolvedBg, isLowerThird)
+    val useVideoBackground = resolvedBg.usesVideo
+    val effectiveOpacity = resolvedBg.opacity
+    val bgModifier: Modifier = backgroundModifier(resolvedBg, backgroundImageBitmap)
 
     // Fade-in on first appearance (covers background + text)
     val fadeInDuration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
@@ -305,22 +310,28 @@ fun SongPresenter(
         }
     }
 
+    // A blurred background has to be its own layer — blurring the box the lyrics sit in would blur
+    // the lyrics with it. Only a song background can ask for blur, so an unblurred one keeps the
+    // original single-box shape and its behaviour exactly.
+    val blurred = bgBlurReferencePx > 0
     BoxWithConstraints(
         modifier
             .fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
-            .then(if (!isLowerThird) bgModifier else Modifier)
+            .then(if (!isLowerThird && !blurred) bgModifier else Modifier)
     ) {
-        if (useVideoBackground && !isLowerThird) {
-            LoopingVideoBackground(
-                videoPath = effectiveVideoPath,
-                modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
-            )
-        }
         val density = LocalDensity.current
         val widthScale = with(density) { maxWidth.toPx() / 1920f }
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
+        val blurRadius = backgroundBlurRadius(bgBlurReferencePx, maxWidth)
+        PresenterBackgroundLayers(
+            background = resolvedBg,
+            backgroundModifier = bgModifier,
+            isLowerThird = isLowerThird,
+            blurRadius = blurRadius,
+        )
 
         // Scale shadow to be visible at projection resolution
         fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
@@ -339,6 +350,17 @@ fun SongPresenter(
                 if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
                 if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity
             )) else titleTextStyle
+        val songNumberTextStyleScaled = if (numberStyleProfile.shadow) {
+            songNumberTextStyle.copy(
+                shadow = scaleElementShadow(
+                    numberStyleProfile.shadowColor,
+                    numberStyleProfile.shadowSize,
+                    numberStyleProfile.shadowOpacity,
+                ),
+            )
+        } else {
+            songNumberTextStyle
+        }
         val lyricsTextStyleScaled = if (effectiveLyricsShadow)
             lyricsTextStyle.copy(shadow = scaleElementShadow(
                 if (isLowerThird) ss.lyricsLowerThirdShadowColor else ss.lyricsShadowColor,
@@ -371,7 +393,7 @@ fun SongPresenter(
                 // In side-by-side bilingual mode, each column gets half the width
                 val refWidth = if (sideBySide) fullWidth / 2 else fullWidth
                 val fullHeight = if (isLowerThird) {
-                    (1080 * appSettings.projectionSettings.lowerThirdHeightPercent / 100) -
+                    (1080 * appSettings.songSettings.lowerThirdHeightPercent / 100) -
                             appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 } else {
@@ -483,7 +505,7 @@ fun SongPresenter(
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
-            val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
+            val lowerThirdFraction = appSettings.songSettings.lowerThirdHeightPercent / 100f
             // Background stretches full width at bottom third, text respects padding on top —
             // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
             // bilingual content to stack instead of side-by-side, see TextContent below.
@@ -492,9 +514,10 @@ fun SongPresenter(
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .then(if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+                    .then(if (blurred) Modifier.blur(blurRadius) else Modifier)
+                    .then(if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
             ) {
-                if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
+                if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
                     Image(
                         painter = BitmapPainter(backgroundImageBitmap),
                         contentDescription = null,
@@ -504,8 +527,20 @@ fun SongPresenter(
                     )
                 }
                 if (useVideoBackground) {
-                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize().alpha(effectiveOpacity))
+                    LoopingVideoBackground(
+                        videoPath = resolvedBg.videoPath,
+                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
+                    )
                 }
+            }
+            if (bgDimPercent > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(lowerThirdFraction)
+                        .align(Alignment.BottomCenter)
+                        .background(Color.Black.copy(alpha = bgDimPercent / 100f))
+                )
             }
             // Gradient overlay
             if (bgConfig.gradientEnabled) {
@@ -538,7 +573,7 @@ fun SongPresenter(
             val innerModifier = if (isLowerThird)
                 Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(appSettings.projectionSettings.lowerThirdHeightPercent / 100f)
+                    .fillMaxHeight(appSettings.songSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
             else
                 Modifier
@@ -738,10 +773,12 @@ fun SongPresenter(
                         offset = Offset(6f * scaleFactor * laShadowSizeMul, 6f * scaleFactor * laShadowSizeMul),
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
+                    val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
-                        textDecoration = if (laUnderline) TextDecoration.Underline else TextDecoration.None,
+                        textDecoration = combinedTextDecoration(laUnderline, laStyleProfile.strikethrough),
+                        letterSpacing = spacingEm(laStyleProfile.letterSpacing, laStyleProfile.fontSize).em,
                         shadow = if (laShadowEnabled) laBaseShadow else null
                     )
                     // Look-ahead next uses auto-fit capped at its own configured max
@@ -754,13 +791,26 @@ fun SongPresenter(
                     @Composable
                     fun LyricLine(lineIdx: Int, line: String, laStart: Int) {
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
+                        val lineProfile = if (isLookAheadLine) laStyleProfile else lyricsStyleProfile
+                        // The next-section lines take their own alignment once one is set; blank
+                        // keeps them following the look-ahead's, which is what they always did.
+                        val lineAlign = if (isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank()) {
+                            getTextAlign(laStyleProfile.horizontalAlignment)
+                        } else {
+                            lyricsHorizontalAlignment
+                        }
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = lyricsHorizontalAlignment,
+                            textAlign = lineAlign,
                             fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
                             fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
                             softWrap = appSettings.songSettings.wordWrap,
-                            text = presentedText(line, lyricsTransform, lyricsWordSpacing),
+                            text = styledDisplayText(
+                                line,
+                                lineProfile.transform,
+                                spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
+                                spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
+                            ),
                             color = if (isLookAheadLine) laColor else lyricsColor,
                             style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
                         )
@@ -856,11 +906,16 @@ fun SongPresenter(
                         Text(
                             modifier = modifier.alpha(visibilityAlpha),
                             textAlign = songNumberHorizontalAlignment,
-                            fontFamily = titleFontFamily,
+                            fontFamily = songNumberFontFamily,
                             fontSize = scaledSongNumberFontSize,
-                            text = section.songNumber.toString(),
-                            color = titleColor,
-                            style = titleTextStyleScaled
+                            text = styledDisplayText(
+                                section.songNumber.toString(),
+                                numberStyleProfile.transform,
+                                spacingEm(numberStyleProfile.letterSpacing, numberStyleProfile.fontSize),
+                                spacingEm(numberStyleProfile.wordSpacing, numberStyleProfile.fontSize),
+                            ),
+                            color = songNumberColor,
+                            style = songNumberTextStyleScaled
                         )
                     }
 
@@ -871,7 +926,12 @@ fun SongPresenter(
                             textAlign = titleHorizontalAlignment,
                             fontFamily = titleFontFamily,
                             fontSize = scaledTitleFontSize,
-                            text = effectiveTitle,
+                            text = styledDisplayText(
+                                effectiveTitle,
+                                titleStyleProfile.transform,
+                                spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize),
+                                spacingEm(titleStyleProfile.wordSpacing, titleStyleProfile.fontSize),
+                            ),
                             color = titleColor,
                             style = titleTextStyleScaled
                         )
@@ -1138,9 +1198,10 @@ private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean
         Constants.EVERY_PAGE -> true
         Constants.FIRST_PAGE -> {
             // Show only on the first verse section (header null, ends with "1", or verse with no number)
-            val header = lyricSection.header ?: return true  // null header = first/only section
-            // Chorus/bridge sections are not "first page"
-            if (lyricSection.type == Constants.SECTION_TYPE_CHORUS) return false
+            val header = lyricSection.header ?: return lyricSection.slideIndex == 0 // null = first section
+            // Chorus/bridge sections are not "first page"; nor is the second slide of a section
+            // broken by a manual [---], which is the same page continued.
+            if (lyricSection.type == Constants.SECTION_TYPE_CHORUS || lyricSection.slideIndex > 0) return false
             val inner = header.trim().removePrefix("[").removePrefix("{").removeSuffix("]").removeSuffix("}").trim()
             // The trailing number is compared as a number, not as a string ending in "1" — that read
             // verses 11, 21 and 31 as the opening slide, so the title came back over them part-way

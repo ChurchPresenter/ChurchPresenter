@@ -44,6 +44,14 @@ Built with Kotlin Multiplatform and Compose Desktop.
     repeated titles
   - Entries that are not songs are reported, not dropped
 
+- **VideoPsalm** — one `.json` file from the `SongBooks` folder is a whole numbered book
+  - Read directly rather than repaired into valid JSON: the file has unquoted keys and real line
+    breaks inside its strings
+  - A chorus stored once per singing becomes one section — the repeats are matched on their lyrics,
+    because a book writes the same chorus as `C1` several times and then as `C2`
+  - Verses past the ninth, which books stop numbering, keep counting up instead of stacking
+  - The `***` / `<><><>` end marker on the last verse is dropped
+
 ### Bible Converter
 
 - **XML to SPB** — Convert Zefania XML bible files to `.spb` format

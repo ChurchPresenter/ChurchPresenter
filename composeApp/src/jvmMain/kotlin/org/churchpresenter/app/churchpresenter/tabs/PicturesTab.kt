@@ -783,6 +783,14 @@ fun PicturesTab(
             var isDragActive by remember { mutableStateOf(false) }
             var dragCursorInGrid by remember { mutableStateOf(Offset.Zero) }
 
+            // The grid is given an immutable copy, never the view model's live SnapshotStateList.
+            // `items(list)` captures the list by reference and indexes into it from the item
+            // provider on a later measure pass, so a folder watcher removing a file between the
+            // count being read and `contentType` being asked for indexes past the end — an
+            // IndexOutOfBoundsException raised inside Compose's measure, where the tab cannot catch
+            // it. Copying here makes the count and the indexing come from the same list.
+            val shownImages = viewModel.images.toList()
+
             Box(modifier = Modifier.fillMaxSize().clip(RectangleShape)) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(200.dp),
@@ -792,8 +800,8 @@ fun PicturesTab(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                     contentPadding = PaddingValues(vertical = 18.dp)
                 ) {
-                    items(viewModel.images, key = { it.absolutePath }) { imageFile ->
-                        val index = viewModel.images.indexOf(imageFile)
+                    items(shownImages, key = { it.absolutePath }) { imageFile ->
+                        val index = shownImages.indexOf(imageFile)
                         val isSelected = index == viewModel.selectedImageIndex
                         val isDraggingThis = draggingFile == imageFile
                         val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis

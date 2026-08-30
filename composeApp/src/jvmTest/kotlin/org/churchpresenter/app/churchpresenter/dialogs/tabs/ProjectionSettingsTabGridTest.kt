@@ -188,23 +188,6 @@ class ProjectionSettingsTabGridTest {
     // ── Numeric fields ──────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the lower third height field stores a new percentage`() = projectionTab { get ->
-        retypeNumberField(showing = 33, to = 45)
-        assertEquals(45, get().projectionSettings.lowerThirdHeightPercent, "the height must be stored")
-    }
-
-    @Test
-    fun `the lower third height field keeps the stored value when given one outside its range`() =
-        projectionTab { get ->
-            retypeNumberField(showing = 33, to = 90)
-            assertEquals(
-                33,
-                get().projectionSettings.lowerThirdHeightPercent,
-                "90 is outside the allowed range and must not be stored",
-            )
-        }
-
-    @Test
     fun `each window position field stores its own offset`() {
         // The four offsets share a default, so give each one a value only it holds.
         val distinct = settingsWith { copy(windowTop = 41, windowLeft = 42, windowRight = 43, windowBottom = 44) }
@@ -247,29 +230,32 @@ class ProjectionSettingsTabGridTest {
      */
     @Test
     fun `a typed number is what a fresh render of the saved settings shows`() {
-        var saved = AppSettings()
-        projectionTab { get ->
-            retypeNumberField(showing = 33, to = 47)
+        // The four offsets share a default, so give the top one a value only it holds.
+        var saved = settingsWith { copy(windowTop = 41) }
+        projectionTab(initial = saved) { get ->
+            retypeNumberField(showing = 41, to = 47)
             saved = get()
         }
-        assertEquals(47, saved.projectionSettings.lowerThirdHeightPercent, "the value must have been stored")
+        assertEquals(47, saved.projectionSettings.windowTop, "the value must have been stored")
         projectionTab(initial = saved) { _ ->
             // Re-rendered from settings alone: the field can only be showing what was stored.
-            numberFields()[0].assertTextEquals("47")
+            assertNumberFieldShows(47, "the window offset")
         }
     }
 
     /** The mirror image: a rejected value is echoed on screen but never reaches the settings. */
     @Test
     fun `a rejected number never reaches a fresh render`() {
-        var saved = AppSettings()
-        projectionTab { get ->
-            retypeNumberField(showing = 33, to = 90)
+        // The offsets run 0..10000, so 20001 is out of range the way 90 was for the band height this
+        // pair used to exercise, before that moved to the Bible and Song tabs.
+        var saved = settingsWith { copy(windowTop = 41) }
+        projectionTab(initial = saved) { get ->
+            retypeNumberField(showing = 41, to = 20001)
             saved = get()
         }
-        assertEquals(33, saved.projectionSettings.lowerThirdHeightPercent, "90 is out of range")
+        assertEquals(41, saved.projectionSettings.windowTop, "20001 is out of range")
         projectionTab(initial = saved) { _ ->
-            numberFields()[0].assertTextEquals("33")
+            assertNumberFieldShows(41, "the window offset")
         }
     }
 
@@ -325,7 +311,7 @@ class ProjectionSettingsTabGridTest {
         waitForIdle()
         onNodeWithText("Display 2 (3840x2160 @ 3200,0)").performClick()
         waitForIdle()
-        retypeNumberField(showing = 33, to = 40)
+        retypeNumberField(showing = 32, to = 40)
 
         val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
         val restored = json.decodeFromString<AppSettings>(json.encodeToString(get()))
@@ -335,6 +321,6 @@ class ProjectionSettingsTabGridTest {
             restored.projectionSettings.screenAssignments[0].targetDisplay,
             "the reassigned output must survive",
         )
-        assertEquals(40, restored.projectionSettings.lowerThirdHeightPercent, "the height must survive")
+        assertEquals(40, restored.projectionSettings.windowTop, "the window offset must survive")
     }
 }

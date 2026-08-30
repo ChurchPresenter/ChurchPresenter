@@ -1,0 +1,57 @@
+package org.churchpresenter.app.churchpresenter.composables
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.churchpresenter.bible.PreviewVerse
+import org.churchpresenter.bible.VerseTarget
+import org.churchpresenter.bible.readPreviewVerses
+import java.io.File
+
+/**
+ * Real verses out of each of [fileNames], keyed file name -> target, and empty until the reads land.
+ *
+ * So a preview of a translation quotes *that* translation: a Russian module reads in Russian, a
+ * Tamil one in Tamil, and the reference under each is the book named as its own module names it.
+ * A shared sample string would show the same English line three times over and say nothing about
+ * the fonts the stack actually needs.
+ *
+ * [targets] is asked for in one pass per module -- see [readPreviewVerses] -- so offering three
+ * sample lengths costs one scan per translation, not three. Reads run on `Dispatchers.IO` and each
+ * stops as soon as it has everything it was asked for rather than loading the module. Results
+ * accumulate across recompositions, so adding a seventh translation re-reads only the new one. A
+ * file that cannot be read is simply absent from the map, which is the caller's cue to fall back to
+ * its own sample.
+ */
+@Composable
+fun rememberBiblePreviewVerses(
+    directory: String,
+    fileNames: List<String>,
+    targets: List<VerseTarget>,
+): Map<String, Map<VerseTarget, PreviewVerse>> {
+    var verses by remember(directory) {
+        mutableStateOf<Map<String, Map<VerseTarget, PreviewVerse>>>(emptyMap())
+    }
+    // Keyed by the joined names rather than the list: a recomposition that rebuilds an equal list
+    // must not restart the reads.
+    val key = fileNames.sorted().joinToString(" ")
+    val targetKey = targets.joinToString(" ")
+    LaunchedEffect(directory, key, targetKey) {
+        val wanted = fileNames.filter { it.isNotBlank() && it !in verses }
+        if (wanted.isEmpty()) return@LaunchedEffect
+        val read = withContext(Dispatchers.IO) {
+            wanted.mapNotNull { fileName ->
+                readPreviewVerses(File(directory, fileName).absolutePath, targets)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { fileName to it }
+            }
+        }
+        if (read.isNotEmpty()) verses = verses + read
+    }
+    return verses
+}

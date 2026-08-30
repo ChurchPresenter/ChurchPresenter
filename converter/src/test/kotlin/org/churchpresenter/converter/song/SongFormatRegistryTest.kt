@@ -60,6 +60,7 @@ class SongFormatRegistryTest {
         assertTrue(OpenLpFormat.needsOutputFolder)
         assertTrue(EasyWorshipFormat.needsOutputFolder)
         assertTrue(MediaShoutFormat.needsOutputFolder)
+        assertTrue(VideoPsalmFormat.needsOutputFolder)
         // These write one .song beside each input, so "same as input" is a valid destination.
         assertTrue(!SongBeamerFormat.needsOutputFolder)
         assertTrue(!FreeWorshipFormat.needsOutputFolder)

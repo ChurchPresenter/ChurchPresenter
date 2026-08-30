@@ -94,8 +94,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.StockSearchError
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
-import java.awt.Desktop
-import java.net.URI
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val HALF_WIDTH = 0.5f
 private const val THUMB_ASPECT_W = 4f
@@ -496,7 +495,7 @@ private fun ApiKeyField(
                 }
             }
         ) {
-            TextButton(onClick = { runCatching { Desktop.getDesktop().browse(URI(signupUrl)) } }) {
+            TextButton(onClick = { UrlOpener.open(signupUrl) }) {
                 Text(getKeyStr, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }

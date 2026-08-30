@@ -39,10 +39,56 @@ import java.util.concurrent.atomic.AtomicReference
  *   clock frozen, (b) an unbounded `delay` loop with the clock frozen, and (c) the same loop with
  *   the clock auto-advancing, completes all three in under three seconds.
  *
- * The lead that remains unexamined is the recorded stack itself: `runComposeUiTest` teardown ->
- * `waitForIdle` -> `advanceTimeByFrame` -> `SwingUtilities.invokeAndWait`, blocked on the AWT event
- * queue. Whatever the event queue was busy with is the thing to find, and that is what the dump
- * this class writes is for.
+ * ## The current lead (2026-08-27, occurrence four)
+ *
+ * That dump answered "what was the event queue busy with". It hung `LowerThirdFolderTest` -- a
+ * different class from the three before, which is itself the point: the class is not the property
+ * that matters. Two threads were `BLOCKED`, both inside `SnapshotStateObserver.drainChanges`:
+ *
+ * - `AWT-EventQueue-0`, in Compose Foundation's desktop scrollbar (`Scrollbar.skiko.kt` ->
+ *   `getThumbPixelRange` -> `getAverageVisibleLineSize`) reading a `DerivedSnapshotState`, which
+ *   calls `notifyObjectsInitialized` -> `advanceGlobalSnapshot` -> `drainChanges`.
+ * - `DefaultDispatcher-worker-4`, in `LowerThirdOffscreenRenderer.withSession` calling
+ *   `Snapshot.sendApplyNotifications()` per frame from `LottieRenderCache.renderToFile`. It is
+ *   already inside an outer `drainChanges` and blocks entering a second.
+ *
+ * `advanceGlobalSnapshot` runs *every* registered apply observer, so a background off-screen scene's
+ * snapshot advance reaches into the AWT scene's observer and back. `LottieRenderCache` is an
+ * `object` holding its own `CoroutineScope(Dispatchers.Default)`, so a pre-render started by an
+ * **earlier** test is still running during a later one -- which is why an isolated `--tests` run is
+ * green (nothing started the pre-render) and why the hanging class keeps changing.
+ *
+ * ## Occurrence five (2026-08-29) proved it, and it is fixed
+ *
+ * [appendLockInfo] did what it was added for. Run 33269248282 halted `jvmTestSerial` after 159s in
+ * `AppPreviewLowerThirdScreenshotTest` and printed `=== DEADLOCK CYCLE: 2 threads ===` **with lock
+ * owners**, which is the ownership evidence `getAllStackTraces` could not give:
+ *
+ * - `DefaultDispatcher-worker-3` waiting on `SynchronizedObject@16e079a8` **held by**
+ *   `AWT-EventQueue-0`, inside `sendApplyNotifications` at `LowerThirdOffscreenRenderer.kt:129`.
+ * - `AWT-EventQueue-0` waiting on `SynchronizedObject@8cd911d` **held by**
+ *   `DefaultDispatcher-worker-3`, inside the desktop scrollbar's `DerivedSnapshotState` read.
+ *
+ * So the inversion above was real, and the hypothesis is now a finding. The fix confines
+ * `LowerThirdOffscreenRenderer`'s scene -- construction, every render, and close -- to the event
+ * queue, leaving the pixel copy and file I/O on `Dispatchers.Default`. One thread in Compose's
+ * snapshot machinery means no second lock order to invert against; there is no way to opt a scene
+ * out of the global observer list, so single-threading is the available answer.
+ * `LowerThirdOffscreenRendererConfinementTest` pins that property, and fails if any of it moves
+ * back onto a worker.
+ *
+ * Note it was *not* enough to move the explicit `sendApplyNotifications` call the dump names:
+ * `javap -c` on `BaseComposeScene` (ui-desktop 1.10.3) shows `render` entering the same fan-out
+ * three more times per frame on its own, so hopping only that one line would have closed the door
+ * the dump happened to record and left three open.
+ *
+ * **`ComposeScenePump` still has the identical hazard** and is deliberately unfixed: it builds its
+ * `ImageComposeScene` and advances the snapshot on `Dispatchers.Default` too, driving Browser
+ * Source and NDI at 30-60fps, where confining the draw to the event queue costs real UI budget
+ * whenever an output is live. That wants its own change, with a measurement attached. Until then a
+ * narrower form of this deadlock remains reachable while a virtual output is running --
+ * `BrowserSourceVideoRenderer`, which rides that pump, is already the culprit on an open production
+ * `ArrayIndexOutOfBoundsException` raised inside a hash-map resize during scene construction.
  */
 class HungTestReporter internal constructor(
     private val thresholdMs: Long,
@@ -104,6 +150,7 @@ class HungTestReporter internal constructor(
         out.appendLine("=== HUNG TEST: $name has been running ${elapsedMs / 1000}s ===")
         out.appendLine("=== Every thread in this fork follows. The one blocked in Compose's")
         out.appendLine("=== teardown, and whatever the AWT event queue is doing, are the two to read.")
+        appendLockInfo(out)
         Thread.getAllStackTraces().toSortedMap(compareBy { it.name }).forEach { (thread, stack) ->
             out.appendLine()
             out.appendLine("--- \"${thread.name}\" ${thread.state}${if (thread.isDaemon) " (daemon)" else ""}")
@@ -121,6 +168,43 @@ class HungTestReporter internal constructor(
                 System.err.println("=== the dump above is also at ${file.absolutePath}")
             }
         }
+    }
+
+    /**
+     * Who owns which monitor, which the stacks alone cannot say.
+     *
+     * `Thread.getAllStackTraces` returns frames and nothing else, so a dump showing two threads
+     * `BLOCKED` inside the same method proves they are both waiting and **not** what they are
+     * waiting on or who holds it. The 2026-08-27 dump ended exactly there: `AWT-EventQueue-0` and a
+     * `DefaultDispatcher-worker` both blocked in `SnapshotStateObserver.drainChanges`, one of them
+     * called from `LowerThirdOffscreenRenderer`'s off-screen render, which *looks* like a lock-order
+     * inversion between two Compose scenes on two threads and cannot be shown to be one.
+     *
+     * [ThreadMXBean.findDeadlockedThreads] answers it outright when the cycle is monitors or owned
+     * synchronizers, and [ThreadMXBean.dumpAllThreads] with both flags prints `- locked <id>` and
+     * `- waiting to lock <id>` per frame, which settles it when the cycle is something else. Best
+     * effort: a JVM may refuse either, and a hang that is not a deadlock reports no cycle, so the
+     * plain stacks above stay the primary record.
+     */
+    private fun appendLockInfo(out: StringBuilder) {
+        runCatching {
+            val bean = java.lang.management.ManagementFactory.getThreadMXBean()
+            val deadlocked = bean.findDeadlockedThreads()
+            if (deadlocked == null || deadlocked.isEmpty()) {
+                out.appendLine("=== No monitor/synchronizer deadlock cycle found.")
+                out.appendLine("=== (So this is a wait or a livelock, not a classic lock cycle.)")
+                return@runCatching
+            }
+            out.appendLine()
+            out.appendLine("=== DEADLOCK CYCLE: ${deadlocked.size} threads ===")
+            bean.getThreadInfo(deadlocked, true, true).filterNotNull().forEach { info ->
+                out.appendLine()
+                out.appendLine("--- \"${info.threadName}\" ${info.threadState}")
+                info.lockInfo?.let { out.appendLine("        waiting to lock $it") }
+                info.lockOwnerName?.let { out.appendLine("        held by \"$it\" (id ${info.lockOwnerId})") }
+                info.stackTrace.take(STACK_DEPTH).forEach { out.appendLine("        at $it") }
+            }
+        }.onFailure { out.appendLine("=== lock info unavailable: $it") }
     }
 
     internal companion object {

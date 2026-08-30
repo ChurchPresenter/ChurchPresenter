@@ -21,6 +21,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
 import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
+import churchpresenter.composeapp.generated.resources.canvas_camera_open_privacy_settings
 import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
@@ -44,6 +45,7 @@ import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f
@@ -201,6 +203,33 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+    if (osName.contains("mac") || osName.contains("darwin")) {
+        MacCameraPrivacyHint()
+    }
+}
+
+/** The macOS Camera privacy pane, opened from here because the canvas is also the live output. */
+internal const val MAC_CAMERA_PRIVACY_URI =
+    "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera"
+
+/**
+ * The way out of a privacy refusal, shown beside the camera picker on macOS.
+ *
+ * It lives in the properties panel rather than on the canvas because the canvas composable is also
+ * what the presenter output draws — a button there would be painted onto the screen the
+ * congregation is looking at. The canvas says *what* is wrong; this is where it is acted on.
+ *
+ * No accompanying warning text: a camera that is working needs no explanation, and a panel that
+ * announces macOS is blocking something whenever it is running on macOS is a panel operators learn
+ * to read past. The button is a plain affordance, and the canvas carries the diagnosis.
+ */
+@Composable
+private fun MacCameraPrivacyHint(
+    onOpenPrivacySettings: () -> Unit = { UrlOpener.open(MAC_CAMERA_PRIVACY_URI) }
+) {
+    Button(onClick = onOpenPrivacySettings, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(Res.string.canvas_camera_open_privacy_settings), fontSize = 12.sp)
     }
 }
 

@@ -6,6 +6,7 @@ import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.SongSettings
@@ -123,8 +124,14 @@ internal fun isTunnelConnected(status: TunnelStatus): Boolean = status is Tunnel
 internal fun tunnelJustDropped(previouslyConnected: Boolean, isConnected: Boolean): Boolean =
     previouslyConnected && !isConnected
 
-/** The browser-source output configured at [index], or an unconfigured one when there is none. */
-internal fun browserSourceOutputAt(outputs: List<ScreenAssignment>, index: Int): ScreenAssignment =
+/**
+ * The virtual output configured at [index] of [outputs], or an unconfigured one when there is none.
+ *
+ * Used for both lists of virtual outputs — Browser Source and NDI. Neither is reconciled against
+ * detected hardware the way `screenAssignments` is, so either can be shorter than the loop reading
+ * it for a frame after one is removed.
+ */
+internal fun virtualOutputAt(outputs: List<ScreenAssignment>, index: Int): ScreenAssignment =
     outputs.getOrNull(index) ?: ScreenAssignment()
 
 /** Whether media is what is on the output, which is what connected phones are told. */
@@ -195,6 +202,25 @@ internal fun withMirroredBackgrounds(
     settings: AppSettings,
     mirrored: BackgroundSettings?,
 ): AppSettings = if (mirrored == null) settings else settings.copy(backgroundSettings = mirrored)
+
+/**
+ * [settings] with the quick tray's [picked] entry standing in front of every background.
+ *
+ * This is where a live pick takes effect, and the only place: `effectiveAppSettings` feeds both the
+ * presenter windows and the live preview, so one overlay reaches every output. Nothing is written —
+ * dropping [picked] back to null restores whatever the Background settings tab, and the songs
+ * themselves, already said.
+ *
+ * The two halves travel separately because a quick background is a pair, exactly as a song's is:
+ * the full-screen picture and the lower-third band are chosen in the same panel and can differ.
+ */
+internal fun withQuickBackground(settings: AppSettings, picked: QuickBackground?): AppSettings =
+    if (picked == null) settings else settings.copy(
+        backgroundSettings = settings.backgroundSettings.copy(
+            quickBackground = picked.background,
+            quickLowerThirdBackground = picked.lowerThirdBackground,
+        ),
+    )
 
 /** Whether this is the first update check this install has ever run. */
 internal fun isFirstEverUpdateCheck(lastCheckTimestamp: Long): Boolean = lastCheckTimestamp == 0L

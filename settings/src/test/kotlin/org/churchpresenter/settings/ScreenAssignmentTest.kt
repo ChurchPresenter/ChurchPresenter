@@ -251,4 +251,39 @@ class StageMonitorZoneMappingTest {
 
         assertEquals("Stage", output.browserSourceLabelOr("Browser Source 1"))
     }
+
+    // ── NDI output naming and defaults ──────────────────────────────────────────
+
+    @Test
+    fun `an unnamed ndi output falls back to the numbered label`() {
+        assertEquals("NDI Output 2", ScreenAssignment().ndiLabelOr("NDI Output 2"))
+    }
+
+    @Test
+    fun `a named ndi output keeps its name`() {
+        assertEquals("Lyrics", ScreenAssignment(ndiName = "Lyrics").ndiLabelOr("NDI Output 1"))
+    }
+
+    @Test
+    fun `an ndi name of nothing but spaces is no name at all`() {
+        // A source advertised as whitespace is one an OBS operator cannot pick out of a list.
+        assertEquals("NDI Output 1", ScreenAssignment(ndiName = "   ").ndiLabelOr("NDI Output 1"))
+    }
+
+    @Test
+    fun `an ndi name is trimmed of surrounding space`() {
+        assertEquals("Lyrics", ScreenAssignment(ndiName = "  Lyrics  ").ndiLabelOr("NDI Output 1"))
+    }
+
+    @Test
+    fun `a new ndi output defaults to enabled 1080p30 in alpha mode`() {
+        val output = ScreenAssignment()
+
+        assertTrue(output.ndiEnabled)
+        assertEquals(1920, output.ndiWidth)
+        assertEquals(1080, output.ndiHeight)
+        assertEquals(30, output.ndiFps)
+        // Alpha is the mode SDI cannot do, and the one that makes a lower third arrive keyed.
+        assertEquals(Constants.NDI_MODE_ALPHA, output.ndiMode)
+    }
 }

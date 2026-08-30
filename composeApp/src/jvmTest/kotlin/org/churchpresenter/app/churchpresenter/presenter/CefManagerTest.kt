@@ -244,4 +244,59 @@ class CefManagerTest {
     fun `sinkInputIndicesForProcess on empty output finds nothing`() {
         assertEquals(emptyList(), sinkInputIndicesForProcess("", pid = 1))
     }
+
+    // ── Whether the install is worth attempting at all ──────────────────────────
+
+    private val plentyOfSpace = 10L * 1024 * 1024 * 1024
+
+    @Test
+    fun `a directory that cannot be written to blocks the install`() {
+        // ProgramData ACLs vary and a locked-down corporate build is normal, not a defect.
+        assertEquals(
+            "permission_denied",
+            CefManager.jcefInstallBlocker(writable = false, usableSpaceBytes = plentyOfSpace),
+        )
+    }
+
+    @Test
+    fun `a disk without room for a bundled Chromium blocks the install`() {
+        assertEquals(
+            "disk_space",
+            CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = 50L * 1024 * 1024),
+        )
+    }
+
+    @Test
+    fun `a writable directory with room goes ahead`() {
+        assertNull(CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = plentyOfSpace))
+    }
+
+    @Test
+    fun `an unknown free-space figure is not treated as a full disk`() {
+        // File.usableSpace answers 0 when it cannot determine the figure, which is not the same as
+        // a full disk — reading it that way would block the install wherever the filesystem does
+        // not report one. The real attempt decides instead.
+        assertNull(CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = 0))
+    }
+
+    @Test
+    fun `permission is answered before space when neither is available`() {
+        assertEquals(
+            "permission_denied",
+            CefManager.jcefInstallBlocker(writable = false, usableSpaceBytes = 0),
+        )
+    }
+
+    @Test
+    fun `no CefApp means no client, and no throw`() {
+        // The suite never initialises JCEF, so this is the uninitialised branch — the one that has
+        // to answer null rather than dereference. The failed-native branch beside it cannot be
+        // reached without a real CefApp whose native side has died, which is exactly the state a
+        // test cannot construct; the guarantee that matters is shared and asserted here: every
+        // caller sees null, never an exception, because the only call site is inside a `remember`.
+        assertFalse(CefManager.initialized)
+        assertNull(CefManager.createClient())
+        assertFalse(CefManager.initialized, "answering null must not flip the flag on")
+    }
+
 }

@@ -128,12 +128,22 @@ object CrashReporter {
         buildIdentity: BuildIdentity,
         setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit,
         addShutdownHook: (Runnable) -> Unit,
+        telemetryOff: Boolean = telemetryDisabled(),
+        initTelemetry: () -> Unit = ::initSentry,
     ) {
         build = buildIdentity
         crashDir.mkdirs()
 
+        // [telemetryOff] is read here rather than inside [initSentry] because this is where
+        // "should telemetry run at all" is already decided, and because a branch inside initSentry
+        // is one no test can reach — that function ends in Sentry.init. Both it and the init step
+        // are defaulted parameters so the suite can drive the decision and see which way it went;
+        // only the real Sentry.init stays uncovered.
+        //
+        // The install id is deliberately outside the switch: it identifies the install for the
+        // local crash log too, and minting it has never depended on Sentry being reachable.
         if (analyticsReportingEnabled) {
-            initSentry()
+            if (!telemetryOff) initTelemetry()
             setUser(getOrCreateInstallId())
         }
 
@@ -443,16 +453,52 @@ object CrashReporter {
         return props.getProperty("dsn", "").trim()
     }
 
+    /**
+     * The system property that switches telemetry off outright, whatever else is configured.
+     *
+     * The test tasks set `sentry.dsn=""`, which turns out not to be enough: that only disables the
+     * SDK's own external configuration, while [configureOptions] assigns the DSN this reads off the
+     * classpath. `sentry.properties` lives in `jvmMain/resources`, which is on the *test* runtime
+     * classpath, so a suite that initialised the reporter published straight into the production
+     * project — "kaboom", "boom" and "nowhere to write" are all in Sentry, filed under a test class.
+     */
+    internal const val DISABLE_PROPERTY = "churchpresenter.telemetry.disabled"
+
+    /** Whether telemetry is switched off for this JVM regardless of settings. */
+    internal fun telemetryDisabled(value: String? = System.getProperty(DISABLE_PROPERTY)): Boolean =
+        value?.trim()?.lowercase() in setOf("1", "true", "yes")
+
     private fun initSentry() {
         try {
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             Sentry.init { options -> configureOptions(options, dsn) }
-            // Static context that helps triage: OS arch and dev/release build.
+            // Static context that helps triage: OS family and arch, and dev/release build.
+            // Both are needed, and arch alone is a trap: Adoptium reports "aarch64" on Apple
+            // Silicon and on ARM Linux alike, and "x86_64" on Intel macOS against "amd64"
+            // elsewhere — so a report carrying only arch cannot say which OS a platform-specific
+            // path was taken on. Diagnosing the HEIC decode failures needed exactly that.
+            setTag("os.family", osFamily(System.getProperty("os.name", "")))
             setTag("os.arch", System.getProperty("os.arch", "unknown"))
             setTag("build.type", if (build.isRelease) "release" else "dev")
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
+        }
+    }
+
+    /**
+     * Which OS family [osName] names, as one of "macos", "windows", "linux" or "other".
+     *
+     * A tag wants the family rather than the raw `os.name`, which carries a version ("Windows 11",
+     * "Mac OS X 14.4") and would split one platform across a dozen values.
+     */
+    internal fun osFamily(osName: String): String {
+        val name = osName.lowercase()
+        return when {
+            name.contains("mac") || name.contains("darwin") -> "macos"
+            name.contains("win") -> "windows"
+            name.contains("nux") || name.contains("nix") -> "linux"
+            else -> "other"
         }
     }
 

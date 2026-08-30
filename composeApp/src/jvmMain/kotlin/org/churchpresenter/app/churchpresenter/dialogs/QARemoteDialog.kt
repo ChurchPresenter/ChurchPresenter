@@ -109,6 +109,7 @@ import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 private const val POSITION_GRID_COLUMNS = 3
 
@@ -173,8 +174,7 @@ fun QARemoteDialog(
             availableFonts = availableFonts,
             scrollState = scrollState,
             copyText = { text ->
-                java.awt.Toolkit.getDefaultToolkit().systemClipboard
-                    .setContents(java.awt.datatransfer.StringSelection(text), null)
+                SystemClipboard.copy(text)
             },
             onDismiss = onDismiss
         )

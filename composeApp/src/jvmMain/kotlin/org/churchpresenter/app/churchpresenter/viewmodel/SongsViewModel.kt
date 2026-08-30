@@ -13,9 +13,14 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
+import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
+import org.churchpresenter.core.models.songs.songBackgroundFrom
+import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.settings.utils.Constants
@@ -24,6 +29,9 @@ import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
+import org.churchpresenter.app.churchpresenter.utils.isSlideBreak
+import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
+import org.churchpresenter.app.churchpresenter.utils.isVerseHeader
 import java.io.File
 
 private const val SONG_NUMBER_DIGITS = 4
@@ -432,10 +440,12 @@ class SongsViewModel(
             title = song.title,
             secondaryTitle = song.secondaryTitle,
             songNumber = song.number.toIntOrNull() ?: 0,
-            lines = song.lyrics,
-            secondaryLines = song.secondaryLyrics,
+            // The whole-song slide is the lyrics verbatim, headers and all — but a directive is
+            // configuration rather than words, and putting one on screen is never right.
+            lines = song.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+            secondaryLines = song.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
             type = Constants.SECTION_TYPE_SONG
-        )
+        ).withBackgroundsOf(song)
     }
 
     fun getLyricSections(): List<LyricSection> {
@@ -458,18 +468,27 @@ class SongsViewModel(
             emptyList()
         }
 
-        // Merge primary and secondary sections by index
-        val sections = primarySections.mapIndexed { index, section ->
-            val secondary = secondarySections.getOrNull(index)
-            section.copy(
-                secondaryTitle = song.secondaryTitle,
-                secondaryLines = secondary?.lines ?: emptyList()
-            )
+        // Merge primary and secondary by section first and by slide within it, rather than by a
+        // single running index. The two are the same thing until one language uses a manual slide
+        // break the other does not — and then a flat index would slide every later section under
+        // the wrong translation. Pairing per section keeps the damage inside the section that
+        // disagrees: its extra slides come out untranslated, and verse 3 still meets verse 3.
+        val secondaryGroups = slideGroupsOf(secondarySections)
+        val sections = slideGroupsOf(primarySections).flatMapIndexed { group, slides ->
+            val secondarySlides = secondaryGroups.getOrNull(group)
+            slides.mapIndexed { slide, section ->
+                section.copy(
+                    secondaryTitle = song.secondaryTitle,
+                    secondaryLines = secondarySlides?.getOrNull(slide)?.lines ?: emptyList(),
+                )
+            }
         }
 
-        // Mark the very last section so the presenter can show end-of-song indicator
+        // Mark the very last section so the presenter can show end-of-song indicator, and stamp the
+        // song's own background onto every section — the presenter only ever sees a section.
         return sections.mapIndexed { index, section ->
-            if (index == sections.lastIndex) section.copy(isLastSection = true) else section
+            (if (index == sections.lastIndex) section.copy(isLastSection = true) else section)
+                .withBackgroundsOf(song)
         }
     }
 
@@ -481,8 +500,21 @@ class SongsViewModel(
         var currentHeader: String? = null
         var sectionType = Constants.SECTION_TYPE_VERSE
 
+        // Which slide of the current section is being filled. A manual break ends a slide without
+        // ending the section, so this counts up while the header and type stay put.
+        var slideOfSection = 0
+
+        // The background this section writes for itself, gathered from its `[background: …]`
+        // directives. Cleared at each header, so a section that writes none inherits the song's;
+        // applied from where it is written onward, so a directive after a slide break can even give
+        // one slide of a section a background of its own.
+        val backgroundFields = mutableMapOf<String, String>()
+
+        // A header with no body under it is still a section — navigation steps over it and the
+        // editor shows it — but only once. Past the first slide the header has already been
+        // presented, so a trailing or doubled break must not add an empty slide behind it.
         fun flushSection() {
-            if (currentLines.isNotEmpty() || currentHeader != null) {
+            if (currentLines.isNotEmpty() || (currentHeader != null && slideOfSection == 0)) {
                 rawSections.add(
                     LyricSection(
                         header = currentHeader,
@@ -490,6 +522,10 @@ class SongsViewModel(
                         songNumber = number.toIntOrNull() ?: 0,
                         lines = currentLines.toList(),
                         type = sectionType,
+                        slideIndex = slideOfSection++,
+                        background = songBackgroundFrom(backgroundFields, SONG_BACKGROUND_PREFIX),
+                        lowerThirdBackground =
+                            songBackgroundFrom(backgroundFields, SONG_LOWER_THIRD_BACKGROUND_PREFIX),
                         // Only when the section actually carries chords — otherwise the stage
                         // monitor's chord zone would just repeat the lyrics zone.
                         chordLines = if (currentChordLines.any { ChordTransposer.hasChords(it) }) {
@@ -505,10 +541,20 @@ class SongsViewModel(
         }
 
         lyrics.forEach { line ->
+            val directive = songBackgroundDirectiveOf(line)
             if (isHeaderLine(line)) {
                 flushSection()
+                slideOfSection = 0
+                backgroundFields.clear()
                 currentHeader = line
                 sectionType = if (isChorusHeader(line)) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+            } else if (directive != null) {
+                backgroundFields[directive.first] = directive.second
+            } else if (isSlideBreak(line)) {
+                // Ends the slide, not the section: the header and type carry on, so both halves of
+                // a chorus still read "Chorus". Nothing is emitted for a break with no words behind
+                // it, so a doubled or leading marker costs a blank slide rather than producing one.
+                if (currentLines.isNotEmpty() || currentChordLines.isNotEmpty()) flushSection()
             } else if (line.isNotBlank()) {
                 // Kept as written, for the band's chart only.
                 currentChordLines.add(line)
@@ -525,28 +571,99 @@ class SongsViewModel(
 
         flushSection()
 
-        val sections = foldChordOnlySections(rawSections)
+        return repeatChorusAfterVerses(numberSlides(foldChordOnlySections(rawSections)))
+    }
 
-        // Second pass: auto-repeat chorus after each verse
-        val chorusSection = sections.firstOrNull { it.type == Constants.SECTION_TYPE_CHORUS }
-        if (chorusSection == null) return sections
-        // With no verse there is nothing to repeat the chorus after, and the loop below — which
-        // drops every original chorus and re-adds it only behind a verse — would return an empty
-        // list. A chorus-only song (a short refrain, or a choruses-only songbook) would then put
-        // nothing on screen at all.
-        if (sections.none { it.type == Constants.SECTION_TYPE_VERSE }) return sections
+    /**
+     * Groups consecutive sections that are slides of one authored section — see
+     * [LyricSection.slideIndex]. An unsplit section is a group of one, which is what every song
+     * without a manual break is made of.
+     *
+     * A group runs while the header and type hold and the slide index keeps climbing. Any of the
+     * three breaking means a new section started: the index restarting is the ordinary case, and the
+     * header changing catches the one where [foldChordOnlySections] has already eaten a section's
+     * first slide, so its surviving slides no longer start at zero.
+     */
+    internal fun slideGroupsOf(sections: List<LyricSection>): List<List<LyricSection>> {
+        val groups = mutableListOf<MutableList<LyricSection>>()
+        sections.forEach { section ->
+            val open = groups.lastOrNull()?.last()
+            val continues = open != null &&
+                open.header == section.header &&
+                open.type == section.type &&
+                open.slideIndex < section.slideIndex
+            if (continues) groups.last().add(section) else groups.add(mutableListOf(section))
+        }
+        return groups
+    }
+
+    /**
+     * Stamps each section with its position among the slides of its own section.
+     *
+     * Numbered after [foldChordOnlySections] rather than during the parse, because folding can
+     * remove a slide — a break with nothing but chords behind it — and the operator should be told
+     * "2 of 2", counting what will actually go on screen, not what was typed.
+     */
+    private fun numberSlides(sections: List<LyricSection>): List<LyricSection> =
+        slideGroupsOf(sections).flatMap { group ->
+            group.mapIndexed { index, section -> section.copy(slideIndex = index, slideCount = group.size) }
+        }
+
+    /**
+     * Repeats the chorus after each verse that is not already followed by one, leaving every
+     * section that was written exactly where it was written.
+     *
+     * A hymnal writes the chorus once and expects it sung after every verse, which is what
+     * `SongSettings.autoRepeatChorus` turns on and why it defaults on. With it off the sections are
+     * presented as authored -- the only way to express a chorus placed before verse 1, or after
+     * verse 2 only, or written out in full at each repeat.
+     *
+     * What this must never do, in either mode, is lose words. The pass this replaced dropped every
+     * authored chorus and re-inserted `firstOrNull { chorus }` behind each verse, so a song with a
+     * second, different chorus presented the first one twice and the second one never (#403). Here
+     * the repeat after a verse is the nearest chorus written at or before it -- the one that verse
+     * is sung with -- falling back to the first chorus that follows, for a song whose chorus is
+     * written after all its verses.
+     *
+     * Two guards survive from that pass, and one is added:
+     *  - a song with **no chorus** is returned untouched;
+     *  - a song with **no verse** is returned untouched, so a chorus-only song -- a short refrain,
+     *    a choruses-only songbook -- still puts something on screen rather than coming out empty;
+     *  - a `[Bridge]`, `[Intro]` or `[Tag]` no longer collects a chorus of its own. Only `{}` marks
+     *    a chorus, so those parse as verses; [isVerseHeader] is what separates them.
+     *
+     * [foldChordOnlySections] runs first, so a chord-only intro has already been folded into the
+     * section it leads into and cannot trigger a repeat of its own.
+     */
+    internal fun repeatChorusAfterVerses(sections: List<LyricSection>): List<LyricSection> {
+        if (!appSettings.songSettings.autoRepeatChorus) return sections
+        // Whole sections repeat, not slides: a chorus broken across two slides is sung as two
+        // slides each time round, so the unit here is the group and never the section list.
+        val groups = slideGroupsOf(sections)
+        if (groups.none { isChorusGroup(it) }) return sections
+        if (groups.none { singsTheChorusAfterwards(it) }) return sections
 
         val result = mutableListOf<LyricSection>()
-        for (section in sections) {
-            if (section.type == Constants.SECTION_TYPE_CHORUS) continue // skip original, will be inserted after verses
-            result.add(section)
-            if (section.type == Constants.SECTION_TYPE_VERSE) {
-                result.add(chorusSection)
-            }
+        var precedingChorus: List<LyricSection>? = null
+        groups.forEachIndexed { index, group ->
+            if (isChorusGroup(group)) precedingChorus = group
+            result.addAll(group)
+            if (!singsTheChorusAfterwards(group)) return@forEachIndexed
+            // Already followed by a chorus as written — repeating it here would show it twice.
+            if (groups.getOrNull(index + 1)?.let { isChorusGroup(it) } == true) return@forEachIndexed
+            val chorus = precedingChorus ?: groups.drop(index + 1).firstOrNull { isChorusGroup(it) }
+            if (chorus != null) result.addAll(chorus)
         }
 
         return result
     }
+
+    private fun isChorusGroup(group: List<LyricSection>): Boolean =
+        group.first().type == Constants.SECTION_TYPE_CHORUS
+
+    /** A verse is sung with the chorus after it; a bridge, an intro or a tag is not. */
+    private fun singsTheChorusAfterwards(group: List<LyricSection>): Boolean =
+        group.first().let { it.type == Constants.SECTION_TYPE_VERSE && isVerseHeader(it.header) }
 
     /**
      * Folds a section that is nothing but chords into the one it leads into.
@@ -878,6 +995,39 @@ class SongsViewModel(
         } catch (_: Exception) {
             return false
         }
+    }
+
+    /**
+     * Gives every song in [songbook] the same pair of backgrounds, rewriting each `.song` file.
+     * Returns how many were written — 0 when nothing matched or the library is remote.
+     *
+     * A song whose file has gone missing is skipped rather than recreated: the library on disk is
+     * the record, and this must not resurrect a song someone deleted outside the app.
+     */
+    fun applyBackgroundToSongbook(
+        songbook: String,
+        background: SongBackground,
+        lowerThirdBackground: SongBackground,
+    ): Int {
+        if (remoteModeActive || songbook.isBlank()) return 0
+        val parser = SongFileParser()
+        var written = 0
+        _allSongItems.value
+            .filter { it.songbook == songbook && it.sourceFile.isNotBlank() }
+            .forEach { song ->
+                if (!File(song.sourceFile).exists()) return@forEach
+                try {
+                    parser.writeSongFile(
+                        song.copy(background = background, lowerThirdBackground = lowerThirdBackground),
+                        song.sourceFile,
+                    )
+                    written++
+                } catch (_: Exception) {
+                    // One unwritable file must not abandon the rest of the book.
+                }
+            }
+        if (written > 0) loadSongs()
+        return written
     }
 
     fun createSong(song: SongItem): Boolean {

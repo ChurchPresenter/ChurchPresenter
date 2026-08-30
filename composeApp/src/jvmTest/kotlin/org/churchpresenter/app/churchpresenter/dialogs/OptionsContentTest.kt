@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -105,7 +106,7 @@ class OptionsContentTest {
     @Test
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
-            "System", "Bible", "Song", "Background", "Projection", "Lower Third",
+            "System", "Bible", "Song", "Background", "Projection",
             "Server", "ATEM", "Companion Satellite",
         ).forEach { onNodeWithText(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
@@ -165,7 +166,7 @@ class OptionsContentTest {
     @Test
     fun `every tab renders its own settings content when selected`() = dialog {
         listOf(
-            "System", "Song", "Background", "Projection", "Lower Third", "Server", "ATEM",
+            "System", "Song", "Background", "Projection", "Server", "ATEM",
         ).forEach { label ->
             onNode(hasText(label) and hasClickAction()).performClick()
             onNode(hasText(label) and hasClickAction()).assertIsSelected()
@@ -206,19 +207,24 @@ class OptionsContentTest {
     @Test
     fun `changing the background type dropdown on the Background tab feeds back into saved settings`() =
         dialog(initialTab = 3) { result ->
-        // Both the full-screen and lower-third cards default to "Color" — the full-screen one composes first.
-        onAllNodes(hasText("Color") and hasClickAction())[0].performScrollTo().performClick()
-        waitForIdle()
-        onNode(hasText("Image") and hasClickAction()).performScrollTo().performClick()
+        // The tab opens on the Default surface, whose type segments sit in the editor beside the
+        // rail. "Image" names exactly one of them; the rail rows carry their own type as a meta
+        // line, so the segment is the only *clickable* node reading it on its own.
+        onNode(hasTextExactly("Image") and hasClickAction()).performScrollTo().performClick()
         waitForIdle()
         onNodeWithText("Apply").performClick()
 
         assertEquals(Constants.BACKGROUND_IMAGE, result.saved?.backgroundSettings?.defaultBackgroundType)
     }
 
+    // The Lower Third tab's window-left field was exercised here, as this suite's proof that a tab
+    // with only number fields feeds Apply. The insets went first -- a Lottie file is self-contained
+    // -- and then the tab itself, which duplicated the Lower Third content tab. The Background tab
+    // above and the Server tab below carry the same proof for their own control types.
+
     @Test
     fun `toggling API Key Protection on the Server tab feeds back into saved settings`() =
-        dialog(initialTab = 6) { result ->
+        dialog(initialTab = 5) { result ->
         // Ordinal 0 is Enable Server, which starts a real server on a real port — never touch it.
         onAllNodes(isToggleable())[1].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
@@ -226,8 +232,11 @@ class OptionsContentTest {
         assertEquals(true, result.saved?.serverSettings?.apiKeyEnabled)
     }
 
+    // The Stage Monitor and Dictionary tabs were exercised here too. Both are configured per
+    // output now, from Projection -> Customize, and are covered by that dialog's own suite.
+
     @Test
-    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
+    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 6) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("test-atem-host")
         onNodeWithText("Apply").performClick()
 
@@ -236,7 +245,7 @@ class OptionsContentTest {
 
     @Test
     fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
-        dialog(initialTab = 8) { result ->
+        dialog(initialTab = 7) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -245,7 +254,7 @@ class OptionsContentTest {
 
     @Test
     fun `the OBS and Companion Satellite tabs feed control changes back into saved settings`() = dialog(
-        initialTab = 8,
+        initialTab = 7,
         obsManager = OBSWebSocketManager(),
     ) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick() // OBS tab: "Connect to OBS Studio"
@@ -323,7 +332,6 @@ class OptionsContentTest {
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
                 scenes = emptyList(),
-                onOpenLottieGen = { _, _ -> },
                 obsManager = null,
                 companionSatelliteViewModel = null,
                 initialTab = 0,
@@ -347,7 +355,6 @@ class OptionsContentTest {
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
                 scenes = emptyList(),
-                onOpenLottieGen = { _, _ -> },
                 obsManager = null,
                 companionSatelliteViewModel = null,
                 initialTab = 0,

@@ -50,7 +50,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.luminance
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -143,6 +143,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 @Composable
 fun ServerSettingsTab(
@@ -154,8 +155,7 @@ fun ServerSettingsTab(
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
     val copyText: (String) -> Unit = { text ->
-        java.awt.Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(java.awt.datatransfer.StringSelection(text), null)
+        SystemClipboard.copy(text)
     }
 
     var portText by remember(settings.serverSettings.port) {
@@ -957,7 +957,7 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
         title = stringResource(Res.string.connection_qr_title),
         resizable = false
     ) {
-        AppThemeWrapper(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
+        AppWindowRoot(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
             ConnectionQrDialogContent(serverUrl = serverUrl, apiKey = apiKey, onDismiss = onDismiss)
         }
     }

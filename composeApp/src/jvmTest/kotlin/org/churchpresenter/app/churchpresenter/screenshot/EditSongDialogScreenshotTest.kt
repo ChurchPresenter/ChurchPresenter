@@ -11,6 +11,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.onNodeWithTag
+import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_BUTTON_TAG
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongContent
 import org.churchpresenter.core.models.songs.SongTuning
@@ -85,6 +89,13 @@ class EditSongDialogScreenshotTest {
     @Test
     fun `a song with chords`() = shoot("with_chords", song = withChords())
 
+    /**
+     * A chorus broken across two slides by a manual `[---]`: the marker drawn as the divider it is
+     * in the lyrics box, and the preview showing two slides that are both still the chorus.
+     */
+    @Test
+    fun `a section split across slides`() = shoot("slide_break", song = splitChorus())
+
     @Test
     fun `the chord column turned off`() = shoot("chords_hidden", song = withChords(), chordsVisible = false)
 
@@ -122,6 +133,28 @@ class EditSongDialogScreenshotTest {
         tuning = SongTuning(bpm = 72, capo = 2),
         showTuningFields = true,
     )
+
+    // ── The song's own background ───────────────────────────────────────────────────────────────
+
+    /** The chip sits quiet while the song inherits: an empty swatch struck through. */
+    @Test
+    fun `the background chip while the song inherits`() = shoot("background_inherited")
+
+    /** Tinted, and showing what the song is actually set to. */
+    @Test
+    fun `the background chip on a song with its own background`() =
+        shoot("background_custom", song = amazingGrace().copy(background = DUSK, lowerThirdBackground = BAND))
+
+    /** Its panel, anchored under it. A popup is its own compose root, hence rootIndex 1. */
+    @Test
+    fun `the background panel open`() = shoot(
+        "background_panel",
+        song = amazingGrace().copy(background = DUSK, lowerThirdBackground = BAND),
+        rootIndex = 1,
+    ) {
+        onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+        waitForIdle()
+    }
 
     // ── Menus ───────────────────────────────────────────────────────────────────────────────────
 
@@ -190,6 +223,21 @@ class EditSongDialogScreenshotTest {
         ),
     )
 
+    private fun splitChorus() = amazingGrace().copy(
+        lyrics = listOf(
+            "[Verse 1]",
+            "Amazing grace how sweet the sound",
+            "That saved a wretch like me",
+            "",
+            "{Chorus}",
+            "Praise the Lord, praise the Lord",
+            "Let the earth hear His voice",
+            "[---]",
+            "Praise the Lord, praise the Lord",
+            "Let the people rejoice",
+        ),
+    )
+
     private fun sparse() = amazingGrace().copy(tune = "", author = "", composer = "", ccliNumber = "")
 
     private fun blankSong() =
@@ -197,6 +245,11 @@ class EditSongDialogScreenshotTest {
 
     private companion object {
         const val SECTION = "editSongDialog"
+
+        val DUSK = SongBackground(
+            type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25, blur = 3,
+        )
+        val BAND = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
 
         const val SECONDARY_PANE = "Secondary"
         const val ADD_NEW = "Add New..."

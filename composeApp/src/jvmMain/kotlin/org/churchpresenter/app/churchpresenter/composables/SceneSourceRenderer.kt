@@ -13,7 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
+import kotlin.math.PI
+import kotlin.math.abs
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +52,7 @@ import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
 import churchpresenter.composeapp.generated.resources.canvas_video_file_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
+import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
@@ -94,6 +106,14 @@ private const val VOLUME_PERCENT_SCALE = 100
 private const val URL_DEBOUNCE_MS = 800L
 private const val ERROR_TEXT_COLOR = 0xFFFF8888
 private const val POLL_INTERVAL_MS = 1000L
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
+private const val SECONDS_PER_DAY = 86400
+private const val PERCENT_SCALE = 100f
+/** A curve of 100% spends half a circle on the line; more than a full circle would overlap itself. */
+private const val MAX_CURVE_TURNS = 2f
+/** How much room a bent reference line gets: its own height, plus the room the bend needs. */
+private const val REFERENCE_ROWS = 3f
 private const val MIN_CAPTURE_INTERVAL_MS = 33L
 private const val WINDOW_BOUNDS_FIELDS = 4
 private const val BOUNDS_WIDTH_INDEX = 2
@@ -105,11 +125,20 @@ private const val BOUNDS_HEIGHT_INDEX = 3
 private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
 private const val VLC_OPT_LOOP = ":input-repeat=65535"
 
+/**
+ * Draws one scene source.
+ *
+ * [showDiagnostics] is what separates the editor from the audience: a camera that will not open
+ * says so in red on the canvas the operator is working in, and shows the ordinary placeholder on
+ * the presenter output, where a troubleshooting sentence in front of a congregation would be worse
+ * than the missing picture it explains.
+ */
 @Composable
 fun SceneSourceRenderer(
     source: SceneSource,
     modifier: Modifier = Modifier,
-    fontScale: Float = 1f
+    fontScale: Float = 1f,
+    showDiagnostics: Boolean = true
 ) {
     when (source) {
         is SceneSource.ImageSource -> ImageSourceContent(source, modifier)
@@ -120,7 +149,7 @@ fun SceneSourceRenderer(
         is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier, fontScale)
         is SceneSource.ClockSource -> ClockSourceContent(source, modifier, fontScale)
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
-        is SceneSource.CameraSource -> CameraSourceContent(source, modifier)
+        is SceneSource.CameraSource -> CameraSourceContent(source, modifier, showDiagnostics)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
         is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
@@ -158,6 +187,23 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
     }
 }
 
+/**
+ * Tracking as Compose wants it: [TextUnit.Unspecified] for none at all, rather than a spacing of
+ * zero. The two are not the same to the text shaper — asking for zero re-shapes the line and moves
+ * it by a pixel, which would change every scene that has never touched the setting.
+ */
+private fun trackingOf(percent: Float): TextUnit =
+    if (percent == 0f) TextUnit.Unspecified else (percent / PERCENT_SCALE).em
+
+/** Underline, strike-through, both, or neither — as Compose wants it. */
+private fun textDecorationOf(underline: Boolean, strikethrough: Boolean): TextDecoration? = when {
+    underline && strikethrough ->
+        TextDecoration.combine(listOf(TextDecoration.Underline, TextDecoration.LineThrough))
+    underline -> TextDecoration.Underline
+    strikethrough -> TextDecoration.LineThrough
+    else -> null
+}
+
 @Composable
 private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier, fontScale: Float = 1f) {
     val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
@@ -182,18 +228,77 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
         modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
         contentAlignment = verticalAlign
     ) {
-        Text(
-            text = source.text,
-            color = textColor,
-            fontSize = (source.fontSize * fontScale).sp,
-            fontFamily = fontFamily,
-            fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-            textAlign = align,
-            lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(4.dp)
-        )
+        if (source.curve != 0f) {
+            CurvedText(
+                text = source.text,
+                curve = source.curve,
+                style = TextStyle(
+                    color = textColor,
+                    fontSize = (source.fontSize * fontScale).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
+                modifier = Modifier.fillMaxSize().padding(4.dp)
+            )
+        } else {
+            Text(
+                text = source.text,
+                color = textColor,
+                fontSize = (source.fontSize * fontScale).sp,
+                fontFamily = fontFamily,
+                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                textAlign = align,
+                lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                letterSpacing = trackingOf(source.letterSpacing),
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
+    }
+}
+
+/**
+ * One line of text bent around a circle: [curve] is a percentage, positive arching the line over
+ * the circle and negative cupping it under, and 100 spends a half circle on it.
+ *
+ * Compose has no text-on-a-path, so each glyph is measured and drawn on its own, rotated to the
+ * angle its own centre sits at. That is also why the line cannot wrap — newlines become spaces.
+ */
+@Composable
+internal fun CurvedText(text: String, curve: Float, style: TextStyle, modifier: Modifier = Modifier) {
+    val measurer = rememberTextMeasurer()
+    val glyphs = remember(text, style) {
+        text.replace('\n', ' ').map { measurer.measure(AnnotatedString(it.toString()), style) }
+    }
+    val widths = remember(glyphs) { glyphs.map { it.size.width.toFloat() } }
+    val lineWidth = widths.sum()
+    val lineHeight = remember(glyphs) { glyphs.maxOfOrNull { it.size.height.toFloat() } ?: 0f }
+
+    Canvas(modifier) {
+        if (lineWidth <= 0f) return@Canvas
+        val sweep = (abs(curve) / PERCENT_SCALE).coerceAtMost(MAX_CURVE_TURNS) * PI.toFloat()
+        val radius = lineWidth / sweep
+        // How far the ends fall away from the middle of the arc, which is what it costs in height.
+        val sagitta = radius * (1f - cos(sweep / 2f))
+        val arch = curve > 0f
+        val extentTop = (size.height - (sagitta + lineHeight)) / 2f
+        val apexTop = if (arch) extentTop else extentTop + sagitta
+        val pivot = Offset(size.width / 2f, if (arch) apexTop + radius else apexTop - radius)
+
+        var travelled = 0f
+        glyphs.forEachIndexed { index, glyph ->
+            val centre = travelled + widths[index] / 2f
+            val angle = Math.toDegrees(((centre - lineWidth / 2f) / radius).toDouble()).toFloat()
+            rotate(degrees = if (arch) angle else -angle, pivot = pivot) {
+                drawText(glyph, topLeft = Offset(size.width / 2f - widths[index] / 2f, apexTop))
+            }
+            travelled += widths[index]
+        }
     }
 }
 
@@ -530,63 +635,168 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
     val fontColor = parseHexColor(source.fontColor)
     val fontFamily = systemFontFamilyOrDefault(source.fontFamily)
 
-    var displayText by remember { mutableStateOf("") }
-
-    val totalSeconds = source.targetHour * 3600 + source.targetMinute * 60 + source.targetSecond
-
-    if (source.mode == "countdown") {
-        // Sync TimerStateManager when duration fields change
-        LaunchedEffect(totalSeconds) {
-            TimerStateManager.onDurationChanged(source.id, totalSeconds)
-        }
-
-        // Tick loop lives here so it runs even when the source is not selected
-        val timerState = TimerStateManager.getState(source.id, totalSeconds)
-        LaunchedEffect(timerState.isRunning) {
-            while (timerState.isRunning) {
-                delay(POLL_INTERVAL_MS)
-                TimerStateManager.tick(source.id)
-            }
-        }
-
-        val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
-        val h = remaining / 3600
-        val m = (remaining % 3600) / 60
-        val s = remaining % 60
-        displayText = buildString {
-            if (source.showHours) append("%02d:".format(h))
-            append("%02d".format(m))
-            if (source.showSeconds) append(":%02d".format(s))
-        }
-    } else {
-        LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
-            while (isActive) {
-                val now = LocalTime.now()
-                val pattern = buildString {
-                    if (source.showHours) {
-                        append(if (source.timeFormat == "12h") "hh:" else "HH:")
-                    }
-                    append("mm")
-                    if (source.showSeconds) append(":ss")
-                    if (source.timeFormat == "12h") append(" a")
-                }
-                displayText = now.format(DateTimeFormatter.ofPattern(pattern))
-                delay(POLL_INTERVAL_MS)
-            }
-        }
+    val displayText = when (source.mode) {
+        ClockModes.COUNTDOWN -> countdownText(source)
+        ClockModes.COUNT_UP -> countUpText(source)
+        ClockModes.TARGET_TIME -> targetTimeText(source)
+        else -> wallClockText(source)
     }
+
+    val style = TextStyle(
+        color = fontColor,
+        fontSize = (source.fontSize * fontScale).sp,
+        fontFamily = fontFamily,
+        fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = textDecorationOf(source.underline, source.strikethrough),
+        letterSpacing = trackingOf(source.letterSpacing)
+    )
 
     Box(
         modifier = modifier.fillMaxSize().background(bgColor),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = displayText,
-            color = fontColor,
-            fontSize = (source.fontSize * fontScale).sp,
-            fontFamily = fontFamily,
-            fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal
+        if (source.curve != 0f) {
+            CurvedText(displayText, source.curve, style, Modifier.fillMaxSize())
+        } else {
+            Text(text = displayText, style = style)
+        }
+    }
+}
+
+/** hh:mm:ss, dropping either end as the source asks. */
+private fun formatElapsed(seconds: Int, showHours: Boolean, showSeconds: Boolean): String = buildString {
+    if (showHours) append("%02d:".format(seconds / SECONDS_PER_HOUR))
+    append("%02d".format((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE))
+    if (showSeconds) append(":%02d".format(seconds % SECONDS_PER_MINUTE))
+}
+
+/**
+ * Seconds from now until the next occurrence of a time of day — tomorrow's, once today's has been
+ * and gone, which is what keeps a "service starts at 10:00" countdown from going negative.
+ */
+private fun secondsUntilTimeOfDay(hour: Int, minute: Int, second: Int): Int {
+    val target = hour * SECONDS_PER_HOUR + minute * SECONDS_PER_MINUTE + second
+    val diff = target - LocalTime.now().toSecondOfDay()
+    return if (diff > 0) diff else diff + SECONDS_PER_DAY
+}
+
+/** The countdown's remaining time, or its expiry message once it has run out. */
+@Composable
+private fun countdownText(source: SceneSource.ClockSource): String {
+    val totalSeconds = source.targetHour * SECONDS_PER_HOUR +
+        source.targetMinute * SECONDS_PER_MINUTE + source.targetSecond
+
+    // Sync TimerStateManager when duration fields change
+    LaunchedEffect(totalSeconds) {
+        TimerStateManager.onDurationChanged(source.id, totalSeconds)
+    }
+
+    val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
+    val expired = remaining == 0 && totalSeconds > 0
+    return if (expired && source.expiredText.isNotBlank()) source.expiredText
+    else formatElapsed(remaining, source.showHours, source.showSeconds)
+}
+
+/** A stopwatch: seeded at zero and counted up by the same shared state the countdown uses. */
+@Composable
+private fun countUpText(source: SceneSource.ClockSource): String {
+    return formatElapsed(
+        TimerStateManager.getState(source.id, 0).remainingSeconds,
+        source.showHours,
+        source.showSeconds
+    )
+}
+
+/** Counts down to a time of day off the wall clock, so it needs no transport of its own. */
+@Composable
+private fun targetTimeText(source: SceneSource.ClockSource): String {
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(
+        source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond,
+        source.showHours, source.showSeconds
+    ) {
+        while (isActive) {
+            val remaining =
+                secondsUntilTimeOfDay(source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond)
+            text = formatElapsed(remaining, source.showHours, source.showSeconds)
+            delay(POLL_INTERVAL_MS)
+        }
+    }
+    return text
+}
+
+/** The wall clock itself, in the source's own 12h/24h format. */
+@Composable
+private fun wallClockText(source: SceneSource.ClockSource): String {
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
+        while (isActive) {
+            val pattern = buildString {
+                if (source.showHours) {
+                    append(if (source.timeFormat == "12h") "hh:" else "HH:")
+                }
+                append("mm")
+                if (source.showSeconds) append(":ss")
+                if (source.timeFormat == "12h") append(" a")
+            }
+            text = LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
+            delay(POLL_INTERVAL_MS)
+        }
+    }
+    return text
+}
+
+/**
+ * The verse over its reference, both bent by [SceneSource.BibleSource.curve].
+ *
+ * A bent line cannot wrap, so the verse is one line however long it is — which is the trade the
+ * curve asks for, and why it is off by default.
+ */
+@Composable
+private fun CurvedBibleText(
+    source: SceneSource.BibleSource,
+    textColor: Color,
+    refColor: Color,
+    fontFamily: FontFamily,
+    fontScale: Float
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        CurvedText(
+            text = source.verseText.ifEmpty { "Select a verse..." },
+            curve = source.curve,
+            style = TextStyle(
+                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
+                fontSize = (source.fontSize * fontScale).sp,
+                fontFamily = fontFamily,
+                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                letterSpacing = trackingOf(source.letterSpacing),
+            ),
+            modifier = Modifier.fillMaxWidth().weight(1f)
         )
+        if (source.referenceText.isNotEmpty()) {
+            CurvedText(
+                text = source.referenceText,
+                curve = source.curve,
+                style = TextStyle(
+                    color = refColor,
+                    fontSize = (source.referenceFontSize * fontScale).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(
+                        source.referenceUnderline,
+                        source.referenceStrikethrough
+                    ),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height((source.referenceFontSize * fontScale * REFERENCE_ROWS).dp)
+            )
+        }
     }
 }
 
@@ -675,6 +885,7 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
 private fun CameraSourceContent(
     source: SceneSource.CameraSource,
     modifier: Modifier,
+    showDiagnostics: Boolean,
 ) {
     if (source.devicePath.isBlank()) {
         Box(
@@ -716,11 +927,12 @@ private fun CameraSourceContent(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
+            val shownError = error?.takeIf { showDiagnostics }
             Text(
-                text = error
+                text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
                     ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
-                color = if (error != null) Color(ERROR_TEXT_COLOR) else Color.White,
+                color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -916,6 +1128,10 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
         modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
         contentAlignment = verticalAlign
     ) {
+        if (source.curve != 0f) {
+            CurvedBibleText(source, textColor, refColor, fontFamily, fontScale)
+            return@Box
+        }
         Column(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalAlignment = when (source.horizontalAlignment) {
@@ -931,8 +1147,10 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 fontFamily = fontFamily,
                 fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textDecoration = textDecorationOf(source.underline, source.strikethrough),
                 textAlign = align,
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -945,7 +1163,12 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                     fontFamily = fontFamily,
                     fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(
+                        source.referenceUnderline,
+                        source.referenceStrikethrough
+                    ),
                     textAlign = align,
+                    letterSpacing = trackingOf(source.letterSpacing),
                     modifier = Modifier.fillMaxWidth()
                 )
             }

@@ -60,6 +60,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 @Composable
 fun PresentationRemoteDialog(
@@ -88,8 +89,7 @@ fun PresentationRemoteDialog(
         height = dialogHeight
     )
     val copyText: (String) -> Unit = { text ->
-        java.awt.Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(java.awt.datatransfer.StringSelection(text), null)
+        SystemClipboard.copy(text)
     }
 
     // Grow the window (never shrink) when content overflows the current viewport, instead of
@@ -145,8 +145,7 @@ internal fun PresentationRemoteDialogContent(
     onDismiss: () -> Unit,
     scrollState: ScrollState = rememberScrollState(),
     copyText: (String) -> Unit = { text ->
-        java.awt.Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(java.awt.datatransfer.StringSelection(text), null)
+        SystemClipboard.copy(text)
     },
 ) {
         Surface(

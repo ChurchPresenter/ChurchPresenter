@@ -46,6 +46,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
@@ -56,6 +57,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.ResolvedDisplay
@@ -88,6 +90,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
+import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -111,7 +116,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -138,11 +143,9 @@ import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
 import java.io.File
-import java.net.URI
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.server.applyRemoteLiveState
@@ -161,6 +164,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
@@ -240,6 +244,14 @@ fun main() {
         System.exit(0)
         return
     }
+
+    // ImageIO caches its output stream in a temp file by default, so every slide JPEG the
+    // presentation cache writes depended on java.io.tmpdir being writable — and where it was not,
+    // ImageIO.write failed with the useless "Can't create an ImageOutputStream!" rather than
+    // anything naming a temp directory. That was 75 reports across four churches. The images this
+    // app writes are single slides and thumbnails, small enough to stage in memory, so the temp
+    // file buys nothing and costs a dependency on a directory the app does not control.
+    javax.imageio.ImageIO.setUseCache(false)
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
@@ -533,8 +545,33 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
         mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
     }
-    val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings) {
-        withMirroredBackgrounds(appSettings, mirroredBackgroundSettings)
+    // A quick-tray pick lives only as long as the app is open: it is a live control, not a setting,
+    // so it is held here rather than written back through onSettingsChange.
+    var activeQuickBackground by remember { mutableStateOf<QuickBackground?>(null) }
+    // The settings dialog's on-screen preview edits a draft copy that does not reach `appSettings`
+    // until Apply or OK, so while it is running the outputs render that draft instead -- otherwise
+    // the preview would show the sample in the styling the operator is in the middle of replacing.
+    // Null whenever no preview is running, which is every other moment of the app's life.
+    val previewSettingsOverride by presenterManager.previewSettingsOverride
+    val effectiveAppSettings = remember(
+        appSettings,
+        mirroredBackgroundSettings,
+        previewSettingsOverride,
+        activeQuickBackground,
+    ) {
+        // Three layers, innermost first: the settings dialog's draft stands in for the saved
+        // settings while a preview is running, Instance Link swaps the backgrounds inside whichever
+        // of the two that is, and the quick tray's pick goes in front of the lot — it is what an
+        // operator reaches for mid-service to override what is on screen right now.
+        withQuickBackground(
+            withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings),
+            activeQuickBackground,
+        )
+    }
+    // A tile removed from the tray, or a whole settings import, must not leave a stale override live.
+    LaunchedEffect(appSettings.quickBackgrounds) {
+        val stillThere = activeQuickBackground?.id?.let { id -> appSettings.quickBackgrounds.any { it.id == id } }
+        if (stillThere == false) activeQuickBackground = null
     }
     val screenCountForUsage = remember { LiveMapReporter.detectScreenCount() }
     val deckLinkCountForUsage = remember {
@@ -595,7 +632,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+                virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -605,7 +642,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val bsOutput = browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+            val bsOutput = virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
             val renderer = remember(
                 i,
                 bsOutput.browserSourceWidth,
@@ -630,6 +667,78 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
             }
             DisposableEffect(renderer) {
                 onDispose { renderer.stop() }
+            }
+        }
+    }
+    // NDI outputs. Registered here beside the Browser Source block above and for the same reason:
+    // both are virtual outputs that open no window, so PresenterWindows.kt never sees them. The
+    // runtime is brought up once, keyed on the configured path so an operator who points the app at
+    // a different install does not have to restart it.
+    LaunchedEffect(appSettings.projectionSettings.ndiRuntimePath) {
+        // Off the composition's dispatcher: bringing the runtime up is a `Native.load` plus an
+        // initialize, and doing that inline would stall the first frame of the app on every launch
+        // of a machine that has NDI installed.
+        withContext(Dispatchers.IO) {
+            NdiManager.ensureStarted(appSettings.projectionSettings.ndiRuntimePath)
+        }
+    }
+    val ndiStatus by NdiManager.status.collectAsState()
+    appSettings.projectionSettings.ndiOutputs.indices.forEach { i ->
+        composeKey(i) {
+            val appSettingsState = rememberUpdatedState(effectiveAppSettings)
+            val screenAssignmentState = rememberUpdatedState(
+                virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            )
+            val effectiveModeState = remember {
+                derivedStateOf {
+                    effectiveOutputMode(
+                        presenterManager.ndiLocks.value, i, presenterManager.presentingMode.value,
+                    )
+                }
+            }
+            val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
+            val ndiOutput = virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            val defaultName = stringResource(Res.string.ndi_output_numbered, i + 1)
+            // Keyed on everything a sender is created with, because NDI has no way to change any of
+            // them in place: a rename, a resize or a mode change is a new source on the network.
+            // Known rough edge — the name is one of those keys and the settings field commits per
+            // keystroke, so typing a name recreates the source once per character. Harmless while
+            // nothing is receiving, and an operator names an output before a service rather than
+            // during one, but it is churn rather than something anyone would design.
+            val renderer = remember(
+                i,
+                ndiStatus,
+                ndiOutput.ndiLabelOr(defaultName),
+                ndiOutput.ndiWidth,
+                ndiOutput.ndiHeight,
+                ndiOutput.ndiFps,
+                ndiOutput.ndiMode,
+            ) {
+                NdiManager.createRenderer(
+                    index = i,
+                    assignment = ndiOutput,
+                    context = OffscreenOutputContext(
+                        presenterManager = presenterManager,
+                        appSettingsState = appSettingsState,
+                        screenAssignmentState = screenAssignmentState,
+                        effectiveModeState = effectiveModeState,
+                        outputIndex = i,
+                        kind = OffscreenOutputKind.NDI,
+                        sttManager = sttManager,
+                        mediaViewModel = mediaViewModel,
+                        qaDisplayUrlState = qaDisplayUrlState,
+                        serverUrlState = browserSourceServerUrlState,
+                    ),
+                    screenAssignmentState = screenAssignmentState,
+                    name = ndiOutput.ndiLabelOr(defaultName),
+                )
+            }
+            LaunchedEffect(renderer) { renderer?.start(this) }
+            DisposableEffect(renderer) {
+                onDispose {
+                    renderer?.stop()
+                    renderer?.let { NdiManager.release(i, it) }
+                }
             }
         }
     }
@@ -773,7 +882,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
             }
             MacMenuBarActivationFix()
             LanguageProvider(language = currentLanguage) {
-                AppThemeWrapper(theme = theme) {
+                AppWindowRoot(theme = theme) {
                     CompositionLocalProvider(
                         LocalMediaViewModel provides mediaViewModel,
                         LocalMainWindowState provides state,
@@ -1140,14 +1249,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 ),
                                 onConverter = { showConverterWindow = true },
                                 onSongLibrary = { showSongLibraryWindow = true },
-                                onHelp = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/wiki"))
-                                },
-                                onHowToBlog = {
-                                    Desktop.getDesktop()
-                                        .browse(URI("https://churchpresenter.org/blog"))
-                                },
+                                onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
+                                onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
                                 onCheckForUpdates = {
                                     coroutineScope.launch {
                                         pendingUpdateResult = UpdateChecker.checkForUpdate(
@@ -1348,6 +1451,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 livePreviewAppSettings = effectiveAppSettings,
+                                activeQuickBackground = activeQuickBackground,
+                                onQuickBackgroundPicked = { activeQuickBackground = it },
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
                                 verseSequenceLog = verseSequenceLog,
@@ -1510,19 +1615,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onIdentifyBrowserSource = { index ->
                                     presenterManager.identifyBrowserSourceOutput(index)
                                 },
-                                onOpenLottieGen = { outputDir, onSaved ->
-                                    if (isUsableOutputDir(outputDir)) {
-                                        lottieGenOutputDir = File(outputDir)
-                                        lottieGenOnFileSaved = onSaved
-                                        showLottieGenWindow = true
-                                    } else {
-                                        javax.swing.JOptionPane.showMessageDialog(
-                                            null,
-                                            "Please set a Lower Third folder in Settings first.",
-                                            "No Folder Configured",
-                                            javax.swing.JOptionPane.WARNING_MESSAGE
-                                        )
-                                    }
+                                onIdentifyNdi = { index ->
+                                    presenterManager.identifyNdiOutput(index)
                                 },
                                 obsManager = obsManager,
                                 companionSatelliteViewModel = companionSatelliteViewModel

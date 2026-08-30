@@ -66,7 +66,7 @@ class SettingsTabWidthTest {
         home.deleteRecursively()
     }
 
-    // Built once and shared across the eleven compositions. Constructing them per tab is most of
+    // Built once and shared across the ten compositions. Constructing them per tab is most of
     // what this test costs, and none of them carry state that one tab's layout could affect.
     private val settingsManager by lazy { SettingsManager() }
     private val companionServer by lazy { CompanionServer() }
@@ -97,7 +97,7 @@ class SettingsTabWidthTest {
     }
 
     /**
-     * One tab per test rather than a loop over all eleven: each composition of the settings dialog
+     * One tab per test rather than a loop over all ten: each composition of the settings dialog
      * costs about a quarter of a second, so the loop version ran to 2.8s — over the bar a unit test
      * here is held to — and named only "some tab" when it failed.
      */
@@ -120,16 +120,14 @@ class SettingsTabWidthTest {
 
     @Test fun `the Projection tab fits a narrowed dialog`() = assertTabFits(4, "Projection")
 
-    @Test fun `the Lower Third tab fits a narrowed dialog`() = assertTabFits(5, "Lower Third")
+    @Test fun `the Server tab fits a narrowed dialog`() = assertTabFits(5, "Server")
 
-    @Test fun `the Server tab fits a narrowed dialog`() = assertTabFits(6, "Server")
+    @Test fun `the Stage Monitor tab fits a narrowed dialog`() = assertTabFits(6, "Stage Monitor")
 
-    @Test fun `the Stage Monitor tab fits a narrowed dialog`() = assertTabFits(7, "Stage Monitor")
+    @Test fun `the ATEM tab fits a narrowed dialog`() = assertTabFits(7, "ATEM")
 
-    @Test fun `the ATEM tab fits a narrowed dialog`() = assertTabFits(8, "ATEM")
-
-    @Test fun `the Dictionary tab fits a narrowed dialog`() = assertTabFits(9, "Dictionary")
+    @Test fun `the Dictionary tab fits a narrowed dialog`() = assertTabFits(8, "Dictionary")
 
     @Test
-    fun `the Companion Satellite tab fits a narrowed dialog`() = assertTabFits(10, "Companion Satellite")
+    fun `the Companion Satellite tab fits a narrowed dialog`() = assertTabFits(9, "Companion Satellite")
 }

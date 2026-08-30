@@ -74,6 +74,7 @@ class SongSourcesTest {
         assertEquals(listOf("songbeamer"), SongSources.matching(".sng").map { it.id })
         assertEquals(listOf("softprojector"), SongSources.matching("sps").map { it.id })
         assertEquals(listOf("quelea"), SongSources.matching(".qsp").map { it.id })
+        assertEquals(listOf("videopsalm"), SongSources.matching(".json").map { it.id })
     }
 
     @Test

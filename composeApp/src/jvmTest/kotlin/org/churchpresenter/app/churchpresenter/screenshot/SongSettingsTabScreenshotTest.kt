@@ -13,15 +13,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -30,21 +29,17 @@ import kotlin.test.Test
 /**
  * The Songs tab of the settings dialog, in both themes.
  *
- * Two columns side by side inside **one** scroll container, so both move together and most of the
- * tab is below the fold — Title Slide, Song Number, Title, Transition and Text Margins down the
- * left, Lyrics, Fullscreen Display, Lower Third Display and the two Look Ahead blocks down the
- * right. The scroll positions below walk that, the way an operator reaches them.
+ * A rail of slide-wide settings on the left and, on the right, a live preview over one set of
+ * styling controls. That one set stands for ten stored profiles — number, title, lyrics, look-ahead
+ * and next-section, on each of the two outputs — chosen by the element tabs and the Full Screen /
+ * Lower Third switch above it. Nothing is below the fold any more: the rail scrolls on its own and
+ * the styling side always fits.
  *
- * The axes that change what is drawn, rather than merely which segment of a row is lit:
+ * The preview renders `SongPresenter` itself rather than reproducing its layout, so these images
+ * also catch a presenter change that alters what the operator is shown.
  *
- *  - **Eight shadow toggles**, each unfolding a colour/size/opacity block under it. Off by default,
- *    so the shape with them on is a different tab and is shot separately.
- *  - **The title-slide checkbox**, which greys the "show song number" row under it when off — its
- *    default — and revives it when on.
- *  - **"Number before title"**, which is present only when the song number and the title agree on
- *    *both* their vertical and horizontal alignment, in either the fullscreen or the lower-third
- *    set. The defaults disagree, so it is absent from every other image here.
- *  - **A live [PresenterManager]**, which adds an auto-fit button beside each font size.
+ * The axes worth shooting are each position of those two switches, the controls that appear only
+ * for some elements (reference position, chord colour), and the rail rows that come and go.
  */
 class SongSettingsTabScreenshotTest {
 
@@ -60,7 +55,6 @@ class SongSettingsTabScreenshotTest {
     private fun shoot(
         name: String,
         settings: AppSettings = AppSettings(),
-        presenterManager: PresenterManager? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
@@ -73,7 +67,6 @@ class SongSettingsTabScreenshotTest {
                             SongSettingsTab(
                                 settings = current,
                                 onSettingsChange = { transform -> current = transform(current) },
-                                presenterManager = presenterManager,
                             )
                         }
                     }
@@ -85,45 +78,52 @@ class SongSettingsTabScreenshotTest {
         }
     }
 
-    /** Scrolls [label]'s section heading into view and shoots what that lands on. */
-    private fun section(name: String, label: String, settings: AppSettings = AppSettings()) =
-        shoot(name, settings = settings) {
-            onAllNodesWithText(label)[0].performScrollTo()
-            waitForIdle()
-        }
-
     // ── What opens ──────────────────────────────────────────────────────────────────────────────
 
     @Test
     fun `as it opens, at the defaults`() = shoot("top")
 
+    // ── What the one control set is pointed at ──────────────────────────────────────────────────
+
+    @Test
+    fun `the lower third`() = shoot("lower_third") {
+        onNodeWithText("Lower Third").performClick()
+        waitForIdle()
+    }
+
+    /** The number: the one element besides the title with a position of its own. */
+    @Test
+    fun `the number element`() = shoot("element_number") {
+        onNodeWithText("Number").performClick()
+        waitForIdle()
+    }
+
+    /** The title, which the preview now shows above the lyrics rather than nowhere. */
+    @Test
+    fun `the title element`() = shoot("element_title") {
+        onNodeWithText("Title").performClick()
+        waitForIdle()
+    }
+
     /**
-     * With a presenter attached.
+     * The look-ahead, which turns the preview's look-ahead on by itself.
      *
-     * The auto-fit buttons this adds beside the lyrics font sizes are drawn disabled, because they
-     * need a fullscreen or lower-third screen assigned *and* lyrics already live — neither of which
-     * a bare [PresenterManager] has. Disabled is still the state an operator meets first, and it is
-     * the only one reachable without a display.
+     * That element only appears on a look-ahead slide, so selecting it forces the preview there —
+     * editing a control whose effect is off screen is what this tab exists to stop.
      */
     @Test
-    fun `with a presenter attached`() = shoot("presenter_attached", presenterManager = PresenterManager())
-
-    // ── Below the fold ──────────────────────────────────────────────────────────────────────────
-    // The left column runs out well before the right one, so a scroll target low on the left lands
-    // mid-way down the right. Each of these is a distinct picture; the sections not listed sit in a
-    // viewport one of them already covers.
-
-    // Not shot: the title, fullscreen-display and lower-third blocks on their own. All three sit in
-    // the first viewport, so scrolling to any of them lands where the tab already was and produces
-    // `top` again. Only the look-ahead blocks and the foot of the tab are really below the fold.
+    fun `the look ahead element`() = shoot("element_look_ahead") {
+        onNodeWithText("Look Ahead").performClick()
+        waitForIdle()
+    }
 
     @Test
-    fun `scrolled to the look ahead block`() = section("look_ahead", LOOK_AHEAD_FULLSCREEN)
+    fun `the next section element`() = shoot("element_next_section") {
+        onNodeWithText("Next Section").performClick()
+        waitForIdle()
+    }
 
-    @Test
-    fun `scrolled to the bottom`() = section("bottom", LOOK_AHEAD_LOWER_THIRD)
-
-    // ── The title slide ─────────────────────────────────────────────────────────────────────────
+    // ── Rows that come and go ───────────────────────────────────────────────────────────────────
 
     /**
      * Switched on, which revives the row under it.
@@ -137,40 +137,37 @@ class SongSettingsTabScreenshotTest {
         settings = songSettings { copy(titleSlideEnabled = true) },
     )
 
-    // ── Rows that appear ────────────────────────────────────────────────────────────────────────
-
-    /**
-     * "Number before title", which the defaults keep hidden.
-     *
-     * The number sits below the verse and to the right while the title is centred in the middle, so
-     * neither the fullscreen nor the lower-third pair matches and the row is not drawn. Matching the
-     * fullscreen pair to the title's is enough to bring it back — the check is an `||`.
-     */
+    /** Single: the bilingual layout row has nothing to lay out, so it is not drawn. */
     @Test
-    fun `the number-before-title row showing`() = section(
-        "number_before_title",
-        SONG_NUMBER,
+    fun `a single language`() = shoot("language_single", settings = singleLanguage())
+
+    /** Auto off, which hands the size box back the say over how big the lyrics are. */
+    @Test
+    fun `auto fit switched off`() = shoot(
+        "auto_fit_off",
+        settings = songSettings { copy(lyricsFontSizeAutoFit = false) },
+    )
+
+    /** Shadow on: three more controls fold out beside the checkbox, on the transform's own row. */
+    @Test
+    fun `shadow switched on`() = shoot("shadow_on") {
+        onNodeWithText("Shadow").performClick()
+        waitForIdle()
+    }
+
+    /** The typography the redesign added: tracking, word spacing, a case transform, strikethrough. */
+    @Test
+    fun `the new typography controls in use`() = shoot(
+        "styled_typography",
         settings = songSettings {
             copy(
-                songNumberPosition = Constants.MIDDLE,
-                songNumberHorizontalAlignment = Constants.CENTER,
+                lyricsLetterSpacing = 6,
+                lyricsWordSpacing = 12,
+                lyricsStrikethrough = true,
+                lyricsTransform = Constants.TEXT_TRANSFORM_UPPERCASE,
             )
         },
     )
-
-    // ── Shadows ─────────────────────────────────────────────────────────────────────────────────
-    // All eight on in one settings object, then shot at the scroll positions where the blocks they
-    // unfold actually are. One state, several viewports — the same tab, not several tabs.
-
-    @Test
-    fun `shadow controls under the title`() = section("shadow_title", TITLE, settings = allShadowsOn())
-
-    // Not shot: the lyrics shadow row on its own — the title and lyrics blocks share a viewport, so
-    // it is the same picture as `shadow_title`.
-
-    @Test
-    fun `shadow controls under the look ahead blocks`() =
-        section("shadow_look_ahead", LOOK_AHEAD_FULLSCREEN, settings = allShadowsOn())
 
     // ── The pickers a row opens ─────────────────────────────────────────────────────────────────
 
@@ -191,17 +188,15 @@ class SongSettingsTabScreenshotTest {
 
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
-    /** Every shadow flag on, so all eight colour/size/opacity blocks are unfolded at once. */
-    private fun allShadowsOn() = songSettings {
-        copy(
-            titleShadow = true,
-            titleLowerThirdShadow = true,
-            lyricsShadow = true,
-            lyricsLowerThirdShadow = true,
-            lookAheadShadow = true,
-            lookAheadNextShadow = true,
-            lowerThirdLookAheadShadow = true,
-            lowerThirdLookAheadNextShadow = true,
+    /** Every output down to one language, which is what the rail's Single writes. */
+    private fun singleLanguage(): AppSettings {
+        val base = songSettings { this }
+        return base.copy(
+            projectionSettings = base.projectionSettings.copy(
+                screenAssignments = base.projectionSettings.screenAssignments.map {
+                    it.copy(songMode = Constants.SONG_LANG_PRIMARY)
+                },
+            ),
         )
     }
 
@@ -247,13 +242,9 @@ class SongSettingsTabScreenshotTest {
         val SONGS = listOf("001 Amazing Grace.sps", "002 It Is Well.sps", "003 Be Thou My Vision.sps")
 
         // As the tab renders them — the scroll targets for each block below the fold.
-        const val TITLE = "Title"
-        const val SONG_NUMBER = "Song Number"
         const val LYRICS = "Lyrics"
         const val FULLSCREEN_DISPLAY = "Fullscreen Display"
         const val LOWER_THIRD_DISPLAY = "Lower Third Display"
-        const val LOOK_AHEAD_FULLSCREEN = "Look Ahead (Fullscreen)"
-        const val LOOK_AHEAD_LOWER_THIRD = "Look Ahead (Lower Third)"
 
         /** The default of every colour on this tab, and so the handle on a colour row. */
         const val WHITE_HEX = "#FFFFFF"

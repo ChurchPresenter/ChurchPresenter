@@ -51,6 +51,18 @@ data class BibleTranslationSettings(
     val lowerThirdReferencePosition: String = "Below",
     val referenceHorizontalAlignment: String = Constants.RIGHT,
     val lowerThirdReferenceHorizontalAlignment: String = Constants.RIGHT,
+    /**
+     * Whether the reference line is prefixed with this Bible's abbreviation -- "KJV John 3:16".
+     *
+     * The reference and not the verse text: the label belongs with the citation. The checkbox is
+     * shown only on the Reference element tab for that reason -- it used to sit in the header shared
+     * with Verse Text, where it appeared to do nothing at all.
+     *
+     * The string is [customAbbreviation] where the operator typed one, and otherwise the module's
+     * own -- from its `##Title:` header, or from its file name where it has no title. That fallback
+     * is what the abbreviation box shows as its placeholder, so the box is a rename rather than the
+     * only way to get a label.
+     */
     val showAbbreviation: Boolean = false,
     val referenceBold: Boolean = false,
     val referenceItalic: Boolean = false,
@@ -74,19 +86,36 @@ data class BibleTranslationSettings(
     val lowerThirdReferenceShadowColor: String = "#000000",
     val lowerThirdReferenceShadowSize: Int = 100,
     val lowerThirdReferenceShadowOpacity: Int = 90,
-    /**
-     * Letter and word spacing, in hundredths of an em, and how the verse is re-cased.
-     *
-     * Stored per style profile like everything else here: a lower-third band is short and often
-     * wants the letters opened up where the full screen does not. Spacing is an em fraction rather
-     * than pixels so it tracks the font size, including the size auto-fit lands on.
-     */
+
+    // Struck-through text, alongside the bold/italic/underline flags above. Stored as its own flag
+    // rather than folded into the underline one because Compose composes the two decorations.
+    val textStrikethrough: Boolean = false,
+    val lowerThirdTextStrikethrough: Boolean = false,
+    val referenceStrikethrough: Boolean = false,
+    val lowerThirdReferenceStrikethrough: Boolean = false,
+
+    // Tracking, in points at the configured font size, added between every character. Negative
+    // tightens. The presenter scales it with the rest of the type, so a value set against one
+    // output resolution still reads the same on another.
     val textLetterSpacing: Int = 0,
-    val textWordSpacing: Int = 0,
-    val textTransform: String = Constants.TEXT_TRANSFORM_NONE,
     val lowerThirdTextLetterSpacing: Int = 0,
+    val referenceLetterSpacing: Int = 0,
+    val lowerThirdReferenceLetterSpacing: Int = 0,
+
+    // Extra space added at each word break, on top of whatever the face's own space glyph is.
+    // Compose has no `wordSpacing`, so it is drawn by widening the spaces themselves -- see
+    // `bibleDisplayText`.
+    val textWordSpacing: Int = 0,
     val lowerThirdTextWordSpacing: Int = 0,
+    val referenceWordSpacing: Int = 0,
+    val lowerThirdReferenceWordSpacing: Int = 0,
+
+    // One of [Constants.TEXT_TRANSFORM_NONE], `_UPPERCASE`, `_LOWERCASE` or `_CAPITALIZE`, applied
+    // as the text is drawn.
+    val textTransform: String = Constants.TEXT_TRANSFORM_NONE,
     val lowerThirdTextTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val referenceTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdReferenceTransform: String = Constants.TEXT_TRANSFORM_NONE,
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the
@@ -207,6 +236,24 @@ data class BibleSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    /**
+     * How much of the output's height the lower-third band takes, as a whole percentage. 10..60.
+     *
+     * Per content type rather than global. It used to be one number on `ProjectionSettings`, and
+     * two things were wrong with that. Only the Bible and song presenters ever read it -- the Lottie
+     * lower third, announcements, captions and Q&A all size themselves -- so it was never a property
+     * of the projection window; and being single, it forced scripture and lyrics into the same band,
+     * when wanting a shallow one for a verse and a deeper one for two lines of a chorus is the usual
+     * reason to reach for the number at all.
+     *
+     * This one is scripture'. Every output kind honours it without knowing it exists: a screen
+     * window, a Browser Source and an NDI sender all render the same presenter with the same
+     * `AppSettings`. The control it replaced reached only the first of those -- it lived on the
+     * Screen Assignment card, so an operator sending an NDI lower third could see the band on air
+     * and find nothing in settings that moved it.
+     */
+    val lowerThirdHeightPercent: Int = 33,
+
     // Shadow customization — per-element
     val primaryBibleShadowColor: String = "#000000",
     val primaryBibleShadowSize: Int = 100,
@@ -245,6 +292,16 @@ data class BibleSettings(
     val splitLivePanelWidth: Int = 300,
     val crossReferencesEnabled: Boolean = true,
     val crossReferencesPanel: Boolean = false,
+
+    /**
+     * Whether a very long verse is shown as two halves rather than shrunk to fit in one.
+     *
+     * The presenter never cuts scripture off -- it scales the whole verse down until it fits -- so
+     * the longest verses arrive on screen too small to read over a background image. With this on,
+     * one past the length threshold is broken at the word boundary nearest its middle and the
+     * next/previous-verse keys step through both halves before moving on.
+     */
+    val splitLongVerses: Boolean = false,
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.

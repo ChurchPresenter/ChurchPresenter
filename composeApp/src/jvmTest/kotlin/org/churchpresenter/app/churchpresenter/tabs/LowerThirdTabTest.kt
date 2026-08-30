@@ -39,16 +39,19 @@ class LowerThirdTabTest {
     }
 
     @Test
-    fun `with no folder configured the tab says there are no presets`() =
+    fun `with no folder configured the tab says so, rather than that the folder is empty`() =
         lowerThirdTab(folder = null) { _ ->
-            assertTrue(showsExactly(LowerThirdLabel.NO_PRESETS), "got ${renderedText()}")
+            assertTrue(showsExactly(LowerThirdLabel.NO_FOLDER), "got ${renderedText()}")
         }
 
     @Test
-    fun `an empty folder is the same as no presets`() = lowerThirdTab(folder = lottieFolder()) { _ ->
-        // The folder exists but holds only the non-Lottie file.
-        assertTrue(showsExactly(LowerThirdLabel.NO_PRESETS), "got ${renderedText()}")
-    }
+    fun `an empty folder says the folder is empty, not that none is configured`() =
+        lowerThirdTab(folder = lottieFolder()) { _ ->
+            // The folder exists but holds only the non-Lottie file. A configured-but-empty folder and
+            // an unconfigured one used to read identically, which left the operator no way to tell a
+            // mistyped path from a folder they had simply not filled yet.
+            assertTrue(showsExactly(LowerThirdLabel.NO_FILES), "got ${renderedText()}")
+        }
 
     // ── Choosing one ────────────────────────────────────────────────────────────
 

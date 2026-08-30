@@ -1,8 +1,10 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -41,7 +43,7 @@ internal fun titleSlideSection(
     },
     bpm = tuning.bpm,
     capo = tuning.capo,
-)
+).withBackgroundsOf(song)
 
 /** Where a live-edited song lands: the section/line to select and the section to send. */
 internal data class EditedSongPush(val sectionIndex: Int, val lineIndex: Int, val section: LyricSection)
@@ -64,10 +66,14 @@ internal fun resolveEditedSongPush(
         title = editedSong.title,
         secondaryTitle = editedSong.secondaryTitle,
         songNumber = editedSong.number.toIntOrNull() ?: 0,
-        lines = editedSong.lyrics,
-        secondaryLines = editedSong.secondaryLyrics,
+        lines = editedSong.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+        secondaryLines = editedSong.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
         type = Constants.SECTION_TYPE_SONG,
     )
     val lineIndex = liveLineIndex.coerceIn(0, (section.lines.size - 1).coerceAtLeast(0))
-    return EditedSongPush(sectionIndex, lineIndex, section.copy(bpm = tuning.bpm, capo = tuning.capo))
+    return EditedSongPush(
+        sectionIndex,
+        lineIndex,
+        section.copy(bpm = tuning.bpm, capo = tuning.capo).withBackgroundsOf(editedSong),
+    )
 }

@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class CrashReporterSentryTest {
@@ -265,5 +266,23 @@ class CrashReporterSentryTest {
         } finally {
             crashDir.deleteRecursively()
         }
+    }
+
+    @Test
+    fun `the os family tag collapses a version string down to a platform`() {
+        // Raw os.name carries a version, which would split one platform across a dozen tag values.
+        assertEquals("macos", CrashReporter.osFamily("Mac OS X"))
+        assertEquals("macos", CrashReporter.osFamily("Darwin"))
+        assertEquals("windows", CrashReporter.osFamily("Windows 11"))
+        assertEquals("linux", CrashReporter.osFamily("Linux"))
+        assertEquals("other", CrashReporter.osFamily("SunOS"))
+        assertEquals("other", CrashReporter.osFamily(""))
+    }
+
+    @Test
+    fun `os family is what separates the platforms that share an arch`() {
+        // Adoptium reports aarch64 on Apple Silicon and on ARM Linux alike, so arch alone cannot
+        // say which OS a platform-specific path ran on — which is what this tag is for.
+        assertNotEquals(CrashReporter.osFamily("Mac OS X"), CrashReporter.osFamily("Linux"))
     }
 }

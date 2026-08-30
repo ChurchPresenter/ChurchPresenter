@@ -18,6 +18,11 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
+
+/** The key the band height is stored under, in all three of its homes. */
+private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 
 private const val VERSION_HIDDEN_TABS = 5
 private const val VERSION_SCREEN_ASSIGNMENTS = 6
@@ -79,6 +84,7 @@ class SettingsManager {
         // Also version 7: the stage monitor's chord switch and its zone names moved in the same
         // unreleased change, so they share a version rather than spending two on one release.
         7 to ::migrateStageMonitorZoneNames,
+        8 to ::migrateLowerThirdHeight,
     )
 
     fun loadSettings(): AppSettings {
@@ -180,7 +186,10 @@ class SettingsManager {
      * [BibleSettings.migrateTranslations]'s own guard.
      */
     private fun AppSettings.repaired(): AppSettings =
-        copy(bibleSettings = bibleSettings.migrateTranslations())
+        copy(
+            bibleSettings = bibleSettings.migrateTranslations(),
+            songSettings = songSettings.migrateSongNumberStyle(),
+        )
 
     /**
      * An output used to name which of two bibles it showed. With a stack of any length it names
@@ -461,6 +470,42 @@ class SettingsManager {
     }
 
     /** Schema version 2. Migrates old screen1-4Assignment fields to screenAssignments list. */
+    /**
+     * The lower-third band height moved off [ProjectionSettings] and onto the two content types that
+     * actually draw a band -- [BibleSettings] and [SongSettings] -- so a church can give scripture a
+     * shallow band and lyrics a deeper one.
+     *
+     * A migration and not just a default, because the field was *removed*: `ignoreUnknownKeys` would
+     * decode an existing document without complaint and drop the operator's number on the floor, and
+     * the next save would write the file back without it. Someone who had set 45 would find their
+     * band at 33 with nothing anywhere to explain it.
+     *
+     * Copies into both, and into neither where one already has a value -- a document written by a
+     * newer build, opened by an older one and rolled forward again must not have its two values
+     * flattened back into the one they replaced. The old key is left where it is: unknown on read,
+     * and gone the first time the file is saved.
+     */
+    private fun migrateLowerThirdHeight(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val height = root["projectionSettings"]?.jsonObject
+            ?.get(LOWER_THIRD_HEIGHT_KEY)?.jsonPrimitive?.intOrNull ?: return raw
+
+        fun carried(name: String): JsonObject {
+            val section = root[name]?.jsonObject ?: buildJsonObject { }
+            if (LOWER_THIRD_HEIGHT_KEY in section) return section
+            return buildJsonObject {
+                section.forEach { (k, v) -> put(k, v) }
+                put(LOWER_THIRD_HEIGHT_KEY, JsonPrimitive(height))
+            }
+        }
+
+        val carriers = setOf("bibleSettings", "songSettings")
+        return buildJsonObject {
+            root.forEach { (k, v) -> if (k !in carriers) put(k, v) }
+            carriers.forEach { put(it, carried(it)) }
+        }.toString()
+    }
+
     private fun migrateProjectionSettings(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
         val proj = root["projectionSettings"]?.jsonObject ?: return raw

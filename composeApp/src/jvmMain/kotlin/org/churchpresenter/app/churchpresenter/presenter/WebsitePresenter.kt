@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
@@ -36,6 +39,12 @@ import kotlinx.coroutines.delay
 import java.lang.invoke.MethodHandles
 
 private const val ASCII_MAX = 128
+
+/**
+ * Free space JCEF needs to unpack, with room to spare — the download is a bundled Chromium and runs
+ * to a couple of hundred megabytes.
+ */
+private const val JCEF_REQUIRED_BYTES = 400L * 1024 * 1024
 private const val AUDIO_INIT_DELAY_MS = 2000L
 private const val AUDIO_RETRY_DELAY_MS = 5000L
 
@@ -45,7 +54,15 @@ private const val AUDIO_RETRY_DELAY_MS = 5000L
  */
 object CefManager {
     private var cefApp: CefApp? = null
-    var initialized = false
+
+    /**
+     * Whether a usable [CefApp] exists right now.
+     *
+     * Compose-backed rather than a plain `var` because it can go from true to false mid-session:
+     * [createClient] clears it when the native side turns out to be dead, and the tab's
+     * "web engine unavailable" panel is only reached if that write recomposes its reader.
+     */
+    var initialized by mutableStateOf(false)
         private set
 
     /** True when [init] was skipped because the running macOS version is below [MIN_MACOS_MAJOR]. */
@@ -175,6 +192,24 @@ object CefManager {
         }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
     }
 
+    /**
+     * Why a JCEF install cannot be attempted into a directory in this state, or null to go ahead.
+     *
+     * Both answers are the machine: a directory the user cannot write to (ProgramData ACLs vary,
+     * and a locked-down install is a normal corporate build), and a disk without room for a
+     * bundled Chromium. Neither is a defect and neither becomes an event; what they do is stop the
+     * app spending a download to discover it, and leave a tag saying which one it was.
+     *
+     * Zero is not "full": `File.usableSpace` answers 0 when it cannot determine the figure at all,
+     * so treating it as no space would block the install on every machine whose filesystem does not
+     * report one. An unknown figure goes ahead and lets the real attempt decide.
+     */
+    internal fun jcefInstallBlocker(writable: Boolean, usableSpaceBytes: Long): String? = when {
+        !writable -> "permission_denied"
+        usableSpaceBytes in 1 until JCEF_REQUIRED_BYTES -> "disk_space"
+        else -> null
+    }
+
     fun init() {
         if (initialized) return
         if (isUnsupportedMacOS()) {
@@ -188,6 +223,23 @@ object CefManager {
         val installDir = File(root, "jcef")
         try {
             installDir.mkdirs()
+
+            // Two of the ways this fails are the machine rather than the app, and both are knowable
+            // before the download starts. Asking beforehand keeps them out of the crash reports and
+            // is locale-independent — the exceptions they raise say "Access is denied" and "There is
+            // not enough space on the disk" only on an English Windows, so classifying them after
+            // the fact would work in one language.
+            val blocker = jcefInstallBlocker(installDir.canWrite(), installDir.usableSpace)
+            if (blocker != null) {
+                System.err.println("[JCEF] Not installing to ${installDir.path}: $blocker")
+                cefApp = null
+                initialized = false
+                // No event: web features simply stay unavailable, which jcef.available already
+                // says. The tag rides along on anything else this session reports.
+                runCatching { CrashReporter.setTag("jcef.blocked", blocker) }
+                return
+            }
+
             val cacheDir = File(root, "webview-cache")
             cacheDir.mkdirs()
 
@@ -232,7 +284,36 @@ object CefManager {
         }
     }
 
-    fun createClient(): CefClient? = cefApp?.createClient()
+    /**
+     * A client for a new browser, or null when the web engine cannot provide one.
+     *
+     * [CefAppBuilder.build] returning normally is not a promise that the native side came up:
+     * jcefmaven hands back the process-wide singleton, whose startup can fail afterwards and
+     * asynchronously, leaving it in `INITIALIZATION_FAILED`. `CefApp.createClient()` then throws —
+     * and the only caller is [EmbeddedWebView], inside a `remember`, so the throw landed in
+     * composition on the UI thread and took the whole app down.
+     *
+     * Recovering is simply returning null, which every caller already handles by drawing nothing.
+     * [initialized] is cleared with it so the tab falls back to its explanatory panel and nothing
+     * asks a second time. Filed as a warning, not an exception: the condition is recovered, and an
+     * exception here would write a `crash-reports/` file for a session that carries on.
+     */
+    fun createClient(): CefClient? {
+        val app = cefApp ?: return null
+        return try {
+            app.createClient()
+        } catch (t: Throwable) {
+            cefApp = null
+            initialized = false
+            runCatching { CrashReporter.setTag("jcef.blocked", "client_creation_failed") }
+            CrashReporter.reportWarning(
+                "JCEF client creation failed; web features disabled for this session",
+                throwable = t,
+                tags = mapOf("subsystem" to "webview", "jcef.recovered" to "true"),
+            )
+            null
+        }
+    }
 
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown
@@ -355,7 +436,13 @@ fun EmbeddedWebView(
 
     val client = remember { CefManager.createClient() } ?: return
     val initialUrl = remember { url }
-    val browser = remember { client.createBrowser(initialUrl, false, false) }
+    // createBrowser asks JCEF for the global CefRequestContext, which answers null once the native
+    // side is down — and the caller then reads a field off it, so this arrived as
+    // `NullPointerException: Cannot read field "N_CefHandle" because "result" is null`, thrown in
+    // composition. There is no state to ask beforehand (CefApp's own state is not exposed here),
+    // so the attempt is the check; drawing nothing is what every other unavailable path does.
+    val browser = remember { runCatching { client.createBrowser(initialUrl, false, false) }.getOrNull() }
+        ?: return
 
     LaunchedEffect(browser) {
         navController?.browser = browser
@@ -430,8 +517,13 @@ fun EmbeddedWebView(
                 comp.isVisible = false
                 comp.parent?.remove(comp)
             } catch (_: Exception) {}
-            browser.close(true)
-            client.dispose()
+            // JCEF tears its native context down from its own shutdown hook, which races composable
+            // disposal on the way out of the app: both of these then throw
+            // `IllegalStateException: CefApp was terminated` out of onDispose. There is nothing left
+            // to release at that point — the process is going away — so failing to release it is not
+            // a fault, and letting the throw escape disposal is.
+            runCatching { browser.close(true) }
+            runCatching { client.dispose() }
         }
     }
 

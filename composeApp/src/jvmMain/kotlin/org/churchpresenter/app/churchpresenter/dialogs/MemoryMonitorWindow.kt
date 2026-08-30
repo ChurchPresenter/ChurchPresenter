@@ -45,7 +45,7 @@ import churchpresenter.composeapp.generated.resources.memory_monitor_non_heap
 import churchpresenter.composeapp.generated.resources.memory_monitor_used
 import churchpresenter.composeapp.generated.resources.memory_monitor_window_title
 import kotlinx.coroutines.delay
-import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -112,7 +112,7 @@ fun MemoryMonitorWindow(isVisible: Boolean, theme: ThemeMode, onClose: () -> Uni
         // `DialogSizes.kt`, which records why it is 500dp and not the 440dp that shipped clipped.
         state = rememberWindowState(width = MEMORY_MONITOR_WINDOW_WIDTH, height = MEMORY_MONITOR_WINDOW_HEIGHT)
     ) {
-        AppThemeWrapper(theme = theme) {
+        AppWindowRoot(theme = theme) {
             MemoryMonitorContent()
         }
     }

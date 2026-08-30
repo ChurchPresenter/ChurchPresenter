@@ -56,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
+import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
 import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
@@ -68,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.unlock_screen
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -125,7 +127,7 @@ fun LivePreviewPanel(
     val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
     val mediaViewModel = LocalMediaViewModel.current
 
-    // Scrollable: with several outputs (displays, dev-fallback windows, browser sources) the
+    // Scrollable: with several outputs (displays, dev-fallback windows, browser sources, NDI) the
     // previews are taller than the sidebar and would otherwise be clipped at the bottom.
     Column(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -174,6 +176,28 @@ fun LivePreviewPanel(
                 onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
                 label = proj.browserSourceOutputs[i]
                     .browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1)),
+            )
+        }
+
+        // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
+        // get their own loop over ProjectionSettings.ndiOutputs and their own lock index space.
+        // A disabled output is skipped: main.kt renders nothing for it, so a preview would show a
+        // picture the network is not actually receiving.
+        for (i in proj.ndiOutputs.indices) {
+            val output = proj.ndiOutputs[i]
+            if (!output.ndiEnabled) continue
+            SingleDisplayPreview(
+                screenIndex = i,
+                screenAssignment = output,
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier.fillMaxWidth(),
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                locks = presenterManager.ndiLocks.value,
+                onToggleLock = { mode -> presenterManager.setNdiLock(i, mode) },
+                label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1)),
             )
         }
 
@@ -251,6 +275,12 @@ private fun SingleDisplayPreview(
 
     val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
     val isLowerThird = screenAssignment.isLowerThird
+
+    // The same background switches every real output obeys — this layout's own
+    // (Projection settings' Fullscreen/Lower Third Background columns) and the per-content-type
+    // one beside it. Without them the preview draws a background the output is suppressing, and
+    // the two disagree on screen for the rest of the service.
+    val showsBackground = showsOutputBackground(screenAssignment)
 
     // Determine if this screen shows the current content
     val showsContent = when (effectiveMode) {
@@ -350,7 +380,12 @@ private fun SingleDisplayPreview(
         // so WEBSITE is handled separately below at native size.
         if (effectiveMode != Presenting.WEBSITE) {
             ScaledPresenterContent {
-                PresenterScreen(appSettings = outputSettings, outputRole = primaryRole, isLowerThird = isLowerThird) {
+                PresenterScreen(
+                    appSettings = outputSettings,
+                    outputRole = primaryRole,
+                    isLowerThird = isLowerThird,
+                    showBackground = showsBackground,
+                ) {
                     if (effectiveMode != Presenting.NONE && showsContent) {
                         val modeCrossfadeOn = outputSettings.bibleSettings.crossfade ||
                             outputSettings.songSettings.crossfade
@@ -370,6 +405,7 @@ private fun SingleDisplayPreview(
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
+                                    showBackground = showsBackground && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = outputSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations
                                 )
@@ -385,9 +421,10 @@ private fun SingleDisplayPreview(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
+                                    showBackground = showsBackground && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
-                    showChords = screenAssignment.showChords,
+                                    showChords = screenAssignment.showChords,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(
@@ -415,7 +452,6 @@ private fun SingleDisplayPreview(
                                 LowerThirdPresenter(
                                     composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
-                                    appSettings = outputSettings,
                                     frame = presenterManager.lottieFrame.value
                                 )
                             Presenting.ANNOUNCEMENTS ->

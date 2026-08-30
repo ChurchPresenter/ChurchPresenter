@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundScope
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.withConfigFor
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 
@@ -7,48 +9,20 @@ class BackgroundSettingsViewModel {
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun updateDefaultColor(
-        color: String,
-        onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-    ) {
-        onSettingsChange { s ->
-            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundColor = color))
-        }
-    }
-
-    fun updateBibleBackground(
+    /**
+     * Writes [config] to whichever surface is open.
+     *
+     * One method rather than one per surface: the Background tab edits all six through the same
+     * editor now, and [withConfigFor] is what knows that two of them keep their settings in flat
+     * fields instead of a [BackgroundConfig].
+     */
+    internal fun updateBackground(
+        scope: BackgroundScope,
         config: BackgroundConfig,
         onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
     ) {
         onSettingsChange { s ->
-            s.copy(backgroundSettings = s.backgroundSettings.copy(bibleBackground = config))
-        }
-    }
-
-    fun updateBibleLowerThirdBackground(
-        config: BackgroundConfig,
-        onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-    ) {
-        onSettingsChange { s ->
-            s.copy(backgroundSettings = s.backgroundSettings.copy(bibleLowerThirdBackground = config))
-        }
-    }
-
-    fun updateSongBackground(
-        config: BackgroundConfig,
-        onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-    ) {
-        onSettingsChange { s ->
-            s.copy(backgroundSettings = s.backgroundSettings.copy(songBackground = config))
-        }
-    }
-
-    fun updateSongLowerThirdBackground(
-        config: BackgroundConfig,
-        onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-    ) {
-        onSettingsChange { s ->
-            s.copy(backgroundSettings = s.backgroundSettings.copy(songLowerThirdBackground = config))
+            s.copy(backgroundSettings = s.backgroundSettings.withConfigFor(scope, config))
         }
     }
 }

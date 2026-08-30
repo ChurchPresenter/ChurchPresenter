@@ -72,21 +72,18 @@ class AppPreviewSettingsScreenshotTest {
     fun projection() = settingsTab("projection", 4)
 
     @Test
-    fun `lower third`() = settingsTab("lower_third", 5)
+    fun server() = settingsTab("server", 5)
 
     @Test
-    fun server() = settingsTab("server", 6)
+    fun `stage monitor`() = settingsTab("stage_monitor", 6)
 
     @Test
-    fun `stage monitor`() = settingsTab("stage_monitor", 7)
+    fun atem() = settingsTab("atem", 7)
 
     @Test
-    fun atem() = settingsTab("atem", 8)
+    fun dictionary() = settingsTab("dictionary", 8)
 
     @Test
-    fun dictionary() = settingsTab("dictionary", 9)
-
-    @Test
-    fun `companion satellite`() = settingsTab("companion_satellite", 10)
+    fun `companion satellite`() = settingsTab("companion_satellite", 9)
 
 }

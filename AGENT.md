@@ -46,7 +46,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 |------------------|---------------------------------------------------------------------|
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
-| `presenter/`     | Output window rendering (what the audience sees)                    |
+| `presenter/`     | Output window rendering (what the audience sees) — plus the two off-screen outputs, `BrowserSourceVideoRenderer` and `NdiVideoRenderer`, on the shared `ComposeScenePump`                    |
 | `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
@@ -86,6 +86,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `settings/`            | `:settings`            | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md)            |
 | `diagnostics/`         | `:diagnostics`         | Crash reporting: the crash log on disk and the Sentry bridge behind it            | [AGENT.md](diagnostics/AGENT.md)         |
 | `atem/`                | `:atem`                | The Blackmagic ATEM protocol client — UDP, state, keyers, media-pool upload       | [AGENT.md](atem/AGENT.md)                |
+| `ndi/`                 | `:ndi`                 | NDI output — runtime discovery and the six native send calls, behind one interface | [AGENT.md](ndi/AGENT.md)                 |
 | `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
@@ -245,19 +246,30 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**Two churn sources are NOT fixed, and they fail 24 of the 914 images on a clean `main`** — measured
-2026-08-22 on macOS, `main` and a feature branch producing byte-identical failure sets:
+**Three churn sources are NOT fixed, and they fail 27 of the 914 images on a clean `main`** —
+the clock and camera rows measured 2026-08-22, the font rows added 2026-08-27, both times with
+`main` and a feature branch producing byte-identical failure sets:
 
 | suite | images | why it changes every run |
 |---|---|---|
 | `StageMonitorScreenshotTest` | 22 | The stage monitor draws a **live wall clock**. The diff is literally `06:47:19 PM` against `01:56:04 AM`. |
 | `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 1 | Same clock, inside the settings preview. |
 | `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerates the host's **real capture devices**. Committed as "MacBook Pro Camera"; a machine without one renders "Capture screen 0". |
+| `SettingsFieldsScreenshotTest` → `font_picker`, `font_picker_open` | 2 | The **font list is pinned but the glyphs are not**. The picker renders each name in its own typeface, so a machine missing one of `FONTS` draws that row in a fallback face. The test's own comment says the list is fixed "not the machine's", which is true and not enough. |
+| `AppPreviewSettingsScreenshotTest` → `settings_bible_light` | 1 | The same dropdown, inside the Bible settings preview. |
 
-Both are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside the
-composition leaking into the picture — and both want the same remedy: take the value as a parameter
-and let the test pin it. Until then `verifyRoborazziJvm` cannot be read as pass/fail; check the
-failing names against this table first, and treat **anything else** as a real difference.
+All three are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside
+the composition leaking into the picture — and all want the same remedy: take the value as a
+parameter and let the test pin it. For the font rows that means rendering the sample names in a
+bundled face rather than the installed one. Until then `verifyRoborazziJvm` cannot be read as
+pass/fail; check the failing names against this table first, and treat **anything else** as a real
+difference.
+
+**Clear `composeApp/screenshots/.parts` before reading a verify run.** The per-theme halves are
+written there before being stacked, and a run left over from an earlier invocation can be picked up
+by the next one — which surfaces as an extra failure that does not reproduce when the suite is run
+on its own. `BibleSettingsTabScreenshotTest → font_picker` appeared exactly this way and is *not* a
+churn source.
 
 Every state is shot in **both themes and stacked into one image**, light above dark — go through
 `stackedThemes` (or `captureComponent`, which wraps it) and a state is written once, not twice. One
@@ -390,8 +402,12 @@ produces a failure that only appears under load and only sometimes:
   `TestExecutionListener`, watches whichever test is running and, once one has been running past its
   threshold (five minutes by default, **150s in CI** — far past anything this suite legitimately
   does; the slowest class is 37.1s for all of its tests together), dumps every thread in the fork
-  and `halt`s it with exit code 93. **The hang it exists for is still unexplained**; that class's
-  KDoc records what has been ruled out, so the next attempt does not repeat it. The dump goes to stderr *and* to
+  and `halt`s it with exit code 93. **The hang it exists for was a deadlock, and the fifth
+  occurrence's dump proved it** — an ABBA lock inversion between the on-screen AWT scene's
+  `SnapshotStateObserver` and an off-screen one's, because `advanceGlobalSnapshot` fans out to every
+  registered observer. `LowerThirdOffscreenRenderer` now confines its scene to the event queue, and
+  `ComposeScenePump` still does not: a narrower form stays reachable while a Browser Source or NDI
+  output is live. That class's KDoc carries the cycle and what was ruled out first. The dump goes to stderr *and* to
   `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
   as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
   it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has

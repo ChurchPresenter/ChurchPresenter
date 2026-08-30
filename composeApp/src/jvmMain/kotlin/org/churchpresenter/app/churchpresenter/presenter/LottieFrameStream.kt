@@ -55,6 +55,12 @@ class LottieFrameStream(
         const val CLOSE_LINGER_MS = 250L
         /** Sampled frames must be >1% opaque or the whole pre-render is considered blank. */
         const val BLANK_OPAQUE_FRACTION = 0.01f
+
+        // Where along a clip open() samples: an early frame, then the quarter points.
+        const val EARLY_SAMPLE_DIVISOR = 10
+        const val QUARTERS = 4
+        const val HALVES = 2
+        const val THREE_QUARTERS_NUMERATOR = 3
     }
 
     // Single thread so decode order matches request order and bitmap lifecycle is race-free.
@@ -74,16 +80,30 @@ class LottieFrameStream(
      * failure) by sampling a few decoded frames. Returns false — without starting the worker —
      * when the content is blank; the caller should discard the cache file and stay on the
      * live renderer. Must be called exactly once, before any [requestFrame].
+     *
+     * Every sample must be blank, not merely a majority of them. The check exists for a capture
+     * that produced nothing at all, and that case fails on all five samples including the early
+     * one, as does a zero-length or truncated cache ([isFrameBlank] calls an empty frame blank).
+     * A majority once meant something else too: a lower third that animates in, holds and fades
+     * out — the shape the bundled generator writes — is genuinely transparent at 50%, 75% and
+     * 100% of its clip, so three of the four old samples read blank and a perfectly good render
+     * was deleted, silently dropping the operator back to the live renderer and re-rendering from
+     * scratch on the next play. That was 14 reports across 3 churches.
      */
     suspend fun open(): Boolean = withContext(decodeDispatcher) {
         val r = LottieRenderCache.Reader(file)
         reader = r
         frameCount = r.frameCount
-        val sampleIndices = listOf(r.frameCount / 4, r.frameCount / 2, r.frameCount * 3 / 4, r.frameCount - 1)
-            .map { it.coerceIn(0, r.frameCount - 1) }
-            .distinct()
-        val blankCount = sampleIndices.count { isFrameBlank(r.frameArgb(it)) }
-        if (blankCount > sampleIndices.size / 2) return@withContext false
+        val sampleIndices = blankSampleIndices(r.frameCount)
+        blankSampleCount = sampleIndices.size
+        // A sample that will not decode counts as blank rather than throwing: it is no evidence
+        // that the capture worked, and the whole point of open() is to answer that question
+        // without taking the pre-render coroutine down. decodeAndPublish already treats a single
+        // bad frame this way during playback.
+        blankFrameCount = sampleIndices.count { index ->
+            runCatching { isFrameBlank(r.frameArgb(index)) }.getOrDefault(true)
+        }
+        if (blankFrameCount == sampleIndices.size) return@withContext false
         worker = scope.launch(decodeDispatcher) {
             for (index in requests) {
                 decodeAndPublish(index)
@@ -91,6 +111,12 @@ class LottieFrameStream(
         }
         true
     }
+
+    /** How many frames [open] sampled, and how many of them were blank. Read for reporting. */
+    internal var blankSampleCount = 0
+        private set
+    internal var blankFrameCount = 0
+        private set
 
     /** Ask for a frame; conflated, so only the most recent request is decoded. */
     fun requestFrame(index: Int) {
@@ -137,6 +163,24 @@ class LottieFrameStream(
             CrashReporter.reportException(e, "Lower third frame decode")
         }
     }
+
+    /**
+     * Which frames of a [frameCount]-frame clip [open] samples.
+     *
+     * Spread across the whole clip and deliberately including an early frame: a clip's own
+     * fade-out makes its tail transparent by design, so a set of samples drawn only from the
+     * second half cannot tell "nothing rendered" from "it ended".
+     */
+    internal fun blankSampleIndices(frameCount: Int): List<Int> =
+        listOf(
+            frameCount / EARLY_SAMPLE_DIVISOR,
+            frameCount / QUARTERS,
+            frameCount / HALVES,
+            frameCount * THREE_QUARTERS_NUMERATOR / QUARTERS,
+            frameCount - 1,
+        )
+            .map { it.coerceIn(0, maxOf(0, frameCount - 1)) }
+            .distinct()
 
     /**
      * Roughly estimates whether a frame is meaningfully blank (near-fully transparent).

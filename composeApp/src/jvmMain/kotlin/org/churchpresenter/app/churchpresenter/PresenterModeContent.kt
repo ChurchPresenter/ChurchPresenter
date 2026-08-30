@@ -159,7 +159,6 @@ internal fun PresenterModeContent(
                 LowerThirdPresenter(
                     composition = lottieComposition,
                     progress = { presenterManager.lottieProgress.value },
-                    appSettings = appSettings,
                     frame = lottieFrame
                 )
 

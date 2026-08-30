@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SETTINGS_PREVIEW_SCALED_TAG
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.Dp
@@ -188,6 +190,11 @@ internal fun ComposeUiTest.horizontalOverflow(probe: ViewportProbe): Dp {
     var worst = 0f
     fun walk(node: SemanticsNode) {
         if (node.config.contains(SemanticsProperties.HorizontalScrollAxisRange)) return
+        // The settings previews render the real presenter at the output's own size and scale the
+        // drawn result into a few hundred dp. Their nodes report the size they were measured at, so
+        // left in they read as 1600dp of overflow -- while nothing in them is drawn outside the
+        // preview box at all. See SETTINGS_PREVIEW_SCALED_TAG.
+        if (node.config.getOrNull(SemanticsProperties.TestTag) == SETTINGS_PREVIEW_SCALED_TAG) return
         if (node.size.width > 0 && node.size.height > 0) {
             worst = maxOf(worst, node.positionInRoot.x + node.size.width - edge)
         }

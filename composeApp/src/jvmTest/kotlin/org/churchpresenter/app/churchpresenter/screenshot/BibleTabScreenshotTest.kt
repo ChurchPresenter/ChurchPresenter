@@ -20,6 +20,11 @@ import org.churchpresenter.app.churchpresenter.tabs.BibleLabel
 import org.churchpresenter.app.churchpresenter.tabs.actionButton
 import org.churchpresenter.app.churchpresenter.tabs.bibleSearch
 import org.churchpresenter.app.churchpresenter.tabs.bibleTab
+import org.churchpresenter.bible.SpbFixture
+import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.app.churchpresenter.tabs.bibleFixture
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.splitAtWordMidpoint
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.AfterTest
@@ -69,11 +74,15 @@ class BibleTabScreenshotTest {
         crossReferences: CrossReferenceRepository? = null,
         /** Modules to write alongside the primary — see `bibleTab`'s parameter of the same name. */
         extraModules: List<String> = emptyList(),
+        content: String = bibleFixture,
+        /** Non-null gives the tab something live to read, which is what the split mark needs. */
+        presenter: (() -> PresenterManager)? = null,
         drive: ComposeUiTest.(BibleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         bibleTab(
             settings = settings, width = width, stt = stt, themeMode = mode,
             crossReferences = crossReferences, extraModules = extraModules,
+            content = content, presenter = presenter?.invoke(),
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -301,6 +310,71 @@ class BibleTabScreenshotTest {
         "load_error",
         settings = { stack(it, "test.spb", "deleted.spb") },
     )
+
+    // -- A long verse shown as two halves ---------------------------------------
+
+    /** 60 words, past the count that makes a verse worth splitting. */
+    private val longVerse =
+        "And the king's scribes were called at that time in the third month, that is, the month " +
+        "Sivan, on the three and twentieth day thereof; and it was written according to all that " +
+        "Mordecai commanded unto the Jews, and to the lieutenants, and the deputies and rulers " +
+        "of the provinces which are from India unto Ethiopia, an hundred twenty and seven."
+
+    private fun longVerseFixture() = SpbFixture.buildContent(
+        title = "Test Bible",
+        books = listOf(SpbFixture.Book(17, "Esther", 1)),
+        verses = listOf(
+            SpbFixture.Verse(17, 1, 1, "Now it came to pass in the days of Ahasuerus."),
+            SpbFixture.Verse(17, 1, 2, longVerse),
+            SpbFixture.Verse(17, 1, 3, "On the seventh day the heart of the king was merry."),
+        ),
+    )
+
+    private fun splitting(app: AppSettings) =
+        app.copy(bibleSettings = app.bibleSettings.copy(splitLongVerses = true))
+
+    /** A presenter already showing [half], as going live with that half would leave it. */
+    private fun showing(half: String) = PresenterManager().apply {
+        setDisplayedVerses(
+            listOf(
+                SelectedVerse(
+                    bookName = "Esther", chapter = 1, verseNumber = 2, verseText = half, bookId = 17,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `the first half of a split verse is live`() = shoot(
+        "split_verse_first_half",
+        settings = ::splitting,
+        content = longVerseFixture(),
+        presenter = { showing(splitAtWordMidpoint(longVerse).first) },
+    ) { vm ->
+        vm.selectVerse(1)
+        waitForIdle()
+    }
+
+    @Test
+    fun `the second half of a split verse is live`() = shoot(
+        "split_verse_second_half",
+        settings = ::splitting,
+        content = longVerseFixture(),
+        presenter = { showing(splitAtWordMidpoint(longVerse).second) },
+    ) { vm ->
+        vm.selectVerse(1)
+        waitForIdle()
+    }
+
+    @Test
+    fun `a long verse is unmarked while splitting is off`() = shoot(
+        "split_verse_setting_off",
+        content = longVerseFixture(),
+        presenter = { showing(longVerse) },
+    ) { vm ->
+        vm.selectVerse(1)
+        waitForIdle()
+    }
 
     private companion object {
         const val SECTION = "bibleTab"

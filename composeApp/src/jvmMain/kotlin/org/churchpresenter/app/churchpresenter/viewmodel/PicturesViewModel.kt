@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +16,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -23,6 +25,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
+import java.util.UUID
 import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.WatchEvent
@@ -44,16 +47,6 @@ private const val THUMBNAIL_RETRY_MS = 120L
 private const val THUMBNAIL_RETRY_ATTEMPTS = 3
 
 /**
- * How many times a decoded thumbnail is written into the state maps before giving up on it, and how
- * long between tries.
- *
- * The write races the thread advancing the global snapshot and can lose; the window is momentary, so
- * a handful of tries a few milliseconds apart clears it without costing anything measurable.
- */
-private const val PUBLISH_ATTEMPTS = 4
-private const val PUBLISH_RETRY_MS = 20L
-
-/**
  * How many unreadable files one warning describes in full.
  *
  * A folder where everything failed is one problem, not a hundred, and the first handful of lines
@@ -62,7 +55,22 @@ private const val PUBLISH_RETRY_MS = 20L
 private const val MAX_REPORTED_FAILURES = 20
 
 class PicturesViewModel(
-    appSettings: AppSettings? = null
+    appSettings: AppSettings? = null,
+    /**
+     * Where every write to this class's snapshot state is made.
+     *
+     * `Dispatchers.Main` is the Swing event queue, which is the thread that advances the global
+     * snapshot — in the app because that is where composition runs, and under
+     * `runComposeUiTest` because `SkikoComposeUiTest` routes `setContent`/`render`/`closeScene`
+     * through `SwingUtilities.invokeAndWait`. Confining the writes to it is what stops a write
+     * from the folder watcher racing the composition; see [startWatching] and [publishThumbnail].
+     *
+     * A parameter so a test can watch where the writes land. Note that `kotlinx-coroutines-test`
+     * is on the test classpath, so this resolves to `TestMainDispatcher` delegating to the Swing
+     * one — still the event queue. Nothing calls `Dispatchers.setMain` today; anything that did
+     * would quietly take this confinement away.
+     */
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
     private val defaultDirectory = appSettings?.pictureSettings?.storageDirectory ?: ""
 
@@ -120,7 +128,9 @@ class PicturesViewModel(
             }
         }
         val reason = lastError?.message ?: lastError?.toString() ?: "unknown"
-        _thumbnailFailures[file] = reason
+        // Snapshot state, written from whichever thread decoded — same confinement as
+        // [publishThumbnail].
+        withContext(mainDispatcher) { _thumbnailFailures[file] = reason }
         if (file.length() == 0L) return null
         // The reason names the file — the tile and the local log want that, a report does not, so
         // the name comes out here rather than at the reporting end, where the exception's own
@@ -148,29 +158,26 @@ class PicturesViewModel(
     }
 
     /**
-     * Writes a decoded thumbnail into the state maps, from the background thread that decoded it.
+     * Writes a decoded thumbnail into the state maps, on the thread that owns them.
      *
      * Both maps are snapshot state, and a write from a thread other than the one advancing the
      * global snapshot can lose that race — the *write* throws `Reading a state that was created
-     * after the snapshot was taken or in a snapshot that has not yet been applied`. The image is
-     * fine; only the moment it was published in was wrong, so the write is simply made again.
+     * after the snapshot was taken or in a snapshot that has not yet been applied`. The decode
+     * itself belongs on a background thread and stays there; only the publish hops.
      *
-     * Writing inside `Snapshot.withMutableSnapshot` instead is not the fix — it moves the identical
+     * This used to retry the write four times instead, which cleared the window often enough to
+     * look fixed. It was a retry around a race, it left the two other background writers
+     * ([decodeThumbnail]'s failure record and the folder watcher) unprotected, and the watcher is
+     * the one that took CI red. Confining every write to [mainDispatcher] removes the race rather
+     * than out-waiting it.
+     *
+     * Writing inside `Snapshot.withMutableSnapshot` is still not the fix — that moves the identical
      * failure onto the readers, where the grid throws it out of composition.
-     *
-     * Whatever the last attempt throws is left to [decodeThumbnail] to record, so a write that never
-     * lands still resolves the file instead of leaving its tile on "Loading…" for ever.
      */
     private suspend fun publishThumbnail(file: File, bitmap: ImageBitmap) {
-        repeat(PUBLISH_ATTEMPTS) { attempt ->
-            try {
-                _thumbnails[file] = bitmap
-                _thumbnailFailures.remove(file)
-                return
-            } catch (e: IllegalStateException) {
-                if (attempt == PUBLISH_ATTEMPTS - 1) throw e
-                delay(PUBLISH_RETRY_MS)
-            }
+        withContext(mainDispatcher) {
+            _thumbnails[file] = bitmap
+            _thumbnailFailures.remove(file)
         }
     }
 
@@ -214,6 +221,15 @@ class PicturesViewModel(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var watchJob: Job? = null
+
+    /**
+     * The in-flight [loadPictureFromRemote] download, so [clearImages] can stop it.
+     *
+     * Without this, re-selecting the same mirrored picture item started a second loop over the same
+     * cache directory while the first was still running, and both appended the identical file — a
+     * duplicate `absolutePath` in [_images], which is a fatal crash in the grid that keys on it.
+     */
+    private var remoteLoadJob: Job? = null
 
     /**
      * Guards every structural change to [_images], and any index read taken in order to make one.
@@ -269,7 +285,7 @@ class PicturesViewModel(
         // Add only files not already present so a re-entrant/repeated load stays idempotent — a
         // duplicate path in _images would crash the LazyVerticalGrid keyed by absolutePath.
         synchronized(imagesLock) {
-            _images.addAll(imageFiles.filter { it !in _images })
+            imageFiles.forEach { addUniqueLocked(it) }
         }
 
         // Load thumbnails in background
@@ -303,23 +319,34 @@ class PicturesViewModel(
         _selectedFolder.value = File(folderPath)
         val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
         cacheDir.mkdirs()
-        scope.launch {
+        remoteLoadJob = scope.launch {
             for (index in 0 until imageCount) {
+                // Cancellation is cooperative and most of this loop is blocking I/O, so a
+                // superseded download runs on unless it is asked to stop. Checking here stops it
+                // fetching and writing for a folder nobody is looking at any more.
+                if (!isActive) return@launch
                 val cacheFile = File(cacheDir, "image_%04d.jpg".format(index))
                 var cached = cacheFile.exists()
                 if (!cached) {
                     val bytes = fetchBytes(index)
                     if (bytes != null) {
-                        val tmp = File(cacheDir, "${cacheFile.name}.tmp")
+                        // Unique per attempt. Two loads of the same folder overlap whenever the
+                        // operator re-selects a mirrored item, and a shared "image_0000.jpg.tmp"
+                        // made them fight over one path: whichever renamed second found its temp
+                        // file already moved, treated the download as failed and dropped the image,
+                        // so the folder came up short a picture for no stated reason.
+                        val tmp = File(cacheDir, "${cacheFile.name}.${UUID.randomUUID()}.tmp")
                         tmp.writeBytes(bytes)
-                        cached = tmp.renameTo(cacheFile)
-                        if (!cached) tmp.delete()
+                        cached = tmp.renameTo(cacheFile) || cacheFile.exists()
+                        if (tmp.exists()) tmp.delete()
                     }
                 }
                 if (cached) {
-                    synchronized(imagesLock) { _images.add(cacheFile) }
-                    reportThumbnailFailures(listOfNotNull(decodeThumbnail(cacheFile)))
-                    presenterManager?.let { syncWithPresenter(it) }
+                    val added = isActive && synchronized(imagesLock) { addUniqueLocked(cacheFile) }
+                    if (added) {
+                        reportThumbnailFailures(listOfNotNull(decodeThumbnail(cacheFile)))
+                        presenterManager?.let { syncWithPresenter(it) }
+                    }
                 }
             }
         }
@@ -328,6 +355,8 @@ class PicturesViewModel(
     fun clearImages() {
         watchJob?.cancel()
         watchJob = null
+        remoteLoadJob?.cancel()
+        remoteLoadJob = null
         synchronized(imagesLock) { _images.clear() }
         _thumbnails.clear()
         _thumbnailFailures.clear()
@@ -526,11 +555,34 @@ class PicturesViewModel(
                         }
                     }
                 }
+                // The watch job's own scope, so it can be put back inside the hop below.
+                val watcher = this
                 while (isActive) {
                     val key = watchService.take()
                     for (event in key.pollEvents()) {
                         val fileName = watchedImageName(event) ?: continue
-                        applyWatchEvent(event.kind(), File(folder, fileName))
+                        // Every state this touches — `_images`, both thumbnail maps and the
+                        // selected index — is snapshot state, and this coroutine runs on IO. A
+                        // write from here races the thread advancing the global snapshot and
+                        // throws `Reading a state that was created after the snapshot was taken`
+                        // out of the watcher, where nothing catches it. It took CI red on
+                        // `PicturesTabExtraTest`, blamed on whichever test was running when a
+                        // previous folder's watcher woke up.
+                        //
+                        // Hopped here rather than inside `addWatchedImage`/`removeWatchedImage`
+                        // for two reasons: one hop covers the list, both maps and the index
+                        // together, and `PicturesViewModelWatchRaceTest` drives those two
+                        // functions from raw threads on purpose — confining them would serialise
+                        // its lanes and leave it passing while racing nothing.
+                        //
+                        // `with(watcher)` is load-bearing: without it the receiver inside
+                        // `withContext` is the hop's own scope, and `addWatchedImage`'s
+                        // `launch { decodeThumbnail(...) }` would decode images on the event
+                        // queue. Putting the outer scope back keeps both the `isActive` gates and
+                        // the decode's parentage exactly as they were.
+                        withContext(mainDispatcher) {
+                            with(watcher) { applyWatchEvent(event.kind(), File(folder, fileName)) }
+                        }
                     }
                     if (!key.reset()) break
                 }
@@ -566,6 +618,21 @@ class PicturesViewModel(
         else -> false
     }
 
+    /**
+     * Adds [file] unless its path is already listed, answering whether it went in. Caller holds
+     * [imagesLock].
+     *
+     * Compared by `absolutePath` — the exact string [PicturesTab]'s grid uses as its item key —
+     * rather than by [File.equals], which compares the *unnormalised* path. Two `File`s naming one
+     * picture, one relative and one absolute, are unequal to `equals` and identical as keys, so the
+     * membership tests passed and the grid still threw "Key ... was already used".
+     */
+    private fun addUniqueLocked(file: File, index: Int? = null): Boolean {
+        if (_images.any { it.absolutePath == file.absolutePath }) return false
+        if (index != null) _images.add(index, file) else _images.add(file)
+        return true
+    }
+
     internal fun CoroutineScope.addWatchedImage(file: File): Boolean {
         // isActive gates the add: cancellation is cooperative, so a watcher cancelled by
         // clearImages() can still be mid-pollEvents() here — an add now would land in _images
@@ -575,7 +642,7 @@ class PicturesViewModel(
         // the same lock as the insert: apart, it is a check-then-act, and a duplicate path in
         // _images crashes the LazyVerticalGrid keyed by absolutePath. Null means "already there".
         val insertedAt: Int = synchronized(imagesLock) {
-            if (file in _images) {
+            if (_images.any { it.absolutePath == file.absolutePath }) {
                 null
             } else {
                 val insertIndex = _images.indexOfFirst { it.name > file.name }

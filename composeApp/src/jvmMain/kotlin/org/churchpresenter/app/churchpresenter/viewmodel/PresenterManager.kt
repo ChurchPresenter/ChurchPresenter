@@ -14,6 +14,7 @@ import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.songs.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
@@ -113,6 +114,18 @@ class PresenterManager {
         _browserSourceLocks.value = updated
     }
 
+    // Per-NDI-output lock: a third independent index space, for the same reason the Browser Source
+    // one is separate from _screenLocks — ProjectionSettings.ndiOutputs has its own 0-based indices,
+    // so NDI output 0 and Browser Source output 0 are different outputs and must lock separately.
+    private val _ndiLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val ndiLocks: State<Map<Int, Presenting>> = _ndiLocks
+
+    fun setNdiLock(index: Int, mode: Presenting?) {
+        val updated = _ndiLocks.value.toMutableMap()
+        if (mode == null) updated.remove(index) else updated[index] = mode
+        _ndiLocks.value = updated
+    }
+
     // Indices of Browser Source outputs currently showing the "Identify" overlay
     // (their output number, briefly flashed) — same idea as identifyingScreen for
     // physical displays, but per-output since there's no window to flash instead.
@@ -124,6 +137,20 @@ class PresenterManager {
         preRenderScope.launch {
             delay(WATCHDOG_INTERVAL_MS)
             _browserSourceIdentifying.value = _browserSourceIdentifying.value - index
+        }
+    }
+
+    // The same, for NDI outputs. A separate set for the same reason the locks are a separate map:
+    // NDI output 0 and Browser Source output 0 are different outputs, and flashing one must not
+    // flash the other.
+    private val _ndiIdentifying = mutableStateOf<Set<Int>>(emptySet())
+    val ndiIdentifying: State<Set<Int>> = _ndiIdentifying
+
+    fun identifyNdiOutput(index: Int) {
+        _ndiIdentifying.value = _ndiIdentifying.value + index
+        preRenderScope.launch {
+            delay(WATCHDOG_INTERVAL_MS)
+            _ndiIdentifying.value = _ndiIdentifying.value - index
         }
     }
 
@@ -422,6 +449,94 @@ class PresenterManager {
         _showPresenterWindow.value = show
     }
 
+    /**
+     * Settings the outputs should render *instead of* the saved ones, while a preview is running.
+     *
+     * The settings dialog edits a draft copy that reaches the app only on Apply or OK, and the
+     * output windows are fed the saved `appSettings` -- so an on-screen preview that pushed only
+     * content would style it with the styling being replaced, and show nothing of the edit. This is
+     * the channel for the draft: main.kt folds it over `appSettings` when it is non-null, and the
+     * dialog clears it on the way out.
+     *
+     * Deliberately here and not a callback threaded through the dialog: this class is already the
+     * one channel between what the operator is doing and what the outputs draw, and a second
+     * parallel one would be a second thing to remember to clear.
+     */
+    private val _previewSettingsOverride = mutableStateOf<AppSettings?>(null)
+    val previewSettingsOverride: State<AppSettings?> = _previewSettingsOverride
+
+    fun setPreviewSettingsOverride(settings: AppSettings?) {
+        _previewSettingsOverride.value = settings
+    }
+
+    /**
+     * Everything a temporary takeover of the outputs has to put back.
+     *
+     * Bible and song content only, because that is what can be taken over: the settings dialog's
+     * on-screen preview is the one caller, and it draws a verse or a slide. The transition alphas
+     * are deliberately absent -- [setPresentingMode] resets them to 1f on the way back in, which is
+     * the state a restored slide wants anyway, and capturing a value mid-fade would restore a
+     * half-faded screen.
+     */
+    data class LiveStateSnapshot(
+        val mode: Presenting,
+        val selectedVerse: SelectedVerse,
+        val selectedVerses: List<SelectedVerse>,
+        val displayedVerses: List<SelectedVerse>,
+        val lyricSection: LyricSection,
+        val displayedLyricSection: LyricSection,
+        val allLyricSections: List<LyricSection>,
+        val songDisplaySectionIndex: Int,
+        val songDisplayLineIndex: Int,
+        val showPresenterWindow: Boolean,
+    )
+
+    /**
+     * What is live right now, so it can be handed back by [restoreLiveState].
+     *
+     * Here rather than in the caller because this is the one class that knows the full set: a
+     * dialog reaching into ten `mutableState`s of its own would silently miss the next field
+     * somebody adds, and would have to be a friend of internals it has no other business with.
+     */
+    fun snapshotLiveState(): LiveStateSnapshot = LiveStateSnapshot(
+        mode = _presentingMode.value,
+        selectedVerse = _selectedVerse.value,
+        selectedVerses = _selectedVerses.value,
+        displayedVerses = _displayedVerses.value,
+        lyricSection = _lyricSection.value,
+        displayedLyricSection = _displayedLyricSection.value,
+        allLyricSections = _allLyricSections.value,
+        songDisplaySectionIndex = _songDisplaySectionIndex.value,
+        songDisplayLineIndex = _songDisplayLineIndex.value,
+        showPresenterWindow = _showPresenterWindow.value,
+    )
+
+    /**
+     * Puts back what [snapshotLiveState] took, content first and the mode last.
+     *
+     * Order matters: [setPresentingMode] broadcasts, so setting it before the content is back would
+     * announce the restored mode paired with the preview's content. The content setters are the
+     * plain field writes rather than the notifying ones for the same reason -- one broadcast, at
+     * the end, describing a state that is actually true.
+     *
+     * Not [requestClearDisplay]: that only raises a flag for main.kt to fade out on, is a no-op when
+     * the mode is already NONE, and would blank a screen that was showing something before the
+     * preview started.
+     */
+    fun restoreLiveState(snapshot: LiveStateSnapshot) {
+        _selectedVerse.value = snapshot.selectedVerse
+        _selectedVerses.value = snapshot.selectedVerses
+        _displayedVerses.value = snapshot.displayedVerses
+        _lyricSection.value = snapshot.lyricSection
+        _lyricSectionVersion.value++
+        _displayedLyricSection.value = snapshot.displayedLyricSection
+        _allLyricSections.value = snapshot.allLyricSections
+        _songDisplaySectionIndex.value = snapshot.songDisplaySectionIndex
+        _songDisplayLineIndex.value = snapshot.songDisplayLineIndex
+        _showPresenterWindow.value = snapshot.showPresenterWindow
+        setPresentingMode(snapshot.mode)
+    }
+
     fun setDevWindowAlwaysOnTop(alwaysOnTop: Boolean) {
         _devWindowAlwaysOnTop.value = alwaysOnTop
     }
@@ -623,9 +738,22 @@ class PresenterManager {
                         // the live renderer — better than switching to bitmaps of nothing.
                         stream.close()
                         cached.delete()
+                        // The message stays constant so this groups as one issue; everything that
+                        // varies goes in tags and extras. Carrying only the subsystem, as it did,
+                        // made the report unanswerable — a blank render is a property of the
+                        // variant and the file it produced, and neither was in it.
                         CrashReporter.reportWarning(
                             "Lottie pre-render produced blank frames, discarded",
-                            tags = mapOf("subsystem" to "lower_third")
+                            tags = mapOf(
+                                "subsystem" to "lower_third",
+                                "lottie.clip" to variant.clip.toString(),
+                                "lottie.empty_cache_file" to (cached.length() == 0L).toString()
+                            ),
+                            extras = mapOf(
+                                "variant" to "${variant.width}x${variant.height} " +
+                                    "@${variant.fps}fps, ${variant.frameCount} frames",
+                                "cacheFileBytes" to cached.length().toString()
+                            )
                         )
                         return@launch
                     }

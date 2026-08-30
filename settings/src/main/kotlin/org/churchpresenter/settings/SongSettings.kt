@@ -27,7 +27,15 @@ data class SongSettings(
     val titleFontType: String = "Arial",
     val titleMinFontSize: Int = 16,
     val titleMaxFontSize: Int = 72,
-    val titlePosition: String = Constants.MIDDLE,
+    /**
+     * Where the title sits relative to the verse: [Constants.ABOVE_VERSE] or [Constants.BELOW_VERSE].
+     *
+     * This defaulted to [Constants.MIDDLE], which `SongPresenter` draws the title row at neither of
+     * -- it renders the row only above or below -- so out of the box the title was configured to
+     * appear and then appeared nowhere. Above matches where the number is not, and where a title
+     * belongs.
+     */
+    val titlePosition: String = Constants.ABOVE_VERSE,
     val titleHorizontalAlignment: String = Constants.CENTER,
     val titleColor: String = "#FFFFFF", // White
     val titleBold: Boolean = false,
@@ -39,7 +47,7 @@ data class SongSettings(
     val titleLowerThirdDisplay: String = Constants.FIRST_PAGE,
     val titleLowerThirdFontSize: Int = 28,
     val titleLowerThirdFontType: String = "Arial",
-    val titleLowerThirdPosition: String = Constants.MIDDLE,
+    val titleLowerThirdPosition: String = Constants.ABOVE_VERSE,
     val titleLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val titleLowerThirdColor: String = "#FFFFFF",
     val titleLowerThirdBold: Boolean = false,
@@ -56,6 +64,21 @@ data class SongSettings(
     val lyricsMinFontSize: Int = 12,
     val lyricsMaxFontSize: Int = 60,
     val wordWrap: Boolean = false,
+
+    /**
+     * Whether a chorus is repeated after every verse, rather than presented only where it is
+     * written.
+     *
+     * A hymnal writes the chorus once and expects it sung after each verse, which is what this does
+     * and why it defaults on -- switching it off for existing installs would rearrange every song
+     * they present without warning. A song that writes each repeat out in full, or that places a
+     * chorus deliberately (before verse 1, after verse 2 only), wants it off: then the sections are
+     * presented exactly as the file has them.
+     *
+     * Either way no chorus is ever dropped, and a second distinct chorus is never collapsed into the
+     * first -- that was a data-loss bug (#403), not a mode.
+     */
+    val autoRepeatChorus: Boolean = true,
     val lyricsAlignment: String = Constants.MIDDLE,
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
@@ -116,6 +139,24 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    /**
+     * How much of the output's height the lower-third band takes, as a whole percentage. 10..60.
+     *
+     * Per content type rather than global. It used to be one number on `ProjectionSettings`, and
+     * two things were wrong with that. Only the Bible and song presenters ever read it -- the Lottie
+     * lower third, announcements, captions and Q&A all size themselves -- so it was never a property
+     * of the projection window; and being single, it forced scripture and lyrics into the same band,
+     * when wanting a shallow one for a verse and a deeper one for two lines of a chorus is the usual
+     * reason to reach for the number at all.
+     *
+     * This one is lyrics'. Every output kind honours it without knowing it exists: a screen
+     * window, a Browser Source and an NDI sender all render the same presenter with the same
+     * `AppSettings`. The control it replaced reached only the first of those -- it lived on the
+     * Screen Assignment card, so an operator sending an NDI lower third could see the band on air
+     * and find nothing in settings that moved it.
+     */
+    val lowerThirdHeightPercent: Int = 33,
+
     // Shadow customization — per-element (title)
     val titleShadowColor: String = "#000000",
     val titleShadowSize: Int = 100,
@@ -148,6 +189,14 @@ data class SongSettings(
 
     // Fullscreen display
     val fullscreenDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE, // "verse" or "line"
+    /**
+     * **Overridden at every live call site -- see [ScreenAssignment.songMode].**
+     *
+     * This and the three fields like it below are read by `SongPresenter` only when it is given no
+     * `languageOverride`, and every real caller passes that output's own `songMode`, which is never
+     * blank. So a control wired to these restricts nothing that reaches a screen. The Song settings
+     * tab writes `songMode` instead.
+     */
     val fullscreenLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
 
     // Lower third display
@@ -230,5 +279,125 @@ data class SongSettings(
     val lowerThirdLookAheadNextShadow: Boolean = false,
     val lowerThirdLookAheadNextShadowColor: String = "#000000",
     val lowerThirdLookAheadNextShadowSize: Int = 100,
-    val lowerThirdLookAheadNextShadowOpacity: Int = 90
+    val lowerThirdLookAheadNextShadowOpacity: Int = 90,
+
+    // ── Typography that reaches the text rather than the TextStyle alone ─────────────────────────
+    //
+    // Struck-through text, tracking, word spacing and a case transform, for each of the five things
+    // a song draws and on each of the two outputs. Spacing is in points at the element's own
+    // configured size and is turned into a fraction of the em as it is drawn, so it keeps its
+    // proportion through the output's resolution scale and the auto-fit; the transform is one of
+    // [Constants.TEXT_TRANSFORM_NONE], `_UPPERCASE`, `_LOWERCASE` or `_CAPITALIZE` and is applied at
+    // draw time, so the stored lyrics are never altered.
+
+    // The song number
+    val songNumberFontType: String = "",
+    val songNumberLowerThirdFontType: String = "",
+    val songNumberShadowColor: String = "#000000",
+    val songNumberShadowSize: Int = 100,
+    val songNumberShadowOpacity: Int = 90,
+    val songNumberLowerThirdShadowColor: String = "#000000",
+    val songNumberLowerThirdShadowSize: Int = 100,
+    val songNumberLowerThirdShadowOpacity: Int = 90,
+    /**
+     * Where the next-section marker sits across the slide.
+     *
+     * It had no alignment of its own and inherited the look-ahead line's; blank keeps doing that, so
+     * a settings file written before this reads back looking exactly as it did.
+     */
+    val lookAheadNextHorizontalAlignment: String = "",
+    val lowerThirdLookAheadNextHorizontalAlignment: String = "",
+
+    val songNumberStrikethrough: Boolean = false,
+    val songNumberLetterSpacing: Int = 0,
+    val songNumberWordSpacing: Int = 0,
+    val songNumberTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val songNumberLowerThirdStrikethrough: Boolean = false,
+    val songNumberLowerThirdLetterSpacing: Int = 0,
+    val songNumberLowerThirdWordSpacing: Int = 0,
+    val songNumberLowerThirdTransform: String = Constants.TEXT_TRANSFORM_NONE,
+
+    // The song title
+    val titleStrikethrough: Boolean = false,
+    val titleLetterSpacing: Int = 0,
+    val titleWordSpacing: Int = 0,
+    val titleTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val titleLowerThirdStrikethrough: Boolean = false,
+    val titleLowerThirdLetterSpacing: Int = 0,
+    val titleLowerThirdWordSpacing: Int = 0,
+    val titleLowerThirdTransform: String = Constants.TEXT_TRANSFORM_NONE,
+
+    // The lyrics
+    val lyricsStrikethrough: Boolean = false,
+    val lyricsLetterSpacing: Int = 0,
+    val lyricsWordSpacing: Int = 0,
+    val lyricsTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lyricsLowerThirdStrikethrough: Boolean = false,
+    val lyricsLowerThirdLetterSpacing: Int = 0,
+    val lyricsLowerThirdWordSpacing: Int = 0,
+    val lyricsLowerThirdTransform: String = Constants.TEXT_TRANSFORM_NONE,
+
+    // The look-ahead line
+    val lookAheadStrikethrough: Boolean = false,
+    val lookAheadLetterSpacing: Int = 0,
+    val lookAheadWordSpacing: Int = 0,
+    val lookAheadTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdLookAheadStrikethrough: Boolean = false,
+    val lowerThirdLookAheadLetterSpacing: Int = 0,
+    val lowerThirdLookAheadWordSpacing: Int = 0,
+    val lowerThirdLookAheadTransform: String = Constants.TEXT_TRANSFORM_NONE,
+
+    // The next-section marker
+    val lookAheadNextStrikethrough: Boolean = false,
+    val lookAheadNextLetterSpacing: Int = 0,
+    val lookAheadNextWordSpacing: Int = 0,
+    val lookAheadNextTransform: String = Constants.TEXT_TRANSFORM_NONE,
+    val lowerThirdLookAheadNextStrikethrough: Boolean = false,
+    val lowerThirdLookAheadNextLetterSpacing: Int = 0,
+    val lowerThirdLookAheadNextWordSpacing: Int = 0,
+    val lowerThirdLookAheadNextTransform: String = Constants.TEXT_TRANSFORM_NONE
 )
+
+/**
+ * Carries a styled title's look across to the song number, once and only for a file that predates
+ * the number having a look of its own.
+ *
+ * The number used to be drawn with the title's font, colour and face -- its own stored fields were
+ * there but nothing read them, so every settings file has them sitting at their defaults. Now that
+ * the number is drawn from its own fields, a file whose title was styled would have shown a plain
+ * white number where it used to show a styled one. This copies the title across so nothing changes
+ * appearance; a number already styled away from the defaults is left alone, which is what makes it
+ * idempotent and what stops it treading on a deliberate choice.
+ *
+ * The font is deliberately **not** copied. A blank [songNumberFontType] already means "use the
+ * title's", which is what the presenter falls back to -- writing the title's face in would pin the
+ * number to whatever the title happened to be that day and stop it following a later change.
+ */
+fun SongSettings.migrateSongNumberStyle(): SongSettings {
+    val untouched = SongSettings()
+    fun styled(target: SongSettings) = target.songNumberColor != untouched.songNumberColor ||
+        target.songNumberBold != untouched.songNumberBold ||
+        target.songNumberItalic != untouched.songNumberItalic ||
+        target.songNumberUnderline != untouched.songNumberUnderline ||
+        target.songNumberShadow != untouched.songNumberShadow ||
+        target.songNumberFontType.isNotEmpty()
+    if (styled(this)) return this
+    return copy(
+        songNumberColor = titleColor,
+        songNumberBold = titleBold,
+        songNumberItalic = titleItalic,
+        songNumberUnderline = titleUnderline,
+        songNumberShadow = titleShadow,
+        songNumberShadowColor = titleShadowColor,
+        songNumberShadowSize = titleShadowSize,
+        songNumberShadowOpacity = titleShadowOpacity,
+        songNumberLowerThirdColor = titleLowerThirdColor,
+        songNumberLowerThirdBold = titleLowerThirdBold,
+        songNumberLowerThirdItalic = titleLowerThirdItalic,
+        songNumberLowerThirdUnderline = titleLowerThirdUnderline,
+        songNumberLowerThirdShadow = titleLowerThirdShadow,
+        songNumberLowerThirdShadowColor = titleLowerThirdShadowColor,
+        songNumberLowerThirdShadowSize = titleLowerThirdShadowSize,
+        songNumberLowerThirdShadowOpacity = titleLowerThirdShadowOpacity,
+    )
+}
