@@ -42,7 +42,7 @@ class ProjectionSettingsTabRecompositionTest {
         gridButtons().assertCountEquals(1 + rows * Grid.CONTROLS_PER_ROW + Grid.trailing)
         for (row in 0 until rows) {
             gridButton(Grid.displayMode(row)).assertTextEquals("Full Screen")
-            gridButton(Grid.contentOutputs(row)).assertTextEquals("16 of 17 enabled")
+            gridButton(Grid.contentOutputs(row)).assertTextEquals("15 of 16 enabled")
         }
     }
 
@@ -198,7 +198,7 @@ class ProjectionSettingsTabRecompositionTest {
         }
         gridButton(Grid.contentOutputs(row = 0)).performScrollTo().performClick()
         waitForIdle()
-        onNodeWithText("16 of 17 content types enabled on this screen").assertExists()
+        onNodeWithText("15 of 16 content types enabled on this screen").assertExists()
         onAllNodesWithText("Media").assertCountEquals(2)
 
         runOnIdle { tick = 1 }
@@ -206,7 +206,7 @@ class ProjectionSettingsTabRecompositionTest {
 
         onNodeWithText("tick 1").assertExists("the surrounding content must have re-rendered")
         onNodeWithText("Content Outputs — Screen 1").assertExists("the dialog must still be up")
-        onNodeWithText("16 of 17 content types enabled on this screen").assertExists()
+        onNodeWithText("15 of 16 content types enabled on this screen").assertExists()
         onAllNodesWithText("Media").assertCountEquals(2)
         // The Bible chip is a bare label with one translation configured; it appears alongside the
         // dialog's own checkbox label, so both are still present.
@@ -243,7 +243,7 @@ class ProjectionSettingsTabRecompositionTest {
         }
         waitForIdle()
 
-        onNodeWithText("15 of 17 content types enabled on this screen").assertExists()
+        onNodeWithText("14 of 16 content types enabled on this screen").assertExists()
         onAllNodesWithText("Canvas").assertCountEquals(1) // dropped from the preview
         onAllNodesWithText("Media").assertCountEquals(2) // every other cell untouched
         onAllNodesWithText("Dictionary").assertCountEquals(2)
@@ -294,7 +294,7 @@ class ProjectionSettingsTabRecompositionTest {
                 )
             }
         }
-        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("16 of 17 enabled")
+        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("15 of 16 enabled")
 
         runOnIdle {
             settings = settings.copy(
@@ -306,8 +306,8 @@ class ProjectionSettingsTabRecompositionTest {
         }
         waitForIdle()
 
-        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("14 of 17 enabled")
-        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("16 of 17 enabled")
+        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("13 of 16 enabled")
+        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("15 of 16 enabled")
     }
 
     @Test

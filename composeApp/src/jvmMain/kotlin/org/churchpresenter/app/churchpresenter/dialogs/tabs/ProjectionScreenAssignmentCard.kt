@@ -571,7 +571,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             // Replaces the old horizontally-scrolling checkbox grid.
             var showContentDialog by remember { mutableStateOf(false) }
             val enabledCount = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
-            val totalCount = contentOutputsTotalCount(contentGroup, backgroundGroup)
+            val totalCount = contentOutputsTotalCount(assignment, contentGroup, backgroundGroup)
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 OutlinedButton(
                     shape = RoundedCornerShape(6.dp),

@@ -3,7 +3,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -136,12 +138,12 @@ class QuickBackgroundStripTest {
      *
      * The panel is a `Popup` laid over the tab, and the tab has ready-made looks of its own under
      * the same names — so "Cinema" means two different controls while the panel is up.
+     *
+     * Matched by ancestry rather than by where it lands. This used to take the first node whose
+     * centre fell inside the panel's rectangle, which held only while the panel was short enough
+     * not to cover the tab's own look buttons; once it grew, the tab's "Cinema" sat under the
+     * panel and was picked instead, and the click silently went to the wrong control.
      */
-    private fun androidx.compose.ui.test.ComposeUiTest.inPanel(text: String): SemanticsNodeInteraction {
-        val panel = onNodeWithTag(SONG_BACKGROUND_PANEL_TAG).fetchSemanticsNode().boundsInRoot
-        val matches = onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false)
-        val index = matches.indexOfFirst { panel.contains(it.boundsInRoot.center) }
-        check(index >= 0) { "the open panel has no node reading \"${'$'}text\"" }
-        return onAllNodesWithText(text)[index]
-    }
+    private fun androidx.compose.ui.test.ComposeUiTest.inPanel(text: String): SemanticsNodeInteraction =
+        onNode(hasText(text) and hasAnyAncestor(hasTestTag(SONG_BACKGROUND_PANEL_TAG)))
 }

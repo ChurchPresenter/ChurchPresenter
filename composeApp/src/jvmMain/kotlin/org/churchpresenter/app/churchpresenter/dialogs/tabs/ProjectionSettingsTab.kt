@@ -359,7 +359,16 @@ fun ProjectionSettingsTab(
             if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
             else a.copy(songLookAhead = false)
         }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
-        ContentCol(chordsLabel, { it.showChords }, { a, v -> a.copy(showChords = v) }, tooltip = chordsTooltip),
+        // Stage monitor only. The chart is for whoever is playing, so it is drawn on the
+        // confidence screen and nowhere the congregation can see -- a full screen or a lower
+        // third never draws one, and offering them the toggle offers a control that does nothing.
+        ContentCol(
+            chordsLabel,
+            { it.showChords },
+            { a, v -> a.copy(showChords = v) },
+            visible = { it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR },
+            tooltip = chordsTooltip,
+        ),
         ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
         ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
         ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
@@ -776,6 +785,13 @@ data class ContentCol(
     val getter: (ScreenAssignment) -> Boolean,
     val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
     val enabled: (ScreenAssignment) -> Boolean = { true },
+    /**
+     * Whether this output is offered the toggle at all, as against [enabled], which greys one it is
+     * still offered. A column an output cannot obey is left out of the dialog, out of Select All /
+     * Clear All, and out of the "N of M enabled" count -- counting a toggle nobody is shown makes
+     * the denominator disagree with what is on screen.
+     */
+    val visible: (ScreenAssignment) -> Boolean = { true },
     val tooltip: String? = null,
     /** Marks the Web column — its label is localized, so it can't be identified by text. */
     val isWeb: Boolean = false

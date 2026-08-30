@@ -101,6 +101,7 @@ private fun <T> SegmentedButtonGrid(
             ) {
                 rowItems.forEachIndexed { index, item ->
                     val isSelected = selectedValue == item.value
+                    val accent = LocalSegmentedButtonTone.current == SegmentedButtonTone.ACCENT
                     val shape = when {
                         rowItems.size == 1 -> RoundedCornerShape(4.dp)
                         index == 0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)
@@ -121,11 +122,15 @@ private fun <T> SegmentedButtonGrid(
                                     MaterialTheme.colorScheme.outline
                                 ),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (isSelected)
-                                        MaterialTheme.colorScheme.onSecondary
+                                    containerColor = when {
+                                        !isSelected -> Color.Transparent
+                                        accent -> MaterialTheme.colorScheme.primary
+                                        else -> MaterialTheme.colorScheme.onSecondary
+                                    },
+                                    contentColor = if (isSelected && accent)
+                                        MaterialTheme.colorScheme.onPrimary
                                     else
-                                        Color.Transparent,
-                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                        MaterialTheme.colorScheme.onSurface
                                 ),
                                 contentPadding = contentPadding
                             ) {

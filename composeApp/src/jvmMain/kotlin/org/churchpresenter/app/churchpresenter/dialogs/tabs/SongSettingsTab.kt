@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,6 +23,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +58,6 @@ import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
 import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
 import churchpresenter.composeapp.generated.resources.song_chunk
-import churchpresenter.composeapp.generated.resources.song_preview_chords
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead
@@ -82,8 +84,10 @@ import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -138,54 +142,56 @@ fun SongSettingsTab(
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
     var showLookAhead by remember { mutableStateOf(false) }
-    var showChords by remember { mutableStateOf(false) }
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
     // and the controls it illustrates down below the fold with them.
     val scrollState = rememberScrollState()
-    Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp),
-    ) {
-        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .verticalScroll(scrollState)
-                        .padding(end = SettingsScrollbarGutter),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    SongTitleSlideSection(settings, onSettingsChange)
-                    SongLyricsLayoutSection(settings, onSettingsChange)
-                    SongTransitionSection(settings, onSettingsChange)
-                    LowerThirdHeightSection(
-                        percent = settings.songSettings.lowerThirdHeightPercent,
-                        onPercentChange = { percent ->
-                            onSettingsChange { s ->
-                                s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent))
-                            }
-                        },
-                    )
-                    SongMarginsSection(settings, onSettingsChange)
+    // The Bible and Song tabs fill the selected segment with the accent, matching the song
+    // editor's pane tabs. The provider covers the whole tab, so the rail, the typography panels
+    // and the shared preview rows all agree without threading a colour through any of them.
+    CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp),
+        ) {
+            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .verticalScroll(scrollState)
+                            .padding(end = SettingsScrollbarGutter),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        SongTitleSlideSection(settings, onSettingsChange)
+                        SongLyricsLayoutSection(settings, onSettingsChange)
+                        SongTransitionSection(settings, onSettingsChange)
+                        LowerThirdHeightSection(
+                            percent = settings.songSettings.lowerThirdHeightPercent,
+                            onPercentChange = { percent ->
+                                onSettingsChange { s ->
+                                    s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent))
+                                }
+                            },
+                        )
+                        SongMarginsSection(settings, onSettingsChange)
+                    }
+                    SettingsScrollbar(scrollState)
                 }
-                SettingsScrollbar(scrollState)
+                SongStylePane(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    target = target,
+                    onTargetChange = { target = it },
+                    element = element,
+                    onElementChange = { element = it },
+                    showLookAhead = showLookAhead,
+                    onShowLookAheadChange = { showLookAhead = it },
+                    availableFonts = availableFonts,
+                    presenterManager = presenterManager,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                )
             }
-            SongStylePane(
-                settings = settings,
-                onSettingsChange = onSettingsChange,
-                target = target,
-                onTargetChange = { target = it },
-                element = element,
-                onElementChange = { element = it },
-                showLookAhead = showLookAhead,
-                onShowLookAheadChange = { showLookAhead = it },
-                showChords = showChords,
-                onShowChordsChange = { showChords = it },
-                availableFonts = availableFonts,
-                presenterManager = presenterManager,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-            )
         }
     }
 }
@@ -325,6 +331,7 @@ private fun SongLyricsLayoutSection(
 }
 
 /** How a slide arrives and leaves, and how far the end-of-song marker sits from the last line. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SongTransitionSection(
     settings: AppSettings,
@@ -347,7 +354,16 @@ private fun SongTransitionSection(
                 trailingLabel = "${song.transitionDuration.toInt()}$msSuffix",
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Wraps rather than one hard row: "Fade In / Fade Out / Crossfade" is three short
+        // labels in English and three long ones in most translations -- in Russian the first
+        // two took the whole width and squeezed the third into a single-character column,
+        // which drew its label vertically.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             LabeledCheckbox(
                 checked = song.fadeIn,
                 onCheckedChange = {
@@ -452,8 +468,6 @@ private fun SongStylePane(
     onElementChange: (SongStyleElement) -> Unit,
     showLookAhead: Boolean,
     onShowLookAheadChange: (Boolean) -> Unit,
-    showChords: Boolean,
-    onShowChordsChange: (Boolean) -> Unit,
     availableFonts: List<String>,
     presenterManager: PresenterManager?,
     modifier: Modifier = Modifier,
@@ -478,7 +492,8 @@ private fun SongStylePane(
         outputs = PreviewOutputState(
             lowerThird = target.isLowerThird,
             songLookAhead = previewLookAhead,
-            showChords = showChords,
+            // No chart: only a stage monitor draws one, and this preview is a projection output.
+            showChords = false,
         ),
         contentKey = sampleSections,
     ) { manager ->
@@ -497,15 +512,13 @@ private fun SongStylePane(
             showLookAhead = previewLookAhead,
             onShowLookAheadChange = onShowLookAheadChange,
             lookAheadForced = previewLookAhead && !showLookAhead,
-            showChords = showChords,
-            onShowChordsChange = onShowChordsChange,
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             SongPreviewPanel(
                 settings = settings,
                 target = target,
                 showLookAhead = previewLookAhead,
-                showChords = showChords,
+                showChords = false,
                 sections = sampleSections,
                 modifier = Modifier.width(
                     minOf(
@@ -571,8 +584,6 @@ private fun SongTargetSwitchRow(
     onShowLookAheadChange: (Boolean) -> Unit,
     /** On because the selected element needs it, so the box is shown ticked and left alone. */
     lookAheadForced: Boolean,
-    showChords: Boolean,
-    onShowChordsChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -602,17 +613,6 @@ private fun SongTargetSwitchRow(
             onCheckedChange = onShowLookAheadChange,
             enabled = !lookAheadForced,
             label = stringResource(Res.string.song_preview_look_ahead),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        // Also for the picture only. An output draws a chorded song as a chart when its own
-        // `showChords` says so (`ScreenAssignment.showChords`), which is a property of the screen
-        // rather than of this styling -- but the chords take the lyrics' font, size and margins, so
-        // whether a chart still fits is a question about the settings on this tab, and until now
-        // there was no way to ask it.
-        LabeledCheckbox(
-            checked = showChords,
-            onCheckedChange = onShowChordsChange,
-            label = stringResource(Res.string.song_preview_chords),
             style = MaterialTheme.typography.bodySmall,
         )
         Spacer(Modifier.weight(1f))

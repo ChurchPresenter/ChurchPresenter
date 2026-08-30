@@ -121,6 +121,7 @@ import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_HEIGHT
+import org.churchpresenter.app.churchpresenter.dialogs.songBackgroundPanelHeight
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundPanel
@@ -1151,7 +1152,8 @@ private fun QuickBackgroundStripTile(
                 onDismissRequest = { onOpenChange(false) },
                 properties = PopupProperties(focusable = true)
             ) {
-                Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, SONG_BACKGROUND_PANEL_HEIGHT)) {
+                val panelHeight = songBackgroundPanelHeight(SONG_BACKGROUND_PANEL_HEIGHT)
+                Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, panelHeight)) {
                     SongBackgroundPanel(
                         background = draft.background,
                         lowerThirdBackground = draft.lowerThirdBackground,

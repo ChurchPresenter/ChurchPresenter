@@ -161,12 +161,14 @@ class SettingsPreviewOnScreenTest {
 
     @Test
     fun `the preview switches reach the outputs, not just the panel`() = runComposeUiTest {
-        // Every one of them is a property of the *output*: a screen draws the band because its
-        // assignment says lower third, a look-ahead line because its assignment says so, and a chart
-        // because its own showChords does. The switches above the preview describe a picture, so
-        // without translating them the button drew a full-screen slide with no look-ahead and no
-        // chart however the tab was set -- which is to say it ignored everything the tab asked for
-        // except the styling.
+        // Both are properties of the *output*: a screen draws the band because its assignment says
+        // lower third, and a look-ahead line because its assignment says so. The switches above the
+        // preview describe a picture, so without translating them the button drew a full-screen
+        // slide with no look-ahead however the tab was set -- which is to say it ignored everything
+        // the tab asked for except the styling.
+        //
+        // Chords used to be a third switch here. Only a stage monitor draws a chart now, so the
+        // Song tab no longer offers one and the preview never asks for it.
         val pm = liveManager()
         setContent {
             Box(Modifier.size(1400.dp, 900.dp)) {
@@ -177,7 +179,6 @@ class SettingsPreviewOnScreenTest {
 
         onNodeWithText("Lower Third").performClick()
         onNodeWithText("Look ahead").performClick()
-        onNodeWithText("Chords").performClick()
         onNodeWithTag(PREVIEW_ON_SCREEN_TAG).performClick()
         waitForIdle()
 
@@ -185,7 +186,6 @@ class SettingsPreviewOnScreenTest {
         val output = previewed.projectionSettings.screenAssignments.single()
         assertTrue(output.isLowerThird, "the live output has to be showing the band the tab is styling")
         assertTrue(output.songLookAhead, "and the look-ahead line the tab is previewing")
-        assertTrue(output.showChords, "and the chart")
         assertEquals(
             Constants.DISPLAY_MODE_FULLSCREEN,
             withAnOutput.projectionSettings.screenAssignments.single().displayMode,

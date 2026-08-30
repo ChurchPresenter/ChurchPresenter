@@ -299,8 +299,9 @@ class EditSongContentTest {
         waitForIdle()
         onNodeWithText("Custom").performClick()
         waitForIdle()
-        // The panel is a focusable popup over the dialog, so it is closed before Save is reached.
-        onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+        // The panel carries its own Save, and closing by any other route is a cancel -- so the
+        // section's background is kept by that button, not by clicking the chip again.
+        onNodeWithTag(SONG_BACKGROUND_SAVE_TAG).performClick()
         waitForIdle()
         save()
 
