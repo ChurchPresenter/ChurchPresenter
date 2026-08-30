@@ -179,11 +179,11 @@ internal object Grid {
     /** The display-mode dropdown for assignment row [row]. */
     fun displayMode(row: Int) = 3 + row * CONTROLS_PER_ROW
 
-    /** The Customize button for assignment row [row], directly under its display-mode dropdown. */
-    fun customize(row: Int) = 4 + row * CONTROLS_PER_ROW
-
     /** The "N of M enabled" content-outputs button for assignment row [row]. */
-    fun contentOutputs(row: Int) = 5 + row * CONTROLS_PER_ROW
+    fun contentOutputs(row: Int) = 4 + row * CONTROLS_PER_ROW
+
+    /** The Customize button for assignment row [row], which sits beside the content-outputs one. */
+    fun customize(row: Int) = 5 + row * CONTROLS_PER_ROW
 
     /** The first button after the grid, given [rows] assignment rows: "Add Output". */
     fun addOutput(rows: Int) = 1 + rows * CONTROLS_PER_ROW
