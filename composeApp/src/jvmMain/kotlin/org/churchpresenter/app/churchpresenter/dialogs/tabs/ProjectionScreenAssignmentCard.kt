@@ -579,7 +579,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             // Replaces the old horizontally-scrolling checkbox grid.
             var showContentDialog by remember { mutableStateOf(false) }
             val enabledCount = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
-            val totalCount = contentOutputsTotalCount(contentGroup, backgroundGroup)
+            val totalCount = contentOutputsTotalCount(assignment, contentGroup, backgroundGroup)
             // Customize sits beside it rather than at the row's right edge: the two are the row's
             // pair of "open a dialog about this output" buttons, and separating them would read as
             // Customize belonging to whatever column it drifted next to.

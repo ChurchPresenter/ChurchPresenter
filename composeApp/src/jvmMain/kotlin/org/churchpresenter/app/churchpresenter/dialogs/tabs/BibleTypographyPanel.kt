@@ -119,7 +119,6 @@ internal fun BibleTypographyPanel(
             ColorControl(style, onStyleChange)
             FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
-            AlignmentControl(style, onStyleChange)
             // The slack goes here rather than into the font field, which at a weight grew to half
             // the panel to show a name no longer than "Times New Roman".
             Spacer(Modifier.weight(1f))
@@ -129,6 +128,9 @@ internal fun BibleTypographyPanel(
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
             verticalAlignment = Alignment.Top,
         ) {
+            // Alignment sits here rather than beside Size, matching the Song tab: with the Auto
+            // button in that row as well, the four cells came to more than the pane.
+            AlignmentControl(style, onStyleChange)
             // Only the reference has anywhere to sit relative to the verse, so the control is absent
             // rather than disabled while the verse is being edited.
             if (element == BibleStyleElement.REFERENCE) {
@@ -177,9 +179,10 @@ private fun ColorControl(
     style: BibleElementStyle,
     onStyleChange: (BibleElementStyle) -> Unit,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.color), modifier) {
+) = ControlColumn(stringResource(Res.string.color), modifier, labelInsideControl = true) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
+            label = stringResource(Res.string.color),
             color = style.color,
             onColorChange = { onStyleChange(style.copy(color = it)) },
             modifier = Modifier.width(COLOR_SWATCH_WIDTH),
@@ -209,8 +212,9 @@ private fun FontControl(
     onStyleChange: (BibleElementStyle) -> Unit,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.bible_font), modifier) {
+) = ControlColumn(stringResource(Res.string.bible_font), modifier, labelInsideControl = true) {
     FontSettingsDropdown(
+        label = stringResource(Res.string.bible_font),
         value = style.fontType,
         fonts = availableFonts,
         onValueChange = { onStyleChange(style.copy(fontType = it)) },
@@ -226,9 +230,10 @@ private fun SizeControl(
     autoFit: (() -> Unit)?,
     autoFitEnabled: Boolean,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.bible_size), modifier) {
+) = ControlColumn(stringResource(Res.string.bible_size), modifier, labelInsideControl = true) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         NumberSettingsTextField(
+            label = stringResource(Res.string.bible_size),
             initialText = style.fontSize,
             onValueChange = { onStyleChange(style.copy(fontSize = it)) },
             range = FONT_SIZE_MIN..FONT_SIZE_MAX,

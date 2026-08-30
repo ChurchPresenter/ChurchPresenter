@@ -932,8 +932,8 @@
     <string name="content_outputs_preview_translations">%1$s (%2$s)</string>
 
     <!-- Per-output Customize dialog -->
-    <string name="customize">Customize</string>
-    <string name="customize_count">Customized · %1$d</string>
+    <string name="customize">Overwrite Styles</string>
+    <string name="customize_count">Overwritten · %1$d</string>
     <string name="customize_dialog_title">Display Settings — %1$s</string>
     <string name="customize_dialog_subtitle">%1$d of %2$d customized</string>
     <string name="customize_pane_header">%1$s on this screen</string>

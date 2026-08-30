@@ -215,8 +215,9 @@ private fun SongFontControl(
     onStyleChange: (SongElementStyle) -> Unit,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.bible_font), modifier) {
+) = ControlColumn(stringResource(Res.string.bible_font), modifier, labelInsideControl = true) {
     FontSettingsDropdown(
+        label = stringResource(Res.string.bible_font),
         value = style.fontType,
         fonts = availableFonts,
         onValueChange = { onStyleChange(style.copy(fontType = it)) },
@@ -231,7 +232,7 @@ private fun SongSizeControl(
     style: SongElementStyle,
     onStyleChange: (SongElementStyle) -> Unit,
     modifier: Modifier = Modifier,
-) = ControlColumn(stringResource(Res.string.bible_size), modifier) {
+) = ControlColumn(stringResource(Res.string.bible_size), modifier, labelInsideControl = true) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         // Dimmed rather than hidden while Auto is on: the number is still the ceiling the fit works
         // down from, which is worth being able to read even when it is not what lands on screen.
@@ -241,6 +242,7 @@ private fun SongSizeControl(
             modifier = Modifier
                 .width(SIZE_FIELD_WIDTH)
                 .alpha(if (element.hasAutoFit && style.autoFit) AUTO_FIT_DIMMED else 1f),
+            label = stringResource(Res.string.bible_size),
             initialText = style.fontSize,
             onValueChange = { onStyleChange(style.copy(fontSize = it)) },
             range = FONT_SIZE_MIN..FONT_SIZE_MAX,

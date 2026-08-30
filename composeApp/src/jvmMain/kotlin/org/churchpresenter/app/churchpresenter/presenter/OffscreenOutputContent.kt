@@ -192,7 +192,6 @@ internal fun OffscreenOutputContent(
                                     showBackground = showBg && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
-                    showChords = screenAssignment.showChords,
                                 )
                                 Presenting.PICTURES -> PicturePresenter(
                                     imagePath = presenterManager.displayedImagePath.value,

@@ -61,7 +61,12 @@ fun DropdownSelector(
                 end = 11.dp,
                 top = if (compact) 2.dp else 4.dp,
                 bottom = if (compact) 2.dp else 4.dp,
-            )
+            ),
+        // The row wraps its content, which is shorter than the field's fixed height, so without
+        // this it sits against the top edge and the value reads high in the box -- most visibly on
+        // a `compact` field, where a 34dp box holds about 20dp of text. `DropdownSettingsField` and
+        // the font picker's trigger centre theirs the same way.
+        contentAlignment = Alignment.CenterStart,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(

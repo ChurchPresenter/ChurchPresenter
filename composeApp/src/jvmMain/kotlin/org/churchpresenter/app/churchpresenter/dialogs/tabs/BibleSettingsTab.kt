@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -67,8 +70,10 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -160,48 +165,53 @@ fun BibleSettingsTab(
     // styling side down with them -- the preview and the controls it illustrates ended up below the
     // fold on a tab that had room for both.
     val scrollState = rememberScrollState()
-    Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+    // The Bible and Song tabs fill the selected segment with the accent, matching the song
+    // editor's pane tabs. The provider covers the whole tab, so the rail, the typography panels
+    // and the shared preview rows all agree without threading a colour through any of them.
+    CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
         ) {
-            Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .verticalScroll(scrollState)
-                    .padding(end = SettingsScrollbarGutter),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                LeftRail(
+                Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .verticalScroll(scrollState)
+                        .padding(end = SettingsScrollbarGutter),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LeftRail(
+                        settings = settings,
+                        onSettingsChange = onSettingsChange,
+                        bibleFilesInDirectory = bibleFilesInDirectory,
+                        bibleFileDisplayNames = bibleFileDisplayNames,
+                        scanning = listing == null,
+                        selectedIndex = selectedIndex,
+                        onSelect = { selected = it },
+                    )
+                }
+                SettingsScrollbar(scrollState)
+                }
+                StylePane(
                     settings = settings,
                     onSettingsChange = onSettingsChange,
-                    bibleFilesInDirectory = bibleFilesInDirectory,
-                    bibleFileDisplayNames = bibleFileDisplayNames,
-                    scanning = listing == null,
+                    translations = translations,
                     selectedIndex = selectedIndex,
                     onSelect = { selected = it },
+                    target = target,
+                    onTargetChange = { target = it },
+                    element = element,
+                    onElementChange = { element = it },
+                    moduleTitles = listing?.titles.orEmpty(),
+                    availableFonts = availableFonts,
+                    presenterManager = presenterManager,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
             }
-            SettingsScrollbar(scrollState)
-            }
-            StylePane(
-                settings = settings,
-                onSettingsChange = onSettingsChange,
-                translations = translations,
-                selectedIndex = selectedIndex,
-                onSelect = { selected = it },
-                target = target,
-                onTargetChange = { target = it },
-                element = element,
-                onElementChange = { element = it },
-                moduleTitles = listing?.titles.orEmpty(),
-                availableFonts = availableFonts,
-                presenterManager = presenterManager,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-            )
         }
     }
 }
@@ -495,6 +505,7 @@ private fun MiscellaneousSection(
 }
 
 /** Where the block sits on the screen, and how it arrives and leaves. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BlockAndTransitionSection(
     settings: AppSettings,
@@ -535,7 +546,16 @@ private fun BlockAndTransitionSection(
                 trailingLabel = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix"
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Wraps rather than one hard row: "Fade In / Fade Out / Crossfade" is three short
+        // labels in English and three long ones in most translations -- in Russian the first
+        // two took the whole width and squeezed the third into a single-character column,
+        // which drew its label vertically.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             LabeledCheckbox(
                 checked = settings.bibleSettings.fadeIn,
                 onCheckedChange = {
