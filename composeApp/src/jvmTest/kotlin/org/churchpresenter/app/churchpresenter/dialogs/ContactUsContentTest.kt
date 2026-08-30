@@ -51,7 +51,13 @@ class ContactUsContentTest {
         var sentWith: Triple<String, String, String>? = null
     }
 
-    private fun dialog(status: SendStatus = SendStatus.Idle, block: ComposeUiTest.(Result) -> Unit) {
+    private fun dialog(
+        status: SendStatus = SendStatus.Idle,
+        // Defaulted to a no-op, never to the real opener: a click that reached UrlOpener would
+        // launch the machine's browser, which the headless JVM does not prevent.
+        openUrl: (String) -> Unit = {},
+        block: ComposeUiTest.(Result) -> Unit,
+    ) {
         val result = Result()
         runComposeUiTest {
             setContent {
@@ -61,6 +67,7 @@ class ContactUsContentTest {
                     var email by remember { mutableStateOf("") }
                     var message by remember { mutableStateOf("") }
                     ContactUsDialogContent(
+                        openUrl = openUrl,
                         onDismiss = { result.dismissed++ },
                         types = types,
                         selectedType = selectedType,
@@ -164,10 +171,13 @@ class ContactUsContentTest {
     }
 
     @Test
-    fun `clicking the browser fallback button does not crash`() = dialog {
-        // Desktop#browse has no display to open in this headless test JVM; the click handler
-        // wraps it in runCatching specifically so this is safe to exercise.
-        onNodeWithText("Open in Browser").performClick()
+    fun `clicking the browser fallback button opens the web contact form`() {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) {
+            onNodeWithText("Open in Browser").performClick()
+        }
+
+        assertEquals(ContactReporter.WEB_CONTACT_URL, opened)
     }
 
     @Test

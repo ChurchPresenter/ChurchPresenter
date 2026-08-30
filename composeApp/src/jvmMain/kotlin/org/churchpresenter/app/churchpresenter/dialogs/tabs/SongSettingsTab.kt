@@ -58,7 +58,6 @@ import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
 import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
 import churchpresenter.composeapp.generated.resources.song_chunk
-import churchpresenter.composeapp.generated.resources.song_preview_chords
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead

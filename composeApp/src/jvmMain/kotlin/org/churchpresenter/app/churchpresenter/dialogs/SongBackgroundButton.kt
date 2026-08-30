@@ -55,6 +55,10 @@ import org.jetbrains.compose.resources.stringResource
 
 internal const val SONG_BACKGROUND_BUTTON_TAG = "song_background_button"
 
+/** The panel footer's two buttons. Tagged because the dialog behind the panel has a Save of its own. */
+internal const val SONG_BACKGROUND_SAVE_TAG = "song_background_save"
+internal const val SONG_BACKGROUND_CANCEL_TAG = "song_background_cancel"
+
 /**
  * The chip and its panel together. [expanded] is held by the caller so the editor decides when the
  * panel closes — saving the song closes it too.
@@ -123,9 +127,10 @@ internal fun SongBackgroundButton(
                 onDismissRequest = { onExpandedChange(false) },
                 properties = PopupProperties(focusable = true),
             ) {
-                val panelHeight = SONG_BACKGROUND_PANEL_HEIGHT +
-                    SONG_BACKGROUND_FOOTER_HEIGHT +
-                    if (scopes.size > 1) SONG_BACKGROUND_SCOPE_ROW_HEIGHT else 0.dp
+                val panelHeight = songBackgroundPanelHeight(
+                    SONG_BACKGROUND_PANEL_HEIGHT + SONG_BACKGROUND_FOOTER_HEIGHT +
+                        if (scopes.size > 1) SONG_BACKGROUND_SCOPE_ROW_HEIGHT else 0.dp
+                )
                 // What the panel was opened on, so Cancel can put it back.
                 //
                 // The edits themselves stay live rather than being held in a draft: the preview
@@ -187,11 +192,16 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
             shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            modifier = Modifier.testTag(SONG_BACKGROUND_CANCEL_TAG),
         ) {
             Text(stringResource(Res.string.cancel))
         }
         Spacer(Modifier.width(8.dp))
-        Button(shape = RoundedCornerShape(6.dp), onClick = onSave) {
+        Button(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onSave,
+            modifier = Modifier.testTag(SONG_BACKGROUND_SAVE_TAG),
+        ) {
             Text(stringResource(Res.string.save))
         }
     }

@@ -31,11 +31,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -92,6 +95,23 @@ internal val SONG_BACKGROUND_SCOPE_ROW_HEIGHT = 48.dp
  * the last slider back below the fold.
  */
 internal val SONG_BACKGROUND_FOOTER_HEIGHT = 44.dp
+
+/** Left clear of the window's edges when the panel has to be shrunk to fit. */
+private val PANEL_WINDOW_MARGIN = 24.dp
+
+/**
+ * [preferred] clamped to what the window can actually show.
+ *
+ * The panel is a popup of a fixed size, and one taller than its window does not shrink -- it hangs
+ * off the bottom, taking the Save row with it, on a small laptop or a short test window. The look
+ * column scrolls, so giving back the height it cannot have costs a scroll rather than a control.
+ */
+@Composable
+internal fun songBackgroundPanelHeight(preferred: Dp): Dp {
+    val room = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+    val usable = room - PANEL_WINDOW_MARGIN
+    return if (usable > 0.dp) minOf(preferred, usable) else preferred
+}
 
 /** Which of a song's two backgrounds the panel is editing. */
 internal enum class SongBackgroundTarget { FULL_SCREEN, LOWER_THIRD }
