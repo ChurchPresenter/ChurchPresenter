@@ -36,7 +36,6 @@
     <ID>LongMethod:CompanionWebPages.kt$internal fun qaSubmissionPageHtml(): String</ID>
     <ID>LongMethod:CompanionWebPages.kt$internal fun qaVotingPageHtml(): String</ID>
     <ID>LongMethod:CrosswordTab.kt$@OptIn(ExperimentalResourceApi::class) @Composable fun CrosswordTab( modifier: Modifier = Modifier, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit )</ID>
-    <ID>LongMethod:DeckLinkComposeOutput.kt$@Composable fun DeckLinkComposeOutput( deviceIndex: Int, outputRole: String, appSettings: AppSettings, mediaViewModel: MediaViewModel, isLowerThird: Boolean = false, content: @Composable BoxScope.() -&gt; Unit )</ID>
     <ID>LongMethod:DictionaryPresenter.kt$@Composable fun DictionaryPresenter( modifier: Modifier = Modifier, entry: StrongsEntry?, dictionarySettings: DictionarySettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, transitionAlpha: Float = 1f, )</ID>
     <ID>LongMethod:DictionarySettingsTab.kt$@Composable fun DictionarySettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
     <ID>LongMethod:DictionaryTab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun DictionaryDetailPane( modifier: Modifier = Modifier, entry: StrongsEntry?, canGoBack: Boolean = false, canGoForward: Boolean = false, onGoBack: () -&gt; Unit = {}, onGoForward: () -&gt; Unit = {}, dictLanguage: String = "en", onToggleDictLanguage: () -&gt; Unit = {}, interlinearVerses: List&lt;InterlinearVerse&gt;, totalInterlinearCount: Int, isInterlinearLoading: Boolean, interlinearDisplayLimit: Int, onShowMore: () -&gt; Unit, cardBookFilter: Int? = null, cardChapterFilter: Int? = null, cardAvailableBooks: List&lt;Int&gt; = emptyList(), cardAvailableChapters: List&lt;Int&gt; = emptyList(), onFilterCardsByBook: (Int?) -&gt; Unit = {}, onFilterCardsByChapter: (Int?) -&gt; Unit = {}, getVerseText: ((bookId: Int, chapter: Int, verse: Int) -&gt; String?)? = null, getBookName: ((bookId: Int) -&gt; String?)? = null, onWordClick: ((String) -&gt; Unit)? = null, onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -&gt; Unit)? = null, getEntry: ((strongsNumber: String) -&gt; StrongsEntry?)? = null, onAddToSchedule: ((StrongsEntry) -&gt; Unit)? = null, onGoLive: ((StrongsEntry) -&gt; Unit)? = null, )</ID>
@@ -854,10 +853,6 @@
     <ID>MaxLineLength:PresenterManager.kt$PresenterManager$else -&gt; startAnnouncementCountdown(timerHours * SECONDS_PER_HOUR + timerMinutes * SECONDS_PER_MINUTE + timerSeconds, timerExpiredText)</ID>
     <ID>MaxLineLength:PresenterManager.kt$PresenterManager$fun</ID>
     <ID>MaxLineLength:PresenterOutputContent.kt$Crossfade</ID>
-    <ID>MaxLineLength:PresenterScreen.kt$val bgColorHex = if (isLowerThird &amp;&amp; !useDefault) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor</ID>
-    <ID>MaxLineLength:PresenterScreen.kt$val bgImagePath = if (isLowerThird &amp;&amp; !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage</ID>
-    <ID>MaxLineLength:PresenterScreen.kt$val bgOpacity = if (isLowerThird &amp;&amp; !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity</ID>
-    <ID>MaxLineLength:PresenterScreen.kt$val bgVideoPath = if (isLowerThird &amp;&amp; !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo</ID>
     <ID>MaxLineLength:PresenterWindows.kt$Crossfade</ID>
     <ID>MaxLineLength:PresenterWindows.kt$val</ID>
     <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Box</ID>

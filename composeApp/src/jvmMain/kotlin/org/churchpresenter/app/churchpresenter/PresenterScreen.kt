@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
@@ -42,30 +43,30 @@ fun PresenterScreen(
     // projector windows blank to black — that's what "nothing" looks like on a display.
     val transparentBlanking = LocalTransparentBlanking.current
 
-    val bgSettings = appSettings.backgroundSettings
-    // Use lower third defaults when screen is in lower third mode.
-    // "FollowDefault" means lower third uses the same background as fullscreen.
-    // "Transparent" means no background at all (fully transparent).
-    val lowerThirdType = bgSettings.defaultLowerThirdBackgroundType
-    val useDefault = isLowerThird && lowerThirdType == Constants.BACKGROUND_FOLLOW_DEFAULT
-    val bgType = when {
-        useDefault -> bgSettings.defaultBackgroundType
-        isLowerThird -> lowerThirdType
-        else -> bgSettings.defaultBackgroundType
+    // A lower-third output draws no background of its own. The band is the content's, and it
+    // already falls through to the Default Lower Third card when its surface says Default, so
+    // painting that card here too could only ever show at the band's edges — which is what put a
+    // hairline of the default's color along the top of a blurred band. Everything else is blank:
+    // black on a projector, genuinely transparent in a Browser Source or NDI alpha scene so the
+    // video underneath keys through.
+    if (isLowerThird) {
+        Box(modifier = modifier.fillMaxSize()) {
+            if (!transparentBlanking) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+            }
+            if (isKey) Box(modifier = Modifier.fillMaxSize().keySignal()) { content() } else content()
+        }
+        return
     }
-    val bgColorHex = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
-    val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
-    val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
-    val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
-    // The look the two Default cards carry. This layer is what the output shows whenever nothing
-    // is drawing a background of its own — nothing live, or Pictures/Media/Canvas, none of which
-    // resolve a background — so without these the dim and blur an operator set only appeared while
-    // a verse or a lyric happened to be on screen.
-    val bgDim = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundDim
-    else bgSettings.defaultBackgroundDim
-    val bgBlur = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundBlur
-    else bgSettings.defaultBackgroundBlur
-    val backgroundColor = if (!showBackground) Color.Black else parseHexColor(bgColorHex)
+
+    val card = appSettings.backgroundSettings.defaultCard()
+    val bgType = card.type
+    val bgImagePath = card.imagePath
+    val bgVideoPath = card.videoPath
+    val bgOpacity = card.opacity
+    val bgDim = card.dim
+    val bgBlur = card.blur
+    val backgroundColor = if (!showBackground) Color.Black else parseHexColor(card.colorHex)
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {
         if (showBackground && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
@@ -79,6 +80,9 @@ fun PresenterScreen(
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isBlurred = showBackground && bgBlur > 0
+        // Read here, not inside the band Box below: that Box's own scope shadows this one, and the
+        // blur is measured against the whole output's width the way the presenters measure it.
+        val outputWidth = maxWidth
         Box(
             modifier = Modifier.fillMaxSize().then(
                 // Overscanned so the blur's own faded edge falls outside the screen rather than
@@ -86,7 +90,7 @@ fun PresenterScreen(
                 // uses, so a background looks the same here as it does under a verse.
                 if (isBlurred) Modifier
                     .graphicsLayer { scaleX = BACKGROUND_BLUR_OVERSCAN; scaleY = BACKGROUND_BLUR_OVERSCAN }
-                    .blur(backgroundBlurRadius(bgBlur, maxWidth))
+                    .blur(backgroundBlurRadius(bgBlur, outputWidth))
                 else Modifier
             )
         ) {
@@ -147,3 +151,36 @@ fun PresenterScreen(
         }
     }
 }
+
+
+/**
+ * One of the two Default cards, flattened.
+ *
+ * This layer is what the output shows whenever nothing is drawing a background of its own —
+ * nothing live, or Pictures/Media/Canvas, none of which resolve a background — so it carries the
+ * card's dim and blur too, which otherwise only appeared while a verse or a lyric was on screen.
+ */
+private data class DefaultBackgroundCard(
+    val type: String,
+    val colorHex: String,
+    val imagePath: String,
+    val videoPath: String,
+    val opacity: Float,
+    val dim: Int,
+    val blur: Int,
+)
+
+/**
+ * The full-screen Default card. There is no lower-third counterpart here on purpose: a lower-third
+ * output returns before this is reached, and the lower-third card is drawn by the content's own
+ * band, through `resolveBackground`.
+ */
+private fun BackgroundSettings.defaultCard(): DefaultBackgroundCard = DefaultBackgroundCard(
+    type = defaultBackgroundType,
+    colorHex = defaultBackgroundColor,
+    imagePath = defaultBackgroundImage,
+    videoPath = defaultBackgroundVideo,
+    opacity = defaultBackgroundOpacity,
+    dim = defaultBackgroundDim,
+    blur = defaultBackgroundBlur,
+)
