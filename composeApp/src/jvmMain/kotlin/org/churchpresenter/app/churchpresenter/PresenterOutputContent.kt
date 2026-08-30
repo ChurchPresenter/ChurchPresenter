@@ -32,7 +32,6 @@ import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -116,8 +115,7 @@ internal fun PresenterOutputContent(
                     appSettings = appSettings,
                     outputRole = primaryRole,
                     isLowerThird = screenAssignment.isLowerThird,
-                    showBackground = showBg,
-                    lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode)
+                    showBackground = showBg
                 ) {
                     Box(
                         modifier = Modifier

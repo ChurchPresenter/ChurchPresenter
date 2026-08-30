@@ -5,12 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -25,7 +22,6 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
-import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.app.churchpresenter.presenter.PERCENT
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -40,12 +36,6 @@ fun PresenterScreen(
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     isLowerThird: Boolean = false,
     showBackground: Boolean = true,
-    /**
-     * How much of the output the lower-third band covers, as a fraction — the only part of the
-     * screen this background paints when [isLowerThird]. Null when the caller cannot know which
-     * content type is live, which falls back to the taller of the two configured bands.
-     */
-    lowerThirdBandFraction: Float? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -53,7 +43,23 @@ fun PresenterScreen(
     // projector windows blank to black — that's what "nothing" looks like on a display.
     val transparentBlanking = LocalTransparentBlanking.current
 
-    val card = appSettings.backgroundSettings.defaultCardFor(isLowerThird)
+    // A lower-third output draws no background of its own. The band is the content's, and it
+    // already falls through to the Default Lower Third card when its surface says Default, so
+    // painting that card here too could only ever show at the band's edges — which is what put a
+    // hairline of the default's color along the top of a blurred band. Everything else is blank:
+    // black on a projector, genuinely transparent in a Browser Source or NDI alpha scene so the
+    // video underneath keys through.
+    if (isLowerThird) {
+        Box(modifier = modifier.fillMaxSize()) {
+            if (!transparentBlanking) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+            }
+            if (isKey) Box(modifier = Modifier.fillMaxSize().keySignal()) { content() } else content()
+        }
+        return
+    }
+
+    val card = appSettings.backgroundSettings.defaultCard()
     val bgType = card.type
     val bgImagePath = card.imagePath
     val bgVideoPath = card.videoPath
@@ -72,29 +78,11 @@ fun PresenterScreen(
         } else null
     }
 
-    // A lower third is a band across the bottom, not a full screen: everything above it belongs to
-    // whatever the output is keyed over, so the default lower-third background is drawn over the
-    // band alone. It used to fill the whole output, which put its color on the two thirds of the
-    // screen that are supposed to stay blank.
-    val bandFraction = (lowerThirdBandFraction ?: appSettings.lowerThirdBandFraction(null)).coerceIn(0f, 1f)
-
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isBlurred = showBackground && bgBlur > 0
         // Read here, not inside the band Box below: that Box's own scope shadows this one, and the
         // blur is measured against the whole output's width the way the presenters measure it.
         val outputWidth = maxWidth
-        // Everything above the band is blank, and blank means black on a projector and genuinely
-        // transparent in a Browser Source or NDI alpha scene — the same two answers the blanked
-        // and Transparent cases below already give, applied to the part of a lower-third output
-        // no background reaches.
-        if (isLowerThird && !transparentBlanking) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black))
-        }
-        Box(
-            modifier = if (isLowerThird) {
-                Modifier.fillMaxWidth().fillMaxHeight(bandFraction).align(Alignment.BottomCenter)
-            } else Modifier.fillMaxSize()
-        ) {
         Box(
             modifier = Modifier.fillMaxSize().then(
                 // Overscanned so the blur's own faded edge falls outside the screen rather than
@@ -153,7 +141,6 @@ fun PresenterScreen(
         if (showBackground && bgDim > 0) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = bgDim / PERCENT)))
         }
-        }
         // Content layer — apply key modifier if key mode
         if (isKey) {
             Box(modifier = Modifier.fillMaxSize().keySignal()) {
@@ -184,32 +171,16 @@ private data class DefaultBackgroundCard(
 )
 
 /**
- * Which Default card an output draws: the lower-third one when it is a lower third, the
- * full-screen one otherwise.
- *
- * `FollowDefault` makes the lower third take the full-screen card outright, which is why this is
- * one decision rather than a field-by-field choice at each use — half a card from each would be a
- * look neither of them describes.
+ * The full-screen Default card. There is no lower-third counterpart here on purpose: a lower-third
+ * output returns before this is reached, and the lower-third card is drawn by the content's own
+ * band, through `resolveBackground`.
  */
-private fun BackgroundSettings.defaultCardFor(isLowerThird: Boolean): DefaultBackgroundCard =
-    if (isLowerThird && defaultLowerThirdBackgroundType != Constants.BACKGROUND_FOLLOW_DEFAULT) {
-        DefaultBackgroundCard(
-            type = defaultLowerThirdBackgroundType,
-            colorHex = defaultLowerThirdBackgroundColor,
-            imagePath = defaultLowerThirdBackgroundImage,
-            videoPath = defaultLowerThirdBackgroundVideo,
-            opacity = defaultLowerThirdBackgroundOpacity,
-            dim = defaultLowerThirdBackgroundDim,
-            blur = defaultLowerThirdBackgroundBlur,
-        )
-    } else {
-        DefaultBackgroundCard(
-            type = defaultBackgroundType,
-            colorHex = defaultBackgroundColor,
-            imagePath = defaultBackgroundImage,
-            videoPath = defaultBackgroundVideo,
-            opacity = defaultBackgroundOpacity,
-            dim = defaultBackgroundDim,
-            blur = defaultBackgroundBlur,
-        )
-    }
+private fun BackgroundSettings.defaultCard(): DefaultBackgroundCard = DefaultBackgroundCard(
+    type = defaultBackgroundType,
+    colorHex = defaultBackgroundColor,
+    imagePath = defaultBackgroundImage,
+    videoPath = defaultBackgroundVideo,
+    opacity = defaultBackgroundOpacity,
+    dim = defaultBackgroundDim,
+    blur = defaultBackgroundBlur,
+)

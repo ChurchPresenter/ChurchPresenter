@@ -41,6 +41,18 @@ import java.io.File
 /** How far a blurred background is scaled up so its faded edge lands off screen. */
 internal const val BACKGROUND_BLUR_OVERSCAN = 1.08f
 
+/**
+ * How far past its own edge a blurred layer has to be drawn for the fade to land out of sight,
+ * as a multiple of the blur radius.
+ *
+ * [BACKGROUND_BLUR_OVERSCAN] is a percentage of the layer, which works on a full screen and does
+ * not on a lower-third band: 8% of a band a third of the output tall is a few pixels, far less
+ * than the fade a blur of any size produces, so the layer behind showed through along the band's
+ * top edge. A multiple of the radius is the right measure — the fade is the radius' size, not the
+ * layer's.
+ */
+internal const val BLUR_EDGE_BLEED = 3f
+
 /** A percentage as a fraction. */
 internal const val PERCENT = 100f
 
@@ -51,9 +63,12 @@ internal const val BACKGROUND_REFERENCE_WIDTH = 1920f
  * How tall the lower-third band is, as a fraction of the output — which is exactly how much of the
  * screen a lower-third background paints, the default one included.
  *
- * Bible and Songs each carry their own band height, so the answer depends on what is live. Anything
- * else — nothing on screen, or a content type that has no band — takes the taller of the two, the
- * largest area a default can be showing in.
+ * Bible and Songs each carry their own band height, so the answer depends on which content type is
+ * asking. A caller with none — the Background tab's two Default surfaces, which sit behind both
+ * bands — takes the taller of the two, the largest area a default can be showing in.
+ *
+ * The presenters do not go through this: each draws its own band from its own setting. It is here
+ * so a preview measures the band the same way the output does.
  */
 internal fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when (mode) {
     Presenting.BIBLE -> bibleSettings.lowerThirdHeightPercent
@@ -160,9 +175,17 @@ internal fun resolveBackground(
     }
 }
 
-/** The Background tab's own default, which a content type inherits by saying Default. */
+/**
+ * The Background tab's own default, which a content type inherits by saying Default.
+ *
+ * A lower third takes the lower-third card unless that card says `FollowDefault`, which hands it
+ * the full-screen one — the same fall-through the Background tab's rail walks. Without that check
+ * `FollowDefault` reached [backgroundModifier] as an unknown type and was drawn as a flat color.
+ */
 private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolean): ResolvedBackground =
-    if (isLowerThird) ResolvedBackground(
+    if (isLowerThird &&
+        settings.defaultLowerThirdBackgroundType != Constants.BACKGROUND_FOLLOW_DEFAULT
+    ) ResolvedBackground(
         type = settings.defaultLowerThirdBackgroundType,
         imagePath = settings.defaultLowerThirdBackgroundImage,
         videoPath = settings.defaultLowerThirdBackgroundVideo,

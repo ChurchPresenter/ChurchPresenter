@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -510,30 +511,29 @@ fun SongPresenter(
             // Background stretches full width at bottom third, text respects padding on top —
             // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
             // bilingual content to stack instead of side-by-side, see TextContent below.
-            // Clipped to the band, with the blurred fill overscanned inside it. `Modifier.blur`
-            // fades a layer's own edge to transparent, so blurring the band itself let whatever is
-            // behind show through along its top as a hairline the width of the blur — and simply
-            // overscanning the band would have spilled the picture above the band line instead.
-            // Clipping outside and overscanning inside puts the faded edge out of sight entirely.
+            // `Modifier.blur` fades a layer's own edge to transparent, so blurring the band
+            // itself let whatever is behind — the default lower third's own color — show through
+            // along the band's top as a hairline the width of the blur.
+            // The fill is drawn larger than the band and the band clips it, so the fade
+            // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
+            // than scaled: the picture is cropped from a slightly larger rectangle instead of
+            // being stretched, which a band is wide enough to show.
+            val bandBleed = if (blurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
+            // Read out here: the band Box's own scope shadows this one.
+            val bandFillWidth = maxWidth + bandBleed * 2
+            val bandFillHeight = maxHeight * lowerThirdFraction + bandBleed * 2
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .clipToBounds()
+                    .clipToBounds(),
+                contentAlignment = Alignment.Center,
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (blurred) Modifier
-                                .graphicsLayer {
-                                    scaleX = BACKGROUND_BLUR_OVERSCAN
-                                    scaleY = BACKGROUND_BLUR_OVERSCAN
-                                }
-                                .blur(blurRadius)
-                            else Modifier
-                        )
+                        .requiredSize(width = bandFillWidth, height = bandFillHeight)
+                        .then(if (blurred) Modifier.blur(blurRadius) else Modifier)
                         .then(if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
                 ) {
                     if (resolvedBg.type == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {

@@ -62,13 +62,10 @@ fun DeckLinkComposeOutput(
     appSettings: AppSettings,
     mediaViewModel: MediaViewModel,
     isLowerThird: Boolean = false,
-    /** The band the lower-third background paints — see [PresenterScreen]'s own parameter. */
-    lowerThirdBandFraction: Float? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val currentAppSettings by rememberUpdatedState(appSettings)
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
-    val currentBandFraction by rememberUpdatedState(lowerThirdBandFraction)
 
     val appIconImage = rememberAppIconImage()
 
@@ -101,8 +98,7 @@ fun DeckLinkComposeOutput(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = currentAppSettings,
                     outputRole = renderRole,
-                    isLowerThird = currentIsLowerThird,
-                    lowerThirdBandFraction = currentBandFraction
+                    isLowerThird = currentIsLowerThird
                 ) {
                     content()
                 }
