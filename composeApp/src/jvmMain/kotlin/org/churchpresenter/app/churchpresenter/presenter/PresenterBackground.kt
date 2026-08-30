@@ -32,6 +32,7 @@ import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
@@ -45,6 +46,20 @@ internal const val PERCENT = 100f
 
 /** The output width every stored background size is measured against. */
 internal const val BACKGROUND_REFERENCE_WIDTH = 1920f
+
+/**
+ * How tall the lower-third band is, as a fraction of the output — which is exactly how much of the
+ * screen a lower-third background paints, the default one included.
+ *
+ * Bible and Songs each carry their own band height, so the answer depends on what is live. Anything
+ * else — nothing on screen, or a content type that has no band — takes the taller of the two, the
+ * largest area a default can be showing in.
+ */
+internal fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when (mode) {
+    Presenting.BIBLE -> bibleSettings.lowerThirdHeightPercent
+    Presenting.LYRICS -> songSettings.lowerThirdHeightPercent
+    else -> maxOf(bibleSettings.lowerThirdHeightPercent, songSettings.lowerThirdHeightPercent)
+}.toFloat() / PERCENT
 
 /**
  * The blur radius for a background stored against a 1920-wide output, drawn [width] wide.

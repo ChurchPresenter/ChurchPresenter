@@ -8,6 +8,8 @@
  */
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -145,35 +147,29 @@ internal fun BackgroundSettings.resolvedConfigFor(scope: BackgroundScope): Backg
  *
  * Bible and Songs each carry their own lower-third height, so a preview has to ask the one whose
  * surface it is drawing rather than assume a single number. The two Defaults sit behind both bands
- * at once and have no height of their own; they take the taller of the two, which is the only part
- * of the screen a default is certain to be showing through.
+ * at once and have no height of their own; they take the taller of the two, the largest area a
+ * default can be showing in — the same stand-in the output itself takes when nothing is live.
  */
 internal fun AppSettings.bandFractionFor(scope: BackgroundScope): Float = when (scope.group) {
-    BackgroundScopeGroup.BIBLE -> bibleSettings.lowerThirdHeightPercent
-    BackgroundScopeGroup.SONGS -> songSettings.lowerThirdHeightPercent
-    BackgroundScopeGroup.DEFAULTS ->
-        maxOf(bibleSettings.lowerThirdHeightPercent, songSettings.lowerThirdHeightPercent)
-}.toFloat() / BAND_PERCENT
-
-private const val BAND_PERCENT = 100f
+    BackgroundScopeGroup.BIBLE -> lowerThirdBandFraction(Presenting.BIBLE)
+    BackgroundScopeGroup.SONGS -> lowerThirdBandFraction(Presenting.LYRICS)
+    BackgroundScopeGroup.DEFAULTS -> lowerThirdBandFraction(null)
+}
 
 /**
  * How much of the output a surface's background actually paints.
  *
- * The three are genuinely different areas, and the four cards this tab replaced said so with a
- * little colored TV badge in each corner: a content type's lower-third background is the *band*
- * at the bottom, while the default lower-third background is everything the band is drawn over.
- * A preview that filled the whole screen for all three would be wrong for two of them.
+ * The two are genuinely different areas, and the four cards this tab replaced said so with a
+ * little colored TV badge in each corner: a full-screen background is the whole output, while
+ * *every* lower-third background — the default one included — is the band at the bottom and
+ * nothing above it. A preview that filled the whole screen for a lower third would show the
+ * operator a look the output never produces.
  */
-internal enum class BackgroundCoverage { FULL_SCREEN, ABOVE_BAND, BAND }
+internal enum class BackgroundCoverage { FULL_SCREEN, BAND }
 
 /** What [BackgroundCoverage] this surface paints. */
 internal val BackgroundScope.coverage: BackgroundCoverage
-    get() = when {
-        this == BackgroundScope.DEFAULT_LOWER_THIRD -> BackgroundCoverage.ABOVE_BAND
-        lowerThird -> BackgroundCoverage.BAND
-        else -> BackgroundCoverage.FULL_SCREEN
-    }
+    get() = if (lowerThird) BackgroundCoverage.BAND else BackgroundCoverage.FULL_SCREEN
 
 /** Whether [scope] is set to something of its own rather than deferring upwards. */
 internal fun BackgroundSettings.isSetExplicitly(scope: BackgroundScope): Boolean =

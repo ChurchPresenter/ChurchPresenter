@@ -62,27 +62,15 @@ fun DeckLinkComposeOutput(
     appSettings: AppSettings,
     mediaViewModel: MediaViewModel,
     isLowerThird: Boolean = false,
+    /** The band the lower-third background paints — see [PresenterScreen]'s own parameter. */
+    lowerThirdBandFraction: Float? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val currentAppSettings by rememberUpdatedState(appSettings)
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
+    val currentBandFraction by rememberUpdatedState(lowerThirdBandFraction)
 
-    // Render the same vector icon used by all Compose Windows to a BufferedImage for the JFrame
-    val iconPainter = painterResource(Res.drawable.ic_app_icon)
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val appIconImage = remember(iconPainter) {
-        try {
-            val size = 32
-            val sizeF = Size(size.toFloat(), size.toFloat())
-            val bitmap = ImageBitmap(size, size)
-            val canvas = Canvas(bitmap)
-            CanvasDrawScope().draw(density, layoutDirection, canvas, sizeF) {
-                with(iconPainter) { draw(sizeF) }
-            }
-            bitmap.toAwtImage()
-        } catch (_: Exception) { null }
-    }
+    val appIconImage = rememberAppIconImage()
 
     DisposableEffect(deviceIndex) {
         if (!DeckLinkManager.isAvailable()) return@DisposableEffect onDispose {}
@@ -94,18 +82,7 @@ fun DeckLinkComposeOutput(
         val h = info?.height ?: 1080
         System.err.println("[DeckLink] Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps, role=$outputRole")
 
-        // Create offscreen JFrame with ComposePanel
-        val jframe = JFrame("DeckLink Output $deviceIndex").apply {
-            isUndecorated = true
-            appIconImage?.let { iconImage = it }
-            setSize(w, h)
-            // Position just outside visible area — close enough for DWM to render
-            val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-            val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
-                acc.union(sd.defaultConfiguration.bounds)
-            }
-            setLocation(virtualBounds.x - w, virtualBounds.y)
-        }
+        val jframe = offscreenFrame(deviceIndex, w, h, appIconImage)
 
         val composePanel = ComposePanel().apply {
             preferredSize = Dimension(w, h)
@@ -124,7 +101,8 @@ fun DeckLinkComposeOutput(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = currentAppSettings,
                     outputRole = renderRole,
-                    isLowerThird = currentIsLowerThird
+                    isLowerThird = currentIsLowerThird,
+                    lowerThirdBandFraction = currentBandFraction
                 ) {
                     content()
                 }
@@ -134,32 +112,9 @@ fun DeckLinkComposeOutput(
         jframe.contentPane.add(composePanel)
         jframe.isVisible = true
 
-        // Find the SkiaLayer inside the ComposePanel
-        fun findSkiaLayer(container: Container): SkiaLayer? {
-            for (comp in container.components) {
-                if (comp is SkiaLayer) return comp
-                if (comp is Container) {
-                    val found = findSkiaLayer(comp)
-                    if (found != null) return found
-                }
-            }
-            return null
-        }
-
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val captureJob = scope.launch {
-            // Wait for ComposePanel to initialize and create SkiaLayer
-            delay(1000)
-
-            var skiaLayer: SkiaLayer? = null
-            // Try to find SkiaLayer (may take a moment to be added)
-            repeat(20) {
-                skiaLayer = findSkiaLayer(composePanel)
-                if (skiaLayer != null) return@repeat
-                delay(100)
-            }
-
-            val layer = skiaLayer
+            val layer = awaitSkiaLayer(composePanel)
             if (layer == null) {
                 System.err.println("[DeckLink] Device $deviceIndex: Could not find SkiaLayer")
                 CrashReporter.reportWarning(
@@ -260,4 +215,76 @@ internal fun skiaBgraToArgbPixels(byteBuf: ByteArray, pixels: IntArray, pixelCou
         val a = byteBuf[off + 3].toInt() and 0xFF
         pixels[i] = (a shl ALPHA_SHIFT) or (r shl RED_SHIFT) or (g shl GREEN_SHIFT) or b
     }
+}
+
+/** The same vector icon every Compose Window uses, rendered for the off-screen `JFrame`'s title. */
+@Composable
+private fun rememberAppIconImage(): java.awt.image.BufferedImage? {
+    val iconPainter = painterResource(Res.drawable.ic_app_icon)
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    return remember(iconPainter) {
+        try {
+            val size = 32
+            val sizeF = Size(size.toFloat(), size.toFloat())
+            val bitmap = ImageBitmap(size, size)
+            val canvas = Canvas(bitmap)
+            CanvasDrawScope().draw(density, layoutDirection, canvas, sizeF) {
+                with(iconPainter) { draw(sizeF) }
+            }
+            bitmap.toAwtImage()
+        } catch (_: Exception) { null }
+    }
+}
+
+/**
+ * The frame the device's content is composed into, parked just off the left edge of the virtual
+ * desktop — far enough not to be seen, close enough that DWM still renders it.
+ */
+private fun offscreenFrame(
+    deviceIndex: Int,
+    width: Int,
+    height: Int,
+    icon: java.awt.image.BufferedImage?,
+): JFrame = JFrame("DeckLink Output $deviceIndex").apply {
+    isUndecorated = true
+    icon?.let { iconImage = it }
+    setSize(width, height)
+    val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+    val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
+        acc.union(sd.defaultConfiguration.bounds)
+    }
+    setLocation(virtualBounds.x - width, virtualBounds.y)
+}
+
+/** The `SkiaLayer` a `ComposePanel` builds itself around, wherever in its tree it ended up. */
+private fun findSkiaLayer(container: Container): SkiaLayer? {
+    for (comp in container.components) {
+        if (comp is SkiaLayer) return comp
+        if (comp is Container) {
+            val found = findSkiaLayer(comp)
+            if (found != null) return found
+        }
+    }
+    return null
+}
+
+/** How long a `ComposePanel` is given to come up before its layer is first looked for. */
+private const val SKIA_LAYER_WARMUP_MS = 1000L
+
+/** How many times, and how far apart, that look is repeated before giving up. */
+private const val SKIA_LAYER_ATTEMPTS = 20
+private const val SKIA_LAYER_RETRY_MS = 100L
+
+/**
+ * The panel's [SkiaLayer] once it exists — a `ComposePanel` builds it asynchronously, so the first
+ * look after `isVisible` finds nothing. Null if it never appears.
+ */
+private suspend fun awaitSkiaLayer(panel: Container): SkiaLayer? {
+    delay(SKIA_LAYER_WARMUP_MS)
+    repeat(SKIA_LAYER_ATTEMPTS) {
+        findSkiaLayer(panel)?.let { return it }
+        delay(SKIA_LAYER_RETRY_MS)
+    }
+    return findSkiaLayer(panel)
 }

@@ -140,7 +140,8 @@ internal fun OffscreenOutputContent(
                     appSettings = appSettings,
                     outputRole = outputRole,
                     isLowerThird = isLowerThird,
-                    showBackground = showBg
+                    showBackground = showBg,
+                    lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode)
                 ) {
                     // Mode-to-mode crossfade — same behavior and duration formula as the
                     // real output windows (main.kt): fades only when bible/song crossfade

@@ -38,6 +38,7 @@ import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
+import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
@@ -168,6 +169,7 @@ internal fun PresenterWindows(
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
                         isLowerThird = screenAssignment.isLowerThird,
+                        lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode),
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -204,6 +206,7 @@ internal fun PresenterWindows(
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
                         isLowerThird = screenAssignment.isLowerThird,
+                        lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode),
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -440,6 +443,7 @@ internal fun PresenterWindows(
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
                         isLowerThird = screenAssignment.isLowerThird,
+                        lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode),
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(

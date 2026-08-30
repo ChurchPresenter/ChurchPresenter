@@ -80,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
@@ -381,6 +382,7 @@ private fun SingleDisplayPreview(
                     outputRole = primaryRole,
                     isLowerThird = isLowerThird,
                     showBackground = showsBackground,
+                    lowerThirdBandFraction = appSettings.lowerThirdBandFraction(effectiveMode),
                 ) {
                     if (effectiveMode != Presenting.NONE && showsContent) {
                         val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
