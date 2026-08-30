@@ -9,6 +9,8 @@ import org.churchpresenter.ndi.NdiSender
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
+private const val NANOS_PER_MILLI = 1_000_000L
+
 /**
  * Puts one output's live content on the network as an NDI source.
  *
@@ -16,12 +18,11 @@ import org.churchpresenter.settings.utils.Constants
  * driving [OffscreenOutputContent], so an NDI receiver sees pixel-for-pixel what a Browser Source
  * and a projector window see, with no second implementation to drift.
  *
- * What differs from a Browser Source is what happens to the pixels afterwards, and it is the
- * opposite trade. A Browser Source encodes only what changed, so a static slide costs one encode;
- * NDI sends every frame regardless, because a receiver expects a continuous stream and an NDI
- * source that stops sending reads as a dead one. That is why [shouldSend] gates on the output being
- * switched on rather than on anyone watching: NDI's own answer to "is anyone watching" is the
- * connection count, and a source with no receivers still has to keep announcing itself.
+ * What differs from a Browser Source is what happens to the pixels afterwards. A Browser Source
+ * encodes only what changed, so a static slide costs one encode; NDI sends every frame regardless,
+ * because a receiver expects a continuous stream. So while there is a receiver this output has a
+ * floor its neighbour does not — and while there is not, [shouldSend] parks it entirely, exactly as
+ * the Browser Source parks on its subscriber count.
  *
  * In [NdiOutputMode.ALPHA] the content is drawn with transparent blanking, so the frame carries
  * genuine per-pixel alpha and OBS receives a keyed layer directly. In the fill modes it is drawn
@@ -34,7 +35,7 @@ class NdiVideoRenderer(
     private val screenAssignmentState: State<ScreenAssignment>,
     width: Int = DEFAULT_WIDTH,
     height: Int = DEFAULT_HEIGHT,
-    private val fps: Int = DEFAULT_FPS,
+    fps: Int = DEFAULT_FPS,
     /**
      * Called the first time a receiver is found watching this output, so the usage ping can count
      * the services where NDI was genuinely consumed rather than merely switched on.
@@ -48,7 +49,7 @@ class NdiVideoRenderer(
         width = width,
         height = height,
         fps = fps,
-        shouldRender = { shouldSend(screenAssignmentState.value.ndiEnabled, sender.isOpen) },
+        shouldRender = { shouldRenderTick() },
     ) {
         OffscreenOutputContent(context, transparentBlanking = sender.mode == NdiOutputMode.ALPHA)
     }
@@ -59,29 +60,31 @@ class NdiVideoRenderer(
         internal const val DEFAULT_FPS = 30
 
         /**
-         * Whether this tick is worth rendering.
+         * How long a receiver count is trusted before the runtime is asked again.
          *
-         * Deliberately *not* gated on the receiver count, unlike the Browser Source's equivalent: a
-         * receiver tuning in expects a picture immediately, and NDI's discovery already means an
-         * unwatched source costs only the frames it sends. What it is gated on is the operator's own
-         * switch, and on the sender actually being on the network — rendering into a sender that
-         * failed to open is pure waste.
+         * Deliberately just under [ComposeScenePump.IDLE_POLL_MS], so a parked output asks on every
+         * one of its idle ticks rather than skipping one to timing jitter and taking two of them to
+         * notice a receiver. While rendering it caps the ask at five a second instead of one per
+         * frame.
          */
-        internal fun shouldSend(enabled: Boolean, senderOpen: Boolean): Boolean = enabled && senderOpen
+        internal const val RECEIVER_POLL_MS = 200L
 
         /**
-         * Whether this frame should ask how many receivers there are.
+         * Whether this tick is worth rendering.
          *
-         * About once a second rather than on every frame, and not at all once one has been seen.
-         * [NdiSender.connectionCount] is a non-blocking native read, but it is the only reason this
-         * class would touch the runtime outside sending, and after the answer has been recorded
-         * there is nothing left to learn from asking again.
+         * Gated on the receiver count, which an earlier version of this class deliberately did not
+         * do — the reasoning being that a source still has to announce itself. It does, but
+         * announcing is the discovery threads' job and has nothing to do with the video stream: a
+         * source with no frames flowing is still listed in OBS, and [NdiSender.connectionCount]
+         * still answers, because a receiver arrives on the sender's own accept thread. Rendering
+         * for nobody is not what keeps a source alive; it is just 1080p30 thrown away, which is
+         * what a reported machine was doing for an entire service.
          *
-         * [fps] of zero or less would divide by zero, so it polls every frame instead — a renderer
-         * built with no cadence is not a case worth failing on.
+         * The cost of gating is that a receiver tuning in waits for the pump's next idle tick — at
+         * most [ComposeScenePump.IDLE_POLL_MS] — for its first picture.
          */
-        internal fun isReceiverPollTick(frame: Long, fps: Int, alreadySeen: Boolean): Boolean =
-            !alreadySeen && (fps <= 0 || frame % fps == 0L)
+        internal fun shouldSend(enabled: Boolean, senderOpen: Boolean, receivers: Int): Boolean =
+            enabled && senderOpen && receivers > 0
 
         /** The stored `ndiMode` string as the behaviour it names, defaulting to alpha. */
         fun modeOf(assignment: ScreenAssignment): NdiOutputMode = when (assignment.ndiMode) {
@@ -101,20 +104,47 @@ class NdiVideoRenderer(
     /** How many receivers are watching, for the settings card to show. */
     fun connectionCount(): Int = sender.connectionCount()
 
-    private var frameIndex = 0L
+    private var polled = false
+    private var lastPollMs = 0L
+    private var receivers = 0
     private var receiversSeen = false
 
     /**
-     * Notices the first receiver to tune in, called once per sent frame.
+     * The receiver count, asked of the runtime at most once per [RECEIVER_POLL_MS] and remembered
+     * in between, and the first receiver reported as usage on the way past.
      *
-     * Internal so a test drives it directly against a fake library rather than through the pump —
-     * the decision is the thing worth asserting, and running it needs neither Compose nor a wait.
+     * One place asks, because both things that want the answer — whether to render at all, and
+     * whether NDI was genuinely consumed this service — want the same answer at the same moment.
+     * Splitting them meant two native calls on two different schedules and two ideas of "seen".
+     *
+     * Takes [nowMs] rather than reading a clock, so a test drives the whole schedule directly
+     * against a fake library: no Compose, no wait, and no dependence on how long anything took.
+     * Called only from the pump's own coroutine, which is what makes the unguarded state safe —
+     * the same single-driver contract [NdiSender] is written to.
      */
-    internal fun observeReceivers() {
-        if (!isReceiverPollTick(frameIndex++, fps, receiversSeen)) return
-        if (sender.connectionCount() <= 0) return
-        receiversSeen = true
-        onReceiverSeen()
+    internal fun refreshReceivers(nowMs: Long): Int {
+        if (polled && nowMs - lastPollMs < RECEIVER_POLL_MS) return receivers
+        polled = true
+        lastPollMs = nowMs
+        receivers = sender.connectionCount()
+        if (receivers > 0 && !receiversSeen) {
+            receiversSeen = true
+            onReceiverSeen()
+        }
+        return receivers
+    }
+
+    /**
+     * Whether the pump should render this tick — the switch, the sender, and someone to send to.
+     *
+     * The runtime is only asked about receivers once the first two hold: an output the operator has
+     * switched off, or whose sender never opened, is not going to render whatever the answer is.
+     */
+    private fun shouldRenderTick(): Boolean {
+        val enabled = screenAssignmentState.value.ndiEnabled
+        val open = sender.isOpen
+        val watching = if (enabled && open) refreshReceivers(System.nanoTime() / NANOS_PER_MILLI) else 0
+        return shouldSend(enabled, open, watching)
     }
 
     /**
@@ -123,10 +153,7 @@ class NdiVideoRenderer(
      */
     fun start(scope: CoroutineScope) {
         if (!sender.open()) return
-        pump.start(scope) { argb, w, h, _ ->
-            sender.send(argb, w, h)
-            observeReceivers()
-        }
+        pump.start(scope) { argb, w, h, _ -> sender.send(argb, w, h) }
     }
 
     /**
