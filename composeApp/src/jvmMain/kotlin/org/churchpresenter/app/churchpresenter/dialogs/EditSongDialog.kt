@@ -98,6 +98,7 @@ import churchpresenter.composeapp.generated.resources.song_capo
 import churchpresenter.composeapp.generated.resources.song_chords
 import churchpresenter.composeapp.generated.resources.song_chords_toggle
 import churchpresenter.composeapp.generated.resources.song_insert_section
+import churchpresenter.composeapp.generated.resources.song_insert_slide_break
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
@@ -463,6 +464,13 @@ internal fun EditSongContent(
                                 InsertChip(marker.trim('[', ']', '{', '}')) {
                                     setPaneValue(insertSnippet(paneValue, marker, ownLine = true))
                                 }
+                            }
+                            // Deliberately not in SONG_SECTION_MARKERS: that list is what the app
+                            // treats as a section, and a break is the opposite of one.
+                            InsertChip(stringResource(Res.string.song_insert_slide_break)) {
+                                setPaneValue(
+                                    insertSnippet(paneValue, ChordTransposer.SLIDE_BREAK, ownLine = true),
+                                )
                             }
                         }
 
@@ -886,12 +894,19 @@ private fun rememberLyricsHighlight(): VisualTransformation {
     val verse = SectionInk.of(SongSectionKind.VERSE)
     val chorus = SectionInk.of(SongSectionKind.CHORUS)
     val chord = MaterialTheme.colorScheme.primary
-    return remember(verse, chorus, chord) {
+    val divider = MaterialTheme.colorScheme.onSurfaceVariant
+    return remember(verse, chorus, chord, divider) {
         VisualTransformation { text ->
             val annotated = buildAnnotatedString {
                 text.text.split("\n").forEachIndexed { i, line ->
                     if (i > 0) append("\n")
-                    if (ChordTransposer.isSectionHeader(line)) {
+                    if (ChordTransposer.isSlideBreak(line)) {
+                        // Neither a section nor a chord — a rule drawn through the words, so it
+                        // reads as the divider it is while it is being typed.
+                        pushStyle(SpanStyle(color = divider, fontWeight = FontWeight.Bold))
+                        append(line)
+                        pop()
+                    } else if (ChordTransposer.isSectionHeader(line)) {
                         val ink = if (sectionKindOf(line.trim().trim('[', ']', '{', '}')) == SongSectionKind.CHORUS) {
                             chorus
                         } else {

@@ -272,6 +272,133 @@ class LyricSectionsTest {
         assertEquals(listOf(listOf("first refrain"), listOf("second refrain")), sections.map { it.lines })
     }
 
+    // ── Manual slide breaks ─────────────────────────────────────────────────────
+
+    @Test
+    fun `a break splits a section into slides that keep its name`() {
+        // Issue #404: the only way to break a long chorus used to be to start a new section, which
+        // put the wrong name on the second half.
+        val sections = asWritten.getLyricSections(
+            song(listOf("{Chorus}", "first half", "[---]", "second half")),
+        )
+
+        assertEquals(2, sections.size)
+        assertEquals(listOf(listOf("first half"), listOf("second half")), sections.map { it.lines })
+        assertTrue(sections.all { it.header == "{Chorus}" }, "both slides are still the chorus")
+        assertTrue(sections.all { it.type == Constants.SECTION_TYPE_CHORUS })
+        assertEquals(listOf(0, 1), sections.map { it.slideIndex })
+        assertTrue(sections.all { it.slideCount == 2 })
+    }
+
+    @Test
+    fun `a break is never a section of its own`() {
+        // It parsed as a header named "---", so the reporter's editor showed a `---` badge and
+        // counted the break as a section.
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "a", "[---]", "b")),
+        )
+        assertTrue(sections.none { it.header?.contains("-") == true })
+        assertTrue(sections.none { it.lines.any { line -> line.contains("---") } })
+    }
+
+    @Test
+    fun `a section can be split three ways`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "one", "[---]", "two", "[---]", "three")),
+        )
+        assertEquals(listOf(listOf("one"), listOf("two"), listOf("three")), sections.map { it.lines })
+        assertEquals(listOf(0, 1, 2), sections.map { it.slideIndex })
+        assertTrue(sections.all { it.slideCount == 3 })
+    }
+
+    @Test
+    fun `a break with nothing behind it costs no blank slide`() {
+        // Leading, doubled and trailing markers are what someone editing by hand actually leaves.
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "[---]", "one", "[---]", "[---]", "two", "[---]")),
+        )
+        assertEquals(listOf(listOf("one"), listOf("two")), sections.map { it.lines })
+        assertTrue(sections.all { it.slideCount == 2 })
+    }
+
+    @Test
+    fun `a break outside any section splits the untitled body`() {
+        val sections = asWritten.getLyricSections(song(listOf("one", "[---]", "two")))
+        assertEquals(listOf(listOf("one"), listOf("two")), sections.map { it.lines })
+        assertTrue(sections.all { it.header == null })
+    }
+
+    @Test
+    fun `a song of nothing but breaks produces nothing`() {
+        assertTrue(asWritten.getLyricSections(song(listOf("[---]", "[---]"))).isEmpty())
+    }
+
+    @Test
+    fun `an unsplit section is slide one of one`() {
+        val sections = asWritten.getLyricSections(song(listOf("[Verse 1]", "a", "[Verse 2]", "b")))
+        assertTrue(sections.all { it.slideIndex == 0 && it.slideCount == 1 })
+    }
+
+    @Test
+    fun `two sections split the same way are numbered apart`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "a", "[---]", "b", "[Verse 2]", "c", "[---]", "d")),
+        )
+        assertEquals(listOf(0, 1, 0, 1), sections.map { it.slideIndex })
+        assertEquals(listOf("[Verse 1]", "[Verse 1]", "[Verse 2]", "[Verse 2]"), sections.map { it.header })
+    }
+
+    @Test
+    fun `only the last slide of the last section carries the end-of-song marker`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "a", "[---]", "b")),
+        )
+        assertTrue(sections.last().isLastSection)
+        assertTrue(sections.dropLast(1).none { it.isLastSection })
+    }
+
+    @Test
+    fun `a split chorus is repeated whole`() {
+        // The auto-repeat works in sections, so a two-slide chorus is sung as two slides each time.
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "v1", "{Chorus}", "c1", "[---]", "c2", "[Verse 2]", "v2")),
+        )
+        assertEquals(
+            listOf(listOf("v1"), listOf("c1"), listOf("c2"), listOf("v2"), listOf("c1"), listOf("c2")),
+            sections.map { it.lines },
+        )
+        assertEquals(listOf(0, 0, 1, 0, 0, 1), sections.map { it.slideIndex })
+    }
+
+    @Test
+    fun `a split verse collects one chorus, not one per slide`() {
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "v1a", "[---]", "v1b", "{Chorus}", "c")),
+        )
+        assertEquals(listOf(listOf("v1a"), listOf("v1b"), listOf("c")), sections.map { it.lines })
+    }
+
+    @Test
+    fun `a break inside a chord-only section does not resurrect it as a blank slide`() {
+        // The intro has no words, so it is folded onto the verse and the break inside it goes with
+        // it — an empty slide would be a black screen the operator has to click past.
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Intro]", "[Cm] [Bb]", "[---]", "[Ab] [G]", "[Verse 1]", "one")),
+        )
+        assertEquals(1, sections.size, "got ${sections.map { it.header }}")
+        assertEquals("[Verse 1]", sections.single().header)
+        assertEquals(listOf("one"), sections.single().lines)
+    }
+
+    @Test
+    fun `a split section divides its chart along with its words`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "[G]one", "[---]", "[C]two")),
+        )
+        assertEquals(listOf(listOf("[G]one"), listOf("[C]two")), sections.map { it.chordLines })
+        assertEquals(listOf(listOf("one"), listOf("two")), sections.map { it.lines })
+    }
+
     // ── End-of-song marker ──────────────────────────────────────────────────────
 
     @Test
@@ -332,6 +459,37 @@ class LyricSectionsTest {
         assertEquals(listOf("uno"), sections[0].secondaryLines)
         assertTrue(sections[1].secondaryLines.isEmpty(), "untranslated sections must not drop out")
         assertTrue(sections[2].secondaryLines.isEmpty())
+    }
+
+    @Test
+    fun `matching breaks in both languages pair slide for slide`() {
+        val sections = asWritten.getLyricSections(
+            song(
+                lyrics = listOf("{Chorus}", "English one", "[---]", "English two"),
+                secondary = listOf("{Chorus}", "Russian one", "[---]", "Russian two"),
+            ),
+        )
+        assertEquals(listOf(listOf("Russian one"), listOf("Russian two")), sections.map { it.secondaryLines })
+    }
+
+    /**
+     * A break in one language and not the other cannot be paired, and the question is only how far
+     * the damage spreads. Pairing runs per section rather than on one running index, so the extra
+     * slide comes out untranslated and **verse 2 still meets verse 2** — where a flat index would
+     * have slid every later section under the wrong translation.
+     */
+    @Test
+    fun `a break in one language only leaves that section short, not the rest of the song`() {
+        val sections = asWritten.getLyricSections(
+            song(
+                lyrics = listOf("[Verse 1]", "one", "[---]", "one and a half", "[Verse 2]", "two"),
+                secondary = listOf("[Verse 1]", "uno", "[Verse 2]", "dos"),
+            ),
+        )
+        assertEquals(3, sections.size)
+        assertEquals(listOf("uno"), sections[0].secondaryLines)
+        assertTrue(sections[1].secondaryLines.isEmpty(), "the untranslated extra slide")
+        assertEquals(listOf("dos"), sections[2].secondaryLines, "verse 2 still meets its translation")
     }
 
     @Test

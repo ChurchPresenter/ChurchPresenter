@@ -68,17 +68,43 @@ object ChordTransposer {
     fun isChord(token: String): Boolean = CHORD.matches(token.trim())
 
     /**
+     * The canonical manual slide break, written on a line of its own inside a section.
+     *
+     * A long verse or chorus has to be broken across slides somewhere, and the only tool for that
+     * used to be starting a new section -- which puts the wrong name on the second half. This
+     * splits the slide without splitting the section, so both halves still read "Chorus".
+     */
+    const val SLIDE_BREAK = "[---]"
+
+    /**
+     * A whole line of nothing but dashes in brackets: `[---]`, `{--}`, `[- - -]`.
+     *
+     * Deliberately forgiving about how many dashes and where the spaces fall, because this is typed
+     * by hand into a lyrics box and a marker that works only at exactly three dashes is a marker
+     * people will get wrong. What it will not accept is dashes with anything else between the
+     * brackets, so a section genuinely named `[--- Chorus ---]` stays a section.
+     */
+    private val SLIDE_BREAK_LINE = Regex("^[\\[{][\\s-]*-[\\s-]*[\\]}]$")
+
+    /** True when [line] is a manual slide break -- see [SLIDE_BREAK]. */
+    fun isSlideBreak(line: String): Boolean = SLIDE_BREAK_LINE.matches(line.trim())
+
+    /**
      * True when [line] is a section header — a whole line wrapped in `[]` or `{}`.
      *
      * Two bracketed lines are not headers. One holding a single chord, as an instrumental writes
      * `[Am]`. And one holding a run of them, as an intro writes `[Cm] [Bb] [Ab] [G]` — that line
      * also opens with `[` and closes with `]`, but what sits between them is further brackets, not
      * a name, so it is a chord line and has to be read as one.
+     *
+     * Nor is a slide break — see [isSlideBreak]. It ends a slide, not a section.
      */
     fun isSectionHeader(line: String): Boolean {
         val t = line.trim()
         val bracketed = (t.startsWith("[") && t.endsWith("]")) || (t.startsWith("{") && t.endsWith("}"))
-        if (!bracketed) return false
+        // A slide break is bracketed and is not a chord, so it would otherwise parse as a section
+        // named "---" -- which is what it did, and what put a `---` badge on half a chorus.
+        if (!bracketed || isSlideBreak(t)) return false
         val inner = t.substring(1, t.length - 1)
         if (inner.any { it in "[]{}" }) return false
         return !isChord(inner)

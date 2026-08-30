@@ -48,6 +48,43 @@ class ChordTransposerTest {
         assertFalse(ChordTransposer.isSectionHeader("[G]Amazing grace"))
     }
 
+    // ── The manual slide break ──────────────────────────────────────────────────
+
+    @Test
+    fun `a slide break is not a section header`() {
+        // It used to be one, named "---", so half a chorus came out badged `---` (issue #404).
+        assertFalse(ChordTransposer.isSectionHeader(ChordTransposer.SLIDE_BREAK))
+        assertFalse(ChordTransposer.isSectionHeader("  [---]  "))
+    }
+
+    @Test
+    fun `the break is recognised however many dashes and spaces it is typed with`() {
+        for (line in listOf("[---]", "[-]", "[----------]", "{---}", "  [- - -]  ", "[ --- ]")) {
+            assertTrue(ChordTransposer.isSlideBreak(line), "should be a slide break: \"$line\"")
+            assertFalse(ChordTransposer.isSectionHeader(line), "and so not a header: \"$line\"")
+        }
+    }
+
+    @Test
+    fun `a section whose name merely contains dashes is still a section`() {
+        for (line in listOf("[--- Chorus ---]", "[Pre-Chorus]", "[Verse 1]", "[]", "[ ]")) {
+            assertFalse(ChordTransposer.isSlideBreak(line), "should not be a slide break: \"$line\"")
+        }
+        assertTrue(ChordTransposer.isSectionHeader("[--- Chorus ---]"))
+    }
+
+    @Test
+    fun `a dash inside a lyric line is not a break`() {
+        assertFalse(ChordTransposer.isSlideBreak("well — he said"))
+        assertFalse(ChordTransposer.isSlideBreak("[G]one - two"))
+    }
+
+    @Test
+    fun `stripping leaves a slide break alone`() {
+        // It is not a chord, so it survives to the splitter that consumes it.
+        assertEquals(ChordTransposer.SLIDE_BREAK, ChordTransposer.stripChords(ChordTransposer.SLIDE_BREAK))
+    }
+
     // ── Moving chords ───────────────────────────────────────────────────────────
 
     @Test

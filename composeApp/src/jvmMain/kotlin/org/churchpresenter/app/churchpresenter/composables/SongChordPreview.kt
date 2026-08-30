@@ -59,14 +59,28 @@ private const val CHORD_SPACING_RATIO = 0.42f
 /** How a section reads in the preview — the colour tells verses from choruses at a glance. */
 enum class SongSectionKind { VERSE, CHORUS, BRIDGE, TAG }
 
-/** A section of the song as the preview draws it: a label, and its lines already split into runs. */
+/**
+ * A section of the song as the preview draws it: a label, and its lines already split into runs.
+ *
+ * [slideIndex] and [slideCount] mirror `LyricSection`'s — a section broken by a manual `[---]`
+ * arrives here as several slides carrying the same label, so the preview shows what will go on
+ * screen rather than what was typed.
+ */
 data class PreviewSection(
     val label: String,
     val kind: SongSectionKind,
     val lines: List<List<ChordSegment>>,
+    val slideIndex: Int = 0,
+    val slideCount: Int = 1,
 )
 
-/** What the footer counts. */
+/**
+ * What the footer counts.
+ *
+ * [sections] counts sections, not slides: a chorus broken by a manual `[---]` is drawn as two
+ * [PreviewSection]s so the preview shows what will go on screen, but it is still one chorus and
+ * counting it as two would tell the person editing that they had written a section they had not.
+ */
 data class SongStats(val sections: Int, val lines: Int, val words: Int)
 
 /**
@@ -94,6 +108,10 @@ fun sectionKindOf(label: String): SongSectionKind = when (SongSectionWords.group
  * header — the same rule `SongsViewModel.splitLyricsIntoSections` presents by, so the preview shows
  * what will actually go on screen. Blank lines are separators only; they neither start a section nor
  * appear in one, so a song written without blank lines between its verses still reads as verses.
+ *
+ * A manual break (`[---]`) ends a slide without ending the section, so the section comes back as
+ * several [PreviewSection]s carrying the same label and numbered among themselves — again matching
+ * what the presenter will do with it.
  */
 fun buildPreviewSections(
     text: String,
@@ -103,6 +121,7 @@ fun buildPreviewSections(
 ): List<PreviewSection> {
     val out = mutableListOf<PreviewSection>()
     var label = ""
+    var slideOfSection = 0
     val body = mutableListOf<String>()
 
     fun flush() {
@@ -112,6 +131,7 @@ fun buildPreviewSections(
                 label = label,
                 kind = sectionKindOf(label),
                 lines = body.map { ChordTransposer.parseLine(it, steps, flats, showChords) },
+                slideIndex = slideOfSection++,
             )
         )
         body.clear()
@@ -120,13 +140,27 @@ fun buildPreviewSections(
     text.lines().forEach { line ->
         if (ChordTransposer.isSectionHeader(line)) {
             flush()
+            slideOfSection = 0
             label = line.trim().let { it.substring(1, it.length - 1) }.trim()
+        } else if (ChordTransposer.isSlideBreak(line)) {
+            if (body.isNotEmpty()) flush()
         } else if (line.isNotBlank()) {
             body.add(line)
         }
     }
     flush()
-    return out
+    // A section's slide count is only known once the section has ended, so it is filled in
+    // afterwards: a run of slides begins at index 0 and lasts until the next one that does.
+    val counts = IntArray(out.size)
+    var runStart = 0
+    out.forEachIndexed { index, section ->
+        if (section.slideIndex == 0 && index > 0) {
+            for (i in runStart until index) counts[i] = index - runStart
+            runStart = index
+        }
+    }
+    for (i in runStart until out.size) counts[i] = out.size - runStart
+    return out.mapIndexed { index, section -> section.copy(slideCount = counts[index]) }
 }
 
 /** Counts what the footer reports. Words are counted after chords come off, not before. */
@@ -137,7 +171,7 @@ fun songStatsOf(sections: List<PreviewSection>): SongStats {
             line.joinToString("") { it.text }.split(Regex("\\s+")).count { it.isNotBlank() }
         }
     }
-    return SongStats(sections.size, lines, words)
+    return SongStats(sections.count { it.slideIndex == 0 }, lines, words)
 }
 
 /**
@@ -168,7 +202,12 @@ internal object SectionInk {
  * way in both; [label] is the bare name, with any `[]`/`{}` already off it.
  */
 @Composable
-fun SectionLabelRow(label: String, modifier: Modifier = Modifier) {
+fun SectionLabelRow(
+    label: String,
+    modifier: Modifier = Modifier,
+    slideIndex: Int = 0,
+    slideCount: Int = 1,
+) {
     val ink = SectionInk.of(sectionKindOf(label))
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -182,6 +221,12 @@ fun SectionLabelRow(label: String, modifier: Modifier = Modifier) {
                 .background(ink.copy(alpha = 0.16f), RoundedCornerShape(6.dp))
                 .padding(horizontal = 9.dp, vertical = 3.dp),
         )
+        // Which slide of the section this is, shown only when there is more than one — otherwise
+        // every unsplit verse in the library would carry a "1/1" that tells nobody anything. Digits
+        // and a slash, so there is nothing here to translate.
+        if (slideCount > 1) {
+            ZoneLabel(text = "${slideIndex + 1}/$slideCount")
+        }
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier.weight(1f),
@@ -281,7 +326,12 @@ fun SongChordPreview(
             sections.forEach { section ->
                 Column(verticalArrangement = Arrangement.spacedBy(if (showChords) 5.dp else 2.dp)) {
                     if (section.label.isNotBlank()) {
-                        SectionLabelRow(section.label, modifier = Modifier.padding(bottom = 3.dp))
+                        SectionLabelRow(
+                            section.label,
+                            modifier = Modifier.padding(bottom = 3.dp),
+                            slideIndex = section.slideIndex,
+                            slideCount = section.slideCount,
+                        )
                     }
                     section.lines.forEach { line -> ChordLine(line, showChords) }
                 }

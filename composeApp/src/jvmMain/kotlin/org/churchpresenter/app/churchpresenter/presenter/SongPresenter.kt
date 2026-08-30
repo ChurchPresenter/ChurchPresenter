@@ -1198,9 +1198,10 @@ private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean
         Constants.EVERY_PAGE -> true
         Constants.FIRST_PAGE -> {
             // Show only on the first verse section (header null, ends with "1", or verse with no number)
-            val header = lyricSection.header ?: return true  // null header = first/only section
-            // Chorus/bridge sections are not "first page"
-            if (lyricSection.type == Constants.SECTION_TYPE_CHORUS) return false
+            val header = lyricSection.header ?: return lyricSection.slideIndex == 0 // null = first section
+            // Chorus/bridge sections are not "first page"; nor is the second slide of a section
+            // broken by a manual [---], which is the same page continued.
+            if (lyricSection.type == Constants.SECTION_TYPE_CHORUS || lyricSection.slideIndex > 0) return false
             val inner = header.trim().removePrefix("[").removePrefix("{").removeSuffix("]").removeSuffix("}").trim()
             // The trailing number is compared as a number, not as a string ending in "1" — that read
             // verses 11, 21 and 31 as the opening slide, so the title came back over them part-way

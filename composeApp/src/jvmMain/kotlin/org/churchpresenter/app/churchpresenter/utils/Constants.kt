@@ -182,3 +182,10 @@ fun isVerseHeader(header: String?): Boolean {
         .replace(Regex("[\\s-]"), "")
     return name !in NON_VERSE_SECTION_NAMES
 }
+
+/**
+ * Whether [line] is a manual slide break — a line of dashes in brackets, `[---]`, that ends a slide
+ * without ending the section. See [ChordTransposer.isSlideBreak], which owns the grammar; this is
+ * the app-side name, matching [isHeaderLine].
+ */
+fun isSlideBreak(line: String): Boolean = ChordTransposer.isSlideBreak(line)

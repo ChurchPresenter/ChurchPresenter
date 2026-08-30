@@ -89,6 +89,13 @@ class EditSongDialogScreenshotTest {
     @Test
     fun `a song with chords`() = shoot("with_chords", song = withChords())
 
+    /**
+     * A chorus broken across two slides by a manual `[---]`: the marker drawn as the divider it is
+     * in the lyrics box, and the preview showing two slides that are both still the chorus.
+     */
+    @Test
+    fun `a section split across slides`() = shoot("slide_break", song = splitChorus())
+
     @Test
     fun `the chord column turned off`() = shoot("chords_hidden", song = withChords(), chordsVisible = false)
 
@@ -213,6 +220,21 @@ class EditSongDialogScreenshotTest {
             "",
             "{Chorus}",
             "Alabad al Señor, alabad al Señor",
+        ),
+    )
+
+    private fun splitChorus() = amazingGrace().copy(
+        lyrics = listOf(
+            "[Verse 1]",
+            "Amazing grace how sweet the sound",
+            "That saved a wretch like me",
+            "",
+            "{Chorus}",
+            "Praise the Lord, praise the Lord",
+            "Let the earth hear His voice",
+            "[---]",
+            "Praise the Lord, praise the Lord",
+            "Let the people rejoice",
         ),
     )
 

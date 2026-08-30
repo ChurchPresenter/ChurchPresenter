@@ -265,6 +265,19 @@ class EditSongContentTest {
     }
 
     @Test
+    fun `the slide break chip writes the marker on a line of its own`() = editor { saved ->
+        // The reporter had to guess the syntax; the chip is there so nobody has to.
+        type(Field.LYRICS, "{Chorus}\nfirst half")
+        onNodeWithText("Slide Break").performClick()
+        waitForIdle()
+        save()
+
+        // Spaced like the section chips it sits beside — the blank lines are separators the
+        // splitter drops, so what matters is that the marker is alone on its line.
+        assertEquals(listOf("{Chorus}", "first half", "", "[---]", ""), saved.song?.lyrics)
+    }
+
+    @Test
     fun `the song's file on disk is carried through untouched`() =
         editor(aSong(sourceFile = "/songs/hymnal/42.sps")) { saved ->
             type(Field.TITLE, "Renamed Entirely")

@@ -404,6 +404,8 @@ internal fun RowScope.SongLyricsPanel(
                                 SectionLabelRow(
                                     label = header.trim().trim('[', ']', '{', '}').trim(),
                                     modifier = Modifier.padding(vertical = 4.dp),
+                                    slideIndex = section.slideIndex,
+                                    slideCount = section.slideCount,
                                 )
                             }
 

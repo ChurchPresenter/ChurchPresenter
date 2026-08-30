@@ -10,6 +10,19 @@ data class LyricSection(
     val lines: List<String> = emptyList(),
     val secondaryLines: List<String> = emptyList(),
     val isLastSection: Boolean = false,
+    /**
+     * Which slide of its section this is, and how many slides that section was split into.
+     *
+     * A long verse or chorus is broken across slides with a manual break (`[---]`) written inside
+     * it, which produces several [LyricSection]s that all carry the *same* [header] and [type] --
+     * both halves of a chorus still read "Chorus". These two are what tells them apart: the operator
+     * sees "Chorus 2/3", and rules that mean "the opening slide" (the song title on the first page,
+     * say) can ask for [slideIndex] `0` rather than assuming a section is one slide.
+     *
+     * An unsplit section is slide 0 of 1, which is why the defaults are what they are.
+     */
+    val slideIndex: Int = 0,
+    val slideCount: Int = 1,
     val bpm: Int = 0, // metronome tempo for this song (0 = off)
     val capo: Int = 0, // capo the chart is read with (0 = none)
     /**

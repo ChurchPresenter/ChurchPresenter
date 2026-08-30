@@ -831,6 +831,7 @@
     <string name="song_language_single">1 · Single</string>
     <string name="song_language_bilingual">2 · Bilingual</string>
     <string name="song_lyrics_layout">Lyrics layout</string>
+    <string name="song_insert_slide_break">Slide Break</string>
     <string name="song_auto_repeat_chorus">Repeat chorus after each verse</string>
     <string name="song_transition_and_markers">Transition &amp; markers</string>
     <string name="song_element_number">Number</string>

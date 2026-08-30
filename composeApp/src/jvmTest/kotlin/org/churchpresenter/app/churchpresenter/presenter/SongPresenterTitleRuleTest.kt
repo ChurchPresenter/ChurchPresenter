@@ -69,6 +69,25 @@ class SongPresenterTitleRuleTest {
     }
 
     @Test
+    fun `first page means the first slide, not every slide of the first verse`() {
+        // A verse broken by a manual [---] arrives as several sections all headed [Verse 1]; the
+        // title belongs on the opening slide only, exactly as it does on verse 2 onwards.
+        val opening = section("[Verse 1]").copy(slideIndex = 0, slideCount = 2)
+        val continued = section("[Verse 1]").copy(slideIndex = 1, slideCount = 2)
+
+        assertTrue(shouldShowText(Constants.FIRST_PAGE, opening))
+        assertFalse(shouldShowText(Constants.FIRST_PAGE, continued))
+    }
+
+    @Test
+    fun `an unheaded song shows the title on its first slide only`() {
+        assertTrue(shouldShowText(Constants.FIRST_PAGE, section(null)))
+        assertFalse(
+            shouldShowText(Constants.FIRST_PAGE, section(null).copy(slideIndex = 1, slideCount = 2)),
+        )
+    }
+
+    @Test
     fun `first page does not show it on later verses`() {
         listOf("[Verse 2]", "[Verse 3]", "[Verse 10]").forEach { header ->
             assertFalse(
