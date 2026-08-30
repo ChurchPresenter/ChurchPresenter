@@ -140,3 +140,45 @@ fun isChorusHeader(line: String): Boolean {
     return t.startsWith("{") && t.endsWith("}")
 }
 
+
+/**
+ * Section names that are typed as verses but are not one: an intro, a bridge, a tag.
+ *
+ * Only `{}` marks a chorus, so every other header -- `[Verse 2]`, `[Bridge]`, `[Tag]` -- parses as
+ * [Constants.SECTION_TYPE_VERSE]. That is right for what the section *is*, and wrong for the one
+ * question the chorus auto-repeat asks of it, which is whether the congregation sings the chorus
+ * after it. They do after a verse; they do not after a bridge.
+ */
+private val NON_VERSE_SECTION_NAMES = setOf(
+    "intro",
+    "outro",
+    "bridge",
+    "tag",
+    "end",
+    "ending",
+    "interlude",
+    "instrumental",
+    "prechorus",
+    "vamp",
+    "coda",
+    "turnaround",
+    "break",
+)
+
+/**
+ * Whether [header] names a verse -- as opposed to a bridge, an intro, a tag or another section that
+ * merely shares the verse's `[]` bracket. A section with no header at all is body text, so a verse.
+ *
+ * A trailing number is part of the label, not of the name (`[Verse 2]`, `[Bridge 2]`), and the names
+ * are matched ignoring case, spaces and hyphens so `[Pre-Chorus]` and `[pre chorus]` are one name.
+ * The list is English-only: a translated header falls through as a verse, which is the behaviour
+ * this replaced and so never a regression.
+ */
+fun isVerseHeader(header: String?): Boolean {
+    val label = header?.trim()?.trim('[', ']', '{', '}')?.trim().orEmpty()
+    if (label.isEmpty()) return true
+    val name = label.trimEnd { it.isDigit() || it.isWhitespace() }
+        .lowercase(Locale.US)
+        .replace(Regex("[\\s-]"), "")
+    return name !in NON_VERSE_SECTION_NAMES
+}

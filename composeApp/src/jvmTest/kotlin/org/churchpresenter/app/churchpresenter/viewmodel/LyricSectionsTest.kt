@@ -14,12 +14,17 @@ import kotlin.test.assertTrue
  * "edit a song while it is live" fix, so it takes an explicit song rather than reading selection
  * state — which is exactly what makes it testable here.
  *
- * The behaviour that matters: header parsing, automatic chorus repetition after every verse,
- * bilingual pairing by index, and the end-of-song marker.
+ * The behaviour that matters: header parsing, the chorus repetition after every verse and the
+ * setting that turns it off, bilingual pairing by index, and the end-of-song marker.
  */
 class LyricSectionsTest {
 
     private val vm = SongsViewModel(AppSettings())
+
+    /** The same view model with the chorus auto-repeat switched off. */
+    private val asWritten = SongsViewModel(
+        AppSettings().let { it.copy(songSettings = it.songSettings.copy(autoRepeatChorus = false)) },
+    )
 
     private fun song(
         lyrics: List<String>,
@@ -97,7 +102,8 @@ class LyricSectionsTest {
                 ),
             ),
         )
-        // Verse 1, Chorus, Verse 2, Chorus — the chorus is never left where it was written.
+        // Verse 1, Chorus, Verse 2, Chorus — the written chorus stays where it is and is repeated
+        // after the verse that has none behind it.
         assertEquals(4, sections.size)
         assertEquals(listOf("First verse"), sections[0].lines)
         assertEquals(listOf("The chorus"), sections[1].lines)
@@ -116,8 +122,14 @@ class LyricSectionsTest {
         assertTrue(sections.none { it.type == Constants.SECTION_TYPE_CHORUS })
     }
 
+    /**
+     * A second, different chorus used to be **lost outright**: the pass dropped every authored
+     * chorus and re-inserted `firstOrNull { chorus }` after each verse, so this song presented
+     * "chorus one" twice and "chorus two" never (#403). Both are words someone wrote and expects to
+     * sing.
+     */
     @Test
-    fun `only the first chorus is used when several are written`() {
+    fun `a second chorus is never collapsed into the first`() {
         val sections = vm.getLyricSections(
             song(
                 listOf(
@@ -128,8 +140,106 @@ class LyricSectionsTest {
                 ),
             ),
         )
-        val choruses = sections.filter { it.type == Constants.SECTION_TYPE_CHORUS }
-        assertTrue(choruses.all { it.lines == listOf("chorus one") }, "the first chorus wins everywhere")
+        val choruses = sections.filter { it.type == Constants.SECTION_TYPE_CHORUS }.map { it.lines }
+        assertTrue(listOf("chorus one") in choruses, "the first chorus must still be presented")
+        assertTrue(listOf("chorus two") in choruses, "the second chorus must not be dropped")
+        // Both are written before verse 2, so the repeat after it is the nearer one.
+        assertEquals(
+            listOf(listOf("v1"), listOf("chorus one"), listOf("chorus two"), listOf("v2"), listOf("chorus two")),
+            sections.map { it.lines },
+        )
+    }
+
+    @Test
+    fun `the reporter's song keeps its authored order and its bridge`() {
+        // Issue #403: [Verse 1] [Verse 2] {Chorus} [Bridge] presented as
+        // Verse 1 · Chorus · Verse 2 · Chorus · Bridge · Chorus — a chorus behind the bridge, which
+        // is a verse only because it is bracketed.
+        val sections = vm.getLyricSections(
+            song(
+                listOf(
+                    "[Verse 1]", "v1",
+                    "[Verse 2]", "v2",
+                    "{Chorus}", "c",
+                    "[Bridge]", "b",
+                ),
+            ),
+        )
+        assertEquals(
+            listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Bridge]"),
+            sections.map { it.header },
+        )
+    }
+
+    @Test
+    fun `a bridge does not collect a chorus of its own`() {
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "v1", "{Chorus}", "c", "[Bridge]", "b")),
+        )
+        assertEquals(listOf("[Verse 1]", "{Chorus}", "[Bridge]"), sections.map { it.header })
+    }
+
+    @Test
+    fun `an intro, a tag and a pre-chorus are not verses either`() {
+        val sections = vm.getLyricSections(
+            song(
+                listOf(
+                    "[Intro]", "i",
+                    "[Pre-Chorus]", "p",
+                    "{Chorus}", "c",
+                    "[Tag]", "t",
+                ),
+            ),
+        )
+        // Nothing here is a verse, so the chorus stays exactly where it was written.
+        assertEquals(listOf("[Intro]", "[Pre-Chorus]", "{Chorus}", "[Tag]"), sections.map { it.header })
+    }
+
+    // ── Auto-repeat switched off ────────────────────────────────────────────────
+
+    @Test
+    fun `with the setting off the sections are presented as written`() {
+        val lyrics = listOf("[Verse 1]", "v1", "[Verse 2]", "v2", "{Chorus}", "c", "[Bridge]", "b")
+        val sections = asWritten.getLyricSections(song(lyrics))
+
+        assertEquals(listOf("[Verse 1]", "[Verse 2]", "{Chorus}", "[Bridge]"), sections.map { it.header })
+    }
+
+    @Test
+    fun `with the setting off a chorus before verse one keeps its place`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("{Chorus}", "c", "[Verse 1]", "v1", "[Verse 2]", "v2")),
+        )
+        assertEquals(listOf("{Chorus}", "[Verse 1]", "[Verse 2]"), sections.map { it.header })
+        assertTrue(sections.last().isLastSection, "the marker still lands on the final section")
+    }
+
+    @Test
+    fun `with the setting off both choruses survive in order`() {
+        val sections = asWritten.getLyricSections(
+            song(listOf("[Verse 1]", "v1", "{Chorus 1}", "one", "[Verse 2]", "v2", "{Chorus 2}", "two")),
+        )
+        assertEquals(
+            listOf(listOf("v1"), listOf("one"), listOf("v2"), listOf("two")),
+            sections.map { it.lines },
+        )
+    }
+
+    @Test
+    fun `a chorus written after every verse is not repeated twice over`() {
+        // Someone who writes each repeat out in full must not get it doubled with the setting on.
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "v1", "{Chorus}", "c", "[Verse 2]", "v2", "{Chorus}", "c")),
+        )
+        assertEquals(4, sections.size, "got ${sections.map { it.header }}")
+    }
+
+    @Test
+    fun `a chorus written after all the verses is still repeated after each of them`() {
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "v1", "[Verse 2]", "v2", "{Chorus}", "c")),
+        )
+        assertEquals(listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}"), sections.map { it.header })
     }
 
     /**
@@ -180,7 +290,7 @@ class LyricSectionsTest {
 
     @Test
     fun `the repeated chorus, not the original position, carries the marker`() {
-        // The chorus is moved to the end, so the last thing shown is a chorus.
+        // The chorus is written last and nothing is inserted after it, so it carries the marker.
         val sections = vm.getLyricSections(song(listOf("[Verse 1]", "v", "{Chorus}", "c")))
         assertEquals(Constants.SECTION_TYPE_CHORUS, sections.last().type)
         assertTrue(sections.last().isLastSection)

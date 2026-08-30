@@ -53,6 +53,7 @@ import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
+import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
 import churchpresenter.composeapp.generated.resources.song_chunk
 import churchpresenter.composeapp.generated.resources.song_preview_chords
 import churchpresenter.composeapp.generated.resources.song_chunk_line
@@ -245,6 +246,18 @@ private fun SongLyricsLayoutSection(
             controlModifier = Modifier.size(24.dp),
             label = stringResource(Res.string.word_wrap),
             modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        // Off means "present the sections as the file has them", which is the only way to place a
+        // chorus deliberately — before verse 1, or after verse 2 alone.
+        LabeledCheckbox(
+            checked = song.autoRepeatChorus,
+            onCheckedChange = { on ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(autoRepeatChorus = on)) }
+            },
+            controlModifier = Modifier.size(24.dp),
+            label = stringResource(Res.string.song_auto_repeat_chorus),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("song_autoRepeatChorus"),
             style = MaterialTheme.typography.bodyMedium,
         )
         Row(

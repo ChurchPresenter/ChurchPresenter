@@ -64,6 +64,21 @@ data class SongSettings(
     val lyricsMinFontSize: Int = 12,
     val lyricsMaxFontSize: Int = 60,
     val wordWrap: Boolean = false,
+
+    /**
+     * Whether a chorus is repeated after every verse, rather than presented only where it is
+     * written.
+     *
+     * A hymnal writes the chorus once and expects it sung after each verse, which is what this does
+     * and why it defaults on -- switching it off for existing installs would rearrange every song
+     * they present without warning. A song that writes each repeat out in full, or that places a
+     * chorus deliberately (before verse 1, after verse 2 only), wants it off: then the sections are
+     * presented exactly as the file has them.
+     *
+     * Either way no chorus is ever dropped, and a second distinct chorus is never collapsed into the
+     * first -- that was a data-loss bug (#403), not a mode.
+     */
+    val autoRepeatChorus: Boolean = true,
     val lyricsAlignment: String = Constants.MIDDLE,
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
