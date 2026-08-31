@@ -54,7 +54,7 @@ object SongSources {
         SongSource(SOFTPROJECTOR, SourceGroup.SONGS, "SoftProjector", ".sps", "SP"),
         SongSource(SONGBEAMER, SourceGroup.SONGS, "SongBeamer", ".sng", "SB"),
         SongSource(VIDEOPSALM, SourceGroup.SONGS, "VideoPsalm", ".json", "VP"),
-        SongSource(DOCUMENTS, SourceGroup.DOCUMENTS, "Documents", "pdf/pptx", "DO"),
+        SongSource(DOCUMENTS, SourceGroup.DOCUMENTS, "Documents", "pdf/pptx/key", "DO"),
     )
 
     /**

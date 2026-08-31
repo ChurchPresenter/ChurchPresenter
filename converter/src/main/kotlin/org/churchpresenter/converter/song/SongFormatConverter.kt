@@ -327,10 +327,10 @@ object SoftProjectorFormat : SongFormatConverter {
     override fun outputNameFor(input: File) = SpsToSongConverter.getTargetFolderName(input)
 }
 
-/** PDF, PowerPoint and Word documents, split into songs by their headings. */
+/** PDF, PowerPoint, Keynote and Word documents, split into songs by their headings. */
 object DocumentFormat : SongFormatConverter {
     override val id = "documents"
-    override val extensions = listOf("pdf", "docx", "pptx")
+    override val extensions = listOf("pdf", "docx", "pptx", "ppt", "key")
     override val needsOutputFolder = true
 
     override fun convert(input: File, outputDir: File?): SongConversionResult {

@@ -2693,12 +2693,35 @@ private fun findFilesRecursive(dir: File, extension: String): List<File> =
  * This is what makes "select folder" a bulk convert rather than a partial one: it matches **all** of
  * a format's extensions instead of only its first, so pointing at a documents folder no longer
  * quietly picks up the PDFs and leaves the .docx and .pptx files behind.
+ *
+ * A Keynote `.key` may be a **package directory** rather than a single file. One of those is an
+ * input in its own right, so it is taken whole and not descended into — otherwise it contributes
+ * nothing itself and the walk wanders through its `Index/` and `Data/` innards instead.
  */
 private fun findFilesRecursive(dir: File, format: SongFormatConverter): List<File> =
     dir.walkTopDown()
-        .filter { it.isFile && matchesFormat(it, format) }
+        .onEnter { it == dir || !isPackageInput(it, format) }
+        .filter { it != dir && (it.isFile || isPackageInput(it, format)) && matchesFormat(it, format) }
         .sortedBy { it.absolutePath }
         .toList()
+
+/** Extensions whose "file" can be a macOS package directory instead of a single file. */
+private val PACKAGE_EXTENSIONS = setOf("key")
+
+/**
+ * True when [file] is a directory that *is* one of [format]'s inputs, rather than a folder holding
+ * some.
+ *
+ * Kept to [PACKAGE_EXTENSIONS] rather than the format's whole extension list, so no other format's
+ * folder scan changes: a directory that merely happens to be named `stuff.xml` stays a directory to
+ * search. And extensionless matching is deliberately not honoured here — an OpenSong song carries no
+ * extension, so honouring it would make **every** plain folder a package and halt the walk at the
+ * first subdirectory.
+ */
+private fun isPackageInput(file: File, format: SongFormatConverter): Boolean =
+    file.isDirectory && format.extensions.any {
+        it in PACKAGE_EXTENSIONS && file.extension.equals(it, ignoreCase = true)
+    }
 
 private fun matchesFormat(file: File, format: SongFormatConverter): Boolean =
     format.extensions.any { file.extension.equals(it, ignoreCase = true) } ||
@@ -2710,6 +2733,13 @@ private fun matchesFormat(file: File, format: SongFormatConverter): Boolean =
  * Formats whose files usually carry no extension — OpenSong writes a bare name — get a filter that
  * accepts those too, because an extension filter hides every one of their songs and the panel then
  * looks like it works while converting nothing.
+ *
+ * One known gap: a `.key` saved as a **package directory** rather than a zip is entered by this
+ * chooser rather than selected, because the filter accepts every directory so the tree stays
+ * navigable. Keynote writes the zip form by default, and "select folder" takes either — see
+ * [findFilesRecursive] — so the remedy is to point at the enclosing folder. Making bundles
+ * selectable here means a non-traversable `FileSystemView`, which would change the chooser for
+ * every format on this screen.
  */
 private fun pickSourceFiles(source: SongSource, format: SongFormatConverter): List<File> {
     val label = pickerLabel(source)

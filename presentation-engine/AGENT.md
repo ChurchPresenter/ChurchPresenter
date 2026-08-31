@@ -11,6 +11,14 @@ reverse-engineered IWA parser)**. `:composeApp` calls `PresentationLoader`, `Dec
 `TimelineEvaluator`, `SlideDiskCache`, `SlideFontRegistry` and the `model` types from
 `viewmodel/PresentationViewModel.kt`, `presenter/PresentationPlayer.kt` and `server/CompanionServer.kt`.
 
+`:converter` is the module's other consumer, and it wants the opposite of pixels: `KeynoteText`
+hands back a `.key`'s **words**, one string per slide, so the converter can write them out as
+songs. It is deliberately the only text-shaped entry point — `Deck`/`Slide` carry `notes` and layer
+geometry but no slide body text — and it exists so the IWA reader here is not written a second time
+in a module that only needs the lyrics. It keeps the never-throws contract below: an unreadable
+deck is an empty list. Its own fallback is the `QuickLook/Preview.pdf` Keynote embeds, which is how
+an iWork '09 or password-protected document still yields its text.
+
 ## How it is wired in
 
 A real Gradle module of this build: `include(":presentation-engine")`,
