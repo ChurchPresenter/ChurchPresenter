@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 /**
  * Every type the Add-source menu offers, and what each one actually adds.
  *
- * [CanvasTabTest] covers three of the ten (text, image, clock) and the fact that a source lands in
+ * [CanvasTabTest] covers three of the eleven (text, image, clock) and the fact that a source lands in
  * the current scene at all. The rest were never driven — and they are exactly where a wiring mistake
  * hides, because every entry looks alike at the call site: one menu item, one `addSource` with a
  * different `SceneSource` subclass and a different default rectangle.
@@ -106,5 +106,18 @@ class CanvasTabAddSourceTest {
             assertTrue(t.x > 0f && t.y > 0f, "inset from the corner, got ${t.x},${t.y}")
             assertTrue(t.width > 0f && t.height > 0f, "and has size, got ${t.width}x${t.height}")
             assertTrue(t.x + t.width <= 1f && t.y + t.height <= 1f, "and fits the canvas")
+        }
+
+    @Test
+    fun `an NDI source is added as an NDI source, pointed at nothing yet`() =
+        canvasTab(seed = { addScene("Scene") }) { vm, _ ->
+            addSourceOfType(CanvasLabel.NDI)
+
+            val source = soleSource(vm)
+            assertTrue(source is SceneSource.NdiSource, "got $source")
+            // Blank on purpose: which source it receives is the operator's choice in the properties
+            // panel, and guessing one would put a stranger's camera on the canvas.
+            assertEquals("", source.sourceName)
+            assertEquals(false, source.lowBandwidth)
         }
 }

@@ -1360,6 +1360,7 @@
     <string name="canvas_source_qrcode">QR Code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>
+    <string name="canvas_source_ndi">NDI Source</string>
     <string name="canvas_source_bible">Bible</string>
     <string name="canvas_bible_version">Bible Version</string>
     <string name="canvas_bible_verse_text">Verse Text</string>
@@ -1430,6 +1431,16 @@
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
     <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
+    <string name="canvas_ndi_source">Source</string>
+    <string name="canvas_ndi_refresh">Refresh Sources</string>
+    <string name="canvas_ndi_none_found">No NDI sources found on the network</string>
+    <string name="canvas_ndi_searching">Looking for NDI sources…</string>
+    <string name="canvas_ndi_low_bandwidth">Low bandwidth (proxy stream)</string>
+    <string name="canvas_ndi_low_bandwidth_help">Receives the smaller preview stream the sender already produces. Use it for a small layer, or on a busy network.</string>
+    <string name="canvas_ndi_runtime_missing">NDI sources need the free NDI Runtime, which is installed separately. Install it, then open Settings → Projection to check again.</string>
+    <string name="canvas_placeholder_ndi">NDI: %1$s</string>
+    <string name="canvas_placeholder_ndi_default">No NDI source selected</string>
+    <string name="canvas_placeholder_ndi_waiting">Waiting for %1$s…</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
     <string name="canvas_transform_w">W</string>

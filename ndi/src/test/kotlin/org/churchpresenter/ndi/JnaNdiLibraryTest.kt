@@ -1,6 +1,8 @@
 package org.churchpresenter.ndi
 
+import com.sun.jna.Memory
 import com.sun.jna.Pointer
+import com.sun.jna.ptr.IntByReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -9,6 +11,8 @@ import kotlin.test.assertTrue
 
 private const val HANDLE_VALUE = 0x1234L
 private const val SECOND_HANDLE_VALUE = 0x5678L
+private const val FINDER_HANDLE_VALUE = 0x9abcL
+private const val RECEIVER_HANDLE_VALUE = 0xdef0L
 
 /**
  * A stand-in for the C symbols `libndi` exports.
@@ -26,6 +30,8 @@ private class FakeNdiLibC(
     private val supportedCpu: Boolean = true,
     private val initializes: Boolean = true,
     private val createReturns: Pointer? = Pointer(HANDLE_VALUE),
+    private val findCreateReturns: Pointer? = Pointer(FINDER_HANDLE_VALUE),
+    private val recvCreateReturns: Pointer? = Pointer(RECEIVER_HANDLE_VALUE),
 ) : NdiLibC {
     val createSettings = mutableListOf<NdiSendCreateStruct>()
     val videoFrames = mutableListOf<NdiVideoFrameStruct>()
@@ -56,6 +62,103 @@ private class FakeNdiLibC(
         lastConnectionTimeout = timeoutMs
         return connectionsAnswer
     }
+
+    // ── The receive half ────────────────────────────────────────────
+
+    val findSettings = mutableListOf<NdiFindCreateStruct>()
+    val recvSettings = mutableListOf<NdiRecvCreateStruct>()
+    val destroyedFinders = mutableListOf<Long>()
+    val destroyedReceivers = mutableListOf<Long>()
+    val freedFrames = mutableListOf<NdiVideoFrameStruct>()
+    var waits = 0
+    var lastWaitTimeout = -1
+    var lastCaptureTimeout = -1
+
+    /** The frame type the next capture answers with, and how it fills the caller's struct. */
+    var nextFrameType = FRAME_TYPE_NONE
+    var fillCapturedFrame: (NdiVideoFrameStruct) -> Unit = {}
+
+    /** The source array discovery hands back, held so its native strings stay alive. */
+    private var sources: Array<NdiSourceStruct>? = null
+
+    /** Publishes [names] as the sources a finder will report, in real native memory. */
+    fun advertise(vararg names: Pair<String, String>) {
+        if (names.isEmpty()) {
+            sources = null
+            return
+        }
+        @Suppress("UNCHECKED_CAST")
+        val array = NdiSourceStruct().toArray(names.size) as Array<NdiSourceStruct>
+        array.forEachIndexed { index, struct ->
+            struct.p_ndi_name = names[index].first
+            struct.p_url_address = names[index].second
+            struct.write()
+        }
+        sources = array
+    }
+
+    override fun NDIlib_find_create_v2(settings: NdiFindCreateStruct): Pointer? {
+        findSettings += settings
+        return findCreateReturns
+    }
+
+    override fun NDIlib_find_destroy(finder: Pointer) {
+        destroyedFinders += Pointer.nativeValue(finder)
+    }
+
+    override fun NDIlib_find_wait_for_sources(finder: Pointer, timeoutMs: Int): Boolean {
+        waits++
+        lastWaitTimeout = timeoutMs
+        return sources != null
+    }
+
+    override fun NDIlib_find_get_current_sources(finder: Pointer, count: IntByReference): Pointer? {
+        val found = sources ?: return null
+        count.value = found.size
+        return found.first().pointer
+    }
+
+    override fun NDIlib_recv_create_v3(settings: NdiRecvCreateStruct): Pointer? {
+        recvSettings += settings
+        return recvCreateReturns
+    }
+
+    override fun NDIlib_recv_destroy(receiver: Pointer) {
+        destroyedReceivers += Pointer.nativeValue(receiver)
+    }
+
+    override fun NDIlib_recv_capture_v2(
+        receiver: Pointer,
+        video: NdiVideoFrameStruct?,
+        audio: Pointer?,
+        metadata: Pointer?,
+        timeoutMs: Int,
+    ): Int {
+        lastCaptureTimeout = timeoutMs
+        if (video != null && nextFrameType == FRAME_TYPE_VIDEO) fillCapturedFrame(video)
+        return nextFrameType
+    }
+
+    override fun NDIlib_recv_free_video_v2(receiver: Pointer, video: NdiVideoFrameStruct) {
+        freedFrames += video
+    }
+}
+
+private const val FRAME_TYPE_NONE = 0
+private const val FRAME_TYPE_VIDEO = 1
+private const val FRAME_TYPE_AUDIO = 2
+private const val HIGHEST_BANDWIDTH = 100
+private const val LOWEST_BANDWIDTH = 0
+
+/** A YUV FourCC — a real NDI format, and one this module deliberately does not read. */
+private const val UYVY_FOURCC = 0x59565955
+
+/** Native memory holding [rows] of pixel bytes at [stride], as the runtime hands a frame over. */
+private fun nativeFrame(rows: List<ByteArray>, stride: Int): Memory {
+    val memory = Memory((rows.size.toLong() * stride).coerceAtLeast(1))
+    memory.clear()
+    rows.forEachIndexed { index, row -> memory.write(index.toLong() * stride, row, 0, row.size) }
+    return memory
 }
 
 private fun frame(
@@ -285,6 +388,235 @@ class JnaNdiLibraryTest {
         val c = FakeNdiLibC()
         JnaNdiLibrary(c).destroy()
         assertEquals(1, c.destroyCount)
+    }
+
+    // ── The receive half ────────────────────────────────────────────
+
+    @Test
+    fun `discovery is created with the caller's flags, and a refusal is a zero handle`() {
+        val c = FakeNdiLibC()
+        val handle = JnaNdiLibrary(c).findCreate(showLocalSources = false, groups = "Sanctuary")
+        assertEquals(FINDER_HANDLE_VALUE, handle)
+        assertEquals(false, c.findSettings.single().show_local_sources)
+        assertEquals("Sanctuary", c.findSettings.single().p_groups)
+
+        val refused = FakeNdiLibC(findCreateReturns = null)
+        assertEquals(0L, JnaNdiLibrary(refused).findCreate())
+    }
+
+    @Test
+    fun `blank groups reach the runtime as null, which is what selects the default groups`() {
+        val c = FakeNdiLibC()
+        JnaNdiLibrary(c).findCreate()
+        assertEquals(null, c.findSettings.single().p_groups)
+        assertEquals(true, c.findSettings.single().show_local_sources)
+    }
+
+    @Test
+    fun `the runtime's source array is read out by name and address`() {
+        val c = FakeNdiLibC()
+        c.advertise("BOOTH (Camera 1)" to "192.168.1.20:5961", "BOOTH (Graphics)" to "")
+        val sources = JnaNdiLibrary(c).findSources(FINDER_HANDLE_VALUE)
+
+        assertEquals(
+            listOf(
+                NdiSourceInfo("BOOTH (Camera 1)", "192.168.1.20:5961"),
+                NdiSourceInfo("BOOTH (Graphics)", ""),
+            ),
+            sources,
+        )
+    }
+
+    @Test
+    fun `a zero wait does not block, and a real one does`() {
+        val c = FakeNdiLibC()
+        c.advertise("BOOTH (Camera 1)" to "")
+        val lib = JnaNdiLibrary(c)
+
+        lib.findSources(FINDER_HANDLE_VALUE, timeoutMs = 0)
+        assertEquals(0, c.waits, "a redraw must not stall on discovery")
+
+        lib.findSources(FINDER_HANDLE_VALUE, timeoutMs = 250)
+        assertEquals(1, c.waits)
+        assertEquals(250, c.lastWaitTimeout)
+    }
+
+    @Test
+    fun `an empty network and a dead finder both read as no sources`() {
+        val c = FakeNdiLibC()
+        val lib = JnaNdiLibrary(c)
+        assertEquals(emptyList(), lib.findSources(FINDER_HANDLE_VALUE))
+        assertEquals(emptyList(), lib.findSources(0L))
+    }
+
+    @Test
+    fun `destroying a finder passes the handle through, and a dead one is ignored`() {
+        val c = FakeNdiLibC()
+        val lib = JnaNdiLibrary(c)
+        lib.findDestroy(FINDER_HANDLE_VALUE)
+        lib.findDestroy(0L)
+        assertEquals(listOf(FINDER_HANDLE_VALUE), c.destroyedFinders)
+    }
+
+    @Test
+    fun `a receiver is created against the named source at the bandwidth asked for`() {
+        val c = FakeNdiLibC()
+        val handle = JnaNdiLibrary(c).recvCreate(
+            NdiSourceInfo("BOOTH (Camera 1)", "192.168.1.20:5961"),
+            NdiBandwidth.LOWEST,
+            receiverName = "Canvas",
+        )
+
+        assertEquals(RECEIVER_HANDLE_VALUE, handle)
+        val settings = c.recvSettings.single()
+        assertEquals("BOOTH (Camera 1)", settings.source_to_connect_to.p_ndi_name)
+        assertEquals("192.168.1.20:5961", settings.source_to_connect_to.p_url_address)
+        assertEquals("Canvas", settings.p_ndi_recv_name)
+        assertEquals(LOWEST_BANDWIDTH, settings.bandwidth)
+    }
+
+    @Test
+    fun `a source with no address, and no receiver name, send null rather than empty strings`() {
+        val c = FakeNdiLibC()
+        JnaNdiLibrary(c).recvCreate(NdiSourceInfo("BOOTH (Graphics)"))
+
+        val settings = c.recvSettings.single()
+        assertEquals(null, settings.source_to_connect_to.p_url_address)
+        assertEquals(null, settings.p_ndi_recv_name)
+        assertEquals(HIGHEST_BANDWIDTH, settings.bandwidth)
+        assertEquals(false, settings.allow_video_fields, "the runtime deinterlaces for us")
+    }
+
+    @Test
+    fun `a runtime that refuses to connect gives a zero handle`() {
+        val lib = JnaNdiLibrary(FakeNdiLibC(recvCreateReturns = null))
+        assertEquals(0L, lib.recvCreate(NdiSourceInfo("BOOTH (Camera 1)")))
+    }
+
+    @Test
+    fun `a captured video frame is copied out of the runtime's memory and then freed`() {
+        val c = FakeNdiLibC()
+        val pixels = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8)
+        val memory = nativeFrame(listOf(pixels), stride = 8)
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        c.fillCapturedFrame = { it.xres = 2; it.yres = 1; it.FourCC = NdiPixelFormat.BGRA.fourCc; it.p_data = memory }
+
+        val frame = assertNotNull(JnaNdiLibrary(c).recvCaptureVideo(RECEIVER_HANDLE_VALUE, timeoutMs = 100))
+
+        assertEquals(2, frame.width)
+        assertEquals(1, frame.height)
+        assertEquals(NdiPixelFormat.BGRA, frame.format)
+        assertEquals(pixels.toList(), frame.bgra.take(pixels.size))
+        assertEquals(100, c.lastCaptureTimeout)
+        assertEquals(1, c.freedFrames.size, "the runtime's frame must go back to it")
+    }
+
+    @Test
+    fun `padded rows are unpacked, so a frame with a stride is not sheared`() {
+        val c = FakeNdiLibC()
+        val rows = listOf(byteArrayOf(1, 2, 3, 4), byteArrayOf(5, 6, 7, 8))
+        // Eight bytes per row on the wire for a one-pixel-wide frame: four of pixel, four of pad.
+        val memory = nativeFrame(rows, stride = 8)
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        c.fillCapturedFrame = {
+            it.xres = 1; it.yres = 2; it.FourCC = NdiPixelFormat.BGRX.fourCc
+            it.p_data = memory; it.line_stride_in_bytes = 8
+        }
+
+        val frame = assertNotNull(JnaNdiLibrary(c).recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+
+        assertEquals(listOf<Byte>(1, 2, 3, 4, 5, 6, 7, 8), frame.bgra.take(8))
+        assertEquals(NdiPixelFormat.BGRX, frame.format)
+    }
+
+    @Test
+    fun `an audio or metadata frame is not a picture and answers null`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_AUDIO
+        assertEquals(null, JnaNdiLibrary(c).recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        assertTrue(c.freedFrames.isEmpty(), "nothing was handed over, so nothing is freed")
+    }
+
+    @Test
+    fun `a dead receiver handle captures nothing`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        assertEquals(null, JnaNdiLibrary(c).recvCaptureVideo(0L, 0))
+        assertEquals(-1, c.lastCaptureTimeout, "the runtime should not have been asked")
+    }
+
+    @Test
+    fun `a frame in a format we do not read is dropped, and still freed`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        c.fillCapturedFrame = {
+            it.xres = 2; it.yres = 1; it.FourCC = UYVY_FOURCC; it.p_data = nativeFrame(listOf(ByteArray(8)), 8)
+        }
+
+        assertEquals(null, JnaNdiLibrary(c).recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        assertEquals(1, c.freedFrames.size, "or the runtime leaks that frame for the whole service")
+    }
+
+    @Test
+    fun `a frame with no data pointer, or no pixels, is dropped rather than read`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        c.fillCapturedFrame = { it.xres = 2; it.yres = 1; it.FourCC = NdiPixelFormat.BGRA.fourCc }
+        val lib = JnaNdiLibrary(c)
+        assertEquals(null, lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+
+        c.fillCapturedFrame = {
+            it.xres = 0; it.yres = 0; it.FourCC = NdiPixelFormat.BGRA.fourCc
+            it.p_data = nativeFrame(listOf(ByteArray(4)), 4)
+        }
+        assertEquals(null, lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+    }
+
+    @Test
+    fun `one buffer per receiver is reused across frames and not shared between receivers`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        val memory = nativeFrame(listOf(byteArrayOf(1, 2, 3, 4)), stride = 4)
+        c.fillCapturedFrame = { it.xres = 1; it.yres = 1; it.FourCC = NdiPixelFormat.BGRA.fourCc; it.p_data = memory }
+        val lib = JnaNdiLibrary(c)
+
+        val first = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        val second = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        assertSame(first.bgra, second.bgra)
+
+        val other = assertNotNull(lib.recvCaptureVideo(SECOND_HANDLE_VALUE, 0))
+        assertTrue(first.bgra !== other.bgra, "two receivers must not write into one buffer")
+    }
+
+    @Test
+    fun `destroying a receiver drops its buffer, and a dead handle is ignored`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        val memory = nativeFrame(listOf(byteArrayOf(1, 2, 3, 4)), stride = 4)
+        c.fillCapturedFrame = { it.xres = 1; it.yres = 1; it.FourCC = NdiPixelFormat.BGRA.fourCc; it.p_data = memory }
+        val lib = JnaNdiLibrary(c)
+
+        val first = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        lib.recvDestroy(RECEIVER_HANDLE_VALUE)
+        lib.recvDestroy(0L)
+        assertEquals(listOf(RECEIVER_HANDLE_VALUE), c.destroyedReceivers)
+
+        val afterwards = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        assertTrue(first.bgra !== afterwards.bgra, "the old buffer went with the old receiver")
+    }
+
+    @Test
+    fun `destroy releases receive buffers too`() {
+        val c = FakeNdiLibC()
+        c.nextFrameType = FRAME_TYPE_VIDEO
+        val memory = nativeFrame(listOf(byteArrayOf(1, 2, 3, 4)), stride = 4)
+        c.fillCapturedFrame = { it.xres = 1; it.yres = 1; it.FourCC = NdiPixelFormat.BGRA.fourCc; it.p_data = memory }
+        val lib = JnaNdiLibrary(c)
+
+        val first = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        lib.destroy()
+        val afterwards = assertNotNull(lib.recvCaptureVideo(RECEIVER_HANDLE_VALUE, 0))
+        assertTrue(first.bgra !== afterwards.bgra)
     }
 
     @Test

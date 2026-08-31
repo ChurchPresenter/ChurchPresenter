@@ -101,6 +101,7 @@ fun SourcePropertiesPanel(
             is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
             is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
+            is SceneSource.NdiSource -> NdiProperties(source, onSourceUpdate)
             is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)
         }
     }

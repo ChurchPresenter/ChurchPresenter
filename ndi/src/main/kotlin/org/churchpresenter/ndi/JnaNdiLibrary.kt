@@ -5,6 +5,7 @@ import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
+import com.sun.jna.ptr.IntByReference
 import io.sentry.SentryLevel
 import org.churchpresenter.diagnostics.CrashReporter
 import java.util.concurrent.ConcurrentHashMap
@@ -13,15 +14,28 @@ private const val PROGRESSIVE = 1
 private const val SYNTHESIZE_TIMECODE = Long.MAX_VALUE
 private const val SIXTEEN_NINE = 16f / 9f
 
+/** `NDIlib_recv_color_format_BGRX_BGRA` — every source arrives as one of this module's two formats. */
+private const val COLOR_FORMAT_BGRX_BGRA = 0
+
+/** `NDIlib_frame_type_video`, the one answer from `recv_capture` that carries a picture. */
+private const val FRAME_TYPE_VIDEO = 1
+
+/** `NDIlib_recv_bandwidth_e`: the full stream, and the sender's free low-resolution proxy. */
+private const val BANDWIDTH_HIGHEST = 100
+private const val BANDWIDTH_LOWEST = 0
+
 /**
- * The NDI send API as JNA sees it — the flat C symbols `libndi` exports, six of which is the whole
- * of what this app needs.
+ * The NDI API as JNA sees it — the flat C symbols `libndi` exports, sixteen of which are the whole
+ * of what this app needs: four for the runtime itself, four to put a source on the network, and
+ * eight to find one and take it off again.
  *
  * Declared against the SDK's C signatures rather than the `NDIlib_v5_load()` struct-of-pointers the
  * headers wrap them in: the shared library exports both, and the flat symbols are the form JNA can
  * bind without hand-rolling a function-pointer table.
  */
-@Suppress("FunctionNaming")  // These are the C symbols' own names; renaming them unbinds them.
+// TooManyFunctions: these are the symbols `libndi` exports, and JNA binds one interface to one
+// library — splitting them by theme would not reduce the surface, only spread it over two names.
+@Suppress("FunctionNaming", "TooManyFunctions")  // C symbols' own names; renaming them unbinds them.
 internal interface NdiLibC : Library {
     fun NDIlib_initialize(): Boolean
     fun NDIlib_destroy()
@@ -31,6 +45,66 @@ internal interface NdiLibC : Library {
     fun NDIlib_send_destroy(sender: Pointer)
     fun NDIlib_send_send_video_v2(sender: Pointer, frame: NdiVideoFrameStruct)
     fun NDIlib_send_get_no_connections(sender: Pointer, timeoutMs: Int): Int
+    fun NDIlib_find_create_v2(settings: NdiFindCreateStruct): Pointer?
+    fun NDIlib_find_destroy(finder: Pointer)
+    fun NDIlib_find_wait_for_sources(finder: Pointer, timeoutMs: Int): Boolean
+    fun NDIlib_find_get_current_sources(finder: Pointer, count: IntByReference): Pointer?
+    fun NDIlib_recv_create_v3(settings: NdiRecvCreateStruct): Pointer?
+    fun NDIlib_recv_destroy(receiver: Pointer)
+    fun NDIlib_recv_capture_v2(
+        receiver: Pointer,
+        video: NdiVideoFrameStruct?,
+        audio: Pointer?,
+        metadata: Pointer?,
+        timeoutMs: Int,
+    ): Int
+    fun NDIlib_recv_free_video_v2(receiver: Pointer, video: NdiVideoFrameStruct)
+}
+
+/** `NDIlib_find_create_t`. Field order is the ABI and must not be reordered. */
+@Suppress("VariableNaming")  // Field names are matched to the C struct by JNA and are the ABI.
+@Structure.FieldOrder("show_local_sources", "p_groups", "p_extra_ips")
+internal open class NdiFindCreateStruct : Structure() {
+    @JvmField var show_local_sources: Boolean = true
+    @JvmField var p_groups: String? = null
+    @JvmField var p_extra_ips: String? = null
+}
+
+/**
+ * `NDIlib_source_t`. Field order is the ABI and must not be reordered.
+ *
+ * The second field is a union of `p_url_address` and `p_ip_address` in the SDK's header; both are a
+ * `const char*` at the same offset, so one field reads either.
+ */
+@Suppress("VariableNaming")  // Field names are matched to the C struct by JNA and are the ABI.
+@Structure.FieldOrder("p_ndi_name", "p_url_address")
+internal open class NdiSourceStruct : Structure {
+    @JvmField var p_ndi_name: String? = null
+    @JvmField var p_url_address: String? = null
+
+    constructor() : super()
+
+    /** Reads a source the runtime allocated — how the discovery array is walked. */
+    constructor(memory: Pointer) : super(memory) {
+        read()
+    }
+}
+
+/** `NDIlib_recv_create_v3_t`. Field order is the ABI and must not be reordered. */
+@Suppress("VariableNaming")  // Field names are matched to the C struct by JNA and are the ABI.
+@Structure.FieldOrder(
+    "source_to_connect_to", "color_format", "bandwidth", "allow_video_fields", "p_ndi_recv_name",
+)
+internal open class NdiRecvCreateStruct : Structure() {
+    /** By value, inline in this struct — not a pointer to one. JNA nests a Structure field so. */
+    @JvmField var source_to_connect_to: NdiSourceStruct = NdiSourceStruct()
+    @JvmField var color_format: Int = COLOR_FORMAT_BGRX_BGRA
+    @JvmField var bandwidth: Int = BANDWIDTH_HIGHEST
+
+    // False deliberately: the runtime then deinterlaces an interlaced source itself, so a capture
+    // loop never has to work out that it has been handed half a picture.
+    @JvmField var allow_video_fields: Boolean = false
+    @JvmField var p_ndi_recv_name: String? = null
 }
 
 /** `NDIlib_send_create_t`. Field order is the ABI and must not be reordered. */
@@ -89,6 +163,12 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
 
     /** One reused pixel buffer per sender handle. See the class doc for why it is not one buffer. */
     private val buffers = ConcurrentHashMap<Long, Memory>()
+
+    /**
+     * One reused frame buffer per receiver handle, for the same reason and with the same rule: a
+     * receiver is driven by one capture loop, so its buffer is touched by one thread.
+     */
+    private val received = ConcurrentHashMap<Long, ByteArray>()
 
     companion object {
         /**
@@ -178,9 +258,100 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
         buffers.remove(sender)?.close()
     }
 
+    override fun findCreate(showLocalSources: Boolean, groups: String): Long {
+        val settings = NdiFindCreateStruct().apply {
+            show_local_sources = showLocalSources
+            p_groups = groups.ifBlank { null }
+        }
+        return Pointer.nativeValue(lib.NDIlib_find_create_v2(settings) ?: return 0L)
+    }
+
+    override fun findSources(finder: Long, timeoutMs: Int): List<NdiSourceInfo> {
+        if (finder == 0L) return emptyList()
+        val handle = Pointer(finder)
+        // Answer 0 immediately with what is already known; anything else blocks for at most that
+        // long and returns early the moment the list changes.
+        if (timeoutMs > 0) lib.NDIlib_find_wait_for_sources(handle, timeoutMs)
+        val count = IntByReference()
+        val first = lib.NDIlib_find_get_current_sources(handle, count) ?: return emptyList()
+        if (count.value <= 0) return emptyList()
+        // The runtime owns this array and keeps it alive until the next call on the same finder,
+        // so the names are copied out of it here rather than held.
+        return NdiSourceStruct(first).toArray(count.value).map { struct ->
+            val source = struct as NdiSourceStruct
+            NdiSourceInfo(source.p_ndi_name.orEmpty(), source.p_url_address.orEmpty())
+        }
+    }
+
+    override fun findDestroy(finder: Long) {
+        if (finder == 0L) return
+        lib.NDIlib_find_destroy(Pointer(finder))
+    }
+
+    override fun recvCreate(source: NdiSourceInfo, bandwidth: NdiBandwidth, receiverName: String): Long {
+        val settings = NdiRecvCreateStruct()
+        settings.source_to_connect_to.p_ndi_name = source.name.ifBlank { null }
+        settings.source_to_connect_to.p_url_address = source.address.ifBlank { null }
+        settings.bandwidth = if (bandwidth == NdiBandwidth.LOWEST) BANDWIDTH_LOWEST else BANDWIDTH_HIGHEST
+        settings.p_ndi_recv_name = receiverName.ifBlank { null }
+        return Pointer.nativeValue(lib.NDIlib_recv_create_v3(settings) ?: return 0L)
+    }
+
+    override fun recvCaptureVideo(receiver: Long, timeoutMs: Int): NdiVideoFrame? {
+        if (receiver == 0L) return null
+        val handle = Pointer(receiver)
+        val native = NdiVideoFrameStruct()
+        // Null for audio and metadata: the runtime then consumes and drops both rather than
+        // queueing them behind a caller that will never ask for them.
+        if (lib.NDIlib_recv_capture_v2(handle, native, null, null, timeoutMs) != FRAME_TYPE_VIDEO) return null
+        return try {
+            copyReceivedFrame(receiver, native)
+        } finally {
+            // The frame's pixels belong to the runtime until this returns them, and a capture loop
+            // that skipped it — because the format was one we do not read, say — would leak a
+            // frame's worth of native memory per frame for the length of the service.
+            lib.NDIlib_recv_free_video_v2(handle, native)
+        }
+    }
+
+    /**
+     * The runtime's frame copied into [receiver]'s own buffer, or null when it is not one we read.
+     *
+     * **[NdiVideoFrameStruct.line_stride_in_bytes] is not `width * 4`** in general — the runtime is
+     * entitled to pad rows — so the copy is row by row unless the frame happens to be packed, in
+     * which case it is one read rather than 1,080 of them.
+     */
+    private fun copyReceivedFrame(receiver: Long, native: NdiVideoFrameStruct): NdiVideoFrame? {
+        val data = native.p_data ?: return null
+        val format = NdiPixelFormat.ofFourCc(native.FourCC) ?: return null
+        val needed = frameSizeBytes(native.xres, native.yres)
+        if (needed <= 0) return null
+        val target = received[receiver]?.takeIf { it.size >= needed }
+            ?: ByteArray(needed).also { received[receiver] = it }
+        val packed = lineStrideBytes(native.xres)
+        val stride = native.line_stride_in_bytes.takeIf { it > packed } ?: packed
+        if (stride == packed) {
+            data.read(0, target, 0, needed)
+        } else {
+            for (row in 0 until native.yres) {
+                data.read(row.toLong() * stride, target, row * packed, packed)
+            }
+        }
+        return NdiVideoFrame(
+            target, native.xres, native.yres, format, native.frame_rate_N, native.frame_rate_D,
+        )
+    }
+
+    override fun recvDestroy(receiver: Long) {
+        if (receiver == 0L) return
+        lib.NDIlib_recv_destroy(Pointer(receiver))
+        received.remove(receiver)
+    }
+
     override fun destroy() {
         for (buffer in buffers.values) buffer.close()
         buffers.clear()
+        received.clear()
         lib.NDIlib_destroy()
     }
 }

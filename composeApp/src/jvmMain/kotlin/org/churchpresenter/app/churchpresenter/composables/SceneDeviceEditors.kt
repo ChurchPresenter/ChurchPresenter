@@ -42,8 +42,22 @@ import churchpresenter.composeapp.generated.resources.canvas_capture_refresh_win
 import churchpresenter.composeapp.generated.resources.canvas_capture_interval
 import churchpresenter.composeapp.generated.resources.canvas_decklink_io_warning
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
+import churchpresenter.composeapp.generated.resources.canvas_source_ndi
+import churchpresenter.composeapp.generated.resources.canvas_ndi_source
+import churchpresenter.composeapp.generated.resources.canvas_ndi_refresh
+import churchpresenter.composeapp.generated.resources.canvas_ndi_none_found
+import churchpresenter.composeapp.generated.resources.canvas_ndi_searching
+import churchpresenter.composeapp.generated.resources.canvas_ndi_low_bandwidth
+import churchpresenter.composeapp.generated.resources.canvas_ndi_low_bandwidth_help
+import churchpresenter.composeapp.generated.resources.canvas_ndi_runtime_missing
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
@@ -51,8 +65,129 @@ private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f
 
 /**
- * The scene sources that come from hardware or another window: a camera and a screen capture.
+ * The scene sources that come from hardware, another window, or the network: a camera, a screen
+ * capture and an NDI source.
  */
+
+/**
+ * Where an NDI layer's source is chosen.
+ *
+ * Discovery runs only while this panel is on screen — [SharedNdiSources] is acquired here and let
+ * go on dispose — because a finder that is never closed keeps answering mDNS for a panel that was
+ * shut an hour ago. The first look is done off the composition: it waits on the network, and doing
+ * that inline would freeze the properties panel for a second every time a layer is selected.
+ *
+ * The configured source is always in the list even when discovery cannot see it. A source that is
+ * powered off between services must not silently un-select itself from the scene the operator
+ * built.
+ */
+@Composable
+internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_ndi),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    // Collected rather than read once: an operator who installs the runtime and presses "check
+    // again" in Settings should see this panel come to life, not have to reselect the layer.
+    val runtimeStatus by NdiManager.status.collectAsState()
+    if (!runtimeStatus.isReady) {
+        Text(
+            text = stringResource(Res.string.canvas_ndi_runtime_missing),
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+        return
+    }
+
+    val scope = rememberCoroutineScope()
+    var discovered by remember { mutableStateOf<List<NdiSourceInfo>>(emptyList()) }
+    var looked by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        SharedNdiSources.acquire()
+        onDispose { SharedNdiSources.release() }
+    }
+    LaunchedEffect(Unit) {
+        discovered = withContext(Dispatchers.IO) { SharedNdiSources.sources() }
+        looked = true
+    }
+
+    Button(
+        onClick = {
+            scope.launch {
+                discovered = withContext(Dispatchers.IO) { SharedNdiSources.sources() }
+                looked = true
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(stringResource(Res.string.canvas_ndi_refresh), style = MaterialTheme.typography.labelSmall)
+    }
+
+    val names = ndiSourceChoices(discovered, source.sourceName)
+    if (names.isEmpty()) {
+        Text(
+            text = if (looked) stringResource(Res.string.canvas_ndi_none_found)
+                   else stringResource(Res.string.canvas_ndi_searching),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    } else {
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_ndi_source),
+            items = names,
+            selected = source.sourceName,
+            onSelectedChange = { chosen -> onUpdate(ndiSourceOn(source, discovered, chosen)) },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    LabeledCheckbox(
+        checked = source.lowBandwidth,
+        onCheckedChange = { onUpdate(source.copy(lowBandwidth = it)) },
+        label = stringResource(Res.string.canvas_ndi_low_bandwidth),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        spacing = 4.dp,
+    )
+    Text(
+        text = stringResource(Res.string.canvas_ndi_low_bandwidth_help),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        fontSize = 11.sp,
+    )
+}
+
+/**
+ * The names the picker offers: what discovery found, plus [configured] when it is not among them.
+ *
+ * The second half is the point. A source that is switched off, or that discovery has not seen yet,
+ * would otherwise vanish from its own dropdown and the panel would show the layer as pointing at
+ * nothing.
+ */
+internal fun ndiSourceChoices(discovered: List<NdiSourceInfo>, configured: String): List<String> {
+    val names = discovered.map { it.name }
+    return if (configured.isBlank() || configured in names) names else names + configured
+}
+
+/**
+ * [source] pointed at [chosen], keeping the address discovery reported for it.
+ *
+ * The address is stored beside the name rather than instead of it: it is what lets a receiver reach
+ * a source on another subnet, and it is the half that goes stale when DHCP moves the sender.
+ */
+internal fun ndiSourceOn(
+    source: SceneSource.NdiSource,
+    discovered: List<NdiSourceInfo>,
+    chosen: String,
+): SceneSource.NdiSource {
+    val match = discovered.find { it.name == chosen }
+    return source.copy(sourceName = chosen, sourceAddress = match?.address.orEmpty())
+}
 
 @Composable
 internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
