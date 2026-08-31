@@ -30,6 +30,9 @@ dependencies {
     implementation(projects.bibleFormats)
     // The chord grammar songs are written in, shared with the app rather than repeated here.
     implementation(projects.songChords)
+    // Keynote text, for the Documents source. The IWA reader that answers it lives there already;
+    // this module takes it rather than parsing the format a second time.
+    implementation(projects.presentationEngine)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
@@ -42,6 +45,8 @@ dependencies {
         exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
     }
     implementation(libs.apache.poi.ooxmlFull)
+    // HSLF, for the legacy binary .ppt the Documents source reads alongside .pptx.
+    implementation(libs.apache.poi.scratchpad)
 
     testImplementation(kotlin("test"))
 }

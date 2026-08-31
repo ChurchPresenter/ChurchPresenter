@@ -94,6 +94,9 @@ import org.churchpresenter.converter.library.DuplicateFinder
 import org.churchpresenter.converter.library.TextUtils
 import org.churchpresenter.converter.library.DuplicateGroup
 import org.churchpresenter.converter.song.DocumentTextExtractor
+import org.churchpresenter.converter.song.findFormatInputs
+import org.churchpresenter.converter.song.inputSize
+import org.churchpresenter.converter.song.matchesFormat
 import org.churchpresenter.converter.song.MarkdownToSongConverter
 import org.churchpresenter.converter.song.ParsedSong
 import org.churchpresenter.converter.song.DocumentFormat
@@ -347,7 +350,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                         }
                         OutlinedButton(shape = ButtonShape, onClick = {
                             val dir = pickDirectory() ?: return@OutlinedButton
-                            val picked = findFilesRecursive(dir, format)
+                            val picked = findFormatInputs(dir, format)
                             choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
@@ -357,7 +360,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                 } else {
                     SelectedFilesCard(
                         summary = summary,
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
                         onChange = {
                             val picked = pickSourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
@@ -493,7 +496,7 @@ private fun SoftProjectorPanel() {
                         }
                         OutlinedButton(shape = ButtonShape, onClick = {
                             val dir = pickDirectory() ?: return@OutlinedButton
-                            val picked = findFilesRecursive(dir, SoftProjectorFormat)
+                            val picked = findFormatInputs(dir, SoftProjectorFormat)
                             choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
@@ -503,7 +506,7 @@ private fun SoftProjectorPanel() {
                 } else {
                     SelectedFilesCard(
                         summary = summary,
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
                         onChange = {
                             val picked = pickSourceFiles(spsSource, SoftProjectorFormat)
                             choose(picked, Strings.filesSelected(picked.size))
@@ -685,7 +688,7 @@ private fun DocumentsPanel(source: SongSource) {
                         }
                         OutlinedButton(shape = ButtonShape, onClick = {
                             val dir = pickDirectory() ?: return@OutlinedButton
-                            val picked = findFilesRecursive(dir, DocumentFormat)
+                            val picked = findFormatInputs(dir, DocumentFormat)
                             if (picked.isNotEmpty()) { files = picked; clearResults() }
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
@@ -695,7 +698,7 @@ private fun DocumentsPanel(source: SongSource) {
                 } else {
                     SelectedFilesCard(
                         summary = Strings.filesSelected(files.size),
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
                         onChange = {
                             val picked = pick()
                             if (picked.isNotEmpty()) { files = picked; clearResults() }
@@ -2687,22 +2690,6 @@ private fun findFilesRecursive(dir: File, extension: String): List<File> =
         .sortedBy { it.absolutePath }
         .toList()
 
-/**
- * Every file in [dir] and below that [format] can read.
- *
- * This is what makes "select folder" a bulk convert rather than a partial one: it matches **all** of
- * a format's extensions instead of only its first, so pointing at a documents folder no longer
- * quietly picks up the PDFs and leaves the .docx and .pptx files behind.
- */
-private fun findFilesRecursive(dir: File, format: SongFormatConverter): List<File> =
-    dir.walkTopDown()
-        .filter { it.isFile && matchesFormat(it, format) }
-        .sortedBy { it.absolutePath }
-        .toList()
-
-private fun matchesFormat(file: File, format: SongFormatConverter): Boolean =
-    format.extensions.any { file.extension.equals(it, ignoreCase = true) } ||
-        (format.acceptsExtensionlessFiles && file.extension.isEmpty())
 
 /**
  * The file picker for one song format.
@@ -2710,6 +2697,13 @@ private fun matchesFormat(file: File, format: SongFormatConverter): Boolean =
  * Formats whose files usually carry no extension — OpenSong writes a bare name — get a filter that
  * accepts those too, because an extension filter hides every one of their songs and the panel then
  * looks like it works while converting nothing.
+ *
+ * One known gap: a `.key` saved as a **package directory** rather than a zip is entered by this
+ * chooser rather than selected, because the filter accepts every directory so the tree stays
+ * navigable. Keynote writes the zip form by default, and "select folder" takes either — see
+ * [findFormatInputs] — so the remedy is to point at the enclosing folder. Making bundles
+ * selectable here means a non-traversable `FileSystemView`, which would change the chooser for
+ * every format on this screen.
  */
 private fun pickSourceFiles(source: SongSource, format: SongFormatConverter): List<File> {
     val label = pickerLabel(source)

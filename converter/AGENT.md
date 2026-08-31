@@ -44,7 +44,7 @@ does not live here.
 Source formats currently handled: SongBeamer `.sng`, OpenLP (`songs.sqlite` and OpenLyrics),
 OpenSong, FreeShow, Free Worship, EasySlides, EasyWorship (including schedules), Quelea,
 ProPresenter, MediaShout, SoftProjector `.sps`, VideoPsalm `.json` song books, Markdown, and lyrics
-extracted from PDF/Word/PowerPoint documents.
+extracted from PDF/Word/PowerPoint/Keynote documents (`.pdf`, `.docx`, `.pptx`, `.ppt`, `.key`).
 
 ## Commands
 
@@ -84,6 +84,11 @@ shared build files — see the `converter` filter in `.github/workflows/test.yml
 - POI: `poi-ooxml:5.3.0` **with `poi-ooxml-lite` excluded** plus `poi-ooxml-full:5.3.0`. This jar
   is on the app's classpath, and **exactly ONE POI schema jar may be there** — the same exclusion
   is mirrored in `composeApp/build.gradle.kts` and in the Presentation Engine.
+  `poi-scratchpad` is here too, for the legacy binary `.ppt` the Documents source reads: HSLF is a
+  separate hierarchy from the XSLF that reads `.pptx`.
+- `:presentation-engine`, for Keynote. `KeynoteText.slideTexts` is the only thing taken from it —
+  the Documents source needs a `.key`'s words, and the IWA reader that answers that already lives
+  there. **Do not parse Keynote a second time here.**
 - `pdfbox:2.0.33` for document text extraction, `sqlite-jdbc` for the OpenLP/MediaShout databases,
   `kotlinx-serialization-json` for the JSON-shaped formats.
 - Versions come from `gradle/libs.versions.toml` where the catalogue has them; the POI/PDFBox
