@@ -217,6 +217,35 @@ class SongBackgroundFormatTest {
         assertFalse(text.contains("background-blur"))
     }
 
+    /**
+     * Opacity was in [SongBackground] but in neither [songBackgroundKeys] nor
+     * [songBackgroundFields], so a song's background opacity silently reverted to full on every
+     * reload. It is written like dim and blur — only when it is set to something.
+     */
+    @Test
+    fun `a full opacity is not written, and anything less is`() {
+        val full = written(blank().copy(background = SongBackground(type = SongBackgroundType.COLOR)))
+        val faded = written(
+            blank().copy(background = SongBackground(type = SongBackgroundType.COLOR, opacity = 55))
+        )
+
+        assertFalse(full.contains("background-opacity"))
+        assertTrue(faded.contains("background-opacity: 55"))
+    }
+
+    @Test
+    fun `an opacity out of range is clamped, and a non-numeric one falls back to full`() {
+        val over = songBackgroundFrom(
+            mapOf("background" to "color", "background-opacity" to "180"), SONG_BACKGROUND_PREFIX
+        )
+        val junk = songBackgroundFrom(
+            mapOf("background" to "color", "background-opacity" to "half"), SONG_BACKGROUND_PREFIX
+        )
+
+        assertEquals(SONG_BACKGROUND_FULL_OPACITY, over.opacity)
+        assertEquals(SONG_BACKGROUND_FULL_OPACITY, junk.opacity)
+    }
+
     @Test
     fun `every field of both backgrounds survives the round trip`() {
         val original = blank().copy(
@@ -227,12 +256,14 @@ class SongBackgroundFormatTest {
                 colorEnd = "#3a2352",
                 dim = 25,
                 blur = 3,
+                opacity = 70,
             ),
             lowerThirdBackground = SongBackground(
                 type = SongBackgroundType.VIDEO,
                 video = "/media/loop.mp4",
                 dim = 65,
                 blur = 12,
+                opacity = 40,
             ),
         )
 
@@ -301,6 +332,7 @@ class SongBackgroundFormatTest {
     fun `the header and a section directive are written in one vocabulary`() {
         val background = SongBackground(
             type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25, blur = 3,
+            opacity = 80,
         )
 
         val fields = songBackgroundFields(background, SONG_BACKGROUND_PREFIX)
@@ -313,6 +345,7 @@ class SongBackgroundFormatTest {
                 "background-color-end" to "#3a2352",
                 "background-dim" to "25",
                 "background-blur" to "3",
+                "background-opacity" to "80",
             ),
             fields,
         )
