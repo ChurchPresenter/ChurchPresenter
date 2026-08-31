@@ -9,6 +9,7 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.InstanceLinkRole
@@ -140,7 +141,7 @@ internal suspend fun downloadMirroredBackgroundSettings(
         }
         return cacheFile.absolutePath
     }
-    return remote.copy(
+    return remote.withoutCameras().copy(
         defaultBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundImage, false),
         defaultBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundVideo, true),
         defaultLowerThirdBackgroundImage = cache(
@@ -187,6 +188,24 @@ internal suspend fun downloadMirroredBackgroundSettings(
         )
     )
 }
+
+/**
+ * [this] with every camera background dropped.
+ *
+ * A picture or a clip is fetched and cached, so a mirrored one resolves here. A camera cannot be:
+ * the primary's device path names the primary's hardware, and the danger is not that it fails to
+ * open on the follower but that it **succeeds** — `avfoundation://0` is a camera on almost any
+ * machine, just not the one that was chosen. Dropping it puts the follower on its own configured
+ * background, which is the same thing `cache` does by returning "" when an asset cannot be had.
+ */
+private fun BackgroundSettings.withoutCameras(): BackgroundSettings = copy(
+    defaultBackgroundCamera = CameraDeviceRef(),
+    defaultLowerThirdBackgroundCamera = CameraDeviceRef(),
+    bibleBackground = bibleBackground.copy(camera = CameraDeviceRef()),
+    bibleLowerThirdBackground = bibleLowerThirdBackground.copy(camera = CameraDeviceRef()),
+    songBackground = songBackground.copy(camera = CameraDeviceRef()),
+    songLowerThirdBackground = songLowerThirdBackground.copy(camera = CameraDeviceRef()),
+)
 
 /**
  * Applies a [LiveStateDto] received from another instance's CompanionServer to this instance's own

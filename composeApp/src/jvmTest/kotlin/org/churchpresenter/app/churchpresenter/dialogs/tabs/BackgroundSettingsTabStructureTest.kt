@@ -70,10 +70,12 @@ class BackgroundSettingsTabStructureTest {
     }
 
     @Test
-    fun `every surface offers the four types that stand on their own`() = backgroundTab { _ ->
+    fun `every surface offers the five types that stand on their own`() = backgroundTab { _ ->
         Surface.entries.forEach { surface ->
             openSurface(surface)
-            listOf(TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.TRANSPARENT).forEach {
+            listOf(
+                TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA, TypeLabel.TRANSPARENT,
+            ).forEach {
                 assertEquals(1, controlsCount(it), "${surface.name} must offer $it")
             }
         }
