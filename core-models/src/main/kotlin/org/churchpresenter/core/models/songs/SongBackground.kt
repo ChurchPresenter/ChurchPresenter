@@ -72,7 +72,8 @@ private const val SONG_BACKGROUND_PERCENT_MAX = 100
  * than two, so a background reads the same wherever it is stored.
  */
 fun songBackgroundKeys(prefix: String): List<String> =
-    listOf(prefix) + listOf("color", "color-end", "image", "video", "dim", "blur").map { "$prefix-$it" }
+    listOf(prefix) +
+        listOf("color", "color-end", "image", "video", "dim", "blur", "opacity").map { "$prefix-$it" }
 
 /**
  * The [SongBackground] held under [prefix] in [fields], or an inheriting one when nothing there
@@ -89,6 +90,8 @@ fun songBackgroundFrom(fields: Map<String, String>, prefix: String): SongBackgro
         video = fields["$prefix-video"].orEmpty(),
         dim = fields["$prefix-dim"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_PERCENT_MAX) ?: 0,
         blur = fields["$prefix-blur"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_MAX_BLUR) ?: 0,
+        opacity = fields["$prefix-opacity"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_PERCENT_MAX)
+            ?: SONG_BACKGROUND_FULL_OPACITY,
     )
 }
 
@@ -97,7 +100,7 @@ fun songBackgroundFrom(fields: Map<String, String>, prefix: String): SongBackgro
  * it inherits, since an inherited background is stored by writing nothing at all.
  *
  * Only what the type actually reads is written: a colour background records no gradient end, and
- * dim and blur appear only when they are set to something.
+ * dim, blur and opacity appear only when they are set to something other than their default.
  */
 fun songBackgroundFields(background: SongBackground, prefix: String): List<Pair<String, String>> {
     if (!background.isCustom) return emptyList()
@@ -114,5 +117,8 @@ fun songBackgroundFields(background: SongBackground, prefix: String): List<Pair<
         }
         if (background.dim > 0) add("$prefix-dim" to background.dim.toString())
         if (background.blur > 0) add("$prefix-blur" to background.blur.toString())
+        if (background.opacity < SONG_BACKGROUND_FULL_OPACITY) {
+            add("$prefix-opacity" to background.opacity.toString())
+        }
     }
 }
