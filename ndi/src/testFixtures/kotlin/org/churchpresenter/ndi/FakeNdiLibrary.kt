@@ -13,6 +13,10 @@ class FakeNdiLibrary(
     private val initializes: Boolean = true,
     /** Names for which sendCreate refuses, as the real runtime does when a name is already taken. */
     private val refuseNames: Set<String> = emptySet(),
+    /** Sources for which recvCreate refuses, as the runtime does for one that has gone away. */
+    private val refuseSources: Set<String> = emptySet(),
+    /** Whether findCreate refuses, which is what a runtime with no network interface up does. */
+    private val refuseFinder: Boolean = false,
 ) : NdiLibrary {
 
     data class SentFrame(
@@ -97,6 +101,93 @@ class FakeNdiLibrary(
 
     override fun sendDestroy(sender: Long) {
         destroyed += sender
+    }
+
+    // ── The receive half ────────────────────────────────────────────
+
+    /** What the fake network is advertising. Mutate it to make a source appear or disappear. */
+    val discoverable: MutableList<NdiSourceInfo> =
+        java.util.Collections.synchronizedList(mutableListOf())
+
+    /** Every finder handle created, and every one destroyed. */
+    val findersCreated: MutableList<Long> = java.util.Collections.synchronizedList(mutableListOf())
+    val findersDestroyed: MutableList<Long> = java.util.Collections.synchronizedList(mutableListOf())
+
+    /** The source each receiver handle was connected to, and the bandwidth it asked for. */
+    val receivers: MutableMap<Long, ReceiverConnection> = java.util.concurrent.ConcurrentHashMap()
+    val receiversDestroyed: MutableList<Long> = java.util.Collections.synchronizedList(mutableListOf())
+
+    /** What [findSources] was last asked to wait, so a test can assert on discovery's blocking. */
+    @Volatile
+    var lastFindTimeoutMs: Int = -1
+        private set
+
+    /** How many times a capture has been asked for — a positive signal a loop is running. */
+    @Volatile
+    var captureCount = 0
+        private set
+
+    data class ReceiverConnection(
+        val source: NdiSourceInfo,
+        val bandwidth: NdiBandwidth,
+        val receiverName: String,
+    )
+
+    private val incoming = java.util.concurrent.ConcurrentLinkedQueue<NdiVideoFrame>()
+
+    /**
+     * Queues one frame for the next [recvCaptureVideo] to return. An empty queue answers null,
+     * which is the ordinary "nothing arrived yet" a real receiver gives.
+     */
+    fun offerFrame(frame: NdiVideoFrame) {
+        incoming += frame
+    }
+
+    /** Queues a frame of one repeated colour, which is enough to assert the pixels came through. */
+    fun offerSolidFrame(
+        width: Int,
+        height: Int,
+        argb: Int,
+        format: NdiPixelFormat = NdiPixelFormat.BGRA,
+    ) {
+        val bytes = ByteArray(frameSizeBytes(width, height))
+        argbToNdiBytes(IntArray(width * height) { argb }, bytes, opaque = format == NdiPixelFormat.BGRX)
+        offerFrame(NdiVideoFrame(bytes, width, height, format, 30_000, 1_000))
+    }
+
+    @Synchronized
+    override fun findCreate(showLocalSources: Boolean, groups: String): Long {
+        if (refuseFinder) return 0L
+        val handle = nextHandle++
+        findersCreated += handle
+        return handle
+    }
+
+    override fun findSources(finder: Long, timeoutMs: Int): List<NdiSourceInfo> {
+        lastFindTimeoutMs = timeoutMs
+        return synchronized(discoverable) { discoverable.toList() }
+    }
+
+    override fun findDestroy(finder: Long) {
+        findersDestroyed += finder
+    }
+
+    @Synchronized
+    override fun recvCreate(source: NdiSourceInfo, bandwidth: NdiBandwidth, receiverName: String): Long {
+        if (source.name in refuseSources) return 0L
+        val handle = nextHandle++
+        receivers[handle] = ReceiverConnection(source, bandwidth, receiverName)
+        return handle
+    }
+
+    override fun recvCaptureVideo(receiver: Long, timeoutMs: Int): NdiVideoFrame? {
+        captureCount++
+        return incoming.poll()
+    }
+
+    override fun recvDestroy(receiver: Long) {
+        receiversDestroyed += receiver
+        receivers.remove(receiver)
     }
 
     override fun destroy() {

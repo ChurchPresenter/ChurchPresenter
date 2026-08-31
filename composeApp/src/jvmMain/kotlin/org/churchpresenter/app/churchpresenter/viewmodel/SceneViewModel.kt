@@ -168,6 +168,7 @@ class SceneViewModel {
                 is SceneSource.QRCodeSource -> source.copy(visible = !source.visible)
                 is SceneSource.CameraSource -> source.copy(visible = !source.visible)
                 is SceneSource.ScreenCaptureSource -> source.copy(visible = !source.visible)
+                is SceneSource.NdiSource -> source.copy(visible = !source.visible)
                 is SceneSource.BibleSource -> source.copy(visible = !source.visible)
             }
         }
@@ -186,6 +187,7 @@ class SceneViewModel {
                 is SceneSource.QRCodeSource -> source.copy(locked = !source.locked)
                 is SceneSource.CameraSource -> source.copy(locked = !source.locked)
                 is SceneSource.ScreenCaptureSource -> source.copy(locked = !source.locked)
+                is SceneSource.NdiSource -> source.copy(locked = !source.locked)
                 is SceneSource.BibleSource -> source.copy(locked = !source.locked)
             }
         }
@@ -204,6 +206,7 @@ class SceneViewModel {
                 is SceneSource.QRCodeSource -> source.copy(transform = transform)
                 is SceneSource.CameraSource -> source.copy(transform = transform)
                 is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
+                is SceneSource.NdiSource -> source.copy(transform = transform)
                 is SceneSource.BibleSource -> source.copy(transform = transform)
             }
         }

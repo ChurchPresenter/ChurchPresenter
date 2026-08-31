@@ -25,11 +25,14 @@ sealed interface NdiRuntimeStatus {
 }
 
 /**
- * Brings the runtime up once for the whole process and hands out [NdiSender]s over it.
+ * Brings the runtime up once for the whole process and hands out [NdiSender]s, [NdiFinder]s and
+ * [NdiReceiver]s over it.
  *
  * One instance per app. The runtime is a global in the native library — `NDIlib_initialize` is
  * refcounted but the version string, the CPU check and the buffer inside [JnaNdiLibrary] are not —
- * so senders share this rather than each loading their own.
+ * so everything that
+ * touches NDI shares this rather than each loading its own — the outputs on the Projection tab and
+ * the NDI sources on the Canvas alike.
  *
  * [loader] is how the library is obtained, injected so the suite drives the whole lifecycle against
  * a fake and only the real `JnaNdiLibrary.load` call stays uncovered.
@@ -67,7 +70,32 @@ class NdiRuntimeHost(
         return NdiSender(lib, name, mode, fps)
     }
 
-    /** Takes the runtime down. The caller is responsible for having closed its senders first. */
+    /**
+     * A finder over the running runtime, or null when it is not [NdiRuntimeStatus.Ready].
+     *
+     * Not cached here. Discovery is worth running only while something is looking at a source list,
+     * and a finder held for the life of the app would keep answering mDNS for a dialog that closed
+     * an hour ago — so the caller owns its lifetime, as it owns a sender's.
+     */
+    fun createFinder(showLocalSources: Boolean = true, groups: String = ""): NdiFinder? {
+        val lib = library ?: return null
+        return NdiFinder(lib, showLocalSources, groups)
+    }
+
+    /** A receiver over the running runtime, or null when it is not [NdiRuntimeStatus.Ready]. */
+    fun createReceiver(
+        source: NdiSourceInfo,
+        bandwidth: NdiBandwidth = NdiBandwidth.HIGHEST,
+        receiverName: String = "",
+    ): NdiReceiver? {
+        val lib = library ?: return null
+        return NdiReceiver(lib, source, bandwidth, receiverName)
+    }
+
+    /**
+     * Takes the runtime down. The caller is responsible for having closed its senders, finders and
+     * receivers first.
+     */
     fun shutdown() {
         library?.destroy()
         library = null

@@ -44,3 +44,24 @@ fun argbToNdiBytes(argb: IntArray, out: ByteArray, opaque: Boolean) {
             if (opaque) OPAQUE_ALPHA_BYTE else ((pixel shr ALPHA_SHIFT) and BYTE_MASK).toByte()
     }
 }
+
+/**
+ * Converts the byte order NDI delivers back into packed ARGB — the inverse of [argbToNdiBytes], and
+ * what every renderer in this app draws.
+ *
+ * Reads the first [count] pixels of [bgra] into [out], which must hold at least that many ints and
+ * may be longer: the receiver keeps one buffer sized to the largest frame it has seen rather than
+ * reallocating when a source changes resolution. When [opaque] is set the alpha byte is ignored and
+ * 0xFF written instead, which is what a `BGRX` frame means — its fourth byte is undefined, and
+ * trusting it turns an ordinary camera feed into an invisible layer.
+ */
+fun ndiBytesToArgb(bgra: ByteArray, out: IntArray, count: Int, opaque: Boolean) {
+    for (i in 0 until count) {
+        val off = i * BYTES_PER_PIXEL
+        val alpha = if (opaque) BYTE_MASK else bgra[off + ALPHA_BYTE].toInt() and BYTE_MASK
+        out[i] = (alpha shl ALPHA_SHIFT) or
+            ((bgra[off + RED_BYTE].toInt() and BYTE_MASK) shl RED_SHIFT) or
+            ((bgra[off + GREEN_BYTE].toInt() and BYTE_MASK) shl GREEN_SHIFT) or
+            (bgra[off + BLUE_BYTE].toInt() and BYTE_MASK)
+    }
+}

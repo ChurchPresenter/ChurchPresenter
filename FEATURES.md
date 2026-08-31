@@ -119,8 +119,9 @@
 
 ## Web & Canvas
 - **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
-- **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, web pages and Bible verses — like a mini production switcher inside the app.
+- **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, NDI sources from the network, web pages and Bible verses — like a mini production switcher inside the app.
 - **QR codes made easy** — generate QR codes for URLs, WiFi, contact cards, email, SMS and more, right on the slide.
+- **NDI sources on the canvas** — receive any NDI source on your network as a layer: a camera from another machine, a graphics feed, an overflow room's output. Pick it from a list of what is sending, or drop to the sender's low-bandwidth proxy for a small layer on a busy network. Needs the same free NDI Runtime as NDI output.
 
 **Source locations:**
 - `tabs/WebTab.kt` — web browser UI
@@ -129,6 +130,7 @@
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module)
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
+- `composables/NdiFrameCache.kt`, `composables/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
 - `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
 - `data/settings/WebBookmark.kt`
 
