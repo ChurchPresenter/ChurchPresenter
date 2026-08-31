@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -311,13 +312,20 @@ private fun CustomizePaneContent(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     val shown = element ?: return
-    when (pane) {
-        CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
-        CustomizePane.SONGS -> SongCustomizePane(shown, draft, onSettingsChange)
-        CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
-        CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
-        // Handled by CustomizeBody, which gives it the whole width instead of this column.
-        CustomizePane.STAGE_MONITOR -> Unit
+    // Keyed on what the column is pointed at. One set of controls stands for many stored profiles,
+    // and without this Compose keeps the subtree across a switch and hands each control the state
+    // -- and the write-back lambda -- of whichever control held its slot before. Picking the second
+    // translation and typing a font size then wrote it to the first. The global Bible tab keys its
+    // own panel for exactly this reason.
+    key(pane, shown, translationIndex) {
+        when (pane) {
+            CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
+            CustomizePane.SONGS -> SongCustomizePane(shown, draft, onSettingsChange)
+            CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
+            CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
+            // Handled by CustomizeBody, which gives it the whole width instead of this column.
+            CustomizePane.STAGE_MONITOR -> Unit
+        }
     }
 }
 

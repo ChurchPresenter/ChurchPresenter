@@ -3,19 +3,20 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,9 +28,14 @@ import kotlin.test.assertTrue
 /**
  * The per-output Customize button on each assignment row, and the dialog it opens.
  *
- * The dialog shows what the row's display mode can actually use, so most of these drive a row into
- * a mode first and then assert on which panes and which style profile turn up. Settings assertions
- * go through `get()`; nothing here trusts a control's own text right after a click.
+ * Most of these drive a row into a display mode first, because that decides which categories the
+ * dialog offers and which of the two style profiles its controls edit. Settings assertions go
+ * through `get()`; nothing here trusts a control's own text right after a click.
+ *
+ * **A category that is following the global settings swallows pointer input** — see
+ * `DimmedWhenFollowing` — so anything that clicks a control turns the override switch on first,
+ * which is what an operator does too. Typing is not affected: `performTextReplacement` goes through
+ * the semantics action rather than through hit testing.
  */
 class ProjectionSettingsTabCustomizeTest {
 
@@ -39,105 +45,184 @@ class ProjectionSettingsTabCustomizeTest {
         ),
     )
 
+    /** Margins with four distinct values, so a test can address one field by the number in it. */
+    private fun withMargins(mode: String = Constants.DISPLAY_MODE_FULLSCREEN) = AppSettings(
+        bibleSettings = BibleSettings(marginTop = 11, marginBottom = 22, marginLeft = 33, marginRight = 44),
+        projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode))),
+    )
+
+    /** Two translations in the stack, which is what makes the translation chips appear. */
+    private fun twoTranslations(mode: String = Constants.DISPLAY_MODE_FULLSCREEN) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = listOf(
+                BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 70),
+                BibleTranslationSettings(fileName = "niv.spb", textFontSize = 70),
+            ),
+        ),
+        projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode))),
+    )
+
     private fun ComposeUiTest.openCustomize(row: Int) {
         gridButton(Grid.customize(row)).performScrollTo().performClick()
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.selectPane(pane: CustomizePane) {
+        onNodeWithTag(railTag(pane.name)).performClick()
+        waitForIdle()
+    }
+
+    /** Turns this category's override on, so its controls accept a click. */
+    private fun ComposeUiTest.enableOverride() {
+        onNodeWithTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG).performClick()
         waitForIdle()
     }
 
     // ── The button ──────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `every assignment row offers a Customize button`() = projectionTab { _ ->
+    fun `every assignment row offers the overwrite button`() = projectionTab { _ ->
         for (row in 0..1) {
-            gridButton(Grid.customize(row)).performScrollTo().assertTextEquals("Customize")
+            gridButton(Grid.customize(row)).performScrollTo().assertTextEquals("Overwrite Styles")
+        }
+    }
+
+    @Test
+    fun `the button counts the categories this output has overwritten`() {
+        val customized = AppSettings(
+            projectionSettings = ProjectionSettings(
+                screenAssignments = listOf(
+                    ScreenAssignment(bibleOverride = BibleSettings(), songOverride = SongSettings()),
+                ),
+            ),
+        )
+        projectionTab(customized) { _ ->
+            gridButton(Grid.customize(0)).performScrollTo().assertTextEquals("Overwritten · 2")
         }
     }
 
     @Test
     fun `an untouched output follows the global settings`() = projectionTab { get ->
         openCustomize(row = 0)
-        onNodeWithTag(CUSTOMIZE_STATUS_TAG).assertTextEquals("Following the global settings")
+        onNodeWithTag(CUSTOMIZE_STATUS_TAG).assertTextEquals("0 of 4 customized")
         assertFalse(get().projectionSettings.screenAssignments[0].isCustomized)
-        onNodeWithText("Reset to Global").assertDoesNotExist()
     }
 
-    // ── Which panes each display mode offers ────────────────────────────────────────────────────
+    // ── Which categories each display mode offers ───────────────────────────────────────────────
 
     @Test
     fun `a stage monitor row offers its zones and the dictionary, not Bible or Songs`() {
         projectionTab(rows(Constants.DISPLAY_MODE_STAGE_MONITOR, Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
             openCustomize(row = 0)
-            onNodeWithText("Stage Monitor").assertExists("its own settings must be the first pane")
-            onNodeWithText("Dictionary").assertExists("a stage monitor draws the dictionary card too")
-            // A stage monitor draws its zones, not the Bible profile.
-            onNodeWithText("Bible").assertDoesNotExist()
-            onNodeWithText("Songs").assertDoesNotExist()
+            onNodeWithTag(railTag(CustomizePane.STAGE_MONITOR.name)).assertExists()
+            onNodeWithTag(railTag(CustomizePane.DICTIONARY.name)).assertExists()
+            onNodeWithTag(railTag(CustomizePane.BIBLE.name)).assertDoesNotExist()
+            onNodeWithTag(railTag(CustomizePane.SONGS.name)).assertDoesNotExist()
         }
     }
 
     @Test
-    fun `a fullscreen row offers Bible, Songs, Lower Third and Dictionary`() {
+    fun `a fullscreen row offers Bible, Songs, Dictionary and Background`() {
         projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
             openCustomize(row = 0)
-            for (pane in listOf("Bible", "Songs", "Lower Third", "Dictionary")) {
-                onNodeWithText(pane).assertExists("$pane must be offered")
+            for (pane in listOf(
+                CustomizePane.BIBLE,
+                CustomizePane.SONGS,
+                CustomizePane.DICTIONARY,
+                CustomizePane.BACKGROUND,
+            )) {
+                onNodeWithTag(railTag(pane.name)).assertExists()
             }
-            onNodeWithText("Stage Monitor").assertDoesNotExist()
+            onNodeWithTag(railTag(CustomizePane.STAGE_MONITOR.name)).assertDoesNotExist()
         }
     }
 
-    // ── Which style profile the Bible and Song panes show ───────────────────────────────────────
+    // ── The element chips ───────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `a fullscreen row shows the full-screen profile alone`() {
+    fun `the Bible pane chips its two elements and previews the output`() {
         projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
             openCustomize(row = 0)
-            onNodeWithText("Songs").performClick()
-            waitForIdle()
-
-            onNodeWithText("Fullscreen Display").assertExists()
-            // A fullscreen output cannot obey a lower-third setting, so it must not be offered.
-            onNodeWithText("Lower Third Display").assertDoesNotExist()
-            onAllNodesWithText("Lower Third Size").assertCountEquals(0)
+            selectPane(CustomizePane.BIBLE)
+            onNodeWithTag(elementChipTag(CustomizeElement.BIBLE_TEXT.name)).assertExists()
+            onNodeWithTag(elementChipTag(CustomizeElement.BIBLE_REFERENCE.name)).assertExists()
+            onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertExists()
         }
     }
 
     @Test
-    fun `a lower-third row shows the lower-third profile alone`() {
+    fun `the stage monitor pane takes the whole width, with no chips and no preview`() {
+        projectionTab(rows(Constants.DISPLAY_MODE_STAGE_MONITOR)) { _ ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.STAGE_MONITOR)
+            onNodeWithTag(CUSTOMIZE_ELEMENT_ROW_TAG).assertDoesNotExist()
+            onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `the Songs pane offers no chord colour on a full screen`() {
+        projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.SONGS)
+            // A chart is drawn only by the stage monitor, so its colour would write nowhere here.
+            onNodeWithText("Chords").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `the Songs pane offers no chord colour on a lower third either`() {
         projectionTab(rows(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { _ ->
             openCustomize(row = 0)
-            onNodeWithText("Songs").performClick()
-            waitForIdle()
-
-            onNodeWithText("Lower Third Display").assertExists()
-            onNodeWithText("Fullscreen Display").assertDoesNotExist()
-            onAllNodesWithText("Full Screen").assertCountEquals(0)
+            selectPane(CustomizePane.SONGS)
+            onNodeWithText("Chords").assertDoesNotExist()
         }
     }
 
+    // ── The translation selector ────────────────────────────────────────────────────────────────
+
     @Test
-    fun `the Bible pane drops the library sections when it is editing one output`() {
+    fun `one translation in the stack needs no selector`() {
         projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
             openCustomize(row = 0)
-            onNodeWithText("Bible").performClick()
-            waitForIdle()
-
-            // The folder, the stack and the browsing panels are one per install, not per output.
-            onNodeWithText("Bible Selection").assertDoesNotExist()
-            // What the output actually draws with stays.
-            onNodeWithText("Text Margins").assertExists()
+            selectPane(CustomizePane.BIBLE)
+            onNodeWithTag(CUSTOMIZE_TRANSLATION_ROW_TAG).assertDoesNotExist()
         }
     }
 
-    // ── Editing creates the override ────────────────────────────────────────────────────────────
+    @Test
+    fun `editing the second translation leaves the first alone`() {
+        projectionTab(twoTranslations()) { get ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.BIBLE)
+            onNodeWithTag(translationChipTag(1)).performClick()
+            waitForIdle()
+            onNode(hasSetTextAction() and hasText("70")).performScrollTo().performTextReplacement("41")
+            waitForIdle()
+
+            val stack = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+                .translationList()
+            assertEquals(41, stack[1].textFontSize, "the selected translation must take the edit")
+            assertEquals(70, stack[0].textFontSize, "and the one beside it must be untouched")
+        }
+    }
+
+    // ── The category strip under the preview ────────────────────────────────────────────────────
 
     @Test
-    fun `editing in the dialog stores an override on that row alone`() {
-        projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN, Constants.DISPLAY_MODE_FULLSCREEN)) { get ->
+    fun `a margin typed on the strip stores an override on that row alone`() {
+        val two = withMargins().let {
+            it.copy(
+                projectionSettings = it.projectionSettings.copy(
+                    screenAssignments = it.projectionSettings.screenAssignments +
+                        ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+                ),
+            )
+        }
+        projectionTab(two) { get ->
             openCustomize(row = 0)
-            onNodeWithText("Bible").performClick()
-            waitForIdle()
-            onNode(hasSetTextAction() and hasText("54")).performScrollTo().performTextReplacement("31")
+            selectPane(CustomizePane.BIBLE)
+            onNode(hasSetTextAction() and hasText("11")).performTextReplacement("31")
             waitForIdle()
 
             val edited = get().projectionSettings.screenAssignments[0]
@@ -147,70 +232,82 @@ class ProjectionSettingsTabCustomizeTest {
                 get().projectionSettings.screenAssignments[1].isCustomized,
                 "the other row must still be following the global settings",
             )
+            assertEquals(11, get().bibleSettings.marginTop, "and the global document must be untouched")
+        }
+    }
+
+    @Test
+    fun `a full screen writes the full-screen bilingual layout`() {
+        projectionTab(twoTranslations()) { get ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.BIBLE)
+            enableOverride()
+            onNodeWithText("Left / Right").performClick()
+            waitForIdle()
+
+            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+            assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, bible.bilingualLayout)
             assertEquals(
-                54,
-                get().bibleSettings.marginTop,
-                "and the global document itself must be untouched",
+                Constants.BILINGUAL_SIDE_BY_SIDE,
+                bible.bilingualLayoutLowerThird,
+                "the band keeps its own value, which happens to be the same by default",
             )
         }
     }
 
     @Test
-    fun `Reset to Global clears every override on the row`() {
+    fun `a lower third writes the band's bilingual layout, not the full screen's`() {
+        projectionTab(twoTranslations(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.BIBLE)
+            enableOverride()
+            onNodeWithText("Top / Bottom").performClick()
+            waitForIdle()
+
+            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+            assertEquals(Constants.BILINGUAL_TOP_BOTTOM, bible.bilingualLayoutLowerThird)
+            assertEquals(
+                Constants.BILINGUAL_TOP_BOTTOM,
+                bible.bilingualLayout,
+                "the full screen keeps its own value, which happens to be the same by default",
+            )
+        }
+    }
+
+    @Test
+    fun `a single-language output is offered no bilingual layout`() {
+        projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
+            openCustomize(row = 0)
+            selectPane(CustomizePane.BIBLE)
+            onNodeWithText("Left / Right").assertDoesNotExist()
+        }
+    }
+
+    // ── Reset ───────────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `Reset to global clears the selected category's override`() {
         val customized = AppSettings(
             projectionSettings = ProjectionSettings(
                 screenAssignments = listOf(
                     ScreenAssignment(
-                        bibleOverride = org.churchpresenter.settings.BibleSettings(marginTop = 12),
-                        songOverride = org.churchpresenter.settings.SongSettings(marginTop = 12),
+                        bibleOverride = BibleSettings(marginTop = 12),
+                        songOverride = SongSettings(marginTop = 12),
                     ),
                 ),
             ),
         )
         projectionTab(customized) { get ->
             openCustomize(row = 0)
-            onNodeWithTag(CUSTOMIZE_STATUS_TAG).assertTextEquals("Customized for this output only")
+            onNodeWithTag(CUSTOMIZE_STATUS_TAG).assertTextEquals("2 of 4 customized")
 
-            onNodeWithText("Reset to Global").performClick()
+            selectPane(CustomizePane.BIBLE)
+            onNodeWithText("Reset to global").performClick()
             waitForIdle()
 
             val reset = get().projectionSettings.screenAssignments[0]
-            assertNull(reset.bibleOverride)
-            assertNull(reset.songOverride)
-            assertNull(reset.stageMonitorOverride)
-            assertNull(reset.dictionaryOverride)
-            assertFalse(reset.isCustomized)
-        }
-    }
-
-    // ── The lower third's orientation ───────────────────────────────────────────────────────────
-
-    @Test
-    fun `a lower-third row picks its orientation in the dialog`() {
-        projectionTab(rows(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
-            openCustomize(row = 0)
-            onNodeWithText("Lower Third").performClick()
-            waitForIdle()
-
-            onNodeWithText("Orientation").assertExists()
-            onNodeWithText("Vertical Lower Third").performClick()
-            waitForIdle()
-
-            val assignment = get().projectionSettings.screenAssignments[0]
-            assertTrue(assignment.isLowerThirdVertical, "the picked orientation must be stored")
-            assertTrue(assignment.isLowerThird, "and it is still a lower third")
-        }
-    }
-
-    @Test
-    fun `a fullscreen row is offered no orientation`() {
-        projectionTab(rows(Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
-            openCustomize(row = 0)
-            onNodeWithText("Lower Third").performClick()
-            waitForIdle()
-
-            // A fullscreen output has no band to turn, so the pane offers nothing.
-            onNodeWithText("Orientation").assertDoesNotExist()
+            assertNull(reset.bibleOverride, "the selected category is cleared")
+            assertNotNull(reset.songOverride, "and the others are left alone")
         }
     }
 }
