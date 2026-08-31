@@ -8,7 +8,6 @@ import churchpresenter.composeapp.generated.resources.look_ahead_next_lower_thir
 import churchpresenter.composeapp.generated.resources.look_ahead_next_fullscreen
 import churchpresenter.composeapp.generated.resources.look_ahead_lower_third
 import churchpresenter.composeapp.generated.resources.look_ahead_fullscreen
-import churchpresenter.composeapp.generated.resources.customize_group_chords
 import churchpresenter.composeapp.generated.resources.customize_group_lyrics
 import churchpresenter.composeapp.generated.resources.customize_style
 import churchpresenter.composeapp.generated.resources.font_size
@@ -57,10 +56,13 @@ internal fun SongCustomizePane(
                 SongLookAheadGroup(ss, lowerThird, fonts, ::update)
             CustomizeElement.SONG_NEXT_SECTION ->
                 SongLookAheadNextGroup(ss, lowerThird, fonts, ::update)
+            // No chord colour. A chart is drawn only by `StageMonitorScreen`; all three production
+            // `SongPresenter` call sites take its `showChords = false` default, so on a full screen
+            // or a lower third -- the only two shapes that reach this pane -- the colour is read by
+            // nothing.
             else -> {
                 SongLyricsGroup(ss, lowerThird, fonts, ::update)
                 SongTypographyGroup(ss, lowerThird, ::update)
-                SongChordsGroup(ss, lowerThird, ::update)
             }
         }
     }
@@ -187,27 +189,6 @@ private fun SongTypographyGroup(
     )
 }
 
-@Composable
-private fun SongChordsGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-
-    CustomizeGroup(stringResource(Res.string.customize_group_chords)) {
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) ss.lyricsLowerThirdChordColor else ss.lyricsChordColor,
-                onColorChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdChordColor = v) else it.copy(lyricsChordColor = v)
-                    }
-                },
-            )
-        }
-    }
-}
 
 @Composable
 private fun SongTitleGroup(

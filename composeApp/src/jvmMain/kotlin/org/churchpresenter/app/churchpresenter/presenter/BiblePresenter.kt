@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,6 +73,9 @@ private const val SHADOW_OFFSET_PX = 6f
  * fit found anywhere near it means the layout has a problem no fit scale can solve.
  */
 private const val MIN_FIT_SCALE = 0.0001f
+
+/** How strongly the rule between two translations reads against the verse text either side. */
+private const val DIVIDER_ALPHA = 0.45f
 
 /**
  * The largest scale at or below 1 whose content fits, per [fits].
@@ -668,7 +673,33 @@ fun BiblePresenter(
                     // below is measured against the bands, so anything it cannot get under would
                     // otherwise draw through the configured margins and off the output.
                     BoxWithConstraints(modifier = innerModifier.fillMaxSize().clipToBounds()) {
-                        val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
+                        // How the stack is arranged. Both arrangements were hardcoded here until
+                        // `BibleSettings` grew the two `bilingualLayout` fields; their defaults are what this
+                        // path already drew, so nothing moves until an operator picks the other option.
+                        val sideBySide = bs.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
+                        val slots = visible.size.coerceAtLeast(1)
+                        // The spacing between two translations plus the divider's own line, along whichever
+                        // axis they are laid out on. It scales with the fit, so every scale the search probes
+                        // has to recompute it.
+                        fun gapsPx(scale: Float): Int {
+                            val gapCount = (visible.size - 1).coerceAtLeast(0)
+                            val gap = with(density) { (bs.multiTranslationSpacing * scale).dp.roundToPx() }
+                            val divider = if (bs.multiTranslationDivider) {
+                                with(density) { 1.dp.roundToPx() }
+                            } else {
+                                0
+                            }
+                            return gapCount * (gap + divider)
+                        }
+                        // Side by side, a translation gets a column of the width and the whole height; stacked,
+                        // the whole width and a band of the height. The measurement below has to agree with
+                        // whichever it is, or the fit search solves for a box the text is not drawn in.
+                        fun itemWidth(scale: Float): Int =
+                            if (sideBySide) {
+                                ((constraints.maxWidth - gapsPx(scale)) / slots).coerceAtLeast(1)
+                            } else {
+                                constraints.maxWidth
+                            }
                         fun alignment(value: String) = when (value) {
                             Constants.LEFT -> TextAlign.Start
                             Constants.RIGHT -> TextAlign.End
@@ -727,27 +758,27 @@ fun BiblePresenter(
                             val refSize = (item.referenceFontSize * scaleFactor * scale).sp
                             val textFont = systemFontFamilyOrDefault(item.textFontType)
                             val refFont = systemFontFamilyOrDefault(item.referenceFontType)
-                            return textMeasurer.measure(itemText(item, verse.verseText), textStyle(item).copy(fontFamily = textFont, fontSize = textSize), constraints = widthConstraint).size.height +
+                            val widthConstraint = Constraints(maxWidth = itemWidth(scale))
+                            return textMeasurer.measure(
+                                itemText(item, verse.verseText),
+                                textStyle(item).copy(fontFamily = textFont, fontSize = textSize),
+                                constraints = widthConstraint,
+                            ).size.height +
                                 textMeasurer.measure(
                                     itemRefText(item, buildRefText(verse, item)),
                                     referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
                                     constraints = widthConstraint,
                                 ).size.height
                         }
-                        // What one translation has to fit in: the frame less the gaps, split evenly.
-                        fun bandHeight(scale: Float): Int {
-                            val gapCount = (visible.size - 1).coerceAtLeast(0)
-                            val gapHeight = with(density) {
-                                (bs.multiTranslationSpacing * scale).dp.roundToPx()
-                            }
-                            val dividerHeight = if (bs.multiTranslationDivider) {
-                                with(density) { 1.dp.roundToPx() }
+                        // What one translation has to fit in. Stacked that is the frame less the gaps split
+                        // evenly; side by side the gaps come out of the width instead, so each column keeps the
+                        // whole height.
+                        fun bandHeight(scale: Float): Int =
+                            if (sideBySide) {
+                                constraints.maxHeight
                             } else {
-                                0
+                                (constraints.maxHeight - gapsPx(scale)) / slots
                             }
-                            val gaps = gapCount * (gapHeight + dividerHeight)
-                            return (constraints.maxHeight - gaps) / visible.size.coerceAtLeast(1)
-                        }
                         // One scale for the whole stack, so every translation reads at the same size,
                         // and no floor: a full stack of six shrinks until the whole of every one of them
                         // is inside its band. Everything measured here scales with the argument bar the
@@ -764,8 +795,11 @@ fun BiblePresenter(
                         // measurement and returns 1f when it fits, so gating here measured every
                         // translation twice over.
                         val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            visible.forEachIndexed { index, (verse, item) ->
+                        // The type of one translation, laid out inside whatever slot the container gives it.
+                        // Hoisted so the two containers below share it: they differ only in the axis they lay
+                        // their slots out on and in the divider that separates them, never in the text.
+                        val translationBlock: @Composable (SelectedVerse, BibleTranslationSettings) -> Unit =
+                            { verse, item ->
                                 val textSize = (item.textFontSize * scaleFactor * fitScale).sp
                                 val refSize = (item.referenceFontSize * scaleFactor * fitScale).sp
                                 val textFont = systemFontFamilyOrDefault(item.textFontType)
@@ -775,65 +809,78 @@ fun BiblePresenter(
                                 val textAlign = alignment(item.textHorizontalAlignment)
                                 val refAlign = alignment(item.referenceHorizontalAlignment)
                                 val refPosition = item.referencePosition
-                                Box(
-                                    modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds(),
-                                    contentAlignment = contentAlignment,
-                                ) {
-                                    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                        if (refPosition == Constants.POSITION_ABOVE) {
-                                            Text(
-                                                itemRefText(item, buildRefText(verse, item)),
-                                                Modifier.fillMaxWidth(),
-                                                color = refColor,
-                                                fontFamily = refFont,
-                                                fontSize = refSize,
-                                                textAlign = refAlign,
-                                                style = referenceStyle(item),
-                                            )
-                                        }
+                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                    if (refPosition == Constants.POSITION_ABOVE) {
                                         Text(
-                                            itemText(item, verse.verseText),
+                                            itemRefText(item, buildRefText(verse, item)),
                                             Modifier.fillMaxWidth(),
-                                            color = textColor,
-                                            fontFamily = textFont,
-                                            fontSize = textSize,
-                                            textAlign = textAlign,
-                                            style = textStyle(item),
+                                            color = refColor,
+                                            fontFamily = refFont,
+                                            fontSize = refSize,
+                                            textAlign = refAlign,
+                                            style = referenceStyle(item),
                                         )
-                                        if (refPosition == Constants.POSITION_BELOW) {
-                                            Text(
-                                                itemRefText(item, buildRefText(verse, item)),
-                                                Modifier.fillMaxWidth(),
-                                                color = refColor,
-                                                fontFamily = refFont,
-                                                fontSize = refSize,
-                                                textAlign = refAlign,
-                                                style = referenceStyle(item),
-                                            )
-                                        }
+                                    }
+                                    Text(
+                                        itemText(item, verse.verseText),
+                                        Modifier.fillMaxWidth(),
+                                        color = textColor,
+                                        fontFamily = textFont,
+                                        fontSize = textSize,
+                                        textAlign = textAlign,
+                                        style = textStyle(item),
+                                    )
+                                    if (refPosition == Constants.POSITION_BELOW) {
+                                        Text(
+                                            itemRefText(item, buildRefText(verse, item)),
+                                            Modifier.fillMaxWidth(),
+                                            color = refColor,
+                                            fontFamily = refFont,
+                                            fontSize = refSize,
+                                            textAlign = refAlign,
+                                            style = referenceStyle(item),
+                                        )
                                     }
                                 }
-                                if (index < visible.lastIndex) {
-                                    Spacer(
-                                        modifier = Modifier.height(
-                                            (bs.multiTranslationSpacing * fitScale / 2f).dp,
-                                        ),
-                                    )
-                                    if (bs.multiTranslationDivider) {
-                                        HorizontalDivider(
-                                            color = if (isKey) {
-                                                Color.White
-                                            } else {
-                                                Color.White.copy(alpha = 0.45f)
-                                            },
-                                            thickness = 1.dp,
-                                        )
+                            }
+                        val dividerColor = if (isKey) Color.White else Color.White.copy(alpha = DIVIDER_ALPHA)
+                        // Half the spacing either side of the divider, so the rule sits on the centre line of
+                        // the gap whether or not it is drawn -- as it did when this was one Column.
+                        val halfGap = (bs.multiTranslationSpacing * fitScale / 2f).dp
+                        if (sideBySide) {
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                visible.forEachIndexed { index, (verse, item) ->
+                                    Box(
+                                        modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds(),
+                                        contentAlignment = contentAlignment,
+                                    ) {
+                                        translationBlock(verse, item)
                                     }
-                                    Spacer(
-                                        modifier = Modifier.height(
-                                            (bs.multiTranslationSpacing * fitScale / 2f).dp,
-                                        ),
-                                    )
+                                    if (index < visible.lastIndex) {
+                                        Spacer(modifier = Modifier.width(halfGap))
+                                        if (bs.multiTranslationDivider) {
+                                            VerticalDivider(color = dividerColor, thickness = 1.dp)
+                                        }
+                                        Spacer(modifier = Modifier.width(halfGap))
+                                    }
+                                }
+                            }
+                        } else {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                visible.forEachIndexed { index, (verse, item) ->
+                                    Box(
+                                        modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds(),
+                                        contentAlignment = contentAlignment,
+                                    ) {
+                                        translationBlock(verse, item)
+                                    }
+                                    if (index < visible.lastIndex) {
+                                        Spacer(modifier = Modifier.height(halfGap))
+                                        if (bs.multiTranslationDivider) {
+                                            HorizontalDivider(color = dividerColor, thickness = 1.dp)
+                                        }
+                                        Spacer(modifier = Modifier.height(halfGap))
+                                    }
                                 }
                             }
                         }
@@ -844,7 +891,16 @@ fun BiblePresenter(
                 // isLowerThirdVertical forces bilingual/parallel content to stack (one below the
                 // other) instead of the side-by-side Row split below — same band/geometry as
                 // horizontal otherwise, see the routing to the single-column "else" branch.
-                if (showParallelLayout && isLowerThird && !isLowerThirdVertical) {
+                //
+                // `bilingualLayoutLowerThird` now takes the same route by choice rather than by
+                // shape: Top/Bottom on a horizontal band falls through to that same stacked branch,
+                // which is why making the band stack needed no second layout written for it. A
+                // vertical strip still stacks whatever the setting says — it has no width to split.
+                // A band splits across its width only when it has a width to split: a vertical strip
+                // and a Top/Bottom choice both send it to the stacked branch instead.
+                val bandSplits = bs.bilingualLayoutLowerThird == Constants.BILINGUAL_SIDE_BY_SIDE &&
+                    !isLowerThirdVertical
+                if (showParallelLayout && isLowerThird && bandSplits) {
                     val sec = secondary
                     // Lower third: side-by-side Row layout (50/50) with matched auto-fit
                     BoxWithConstraints(

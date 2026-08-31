@@ -39,6 +39,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -188,6 +189,12 @@ internal fun OutputCustomizeDialog(
     var pickedElement by remember(pane) { mutableStateOf(elements.firstOrNull()) }
     val element = pickedElement?.takeIf { it in elements } ?: elements.firstOrNull()
 
+    // Which entry of the Bible stack the pane edits. Keyed on the stack itself so removing a
+    // translation cannot leave the selection pointing past the end of the list.
+    val stackSize = globalSettings.bibleSettings.translationList().size
+    var pickedTranslation by remember(stackSize) { mutableIntStateOf(0) }
+    val translationIndex = pickedTranslation.coerceIn(0, (stackSize - 1).coerceAtLeast(0))
+
     // Seeded from the resolved settings so a pane opens showing what this output currently draws —
     // the global values until the category is switched on, its own once it is.
     var draft by remember(assignment) { mutableStateOf(globalSettings.resolvedFor(assignment)) }
@@ -244,6 +251,8 @@ internal fun OutputCustomizeDialog(
                         live = overridden || !pane.hasOverride,
                         draft = draft,
                         assignment = assignment,
+                        translationIndex = translationIndex,
+                        onTranslationChange = { pickedTranslation = it },
                         onElementChange = { pickedElement = it },
                         onSettingsChange = ::edit,
                     )

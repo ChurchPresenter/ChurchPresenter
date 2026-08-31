@@ -39,7 +39,9 @@ import churchpresenter.composeapp.generated.resources.customize_hint_on
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
 import churchpresenter.composeapp.generated.resources.preview
+import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.jetbrains.compose.resources.stringResource
 
@@ -68,6 +70,8 @@ internal fun CustomizeBody(
     live: Boolean,
     draft: AppSettings,
     assignment: ScreenAssignment,
+    translationIndex: Int,
+    onTranslationChange: (Int) -> Unit,
     onElementChange: (CustomizeElement) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -79,10 +83,19 @@ internal fun CustomizeBody(
     }
     Row(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.width(CONTROLS_WIDTH).fillMaxHeight()) {
+            // Bible only, and only with a stack worth choosing from: every other category has one
+            // set of settings, so a selector above it would name a choice that does not exist.
+            if (pane == CustomizePane.BIBLE) {
+                CustomizeTranslationChips(
+                    translations = draft.bibleSettings.translationList(),
+                    selected = translationIndex,
+                    onSelect = onTranslationChange,
+                )
+            }
             CustomizeElementChips(elements, element, onElementChange)
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-                CustomizePaneContent(pane, element, draft, onSettingsChange)
+                CustomizePaneContent(pane, element, translationIndex, draft, onSettingsChange)
             }
         }
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -141,6 +154,66 @@ private fun CustomizePreviewColumn(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         DimmedWhenFollowing(live, Modifier.fillMaxWidth()) {
             CustomizeCategoryStrip(pane, draft, assignment, onSettingsChange)
+        }
+    }
+}
+
+/**
+ * Which translation of the stack the Bible controls below are editing.
+ *
+ * Numbered and abbreviated exactly as the global Bible tab's own selector is (`1 · KJV`), because
+ * they pick from the same ordered stack and an operator moving between the two should not have to
+ * work out that they are the same list. One entry means no choice, so nothing is drawn.
+ *
+ * The module titles the global tab resolves its abbreviations from are not read here -- this dialog
+ * opens no `.spb` -- so a translation that has never been given a custom abbreviation falls back to
+ * the one derived from its file name, which is what the presenter draws for it anyway.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CustomizeTranslationChips(
+    translations: List<BibleTranslationSettings>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+) {
+    if (translations.size < 2) return
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(start = 10.dp, end = 10.dp, top = 6.dp)
+            .testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        translations.forEachIndexed { index, translation ->
+            val abbreviation = translation.customAbbreviation.ifBlank {
+                defaultTranslationAbbreviation(title = "", fileName = translation.fileName)
+            }
+            FilterChip(
+                selected = index == selected,
+                onClick = { onSelect(index) },
+                label = {
+                    Text(
+                        text = "${index + 1} · $abbreviation",
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                shape = RoundedCornerShape(7.dp),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = index == selected,
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    selectedBorderColor = Color.Transparent,
+                ),
+                modifier = Modifier.height(26.dp).testTag(translationChipTag(index)),
+            )
         }
     }
 }
@@ -233,12 +306,13 @@ internal fun paneHint(pane: CustomizePane, overridden: Boolean): String =
 private fun CustomizePaneContent(
     pane: CustomizePane,
     element: CustomizeElement?,
+    translationIndex: Int,
     draft: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     val shown = element ?: return
     when (pane) {
-        CustomizePane.BIBLE -> BibleCustomizePane(shown, draft, onSettingsChange)
+        CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
         CustomizePane.SONGS -> SongCustomizePane(shown, draft, onSettingsChange)
         CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
         CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
@@ -249,3 +323,9 @@ private fun CustomizePaneContent(
 
 /** Test handle for the row of element chips above the control column. */
 internal const val CUSTOMIZE_ELEMENT_ROW_TAG = "customize_element_row"
+
+/** Test handle for the Bible pane's translation selector. */
+internal const val CUSTOMIZE_TRANSLATION_ROW_TAG = "customize_translation_row"
+
+/** Test handle for one translation chip, by its position in the stack. */
+internal fun translationChipTag(index: Int): String = "customize_translation_$index"

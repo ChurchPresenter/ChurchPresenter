@@ -71,7 +71,15 @@ internal fun CustomizeCategoryStrip(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStrip(settings.bibleSettings, lowerThird) { transform ->
+            CustomizePane.BIBLE -> BibleStrip(
+                bs = settings.bibleSettings,
+                lowerThird = lowerThird,
+                // Two translations have to be on this screen before their arrangement means
+                // anything. `bibleTranslations` empty means "all of them", which is the usual case.
+                parallel = assignment.bibleMode != Constants.SONG_LANG_OFF &&
+                    (assignment.bibleTranslations.size > 1 || assignment.bibleTranslations.isEmpty()) &&
+                    settings.bibleSettings.translationList().size > 1,
+            ) { transform ->
                 onSettingsChange { s -> s.copy(bibleSettings = transform(s.bibleSettings)) }
             }
             CustomizePane.SONGS -> SongStrip(
@@ -95,7 +103,12 @@ internal fun CustomizeCategoryStrip(
 }
 
 @Composable
-private fun BibleStrip(bs: BibleSettings, lowerThird: Boolean, update: ((BibleSettings) -> BibleSettings) -> Unit) {
+private fun BibleStrip(
+    bs: BibleSettings,
+    lowerThird: Boolean,
+    parallel: Boolean,
+    update: ((BibleSettings) -> BibleSettings) -> Unit,
+) {
     MarginsStripRow(
         top = bs.marginTop,
         bottom = bs.marginBottom,
@@ -136,6 +149,26 @@ private fun BibleStrip(bs: BibleSettings, lowerThird: Boolean, update: ((BibleSe
             onValueChange = { v -> update { it.copy(multiTranslationSpacing = v) } },
             range = SPACING_RANGE_MIN..SPACING_RANGE_MAX,
         )
+    }
+    // The two shapes keep separate values: a full screen stacks by default and a band splits by
+    // default, which is what they have always drawn, so one shared field could not have preserved
+    // both. Whichever shape this output is, it edits its own.
+    if (parallel) {
+        StripRow(stringResource(Res.string.customize_bilingual)) {
+            ChoiceControl(
+                options = listOf(
+                    Constants.BILINGUAL_SIDE_BY_SIDE to stringResource(Res.string.bilingual_left_right),
+                    Constants.BILINGUAL_TOP_BOTTOM to stringResource(Res.string.bilingual_top_bottom),
+                ),
+                selected = if (lowerThird) bs.bilingualLayoutLowerThird else bs.bilingualLayout,
+                onSelect = { v ->
+                    update {
+                        if (lowerThird) it.copy(bilingualLayoutLowerThird = v)
+                        else it.copy(bilingualLayout = v)
+                    }
+                },
+            )
+        }
     }
 }
 

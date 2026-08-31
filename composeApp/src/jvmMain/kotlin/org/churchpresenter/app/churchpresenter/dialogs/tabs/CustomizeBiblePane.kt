@@ -20,19 +20,24 @@ import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Bible pane, showing whichever element the chips above it have selected.
+ * The Bible pane, showing one element of one translation -- the chips above it pick both.
  *
- * Edits every translation in the stack at once. The global tab is where one translation is styled
- * apart from another; here the question is "how does the Bible look on this screen", and a stack
- * whose languages disagree about that on one output is not what the operator came to say.
+ * **One translation at a time, not the whole stack.** An earlier version of this pane read the
+ * first translation's values and wrote every edit to all of them, so a screen could not be given a
+ * smaller secondary language or a different colour for its third: the controls showed translation
+ * one and silently overwrote the rest. The stack is ordered and each entry carries its own full
+ * profile -- the same four families the global tab edits -- so the dialog offers the same choice,
+ * per output.
  *
- * The margins, the fades and the band's geometry are no longer here: they belong to the picture
- * rather than to the verse text or its reference, and they sit under the preview in
+ * The margins, the fades and the band's geometry are not here: they belong to the picture rather
+ * than to the verse text or its reference, and they sit under the preview in
  * [CustomizeCategoryStrip] where the picture they move is in the same glance.
  */
 @Composable
 internal fun BibleCustomizePane(
     element: CustomizeElement,
+    /** Which entry of the ordered stack is being styled -- see [CustomizeTranslationChips]. */
+    translationIndex: Int,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -40,12 +45,17 @@ internal fun BibleCustomizePane(
     val lowerThird = scope == OutputStyleScope.LOWER_THIRD
     val fonts = rememberSystemFonts()
     val bs = settings.bibleSettings
-    val t = bs.translationList().firstOrNull() ?: BibleTranslationSettings()
+    val stack = bs.translationList()
+    // A shelf with nothing configured still has a Bible style to edit, and an index left over from
+    // a longer stack must not read off the end.
+    val index = translationIndex.coerceIn(0, (stack.size - 1).coerceAtLeast(0))
+    val t = stack.getOrNull(index) ?: BibleTranslationSettings()
 
-    fun updateAll(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
+    // Writes the selected entry alone, through the same `updateTranslation` the global tab uses,
+    // so both edit the stack by one path.
+    fun updateEntry(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
         onSettingsChange { s ->
-            val current = s.bibleSettings
-            s.copy(bibleSettings = current.withTranslations(current.translationList().map(transform)))
+            s.copy(bibleSettings = s.bibleSettings.updateTranslation(index, transform))
         }
     }
 
@@ -55,10 +65,10 @@ internal fun BibleCustomizePane(
 
     PaneScaffold {
         if (element == CustomizeElement.BIBLE_REFERENCE) {
-            BibleReferenceGroup(t, lowerThird, ::updateAll)
+            BibleReferenceGroup(t, lowerThird, ::updateEntry)
         } else {
-            BibleVerseTextGroup(bs, t, lowerThird, fonts, ::updateAll, ::updateBible)
-            BibleTypographyGroup(t, lowerThird, ::updateAll)
+            BibleVerseTextGroup(bs, t, lowerThird, fonts, ::updateEntry, ::updateBible)
+            BibleTypographyGroup(t, lowerThird, ::updateEntry)
         }
     }
 }
@@ -70,7 +80,7 @@ private fun BibleVerseTextGroup(
     t: BibleTranslationSettings,
     lowerThird: Boolean,
     fonts: List<String>,
-    updateAll: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
+    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
     updateBible: ((BibleSettings) -> BibleSettings) -> Unit,
 ) {
     CustomizeGroup(stringResource(Res.string.customize_group_verse_text)) {
@@ -80,7 +90,7 @@ private fun BibleVerseTextGroup(
                 value = if (lowerThird) t.lowerThirdTextFontType else t.textFontType,
                 fonts = fonts,
                 onValueChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextFontType = v) else it.copy(textFontType = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextFontType = v) else it.copy(textFontType = v) }
                 },
             )
         }
@@ -89,7 +99,7 @@ private fun BibleVerseTextGroup(
                 label = stringResource(Res.string.font_size),
                 value = if (lowerThird) t.lowerThirdTextFontSize else t.textFontSize,
                 onValueChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextFontSize = v) else it.copy(textFontSize = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextFontSize = v) else it.copy(textFontSize = v) }
                 },
                 range = FONT_SIZE_RANGE,
             )
@@ -99,7 +109,7 @@ private fun BibleVerseTextGroup(
                 label = stringResource(Res.string.color),
                 color = if (lowerThird) t.lowerThirdTextColor else t.textColor,
                 onColorChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextColor = v) else it.copy(textColor = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextColor = v) else it.copy(textColor = v) }
                 },
             )
         }
@@ -110,18 +120,18 @@ private fun BibleVerseTextGroup(
                 underline = if (lowerThird) t.lowerThirdTextUnderline else t.textUnderline,
                 shadow = if (lowerThird) t.lowerThirdTextShadow else t.textShadow,
                 onBoldChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextBold = v) else it.copy(textBold = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextBold = v) else it.copy(textBold = v) }
                 },
                 onItalicChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextItalic = v) else it.copy(textItalic = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextItalic = v) else it.copy(textItalic = v) }
                 },
                 onUnderlineChange = { v ->
-                    updateAll {
+                    updateEntry {
                         if (lowerThird) it.copy(lowerThirdTextUnderline = v) else it.copy(textUnderline = v)
                     }
                 },
                 onShadowChange = { v ->
-                    updateAll { if (lowerThird) it.copy(lowerThirdTextShadow = v) else it.copy(textShadow = v) }
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextShadow = v) else it.copy(textShadow = v) }
                 },
             )
         }
@@ -129,7 +139,7 @@ private fun BibleVerseTextGroup(
             HorizontalAlignControl(
                 selected = if (lowerThird) t.lowerThirdTextHorizontalAlignment else t.textHorizontalAlignment,
                 onSelect = { v ->
-                    updateAll {
+                    updateEntry {
                         if (lowerThird) it.copy(lowerThirdTextHorizontalAlignment = v)
                         else it.copy(textHorizontalAlignment = v)
                     }
@@ -148,7 +158,7 @@ private fun BibleVerseTextGroup(
 private fun BibleTypographyGroup(
     t: BibleTranslationSettings,
     lowerThird: Boolean,
-    updateAll: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
+    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
 ) {
 
     TypographyGroup(
@@ -156,15 +166,15 @@ private fun BibleTypographyGroup(
         wordSpacing = if (lowerThird) t.lowerThirdTextWordSpacing else t.textWordSpacing,
         transform = if (lowerThird) t.lowerThirdTextTransform else t.textTransform,
         onLetterSpacing = { v ->
-            updateAll {
+            updateEntry {
                 if (lowerThird) it.copy(lowerThirdTextLetterSpacing = v) else it.copy(textLetterSpacing = v)
             }
         },
         onWordSpacing = { v ->
-            updateAll { if (lowerThird) it.copy(lowerThirdTextWordSpacing = v) else it.copy(textWordSpacing = v) }
+            updateEntry { if (lowerThird) it.copy(lowerThirdTextWordSpacing = v) else it.copy(textWordSpacing = v) }
         },
         onTransform = { v ->
-            updateAll { if (lowerThird) it.copy(lowerThirdTextTransform = v) else it.copy(textTransform = v) }
+            updateEntry { if (lowerThird) it.copy(lowerThirdTextTransform = v) else it.copy(textTransform = v) }
         },
     )
 }
@@ -173,7 +183,7 @@ private fun BibleTypographyGroup(
 private fun BibleReferenceGroup(
     t: BibleTranslationSettings,
     lowerThird: Boolean,
-    updateAll: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
+    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
 ) {
 
     CustomizeGroup(stringResource(Res.string.customize_group_reference)) {
@@ -182,7 +192,7 @@ private fun BibleReferenceGroup(
                 label = stringResource(Res.string.font_size),
                 value = if (lowerThird) t.lowerThirdReferenceFontSize else t.referenceFontSize,
                 onValueChange = { v ->
-                    updateAll {
+                    updateEntry {
                         if (lowerThird) it.copy(lowerThirdReferenceFontSize = v)
                         else it.copy(referenceFontSize = v)
                     }
@@ -195,7 +205,7 @@ private fun BibleReferenceGroup(
                 label = stringResource(Res.string.color),
                 color = if (lowerThird) t.lowerThirdReferenceColor else t.referenceColor,
                 onColorChange = { v ->
-                    updateAll {
+                    updateEntry {
                         if (lowerThird) it.copy(lowerThirdReferenceColor = v) else it.copy(referenceColor = v)
                     }
                 },
@@ -207,7 +217,7 @@ private fun BibleReferenceGroup(
                 aboveValue = REFERENCE_ABOVE,
                 belowValue = REFERENCE_BELOW,
                 onSelect = { v ->
-                    updateAll {
+                    updateEntry {
                         if (lowerThird) it.copy(lowerThirdReferencePosition = v)
                         else it.copy(referencePosition = v)
                     }
@@ -216,7 +226,7 @@ private fun BibleReferenceGroup(
         }
         CustomizeRow(stringResource(Res.string.customize_show_abbreviation), labelInsideControl = true) {
             ToggleControl(stringResource(Res.string.customize_show_abbreviation), t.showAbbreviation) { v ->
-                updateAll { it.copy(showAbbreviation = v) }
+                updateEntry { it.copy(showAbbreviation = v) }
             }
         }
     }

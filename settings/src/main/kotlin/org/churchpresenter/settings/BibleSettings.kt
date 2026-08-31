@@ -141,6 +141,25 @@ data class BibleSettings(
     val multiTranslationSpacing: Int = 24,
     val multiTranslationDivider: Boolean = false,
 
+    /**
+     * How two or more translations sit against each other, per output shape.
+     *
+     * Two fields rather than one because the two shapes have never agreed: a full screen stacks the
+     * ordered stack down the frame, and a band splits it 50/50 across the width. Both arrangements
+     * were hardcoded in `BiblePresenter` until these were added, so the defaults here are exactly
+     * what every existing install already draws -- upgrading changes nothing until someone picks
+     * the other option.
+     *
+     * [BILINGUAL_SIDE_BY_SIDE] on the full screen gives each translation an equal *column* instead
+     * of an equal band; [BILINGUAL_TOP_BOTTOM] on the band stacks the two languages inside it. A
+     * vertical band ignores both and always stacks -- it has no width to split.
+     *
+     * Named to match [SongSettings.bilingualLayout], which is the same choice for song lyrics,
+     * except that songs store one value for both shapes.
+     */
+    val bilingualLayout: String = Constants.BILINGUAL_TOP_BOTTOM,
+    val bilingualLayoutLowerThird: String = Constants.BILINGUAL_SIDE_BY_SIDE,
+
     // Bible tab column widths (dp); 0 = use default
     val bibleColWidthBook: Int = 200,
     val bibleColWidthChapter: Int = 120,
