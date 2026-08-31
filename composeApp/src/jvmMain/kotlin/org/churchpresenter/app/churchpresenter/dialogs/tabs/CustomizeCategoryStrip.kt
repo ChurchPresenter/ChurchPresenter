@@ -20,8 +20,11 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
+import churchpresenter.composeapp.generated.resources.bilingual_left_right
+import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.customize_group_margins
+import churchpresenter.composeapp.generated.resources.customize_bilingual
 import churchpresenter.composeapp.generated.resources.customize_layout
 import churchpresenter.composeapp.generated.resources.customize_motion
 import churchpresenter.composeapp.generated.resources.fade_in
@@ -35,7 +38,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -53,6 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun CustomizeCategoryStrip(
     pane: CustomizePane,
     settings: AppSettings,
+    assignment: ScreenAssignment,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -68,7 +74,14 @@ internal fun CustomizeCategoryStrip(
             CustomizePane.BIBLE -> BibleStrip(settings.bibleSettings, lowerThird) { transform ->
                 onSettingsChange { s -> s.copy(bibleSettings = transform(s.bibleSettings)) }
             }
-            CustomizePane.SONGS -> SongStrip(settings.songSettings, lowerThird) { transform ->
+            CustomizePane.SONGS -> SongStrip(
+                ss = settings.songSettings,
+                lowerThird = lowerThird,
+                // This output's own language mode, which is what decides whether two languages
+                // actually land on it -- the global tab asks the same question of the whole
+                // install. A single-language screen has nothing to arrange.
+                bilingual = assignment.songMode == Constants.SONG_LANG_BOTH,
+            ) { transform ->
                 onSettingsChange { s -> s.copy(songSettings = transform(s.songSettings)) }
             }
             CustomizePane.DICTIONARY -> DictionaryStrip(settings.dictionarySettings) { transform ->
@@ -127,7 +140,12 @@ private fun BibleStrip(bs: BibleSettings, lowerThird: Boolean, update: ((BibleSe
 }
 
 @Composable
-private fun SongStrip(ss: SongSettings, lowerThird: Boolean, update: ((SongSettings) -> SongSettings) -> Unit) {
+private fun SongStrip(
+    ss: SongSettings,
+    lowerThird: Boolean,
+    bilingual: Boolean,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+) {
     MarginsStripRow(
         top = ss.marginTop,
         bottom = ss.marginBottom,
@@ -155,6 +173,23 @@ private fun SongStrip(ss: SongSettings, lowerThird: Boolean, update: ((SongSetti
                 value = ss.lowerThirdHeightPercent,
                 onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
                 range = BAND_RANGE,
+            )
+        }
+    }
+    // How the two languages sit against each other -- the one control the global Song tab has at
+    // this level that this dialog was missing. It is a property of the slide rather than of the
+    // lyrics or the title, so it belongs on the strip and not under a chip; and it is one stored
+    // value serving both shapes, exactly as `SongPresenter` reads it (a vertical band ignores
+    // side-by-side and stacks regardless, having no width to split).
+    if (bilingual) {
+        StripRow(stringResource(Res.string.customize_bilingual)) {
+            ChoiceControl(
+                options = listOf(
+                    Constants.BILINGUAL_SIDE_BY_SIDE to stringResource(Res.string.bilingual_left_right),
+                    Constants.BILINGUAL_TOP_BOTTOM to stringResource(Res.string.bilingual_top_bottom),
+                ),
+                selected = ss.bilingualLayout,
+                onSelect = { v -> update { it.copy(bilingualLayout = v) } },
             )
         }
     }

@@ -140,7 +140,7 @@ private fun CustomizePreviewColumn(
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         DimmedWhenFollowing(live, Modifier.fillMaxWidth()) {
-            CustomizeCategoryStrip(pane, draft, onSettingsChange)
+            CustomizeCategoryStrip(pane, draft, assignment, onSettingsChange)
         }
     }
 }

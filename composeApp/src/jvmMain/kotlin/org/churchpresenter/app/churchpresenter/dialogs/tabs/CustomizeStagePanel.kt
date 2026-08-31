@@ -92,7 +92,7 @@ private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: Preview
     )
 }
 
-/** A verse and the chorus behind it, with the look-ahead and chart this output is set up for. */
+/** A verse and the chorus behind it, with the look-ahead this output is set up for. */
 @Composable
 private fun SongStage(
     settings: AppSettings,
@@ -105,9 +105,16 @@ private fun SongStage(
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
         // Taken from this output's own assignment rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
-        // answered — it either has a look-ahead and a chart or it does not.
+        // answered whether it carries a look-ahead line.
         showLookAhead = assignment.songLookAhead,
-        showChords = assignment.showChords,
+        // Never a chord chart. The chart is for whoever is playing, so it is drawn on the stage
+        // monitor and nowhere the congregation can see -- `ProjectionSettingsTab` shows the Show
+        // Chords column only for a stage monitor, and `PresenterOutputContent` passes `showChords`
+        // only into `StageMonitorScreen`. This pane is reached only by a full screen or a lower
+        // third, neither of which draws one, and `ScreenAssignment.showChords` defaults to `true`
+        // -- so reading it here drew a chart on every song preview that the screen never shows.
+        // `SongSettingsTab`'s own preview passes `false` for the same reason.
+        showChords = false,
         sections = songSampleSections(slot),
         modifier = Modifier.fillMaxWidth(),
     )

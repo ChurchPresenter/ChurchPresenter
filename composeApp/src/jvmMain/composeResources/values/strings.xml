@@ -953,6 +953,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Motion</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_bilingual">Bilingual</string>
     <string name="customize_no_preview">No preview for this section</string>
     <string name="customize_bible">Bible</string>
     <string name="customize_songs">Songs</string>
