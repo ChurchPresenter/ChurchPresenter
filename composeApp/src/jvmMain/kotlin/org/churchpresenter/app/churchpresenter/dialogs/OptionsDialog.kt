@@ -51,6 +51,8 @@ import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
 import churchpresenter.composeapp.generated.resources.companion_satellite_settings
+import churchpresenter.composeapp.generated.resources.stage_monitor
+import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
@@ -63,10 +65,12 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
@@ -78,8 +82,10 @@ import org.jetbrains.compose.resources.stringResource
 private const val TAB_BACKGROUND = 3
 private const val TAB_PROJECTION = 4
 private const val TAB_SERVER = 5
-private const val TAB_ATEM = 6
-private const val TAB_INTEGRATIONS = 7
+private const val TAB_STAGE_MONITOR = 6
+private const val TAB_ATEM = 7
+private const val TAB_DICTIONARY = 8
+private const val TAB_INTEGRATIONS = 9
 
 @Composable
 fun OptionsDialog(
@@ -161,7 +167,7 @@ internal fun OptionsDialogContent(
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt
 ) {
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val companionSatelliteTabIndex = if (obsManager != null) 8 else 7
+    val companionSatelliteTabIndex = if (obsManager != null) 10 else 9
     val tabCount = companionSatelliteTabIndex + 1
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
@@ -221,9 +227,19 @@ internal fun OptionsDialogContent(
                                 text = { Text(stringResource(Res.string.server_settings)) }
                             )
                             Tab(
+                                selected = safeTabIndex == TAB_STAGE_MONITOR,
+                                onClick = { selectedTabIndex = TAB_STAGE_MONITOR },
+                                text = { Text(stringResource(Res.string.stage_monitor)) }
+                            )
+                            Tab(
                                 selected = safeTabIndex == TAB_ATEM,
                                 onClick = { selectedTabIndex = TAB_ATEM },
                                 text = { Text(stringResource(Res.string.atem_settings)) }
+                            )
+                            Tab(
+                                selected = safeTabIndex == TAB_DICTIONARY,
+                                onClick = { selectedTabIndex = TAB_DICTIONARY },
+                                text = { Text(stringResource(Res.string.tab_dictionary)) }
                             )
                             if (obsManager != null) {
                                 Tab(
@@ -296,7 +312,19 @@ internal fun OptionsDialogContent(
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager
                             )
+                            TAB_STAGE_MONITOR -> StageMonitorSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
                             TAB_ATEM -> AtemSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            TAB_DICTIONARY -> DictionarySettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

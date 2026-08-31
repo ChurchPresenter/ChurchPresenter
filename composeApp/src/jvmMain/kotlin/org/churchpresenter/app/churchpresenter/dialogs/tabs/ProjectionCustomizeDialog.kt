@@ -17,17 +17,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
@@ -66,22 +63,15 @@ import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
 import churchpresenter.composeapp.generated.resources.customize_done
-import churchpresenter.composeapp.generated.resources.customize_hint_lower_third
 import churchpresenter.composeapp.generated.resources.customize_hint_off
 import churchpresenter.composeapp.generated.resources.customize_hint_on
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
-import churchpresenter.composeapp.generated.resources.customize_lower_third_orientation
-import churchpresenter.composeapp.generated.resources.customize_lower_third_vertical_hint
 import churchpresenter.composeapp.generated.resources.customize_pane_header
 import churchpresenter.composeapp.generated.resources.customize_reset_to_global
 import churchpresenter.composeapp.generated.resources.customize_songs
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.ScreenAssignment
@@ -106,7 +96,6 @@ private enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean
     STAGE_MONITOR(Icons.Filled.Tv),
     BIBLE(Icons.Filled.MenuBook),
     SONGS(Icons.Filled.MusicNote),
-    LOWER_THIRD(Icons.Filled.Subtitles, hasOverride = false),
     BACKGROUND(Icons.Filled.Wallpaper),
     DICTIONARY(Icons.Filled.Book);
 
@@ -115,7 +104,6 @@ private enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean
         STAGE_MONITOR -> assignment.stageMonitorOverride != null
         BIBLE -> assignment.bibleOverride != null
         SONGS -> assignment.songOverride != null
-        LOWER_THIRD -> false
         BACKGROUND -> assignment.backgroundOverride != null
         DICTIONARY -> assignment.dictionaryOverride != null
     }
@@ -128,7 +116,6 @@ private enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean
             )
             BIBLE -> assignment.copy(bibleOverride = if (on) edited.bibleSettings else null)
             SONGS -> assignment.copy(songOverride = if (on) edited.songSettings else null)
-            LOWER_THIRD -> assignment
             BACKGROUND -> assignment.copy(backgroundOverride = if (on) edited.backgroundSettings else null)
             DICTIONARY -> assignment.copy(dictionaryOverride = if (on) edited.dictionarySettings else null)
         }
@@ -144,9 +131,8 @@ private fun customizePanes(displayMode: String): List<CustomizePane> =
         listOf(
             CustomizePane.BIBLE,
             CustomizePane.SONGS,
-            CustomizePane.LOWER_THIRD,
-            CustomizePane.BACKGROUND,
             CustomizePane.DICTIONARY,
+            CustomizePane.BACKGROUND,
         )
     }
 
@@ -155,7 +141,6 @@ private fun CustomizePane.label(): String = when (this) {
     CustomizePane.STAGE_MONITOR -> stringResource(Res.string.stage_monitor)
     CustomizePane.BIBLE -> stringResource(Res.string.customize_bible)
     CustomizePane.SONGS -> stringResource(Res.string.customize_songs)
-    CustomizePane.LOWER_THIRD -> stringResource(Res.string.display_lower_third)
     CustomizePane.BACKGROUND -> stringResource(Res.string.background)
     CustomizePane.DICTIONARY -> stringResource(Res.string.tab_dictionary)
 }
@@ -240,7 +225,6 @@ internal fun OutputCustomizeDialog(
                     assignment = assignment,
                     onOverriddenChange = ::setOverridden,
                     onSettingsChange = ::edit,
-                    onAssignmentChange = onApply,
                 )
             }
         },
@@ -394,7 +378,6 @@ private fun CustomizePaneBody(
     assignment: ScreenAssignment,
     onOverriddenChange: (Boolean) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -428,7 +411,7 @@ private fun CustomizePaneBody(
                 CompositionLocalProvider(
                     LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
                 ) {
-                    CustomizePaneContent(pane, draft, assignment, onSettingsChange, onAssignmentChange)
+                    CustomizePaneContent(pane, draft, onSettingsChange)
                 }
             }
             if (!live) {
@@ -450,9 +433,7 @@ private fun CustomizePaneBody(
 
 @Composable
 private fun paneHint(pane: CustomizePane, overridden: Boolean): String =
-    if (pane == CustomizePane.LOWER_THIRD) {
-        stringResource(Res.string.customize_hint_lower_third)
-    } else if (pane == CustomizePane.STAGE_MONITOR) {
+    if (pane == CustomizePane.STAGE_MONITOR) {
         if (overridden) stringResource(Res.string.customize_hint_stage_on)
         else stringResource(Res.string.customize_hint_stage_off)
     } else {
@@ -465,9 +446,7 @@ private fun paneHint(pane: CustomizePane, overridden: Boolean): String =
 private fun CustomizePaneContent(
     pane: CustomizePane,
     draft: AppSettings,
-    assignment: ScreenAssignment,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     when (pane) {
         // The stage monitor keeps its own tab: its pane is a zone layout picker and a per-zone style
@@ -478,54 +457,6 @@ private fun CustomizePaneContent(
         CustomizePane.SONGS -> SongCustomizePane(draft, onSettingsChange)
         CustomizePane.BACKGROUND -> BackgroundCustomizePane(draft, onSettingsChange)
         CustomizePane.DICTIONARY -> DictionaryCustomizePane(draft, onSettingsChange)
-        CustomizePane.LOWER_THIRD -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            if (assignment.isLowerThird) {
-                LowerThirdOrientationSection(
-                    displayMode = assignment.displayMode,
-                    onDisplayModeChange = { mode -> onAssignmentChange(assignment.copy(displayMode = mode)) },
-                )
-            }
-        }
-    }
-}
-
-/**
- * Whether this output's lower third is a band across the bottom or a strip down the side.
- *
- * Lives here rather than in the Display Mode dropdown because the two orientations are one mode:
- * they share every styling field, and only the band's geometry differs. The dropdown says what the
- * output *is*; this says how it is shaped.
- *
- * A checkbox rather than a pair of buttons because there are exactly two shapes and the horizontal
- * band is the ordinary one — so the question is "is this one the vertical variant?", which is what
- * a checkbox asks.
- */
-@Composable
-private fun LowerThirdOrientationSection(
-    displayMode: String,
-    onDisplayModeChange: (String) -> Unit,
-) {
-    SettingsSection(title = stringResource(Res.string.customize_lower_third_orientation)) {
-        LabeledCheckbox(
-            checked = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL,
-            onCheckedChange = { vertical ->
-                onDisplayModeChange(
-                    if (vertical) Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
-                    else Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-                )
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.display_lower_third_vertical),
-            supporting = stringResource(Res.string.customize_lower_third_vertical_hint),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag(LOWER_THIRD_VERTICAL_TAG),
-            style = MaterialTheme.typography.bodyMedium,
-        )
     }
 }
 
@@ -609,7 +540,6 @@ internal const val CUSTOMIZE_STATUS_TAG = "customize_status"
 internal const val CUSTOMIZE_OVERRIDE_SWITCH_TAG = "customize_override_switch"
 
 /** Test handle for the lower third's vertical/horizontal checkbox. */
-internal const val LOWER_THIRD_VERTICAL_TAG = "customize_lower_third_vertical"
 
 /**
  * The mode the Display Mode dropdown should show as selected for an output in [mode].

@@ -75,9 +75,8 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val VARIANT_CARD_WIDTH = 132
 private const val VARIANT_GRID_HEIGHT = 80
-private const val FIRST_CELL_ALPHA = 0.75f
 private const val BEZEL_ALPHA = 0.38f
-private const val PLAIN_CELL_ALPHA = 0.40f
+private const val CELL_ALPHA = 0.40f
 
 @Composable
 internal fun layoutLabel(layout: StageMonitorLayout): String = when (layout) {
@@ -182,7 +181,8 @@ private fun LayoutVariantCard(
  *
  * The zones are always white on the black screen, whichever card is picked and whatever the theme:
  * a theme colour here reads as "off" on one of the two, and the picked card is already said by its
- * border and label.
+ * border and label. Every cell is drawn at the same weight — singling the first slot out read as
+ * one zone being selected or active rather than as a hint about where Zone 1 sits.
  */
 @Composable
 internal fun LayoutMiniature(
@@ -199,14 +199,12 @@ internal fun LayoutMiniature(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 row.cells.forEach { cell ->
-                    // The first slot is drawn brighter so a card says which corner Zone 1 is.
-                    val alpha = if (cell.slot == variant.slots.first()) FIRST_CELL_ALPHA else PLAIN_CELL_ALPHA
                     Box(
                         modifier = Modifier
                             .weight(cell.weight)
                             .fillMaxSize()
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color.White.copy(alpha = alpha)),
+                            .background(Color.White.copy(alpha = CELL_ALPHA)),
                     )
                 }
             }

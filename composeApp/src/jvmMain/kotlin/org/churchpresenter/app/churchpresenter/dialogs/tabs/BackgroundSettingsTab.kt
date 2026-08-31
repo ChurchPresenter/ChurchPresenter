@@ -588,7 +588,7 @@ internal fun backgroundGroupLabel(group: BackgroundScopeGroup): StringResource =
     BackgroundScopeGroup.SONGS -> Res.string.songs
 }
 
-private fun backgroundScopeName(scope: BackgroundScope): StringResource = when (scope) {
+internal fun backgroundScopeName(scope: BackgroundScope): StringResource = when (scope) {
     BackgroundScope.DEFAULT -> Res.string.background_scope_default
     BackgroundScope.DEFAULT_LOWER_THIRD -> Res.string.background_scope_default_lower_third
     else -> if (scope.lowerThird) Res.string.display_lower_third else Res.string.full_screen
@@ -596,7 +596,7 @@ private fun backgroundScopeName(scope: BackgroundScope): StringResource = when (
 
 /** "Bible · Lower Third" for a content surface; a Default surface stands on its own name. */
 @Composable
-private fun backgroundScopeTitle(scope: BackgroundScope): String =
+internal fun backgroundScopeTitle(scope: BackgroundScope): String =
     if (scope.group == BackgroundScopeGroup.DEFAULTS) stringResource(backgroundScopeName(scope))
     else stringResource(
         Res.string.background_scope_title,

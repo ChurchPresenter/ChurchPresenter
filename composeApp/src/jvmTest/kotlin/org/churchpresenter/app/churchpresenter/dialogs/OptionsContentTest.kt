@@ -107,12 +107,9 @@ class OptionsContentTest {
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
             "System", "Bible", "Song", "Background", "Projection",
-            "Server", "ATEM", "Companion Satellite",
+            "Server", "Stage Monitor", "ATEM", "Dictionary", "Companion Satellite",
         ).forEach { onNodeWithText(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
-        // Stage Monitor and Dictionary are configured per output, from Projection -> Customize.
-        onNodeWithText("Stage Monitor").assertDoesNotExist()
-        onNodeWithText("Dictionary").assertDoesNotExist()
     }
 
     @Test
@@ -232,11 +229,8 @@ class OptionsContentTest {
         assertEquals(true, result.saved?.serverSettings?.apiKeyEnabled)
     }
 
-    // The Stage Monitor and Dictionary tabs were exercised here too. Both are configured per
-    // output now, from Projection -> Customize, and are covered by that dialog's own suite.
-
     @Test
-    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 6) { result ->
+    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("test-atem-host")
         onNodeWithText("Apply").performClick()
 
@@ -245,7 +239,7 @@ class OptionsContentTest {
 
     @Test
     fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
-        dialog(initialTab = 7) { result ->
+        dialog(initialTab = 9) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -254,7 +248,7 @@ class OptionsContentTest {
 
     @Test
     fun `the OBS and Companion Satellite tabs feed control changes back into saved settings`() = dialog(
-        initialTab = 7,
+        initialTab = 9,
         obsManager = OBSWebSocketManager(),
     ) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick() // OBS tab: "Connect to OBS Studio"

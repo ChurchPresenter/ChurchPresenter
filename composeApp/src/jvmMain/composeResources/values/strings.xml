@@ -967,6 +967,9 @@
     <string name="customize_type_image">Image</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
+    <string name="customize_type_default">Default</string>
+    <string name="customize_type_gradient">Gradient</string>
+    <string name="percent_suffix">%</string>
     <string name="customize_style">Style</string>
     <string name="customize_letter_spacing">Letter spacing</string>
     <string name="customize_word_spacing">Word spacing</string>
