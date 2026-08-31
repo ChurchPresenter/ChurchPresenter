@@ -333,10 +333,14 @@ internal class KeynoteSceneRasterizer(private val scene: KeynoteScene) : AutoClo
         paint: Boolean
     ): Float {
         var y = startY
-        val family = paragraph.fontFamily?.let { SlideFontRegistry.resolveFamily(it) } ?: Font.SANS_SERIF
+        // Keynote names the typeface in PostScript form, so the weight can live in the name
+        // ("Arial-BoldMT") rather than in CHAR_PROPS_BOLD. Take both: the name's style bits are
+        // OR-ed on top of the parsed flags, never substituted for them.
+        val face = paragraph.fontFamily?.let { SlideFontRegistry.resolveFace(it) }
+        val family = face?.family ?: Font.SANS_SERIF
         var style = Font.PLAIN
-        if (paragraph.bold) style = style or Font.BOLD
-        if (paragraph.italic) style = style or Font.ITALIC
+        if (paragraph.bold || face?.bold == true) style = style or Font.BOLD
+        if (paragraph.italic || face?.italic == true) style = style or Font.ITALIC
         val font = Font(family, style, 12).deriveFont(paragraph.fontSizePt.toFloat())
 
         val attributed = AttributedString(paragraph.text)

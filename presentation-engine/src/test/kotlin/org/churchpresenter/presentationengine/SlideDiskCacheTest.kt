@@ -82,6 +82,44 @@ class SlideDiskCacheTest {
     }
 
     @Test
+    fun `an entry rendered by an older renderer is invalid even though the source is untouched`() {
+        // The bug this guards: mtime and width both still match, so a deck kept serving pre-fix
+        // images for ever and an engine fix appeared not to work at all.
+        val cache = newCache()
+        val source = sourceFile()
+        val writer = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        writer.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+        writer.commit()
+        assertNotNull(cache.lookup(source, 1920), "freshly written entry must be valid")
+
+        val manifestFile = File(cache.dirFor(source), "manifest.json")
+        manifestFile.writeText(
+            manifestFile.readText().replace(
+                "\"rendererVersion\": ${SlideDiskCache.RENDERER_VERSION}",
+                "\"rendererVersion\": ${SlideDiskCache.RENDERER_VERSION - 1}",
+            )
+        )
+        assertNull(cache.lookup(source, 1920))
+    }
+
+    @Test
+    fun `an entry written before rendererVersion existed is invalid`() {
+        val cache = newCache()
+        val source = sourceFile()
+        val writer = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        writer.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+        writer.commit()
+
+        val manifestFile = File(cache.dirFor(source), "manifest.json")
+        manifestFile.writeText(
+            manifestFile.readText().lines()
+                .filterNot { it.contains("\"rendererVersion\"") }
+                .joinToString("\n")
+        )
+        assertNull(cache.lookup(source, 1920), "a missing version reads as 0, which is stale")
+    }
+
+    @Test
     fun `legacy v1 entry (mtime txt, no manifest) is invalid`() {
         val cache = newCache()
         val source = sourceFile()
