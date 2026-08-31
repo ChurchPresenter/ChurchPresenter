@@ -52,6 +52,14 @@ Built with Kotlin Multiplatform and Compose Desktop.
   - Verses past the ninth, which books stop numbering, keep counting up instead of stacking
   - The `***` / `<><><>` end marker on the last verse is dropped
 
+- **Documents** — lyrics pulled straight out of the files a church already has: `.pdf`, `.docx`,
+  `.pptx`, `.ppt` and Keynote `.key`
+  - Headings split a file holding several songs into one `.song` each; section labels
+    (`Chorus`, `Куплет 2`, …) are recognised, and unlabelled paragraphs become numbered verses
+  - Each slide of a deck is its own section, so a song typed one verse per slide imports that way
+  - Keynote is read through the app's own presentation engine — both the modern format and, via
+    the preview Keynote embeds, documents it cannot open natively
+
 ### Bible Converter
 
 - **XML to SPB** — Convert Zefania XML bible files to `.spb` format

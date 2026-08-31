@@ -22,6 +22,9 @@ internal object KeynoteDeckParser {
     /** A style/template chain that long is a cycle in the document, not a real inheritance. */
     private const val MAX_STYLE_CHAIN = 8
 
+    /** Last-resort size when neither the character nor the paragraph style names one. */
+    private const val DEFAULT_FONT_SIZE_PT = 20.0
+
     /** Keynote path element types, and how many points each needs. */
     private const val PATH_MOVE_TO = 1
     private const val PATH_LINE_TO = 2
@@ -420,22 +423,25 @@ internal object KeynoteDeckParser {
         var start = 0
         for (line in text.split('\n')) {
             val cleanText = line.filterNot { it == '\uFFFC' || it == '\uFFFB' }
-            val charStyleId = styleAt(charStyleTable, start)
-            val paraStyleId = styleAt(paraStyleTable, start)
+            val charStyleId = charStyleAt(charStyleTable, start)
+            val paraStyleId = paraStyleAt(paraStyleTable, start)
             val paraStyle = paraStyleId?.let { index.message(it) }
+            // Per property, not all-or-nothing: a character style that only overrides (say) italic
+            // must still take its family, size and colour from the paragraph style. Falling back
+            // wholesale is what left five of six paragraphs at the 20pt-black defaults below.
             val charProps = resolveCharProps(index, charStyleId)
-                ?: paraStyle?.let { resolveCharPropsFromParagraphStyle(index, paraStyleId) }
+            val paraProps = paraStyle?.let { resolveCharProps(index, paraStyleId) }
             val alignment = paraStyle?.message(F.PARAGRAPH_STYLE_PARA_PROPERTIES)
                 ?.varint(F.PARA_PROPS_ALIGNMENT)?.toInt()
                 ?: 0
             paragraphs.add(
                 KnParagraph(
                     text = cleanText,
-                    fontFamily = charProps?.fontName,
-                    fontSizePt = charProps?.fontSize ?: 20.0,
-                    bold = charProps?.bold ?: false,
-                    italic = charProps?.italic ?: false,
-                    color = charProps?.color ?: Color.BLACK,
+                    fontFamily = charProps?.fontName ?: paraProps?.fontName,
+                    fontSizePt = charProps?.fontSize ?: paraProps?.fontSize ?: DEFAULT_FONT_SIZE_PT,
+                    bold = charProps?.bold ?: paraProps?.bold ?: false,
+                    italic = charProps?.italic ?: paraProps?.italic ?: false,
+                    color = charProps?.color ?: paraProps?.color ?: Color.BLACK,
                     alignment = alignment
                 )
             )
@@ -444,15 +450,29 @@ internal object KeynoteDeckParser {
         return paragraphs
     }
 
-    private fun attributeRuns(table: IwaMessage?): List<Pair<Int, Long>> =
+    /**
+     * The runs of an attribute table, **keeping** those that carry no style object: in iWork a run
+     * with the reference left off is not padding, it is the point at which the previous run's
+     * override stops applying. Dropping them let a character style that covered one word leak
+     * forward over every later paragraph in the box.
+     */
+    private fun attributeRuns(table: IwaMessage?): List<Pair<Int, Long?>> =
         table?.messages(F.ATTR_TABLE_ENTRIES)?.mapNotNull { entry ->
             val charIndex = entry.varint(F.ATTR_ENTRY_CHAR_INDEX)?.toInt() ?: return@mapNotNull null
-            val obj = entry.message(F.ATTR_ENTRY_OBJECT)?.varint(F.REFERENCE_IDENTIFIER) ?: return@mapNotNull null
-            charIndex to obj
+            charIndex to entry.message(F.ATTR_ENTRY_OBJECT)?.varint(F.REFERENCE_IDENTIFIER)
         } ?: emptyList()
 
-    private fun styleAt(runs: List<Pair<Int, Long>>, charIndex: Int): Long? =
+    /** Character override in force at [charIndex] — null once an object-less run has cleared it. */
+    private fun charStyleAt(runs: List<Pair<Int, Long?>>, charIndex: Int): Long? =
         runs.lastOrNull { it.first <= charIndex }?.second
+
+    /**
+     * Paragraph style in force at [charIndex]. Unlike a character run, a paragraph run with no
+     * object means "same style as the paragraph before" — Keynote writes one per paragraph and
+     * only names the style where it changes — so the last *named* style carries forward.
+     */
+    private fun paraStyleAt(runs: List<Pair<Int, Long?>>, charIndex: Int): Long? =
+        runs.lastOrNull { it.first <= charIndex && it.second != null }?.second
 
     private class CharProps(
         val fontName: String?,
@@ -490,8 +510,4 @@ internal object KeynoteDeckParser {
         }
         return if (sawAny) CharProps(fontName, fontSize, bold, italic, color) else null
     }
-
-    /** Paragraph styles carry char defaults too (same properties message at field 11). */
-    private fun resolveCharPropsFromParagraphStyle(index: ObjectIndex, styleId: Long?): CharProps? =
-        resolveCharProps(index, styleId)
 }

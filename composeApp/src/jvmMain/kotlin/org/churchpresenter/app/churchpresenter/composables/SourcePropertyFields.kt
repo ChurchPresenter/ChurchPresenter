@@ -135,6 +135,7 @@ internal fun updateName(source: SceneSource, name: String): SceneSource = when (
     is SceneSource.QRCodeSource -> source.copy(name = name)
     is SceneSource.CameraSource -> source.copy(name = name)
     is SceneSource.ScreenCaptureSource -> source.copy(name = name)
+    is SceneSource.NdiSource -> source.copy(name = name)
     is SceneSource.BibleSource -> source.copy(name = name)
 }
 
@@ -149,6 +150,7 @@ internal fun updateTransform(source: SceneSource, transform: SourceTransform): S
     is SceneSource.QRCodeSource -> source.copy(transform = transform)
     is SceneSource.CameraSource -> source.copy(transform = transform)
     is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
+    is SceneSource.NdiSource -> source.copy(transform = transform)
     is SceneSource.BibleSource -> source.copy(transform = transform)
 }
 

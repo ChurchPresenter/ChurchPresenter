@@ -57,11 +57,14 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
 > protocol client. `./gradlew :companion-satellite:test`.
 >
+> **[`ndi/`](./ndi)** — NDI itself, both directions: putting an output on the network as an NDI
+> source, and finding and receiving someone else's to draw on the Canvas. The NDI Runtime is a
+> separate free download, detected at startup exactly as VLC is. `./gradlew :ndi:test`.
+>
 > **[`atem/`](./atem)** — the Blackmagic ATEM protocol client: the UDP conversation with the
 > switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
 > switcher built from a capture of real hardware, so no device is needed.
 > `./gradlew :atem:test`.
-./gradlew :ndi:test                    # the NDI send client's suite
 >
 > **[`theme/`](./theme)** — the app's look: the nine color schemes, the semantic color roles, the
 > typography and shape scales. `./gradlew :theme:test`.

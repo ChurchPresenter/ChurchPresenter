@@ -57,6 +57,8 @@ import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
+import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.ui.unit.em
@@ -75,17 +77,26 @@ private const val INDICATOR_REPEAT_COUNT = 3
 internal fun songBackgroundTypeConstant(type: String): String = when (type) {
     SongBackgroundType.IMAGE -> Constants.BACKGROUND_IMAGE
     SongBackgroundType.VIDEO -> Constants.BACKGROUND_VIDEO
+    SongBackgroundType.CAMERA -> Constants.BACKGROUND_CAMERA
     else -> Constants.BACKGROUND_COLOR
 }
 
 /**
- * Whether [background] can actually be drawn: a colour always can, a picture or a clip only while
- * the file it names is still on this machine. A song travels; the media it points at may not.
+ * Whether [background] can actually be drawn **here**: a colour always can, a picture or a clip
+ * only while the file it names is still on this machine, and a camera only while this machine has
+ * the device it names. A song travels; neither the media it points at nor the hardware it points at
+ * travels with it.
+ *
+ * The camera arm asks [cameraResolves] against the catalog's **last known** device list rather than
+ * enumerating: this runs inside a `remember` on the composition thread of every presenter output,
+ * and enumerating shells out to ffmpeg. Before anything has enumerated the answer is yes — see
+ * [cameraResolves] for why accepting is the safe direction there.
  */
 internal fun songBackgroundResolves(background: SongBackground): Boolean = when (background.type) {
     SongBackgroundType.COLOR, SongBackgroundType.GRADIENT -> true
     SongBackgroundType.IMAGE, SongBackgroundType.VIDEO ->
         background.mediaPath.isNotBlank() && File(background.mediaPath).exists()
+    SongBackgroundType.CAMERA -> cameraResolves(background.camera, CameraDeviceCatalog.devices.value)
     else -> false
 }
 

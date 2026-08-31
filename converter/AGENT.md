@@ -44,7 +44,7 @@ does not live here.
 Source formats currently handled: SongBeamer `.sng`, OpenLP (`songs.sqlite` and OpenLyrics),
 OpenSong, FreeShow, Free Worship, EasySlides, EasyWorship (including schedules), Quelea,
 ProPresenter, MediaShout, SoftProjector `.sps`, VideoPsalm `.json` song books, Markdown, and lyrics
-extracted from PDF/Word/PowerPoint documents.
+extracted from PDF/Word/PowerPoint/Keynote documents (`.pdf`, `.docx`, `.pptx`, `.ppt`, `.key`).
 
 ## Commands
 
@@ -62,10 +62,17 @@ shared build files — see the `converter` filter in `.github/workflows/test.yml
 ## Gates
 
 - **detekt**: same `config/detekt/detekt.yml` as the app, **no baseline**, and everything it
-  analyzes is clean — keep it that way. `source` is set to `src/main/kotlin/converter` and
-  `src/test/kotlin`, so `ui/**` is deliberately out of scope: it is the pre-existing Compose GUI,
-  the kind of code `:composeApp` keeps in its own baseline rather than gating. **Everything that
-  parses a file is analyzed.**
+  analyzes is clean — keep it that way. `source` is the whole of `src/main/kotlin` and
+  `src/test/kotlin`, with `**/ui/**` excluded on the task: that is the pre-existing Compose GUI, the
+  kind of code `:composeApp` keeps in its own baseline rather than gating. **Everything that parses
+  a file is analyzed.**
+
+  **Name what is excluded, never what is included.** `source` used to be
+  `src/main/kotlin/converter`, carving `ui/**` out by not listing it. When the sources moved under
+  `org/churchpresenter/` that path matched nothing, and main-source analysis switched itself off
+  **silently** — detekt over zero files is a passing detekt — so the module was gating only its
+  tests until it was noticed. An exclude cannot fail that way round: if `**/ui/**` stops matching,
+  the gate analyzes too much and says so.
 - **Coverage** (the root build's six counters — see the root `AGENT.md`): `extra["coverageFloors"]`
   lowers BRANCH to 0.80 and COMPLEXITY to 0.75 because they cannot reach 85 here; the other four
   stay at the 85% default. `extra["coverageExcludes"]` drops `ui/**` and `MainKt*` — they need a
@@ -77,6 +84,11 @@ shared build files — see the `converter` filter in `.github/workflows/test.yml
 - POI: `poi-ooxml:5.3.0` **with `poi-ooxml-lite` excluded** plus `poi-ooxml-full:5.3.0`. This jar
   is on the app's classpath, and **exactly ONE POI schema jar may be there** — the same exclusion
   is mirrored in `composeApp/build.gradle.kts` and in the Presentation Engine.
+  `poi-scratchpad` is here too, for the legacy binary `.ppt` the Documents source reads: HSLF is a
+  separate hierarchy from the XSLF that reads `.pptx`.
+- `:presentation-engine`, for Keynote. `KeynoteText.slideTexts` is the only thing taken from it —
+  the Documents source needs a `.key`'s words, and the IWA reader that answers that already lives
+  there. **Do not parse Keynote a second time here.**
 - `pdfbox:2.0.33` for document text extraction, `sqlite-jdbc` for the OpenLP/MediaShout databases,
   `kotlinx-serialization-json` for the JSON-shaped formats.
 - Versions come from `gradle/libs.versions.toml` where the catalogue has them; the POI/PDFBox

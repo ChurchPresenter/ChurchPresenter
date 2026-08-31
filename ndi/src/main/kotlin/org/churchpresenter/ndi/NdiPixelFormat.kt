@@ -1,7 +1,7 @@
 package org.churchpresenter.ndi
 
 /**
- * The NDI FourCC codes this module sends in.
+ * The NDI FourCC codes this module sends and receives in.
  *
  * The values are the SDK's own `NDI_LIB_FOURCC(ch0, ch1, ch2, ch3)` macro — `ch0 or (ch1 shl 8) or
  * (ch2 shl 16) or (ch3 shl 24)` — spelled out rather than computed, because they are a wire
@@ -13,6 +13,19 @@ enum class NdiPixelFormat(val fourCc: Int) {
 
     /** `BGRX` — the same layout with the fourth byte ignored, i.e. an explicitly opaque frame. */
     BGRX(0x58524742),
+    ;
+
+    companion object {
+        /**
+         * The format a received frame's FourCC names, or null for anything else.
+         *
+         * Only these two can arrive: a receiver asks for `BGRX_BGRA`, so the runtime converts
+         * whatever the sender actually put on the wire — including every YUV format — into one of
+         * them before this code sees it. Null therefore means a runtime that answered something it
+         * was not asked for, which is a frame to drop rather than one to guess at.
+         */
+        fun ofFourCc(fourCc: Int): NdiPixelFormat? = entries.find { it.fourCc == fourCc }
+    }
 }
 
 /**

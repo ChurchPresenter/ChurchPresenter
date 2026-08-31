@@ -113,8 +113,8 @@ internal object CanvasLabel {
     const val TOGGLE_LOCK = "Toggle lock"
     const val MOVE_FORWARD = "Move forward"
     const val MOVE_BACKWARD = "Move backward"
-    // The Add-source menu offers ten types; each is also the name the new source is given, which is
-    // what makes `sourceNames()` enough to tell them apart.
+    // The Add-source menu offers eleven types; each is also the name the new source is given, which
+    // is what makes `sourceNames()` enough to tell them apart.
     const val IMAGE = "Image"
     const val TEXT = "Text"
     const val CLOCK = "Clock & Timer"
@@ -124,6 +124,7 @@ internal object CanvasLabel {
     const val QR_CODE = "QR Code"
     const val CAMERA = "Camera"
     const val SCREEN_CAPTURE = "Screen Capture"
+    const val NDI = "NDI Source"
     const val BIBLE = "Bible"
     const val GO_LIVE = "Go Live"
     const val ADD_TO_SCHEDULE = "Add to Schedule"

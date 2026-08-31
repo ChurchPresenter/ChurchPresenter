@@ -114,6 +114,7 @@ jobs:
               - 'converter/**'
               - 'bible-formats/**'        # implementation(projects.bibleFormats)
               - 'song-chords/**'          # implementation(projects.songChords)
+              - 'presentation-engine/**'  # implementation(projects.presentationEngine)
             satellite:
               - *shared
               - 'companion-satellite/**'

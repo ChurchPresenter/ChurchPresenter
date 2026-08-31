@@ -556,6 +556,7 @@
     <string name="background_color_option">Color</string>
     <string name="background_image_option">Image</string>
     <string name="background_video_option">Video Loop</string>
+    <string name="background_camera_option">Camera</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Follow Default</string>
     <string name="background_video">Background Video:</string>
@@ -1079,6 +1080,10 @@
     <string name="background_color_caption">Color</string>
     <string name="background_image_file">Image File</string>
     <string name="background_video_file">Video File</string>
+    <string name="background_camera_device">Camera Device</string>
+    <string name="background_camera_format">Format</string>
+    <string name="background_camera_connection">Input</string>
+    <string name="background_camera_auto">Auto</string>
     <string name="background_opacity_caption">Opacity</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
@@ -1146,6 +1151,7 @@
     <string name="audio_output_device">Output device</string>
     <string name="audio_output_default">System Default</string>
     <string name="media_vlc_required">VLC media player is required for media playback</string>
+    <string name="background_camera_required">A camera or capture device is required. Install ffmpeg, or connect a Blackmagic DeckLink card.</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
     <string name="media_vlc_arch_mismatch">Wrong VLC architecture. Your Mac uses Apple Silicon (arm64) but the installed VLC is Intel-only (x86_64). Download the Apple Silicon build of VLC from videolan.org and restart.</string>
     <string name="media_vlc_load_failed">VLC was found but could not be loaded. Try reinstalling VLC from videolan.org (on Windows, also install the Microsoft Visual C++ Redistributable), then restart the application.</string>
@@ -1425,6 +1431,7 @@
     <string name="canvas_source_qrcode">QR Code</string>
     <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>
+    <string name="canvas_source_ndi">NDI Source</string>
     <string name="canvas_source_bible">Bible</string>
     <string name="canvas_bible_version">Bible Version</string>
     <string name="canvas_bible_verse_text">Verse Text</string>
@@ -1495,6 +1502,16 @@
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
     <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
+    <string name="canvas_ndi_source">Source</string>
+    <string name="canvas_ndi_refresh">Refresh Sources</string>
+    <string name="canvas_ndi_none_found">No NDI sources found on the network</string>
+    <string name="canvas_ndi_searching">Looking for NDI sources…</string>
+    <string name="canvas_ndi_low_bandwidth">Low bandwidth (proxy stream)</string>
+    <string name="canvas_ndi_low_bandwidth_help">Receives the smaller preview stream the sender already produces. Use it for a small layer, or on a busy network.</string>
+    <string name="canvas_ndi_runtime_missing">NDI sources need the free NDI Runtime, which is installed separately. Install it, then open Settings → Projection to check again.</string>
+    <string name="canvas_placeholder_ndi">NDI: %1$s</string>
+    <string name="canvas_placeholder_ndi_default">No NDI source selected</string>
+    <string name="canvas_placeholder_ndi_waiting">Waiting for %1$s…</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
     <string name="canvas_transform_w">W</string>
@@ -2600,6 +2617,7 @@
     <string name="song_background_category_colors">Colors</string>
     <string name="song_background_category_images">Images</string>
     <string name="song_background_category_videos">Videos</string>
+    <string name="song_background_category_cameras">Cameras</string>
     <string name="song_background_option_count">%1$d options</string>
     <string name="song_background_custom_color">Custom color</string>
     <string name="song_background_your_color">Your color</string>
@@ -2623,6 +2641,7 @@
     <string name="song_background_color_teal">Teal Wash</string>
     <string name="song_background_color_slate">Slate</string>
     <string name="song_background_video_loop">video loop</string>
+    <string name="song_background_camera_live">live camera</string>
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
     <string name="quick_background_title">Quick backgrounds</string>

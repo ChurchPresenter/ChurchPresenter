@@ -481,7 +481,7 @@ execution order, so it can appear on one machine and not another.
 ./gradlew :settings:test               # the persisted-settings module's suite
 ./gradlew :diagnostics:test            # the crash-reporting module's suite
 ./gradlew :atem:test                   # the ATEM protocol client's suite
-./gradlew :ndi:test                    # the NDI send client's suite
+./gradlew :ndi:test                    # the NDI client's suite, send and receive
 ./gradlew :planning-center:test        # the Planning Center client's suite
 ```
 

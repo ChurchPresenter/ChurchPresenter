@@ -2,11 +2,16 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
+import org.churchpresenter.ndi.NdiBandwidth
+import org.churchpresenter.ndi.NdiFinder
+import org.churchpresenter.ndi.NdiReceiver
 import org.churchpresenter.ndi.NdiRuntimeStatus
+import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.settings.ScreenAssignment
 
 /**
- * The app's single NDI runtime, and the senders opened over it.
+ * The app's single NDI runtime: the senders opened over it, and the receivers taking sources back
+ * off the network into the Canvas.
  *
  * A process-level object for the same reason
  * [org.churchpresenter.app.churchpresenter.composables.DeckLinkManager] is one: the runtime is a
@@ -40,6 +45,16 @@ object NdiManager {
     ): NdiVideoRenderer? = registry.createRenderer(index, assignment, context, screenAssignmentState, name)
 
     fun release(index: Int, renderer: NdiVideoRenderer) = registry.release(index, renderer)
+
+    /** Discovery over the app's runtime — the Canvas source picker's list. */
+    fun createFinder(): NdiFinder? = registry.createFinder()
+
+    /** A receiver over the app's runtime — one NDI layer on the Canvas. */
+    fun createReceiver(
+        source: NdiSourceInfo,
+        bandwidth: NdiBandwidth = NdiBandwidth.HIGHEST,
+        receiverName: String = "",
+    ): NdiReceiver? = registry.createReceiver(source, bandwidth, receiverName)
 
     fun connectionCount(index: Int): Int = registry.connectionCount(index)
 

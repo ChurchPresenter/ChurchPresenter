@@ -30,6 +30,9 @@ dependencies {
     implementation(projects.bibleFormats)
     // The chord grammar songs are written in, shared with the app rather than repeated here.
     implementation(projects.songChords)
+    // Keynote text, for the Documents source. The IWA reader that answers it lives there already;
+    // this module takes it rather than parsing the format a second time.
+    implementation(projects.presentationEngine)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
@@ -42,6 +45,8 @@ dependencies {
         exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
     }
     implementation(libs.apache.poi.ooxmlFull)
+    // HSLF, for the legacy binary .ppt the Documents source reads alongside .pptx.
+    implementation(libs.apache.poi.scratchpad)
 
     testImplementation(kotlin("test"))
 }
@@ -49,12 +54,24 @@ dependencies {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin/converter", "src/test/kotlin")
+    // Whole source set in, `ui/**` back out again below.
+    //
+    // This used to name `src/main/kotlin/converter` and carve `ui/**` out by simply not listing it.
+    // That worked until the sources moved under `org/churchpresenter/`, at which point the path
+    // matched **nothing** and main-source analysis switched itself off -- silently, because a
+    // detekt run over no files is a passing detekt run. Naming what is excluded rather than what is
+    // included is what stops that happening again: if `ui/**` ever stops matching, the gate
+    // analyses too much and says so, instead of too little and saying nothing.
+    source.setFrom("src/main/kotlin", "src/test/kotlin")
     parallel = true
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     jvmTarget = "21"
+    // The one carve-out: `ui/**` is Compose desktop written before this gate existed, and it is the
+    // same shape `:composeApp` keeps in a baseline rather than gating. This module has no baseline,
+    // so it is excluded here instead. Everything that parses a file is analysed, and is clean.
+    exclude("**/ui/**")
     reports {
         html.required.set(true)
         xml.required.set(false)

@@ -400,7 +400,32 @@ class SceneModelsSerializationTest {
             prefix + "ScreenCaptureSource",
             discriminatorOf(SceneSource.ScreenCaptureSource(id = "1", name = "n")),
         )
+        assertEquals(prefix + "NdiSource", discriminatorOf(SceneSource.NdiSource(id = "1", name = "n")))
         assertEquals(prefix + "BibleSource", discriminatorOf(SceneSource.BibleSource(id = "1", name = "n")))
+    }
+
+    @Test
+    fun `an NDI source keeps the source it was pointed at and its bandwidth choice`() {
+        val ndi = SceneSource.NdiSource(
+            id = "ndi1", name = "Stage camera", sourceName = "BOOTH (Camera 1)",
+            sourceAddress = "192.168.1.20:5961", lowBandwidth = true,
+        )
+
+        val back = roundTrip(ndi)
+
+        assertEquals(ndi, back)
+        assertEquals("BOOTH (Camera 1)", back.sourceName)
+        assertEquals("192.168.1.20:5961", back.sourceAddress)
+        assertTrue(back.lowBandwidth)
+    }
+
+    @Test
+    fun `an NDI source that was never pointed at anything reads back as unconfigured`() {
+        val fresh = roundTrip(SceneSource.NdiSource(id = "ndi2", name = "NDI"))
+
+        assertEquals("", fresh.sourceName)
+        assertEquals("", fresh.sourceAddress)
+        assertEquals(false, fresh.lowBandwidth, "a new source takes the full stream, not the proxy")
     }
 
     @Test
@@ -435,6 +460,7 @@ class SceneModelsSerializationTest {
             "QRCodeSource" to null,
             "CameraSource" to null,
             "ScreenCaptureSource" to null,
+            "NdiSource" to null,
             "BibleSource" to null,
         )
 
@@ -465,6 +491,7 @@ class SceneModelsSerializationTest {
             SceneSource.QRCodeSource(id = "8", name = "QR", content = "https://example.org/give"),
             SceneSource.CameraSource(id = "9", name = "Camera", deviceName = "Cam"),
             SceneSource.ScreenCaptureSource(id = "10", name = "Capture", captureX = 5),
+            SceneSource.NdiSource(id = "12", name = "NDI", sourceName = "BOOTH (Camera 1)"),
             SceneSource.BibleSource(id = "11", name = "Verse", verseText = "…"),
         )
 
@@ -561,6 +588,7 @@ class SceneModelsSerializationTest {
             SceneSource.QRCodeSource(id = "8", name = "QR"),
             SceneSource.CameraSource(id = "9", name = "Camera"),
             SceneSource.ScreenCaptureSource(id = "10", name = "Capture"),
+            SceneSource.NdiSource(id = "12", name = "NDI"),
             SceneSource.BibleSource(id = "11", name = "Verse"),
         )
 

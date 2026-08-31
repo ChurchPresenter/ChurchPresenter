@@ -226,6 +226,16 @@ class CanvasTabScreenshotTest {
         SceneSource.ScreenCaptureSource(id = "screen-1", name = "Screen Capture"),
     )
 
+    /**
+     * With no NDI Runtime installed — which is the state of any machine that renders this suite —
+     * so what this pins is the panel's "install the runtime" state, not its source picker.
+     */
+    @Test
+    fun `an NDI source with no runtime installed`() = selected(
+        "source_ndi",
+        SceneSource.NdiSource(id = "ndi-1", name = "NDI Source"),
+    )
+
     // ── The drawing tools ───────────────────────────────────────────────────────────────────────
 
     /** Choosing a drawing tool opens the stroke and fill colour fields beside the tool row. */
