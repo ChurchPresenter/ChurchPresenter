@@ -2,22 +2,15 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -30,7 +23,12 @@ import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,30 +44,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.customize
-import churchpresenter.composeapp.generated.resources.customize_count
 import churchpresenter.composeapp.generated.resources.customize_bible
+import churchpresenter.composeapp.generated.resources.customize_count
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
 import churchpresenter.composeapp.generated.resources.customize_done
-import churchpresenter.composeapp.generated.resources.customize_hint_off
-import churchpresenter.composeapp.generated.resources.customize_hint_on
-import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
-import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
 import churchpresenter.composeapp.generated.resources.customize_pane_header
 import churchpresenter.composeapp.generated.resources.customize_reset_to_global
 import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.customize_tooltip_none
+import churchpresenter.composeapp.generated.resources.customize_tooltip_overwritten
+import churchpresenter.composeapp.generated.resources.customize_tooltip_separator
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
@@ -79,11 +75,9 @@ import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
-private val DIALOG_WIDTH = 1080.dp
+private val DIALOG_WIDTH = 1240.dp
+
 private val BODY_HEIGHT = 520.dp
-private val RAIL_WIDTH = 176.dp
-private val OVERRIDDEN_DOT = 6.dp
-private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
 
 /**
  * One category of an output's own appearance — a row of the dialog's left rail.
@@ -92,7 +86,7 @@ private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
  * each is switched on and off independently: a screen may want its own stage-monitor zones while
  * still following everyone else's Bible styling.
  */
-private enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean = true) {
+internal enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolean = true) {
     STAGE_MONITOR(Icons.Filled.Tv),
     BIBLE(Icons.Filled.MenuBook),
     SONGS(Icons.Filled.MusicNote),
@@ -137,7 +131,7 @@ private fun customizePanes(displayMode: String): List<CustomizePane> =
     }
 
 @Composable
-private fun CustomizePane.label(): String = when (this) {
+internal fun CustomizePane.label(): String = when (this) {
     CustomizePane.STAGE_MONITOR -> stringResource(Res.string.stage_monitor)
     CustomizePane.BIBLE -> stringResource(Res.string.customize_bible)
     CustomizePane.SONGS -> stringResource(Res.string.customize_songs)
@@ -149,19 +143,32 @@ private fun CustomizePane.label(): String = when (this) {
  * One output's own Stage Monitor / Bible / Song / lower-third / dictionary appearance, opened from
  * the Customize button on its row of the Projection settings tab.
  *
- * Laid out as a category rail beside a single pane rather than a tab strip, because each category
- * carries its own on/off: the pane header's switch is what decides whether this screen has settings
- * of its own for the category showing, and the rail marks the ones that do. A pane whose switch is
- * off is dimmed and inert — it shows the global values, which is exactly what that output draws.
+ * Three columns. The **rail** picks a category, and closes with a card naming the screen being
+ * edited, because a dialog that can be opened from any row of the Projection tab should say which
+ * row it came from. The **control column** shows one element of that category at a time, chosen by
+ * the chips above it — the panes used to stack every group in one scroll, which put six to nine
+ * headings between the operator and the line they came to restyle. The **preview column** draws
+ * what the output will actually show, with the settings that belong to the picture as a whole —
+ * margins, fades, band geometry — on a strip beneath it.
+ *
+ * The category's on/off switch sits in the header rather than over the pane: it governs the whole
+ * dialog body now that the body is three columns, and a switch buried in the middle column would
+ * read as belonging to that column alone.
+ *
+ * Each category is switched on and off independently, and the rail marks the ones that are on. A
+ * pane whose switch is off shows the global values dimmed and inert — which is exactly what that
+ * output draws. **The preview is not dimmed with it**: it is a picture of what the screen shows,
+ * and that is no less true for being inherited.
  *
  * Which categories appear follows the output's display mode, because that decides which settings it
  * can obey: offering a stage monitor a full-screen Bible font size is offering a control that does
  * nothing.
  *
- * It reuses the existing settings tabs rather than reimplementing them. They already have the
- * signature `(settings, onSettingsChange)` and know nothing about outputs; this dialog hands them a
- * **draft** [AppSettings] — the global document with this output's overrides already resolved into
- * it — and folds what they return back into the assignment as that one category's override.
+ * It reuses the existing settings composables rather than reimplementing them — the panes are built
+ * from `CustomizeForm`'s controls, and the preview is the same presenter-backed [BiblePreviewPanel]
+ * and [SongPreviewPanel] the global tabs draw. This dialog hands them a **draft** [AppSettings] —
+ * the global document with this output's overrides already resolved into it — and folds what they
+ * return back into the assignment as that one category's override.
  *
  * A Material3 `AlertDialog` rather than a `DialogWindow`, so it composes in a headless test.
  */
@@ -176,6 +183,10 @@ internal fun OutputCustomizeDialog(
     val panes = customizePanes(assignment.displayMode)
     var selected by remember(assignment.displayMode) { mutableStateOf(panes.first()) }
     val pane = if (selected in panes) selected else panes.first()
+
+    val elements = customizeElements(pane)
+    var pickedElement by remember(pane) { mutableStateOf(elements.firstOrNull()) }
+    val element = pickedElement?.takeIf { it in elements } ?: elements.firstOrNull()
 
     // Seeded from the resolved settings so a pane opens showing what this output currently draws —
     // the global values until the category is switched on, its own once it is.
@@ -196,6 +207,7 @@ internal fun OutputCustomizeDialog(
         onApply(next)
     }
 
+    val overridden = pane.isOverridden(assignment)
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.width(DIALOG_WIDTH),
@@ -204,28 +216,38 @@ internal fun OutputCustomizeDialog(
         title = {
             CustomizeDialogHeader(
                 screenLabel = screenLabel,
+                pane = pane,
+                overridden = overridden,
                 customized = panes.count { it.isOverridden(assignment) },
                 total = panes.count { it.hasOverride },
+                onOverriddenChange = ::setOverridden,
                 onDismiss = onDismiss,
             )
         },
         text = {
-            Row(modifier = Modifier.fillMaxWidth().height(BODY_HEIGHT)) {
-                CustomizeRail(
-                    panes = panes,
-                    selected = pane,
-                    assignment = assignment,
-                    onSelect = { selected = it },
-                )
-                VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                CustomizePaneBody(
-                    pane = pane,
-                    overridden = pane.isOverridden(assignment),
-                    draft = draft,
-                    assignment = assignment,
-                    onOverriddenChange = ::setOverridden,
-                    onSettingsChange = ::edit,
-                )
+            CompositionLocalProvider(
+                LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
+            ) {
+                Row(modifier = Modifier.fillMaxWidth().height(BODY_HEIGHT)) {
+                    CustomizeRail(
+                        panes = panes,
+                        selected = pane,
+                        assignment = assignment,
+                        screenLabel = screenLabel,
+                        onSelect = { selected = it },
+                    )
+                    VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    CustomizeBody(
+                        pane = pane,
+                        element = element,
+                        elements = elements,
+                        live = overridden || !pane.hasOverride,
+                        draft = draft,
+                        assignment = assignment,
+                        onElementChange = { pickedElement = it },
+                        onSettingsChange = ::edit,
+                    )
+                }
             }
         },
         confirmButton = {
@@ -233,7 +255,7 @@ internal fun OutputCustomizeDialog(
                 OutlinedButton(
                     shape = RoundedCornerShape(8.dp),
                     onClick = { setOverridden(false) },
-                    enabled = pane.isOverridden(assignment),
+                    enabled = overridden,
                     contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
                 ) {
                     Text(
@@ -241,7 +263,15 @@ internal fun OutputCustomizeDialog(
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = paneHint(pane, overridden),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
                 Button(
                     shape = RoundedCornerShape(8.dp),
                     onClick = onDismiss,
@@ -257,12 +287,18 @@ internal fun OutputCustomizeDialog(
     )
 }
 
-/** Icon badge, the screen's name, how many of its categories are customized, and Close. */
+/**
+ * Icon badge, the screen's name, how many of its categories are customized — and, on the right, the
+ * selected category's own on/off switch.
+ */
 @Composable
 private fun CustomizeDialogHeader(
     screenLabel: String,
+    pane: CustomizePane,
+    overridden: Boolean,
     customized: Int,
     total: Int,
+    onOverriddenChange: (Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -295,6 +331,23 @@ private fun CustomizeDialogHeader(
                 modifier = Modifier.testTag(CUSTOMIZE_STATUS_TAG),
             )
         }
+        if (pane.hasOverride) {
+            Text(
+                text = stringResource(Res.string.customize_pane_header, pane.label()),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = if (overridden) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+            )
+            Spacer(modifier = Modifier.width(9.dp))
+            Switch(
+                checked = overridden,
+                onCheckedChange = onOverriddenChange,
+                modifier = Modifier.testTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG),
+            )
+        }
         IconButton(onClick = onDismiss) {
             Icon(
                 Icons.Filled.Close,
@@ -302,161 +355,6 @@ private fun CustomizeDialogHeader(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
-
-/** The left rail: one row per category, dotted where this output has settings of its own. */
-@Composable
-private fun CustomizeRail(
-    panes: List<CustomizePane>,
-    selected: CustomizePane,
-    assignment: ScreenAssignment,
-    onSelect: (CustomizePane) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .width(RAIL_WIDTH)
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        panes.forEach { pane ->
-            val isSelected = pane == selected
-            val ink = if (isSelected) MaterialTheme.colorScheme.onSurface
-            else MaterialTheme.colorScheme.onSurfaceVariant
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(34.dp)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-                    )
-                    .clickable { onSelect(pane) }
-                    .padding(horizontal = 10.dp)
-                    .testTag(railTag(pane.name)),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(9.dp),
-            ) {
-                Icon(pane.icon, contentDescription = null, tint = ink, modifier = Modifier.size(15.dp))
-                Text(
-                    text = pane.label(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = ink,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                // A screen with settings of its own for this category is worth seeing without
-                // opening it, which is what the dot is.
-                if (pane.isOverridden(assignment)) {
-                    Box(
-                        modifier = Modifier
-                            .size(OVERRIDDEN_DOT)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape),
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * The selected category: its on/off header, then the settings themselves.
- *
- * When the category is off the settings still render — they are the global values, which is what
- * this output is actually drawing — but dimmed and swallowing input, so what is on screen stays
- * true without inviting an edit that would silently switch the category on.
- */
-@Composable
-private fun CustomizePaneBody(
-    pane: CustomizePane,
-    overridden: Boolean,
-    draft: AppSettings,
-    assignment: ScreenAssignment,
-    onOverriddenChange: (Boolean) -> Unit,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(Res.string.customize_pane_header, pane.label()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = paneHint(pane, overridden),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (pane.hasOverride) {
-                Switch(
-                    checked = overridden,
-                    onCheckedChange = onOverriddenChange,
-                    modifier = Modifier.testTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG),
-                )
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        val live = overridden || !pane.hasOverride
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize().alpha(if (live) 1f else FOLLOWING_GLOBAL_ALPHA)) {
-                CompositionLocalProvider(
-                    LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
-                ) {
-                    CustomizePaneContent(pane, draft, onSettingsChange)
-                }
-            }
-            if (!live) {
-                // Swallows clicks rather than disabling each control: the panes are whole settings
-                // tabs, and there is no `enabled` to thread through a hundred of them.
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                        ),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun paneHint(pane: CustomizePane, overridden: Boolean): String =
-    if (pane == CustomizePane.STAGE_MONITOR) {
-        if (overridden) stringResource(Res.string.customize_hint_stage_on)
-        else stringResource(Res.string.customize_hint_stage_off)
-    } else {
-        if (overridden) stringResource(Res.string.customize_hint_on)
-        else stringResource(Res.string.customize_hint_off)
-    }
-
-/** The existing settings tab that edits this category, handed the draft unchanged. */
-@Composable
-private fun CustomizePaneContent(
-    pane: CustomizePane,
-    draft: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    when (pane) {
-        // The stage monitor keeps its own tab: its pane is a zone layout picker and a per-zone style
-        // list, which is what that tab already is — there is no compact form to reduce it to.
-        CustomizePane.STAGE_MONITOR ->
-            StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        CustomizePane.BIBLE -> BibleCustomizePane(draft, onSettingsChange)
-        CustomizePane.SONGS -> SongCustomizePane(draft, onSettingsChange)
-        CustomizePane.BACKGROUND -> BackgroundCustomizePane(draft, onSettingsChange)
-        CustomizePane.DICTIONARY -> DictionaryCustomizePane(draft, onSettingsChange)
     }
 }
 
@@ -481,43 +379,66 @@ internal fun CustomizeOutputCell(
     modifier: Modifier = Modifier,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    // How many of this output's categories have settings of their own. A plain tint said only
+    // Which of this output's categories have settings of their own. A plain tint said only
     // "something here is different"; the count says how much, and reads at a glance down a column
-    // of rows — which is the question the Projection tab is actually being asked.
-    val customized = customizePanes(assignment.displayMode).count { it.isOverridden(assignment) }
+    // of rows — which is the question the Projection tab is actually being asked. The names say
+    // *which*, which is the follow-up question, and they go in the tooltip rather than on the
+    // button: four category names do not fit a table cell, and the count is what wants scanning.
+    val overwritten = customizePanes(assignment.displayMode).filter { it.isOverridden(assignment) }
+    val customized = overwritten.size
+    // Every label resolved every time, so the number of `stringResource` calls does not change
+    // with how many categories happen to be overwritten.
+    val paneLabels = CustomizePane.entries.associateWith { it.label() }
+    val tooltipText = if (customized > 0) {
+        stringResource(
+            Res.string.customize_tooltip_overwritten,
+            overwritten.joinToString(stringResource(Res.string.customize_tooltip_separator)) {
+                paneLabels.getValue(it)
+            },
+        )
+    } else {
+        stringResource(Res.string.customize_tooltip_none)
+    }
     val tint = if (customized > 0) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.onSurfaceVariant
-    OutlinedButton(
-        shape = RoundedCornerShape(6.dp),
-        onClick = { showDialog = true },
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (customized > 0) MaterialTheme.colorScheme.primaryContainer
-            else Color.Transparent,
-        ),
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (customized > 0) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outline,
-        ),
-        modifier = modifier,
+    @OptIn(ExperimentalMaterial3Api::class)
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(tooltipText) } },
+        state = rememberTooltipState(),
     ) {
-        Icon(
-            Icons.Filled.Settings,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(16.dp),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = if (customized > 0) stringResource(Res.string.customize_count, customized)
-            else stringResource(Res.string.customize),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (customized > 0) FontWeight.SemiBold else FontWeight.Normal,
-            color = tint,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        OutlinedButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = { showDialog = true },
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = if (customized > 0) MaterialTheme.colorScheme.primaryContainer
+                else Color.Transparent,
+            ),
+            border = BorderStroke(
+                width = 1.dp,
+                color = if (customized > 0) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.outline,
+            ),
+            modifier = modifier,
+        ) {
+            Icon(
+                Icons.Filled.Settings,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = if (customized > 0) stringResource(Res.string.customize_count, customized)
+                else stringResource(Res.string.customize),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (customized > 0) FontWeight.SemiBold else FontWeight.Normal,
+                color = tint,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
     if (showDialog) {
         OutputCustomizeDialog(
@@ -538,8 +459,6 @@ internal const val CUSTOMIZE_STATUS_TAG = "customize_status"
 
 /** Test handle for the selected category's on/off switch. */
 internal const val CUSTOMIZE_OVERRIDE_SWITCH_TAG = "customize_override_switch"
-
-/** Test handle for the lower third's vertical/horizontal checkbox. */
 
 /**
  * The mode the Display Mode dropdown should show as selected for an output in [mode].

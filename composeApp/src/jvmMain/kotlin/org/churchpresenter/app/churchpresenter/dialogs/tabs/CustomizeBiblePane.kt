@@ -3,15 +3,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.lower_third_size
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bible_translation_spacing
-import churchpresenter.composeapp.generated.resources.bible_translation_divider
-import churchpresenter.composeapp.generated.resources.bible_block_and_transition
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.customize_group_verse_text
 import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
@@ -29,14 +20,19 @@ import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Bible pane.
+ * The Bible pane, showing whichever element the chips above it have selected.
  *
  * Edits every translation in the stack at once. The global tab is where one translation is styled
  * apart from another; here the question is "how does the Bible look on this screen", and a stack
  * whose languages disagree about that on one output is not what the operator came to say.
+ *
+ * The margins, the fades and the band's geometry are no longer here: they belong to the picture
+ * rather than to the verse text or its reference, and they sit under the preview in
+ * [CustomizeCategoryStrip] where the picture they move is in the same glance.
  */
 @Composable
 internal fun BibleCustomizePane(
+    element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -58,12 +54,12 @@ internal fun BibleCustomizePane(
     }
 
     PaneScaffold {
-        BibleVerseTextGroup(bs, t, lowerThird, fonts, ::updateAll, ::updateBible)
-        BibleTypographyGroup(t, lowerThird, ::updateAll)
-        BibleReferenceGroup(t, lowerThird, ::updateAll)
-        BibleBlockGroup(bs, lowerThird, ::updateBible)
-        BibleTransitionsGroup(bs, ::updateBible)
-        BibleMarginsGroup(bs, ::updateBible)
+        if (element == CustomizeElement.BIBLE_REFERENCE) {
+            BibleReferenceGroup(t, lowerThird, ::updateAll)
+        } else {
+            BibleVerseTextGroup(bs, t, lowerThird, fonts, ::updateAll, ::updateBible)
+            BibleTypographyGroup(t, lowerThird, ::updateAll)
+        }
     }
 }
 
@@ -226,75 +222,5 @@ private fun BibleReferenceGroup(
     }
 }
 
-@Composable
-private fun BibleBlockGroup(
-    bs: BibleSettings,
-    lowerThird: Boolean,
-    updateBible: ((BibleSettings) -> BibleSettings) -> Unit,
-) {
 
-    CustomizeGroup(stringResource(Res.string.bible_block_and_transition)) {
-        if (lowerThird) {
-            CustomizeRow(stringResource(Res.string.lower_third_size), labelInsideControl = true) {
-                NumberControl(
-                    label = stringResource(Res.string.lower_third_size),
-                    value = bs.lowerThirdHeightPercent,
-                    onValueChange = { v -> updateBible { it.copy(lowerThirdHeightPercent = v) } },
-                    range = BAND_RANGE,
-                )
-            }
-        }
-        CustomizeRow(stringResource(Res.string.bible_translation_divider), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.bible_translation_divider), bs.multiTranslationDivider) { v ->
-                updateBible { it.copy(multiTranslationDivider = v) }
-            }
-        }
-        CustomizeRow(stringResource(Res.string.bible_translation_spacing), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.bible_translation_spacing),
-                value = bs.multiTranslationSpacing,
-                onValueChange = { v -> updateBible { it.copy(multiTranslationSpacing = v) } },
-                range = SPACING_RANGE_MIN..SPACING_RANGE_MAX,
-            )
-        }
-        CustomizeRow(stringResource(Res.string.animation_crossfade), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.animation_crossfade), bs.crossfade) { v ->
-                updateBible { it.copy(crossfade = v) }
-            }
-        }
-    }
-}
 
-@Composable
-private fun BibleTransitionsGroup(
-    bs: BibleSettings,
-    updateBible: ((BibleSettings) -> BibleSettings) -> Unit,
-) {
-
-    TransitionsGroup(
-        fadeIn = bs.fadeIn,
-        fadeOut = bs.fadeOut,
-        durationMs = bs.transitionDuration,
-        onFadeIn = { v -> updateBible { it.copy(fadeIn = v) } },
-        onFadeOut = { v -> updateBible { it.copy(fadeOut = v) } },
-        onDuration = { v -> updateBible { it.copy(transitionDuration = v) } },
-    )
-}
-
-@Composable
-private fun BibleMarginsGroup(
-    bs: BibleSettings,
-    updateBible: ((BibleSettings) -> BibleSettings) -> Unit,
-) {
-
-    MarginsGroup(
-        top = bs.marginTop,
-        bottom = bs.marginBottom,
-        left = bs.marginLeft,
-        right = bs.marginRight,
-        onTop = { v -> updateBible { it.copy(marginTop = v) } },
-        onBottom = { v -> updateBible { it.copy(marginBottom = v) } },
-        onLeft = { v -> updateBible { it.copy(marginLeft = v) } },
-        onRight = { v -> updateBible { it.copy(marginRight = v) } },
-    )
-}

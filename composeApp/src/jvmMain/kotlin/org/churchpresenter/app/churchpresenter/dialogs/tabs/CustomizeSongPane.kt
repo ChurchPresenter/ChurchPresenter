@@ -4,27 +4,20 @@ import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.auto_fit
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.song_transition_and_markers
 import churchpresenter.composeapp.generated.resources.look_ahead_next_lower_third
 import churchpresenter.composeapp.generated.resources.look_ahead_next_fullscreen
 import churchpresenter.composeapp.generated.resources.look_ahead_lower_third
 import churchpresenter.composeapp.generated.resources.look_ahead_fullscreen
-import churchpresenter.composeapp.generated.resources.lower_third_size
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.customize_group_chords
 import churchpresenter.composeapp.generated.resources.customize_group_lyrics
-import churchpresenter.composeapp.generated.resources.customize_group_title_number
 import churchpresenter.composeapp.generated.resources.customize_style
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.show_number
+import churchpresenter.composeapp.generated.resources.song_element_title
+import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.show_title
-import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
@@ -32,8 +25,16 @@ import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.SongSettings
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * The Song pane, showing whichever element the chips above it have selected.
+ *
+ * The margins, the fades and the band's geometry have moved under the preview into
+ * [CustomizeCategoryStrip]: they belong to the slide rather than to the lyrics or the title, and a
+ * copy of them under all five chips would be five copies of one setting.
+ */
 @Composable
 internal fun SongCustomizePane(
+    element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -47,15 +48,21 @@ internal fun SongCustomizePane(
     }
 
     PaneScaffold {
-        SongLyricsGroup(ss, lowerThird, fonts, ::update)
-        SongTypographyGroup(ss, lowerThird, ::update)
-        SongChordsGroup(ss, lowerThird, ::update)
-        SongTitleNumberGroup(ss, lowerThird, ::update)
-        SongLookAheadGroup(ss, lowerThird, fonts, ::update)
-        SongLookAheadNextGroup(ss, lowerThird, fonts, ::update)
-        SongMarkersGroup(ss, lowerThird, ::update)
-        SongTransitionsGroup(ss, ::update)
-        SongMarginsGroup(ss, ::update)
+        when (element) {
+            CustomizeElement.SONG_TITLE ->
+                SongTitleGroup(ss, lowerThird, ::update)
+            CustomizeElement.SONG_NUMBER ->
+                SongNumberGroup(ss, lowerThird, ::update)
+            CustomizeElement.SONG_LOOK_AHEAD ->
+                SongLookAheadGroup(ss, lowerThird, fonts, ::update)
+            CustomizeElement.SONG_NEXT_SECTION ->
+                SongLookAheadNextGroup(ss, lowerThird, fonts, ::update)
+            else -> {
+                SongLyricsGroup(ss, lowerThird, fonts, ::update)
+                SongTypographyGroup(ss, lowerThird, ::update)
+                SongChordsGroup(ss, lowerThird, ::update)
+            }
+        }
     }
 }
 
@@ -203,13 +210,12 @@ private fun SongChordsGroup(
 }
 
 @Composable
-private fun SongTitleNumberGroup(
+private fun SongTitleGroup(
     ss: SongSettings,
     lowerThird: Boolean,
     update: ((SongSettings) -> SongSettings) -> Unit,
 ) {
-
-    CustomizeGroup(stringResource(Res.string.customize_group_title_number)) {
+    CustomizeGroup(stringResource(Res.string.song_element_title)) {
         CustomizeRow(stringResource(Res.string.show_title)) {
             ChoiceControl(
                 options = showOptions(),
@@ -219,10 +225,9 @@ private fun SongTitleNumberGroup(
                 },
             )
         }
-        val titleSizeLabel = stringResource(Res.string.title) + " " + stringResource(Res.string.font_size)
-        CustomizeRow(titleSizeLabel, labelInsideControl = true) {
+        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
             NumberControl(
-                label = titleSizeLabel,
+                label = stringResource(Res.string.font_size),
                 value = if (lowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize,
                 onValueChange = { v ->
                     update { if (lowerThird) it.copy(titleLowerThirdFontSize = v) else it.copy(titleFontSize = v) }
@@ -230,6 +235,16 @@ private fun SongTitleNumberGroup(
                 range = FONT_SIZE_RANGE,
             )
         }
+    }
+}
+
+@Composable
+private fun SongNumberGroup(
+    ss: SongSettings,
+    lowerThird: Boolean,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+) {
+    CustomizeGroup(stringResource(Res.string.song_element_number)) {
         CustomizeRow(stringResource(Res.string.show_number)) {
             ChoiceControl(
                 options = showOptions(),
@@ -430,63 +445,5 @@ private fun SongLookAheadNextGroup(
     }
 }
 
-@Composable
-private fun SongMarkersGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
 
-    CustomizeGroup(stringResource(Res.string.song_transition_and_markers)) {
-        if (lowerThird) {
-            CustomizeRow(stringResource(Res.string.lower_third_size), labelInsideControl = true) {
-                NumberControl(
-                    label = stringResource(Res.string.lower_third_size),
-                    value = ss.lowerThirdHeightPercent,
-                    onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
-                    range = BAND_RANGE,
-                )
-            }
-        }
-        CustomizeRow(stringResource(Res.string.animation_crossfade), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.animation_crossfade), ss.crossfade) { v ->
-                update { it.copy(crossfade = v) }
-            }
 
-        }
-    }
-}
-
-@Composable
-private fun SongTransitionsGroup(
-    ss: SongSettings,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-
-    TransitionsGroup(
-        fadeIn = ss.fadeIn,
-        fadeOut = ss.fadeOut,
-        durationMs = ss.transitionDuration,
-        onFadeIn = { v -> update { it.copy(fadeIn = v) } },
-        onFadeOut = { v -> update { it.copy(fadeOut = v) } },
-        onDuration = { v -> update { it.copy(transitionDuration = v) } },
-    )
-}
-
-@Composable
-private fun SongMarginsGroup(
-    ss: SongSettings,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-
-    MarginsGroup(
-        top = ss.marginTop,
-        bottom = ss.marginBottom,
-        left = ss.marginLeft,
-        right = ss.marginRight,
-        onTop = { v -> update { it.copy(marginTop = v) } },
-        onBottom = { v -> update { it.copy(marginBottom = v) } },
-        onLeft = { v -> update { it.copy(marginLeft = v) } },
-        onRight = { v -> update { it.copy(marginRight = v) } },
-    )
-}

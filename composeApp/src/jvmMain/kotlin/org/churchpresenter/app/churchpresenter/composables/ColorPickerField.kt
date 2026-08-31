@@ -61,7 +61,12 @@ fun ColorPickerField(
     Column(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(6.dp))
+            // `surfaceVariant`, matching NumberSettingsTextField, DropdownSettingsField and
+            // FontSettingsDropdown -- the fields this one sits beside in every settings form. It
+            // was the only one on `surfaceContainerHigh`, which is also `AlertDialog`'s own
+            // container colour, so inside a dialog the field had no fill at all and read as a
+            // faint border on empty background.
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),

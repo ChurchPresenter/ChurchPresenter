@@ -19,11 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -32,7 +30,6 @@ import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonT
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -51,17 +48,24 @@ import kotlin.math.roundToInt
  * app ships nine themes and a light mode, and a hard-coded palette would be right in exactly one.
  */
 
-private val CHOICE_HEIGHT = 28.dp
+/** Shared with [CustomizeTextControls]: a style button matches the height of a choice segment. */
+internal val CHOICE_HEIGHT = 28.dp
+
 /** The height of a text field, so a shorter control centres against one beside it. */
 private val CONTROL_ROW_HEIGHT = 42.dp
+
 private const val CHOICE_CHAR_WIDTH = 7f
+
 private const val CHOICE_PADDING = 16f
+
 private val CHOICE_MIN_WIDTH = 44.dp
-private val FONT_FIELD_WIDTH = 190.dp
-private val COLOR_FIELD_WIDTH = 132.dp
+
 private val NUMBER_FIELD_WIDTH = 104.dp
+
 private const val NUMBER_CHAR_WIDTH = 7f
+
 private const val NUMBER_PADDING = 26f
+
 private val SLIDER_WIDTH = 190.dp
 
 /** A titled group of rows: an uppercase accent heading with a rule down its left edge. */
@@ -173,17 +177,6 @@ internal fun NumberControl(
     }
 }
 
-/** A colour swatch and its hex. */
-@Composable
-internal fun ColorControl(label: String, color: String, onColorChange: (String) -> Unit) {
-    ColorPickerField(
-        label = label,
-        color = color,
-        onColorChange = onColorChange,
-        modifier = Modifier.width(COLOR_FIELD_WIDTH),
-    )
-}
-
 /** Left / center / right, drawn with the icon buttons every other settings tab uses. */
 @Composable
 internal fun HorizontalAlignControl(selected: String, onSelect: (String) -> Unit) {
@@ -272,62 +265,4 @@ internal fun ChoiceControl(
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
         )
     }
-}
-
-/**
- * The bold/italic/underline/shadow quartet — the shared [TextStyleButtons] the Song tab and the
- * canvas editors draw, so the buttons match wherever text is styled.
- */
-@Suppress("LongParameterList")
-@Composable
-internal fun StyleControl(
-    bold: Boolean,
-    italic: Boolean,
-    underline: Boolean,
-    shadow: Boolean,
-    onBoldChange: (Boolean) -> Unit,
-    onItalicChange: (Boolean) -> Unit,
-    onUnderlineChange: (Boolean) -> Unit,
-    onShadowChange: (Boolean) -> Unit,
-) {
-    TextStyleButtons(
-        bold = bold,
-        italic = italic,
-        underline = underline,
-        shadow = shadow,
-        onBoldChange = onBoldChange,
-        onItalicChange = onItalicChange,
-        onUnderlineChange = onUnderlineChange,
-        onShadowChange = onShadowChange,
-        buttonSize = CHOICE_HEIGHT,
-    )
-}
-
-/** An on/off setting, drawn as the [LabeledCheckbox] every settings tab uses for a boolean. */
-@Composable
-internal fun ToggleControl(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    LabeledCheckbox(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        label = label,
-        style = MaterialTheme.typography.bodySmall,
-    )
-}
-
-/** The font picker, carrying its own label the way it does on every settings tab. */
-@Composable
-internal fun FontControl(
-    label: String,
-    value: String,
-    fonts: List<String>,
-    onValueChange: (String) -> Unit,
-) {
-    FontSettingsDropdown(
-        label = label,
-        value = value,
-        fonts = fonts,
-        onValueChange = onValueChange,
-        modifier = Modifier.width(FONT_FIELD_WIDTH),
-        fillWidth = true,
-    )
 }

@@ -39,18 +39,19 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 internal fun BackgroundCustomizePane(
+    element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
-    // Only the surfaces this output actually draws. The display mode already says whether it is a
-    // full screen or a lower third, so listing all six would offer an operator three surfaces that
-    // cannot reach the screen they are customizing.
+    // Only the surface this output actually draws. The display mode already says whether it is a
+    // full screen or a lower third, so the chip names the surface -- "Default", "Bible", "Songs" --
+    // and the output's own shape picks which of the stored pair it writes. Listing all six would
+    // offer an operator three surfaces that cannot reach the screen they are customizing.
     val lowerThird = LocalOutputStyleScope.current == OutputStyleScope.LOWER_THIRD
+    val scope = element.backgroundScope(lowerThird)
     PaneScaffold {
-        BackgroundScope.entries.filter { it.lowerThird == lowerThird }.forEach { scope ->
-            CustomizeGroup(backgroundScopeTitle(scope)) {
-                BackgroundSurfaceRows(scope, settings, onSettingsChange)
-            }
+        CustomizeGroup(backgroundScopeTitle(scope)) {
+            BackgroundSurfaceRows(scope, settings, onSettingsChange)
         }
     }
 }

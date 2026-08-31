@@ -18,8 +18,15 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * The Dictionary pane, showing whichever part of the card the chips above it have selected.
+ *
+ * The fades have moved under the preview into [CustomizeCategoryStrip]; they belong to the card as
+ * a whole rather than to the word or the definition inside it.
+ */
 @Composable
 internal fun DictionaryCustomizePane(
+    element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -31,12 +38,13 @@ internal fun DictionaryCustomizePane(
     }
 
     PaneScaffold {
-        DictionaryWordGroup(ds, fonts, ::update)
-        DictionaryReferenceGroup(ds, fonts, ::update)
-        DictionaryDefinitionGroup(ds, ::update)
-        DictionaryKjvUsageGroup(ds, ::update)
-        DictionaryCardGroup(ds, ::update)
-        DictionaryTransitionsGroup(ds, ::update)
+        when (element) {
+            CustomizeElement.DICTIONARY_REFERENCE -> DictionaryReferenceGroup(ds, fonts, ::update)
+            CustomizeElement.DICTIONARY_DEFINITION -> DictionaryDefinitionGroup(ds, ::update)
+            CustomizeElement.DICTIONARY_KJV -> DictionaryKjvUsageGroup(ds, ::update)
+            CustomizeElement.DICTIONARY_CARD -> DictionaryCardGroup(ds, ::update)
+            else -> DictionaryWordGroup(ds, fonts, ::update)
+        }
     }
 }
 
@@ -209,17 +217,3 @@ private fun DictionaryCardGroup(
     }
 }
 
-@Composable
-private fun DictionaryTransitionsGroup(
-    ds: DictionarySettings,
-    update: ((DictionarySettings) -> DictionarySettings) -> Unit,
-) {
-    TransitionsGroup(
-        fadeIn = ds.fadeIn,
-        fadeOut = ds.fadeOut,
-        durationMs = ds.transitionDuration,
-        onFadeIn = { v -> update { it.copy(fadeIn = v) } },
-        onFadeOut = { v -> update { it.copy(fadeOut = v) } },
-        onDuration = { v -> update { it.copy(transitionDuration = v) } },
-    )
-}

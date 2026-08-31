@@ -935,6 +935,9 @@
     <!-- Per-output Customize dialog -->
     <string name="customize">Overwrite Styles</string>
     <string name="customize_count">Overwritten · %1$d</string>
+    <string name="customize_tooltip_overwritten">Overwritten on this screen: %1$s</string>
+    <string name="customize_tooltip_none">Follows the global settings — click to give this screen styles of its own</string>
+    <string name="customize_tooltip_separator">, </string>
     <string name="customize_dialog_title">Display Settings — %1$s</string>
     <string name="customize_dialog_subtitle">%1$d of %2$d customized</string>
     <string name="customize_pane_header">%1$s on this screen</string>
@@ -945,6 +948,12 @@
     <string name="customize_hint_lower_third">The shape of this screen's lower third band</string>
     <string name="customize_reset_to_global">Reset to global</string>
     <string name="customize_done">Done</string>
+    <string name="customize_screen_heading">Screen</string>
+    <string name="customize_screen_geometry">%1$d × %2$d · %3$s</string>
+    <string name="customize_screen_geometry_unknown">%1$s</string>
+    <string name="customize_motion">Motion</string>
+    <string name="customize_layout">Layout</string>
+    <string name="customize_no_preview">No preview for this section</string>
     <string name="customize_bible">Bible</string>
     <string name="customize_songs">Songs</string>
     <string name="customize_lower_third_orientation">Orientation</string>
