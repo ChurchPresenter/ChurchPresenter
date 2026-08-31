@@ -41,6 +41,22 @@ class SlideDiskCache(
 
         const val SCHEMA_VERSION = 2
 
+        /**
+         * The version of the *renderer* that produced the cached pixels, as opposed to
+         * [SCHEMA_VERSION], which describes the manifest around them.
+         *
+         * A cache entry is otherwise only checked against the source file's mtime, so an unchanged
+         * deck keeps serving the images it was first rendered with — for ever. That made engine
+         * fixes invisible: correcting Keynote's PostScript font names (`Arial-BoldMT` was
+         * resolving to Open Sans, which is wider and wrapped a line that fits) changed nothing on
+         * screen, because the deck still had its pre-fix JPEGs on disk and nobody had touched the
+         * file. Entries written before this field existed decode as 0 and are re-rendered once.
+         *
+         * **Bump it in the same commit as any change to what a rendered slide looks like** —
+         * layout, fonts, colour, fidelity gating. It costs one re-render per cached deck.
+         */
+        const val RENDERER_VERSION = 1
+
         /** Stable id per source path — same derivation the companion API has always used. */
         fun idFor(absolutePath: String): String = absolutePath.hashCode().toUInt().toString(HEX_RADIX)
 
@@ -95,6 +111,8 @@ class SlideDiskCache(
     @Serializable
     data class Manifest(
         val schemaVersion: Int,
+        /** Absent in entries written before the field existed, which is what makes them stale. */
+        val rendererVersion: Int = 0,
         val sourcePath: String,
         val sourceMtime: Long,
         val format: DeckFormat,
@@ -131,6 +149,7 @@ class SlideDiskCache(
             return null
         }
         if (manifest.schemaVersion != SCHEMA_VERSION) return null
+        if (manifest.rendererVersion != RENDERER_VERSION) return null
         if (manifest.sourceMtime != file.lastModified()) return null
         if (renderWidthPx != null && manifest.renderWidthPx != renderWidthPx) return null
         val slideFiles = (0 until manifest.slideCount).map { File(dir, slideName(it)) }
@@ -248,6 +267,7 @@ class SlideDiskCache(
             if (!activeWriters.remove(key, this)) throw SlideCacheSupersededException(dir)
             val manifest = Manifest(
                 schemaVersion = SCHEMA_VERSION,
+                rendererVersion = RENDERER_VERSION,
                 sourcePath = sourceFile.absolutePath,
                 sourceMtime = sourceFile.lastModified(),
                 format = format,

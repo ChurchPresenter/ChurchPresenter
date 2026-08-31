@@ -52,6 +52,24 @@ class BackgroundSettingsTabTest {
         assertEquals(1, controlsCount("COLOR"), "and the field comes back with it")
     }
 
+    /**
+     * The camera segment is offered everywhere and, on a machine with a capture device, stores its
+     * type. Whether this machine has one is not a property of the tab, so the assertion splits the
+     * way the Video one does rather than pinning an answer only some machines give.
+     */
+    @Test
+    fun `choosing Camera stores it where this machine can capture`() = backgroundTab { settings ->
+        openSurface(Surface.DEFAULT)
+        assertEquals(1, controlsCount(TypeLabel.CAMERA), "the segment is always offered")
+        chooseBackgroundType(TypeLabel.CAMERA)
+        val stored = settings().backgroundSettings.defaultBackgroundType
+        if (stored == Constants.BACKGROUND_CAMERA) {
+            assertEquals(1, controlsCount("CAMERA DEVICE"), "the picker must appear with it")
+        } else {
+            assertEquals(Constants.BACKGROUND_COLOR, stored, "with no capture device the segment is inert")
+        }
+    }
+
     @Test
     fun `the Video segment is pickable only where VLC is installed`() = backgroundTab { settings ->
         openSurface(Surface.DEFAULT)

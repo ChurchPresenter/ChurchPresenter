@@ -15,6 +15,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
+import org.churchpresenter.core.models.camera.CameraDeviceRef
+import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.settings.AppSettings
@@ -125,6 +127,15 @@ fun PresenterScreen(
                         modifier = Modifier.fillMaxSize().alpha(bgOpacity)
                     )
                 }
+                // This layer is what shows while nothing is live — Pictures, Media, Canvas or an
+                // idle output — so a camera chosen for the Default surface has to be drawn here as
+                // well as under a verse, or it appears only once a song is on screen.
+                Constants.BACKGROUND_CAMERA -> {
+                    CameraBackground(
+                        camera = card.camera,
+                        modifier = Modifier.fillMaxSize().alpha(bgOpacity)
+                    )
+                }
                 Constants.BACKGROUND_TRANSPARENT -> {
                     // No visible background — black (appears as "nothing" on a projector/display);
                     // genuinely transparent in Browser Source scenes so OBS can key through it
@@ -168,6 +179,7 @@ private data class DefaultBackgroundCard(
     val opacity: Float,
     val dim: Int,
     val blur: Int,
+    val camera: CameraDeviceRef,
 )
 
 /**
@@ -183,4 +195,5 @@ private fun BackgroundSettings.defaultCard(): DefaultBackgroundCard = DefaultBac
     opacity = defaultBackgroundOpacity,
     dim = defaultBackgroundDim,
     blur = defaultBackgroundBlur,
+    camera = defaultBackgroundCamera,
 )

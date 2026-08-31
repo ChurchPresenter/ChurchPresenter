@@ -24,6 +24,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_background_camera_live
+import churchpresenter.composeapp.generated.resources.song_background_category_cameras
 import churchpresenter.composeapp.generated.resources.song_background_category_colors
 import churchpresenter.composeapp.generated.resources.song_background_category_images
 import churchpresenter.composeapp.generated.resources.song_background_category_videos
@@ -47,6 +49,9 @@ import java.io.File
 @Composable
 internal fun songBackgroundName(background: SongBackground): String = when {
     !background.isCustom -> stringResource(Res.string.song_background_inherited)
+    // A camera has no mediaPath — that is a file, and File(...).name on "avfoundation://0" is "0".
+    background.type == SongBackgroundType.CAMERA ->
+        background.camera.deviceName.ifBlank { background.camera.devicePath }
     background.mediaPath.isNotBlank() -> File(background.mediaPath).name
     else -> SONG_BACKGROUND_COLORS
         .firstOrNull { !it.own && it.selects(background, SONG_BACKGROUND_NAMED_COLORS) }
@@ -71,19 +76,21 @@ internal fun songBackgroundMeta(background: SongBackground): String {
 internal fun songBackgroundBadge(background: SongBackground): String = when {
     !background.isCustom -> stringResource(Res.string.song_background_inherited)
     background.type == SongBackgroundType.VIDEO -> stringResource(Res.string.song_background_video_loop)
+    background.type == SongBackgroundType.CAMERA -> stringResource(Res.string.song_background_camera_live)
     else -> songBackgroundName(background)
 }
 
 private fun songBackgroundCategoryLabel(type: String) = when (type) {
     SongBackgroundType.IMAGE -> Res.string.song_background_category_images
     SongBackgroundType.VIDEO -> Res.string.song_background_category_videos
+    SongBackgroundType.CAMERA -> Res.string.song_background_category_cameras
     else -> Res.string.song_background_category_colors
 }
 
 /**
  * Draws whatever [background] points at, blurred and overscanned the way the presenter does it, so
- * the preview and the screen agree. A clip shows as black — spinning up VLC for a thumbnail inside
- * the editor is not worth what it costs.
+ * the preview and the screen agree. A clip and a camera show as black — spinning up VLC, or opening
+ * a capture device, for a thumbnail inside the editor is not worth what it costs.
  */
 @Composable
 internal fun SongBackgroundFill(background: SongBackground, modifier: Modifier) {
@@ -113,7 +120,11 @@ internal fun SongBackgroundFill(background: SongBackground, modifier: Modifier) 
                 )
             )
             background.type == SongBackgroundType.IMAGE -> ImageFill(background.image, shaped)
-            background.type == SongBackgroundType.VIDEO -> Box(shaped.background(Color.Black))
+            // A camera is black here for the reason a clip is, and more so: this tile is drawn by
+            // every quick-tray button and every settings strip at once, so a live preview would
+            // hold the device open for as long as any of them is on screen.
+            background.type == SongBackgroundType.VIDEO ||
+                background.type == SongBackgroundType.CAMERA -> Box(shaped.background(Color.Black))
             else -> Box(shaped.background(parseHexColor(background.color)))
         }
         // The wash the comment above promises, which was never actually drawn.

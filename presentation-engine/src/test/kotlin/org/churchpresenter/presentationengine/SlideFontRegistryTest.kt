@@ -5,6 +5,7 @@ import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import java.awt.Font
 import java.awt.image.BufferedImage
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -43,6 +44,63 @@ class SlideFontRegistryTest {
         val resolved = SlideFontRegistry.resolveFamily("Calibri")
         // Whatever the platform offers, the result must be a real, available family.
         assertTrue(SlideFontRegistry.isFamilyAvailable(resolved), "got unavailable family $resolved")
+    }
+
+    @Test
+    fun `a PostScript name resolves to its family, not to the generic default`() {
+        // Keynote never writes the AWT family name — it writes the PostScript name. Resolving
+        // "Arial-BoldMT" to the fallback silently re-wraps slides, because the substitute is a
+        // different width: 38pt bold measured 922pt as Arial and 987pt as Open Sans, which is one
+        // extra line in the 952.8pt text box of the deck this test was written for.
+        SlideFontRegistry.initialize(scanSystemDirs = false)
+        // The bundled face is the one family every machine running this suite is guaranteed to
+        // have, so it carries the assertion that does not depend on the platform's font set.
+        javaClass.getResourceAsStream("/fonts/OpenSans-Regular.ttf")?.let {
+            SlideFontRegistry.registerFontStream(it)
+        }
+        assertEquals("Open Sans", SlideFontRegistry.resolveFamily("OpenSans-Bold"))
+        assertEquals("Open Sans", SlideFontRegistry.resolveFamily("OpenSans-BoldItalic"))
+        assertEquals("Open Sans", SlideFontRegistry.resolveFamily("Open Sans"), "a plain family still resolves")
+
+        for (postScript in listOf("Arial-BoldMT", "Arial-ItalicMT", "TimesNewRomanPS-BoldMT")) {
+            val family = SlideFontRegistry.resolveFamily(postScript)
+            assertTrue(
+                SlideFontRegistry.isFamilyAvailable(family) || family == Font.SANS_SERIF,
+                "$postScript must resolve to a renderable family, got $family"
+            )
+            assertFalse(family.contains('-'), "$postScript kept its style suffix: $family")
+        }
+        // Only assert the exact family where the platform actually has it.
+        if (SlideFontRegistry.isFamilyAvailable("Arial")) {
+            assertEquals("Arial", SlideFontRegistry.resolveFamily("Arial-BoldMT"))
+        }
+        if (SlideFontRegistry.isFamilyAvailable("Times New Roman")) {
+            assertEquals("Times New Roman", SlideFontRegistry.resolveFamily("TimesNewRomanPS-BoldMT"))
+        }
+    }
+
+    @Test
+    fun `the style a PostScript name carries comes back with the family`() {
+        SlideFontRegistry.initialize(scanSystemDirs = false)
+        val bold = SlideFontRegistry.resolveFace("Arial-BoldMT")
+        assertTrue(bold.bold, "the name says bold")
+        assertFalse(bold.italic)
+
+        val both = SlideFontRegistry.resolveFace("Avenir-BookOblique")
+        assertTrue(both.italic, "oblique is italic")
+
+        val plain = SlideFontRegistry.resolveFace("Georgia")
+        assertFalse(plain.bold, "a bare family name asserts nothing about weight")
+        assertFalse(plain.italic)
+    }
+
+    @Test
+    fun `resolving works before anything has initialised the registry`() {
+        // The engine renders outside the app too (the converter, the companion server, tests),
+        // where nothing calls initialize; an empty index used to send every request to SansSerif.
+        assertTrue(SlideFontRegistry.resolveFamily("Georgia").isNotEmpty())
+        assertTrue(SlideFontRegistry.isFamilyAvailable(SlideFontRegistry.resolveFamily("Georgia")) ||
+            SlideFontRegistry.resolveFamily("Georgia") == Font.SANS_SERIF)
     }
 
     @Test

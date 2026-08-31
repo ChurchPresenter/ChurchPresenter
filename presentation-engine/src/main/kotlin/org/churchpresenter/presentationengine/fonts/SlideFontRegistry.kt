@@ -69,6 +69,9 @@ object SlideFontRegistry {
     /** The ultimate fallback family when nothing else matches (bundled with the app). */
     private const val DEFAULT_FAMILY = "Open Sans"
 
+    /** A requested typeface resolved to a renderable family, with any style its name carried. */
+    data class ResolvedFace(val family: String, val bold: Boolean, val italic: Boolean)
+
     private val systemFontDirs: List<File> by lazy {
         val os = System.getProperty("os.name", "").lowercase()
         val home = System.getProperty("user.home")
@@ -141,14 +144,37 @@ object SlideFontRegistry {
      * installed, else the first installed substitution candidate, else [DEFAULT_FAMILY] when
      * available, else the JVM's logical SansSerif.
      */
-    fun resolveFamily(requested: String): String {
-        val key = requested.trim().lowercase()
-        availableFamilies[key]?.let { return it }
-        substitutionTable[key]?.forEach { candidate ->
-            availableFamilies[candidate.lowercase()]?.let { return it }
+    fun resolveFamily(requested: String): String = resolveFace(requested).family
+
+    /**
+     * Resolves a requested typeface to a renderable family, plus the weight and slant the request
+     * only carried in its *name*.
+     *
+     * Keynote stores the typeface as a **PostScript name** (`Arial-BoldMT`, `HelveticaNeue-Bold`,
+     * `TimesNewRomanPS-BoldMT`), never as the AWT family name, so a plain family lookup misses on
+     * essentially every real deck and everything used to land on [DEFAULT_FAMILY]. Since the
+     * substitute is a different width, that silently re-wrapped slides: `Arial-BoldMT` at 38pt
+     * measured 922pt as Arial and 987pt as Open Sans, which is one extra line in a 952.8pt box.
+     *
+     * [PostScriptName] therefore peels the name back to its family a step at a time, and each
+     * candidate is tried against the installed families *and* [substitutionTable], so
+     * `HelveticaNeue-Bold` still reaches the "helvetica neue" row on a machine without it.
+     */
+    fun resolveFace(requested: String): ResolvedFace {
+        // Same lazy contract as isFamilyAvailable: the engine is used outside the app (the
+        // converter, the companion server's background renders, tests), where nothing has called
+        // initialize, and an empty index would silently resolve every request to SansSerif.
+        if (availableFamilies.isEmpty()) refreshAvailableFamilies()
+        val (bold, italic) = PostScriptName.styleOf(requested)
+        for (candidate in PostScriptName.candidates(requested)) {
+            val key = candidate.lowercase()
+            availableFamilies[key]?.let { return ResolvedFace(it, bold, italic) }
+            substitutionTable[key]?.forEach { substitute ->
+                availableFamilies[substitute.lowercase()]?.let { return ResolvedFace(it, bold, italic) }
+            }
         }
-        availableFamilies[DEFAULT_FAMILY.lowercase()]?.let { return it }
-        return Font.SANS_SERIF
+        val fallback = availableFamilies[DEFAULT_FAMILY.lowercase()] ?: Font.SANS_SERIF
+        return ResolvedFace(fallback, bold, italic)
     }
 
     /**

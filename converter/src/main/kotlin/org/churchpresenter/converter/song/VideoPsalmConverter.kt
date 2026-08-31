@@ -126,8 +126,10 @@ object VideoPsalmConverter {
         for (verse in verses) {
             val lines = linesOf(verse.text("Text"))
             if (lines.isEmpty()) continue
-            if (!alreadySung.add(lines.joinToString("\n").lowercase())) continue
-            sections.add(SongSection(labelOf(verse, used), lines))
+            // A chorus stored once per singing is one section: the repeats are matched on their
+            // lyrics, so only the first singing claims a label.
+            val firstSinging = alreadySung.add(lines.joinToString("\n").lowercase())
+            if (firstSinging) sections.add(SongSection(labelOf(verse, used), lines))
         }
         val tidied = SectionLabel.tidy(sections.map { it.label })
         return sections.mapIndexed { index, section -> section.copy(label = tidied[index]) }
