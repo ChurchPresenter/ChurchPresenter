@@ -44,6 +44,17 @@ object SharedCameraFrameCache {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
 
+    /**
+     * How many devices are being captured right now — read-only, and the one thing a test can ask
+     * that distinguishes a released capture from a leaked one.
+     *
+     * A leak here is not a wasted object: the entry owns a live ffmpeg process holding the device
+     * open, so the next acquire of that camera fails with `device_busy` and the operator's canvas
+     * goes black on hardware nothing else is using.
+     */
+    @get:Synchronized
+    internal val liveCaptureCount: Int get() = entries.size
+
     /** Build a unique key for a camera source. */
     internal fun keyFor(source: SceneSource.CameraSource): String {
         return if (source.isDeckLink && source.deckLinkIndex >= 0) {
@@ -102,9 +113,18 @@ object SharedCameraFrameCache {
             entry.frame.value = null
             entries.remove(key)
 
-            // Only close the device if no other cache entry is using the same device.
-            // When switching connections, the new acquire's openInput() already closed
-            // the old input — calling closeInput here would kill the new one.
+            // Only close the device if no other cache entry is using the same device — two scene
+            // sources on one camera are one capture, and the first of them to go must not take the
+            // picture away from the second.
+            //
+            // A *switch* — another format, another connection — no longer reaches that guard. It
+            // used to: acquire ran from a `remember` block, so the incoming entry existed before
+            // the outgoing one was released, and this skipped the close on the strength of the new
+            // `openInput` having displaced the old one. Acquire now runs from the same
+            // `DisposableEffect` that releases, and Compose disposes the old effect before running
+            // the new one, so a switch closes the device and then reopens it. That is the order
+            // this cache wants: an ffmpeg process still holding a device when the next one asks for
+            // it is exactly the `device_busy` failure the release path exists to prevent.
             if (source.isDeckLink && source.deckLinkIndex >= 0 && DeckLinkManager.isAvailable()) {
                 val deviceStillActive = entries.keys.any {
                     it.startsWith("decklink:${source.deckLinkIndex}:")

@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -198,11 +200,21 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
     )
 
     val deckLinkDeviceFormat = stringResource(Res.string.canvas_decklink_device)
-    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLinkDeviceFormat)) }
     val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
 
+    // Through the catalog, never `listCameraDevicesWithDeckLink` directly: that shells out to
+    // ffmpeg, and on Windows to a PowerShell `Get-CimInstance` as well, so calling it from
+    // composition — or from a click handler — blocked the UI thread for as long as those took. A
+    // panel that hangs the app for seconds every time a camera source is selected is the reported
+    // "Canvas tab is very hanging"; the catalog does the same work on IO and caches it.
+    val known by CameraDeviceCatalog.devices.collectAsState()
+    val devices = known.orEmpty()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(deckLinkDeviceFormat) { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) }
+
     Button(
-        onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
+        onClick = { scope.launch { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) } },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -313,7 +325,9 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    } else {
+    } else if (known != null) {
+        // `known` null means the first enumeration has not answered yet, which is not the same as
+        // "this machine has no camera" and must not be shown as it.
         Text(
             noCamerasLabel,
             style = MaterialTheme.typography.bodySmall,
@@ -322,7 +336,7 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
     }
 
     val osName = System.getProperty("os.name", "").lowercase()
-    if (osName.contains("linux") && devices.isEmpty()) {
+    if (osName.contains("linux") && known != null && devices.isEmpty()) {
         Text(
             stringResource(Res.string.canvas_camera_v4l2_hint),
             style = MaterialTheme.typography.bodySmall,
@@ -330,8 +344,11 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
         )
     }
     if (!osName.contains("linux")) {
-        val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
-        if (!ffmpegAvailable) {
+        // Also off the composition thread: the probe runs `ffmpeg -version`, with a five-second
+        // timeout, against each candidate install path in turn.
+        var ffmpegMissing by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { ffmpegMissing = !withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+        if (ffmpegMissing) {
             Text(
                 stringResource(Res.string.canvas_camera_ffmpeg_hint),
                 style = MaterialTheme.typography.bodySmall,

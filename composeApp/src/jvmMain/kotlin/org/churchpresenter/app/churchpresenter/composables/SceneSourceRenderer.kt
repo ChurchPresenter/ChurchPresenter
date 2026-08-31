@@ -76,6 +76,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
@@ -460,15 +461,19 @@ private fun BrowserSourceContent(
         return
     }
 
-    // Only re-create browser when id or viewport size changes
-    val browserFlows = remember(source.id, source.renderWidth, source.renderHeight) {
-        SharedBrowserFrameCache.acquire(
+    // Only re-create browser when id or viewport size changes.
+    //
+    // Acquired in the effect, for the reason spelled out in [CameraSourceContent] — and here the
+    // dispose keys used to be narrower than the acquire keys, so a resize acquired a second time
+    // and released neither. That leaked a whole headless browser per resize.
+    var browserFlows by remember { mutableStateOf<SharedBrowserFrameCache.BrowserFlows?>(null) }
+    DisposableEffect(source.id, source.renderWidth, source.renderHeight) {
+        browserFlows = SharedBrowserFrameCache.acquire(
             source.id, source.url, source.renderWidth, source.renderHeight,
             source.customCss, source.fps, source.forceTransparent
         )
-    }
-    DisposableEffect(source.id) {
         onDispose {
+            browserFlows = null
             SharedBrowserFrameCache.release(source.id)
         }
     }
@@ -491,8 +496,10 @@ private fun BrowserSourceContent(
         SharedBrowserFrameCache.setFps(source.id, source.fps)
     }
 
-    val frame by browserFlows.frame.collectAsState()
-    val error by browserFlows.error.collectAsState()
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val noError = remember { MutableStateFlow<String?>(null) }
+    val frame by (browserFlows?.frame ?: noFrame).collectAsState()
+    val error by (browserFlows?.error ?: noError).collectAsState()
 
     if (frame != null) {
         Image(
@@ -906,18 +913,28 @@ private fun CameraSourceContent(
         return
     }
 
-    // Use shared cache so canvas preview and presenter output share one capture process
-    val cameraFlows = remember(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
-        SharedCameraFrameCache.acquire(source)
-    }
+    // Use shared cache so canvas preview and presenter output share one capture process.
+    //
+    // Acquired in the effect rather than in `remember`: a composition that is abandoned before its
+    // effects run still discards what `remember` produced, and it does so without calling any
+    // `onDispose`. Acquiring there leaked the refcount — and with it the ffmpeg process holding the
+    // device open, which the *next* acquire then found busy. That is the reported
+    // "Error opening input: Input/output error" on a camera nothing else is using.
+    var cameraFlows by remember { mutableStateOf<SharedCameraFrameCache.CameraFlows?>(null) }
     DisposableEffect(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
+        cameraFlows = SharedCameraFrameCache.acquire(source)
         onDispose {
+            cameraFlows = null
             SharedCameraFrameCache.release(source)
         }
     }
 
-    val frame by cameraFlows.frame.collectAsState()
-    val error by cameraFlows.error.collectAsState()
+    // Stand-ins for the one composition pass before the effect has acquired: collecting needs a
+    // flow, and a conditional `collectAsState` would move with the acquire.
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val noFailure = remember { MutableStateFlow<CameraFailure?>(null) }
+    val frame by (cameraFlows?.frame ?: noFrame).collectAsState()
+    val error by (cameraFlows?.error ?: noFailure).collectAsState()
 
     if (frame != null) {
         Image(
@@ -958,15 +975,20 @@ private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) 
         return
     }
 
-    val flows = remember(source.sourceName, source.sourceAddress, source.lowBandwidth) {
-        SharedNdiFrameCache.acquire(source)
-    }
+    // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
+    var flows by remember { mutableStateOf<NdiFrameCache.NdiFlows?>(null) }
     DisposableEffect(source.sourceName, source.sourceAddress, source.lowBandwidth) {
-        onDispose { SharedNdiFrameCache.release(source) }
+        flows = SharedNdiFrameCache.acquire(source)
+        onDispose {
+            flows = null
+            SharedNdiFrameCache.release(source)
+        }
     }
 
-    val frame by flows.frame.collectAsState()
-    val connected by flows.connected.collectAsState()
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val notConnected = remember { MutableStateFlow(false) }
+    val frame by (flows?.frame ?: noFrame).collectAsState()
+    val connected by (flows?.connected ?: notConnected).collectAsState()
     val label = source.sourceName.ifBlank { source.sourceAddress }
 
     val shown = frame
