@@ -13,6 +13,7 @@ import java.awt.Rectangle
 import java.io.File
 import java.nio.file.Files
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -203,7 +204,7 @@ class DocumentTextExtractorTest {
         val bundle = File(temp, "bundle.key").apply { mkdirs() }
         File(bundle, "QuickLook").mkdirs()
         val zipped = keynote("Bundled all the same")
-        java.util.zip.ZipFile(zipped).use { zip ->
+        ZipFile(zipped).use { zip ->
             val entry = zip.getEntry("QuickLook/Preview.pdf")
             File(bundle, "QuickLook/Preview.pdf").writeBytes(zip.getInputStream(entry).readBytes())
         }
