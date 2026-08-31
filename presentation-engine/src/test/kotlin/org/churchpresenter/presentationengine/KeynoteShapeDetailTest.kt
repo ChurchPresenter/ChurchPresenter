@@ -119,26 +119,38 @@ class KeynoteShapeDetailTest {
         }
     }.toByteArray()
 
-    /** TSWP.StorageArchive: the text, plus a character-style table keyed by character offset. */
-    private fun storage(text: String, charRuns: List<Pair<Int, Long>> = emptyList()) = ProtoWriter().apply {
+    /**
+     * TSWP.StorageArchive: the text, plus the attribute tables keyed by character offset. A run
+     * with a null style id is written with its `ATTR_ENTRY_OBJECT` reference left off, which is
+     * how Keynote itself records "no style from here" — real files are full of them.
+     */
+    private fun storage(
+        text: String,
+        charRuns: List<Pair<Int, Long?>> = emptyList(),
+        paraRuns: List<Pair<Int, Long?>> = emptyList(),
+    ) = ProtoWriter().apply {
         stringField(F.STORAGE_TEXT, text)
-        if (charRuns.isNotEmpty()) {
-            bytesField(
-                F.STORAGE_TABLE_CHAR_STYLE,
-                ProtoWriter().apply {
-                    charRuns.forEach { (charIndex, styleId) ->
-                        bytesField(
-                            F.ATTR_TABLE_ENTRIES,
-                            ProtoWriter().apply {
-                                varintField(F.ATTR_ENTRY_CHAR_INDEX, charIndex.toLong())
-                                bytesField(F.ATTR_ENTRY_OBJECT, reference(styleId))
-                            }.toByteArray(),
-                        )
-                    }
-                }.toByteArray(),
-            )
-        }
+        attributeTable(F.STORAGE_TABLE_CHAR_STYLE, charRuns)
+        attributeTable(F.STORAGE_TABLE_PARA_STYLE, paraRuns)
     }.toByteArray()
+
+    private fun ProtoWriter.attributeTable(field: Int, runs: List<Pair<Int, Long?>>) {
+        if (runs.isEmpty()) return
+        bytesField(
+            field,
+            ProtoWriter().apply {
+                runs.forEach { (charIndex, styleId) ->
+                    bytesField(
+                        F.ATTR_TABLE_ENTRIES,
+                        ProtoWriter().apply {
+                            varintField(F.ATTR_ENTRY_CHAR_INDEX, charIndex.toLong())
+                            if (styleId != null) bytesField(F.ATTR_ENTRY_OBJECT, reference(styleId))
+                        }.toByteArray(),
+                    )
+                }
+            }.toByteArray(),
+        )
+    }
 
     private fun textShape(storageId: Long, geometry: ByteArray = geometry()) = ProtoWriter().apply {
         bytesField(
@@ -438,6 +450,67 @@ class KeynoteShapeDetailTest {
         assertEquals(listOf("Grace", "Peace"), paragraphs.map { it.text }, "a CR is a paragraph break")
         assertEquals(20.0, paragraphs[0].fontSizePt, 1e-6)
         assertEquals(60.0, paragraphs[1].fontSizePt, 1e-6, "the second run's size, not the first's")
+    }
+
+    @Test
+    fun `an object-less character run clears the override instead of leaking forward`() {
+        // Storage 733 of a real deck: a character run covering the first paragraph, then a run at
+        // the next paragraph with the reference left off. Dropping the object-less run made the
+        // first paragraph's style apply to all six, at the 20pt-black defaults.
+        val slide = parseOne(
+            drawables = listOf(Triple(300L, F.TYPE_TSWP_SHAPE_INFO, textShape(storageId = 400L))),
+            extra = listOf(
+                Triple(
+                    400L,
+                    F.TYPE_TSWP_STORAGE,
+                    storage(
+                        "Grace\rPeace\rHope",
+                        charRuns = listOf(0 to 500L, 6 to null),
+                        paraRuns = listOf(0 to 600L, 6 to null, 12 to null),
+                    ),
+                ),
+                Triple(500L, F.TYPE_TSWP_CHARACTER_STYLE, characterStyle(fontSize = 60f)),
+                Triple(
+                    600L,
+                    F.TYPE_TSWP_PARAGRAPH_STYLE,
+                    characterStyle(fontName = "Georgia", fontSize = 40f, fontColor = color(1f, 1f, 1f)),
+                ),
+            ),
+        )
+        val paragraphs = assertIs<KnDrawable.Text>(slide.drawables.single().drawable).paragraphs
+        assertEquals(listOf("Grace", "Peace", "Hope"), paragraphs.map { it.text })
+        assertEquals(60.0, paragraphs[0].fontSizePt, 1e-6, "the character override applies here")
+        assertEquals(40.0, paragraphs[1].fontSizePt, 1e-6, "cleared, so the paragraph style applies")
+        assertEquals(40.0, paragraphs[2].fontSizePt, 1e-6, "and keeps applying to later paragraphs")
+        assertEquals(listOf(Color.WHITE, Color.WHITE), paragraphs.drop(1).map { it.color })
+    }
+
+    @Test
+    fun `a character style fills in only what it declares, the paragraph style supplies the rest`() {
+        // A style archive that carries a properties message but overrides one property used to
+        // count as "resolved", which suppressed the paragraph style wholesale.
+        val slide = parseOne(
+            drawables = listOf(Triple(300L, F.TYPE_TSWP_SHAPE_INFO, textShape(storageId = 400L))),
+            extra = listOf(
+                Triple(
+                    400L,
+                    F.TYPE_TSWP_STORAGE,
+                    storage("Grace", charRuns = listOf(0 to 500L), paraRuns = listOf(0 to 600L)),
+                ),
+                Triple(500L, F.TYPE_TSWP_CHARACTER_STYLE, characterStyle(italic = true)),
+                Triple(
+                    600L,
+                    F.TYPE_TSWP_PARAGRAPH_STYLE,
+                    characterStyle(fontName = "Georgia", fontSize = 40f, bold = true, fontColor = color(1f, 1f, 1f)),
+                ),
+            ),
+        )
+        val paragraph = assertIs<KnDrawable.Text>(slide.drawables.single().drawable).paragraphs.single()
+        assertTrue(paragraph.italic, "the character style's own property")
+        assertEquals("Georgia", paragraph.fontFamily, "everything it left alone comes from the paragraph")
+        assertEquals(40.0, paragraph.fontSizePt, 1e-6)
+        assertTrue(paragraph.bold)
+        assertEquals(Color.WHITE, paragraph.color)
     }
 
     @Test
