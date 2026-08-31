@@ -29,12 +29,28 @@ object KeynoteText {
      * way (password-protected, or an iWork '09 document whose body is `index.apxl`) falls back to
      * the `QuickLook/Preview.pdf` Keynote embeds, which carries the same words as real PDF text.
      *
+     * A deck that parses only *partly* — some slides from archives this module reads, some not —
+     * keeps the slides it read and takes only the missing ones from the preview, so a single
+     * unhandled slide no longer collapses a whole deck into one entry.
+     *
      * Never throws: a damaged, empty or unreadable file comes back as an empty list, matching
      * [PresentationLoader.load]'s contract.
      */
     fun slideTexts(file: File): List<String> {
         val native = nativeSlideTexts(file)
-        return if (native.any { it.isNotBlank() }) native else previewPdfSlideTexts(file)
+        // The whole deck read: the preview is never opened, which is also the common case.
+        if (native.isNotEmpty() && native.none { it.isBlank() }) return native
+        // Otherwise some slides read and some did not -- a deck mixing archives this module handles
+        // with one it does not. Falling back wholesale would throw away the slides that *did* parse,
+        // and keeping `native` wholesale drops the ones that did not, so fill only the gaps. Index
+        // alignment is the risk, so gaps are only filled when the preview's pages and the deck's
+        // slides agree in number; otherwise the older all-or-nothing rule stands.
+        val preview = previewPdfSlideTexts(file)
+        return when {
+            native.isEmpty() -> preview
+            preview.size != native.size -> if (native.any { it.isNotBlank() }) native else preview
+            else -> native.mapIndexed { index, text -> if (text.isBlank()) preview[index] else text }
+        }
     }
 
     // ── The modern path: the IWA object graph ────────────────────────────────
