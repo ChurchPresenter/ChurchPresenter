@@ -57,6 +57,7 @@ class SceneViewModelSourceTypesTest {
         SceneSource.QRCodeSource(id = "qr", name = "QR"),
         SceneSource.CameraSource(id = "camera", name = "Camera"),
         SceneSource.ScreenCaptureSource(id = "screen", name = "Screen"),
+        SceneSource.NdiSource(id = "ndi", name = "NDI", sourceName = "BOOTH (Camera 1)"),
         SceneSource.BibleSource(id = "bible", name = "Bible"),
     )
 

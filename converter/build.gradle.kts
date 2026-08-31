@@ -54,12 +54,24 @@ dependencies {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin/converter", "src/test/kotlin")
+    // Whole source set in, `ui/**` back out again below.
+    //
+    // This used to name `src/main/kotlin/converter` and carve `ui/**` out by simply not listing it.
+    // That worked until the sources moved under `org/churchpresenter/`, at which point the path
+    // matched **nothing** and main-source analysis switched itself off -- silently, because a
+    // detekt run over no files is a passing detekt run. Naming what is excluded rather than what is
+    // included is what stops that happening again: if `ui/**` ever stops matching, the gate
+    // analyses too much and says so, instead of too little and saying nothing.
+    source.setFrom("src/main/kotlin", "src/test/kotlin")
     parallel = true
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     jvmTarget = "21"
+    // The one carve-out: `ui/**` is Compose desktop written before this gate existed, and it is the
+    // same shape `:composeApp` keeps in a baseline rather than gating. This module has no baseline,
+    // so it is excluded here instead. Everything that parses a file is analysed, and is clean.
+    exclude("**/ui/**")
     reports {
         html.required.set(true)
         xml.required.set(false)

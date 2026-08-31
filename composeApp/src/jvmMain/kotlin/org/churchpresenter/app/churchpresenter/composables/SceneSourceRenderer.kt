@@ -51,6 +51,9 @@ import churchpresenter.composeapp.generated.resources.canvas_video_vlc_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
 import churchpresenter.composeapp.generated.resources.canvas_video_file_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_loading
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi_default
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi_waiting
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
@@ -151,6 +154,7 @@ fun SceneSourceRenderer(
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
         is SceneSource.CameraSource -> CameraSourceContent(source, modifier, showDiagnostics)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
+        is SceneSource.NdiSource -> NdiSourceContent(source, modifier)
         is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
 }
@@ -937,6 +941,60 @@ private fun CameraSourceContent(
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+/**
+ * A live NDI source from the network.
+ *
+ * Drawn with [ContentScale.Fit] rather than the camera's `Crop`: an NDI source is as often a
+ * graphics or slide feed from another machine as it is a camera, and cropping one of those loses
+ * content the operator put there on purpose. The layer's own box is how they choose the framing.
+ */
+@Composable
+private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) {
+    if (source.sourceName.isBlank() && source.sourceAddress.isBlank()) {
+        NdiPlaceholder(stringResource(Res.string.canvas_placeholder_ndi_default), modifier)
+        return
+    }
+
+    val flows = remember(source.sourceName, source.sourceAddress, source.lowBandwidth) {
+        SharedNdiFrameCache.acquire(source)
+    }
+    DisposableEffect(source.sourceName, source.sourceAddress, source.lowBandwidth) {
+        onDispose { SharedNdiFrameCache.release(source) }
+    }
+
+    val frame by flows.frame.collectAsState()
+    val connected by flows.connected.collectAsState()
+    val label = source.sourceName.ifBlank { source.sourceAddress }
+
+    val shown = frame
+    if (shown != null) {
+        Image(
+            bitmap = shown,
+            contentDescription = label,
+            contentScale = ContentScale.Fit,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        // Connected but with nothing on the wire yet is "waiting"; not connected is a runtime that
+        // is not installed or a source that has gone away, and the two read differently on purpose.
+        NdiPlaceholder(
+            text = if (connected) stringResource(Res.string.canvas_placeholder_ndi_waiting, label)
+                   else stringResource(Res.string.canvas_placeholder_ndi, label),
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun NdiPlaceholder(text: String, modifier: Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize().background(Color.DarkGray),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = text, color = Color.White, fontSize = 14.sp, textAlign = TextAlign.Center)
     }
 }
 

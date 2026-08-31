@@ -3,6 +3,7 @@ package org.churchpresenter.ndi
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class NdiPixelsTest {
 
@@ -69,5 +70,47 @@ class NdiPixelsTest {
     @Test
     fun `only fill-and-key puts a second sender on the network`() {
         assertEquals(listOf(false, false, true), NdiOutputMode.entries.map { it.hasKeySender })
+    }
+
+    @Test
+    fun `a frame survives the round trip out to NDI and back`() {
+        val original = intArrayOf(0xFF102030.toInt(), 0x80FFFFFF.toInt(), 0x00000000, 0xFF7F0000.toInt())
+        val bytes = ByteArray(frameSizeBytes(original.size, 1))
+        val back = IntArray(original.size)
+
+        argbToNdiBytes(original, bytes, opaque = false)
+        ndiBytesToArgb(bytes, back, original.size, opaque = false)
+
+        assertContentEquals(original, back)
+    }
+
+    @Test
+    fun `an opaque read ignores the fourth byte, whatever it happens to hold`() {
+        val original = intArrayOf(0x00102030, 0x80FFFFFF.toInt())
+        val bytes = ByteArray(frameSizeBytes(original.size, 1))
+        val back = IntArray(original.size)
+
+        argbToNdiBytes(original, bytes, opaque = false)
+        ndiBytesToArgb(bytes, back, original.size, opaque = true)
+
+        assertContentEquals(intArrayOf(0xFF102030.toInt(), 0xFFFFFFFF.toInt()), back)
+    }
+
+    @Test
+    fun `only the pixels asked for are read, so an oversized buffer keeps its tail`() {
+        val bytes = ByteArray(frameSizeBytes(4, 1))
+        argbToNdiBytes(IntArray(4) { 0xFF112233.toInt() }, bytes, opaque = false)
+        val out = IntArray(4) { -1 }
+
+        ndiBytesToArgb(bytes, out, count = 2, opaque = false)
+
+        assertContentEquals(intArrayOf(0xFF112233.toInt(), 0xFF112233.toInt(), -1, -1), out)
+    }
+
+    @Test
+    fun `every format a receiver can be handed is recognised, and nothing else is`() {
+        assertEquals(NdiPixelFormat.BGRA, NdiPixelFormat.ofFourCc(NdiPixelFormat.BGRA.fourCc))
+        assertEquals(NdiPixelFormat.BGRX, NdiPixelFormat.ofFourCc(NdiPixelFormat.BGRX.fourCc))
+        assertNull(NdiPixelFormat.ofFourCc(0x59565955))
     }
 }

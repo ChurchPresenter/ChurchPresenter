@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SongBackground
@@ -23,6 +24,17 @@ class SectionBackgroundSlotTest {
         type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25, blur = 3,
     )
     private val band = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
+    private val stageCamera = SongBackground(
+        type = SongBackgroundType.CAMERA,
+        camera = CameraDeviceRef(
+            devicePath = "decklink://1",
+            deviceName = "DeckLink Mini Recorder",
+            videoFormat = "1920x1080@30",
+            videoConnection = 4,
+            isDeckLink = true,
+            deckLinkIndex = 1,
+        ),
+    )
 
     // ── Reading the sections ────────────────────────────────────────────────────
 
@@ -113,6 +125,32 @@ class SectionBackgroundSlotTest {
 
         assertEquals(band, sectionBackgroundSlots(twice).single().background)
         assertEquals(1, twice.count { it.startsWith("[background:") }, "one type line, not two")
+    }
+
+    /**
+     * A camera's keys are lowercase and hyphenated with no digits, which is what the directive
+     * pattern will accept — a key holding a digit would be read as a line of the song instead.
+     */
+    @Test
+    fun `a camera pinned to a section reads back off the lyrics`() {
+        val out = withSectionBackground(listOf("{Chorus}", "b"), 0, SONG_BACKGROUND_PREFIX, stageCamera)
+
+        assertEquals(stageCamera, sectionBackgroundSlots(out).single().background)
+    }
+
+    /**
+     * Every camera key must be listed in `songBackgroundKeys`, which is what a rewrite clears.
+     * One missing there and its directive is stranded in the lyrics for ever — invisible in the
+     * editor, and read back the next time the section is a camera again.
+     */
+    @Test
+    fun `switching a camera section to a colour strands none of its device lines`() {
+        val camera = withSectionBackground(listOf("{Chorus}", "b"), 0, SONG_BACKGROUND_PREFIX, stageCamera)
+
+        val recoloured = withSectionBackground(camera, 0, SONG_BACKGROUND_PREFIX, band)
+
+        assertTrue(recoloured.none { it.contains("camera") }, "left behind: $recoloured")
+        assertEquals(band, sectionBackgroundSlots(recoloured).single().background)
     }
 
     @Test

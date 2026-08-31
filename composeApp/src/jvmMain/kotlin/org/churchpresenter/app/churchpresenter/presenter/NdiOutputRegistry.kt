@@ -3,13 +3,18 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.churchpresenter.ndi.NdiBandwidth
+import org.churchpresenter.ndi.NdiFinder
+import org.churchpresenter.ndi.NdiReceiver
 import org.churchpresenter.ndi.NdiRuntimeHost
+import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.settings.ScreenAssignment
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * One NDI runtime and the renderers opened over it, keyed by output index.
+ * One NDI runtime, the renderers opened over it keyed by output index, and the finders and
+ * receivers the Canvas opens over the same one.
  *
  * A class rather than the object it is reached through, so its bookkeeping is testable: which
  * renderer answers for which index, what replacing one does to the old one, and what
@@ -86,6 +91,24 @@ class NdiOutputRegistry(private val host: NdiRuntimeHost = NdiRuntimeHost()) {
     fun release(index: Int, renderer: NdiVideoRenderer) {
         renderers.remove(index, renderer)
     }
+
+    /**
+     * Discovery over the same runtime, or null when it is not ready.
+     *
+     * Not tracked here the way renderers are: a finder belongs to whoever is looking at a source
+     * list, and outlives nothing. See `NdiSourceDirectory`, which owns the one the Canvas uses.
+     */
+    fun createFinder(): NdiFinder? = host.createFinder()
+
+    /**
+     * A receiver for [source] over the same runtime, or null when it is not ready.
+     *
+     * The other direction of this class's day job, and deliberately over the same
+     * [NdiRuntimeHost]: `NDIlib_initialize` is refcounted but nothing else in the native library
+     * is, so a canvas layer receiving a camera and an output sending lyrics share one runtime.
+     */
+    fun createReceiver(source: NdiSourceInfo, bandwidth: NdiBandwidth, receiverName: String): NdiReceiver? =
+        host.createReceiver(source, bandwidth, receiverName)
 
     /** How many receivers are watching the output at [index]. 0 when there is no such output. */
     fun connectionCount(index: Int): Int = renderers[index]?.connectionCount() ?: 0

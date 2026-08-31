@@ -4,15 +4,21 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-**The send half of NDI** — Vizrt's Network Device Interface — as a plain Kotlin library: find the
-runtime, bring it up, create a named source, push frames at it, count who is watching, tear it down.
-A real Gradle module of this build: `include(":ndi")`, `implementation(projects.ndi)`.
+**NDI** — Vizrt's Network Device Interface — as a plain Kotlin library, both directions: find the
+runtime, bring it up, create a named source, push frames at it, count who is watching, tear it down;
+and, coming the other way, discover who else is sending and pull one of those sources back in as
+packed ARGB. A real Gradle module of this build: `include(":ndi")`, `implementation(projects.ndi)`.
 
 The package is `org.churchpresenter.ndi`.
 
-**Receive is deliberately not here.** An NDI *receiver* is a second live media pipeline with its own
-reconnect, dropped-frame and audio-sync behaviour; if it is ever wanted it belongs as a `SceneSource`
-in the Canvas compositor beside the camera and screen-capture sources, not bolted onto this.
+**Receive is video only, and that is deliberate.** `recvCaptureVideo` asks the runtime for audio and
+metadata and lets it drop both — a receiver that accepted audio nobody drained would grow the SDK's
+own queue for the length of a service. If audio is ever wanted it is a second pipeline with its own
+sync behaviour, not a flag on this one.
+
+The app-side wiring for receive lives in `:composeApp` beside the camera and screen-capture sources
+it sits next to in the Canvas: `NdiFrameCache` (one connection per source, reference counted) and
+`NdiSourceDirectory` (one finder, held open while a picker is looking).
 
 ## **This module ships no NDI binaries, and never may**
 
@@ -42,11 +48,14 @@ into a fat jar. If someone asks for "one-click NDI", the answer is a link to the
 |---|---|
 | `NdiRuntime.kt` | Where the runtime is: the env vars, the platform defaults, the search. Pure over its arguments — the environment and the filesystem are passed in |
 | `NdiRuntimeStatus.kt` | The four outcomes of looking, and `NdiRuntimeHost` — one runtime per process, handing out senders |
-| `NdiLibrary.kt` | The six native calls, as an interface, plus `NdiVideoFrame`. **The seam** |
-| `JnaNdiLibrary.kt` | The only file that knows JNA exists: the C symbols, the two ABI structs, the native pixel buffer |
+| `NdiLibrary.kt` | The fourteen native calls, as an interface, plus `NdiVideoFrame`. **The seam** |
+| `JnaNdiLibrary.kt` | The only file that knows JNA exists: the C symbols, the five ABI structs, the native pixel buffers |
 | `NdiSender.kt` | One source on the network — the fill, and the key beside it when the mode wants one |
-| `NdiPixelFormat.kt` | The FourCC codes and `NdiOutputMode` |
-| `NdiPixels.kt` | ARGB → NDI byte order, into a buffer the caller reuses |
+| `NdiFinder.kt` | Discovery: one long-lived finder, and what it knows so far |
+| `NdiReceiver.kt` | One source being received — the connection, the conversion and the reused buffer |
+| `NdiSourceInfo.kt` | A source's name and address, the pair everything on the receive side is keyed by |
+| `NdiPixelFormat.kt` | The FourCC codes, `NdiOutputMode`, and the FourCC → format lookup a received frame needs |
+| `NdiPixels.kt` | ARGB ⇄ NDI byte order, into a buffer the caller reuses |
 
 App-side wiring is **not** here, the way `AtemBridge` is not in `:atem`: `NdiVideoRenderer`,
 `NdiManager` and `ProjectionNdiCard` live in `:composeApp`.
@@ -67,8 +76,18 @@ App-side wiring is **not** here, the way `AtemBridge` is not in `:atem`: `NdiVid
 - **Buffers are reused, never reallocated per frame.** At 1080p a fresh array per frame is 8.3 MB
   of garbage 30 times a second — the exact allocation profile the Browser Source renderer was
   explicitly fixed to stop paying. `NdiSender` and `JnaNdiLibrary` each grow one buffer and keep it.
-- **An `NdiSender` is driven by exactly one pump.** That is what makes the reused buffers safe; two
-  threads through one sender tears a frame.
+- **An `NdiSender` is driven by exactly one pump, and so is an `NdiReceiver`.** That is what makes
+  the reused buffers safe; two threads through one sender tears a frame, and two through one
+  receiver read a buffer while it is being overwritten. `JnaNdiLibrary` keeps one buffer **per
+  handle** for the same reason, on both sides.
+- **A received frame's pixels are borrowed, not given.** `NdiLibrary.recvCaptureVideo` and
+  `NdiReceiver.receive` both hand back a buffer that the next call overwrites — copy what you need
+  before asking for another frame. `NdiFrameCache` does that into a `BufferedImage` immediately.
+- **`line_stride_in_bytes` is not `width * 4`.** The runtime is entitled to pad rows, and a copy
+  that assumes packed rows shears the picture. `copyReceivedFrame` reads row by row unless the frame
+  happens to be packed.
+- **Every captured frame must be freed, including one that is dropped.** A format we do not read is
+  still the runtime's memory until `NDIlib_recv_free_video_v2` returns it — hence the `finally`.
 
 ## Why JNA
 
@@ -77,8 +96,9 @@ App-side wiring is **not** here, the way `AtemBridge` is not in `:atem`: `NdiVid
   `libndi.so.5` soname that NDI 6 no longer ships on Linux, which is precisely what
   `libraryFileNamesFor` tries `.so.6` first to avoid.
 - **Panama/FFM** is the modern answer and is finalized in JDK 22. This build targets 21.
-- **JNA** works on 21 and on arm64, was already a dependency of this app via vlcj, and the send API
-  is six functions. No C++ shim, no prebuilt natives to build and commit for three platforms.
+- **JNA** works on 21 and on arm64, was already a dependency of this app via vlcj, and the API this
+  app needs is sixteen functions. No C++ shim, no prebuilt natives to build and commit for three
+  platforms.
 
 The version is `jna` in `gradle/libs.versions.toml` — `:composeApp` uses the same alias. Never a
 hand-copied literal.
@@ -118,6 +138,16 @@ It exists because the fake proves the logic but cannot prove the *binding*: that
 flat C symbols `NdiLibC` declares, and that `NdiSendCreateStruct`/`NdiVideoFrameStruct` match the
 SDK's ABI field-for-field. Those fail **silently** — a wrong `@Structure.FieldOrder` is not a compile
 error and not an exception, it is a wrong picture.
+
+**Receive verified 2026-08-30 against the same SDK, as a full loopback**: a sender put up, found by
+discovery as `AIS-MAC-MINI.LOCAL (ChurchPresenter Loopback Test)` at `127.0.0.1:5961`, connected to,
+and a 16x16 frame read back with its red channel intact. That is the only thing that can check
+`NdiFindCreateStruct`, `NdiSourceStruct` and `NdiRecvCreateStruct`, because a wrong field order
+there is not a crash — the receiver simply connects to nothing and no frame ever arrives.
+
+**A source's advertised name is `MACHINE (Name)`, not the name it was created with.** The loopback
+test matches by containment for that reason, and the picker on the Canvas stores the full advertised
+string, which is what a receiver connects by.
 
 **Verified 2026-08-26 against NDI SDK 6.3.2.0 on macOS** (`NDI SDK APPLE ... 6.3.2.0`, found at
 `/Library/NDI SDK for Apple/lib/macOS/libndi.dylib`): discovery, `JnaNdiLibrary.load`, the version

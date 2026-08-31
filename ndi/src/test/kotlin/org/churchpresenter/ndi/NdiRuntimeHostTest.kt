@@ -138,4 +138,48 @@ class NdiRuntimeHostTest {
         assertTrue(h.start().isReady)
         assertEquals(2, lib.initializeCount)
     }
+
+    @Test
+    fun `no finder or receiver is handed out before the runtime is up`() {
+        val h = host()
+        assertNull(h.createFinder())
+        assertNull(h.createReceiver(NdiSourceInfo("BOOTH (Camera 1)")))
+    }
+
+    @Test
+    fun `a running runtime hands out a finder over the same library`() {
+        val lib = FakeNdiLibrary().apply { discoverable += NdiSourceInfo("BOOTH (Camera 1)") }
+        val h = host(lib)
+        h.start()
+
+        val finder = assertNotNull(h.createFinder())
+        assertTrue(finder.open())
+        assertEquals(listOf(NdiSourceInfo("BOOTH (Camera 1)")), finder.sources())
+    }
+
+    @Test
+    fun `a running runtime hands out a receiver connected to the source it was given`() {
+        val lib = FakeNdiLibrary()
+        val h = host(lib)
+        h.start()
+
+        val source = NdiSourceInfo("BOOTH (Camera 1)")
+        val receiver = assertNotNull(h.createReceiver(source, NdiBandwidth.LOWEST, "Canvas"))
+        assertTrue(receiver.open())
+        assertEquals(
+            FakeNdiLibrary.ReceiverConnection(source, NdiBandwidth.LOWEST, "Canvas"),
+            lib.receivers.values.single(),
+        )
+    }
+
+    @Test
+    fun `a finder is refused again once the runtime has been shut down`() {
+        val h = host()
+        h.start()
+        assertNotNull(h.createFinder())
+
+        h.shutdown()
+        assertNull(h.createFinder())
+        assertNull(h.createReceiver(NdiSourceInfo("BOOTH (Camera 1)")))
+    }
 }

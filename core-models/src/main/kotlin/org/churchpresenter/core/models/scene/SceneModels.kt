@@ -233,6 +233,30 @@ sealed class SceneSource {
         val windowId: String = ""
     ) : SceneSource()
 
+    /**
+     * A live NDI source from the network, received and drawn as a layer.
+     *
+     * [sourceName] is the full `MACHINE (Source)` name the sender advertises, which is the only
+     * durable handle a source has — its address moves with DHCP, so that is stored beside it in
+     * [sourceAddress] as a fallback for a source on another subnet rather than as the identity.
+     *
+     * [lowBandwidth] asks the sender for the low-resolution proxy it generates anyway. Worth having
+     * on a layer that ends up as a corner inset: on a congested network it is the difference
+     * between a service that runs and one that stutters.
+     */
+    @Serializable
+    @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.NdiSource")
+    data class NdiSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val sourceName: String = "",
+        val sourceAddress: String = "",
+        val lowBandwidth: Boolean = false
+    ) : SceneSource()
+
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.BibleSource")
     data class BibleSource(
