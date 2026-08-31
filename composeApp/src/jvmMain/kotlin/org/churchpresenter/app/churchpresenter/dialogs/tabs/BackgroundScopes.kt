@@ -73,6 +73,7 @@ internal fun BackgroundScope.typeOptions(): List<String> = buildList {
     add(Constants.BACKGROUND_COLOR)
     add(Constants.BACKGROUND_IMAGE)
     add(Constants.BACKGROUND_VIDEO)
+    add(Constants.BACKGROUND_CAMERA)
     add(Constants.BACKGROUND_TRANSPARENT)
     if (offersGradient) add(Constants.BACKGROUND_GRADIENT)
 }
@@ -87,6 +88,7 @@ internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundCon
         backgroundOpacity = defaultBackgroundOpacity,
         dim = defaultBackgroundDim,
         blur = defaultBackgroundBlur,
+        camera = defaultBackgroundCamera,
     )
     BackgroundScope.DEFAULT_LOWER_THIRD -> BackgroundConfig(
         backgroundType = defaultLowerThirdBackgroundType,
@@ -96,6 +98,7 @@ internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundCon
         backgroundOpacity = defaultLowerThirdBackgroundOpacity,
         dim = defaultLowerThirdBackgroundDim,
         blur = defaultLowerThirdBackgroundBlur,
+        camera = defaultLowerThirdBackgroundCamera,
     )
     BackgroundScope.BIBLE -> bibleBackground
     BackgroundScope.BIBLE_LOWER_THIRD -> bibleLowerThirdBackground
@@ -116,6 +119,7 @@ internal fun BackgroundSettings.withConfigFor(
         defaultBackgroundOpacity = config.backgroundOpacity,
         defaultBackgroundDim = config.dim,
         defaultBackgroundBlur = config.blur,
+        defaultBackgroundCamera = config.camera,
     )
     BackgroundScope.DEFAULT_LOWER_THIRD -> copy(
         defaultLowerThirdBackgroundType = config.backgroundType,
@@ -125,6 +129,7 @@ internal fun BackgroundSettings.withConfigFor(
         defaultLowerThirdBackgroundOpacity = config.backgroundOpacity,
         defaultLowerThirdBackgroundDim = config.dim,
         defaultLowerThirdBackgroundBlur = config.blur,
+        defaultLowerThirdBackgroundCamera = config.camera,
     )
     BackgroundScope.BIBLE -> copy(bibleBackground = config)
     BackgroundScope.BIBLE_LOWER_THIRD -> copy(bibleLowerThirdBackground = config)

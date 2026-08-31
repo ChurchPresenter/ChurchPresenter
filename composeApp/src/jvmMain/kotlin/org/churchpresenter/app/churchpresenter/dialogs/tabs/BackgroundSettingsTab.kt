@@ -72,6 +72,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.atem_upload_background_1_tooltip
 import churchpresenter.composeapp.generated.resources.atem_upload_background_2_tooltip
 import churchpresenter.composeapp.generated.resources.cancel
@@ -608,6 +609,7 @@ internal fun backgroundTypeLabel(type: String): StringResource = when (type) {
     Constants.BACKGROUND_COLOR -> Res.string.background_color_option
     Constants.BACKGROUND_IMAGE -> Res.string.background_image_option
     Constants.BACKGROUND_VIDEO -> Res.string.background_video_option
+    Constants.BACKGROUND_CAMERA -> Res.string.background_camera_option
     Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option
     Constants.BACKGROUND_GRADIENT -> Res.string.gradient_enabled
     Constants.BACKGROUND_FOLLOW_DEFAULT -> Res.string.background_follow_default_option

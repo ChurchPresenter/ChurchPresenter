@@ -1,5 +1,6 @@
 package org.churchpresenter.core.models.songs
 
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -244,6 +245,93 @@ class SongBackgroundFormatTest {
 
         assertEquals(SONG_BACKGROUND_FULL_OPACITY, over.opacity)
         assertEquals(SONG_BACKGROUND_FULL_OPACITY, junk.opacity)
+    }
+
+    // ── A camera ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a camera records its device and reads it back whole`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(
+                devicePath = "decklink://1",
+                deviceName = "DeckLink Mini Recorder",
+                videoFormat = "1920x1080@30",
+                videoConnection = 4,
+                isDeckLink = true,
+                deckLinkIndex = 1,
+            ),
+        )
+
+        val reread = parser.parseSongContent(written(blank().copy(background = camera)))
+
+        assertEquals(camera, reread?.background)
+    }
+
+    /**
+     * A device path holds colons, slashes and sometimes an `=`; the header splits on the first
+     * colon only, so the rest of the value has to survive intact.
+     */
+    @Test
+    fun `a device path full of punctuation survives the round trip`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "dshow://:dshow-vdev=Logitech HD", deviceName = "Logitech HD"),
+        )
+
+        val reread = parser.parseSongContent(written(blank().copy(background = camera)))
+
+        assertEquals("dshow://:dshow-vdev=Logitech HD", reread?.background?.camera?.devicePath)
+    }
+
+    @Test
+    fun `a camera writes no colour, picture or clip`() {
+        val text = written(
+            blank().copy(
+                background = SongBackground(
+                    type = SongBackgroundType.CAMERA,
+                    camera = CameraDeviceRef(devicePath = "avfoundation://0", deviceName = "FaceTime HD"),
+                    image = "/never/written.jpg",
+                    video = "/never/written.mp4",
+                ),
+            ),
+        )
+
+        assertTrue(text.contains("background-camera-device-path: avfoundation://0"))
+        assertFalse(text.contains("background-image"))
+        assertFalse(text.contains("background-video"))
+        assertFalse(text.contains("background-color"))
+    }
+
+    /**
+     * The optional device fields are written only when they are set, and every one of them reads
+     * back at its own default — which is what keeps the capture key identical across a save and a
+     * reload, and so keeps one device to one capture.
+     */
+    @Test
+    fun `an ordinary camera writes only its path and name`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "avfoundation://0", deviceName = "FaceTime HD"),
+        )
+
+        val text = written(blank().copy(background = camera))
+
+        assertFalse(text.contains("background-camera-format"))
+        assertFalse(text.contains("background-camera-connection"))
+        assertFalse(text.contains("background-camera-decklink"))
+        assertEquals(camera, parser.parseSongContent(text)?.background)
+    }
+
+    @Test
+    fun `a camera has no media path but is still an override`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "avfoundation://0"),
+        )
+
+        assertEquals("", camera.mediaPath, "mediaPath is a file, and a camera has none")
+        assertTrue(camera.isCustom)
     }
 
     @Test

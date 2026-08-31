@@ -53,6 +53,7 @@ class BackgroundSettingsTabLabelsTest {
         "Color" to 5,
         "Image" to 1,
         "Video Loop" to 1,
+        "Camera" to 1,
         "Transparent" to 1,
 
         // On Color: the field, its stored value, and the look controls under it.
