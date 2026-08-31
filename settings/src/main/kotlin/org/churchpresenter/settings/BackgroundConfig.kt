@@ -1,11 +1,13 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.settings.utils.Constants
 
 @Serializable
 data class BackgroundConfig(
-    val backgroundType: String = Constants.BACKGROUND_COLOR, // "Default", "Color", "Image", "Video"
+    // "Default", "Color", "Image", "Video", "Camera", "Transparent", "Gradient"
+    val backgroundType: String = Constants.BACKGROUND_COLOR,
     val backgroundColor: String = "#000000", // Black
     val backgroundImage: String = "",
     val backgroundVideo: String = "",
@@ -22,5 +24,11 @@ data class BackgroundConfig(
      * here and one a song brings with it can be made to look alike.
      */
     val dim: Int = 0,
-    val blur: Int = 0
+    val blur: Int = 0,
+    /**
+     * The device a [Constants.BACKGROUND_CAMERA] background draws, appended for the same reason
+     * dim and blur were: these are same-typed parameters, and re-ordering them would silently
+     * change the meaning of any positional construction.
+     */
+    val camera: CameraDeviceRef = CameraDeviceRef()
 )

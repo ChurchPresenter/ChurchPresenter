@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.settings.utils.Constants
 
@@ -31,6 +32,9 @@ data class BackgroundSettings(
     val defaultBackgroundBlur: Int = 0,
     val defaultLowerThirdBackgroundDim: Int = 0,
     val defaultLowerThirdBackgroundBlur: Int = 0,
+    /** The camera each Default card draws, appended under the same rule as dim and blur above. */
+    val defaultBackgroundCamera: CameraDeviceRef = CameraDeviceRef(),
+    val defaultLowerThirdBackgroundCamera: CameraDeviceRef = CameraDeviceRef(),
     /**
      * The quick tray's live pick, standing in front of every background above it — and in front of
      * a song's own, since an operator reaching for the tray mid-service is overriding what is on
