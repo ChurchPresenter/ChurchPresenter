@@ -52,13 +52,29 @@ class DeviceInfoReportTest {
         }
     }
 
+    /**
+     * The build hash is skipped, and only the build hash.
+     *
+     * The report opens with `Version: 26.10.228 (2adc18080) (dev)` — a git short hash, which is
+     * five to nine hex characters of which most are digits, so sooner or later one of them contains
+     * one of the ports below and this test fails on a commit that changed nothing. It has:
+     * `2adc18080` holds `18080`. The hash comes from the build rather than from [settingsWithSecrets],
+     * so it cannot be the leak this is looking for, and dropping its line keeps the check on the
+     * lines that could actually carry a port.
+     */
     @Test
     fun `configured ports are not printed either`() {
-        val text = report()
+        val text = report().lines().filterNot { it.startsWith("Version:") }.joinToString("\n")
         // Deliberately non-default ports, so a match cannot be coincidental.
         for (port in listOf("19910", "14455", "18080")) {
             assertFalse(port in text, "report leaked port $port")
         }
+    }
+
+    /** And the line that was skipped above is still there, still naming the build. */
+    @Test
+    fun `the report names the build it came from`() {
+        assertTrue(report().lines().any { it.startsWith("Version:") }, "the version line is the first fact")
     }
 
     @Test

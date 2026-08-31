@@ -107,6 +107,23 @@ class ChordTransposerTest {
         )
     }
 
+    /**
+     * A camera's keys are the longest the vocabulary has, and the pattern accepts lowercase letters
+     * and hyphens only — a key holding a digit would be read as a lyric line, silently, and the
+     * device it names would be lost the next time the song was saved.
+     */
+    @Test
+    fun `a camera's device keys are directives`() {
+        assertEquals(
+            "background-camera-device-path" to "avfoundation://0",
+            ChordTransposer.backgroundDirectiveOf("[background-camera-device-path: avfoundation://0]"),
+        )
+        assertEquals(
+            "lower-third-background-camera-decklink-index" to "1",
+            ChordTransposer.backgroundDirectiveOf("[lower-third-background-camera-decklink-index: 1]"),
+        )
+    }
+
     @Test
     fun `a line that is not a background key is left as it was`() {
         for (line in listOf("[Verse 1]", "[Chorus: loud]", "[G]he said: hello", "background: color", "[]")) {

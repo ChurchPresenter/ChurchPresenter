@@ -109,6 +109,7 @@ internal object TypeLabel {
     const val COLOR = "Color"
     const val IMAGE = "Image"
     const val VIDEO = "Video Loop"
+    const val CAMERA = "Camera"
     const val TRANSPARENT = "Transparent"
     const val GRADIENT = "Gradient"
 }

@@ -1,5 +1,6 @@
 package org.churchpresenter.core.models.songs
 
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -217,6 +218,122 @@ class SongBackgroundFormatTest {
         assertFalse(text.contains("background-blur"))
     }
 
+    /**
+     * Opacity was in [SongBackground] but in neither [songBackgroundKeys] nor
+     * [songBackgroundFields], so a song's background opacity silently reverted to full on every
+     * reload. It is written like dim and blur — only when it is set to something.
+     */
+    @Test
+    fun `a full opacity is not written, and anything less is`() {
+        val full = written(blank().copy(background = SongBackground(type = SongBackgroundType.COLOR)))
+        val faded = written(
+            blank().copy(background = SongBackground(type = SongBackgroundType.COLOR, opacity = 55))
+        )
+
+        assertFalse(full.contains("background-opacity"))
+        assertTrue(faded.contains("background-opacity: 55"))
+    }
+
+    @Test
+    fun `an opacity out of range is clamped, and a non-numeric one falls back to full`() {
+        val over = songBackgroundFrom(
+            mapOf("background" to "color", "background-opacity" to "180"), SONG_BACKGROUND_PREFIX
+        )
+        val junk = songBackgroundFrom(
+            mapOf("background" to "color", "background-opacity" to "half"), SONG_BACKGROUND_PREFIX
+        )
+
+        assertEquals(SONG_BACKGROUND_FULL_OPACITY, over.opacity)
+        assertEquals(SONG_BACKGROUND_FULL_OPACITY, junk.opacity)
+    }
+
+    // ── A camera ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a camera records its device and reads it back whole`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(
+                devicePath = "decklink://1",
+                deviceName = "DeckLink Mini Recorder",
+                videoFormat = "1920x1080@30",
+                videoConnection = 4,
+                isDeckLink = true,
+                deckLinkIndex = 1,
+            ),
+        )
+
+        val reread = parser.parseSongContent(written(blank().copy(background = camera)))
+
+        assertEquals(camera, reread?.background)
+    }
+
+    /**
+     * A device path holds colons, slashes and sometimes an `=`; the header splits on the first
+     * colon only, so the rest of the value has to survive intact.
+     */
+    @Test
+    fun `a device path full of punctuation survives the round trip`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "dshow://:dshow-vdev=Logitech HD", deviceName = "Logitech HD"),
+        )
+
+        val reread = parser.parseSongContent(written(blank().copy(background = camera)))
+
+        assertEquals("dshow://:dshow-vdev=Logitech HD", reread?.background?.camera?.devicePath)
+    }
+
+    @Test
+    fun `a camera writes no colour, picture or clip`() {
+        val text = written(
+            blank().copy(
+                background = SongBackground(
+                    type = SongBackgroundType.CAMERA,
+                    camera = CameraDeviceRef(devicePath = "avfoundation://0", deviceName = "FaceTime HD"),
+                    image = "/never/written.jpg",
+                    video = "/never/written.mp4",
+                ),
+            ),
+        )
+
+        assertTrue(text.contains("background-camera-device-path: avfoundation://0"))
+        assertFalse(text.contains("background-image"))
+        assertFalse(text.contains("background-video"))
+        assertFalse(text.contains("background-color"))
+    }
+
+    /**
+     * The optional device fields are written only when they are set, and every one of them reads
+     * back at its own default — which is what keeps the capture key identical across a save and a
+     * reload, and so keeps one device to one capture.
+     */
+    @Test
+    fun `an ordinary camera writes only its path and name`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "avfoundation://0", deviceName = "FaceTime HD"),
+        )
+
+        val text = written(blank().copy(background = camera))
+
+        assertFalse(text.contains("background-camera-format"))
+        assertFalse(text.contains("background-camera-connection"))
+        assertFalse(text.contains("background-camera-decklink"))
+        assertEquals(camera, parser.parseSongContent(text)?.background)
+    }
+
+    @Test
+    fun `a camera has no media path but is still an override`() {
+        val camera = SongBackground(
+            type = SongBackgroundType.CAMERA,
+            camera = CameraDeviceRef(devicePath = "avfoundation://0"),
+        )
+
+        assertEquals("", camera.mediaPath, "mediaPath is a file, and a camera has none")
+        assertTrue(camera.isCustom)
+    }
+
     @Test
     fun `every field of both backgrounds survives the round trip`() {
         val original = blank().copy(
@@ -227,12 +344,14 @@ class SongBackgroundFormatTest {
                 colorEnd = "#3a2352",
                 dim = 25,
                 blur = 3,
+                opacity = 70,
             ),
             lowerThirdBackground = SongBackground(
                 type = SongBackgroundType.VIDEO,
                 video = "/media/loop.mp4",
                 dim = 65,
                 blur = 12,
+                opacity = 40,
             ),
         )
 
@@ -301,6 +420,7 @@ class SongBackgroundFormatTest {
     fun `the header and a section directive are written in one vocabulary`() {
         val background = SongBackground(
             type = SongBackgroundType.GRADIENT, color = "#131a3a", colorEnd = "#3a2352", dim = 25, blur = 3,
+            opacity = 80,
         )
 
         val fields = songBackgroundFields(background, SONG_BACKGROUND_PREFIX)
@@ -313,6 +433,7 @@ class SongBackgroundFormatTest {
                 "background-color-end" to "#3a2352",
                 "background-dim" to "25",
                 "background-blur" to "3",
+                "background-opacity" to "80",
             ),
             fields,
         )

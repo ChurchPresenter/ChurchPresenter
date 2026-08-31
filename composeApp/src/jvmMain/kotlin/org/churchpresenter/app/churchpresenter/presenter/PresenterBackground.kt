@@ -27,9 +27,11 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.AppSettings
@@ -104,8 +106,11 @@ internal data class ResolvedBackground(
     val dimPercent: Int = 0,
     /** Blur radius in the 1920×1080 reference space the presenters measure in. */
     val blurReferencePx: Int = 0,
+    /** The device a camera background draws. Unset for every other type. */
+    val camera: CameraDeviceRef = CameraDeviceRef(),
 ) {
     val usesVideo: Boolean get() = type == Constants.BACKGROUND_VIDEO && videoPath.isNotEmpty()
+    val usesCamera: Boolean get() = type == Constants.BACKGROUND_CAMERA && camera.isSet
     val isBlurred: Boolean get() = blurReferencePx > 0
 }
 
@@ -160,6 +165,7 @@ internal fun resolveBackground(
             opacity = live.opacity / PERCENT,
             dimPercent = live.dim,
             blurReferencePx = live.blur,
+            camera = live.camera,
         )
         config.backgroundType == Constants.BACKGROUND_DEFAULT ->
             defaultBackground(settings, isLowerThird)
@@ -171,6 +177,7 @@ internal fun resolveBackground(
             opacity = config.backgroundOpacity,
             dimPercent = config.dim,
             blurReferencePx = config.blur,
+            camera = config.camera,
         )
     }
 }
@@ -193,6 +200,7 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
         opacity = settings.defaultLowerThirdBackgroundOpacity,
         dimPercent = settings.defaultLowerThirdBackgroundDim,
         blurReferencePx = settings.defaultLowerThirdBackgroundBlur,
+        camera = settings.defaultLowerThirdBackgroundCamera,
     ) else ResolvedBackground(
         type = settings.defaultBackgroundType,
         imagePath = settings.defaultBackgroundImage,
@@ -201,6 +209,7 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
         opacity = settings.defaultBackgroundOpacity,
         dimPercent = settings.defaultBackgroundDim,
         blurReferencePx = settings.defaultBackgroundBlur,
+        camera = settings.defaultBackgroundCamera,
     )
 
 /** [background]'s picture, decoded once per path. Null unless it is an image that still exists. */
@@ -220,8 +229,9 @@ internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBit
         Modifier.background(Brush.verticalGradient(listOf(background.color, background.gradientEndColor)))
     background.type == Constants.BACKGROUND_TRANSPARENT -> Modifier
     background.type == Constants.BACKGROUND_GRADIENT -> Modifier
-    // The clip is drawn as an overlay by PresenterBackgroundLayers; this is what sits under it.
-    background.usesVideo -> Modifier.background(Color.Black)
+    // The clip and the camera are drawn as overlays by PresenterBackgroundLayers; this is what
+    // sits under them, and what a camera with no frame yet shows on its own.
+    background.usesVideo || background.usesCamera -> Modifier.background(Color.Black)
     background.type == Constants.BACKGROUND_IMAGE && bitmap != null ->
         Modifier.alpha(background.opacity)
             .paint(painter = BitmapPainter(bitmap), contentScale = ContentScale.Crop)
@@ -230,8 +240,8 @@ internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBit
 }
 
 /**
- * The layers that cannot be a modifier on the content's own box: the blurred copy, the video, and
- * the dim wash over both.
+ * The layers that cannot be a modifier on the content's own box: the blurred copy, the video, the
+ * live camera, and the dim wash over all of them.
  *
  * A blurred background has to be its own layer — blurring the box the text sits in would blur the
  * text with it — so an unblurred background keeps the original single-box shape and its behaviour
@@ -261,6 +271,13 @@ internal fun BoxScope.PresenterBackgroundLayers(
     if (background.usesVideo) {
         LoopingVideoBackground(
             videoPath = background.videoPath,
+            modifier = Modifier.fillMaxSize().alpha(background.opacity)
+                .then(if (background.isBlurred) Modifier.blur(blurRadius) else Modifier),
+        )
+    }
+    if (background.usesCamera) {
+        CameraBackground(
+            camera = background.camera,
             modifier = Modifier.fillMaxSize().alpha(background.opacity)
                 .then(if (background.isBlurred) Modifier.blur(blurRadius) else Modifier),
         )

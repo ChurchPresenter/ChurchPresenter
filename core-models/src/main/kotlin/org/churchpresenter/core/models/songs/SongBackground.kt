@@ -1,6 +1,7 @@
 package org.churchpresenter.core.models.songs
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 
 /** The background kinds a song can carry. Blank is the absence of one — inherit from settings. */
 object SongBackgroundType {
@@ -9,8 +10,9 @@ object SongBackgroundType {
     const val GRADIENT = "gradient"
     const val IMAGE = "image"
     const val VIDEO = "video"
+    const val CAMERA = "camera"
 
-    val ALL = listOf(COLOR, GRADIENT, IMAGE, VIDEO)
+    val ALL = listOf(COLOR, GRADIENT, IMAGE, VIDEO, CAMERA)
 }
 
 /** The widest blur the editor offers, in reference pixels. */
@@ -29,6 +31,11 @@ const val SONG_BACKGROUND_FULL_OPACITY = 100
  * global background exactly as an unset one does.
  *
  * [type] blank means inherit; nothing else in the class is read in that case.
+ *
+ * A camera is the one kind that names hardware rather than a file. It travels the same way and
+ * cannot be checked the same way — a path that is absent on the new machine draws nothing, but a
+ * path that happens to *exist* there is a different camera — which is why [CameraDeviceRef] carries
+ * the device's name and callers match on it before opening anything.
  */
 @Serializable
 data class SongBackground(
@@ -44,11 +51,17 @@ data class SongBackground(
     val blur: Int = 0,
     /** How opaque the background is drawn, 0–100. 100 is the ordinary case. */
     val opacity: Int = SONG_BACKGROUND_FULL_OPACITY,
+    /** The device a [SongBackgroundType.CAMERA] background draws. Unread for every other type. */
+    val camera: CameraDeviceRef = CameraDeviceRef(),
 ) {
     /** True when this song overrides the global background rather than inheriting it. */
     val isCustom: Boolean get() = type in SongBackgroundType.ALL
 
-    /** The path this background draws from, empty for a colour or an inherited background. */
+    /**
+     * The **file** this background draws from, empty for everything that has none — a colour, a
+     * camera, or an inherited background. Callers do `File(...)` with it, so a camera's device path
+     * deliberately does not appear here.
+     */
     val mediaPath: String get() = when (type) {
         SongBackgroundType.IMAGE -> image
         SongBackgroundType.VIDEO -> video
@@ -72,7 +85,28 @@ private const val SONG_BACKGROUND_PERCENT_MAX = 100
  * than two, so a background reads the same wherever it is stored.
  */
 fun songBackgroundKeys(prefix: String): List<String> =
-    listOf(prefix) + listOf("color", "color-end", "image", "video", "dim", "blur").map { "$prefix-$it" }
+    listOf(prefix) + (SONG_BACKGROUND_VALUE_KEYS + SONG_CAMERA_KEYS).map { "$prefix-$it" }
+
+private val SONG_BACKGROUND_VALUE_KEYS =
+    listOf("color", "color-end", "image", "video", "dim", "blur", "opacity")
+
+/**
+ * The camera device's keys.
+ *
+ * Lowercase letters and hyphens only, and no digits: a per-section background is written as a
+ * directive in the lyrics and recognised by a pattern of exactly that shape, so a key holding a
+ * digit would be read as a line of the song instead. They are listed in [songBackgroundKeys] and so
+ * are cleared when a section's background changes type — miss one there and it is stranded in the
+ * lyrics for ever.
+ */
+private val SONG_CAMERA_KEYS = listOf(
+    "camera-device-path",
+    "camera-device-name",
+    "camera-format",
+    "camera-connection",
+    "camera-decklink",
+    "camera-decklink-index",
+)
 
 /**
  * The [SongBackground] held under [prefix] in [fields], or an inheriting one when nothing there
@@ -89,15 +123,35 @@ fun songBackgroundFrom(fields: Map<String, String>, prefix: String): SongBackgro
         video = fields["$prefix-video"].orEmpty(),
         dim = fields["$prefix-dim"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_PERCENT_MAX) ?: 0,
         blur = fields["$prefix-blur"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_MAX_BLUR) ?: 0,
+        opacity = fields["$prefix-opacity"]?.toIntOrNull()?.coerceIn(0, SONG_BACKGROUND_PERCENT_MAX)
+            ?: SONG_BACKGROUND_FULL_OPACITY,
+        camera = cameraFrom(fields, prefix),
     )
 }
+
+/**
+ * The camera device held under [prefix].
+ *
+ * Nothing is coerced: -1 is a real [CameraDeviceRef.deckLinkIndex] meaning "no card", and
+ * [CameraDeviceRef.videoConnection] is an opaque value the DeckLink driver hands out. Every field
+ * falls back to its own default, so a value the writer omitted reads back identical to what was
+ * written — which is what keeps the capture key stable across a save and a reload.
+ */
+private fun cameraFrom(fields: Map<String, String>, prefix: String): CameraDeviceRef = CameraDeviceRef(
+    devicePath = fields["$prefix-camera-device-path"].orEmpty(),
+    deviceName = fields["$prefix-camera-device-name"].orEmpty(),
+    videoFormat = fields["$prefix-camera-format"].orEmpty(),
+    videoConnection = fields["$prefix-camera-connection"]?.toIntOrNull() ?: 0,
+    isDeckLink = fields["$prefix-camera-decklink"].toBoolean(),
+    deckLinkIndex = fields["$prefix-camera-decklink-index"]?.toIntOrNull() ?: -1,
+)
 
 /**
  * [background] as the key/value pairs that record it under [prefix], in writing order — empty when
  * it inherits, since an inherited background is stored by writing nothing at all.
  *
  * Only what the type actually reads is written: a colour background records no gradient end, and
- * dim and blur appear only when they are set to something.
+ * dim, blur and opacity appear only when they are set to something other than their default.
  */
 fun songBackgroundFields(background: SongBackground, prefix: String): List<Pair<String, String>> {
     if (!background.isCustom) return emptyList()
@@ -111,8 +165,25 @@ fun songBackgroundFields(background: SongBackground, prefix: String): List<Pair<
             }
             SongBackgroundType.IMAGE -> add("$prefix-image" to background.image)
             SongBackgroundType.VIDEO -> add("$prefix-video" to background.video)
+            SongBackgroundType.CAMERA -> addAll(cameraFields(background.camera, prefix))
         }
         if (background.dim > 0) add("$prefix-dim" to background.dim.toString())
         if (background.blur > 0) add("$prefix-blur" to background.blur.toString())
+        if (background.opacity < SONG_BACKGROUND_FULL_OPACITY) {
+            add("$prefix-opacity" to background.opacity.toString())
+        }
     }
+}
+
+/**
+ * [camera]'s pairs under [prefix] — the path and the name always, the rest only when they are set
+ * to something other than their default, so that what is omitted reads back as what was written.
+ */
+private fun cameraFields(camera: CameraDeviceRef, prefix: String): List<Pair<String, String>> = buildList {
+    add("$prefix-camera-device-path" to camera.devicePath)
+    add("$prefix-camera-device-name" to camera.deviceName)
+    if (camera.videoFormat.isNotBlank()) add("$prefix-camera-format" to camera.videoFormat)
+    if (camera.videoConnection != 0) add("$prefix-camera-connection" to camera.videoConnection.toString())
+    if (camera.isDeckLink) add("$prefix-camera-decklink" to "true")
+    if (camera.deckLinkIndex >= 0) add("$prefix-camera-decklink-index" to camera.deckLinkIndex.toString())
 }
