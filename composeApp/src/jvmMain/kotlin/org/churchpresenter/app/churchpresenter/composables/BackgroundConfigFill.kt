@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -77,7 +78,17 @@ internal fun BackgroundConfigFill(
             Icon(
                 imageVector = Icons.Default.Movie,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(GLYPH_SIZE),
+                tint = Color.White.copy(alpha = VIDEO_GLYPH_ALPHA),
+            )
+        }
+        // Black with a glyph, like a clip: opening a capture device to draw a 14dp chip would hold
+        // the camera for as long as the settings tab is on screen, for a picture nobody can read.
+        Constants.BACKGROUND_CAMERA -> Box(shaped.background(Color.Black), Alignment.Center) {
+            Icon(
+                imageVector = Icons.Default.Videocam,
+                contentDescription = null,
+                modifier = Modifier.size(GLYPH_SIZE),
                 tint = Color.White.copy(alpha = VIDEO_GLYPH_ALPHA),
             )
         }
@@ -124,5 +135,8 @@ private fun CheckerboardFill(modifier: Modifier) {
 
 /** The presenter overscans a blurred background by the same amount; a preview must match. */
 private const val BLUR_OVERSCAN = 1.08f
+/** The glyph that stands in for a picture the tile deliberately does not draw. */
+private val GLYPH_SIZE = 14.dp
+
 private const val VIDEO_GLYPH_ALPHA = 0.85f
 private const val CHECKER_SQUARE_PX = 5f

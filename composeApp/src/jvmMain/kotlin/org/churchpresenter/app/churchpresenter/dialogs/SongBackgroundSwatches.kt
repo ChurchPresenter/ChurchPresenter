@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_background_category_cameras
 import churchpresenter.composeapp.generated.resources.song_background_browse
 import churchpresenter.composeapp.generated.resources.song_background_category_colors
 import churchpresenter.composeapp.generated.resources.song_background_category_images
@@ -48,6 +49,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.stringResource
@@ -61,10 +63,20 @@ internal fun SongBackgroundLibrary(
     background: SongBackground,
     onChange: (SongBackground) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * The cameras to offer, or null to ask this machine. A test passes a list: enumeration shells
+     * out to ffmpeg and answers differently on every machine, which is neither fast nor repeatable.
+     */
+    devices: List<CameraDevice>? = null,
 ) {
     var category by remember(background.type) { mutableStateOf(categoryOf(background.type)) }
     val entries = rememberMediaEntries(category)
-    val count = if (category == SongBackgroundType.COLOR) SONG_BACKGROUND_COLORS.size else entries.size + 1
+    val cameras = rememberCameras(category, devices)
+    val count = when (category) {
+        SongBackgroundType.COLOR -> SONG_BACKGROUND_COLORS.size
+        SongBackgroundType.CAMERA -> cameras.size
+        else -> entries.size + 1
+    }
 
     Column(modifier = modifier) {
         Row(
@@ -78,6 +90,8 @@ internal fun SongBackgroundLibrary(
                 category == SongBackgroundType.IMAGE) { category = SongBackgroundType.IMAGE }
             CategoryPill(stringResource(Res.string.song_background_category_videos),
                 category == SongBackgroundType.VIDEO) { category = SongBackgroundType.VIDEO }
+            CategoryPill(stringResource(Res.string.song_background_category_cameras),
+                category == SongBackgroundType.CAMERA) { category = SongBackgroundType.CAMERA }
             Spacer(Modifier.weight(1f))
             Text(
                 text = stringResource(Res.string.song_background_option_count, count),
@@ -104,6 +118,8 @@ internal fun SongBackgroundLibrary(
                         ColorTileFill(entry, background)
                     }
                 }
+            } else if (category == SongBackgroundType.CAMERA) {
+                cameraTiles(cameras, background, onChange)
             } else {
                 mediaTiles(category, entries, background, onChange)
             }
@@ -220,6 +236,7 @@ private fun rememberMediaEntries(category: String): List<LibraryEntry> {
 private fun categoryOf(type: String): String = when (type) {
     SongBackgroundType.IMAGE -> SongBackgroundType.IMAGE
     SongBackgroundType.VIDEO -> SongBackgroundType.VIDEO
+    SongBackgroundType.CAMERA -> SongBackgroundType.CAMERA
     else -> SongBackgroundType.COLOR
 }
 

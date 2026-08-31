@@ -28,6 +28,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background_camera_required
 import churchpresenter.composeapp.generated.resources.background_color_caption
 import churchpresenter.composeapp.generated.resources.background_copy_look_to
 import churchpresenter.composeapp.generated.resources.background_image_file
@@ -55,6 +63,8 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.PresetButton
@@ -119,6 +129,14 @@ private fun BackgroundTypeSegments(
     onConfigChange: (BackgroundConfig) -> Unit
 ) {
     val vlcMissingHint = stringResource(Res.string.media_vlc_required)
+    val cameraMissingHint = stringResource(Res.string.background_camera_required)
+    // Probed once, off the composition thread: isFfmpegAvailable() runs `ffmpeg -version` with a
+    // five-second timeout the first time it is asked. Null until it answers, and a null enables the
+    // segment — a type that is briefly clickable beats one that is briefly dead for no reason.
+    var captureAvailable by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(Unit) {
+        captureAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() || DeckLinkManager.isAvailable() }
+    }
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         PanelCaption(stringResource(Res.string.background_type_caption))
         FlowRow(
@@ -132,11 +150,19 @@ private fun BackgroundTypeSegments(
         ) {
             scope.typeOptions().forEach { type ->
                 val videoWithoutVlc = type == Constants.BACKGROUND_VIDEO && !isVlcAvailable
+                // Camera does not go through VLC — it wants ffmpeg or a DeckLink card.
+                val cameraWithoutCapture =
+                    type == Constants.BACKGROUND_CAMERA && captureAvailable == false
+                val disabledHint = when {
+                    videoWithoutVlc -> vlcMissingHint
+                    cameraWithoutCapture -> cameraMissingHint
+                    else -> null
+                }
                 val segment = @Composable {
                     Segment(
                         label = stringResource(backgroundTypeLabel(type)),
                         selected = config.backgroundType == type,
-                        enabled = !videoWithoutVlc,
+                        enabled = disabledHint == null,
                         onClick = {
                             onConfigChange(
                                 config.copy(
@@ -147,9 +173,10 @@ private fun BackgroundTypeSegments(
                         }
                     )
                 }
-                // A machine without VLC still shows the Video segment; hovering it says why it is
-                // dead, which "it does nothing when clicked" does not.
-                if (videoWithoutVlc) HintTooltip(vlcMissingHint, segment) else segment()
+                // A machine without VLC still shows the Video segment, and one with no capture
+                // device still shows Camera; hovering says why it is dead, which "it does nothing
+                // when clicked" does not.
+                if (disabledHint != null) HintTooltip(disabledHint, segment) else segment()
             }
         }
     }
@@ -196,6 +223,7 @@ private fun BackgroundSourceSection(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+        Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
         else -> Unit
     }
@@ -399,7 +427,8 @@ private fun percentReadout(fraction: Float): String = "${(fraction * PERCENT).to
 private val ADJUSTABLE_TYPES = setOf(
     Constants.BACKGROUND_COLOR,
     Constants.BACKGROUND_IMAGE,
-    Constants.BACKGROUND_VIDEO
+    Constants.BACKGROUND_VIDEO,
+    Constants.BACKGROUND_CAMERA
 )
 
 /** Dim is a percentage, like every other percentage in this tab. */
@@ -407,3 +436,5 @@ private const val BACKGROUND_DIM_MAX = 100
 private const val PERCENT = 100f
 private val COLOR_FIELD_WIDTH = 150.dp
 private val SWATCH_HEIGHT = 22.dp
+
+

@@ -46,7 +46,8 @@ import kotlin.test.Test
  * content surface says *Default*, and only a content lower third offers *Gradient* — and it decides
  * what the stage preview draws, since the three surfaces paint different parts of the output.
  *
- * Video is offered everywhere but is disabled without VLC, which is how a test machine runs.
+ * Video is offered everywhere but is disabled without VLC, which is how a test machine runs, and
+ * Camera is offered everywhere but needs ffmpeg or a capture card, which a test machine may lack.
  */
 class BackgroundSettingsTabScreenshotTest {
 
@@ -126,6 +127,19 @@ class BackgroundSettingsTabScreenshotTest {
                 )
             )
         },
+    )
+
+    /**
+     * Camera: a device picker where Image and Video have a file row.
+     *
+     * The device list is this machine's, so the picker's *contents* are not pinned — what this
+     * image is for is the shape of the slot and the segment being selected. On a machine with no
+     * capture device the slot says so instead, which is itself worth seeing.
+     */
+    @Test
+    fun `a camera background`() = shoot(
+        "type_camera",
+        settings = defaults(Constants.BACKGROUND_CAMERA),
     )
 
     /** Transparent carries no controls at all — the dropdown is the whole slot. */
