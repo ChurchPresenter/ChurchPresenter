@@ -26,12 +26,11 @@ import churchpresenter.composeapp.generated.resources.background_camera_auto
 import churchpresenter.composeapp.generated.resources.background_camera_connection
 import churchpresenter.composeapp.generated.resources.background_camera_device
 import churchpresenter.composeapp.generated.resources.background_camera_format
-import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
-import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
+import org.churchpresenter.app.churchpresenter.composables.cameraHintStringRes
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.CameraFormat
@@ -65,20 +64,30 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
     val devices by CameraDeviceCatalog.devices.collectAsState()
     LaunchedEffect(Unit) { CameraDeviceCatalog.refresh(deckLinkLabel) }
 
+    // Probed off the composition thread. This file's own note above says it deliberately does not
+    // copy the Canvas panel's habit of shelling out from composition — but this call did exactly
+    // that, and `isFfmpegAvailable()` runs `ffmpeg -version` against each candidate install path in
+    // turn with a five-second timeout each. Starts `true` so no hint flashes on a machine that has
+    // ffmpeg.
+    var ffmpegAvailable by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { ffmpegAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         PanelCaption(stringResource(Res.string.background_camera_device))
         val found = devices.orEmpty()
-        if (found.isEmpty()) {
+
+        // Above the dropdown rather than instead of it: on Windows without ffmpeg the PnP fallback
+        // fills the list with names that cannot be opened, so a hint shown only when the list is
+        // empty is a hint the operator who needs it never sees.
+        cameraHintStringRes(System.getProperty("os.name", ""), devices, ffmpegAvailable).forEach { hint ->
             Text(
-                text = stringResource(
-                    if (isFfmpegAvailable()) Res.string.canvas_camera_none_found
-                    else Res.string.canvas_camera_ffmpeg_hint
-                ),
+                text = stringResource(hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            return@Column
         }
+        if (found.isEmpty()) return@Column
+
         DropdownSelector(
             label = stringResource(Res.string.background_camera_device),
             items = found.map { it.displayName },

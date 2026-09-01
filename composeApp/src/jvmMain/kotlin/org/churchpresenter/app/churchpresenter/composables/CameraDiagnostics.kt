@@ -34,6 +34,16 @@ internal enum class CameraFailure {
     /** A DeckLink card whose input cannot be opened because the app is using it for output. */
     DECKLINK_INPUT_IN_USE,
 
+    /**
+     * ffmpeg is not installed, so no camera can be opened at all.
+     *
+     * Decided before ffmpeg runs rather than classified from its stderr, which is why
+     * [classifyCameraFfmpegStderr] has no marker for it: there is no stderr, because there is no
+     * process. Not a defect in the app — but the operator has to be told, or the canvas is simply
+     * black with no reason given.
+     */
+    FFMPEG_MISSING,
+
     /** ffmpeg failed for a reason not recognised here. The stderr tail is reported as-is. */
     UNKNOWN,
 }

@@ -28,7 +28,67 @@ class DeviceEnumerationTest {
 
         cameraDevicesFor("windows 11", runner::run)
 
+        assertEquals(
+            listOf("ffmpeg", "powershell"), runner.programs,
+            "the PnP query is the fallback, and an empty ffmpeg listing is what calls for it",
+        )
+    }
+
+    @Test
+    fun `PowerShell is not run when ffmpeg already listed the cameras`() {
+        // Exit code 1 on purpose: `-i dummy` always exits non-zero, and the listing is read off
+        // stderr regardless — the code must go on ignoring the exit code.
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)")
+            else null
+        }
+
+        val devices = cameraDevicesFor("windows 11", runner::run)
+
+        assertEquals(listOf("ffmpeg"), runner.programs, "the slowest call on this path is skipped outright")
+        assertEquals(listOf("Integrated Webcam"), devices.map { it.name })
+    }
+
+    @Test
+    fun `an absent ffmpeg leaves the PowerShell fallback to name the cameras`() {
+        // Exactly what an unstartable process yields, which is how a machine without ffmpeg reads.
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+        }
+
+        val devices = cameraDevicesFor("windows 11", runner::run)
+
         assertEquals(listOf("ffmpeg", "powershell"), runner.programs)
+        assertEquals(
+            listOf("Surface Camera Front"), devices.map { it.name },
+            "the operator still sees their camera named, beside the hint saying to install ffmpeg",
+        )
+    }
+
+    @Test
+    fun `the windows enumeration commands are bounded`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        cameraDevicesFor("windows 11", runner::run)
+
+        assertEquals(
+            listOf(10L, 15L), runner.timeouts,
+            "both used to wait forever, so a DirectShow filter or a slow WMI query hung the caller",
+        )
+    }
+
+    @Test
+    fun `the PowerShell query asks only for camera-class devices`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        cameraDevicesFor("windows 11", runner::run)
+
+        val query = runner.calls.first { it.first() == "powershell" }.last()
+        assertTrue(query.contains("PNPClass -eq 'Camera'"), "cameras are what the picker offers")
+        assertTrue(
+            !query.contains("'Image'"),
+            "the Image class is scanners and other still-image devices, offered as cameras until now",
+        )
     }
 
     @Test
