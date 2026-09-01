@@ -110,7 +110,7 @@ internal fun BackgroundConfigFill(
 /** The usual checkerboard for "nothing here" — a transparent background has no color to draw. */
 @Composable
 private fun CheckerboardFill(modifier: Modifier) {
-    val light = MaterialTheme.colorScheme.surfaceContainerHighest
+    val light = MaterialTheme.colorScheme.surfaceContainer
     val dark = MaterialTheme.colorScheme.surfaceContainerHigh
     Canvas(modifier) {
         drawRect(light)

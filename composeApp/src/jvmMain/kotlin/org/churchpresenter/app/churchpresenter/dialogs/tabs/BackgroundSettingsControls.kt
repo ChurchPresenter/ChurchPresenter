@@ -90,7 +90,7 @@ internal fun BackgroundControlsColumn(
 ) {
     val config = settings.backgroundSettings.configFor(scope)
     val scrollState = rememberScrollState()
-    Box(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainer)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -142,7 +142,7 @@ private fun BackgroundTypeSegments(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                 .padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -366,7 +366,7 @@ private fun CopyLookSection(
                     modifier = Modifier
                         .height(26.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                         .clickable {
                             onSettingsChange { s ->
