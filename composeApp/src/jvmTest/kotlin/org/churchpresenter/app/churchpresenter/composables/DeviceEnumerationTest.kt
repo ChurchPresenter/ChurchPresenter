@@ -77,6 +77,100 @@ class DeviceEnumerationTest {
         )
     }
 
+    // ── What the enumeration reports about itself ─────────────────────────────────────────────
+
+    @Test
+    fun `a listing ffmpeg produced is attributed to ffmpeg`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") {
+                CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)\n[dshow @ 0x1] \"Capture Card\" (video)")
+            } else {
+                null
+            }
+        }
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(CameraEnumerator.DSHOW, facts.enumerator)
+        assertEquals(2, facts.ffmpegListedCount)
+        assertEquals(0, facts.fallbackListedCount, "the fallback was never consulted, let alone counted")
+    }
+
+    @Test
+    fun `a listing the PnP inventory produced is attributed to the fallback`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+        }
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(CameraEnumerator.PNP_FALLBACK, facts.enumerator)
+        assertEquals(0, facts.ffmpegListedCount)
+        assertEquals(1, facts.fallbackListedCount)
+    }
+
+    @Test
+    fun `a machine neither tool found a camera on counts nothing`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(0, facts.ffmpegListedCount)
+        assertEquals(
+            0, facts.fallbackListedCount,
+            "a machine with no camera must be distinguishable from one whose cameras cannot be opened",
+        )
+    }
+
+    @Test
+    fun `a mac listing ffmpeg produced is attributed to avfoundation`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") {
+                CommandResult(
+                    1,
+                    """
+                    [AVFoundation indev @ 0x1] AVFoundation video devices:
+                    [AVFoundation indev @ 0x1] [0] FaceTime HD Camera
+                    """.trimIndent(),
+                )
+            } else {
+                CommandResult(0, "")
+            }
+        }
+
+        assertEquals(CameraEnumerator.AVFOUNDATION, enumerateCameras("mac os x", runner::run).facts.enumerator)
+    }
+
+    @Test
+    fun `a mac listing only system_profiler produced is attributed to the fallback`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "system_profiler") CommandResult(0, "    FaceTime HD Camera:\n")
+            else CommandResult(-1, "")
+        }
+
+        assertEquals(
+            CameraEnumerator.SYSTEM_PROFILER_FALLBACK,
+            enumerateCameras("mac os x", runner::run).facts.enumerator,
+        )
+    }
+
+    @Test
+    fun `an OS with no enumerator says so rather than looking like a machine with no camera`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        assertEquals(CameraEnumerator.UNSUPPORTED_OS, enumerateCameras("TestOS", runner::run).facts.enumerator)
+    }
+
+    @Test
+    fun `the pure enumeration never decides whether ffmpeg is installed`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        assertEquals(
+            false, enumerateCameras("windows 11", runner::run).facts.ffmpegAvailable,
+            "that is the impure caller's to fill in, which is what keeps this function drivable from a fake",
+        )
+    }
+
     @Test
     fun `the PowerShell query asks only for camera-class devices`() {
         val runner = FakeCommandRunner.alwaysReturning("")

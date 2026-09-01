@@ -99,6 +99,7 @@ internal open class ScreenCaptureCache(
     fun acquire(source: SceneSource.ScreenCaptureSource): StateFlow<ImageBitmap?> {
         val spec = ScreenCaptureSpec.of(source)
         val entry = entries.getOrPut(spec) { CacheEntry() }
+        ResourceCensus.record(SharedResource.SCREEN_GRAB, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch { capture(spec, entry) }

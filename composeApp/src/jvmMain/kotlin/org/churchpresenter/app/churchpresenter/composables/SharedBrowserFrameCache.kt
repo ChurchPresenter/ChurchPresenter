@@ -108,6 +108,7 @@ object SharedBrowserFrameCache {
         forceTransparent: Boolean
     ): BrowserFlows {
         val entry = entries.getOrPut(sourceId) { CacheEntry() }
+        ResourceCensus.record(SharedResource.BROWSER_SOURCE, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch {

@@ -77,6 +77,7 @@ object SharedCameraFrameCache {
     internal fun acquire(source: SceneSource.CameraSource): CameraFlows {
         val key = keyFor(source)
         val entry = entries.getOrPut(key) { CacheEntry() }
+        ResourceCensus.record(SharedResource.CAMERA_CAPTURE, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.error.value = null
@@ -148,6 +149,9 @@ object SharedCameraFrameCache {
             }
         }
     }
+
+    /** Bounds the ffmpeg-missing report to one per process — see [runFfmpegCapture]. */
+    private val ffmpegMissingReport = ReportOnce()
 
     // ── DeckLink capture ────────────────────────────────────────────
 
@@ -336,19 +340,24 @@ object SharedCameraFrameCache {
             return
         }
 
-        // ffmpeg is an optional external tool, not something shipped with the app, and a machine
-        // without it fails every attempt for the same knowable reason. Discovering that five times
-        // over ten seconds tells the operator nothing, so the loop does not run and nothing is
-        // reported to Sentry: a tool the user has not installed is not a fault in the app.
+        // ffmpeg is an optional external tool, and a machine without it fails every attempt for the
+        // same knowable reason. Discovering that five times over ten seconds tells the operator
+        // nothing, so the retry loop does not run.
         //
-        // The failure is still put on `entry.error`, which is new. It used to return silently, so
-        // the canvas drew the ordinary grey placeholder with the device's name on it and the
-        // operator was told nothing at all — on Windows, where the PnP fallback fills the picker
-        // with names even when ffmpeg is absent, that is a camera that looks selectable, selects
-        // fine, and then shows nothing for no stated reason.
+        // It is reported, though, which it did not used to be. The old reasoning — a tool the user
+        // has not installed is not a fault in the app — is right about a *tool* and wrong about this
+        // state: the app listed this device in its own picker, the operator chose it, and the app
+        // then produced nothing. On Windows the picker deliberately offers unopenable names beside a
+        // hint saying what to install, so whether that hint is doing its job is a question about our
+        // own UI. Issue #462 is the evidence that it was not, and the reason we could not see it is
+        // that this path was silent.
+        //
+        // Bounded hard: `FfmpegBinary.isAvailable` is a `by lazy`, so a second report in the same
+        // process would carry nothing the first did not.
         if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
             System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
             entry.error.value = CameraFailure.FFMPEG_MISSING
+            reportCameraFfmpegMissing(source, CameraDeviceCatalog.lastEnumeration, ffmpegMissingReport)
             return
         }
 
@@ -443,6 +452,11 @@ object SharedCameraFrameCache {
             if (consecutiveFailures < MAX_CONSECUTIVE_FAILURES && !stoppedEarly) return
             val reason = cameraGiveUpReason(everStarted, sawImmediateExit)
             System.err.println("[Camera] Giving up after $consecutiveFailures failures ($reason/$lastFailure)")
+            // What enumeration found is carried alongside what capture saw, because on its own
+            // "could not open" does not say whether the name we tried was one ffmpeg had offered.
+            // That distinction is the whole of issue #462, and asking a reporter to run
+            // `ffmpeg -list_devices` by hand was the only way to learn it.
+            val facts = CameraDeviceCatalog.lastEnumeration
             CrashReporter.reportWarning(
                 "Camera: Giving up on device after repeated ffmpeg failures",
                 tags = mapOf(
@@ -451,11 +465,13 @@ object SharedCameraFrameCache {
                     "device_scheme" to deviceScheme(source.devicePath),
                     "failure_cause" to lastFailure.name.lowercase(),
                     "attempts" to consecutiveFailures.toString()
-                ),
+                ) + cameraEnumerationTags(facts, source.deviceName, ffmpegAvailable = true),
                 extras = mapOf(
                     "ffmpeg_stderr_tail" to redactedFfmpegStderr(lastStderr, source.deviceName),
                     "ffmpeg_command" to redactedFfmpegCommand(lastCommand),
-                    "exit_code" to lastExitCode.toString()
+                    "exit_code" to lastExitCode.toString(),
+                    "camera_enumeration" to
+                        cameraEnumerationExtra(facts, source.deviceName, ffmpegAvailable = true)
                 )
             )
         }

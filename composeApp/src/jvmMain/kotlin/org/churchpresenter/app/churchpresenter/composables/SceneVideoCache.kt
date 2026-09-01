@@ -115,6 +115,7 @@ internal open class SceneVideoCache(
     @Synchronized
     fun acquire(spec: SceneVideoSpec, volume: Float): StateFlow<ImageBitmap?> {
         val entry = entries.getOrPut(spec) { CacheEntry() }
+        ResourceCensus.record(SharedResource.VIDEO_DECODE, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.job = scope.launch { play(spec, entry) }

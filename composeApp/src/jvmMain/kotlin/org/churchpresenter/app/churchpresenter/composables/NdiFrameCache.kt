@@ -106,6 +106,7 @@ open class NdiFrameCache(
     @Synchronized
     fun acquire(source: SceneSource.NdiSource): NdiFlows {
         val entry = entries.getOrPut(keyFor(source)) { CacheEntry() }
+        ResourceCensus.record(SharedResource.NDI_RECEIVER, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch { capture(source, entry) }

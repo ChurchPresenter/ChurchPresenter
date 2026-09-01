@@ -164,6 +164,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MILLIS_PER_MINUTE = 60_000L
@@ -291,6 +292,9 @@ fun main() {
     val sessionStartedAt = System.currentTimeMillis()
     Runtime.getRuntime().addShutdownHook(Thread {
         UsageEvents.recordSessionMinutes(((System.currentTimeMillis() - sessionStartedAt) / MILLIS_PER_MINUTE).toInt())
+        // Shutdown is when the high-water marks are final. Reports only when they are higher than a
+        // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
+        ResourceCensus.reportIfLeaky()
     })
 
     val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->

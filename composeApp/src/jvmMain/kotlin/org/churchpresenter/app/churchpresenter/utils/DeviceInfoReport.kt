@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.vlcUnavailableReason
@@ -123,6 +124,21 @@ object DeviceInfoReport {
         if (facts.deckLinkAvailable) {
             if (facts.deckLinkDevices.isEmpty()) appendLine("  (no devices detected)")
             else facts.deckLinkDevices.forEach { appendLine(it) }
+        }
+        appendLine()
+
+        appendLine("-- Cameras --")
+        // From the last enumeration this run, not a fresh one: enumerating costs up to ten seconds
+        // for ffmpeg's DirectShow listing plus fifteen for the PnP query, and this report is
+        // generated from a button the operator is waiting on.
+        val cameras = CameraDeviceCatalog.lastEnumeration
+        if (cameras == null) {
+            appendLine("Not enumerated this run (no camera picker has been opened)")
+        } else {
+            appendLine("ffmpeg: ${if (cameras.ffmpegAvailable) "available" else "not installed"}")
+            appendLine("Enumerated by: ${cameras.enumerator.name.lowercase()}")
+            appendLine("Listed by ffmpeg: ${cameras.ffmpegListedCount}")
+            appendLine("Listed by the platform inventory: ${cameras.fallbackListedCount}")
         }
         appendLine()
 
