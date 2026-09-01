@@ -106,6 +106,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
@@ -324,6 +325,7 @@ fun main() {
     }.apply { isDaemon = true }.start()
 
     vlcCustomPath = startupSettings.projectionSettings.vlcPath
+    FfmpegBinary.customPath = startupSettings.projectionSettings.ffmpegPath
 
     LottieRenderCache.ensureForFolder(
         startupSettings.streamingSettings.lowerThirdFolder,

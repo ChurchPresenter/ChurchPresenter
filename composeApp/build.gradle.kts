@@ -3,6 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.io.File
 import java.util.Calendar
+import java.security.MessageDigest
 import java.util.Properties
 
 val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
@@ -1498,3 +1499,119 @@ tasks.matching {
 }
 
 
+
+// ── Bundled ffmpeg ────────────────────────────────────────────────────────────
+// The app opens every camera and capture card by spawning ffmpeg, so it ships one. On macOS that
+// is not merely a convenience: nothing in the JVM ever touches AVFoundation, so on a machine with
+// no ffmpeg no camera is opened, macOS is never asked for permission, and the app never appears in
+// System Settings → Privacy → Camera at all — which is exactly what issue #464 reported.
+//
+// The binary is NOT committed. The DeckLink JNI libraries beside it in appResources are, but they
+// are ~200 KB; an ffmpeg is tens of megabytes and git keeps every version of a binary for ever.
+// It is fetched from the pinned url + digest in gradle/ffmpeg-builds.properties instead, and
+// written into the same per-OS appResources directory, which both packaging and `run` already read.
+//
+// A target with no url configured is not an error: the app falls back to a discovered ffmpeg
+// exactly as it did before, and the Camera Capture card in Settings → Projection says which one it
+// ended up using.
+val ffmpegBuildProps = Properties().apply {
+    val f = rootProject.file("gradle/ffmpeg-builds.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+/** The manifest key for the machine being built for: `macos-aarch64`, `windows-x86_64`, … */
+fun ffmpegTargetKey(): String {
+    val os = System.getProperty("os.name", "").lowercase()
+    val osPart = when {
+        os.contains("mac") || os.contains("darwin") -> "macos"
+        os.contains("win") -> "windows"
+        else -> "linux"
+    }
+    val arch = when (val a = System.getProperty("os.arch", "").lowercase()) {
+        "aarch64", "arm64" -> "aarch64"
+        "x86_64", "amd64" -> "x86_64"
+        else -> a
+    }
+    return "$osPart-$arch"
+}
+
+val fetchBundledFfmpeg by tasks.registering {
+    description = "Downloads the pinned ffmpeg for this platform into appResources."
+    group = "build"
+
+    val target = ffmpegTargetKey()
+    val url = ffmpegBuildProps.getProperty("$target.url", "")
+    val sha256 = ffmpegBuildProps.getProperty("$target.sha256", "")
+    val archiveKind = ffmpegBuildProps.getProperty("$target.archive", "zip")
+    val entry = ffmpegBuildProps.getProperty("$target.entry", "ffmpeg")
+    val osDir = target.substringBefore('-')
+    val outFile = layout.projectDirectory.file("src/jvmMain/appResources/$osDir/$entry").asFile
+    val cacheDir = layout.buildDirectory.dir("ffmpeg").get().asFile
+
+    // Inputs, so the task re-runs when the pin changes and is up to date when it has not.
+    inputs.property("url", url)
+    inputs.property("sha256", sha256)
+    outputs.file(outFile)
+    onlyIf { url.isNotBlank() }
+
+    doLast {
+        require(sha256.isNotBlank()) {
+            "gradle/ffmpeg-builds.properties: $target.url is set but $target.sha256 is not. " +
+                "An unverified download is not something this build will run."
+        }
+        cacheDir.mkdirs()
+        val archive = File(cacheDir, "$target-${sha256.take(12)}." + if (archiveKind == "tar") "tar" else "zip")
+        if (!archive.exists() || sha256Of(archive) != sha256) {
+            logger.lifecycle("Downloading ffmpeg for $target from $url")
+            uri(url).toURL().openStream().use { input ->
+                archive.outputStream().use { input.copyTo(it) }
+            }
+        }
+        val actual = sha256Of(archive)
+        check(actual == sha256) {
+            "ffmpeg download for $target does not match its pinned digest.\n" +
+                "  expected $sha256\n  actual   $actual\n" +
+                "Either the pin is stale or the download was tampered with; do not 'fix' this by " +
+                "updating the digest without knowing which."
+        }
+        val extractDir = File(cacheDir, "$target-extracted").apply { deleteRecursively(); mkdirs() }
+        if (archiveKind == "tar") {
+            val tar = ProcessBuilder("tar", "-xf", archive.absolutePath, "-C", extractDir.absolutePath)
+                .redirectErrorStream(true).start()
+            val tarOutput = tar.inputStream.bufferedReader().readText()
+            check(tar.waitFor() == 0) { "tar could not unpack the ffmpeg archive for $target:\n$tarOutput" }
+        } else {
+            copy {
+                from(zipTree(archive))
+                into(extractDir)
+            }
+        }
+        // __MACOSX holds AppleDouble side files ("._ffmpeg") that are not the program; skipping the
+        // whole directory is simpler than reasoning about which of its entries could match.
+        val found = extractDir.walkTopDown()
+            .firstOrNull { it.isFile && it.name == entry && "__MACOSX" !in it.path }
+            ?: error("No '$entry' inside the ffmpeg archive for $target ($url)")
+        outFile.parentFile.mkdirs()
+        found.copyTo(outFile, overwrite = true)
+        outFile.setExecutable(true)
+        logger.lifecycle("Bundled ffmpeg: ${outFile.relativeTo(rootProject.projectDir)} (${outFile.length() / 1_048_576} MB)")
+    }
+}
+
+fun sha256Of(file: File): String =
+    MessageDigest.getInstance("SHA-256").let { digest ->
+        file.inputStream().use { stream ->
+            val buf = ByteArray(1 shl 16)
+            while (true) {
+                val n = stream.read(buf)
+                if (n <= 0) break
+                digest.update(buf, 0, n)
+            }
+        }
+        digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+// prepareAppResources copies the per-OS directory into the bundle, and `run` reads the same one.
+tasks.matching { it.name == "prepareAppResources" || it.name == "run" }.configureEach {
+    dependsOn(fetchBundledFfmpeg)
+}

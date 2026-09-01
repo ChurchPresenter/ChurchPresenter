@@ -54,3 +54,10 @@ google-services.json
 # per module, each loading that module's AGENT.md — are shared and must stay tracked.
 CLAUDE.local.md
 .impeccable/
+
+# The bundled ffmpeg, fetched by :composeApp:fetchBundledFfmpeg from the pinned url + digest in
+# gradle/ffmpeg-builds.properties. Tens of megabytes per platform, and git keeps every version of a
+# binary for ever — unlike the DeckLink JNI libraries beside it, which are ~200 KB and committed.
+composeApp/src/jvmMain/appResources/macos/ffmpeg
+composeApp/src/jvmMain/appResources/linux/ffmpeg
+composeApp/src/jvmMain/appResources/windows/ffmpeg.exe

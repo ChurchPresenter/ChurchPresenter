@@ -1059,6 +1059,17 @@
     <string name="ndi_runtime_path">NDI Runtime folder</string>
     <string name="ndi_runtime_browse">Choose Folder</string>
     <string name="ndi_runtime_path_help">Leave empty to detect automatically. NDI_RUNTIME_DIR_V6 and NDI_RUNTIME_DIR_V5 are honoured.</string>
+    <string name="ffmpeg_section_title">Camera Capture</string>
+    <string name="ffmpeg_ready">Using ffmpeg at %1$s</string>
+    <string name="ffmpeg_bundled_ready">Using the ffmpeg included with ChurchPresenter</string>
+    <string name="ffmpeg_missing_title">ffmpeg was not found</string>
+    <string name="ffmpeg_missing_help">Cameras and capture cards are opened with ffmpeg. This build should include one — choose an ffmpeg below, or install ffmpeg and check again.</string>
+    <string name="ffmpeg_path_hint">Choose an ffmpeg program</string>
+    <string name="ffmpeg_browse">Choose ffmpeg</string>
+    <string name="ffmpeg_check_again">Check again</string>
+    <string name="ffmpeg_clear">Use bundled</string>
+    <string name="ffmpeg_download_link">Get ffmpeg</string>
+    <string name="ffmpeg_path_help">Leave empty to use the ffmpeg included with ChurchPresenter.</string>
     <string name="ndi_trademark">NDI® is a registered trademark of Vizrt NDI AB.</string>
 
     <!-- Background Settings Tab -->
@@ -1478,7 +1489,7 @@
          virtual cameras. Kept defined because fourteen locales translate it: removing it here would
          orphan every one of those, which LocaleStringsTest gates against. -->
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
-    <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg. Until ffmpeg is installed, no camera can be shown — install it, then press Refresh Cameras.</string>
+    <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg, and this build could not find its copy. Open Settings → Projection to point at an ffmpeg, then check again.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
     <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ffmpeg is not installed. Install ffmpeg, then select the camera again.</string>

@@ -271,6 +271,14 @@ internal fun parseAvfoundationFormats(output: String): List<CameraFormat> {
 internal fun isFfmpegAvailable(): Boolean = FfmpegBinary.isAvailable
 
 /**
+ * Re-resolves ffmpeg and reports whether it is available now.
+ *
+ * For the settings row, after the operator has pointed [FfmpegBinary.customPath] somewhere else.
+ * Runs `ffmpeg -version`, so it belongs on `Dispatchers.IO` and never on a click handler.
+ */
+internal fun recheckFfmpegAvailability(): Boolean = FfmpegBinary.recheck()
+
+/**
  * The impure edge of enumeration: the real OS, the real commands, the real clock.
  *
  * [enumerateCameras] stays pure over its runner, so everything about *which* tool answers is driven

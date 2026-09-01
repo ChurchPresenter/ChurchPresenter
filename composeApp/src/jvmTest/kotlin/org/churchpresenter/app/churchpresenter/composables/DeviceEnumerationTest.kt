@@ -20,6 +20,16 @@ import kotlin.test.assertTrue
  */
 class DeviceEnumerationTest {
 
+    /**
+     * True when this command runs ffmpeg, whatever path it was resolved to.
+     *
+     * `FfmpegBinary` prefers the copy bundled with the app over one installed on the machine, so
+     * the first token is an absolute path on a machine that has been packaged and a bare name on
+     * one that has not. Both are ffmpeg.
+     */
+    private fun List<String>.isFfmpeg(): Boolean =
+        first().substringAfterLast('/').substringAfterLast('\\').removeSuffix(".exe") == "ffmpeg"
+
     // ── Which enumeration a machine qualifies for ──────────────────────────────────────────────
 
     @Test
@@ -39,7 +49,7 @@ class DeviceEnumerationTest {
         // Exit code 1 on purpose: `-i dummy` always exits non-zero, and the listing is read off
         // stderr regardless — the code must go on ignoring the exit code.
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)")
+            if (command.isFfmpeg()) CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)")
             else null
         }
 
@@ -53,7 +63,7 @@ class DeviceEnumerationTest {
     fun `an absent ffmpeg leaves the PowerShell fallback to name the cameras`() {
         // Exactly what an unstartable process yields, which is how a machine without ffmpeg reads.
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+            if (command.isFfmpeg()) CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
         }
 
         val devices = cameraDevicesFor("windows 11", runner::run)
@@ -82,7 +92,7 @@ class DeviceEnumerationTest {
     @Test
     fun `a listing ffmpeg produced is attributed to ffmpeg`() {
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") {
+            if (command.isFfmpeg()) {
                 CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)\n[dshow @ 0x1] \"Capture Card\" (video)")
             } else {
                 null
@@ -99,7 +109,7 @@ class DeviceEnumerationTest {
     @Test
     fun `a listing the PnP inventory produced is attributed to the fallback`() {
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+            if (command.isFfmpeg()) CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
         }
 
         val facts = enumerateCameras("windows 11", runner::run).facts
@@ -125,7 +135,7 @@ class DeviceEnumerationTest {
     @Test
     fun `a mac listing ffmpeg produced is attributed to avfoundation`() {
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") {
+            if (command.isFfmpeg()) {
                 CommandResult(
                     1,
                     """
@@ -220,7 +230,7 @@ class DeviceEnumerationTest {
         dshowFormatsFrom(":dshow-vdev=Integrated Webcam", runner::run)
 
         assertEquals(
-            listOf("ffmpeg", "-f", "dshow", "-list_options", "true", "-i", "video=Integrated Webcam"),
+            listOf(FfmpegBinary.path, "-f", "dshow", "-list_options", "true", "-i", "video=Integrated Webcam"),
             runner.calls.single(),
             "the stored path's prefix has to come off before ffmpeg will recognise the name",
         )
@@ -243,7 +253,7 @@ class DeviceEnumerationTest {
     @Test
     fun `v4l2 formats come from ffmpeg when ffmpeg knows any`() {
         val runner = FakeCommandRunner { command ->
-            if (command.first() == "ffmpeg") CommandResult(0, "[video4linux2] 1280x720") else null
+            if (command.isFfmpeg()) CommandResult(0, "[video4linux2] 1280x720") else null
         }
 
         val formats = v4l2FormatsFrom("/dev/video0", runner::run)
@@ -255,10 +265,8 @@ class DeviceEnumerationTest {
     @Test
     fun `v4l2 falls back to v4l2-ctl when ffmpeg reports no sizes`() {
         val runner = FakeCommandRunner { command ->
-            when (command.first()) {
-                "ffmpeg" -> CommandResult(0, "no formats here")
-                else -> CommandResult(0, "Size: Discrete 640x480\n  Interval: 0.033s (30.000 fps)")
-            }
+            if (command.isFfmpeg()) CommandResult(0, "no formats here")
+            else CommandResult(0, "Size: Discrete 640x480\n  Interval: 0.033s (30.000 fps)")
         }
 
         val formats = v4l2FormatsFrom("/dev/video0", runner::run)
@@ -282,7 +290,7 @@ class DeviceEnumerationTest {
         avfoundationFormatsFrom("0", runner::run)
 
         assertEquals(
-            listOf("ffmpeg", "-f", "avfoundation", "-video_size", "1x1", "-i", "0:none"),
+            listOf(FfmpegBinary.path, "-f", "avfoundation", "-video_size", "1x1", "-i", "0:none"),
             runner.calls.single(),
             "avfoundation has no -list_formats; ffmpeg rejects the whole command line if it is passed",
         )
