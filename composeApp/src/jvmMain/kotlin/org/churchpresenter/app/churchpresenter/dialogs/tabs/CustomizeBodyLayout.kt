@@ -117,7 +117,7 @@ private fun CustomizePreviewColumn(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
@@ -181,7 +181,7 @@ private fun CustomizeTranslationChips(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(start = 10.dp, end = 10.dp, top = 6.dp)
             .testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -231,7 +231,7 @@ private fun CustomizeElementChips(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 10.dp, vertical = 6.dp)
             .testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
