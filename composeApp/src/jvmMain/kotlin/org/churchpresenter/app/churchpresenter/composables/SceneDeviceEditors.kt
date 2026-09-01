@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,10 +22,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
-import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_open_privacy_settings
-import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
-import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_camera_format
 import churchpresenter.composeapp.generated.resources.canvas_camera_format_auto
@@ -198,11 +197,20 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
     )
 
     val deckLinkDeviceFormat = stringResource(Res.string.canvas_decklink_device)
-    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLinkDeviceFormat)) }
-    val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
+
+    // Through the catalog, never `listCameraDevicesWithDeckLink` directly: that shells out to
+    // ffmpeg, and on Windows to a PowerShell `Get-CimInstance` as well, so calling it from
+    // composition — or from a click handler — blocked the UI thread for as long as those took. A
+    // panel that hangs the app for seconds every time a camera source is selected is the reported
+    // "Canvas tab is very hanging"; the catalog does the same work on IO and caches it.
+    val known by CameraDeviceCatalog.devices.collectAsState()
+    val devices = known.orEmpty()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(deckLinkDeviceFormat) { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) }
 
     Button(
-        onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
+        onClick = { scope.launch { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) } },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -313,34 +321,56 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    } else {
-        Text(
-            noCamerasLabel,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 
     val osName = System.getProperty("os.name", "").lowercase()
-    if (osName.contains("linux") && devices.isEmpty()) {
+    // Probed off the composition thread: `isFfmpegAvailable()` runs `ffmpeg -version` against each
+    // candidate install path in turn, with a five-second timeout each. It starts `true` so the
+    // "install ffmpeg" sentence never flashes up on a machine that has it.
+    var ffmpegAvailable by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { ffmpegAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+
+    // `known`, not `devices`: null means the first enumeration has not answered yet, which the hint
+    // list treats as "say nothing" and must not be flattened into "no cameras found".
+    CameraToolHints(osName, known, ffmpegAvailable)
+
+    if (osName.contains("mac") || osName.contains("darwin")) {
+        MacCameraPrivacyHint()
+    }
+    if (osName.contains("win")) {
+        WindowsCameraPrivacyHint()
+    }
+}
+
+/** Whatever [cameraHintStringRes] decides is worth saying about this machine's camera tooling. */
+@Composable
+private fun CameraToolHints(osName: String, devices: List<CameraDevice>?, ffmpegAvailable: Boolean) {
+    cameraHintStringRes(osName, devices, ffmpegAvailable).forEach { hint ->
         Text(
-            stringResource(Res.string.canvas_camera_v4l2_hint),
+            stringResource(hint),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-    if (!osName.contains("linux")) {
-        val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
-        if (!ffmpegAvailable) {
-            Text(
-                stringResource(Res.string.canvas_camera_ffmpeg_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-    if (osName.contains("mac") || osName.contains("darwin")) {
-        MacCameraPrivacyHint()
+}
+
+/** The Windows Camera privacy page, opened for the same reason as [MAC_CAMERA_PRIVACY_URI]. */
+internal const val WINDOWS_CAMERA_PRIVACY_URI = "ms-settings:privacy-webcam"
+
+/**
+ * The way out of a privacy refusal on Windows — the twin of [MacCameraPrivacyHint], and there for
+ * the same reasons, which are written out at that one.
+ *
+ * Windows has two separate switches on that page (camera access at all, and desktop apps in
+ * particular) and blocks with either off, which is why the button leads there rather than the text
+ * trying to describe the sequence.
+ */
+@Composable
+private fun WindowsCameraPrivacyHint(
+    onOpenPrivacySettings: () -> Unit = { UrlOpener.open(WINDOWS_CAMERA_PRIVACY_URI) },
+) {
+    Button(onClick = onOpenPrivacySettings, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(Res.string.canvas_camera_open_privacy_settings), fontSize = 12.sp)
     }
 }
 

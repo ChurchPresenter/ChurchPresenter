@@ -1400,9 +1400,16 @@
     <string name="canvas_camera_device">Camera</string>
     <string name="canvas_camera_name">Device Name</string>
     <string name="canvas_camera_none_found">No cameras found</string>
+    <!-- Superseded by canvas_camera_ffmpeg_required, which does not frame ffmpeg as needed only for
+         virtual cameras. Kept defined because fourteen locales translate it: removing it here would
+         orphan every one of those, which LocaleStringsTest gates against. -->
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
+    <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg. Until ffmpeg is installed, no camera can be shown — install it, then press Refresh Cameras.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
+    <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ffmpeg is not installed. Install ffmpeg, then select the camera again.</string>
+    <string name="canvas_camera_error_permission_denied_windows">Windows is blocking camera access for ChurchPresenter. Open Settings → Privacy &amp; security → Camera, turn on camera access and "Let desktop apps access your camera", then select the camera again.</string>
+    <string name="canvas_camera_error_device_not_found_windows">Windows could not open a camera with this name. It may have been unplugged, or its driver may name it differently than Windows does — press Refresh Cameras and pick it again.</string>
     <string name="canvas_camera_error_permission_denied">macOS is blocking camera access for ChurchPresenter. Open System Settings → Privacy &amp; Security → Camera, switch ChurchPresenter on, then select the camera again.</string>
     <string name="canvas_camera_error_unsupported_format">This device does not accept the video format that was requested. Choose a specific one under Video Format.</string>
     <string name="canvas_camera_error_unsupported_framerate">This device does not accept the frame rate that was requested. Choose a specific format under Video Format.</string>

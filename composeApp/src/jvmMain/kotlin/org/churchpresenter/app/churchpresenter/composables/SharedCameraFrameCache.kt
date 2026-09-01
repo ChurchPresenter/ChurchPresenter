@@ -44,6 +44,17 @@ object SharedCameraFrameCache {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
 
+    /**
+     * How many devices are being captured right now — read-only, and the one thing a test can ask
+     * that distinguishes a released capture from a leaked one.
+     *
+     * A leak here is not a wasted object: the entry owns a live ffmpeg process holding the device
+     * open, so the next acquire of that camera fails with `device_busy` and the operator's canvas
+     * goes black on hardware nothing else is using.
+     */
+    @get:Synchronized
+    internal val liveCaptureCount: Int get() = entries.size
+
     /** Build a unique key for a camera source. */
     internal fun keyFor(source: SceneSource.CameraSource): String {
         return if (source.isDeckLink && source.deckLinkIndex >= 0) {
@@ -66,6 +77,7 @@ object SharedCameraFrameCache {
     internal fun acquire(source: SceneSource.CameraSource): CameraFlows {
         val key = keyFor(source)
         val entry = entries.getOrPut(key) { CacheEntry() }
+        ResourceCensus.record(SharedResource.CAMERA_CAPTURE, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.error.value = null
@@ -102,9 +114,18 @@ object SharedCameraFrameCache {
             entry.frame.value = null
             entries.remove(key)
 
-            // Only close the device if no other cache entry is using the same device.
-            // When switching connections, the new acquire's openInput() already closed
-            // the old input — calling closeInput here would kill the new one.
+            // Only close the device if no other cache entry is using the same device — two scene
+            // sources on one camera are one capture, and the first of them to go must not take the
+            // picture away from the second.
+            //
+            // A *switch* — another format, another connection — no longer reaches that guard. It
+            // used to: acquire ran from a `remember` block, so the incoming entry existed before
+            // the outgoing one was released, and this skipped the close on the strength of the new
+            // `openInput` having displaced the old one. Acquire now runs from the same
+            // `DisposableEffect` that releases, and Compose disposes the old effect before running
+            // the new one, so a switch closes the device and then reopens it. That is the order
+            // this cache wants: an ffmpeg process still holding a device when the next one asks for
+            // it is exactly the `device_busy` failure the release path exists to prevent.
             if (source.isDeckLink && source.deckLinkIndex >= 0 && DeckLinkManager.isAvailable()) {
                 val deviceStillActive = entries.keys.any {
                     it.startsWith("decklink:${source.deckLinkIndex}:")
@@ -128,6 +149,9 @@ object SharedCameraFrameCache {
             }
         }
     }
+
+    /** Bounds the ffmpeg-missing report to one per process — see [runFfmpegCapture]. */
+    private val ffmpegMissingReport = ReportOnce()
 
     // ── DeckLink capture ────────────────────────────────────────────
 
@@ -316,13 +340,24 @@ object SharedCameraFrameCache {
             return
         }
 
-        // ffmpeg is an optional external tool, not something shipped with the app, and a machine
-        // without it fails every attempt for the same knowable reason. Discovering that five times
-        // over ten seconds tells the operator nothing the canvas has not already told them
-        // (canvas_camera_ffmpeg_hint), so the loop does not run and nothing is reported: a tool the
-        // user has not installed is not a fault in the app.
+        // ffmpeg is an optional external tool, and a machine without it fails every attempt for the
+        // same knowable reason. Discovering that five times over ten seconds tells the operator
+        // nothing, so the retry loop does not run.
+        //
+        // It is reported, though, which it did not used to be. The old reasoning — a tool the user
+        // has not installed is not a fault in the app — is right about a *tool* and wrong about this
+        // state: the app listed this device in its own picker, the operator chose it, and the app
+        // then produced nothing. On Windows the picker deliberately offers unopenable names beside a
+        // hint saying what to install, so whether that hint is doing its job is a question about our
+        // own UI. Issue #462 is the evidence that it was not, and the reason we could not see it is
+        // that this path was silent.
+        //
+        // Bounded hard: `FfmpegBinary.isAvailable` is a `by lazy`, so a second report in the same
+        // process would carry nothing the first did not.
         if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
             System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
+            entry.error.value = CameraFailure.FFMPEG_MISSING
+            reportCameraFfmpegMissing(source, CameraDeviceCatalog.lastEnumeration, ffmpegMissingReport)
             return
         }
 
@@ -417,6 +452,11 @@ object SharedCameraFrameCache {
             if (consecutiveFailures < MAX_CONSECUTIVE_FAILURES && !stoppedEarly) return
             val reason = cameraGiveUpReason(everStarted, sawImmediateExit)
             System.err.println("[Camera] Giving up after $consecutiveFailures failures ($reason/$lastFailure)")
+            // What enumeration found is carried alongside what capture saw, because on its own
+            // "could not open" does not say whether the name we tried was one ffmpeg had offered.
+            // That distinction is the whole of issue #462, and asking a reporter to run
+            // `ffmpeg -list_devices` by hand was the only way to learn it.
+            val facts = CameraDeviceCatalog.lastEnumeration
             CrashReporter.reportWarning(
                 "Camera: Giving up on device after repeated ffmpeg failures",
                 tags = mapOf(
@@ -425,11 +465,13 @@ object SharedCameraFrameCache {
                     "device_scheme" to deviceScheme(source.devicePath),
                     "failure_cause" to lastFailure.name.lowercase(),
                     "attempts" to consecutiveFailures.toString()
-                ),
+                ) + cameraEnumerationTags(facts, source.deviceName, ffmpegAvailable = true),
                 extras = mapOf(
                     "ffmpeg_stderr_tail" to redactedFfmpegStderr(lastStderr, source.deviceName),
                     "ffmpeg_command" to redactedFfmpegCommand(lastCommand),
-                    "exit_code" to lastExitCode.toString()
+                    "exit_code" to lastExitCode.toString(),
+                    "camera_enumeration" to
+                        cameraEnumerationExtra(facts, source.deviceName, ffmpegAvailable = true)
                 )
             )
         }

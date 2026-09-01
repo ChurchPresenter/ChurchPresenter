@@ -57,6 +57,7 @@ import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -91,12 +92,21 @@ internal fun songBackgroundTypeConstant(type: String): String = when (type) {
  * enumerating: this runs inside a `remember` on the composition thread of every presenter output,
  * and enumerating shells out to ffmpeg. Before anything has enumerated the answer is yes — see
  * [cameraResolves] for why accepting is the safe direction there.
+ *
+ * [knownCameras] defaults to that catalog and is passed explicitly only by tests. It is a parameter
+ * rather than a read of the singleton because the catalog is process-global and a *composition*
+ * fills it: opening a camera property panel enumerates, so a suite that renders one leaves every
+ * later test in that fork looking at a populated catalog. Taking it as an argument is what makes
+ * this decision testable without either faking a singleton or depending on what ran first.
  */
-internal fun songBackgroundResolves(background: SongBackground): Boolean = when (background.type) {
+internal fun songBackgroundResolves(
+    background: SongBackground,
+    knownCameras: List<CameraDevice>? = CameraDeviceCatalog.devices.value,
+): Boolean = when (background.type) {
     SongBackgroundType.COLOR, SongBackgroundType.GRADIENT -> true
     SongBackgroundType.IMAGE, SongBackgroundType.VIDEO ->
         background.mediaPath.isNotBlank() && File(background.mediaPath).exists()
-    SongBackgroundType.CAMERA -> cameraResolves(background.camera, CameraDeviceCatalog.devices.value)
+    SongBackgroundType.CAMERA -> cameraResolves(background.camera, knownCameras)
     else -> false
 }
 

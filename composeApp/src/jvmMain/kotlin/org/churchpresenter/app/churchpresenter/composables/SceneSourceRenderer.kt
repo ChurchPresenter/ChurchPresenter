@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +58,6 @@ import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
-import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -72,20 +70,12 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.awt.Rectangle
-import java.awt.Robot
 import java.awt.image.BufferedImage
-import java.awt.image.DataBufferInt
-import java.nio.ByteBuffer
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import java.time.LocalTime
@@ -103,9 +93,6 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
 
-private const val FRAME_INTERVAL_MS = 16L
-private const val PLAYER_SETTLE_MS = 100L
-private const val VOLUME_PERCENT_SCALE = 100
 private const val URL_DEBOUNCE_MS = 800L
 private const val ERROR_TEXT_COLOR = 0xFFFF8888
 private const val POLL_INTERVAL_MS = 1000L
@@ -117,16 +104,10 @@ private const val PERCENT_SCALE = 100f
 private const val MAX_CURVE_TURNS = 2f
 /** How much room a bent reference line gets: its own height, plus the room the bend needs. */
 private const val REFERENCE_ROWS = 3f
-private const val MIN_CAPTURE_INTERVAL_MS = 33L
 private const val WINDOW_BOUNDS_FIELDS = 4
 private const val BOUNDS_WIDTH_INDEX = 2
 private const val BOUNDS_HEIGHT_INDEX = 3
 
-// libvlc media options. Written out per branch rather than collected into a list and spread: play()
-// is a Java vararg, so a spread copies the array on every call, and building the list allocated one
-// more object again for what is at most two constant strings.
-private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
-private const val VLC_OPT_LOOP = ":input-repeat=65535"
 
 /**
  * Draws one scene source.
@@ -354,83 +335,29 @@ private fun VideoSourceContent(
         return
     }
 
-    val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
-    val frameVersion = remember { mutableStateOf(0L) }
-    val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
-
-    val factory = remember {
-        try { MediaPlayerFactory("--no-video-title-show") } catch (t: Throwable) {
-            CrashReporter.reportException(t, "SceneSourceRenderer: VLC MediaPlayerFactory init failed"); null
-        }
-    } ?: return
-
-    val mediaPlayer = remember(factory) {
-        try { factory.mediaPlayers().newEmbeddedMediaPlayer() } catch (_: Throwable) { null }
-    } ?: return
-
-    // Convert frames off VLC's render thread to avoid blocking audio pipeline
-    LaunchedEffect(Unit) {
-        var lastVersion = 0L
-        while (isActive) {
-            val v = frameVersion.value
-            if (v != lastVersion) {
-                lastVersion = v
-                val img = bufferedImageHolder.value
-                if (img != null) {
-                    currentFrame.value = img.toComposeImageBitmap()
-                }
-            }
-            delay(FRAME_INTERVAL_MS)
-        }
-    }
-
-    DisposableEffect(source.filePath) {
-        val bufferFormatCallback = object : BufferFormatCallback {
-            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
-                bufferedImageHolder.value = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
-                return RV32BufferFormat(sourceWidth, sourceHeight)
-            }
-            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
-        }
-
-        val renderCallback = RenderCallback { _, nativeBuffers, _ ->
-            val img = bufferedImageHolder.value ?: return@RenderCallback
-            if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
-            val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
-            try {
-                val buf = nativeBuffers[0] ?: return@RenderCallback
-                buf.rewind()
-                buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
-                frameVersion.value++
-            } catch (_: Throwable) { }
-        }
-
-        mediaPlayer.videoSurface().set(
-            factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true)
-        )
-
+    // Through the shared cache: this composable is mounted once in the canvas editor, once in each
+    // sidebar live preview and once on each presenter output, and each instance used to build its
+    // own VLC factory, its own player and its own conversion loop — decoding the same file that
+    // many times, and playing its audio that many times over itself.
+    val spec = remember(source.filePath, source.loop) { SceneVideoSpec(source.filePath, source.loop) }
+    var frames by remember { mutableStateOf<StateFlow<ImageBitmap?>?>(null) }
+    DisposableEffect(spec) {
+        frames = SharedSceneVideoCache.acquire(spec, source.volume)
         onDispose {
-            try {
-                mediaPlayer.controls().stop()
-                mediaPlayer.release()
-                factory.release()
-            } catch (_: Throwable) { }
+            frames = null
+            SharedSceneVideoCache.release(spec)
         }
     }
+    // Volume is not part of the key, so a change reaches the running decode without restarting it.
+    LaunchedEffect(spec, source.volume) { SharedSceneVideoCache.setVolume(spec, source.volume) }
 
-    LaunchedEffect(source.filePath, source.loop, source.volume) {
-        delay(PLAYER_SETTLE_MS)
-        try {
-            mediaPlayer.audio().setVolume((source.volume * VOLUME_PERCENT_SCALE).toInt())
-            if (source.loop) mediaPlayer.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK, VLC_OPT_LOOP)
-            else mediaPlayer.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK)
-        } catch (_: Throwable) { }
-    }
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val frame by (frames ?: noFrame).collectAsState()
 
-    val frame = currentFrame.value
-    if (frame != null) {
+    val shown = frame
+    if (shown != null) {
         Image(
-            bitmap = frame,
+            bitmap = shown,
             contentDescription = source.name,
             contentScale = ContentScale.Fit,
             modifier = modifier.fillMaxSize()
@@ -460,15 +387,19 @@ private fun BrowserSourceContent(
         return
     }
 
-    // Only re-create browser when id or viewport size changes
-    val browserFlows = remember(source.id, source.renderWidth, source.renderHeight) {
-        SharedBrowserFrameCache.acquire(
+    // Only re-create browser when id or viewport size changes.
+    //
+    // Acquired in the effect, for the reason spelled out in [CameraSourceContent] — and here the
+    // dispose keys used to be narrower than the acquire keys, so a resize acquired a second time
+    // and released neither. That leaked a whole headless browser per resize.
+    var browserFlows by remember { mutableStateOf<SharedBrowserFrameCache.BrowserFlows?>(null) }
+    DisposableEffect(source.id, source.renderWidth, source.renderHeight) {
+        browserFlows = SharedBrowserFrameCache.acquire(
             source.id, source.url, source.renderWidth, source.renderHeight,
             source.customCss, source.fps, source.forceTransparent
         )
-    }
-    DisposableEffect(source.id) {
         onDispose {
+            browserFlows = null
             SharedBrowserFrameCache.release(source.id)
         }
     }
@@ -491,8 +422,10 @@ private fun BrowserSourceContent(
         SharedBrowserFrameCache.setFps(source.id, source.fps)
     }
 
-    val frame by browserFlows.frame.collectAsState()
-    val error by browserFlows.error.collectAsState()
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val noError = remember { MutableStateFlow<String?>(null) }
+    val frame by (browserFlows?.frame ?: noFrame).collectAsState()
+    val error by (browserFlows?.error ?: noError).collectAsState()
 
     if (frame != null) {
         Image(
@@ -906,18 +839,28 @@ private fun CameraSourceContent(
         return
     }
 
-    // Use shared cache so canvas preview and presenter output share one capture process
-    val cameraFlows = remember(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
-        SharedCameraFrameCache.acquire(source)
-    }
+    // Use shared cache so canvas preview and presenter output share one capture process.
+    //
+    // Acquired in the effect rather than in `remember`: a composition that is abandoned before its
+    // effects run still discards what `remember` produced, and it does so without calling any
+    // `onDispose`. Acquiring there leaked the refcount — and with it the ffmpeg process holding the
+    // device open, which the *next* acquire then found busy. That is the reported
+    // "Error opening input: Input/output error" on a camera nothing else is using.
+    var cameraFlows by remember { mutableStateOf<SharedCameraFrameCache.CameraFlows?>(null) }
     DisposableEffect(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
+        cameraFlows = SharedCameraFrameCache.acquire(source)
         onDispose {
+            cameraFlows = null
             SharedCameraFrameCache.release(source)
         }
     }
 
-    val frame by cameraFlows.frame.collectAsState()
-    val error by cameraFlows.error.collectAsState()
+    // Stand-ins for the one composition pass before the effect has acquired: collecting needs a
+    // flow, and a conditional `collectAsState` would move with the acquire.
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val noFailure = remember { MutableStateFlow<CameraFailure?>(null) }
+    val frame by (cameraFlows?.frame ?: noFrame).collectAsState()
+    val error by (cameraFlows?.error ?: noFailure).collectAsState()
 
     if (frame != null) {
         Image(
@@ -958,15 +901,20 @@ private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) 
         return
     }
 
-    val flows = remember(source.sourceName, source.sourceAddress, source.lowBandwidth) {
-        SharedNdiFrameCache.acquire(source)
-    }
+    // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
+    var flows by remember { mutableStateOf<NdiFrameCache.NdiFlows?>(null) }
     DisposableEffect(source.sourceName, source.sourceAddress, source.lowBandwidth) {
-        onDispose { SharedNdiFrameCache.release(source) }
+        flows = SharedNdiFrameCache.acquire(source)
+        onDispose {
+            flows = null
+            SharedNdiFrameCache.release(source)
+        }
     }
 
-    val frame by flows.frame.collectAsState()
-    val connected by flows.connected.collectAsState()
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val notConnected = remember { MutableStateFlow(false) }
+    val frame by (flows?.frame ?: noFrame).collectAsState()
+    val connected by (flows?.connected ?: notConnected).collectAsState()
     val label = source.sourceName.ifBlank { source.sourceAddress }
 
     val shown = frame
@@ -1000,39 +948,19 @@ private fun NdiPlaceholder(text: String, modifier: Modifier) {
 
 @Composable
 private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {
-    var frame by remember { mutableStateOf<ImageBitmap?>(null) }
-
-    LaunchedEffect(source.captureMode, source.captureX, source.captureY, source.captureWidth, source.captureHeight, source.captureInterval, source.windowTitle, source.windowId) {
-        try {
-            val robot = Robot()
-            while (isActive) {
-                val capture: BufferedImage? = if (source.captureMode == "window" && source.windowId.isNotBlank()) {
-                    withContext(Dispatchers.IO) {
-                        val wid = source.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
-                        // Try platform-specific occluded capture, fall back to Robot + bounds
-                        WindowsWindowCapture.captureWindow(wid)
-                            ?: X11WindowCapture.captureWindow(wid)
-                            ?: run {
-                                val rect = findWindowBounds(source.windowTitle)
-                                if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
-                            }
-                    }
-                } else if (source.captureMode == "window" && source.windowTitle.isNotBlank()) {
-                    val rect = withContext(Dispatchers.IO) { findWindowBounds(source.windowTitle) }
-                    if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
-                } else {
-                    val rect = Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
-                    if (rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
-                }
-                if (capture != null) {
-                    frame = capture.toComposeImageBitmap()
-                }
-                delay(source.captureInterval.toLong().coerceAtLeast(MIN_CAPTURE_INTERVAL_MS))
-            }
-        } catch (_: Exception) {
-            // Robot may fail in headless/restricted environments
+    // Through the shared cache: this composable is mounted once in the canvas editor, once in each
+    // sidebar live preview and once on each presenter output, and each instance used to run its own
+    // `Robot.createScreenCapture` loop over the same pixels at up to 30fps.
+    var frames by remember { mutableStateOf<StateFlow<ImageBitmap?>?>(null) }
+    DisposableEffect(ScreenCaptureSpec.of(source)) {
+        frames = SharedScreenCaptureCache.acquire(source)
+        onDispose {
+            frames = null
+            SharedScreenCaptureCache.release(source)
         }
     }
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val frame by (frames ?: noFrame).collectAsState()
 
     Box(
         modifier = modifier.fillMaxSize().background(Color.Black),
@@ -1052,7 +980,7 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
     }
 }
 
-private fun findWindowBounds(windowTitle: String): Rectangle? =
+internal fun findWindowBounds(windowTitle: String): Rectangle? =
     windowBoundsFor(System.getProperty("os.name", "").lowercase(), windowTitle, ::readCommandOutput)
 
 /**

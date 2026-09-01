@@ -28,7 +28,161 @@ class DeviceEnumerationTest {
 
         cameraDevicesFor("windows 11", runner::run)
 
+        assertEquals(
+            listOf("ffmpeg", "powershell"), runner.programs,
+            "the PnP query is the fallback, and an empty ffmpeg listing is what calls for it",
+        )
+    }
+
+    @Test
+    fun `PowerShell is not run when ffmpeg already listed the cameras`() {
+        // Exit code 1 on purpose: `-i dummy` always exits non-zero, and the listing is read off
+        // stderr regardless — the code must go on ignoring the exit code.
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)")
+            else null
+        }
+
+        val devices = cameraDevicesFor("windows 11", runner::run)
+
+        assertEquals(listOf("ffmpeg"), runner.programs, "the slowest call on this path is skipped outright")
+        assertEquals(listOf("Integrated Webcam"), devices.map { it.name })
+    }
+
+    @Test
+    fun `an absent ffmpeg leaves the PowerShell fallback to name the cameras`() {
+        // Exactly what an unstartable process yields, which is how a machine without ffmpeg reads.
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+        }
+
+        val devices = cameraDevicesFor("windows 11", runner::run)
+
         assertEquals(listOf("ffmpeg", "powershell"), runner.programs)
+        assertEquals(
+            listOf("Surface Camera Front"), devices.map { it.name },
+            "the operator still sees their camera named, beside the hint saying to install ffmpeg",
+        )
+    }
+
+    @Test
+    fun `the windows enumeration commands are bounded`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        cameraDevicesFor("windows 11", runner::run)
+
+        assertEquals(
+            listOf(10L, 15L), runner.timeouts,
+            "both used to wait forever, so a DirectShow filter or a slow WMI query hung the caller",
+        )
+    }
+
+    // ── What the enumeration reports about itself ─────────────────────────────────────────────
+
+    @Test
+    fun `a listing ffmpeg produced is attributed to ffmpeg`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") {
+                CommandResult(1, "[dshow @ 0x1] \"Integrated Webcam\" (video)\n[dshow @ 0x1] \"Capture Card\" (video)")
+            } else {
+                null
+            }
+        }
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(CameraEnumerator.DSHOW, facts.enumerator)
+        assertEquals(2, facts.ffmpegListedCount)
+        assertEquals(0, facts.fallbackListedCount, "the fallback was never consulted, let alone counted")
+    }
+
+    @Test
+    fun `a listing the PnP inventory produced is attributed to the fallback`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") CommandResult(-1, "") else CommandResult(0, "Surface Camera Front")
+        }
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(CameraEnumerator.PNP_FALLBACK, facts.enumerator)
+        assertEquals(0, facts.ffmpegListedCount)
+        assertEquals(1, facts.fallbackListedCount)
+    }
+
+    @Test
+    fun `a machine neither tool found a camera on counts nothing`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        val facts = enumerateCameras("windows 11", runner::run).facts
+
+        assertEquals(0, facts.ffmpegListedCount)
+        assertEquals(
+            0, facts.fallbackListedCount,
+            "a machine with no camera must be distinguishable from one whose cameras cannot be opened",
+        )
+    }
+
+    @Test
+    fun `a mac listing ffmpeg produced is attributed to avfoundation`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "ffmpeg") {
+                CommandResult(
+                    1,
+                    """
+                    [AVFoundation indev @ 0x1] AVFoundation video devices:
+                    [AVFoundation indev @ 0x1] [0] FaceTime HD Camera
+                    """.trimIndent(),
+                )
+            } else {
+                CommandResult(0, "")
+            }
+        }
+
+        assertEquals(CameraEnumerator.AVFOUNDATION, enumerateCameras("mac os x", runner::run).facts.enumerator)
+    }
+
+    @Test
+    fun `a mac listing only system_profiler produced is attributed to the fallback`() {
+        val runner = FakeCommandRunner { command ->
+            if (command.first() == "system_profiler") CommandResult(0, "    FaceTime HD Camera:\n")
+            else CommandResult(-1, "")
+        }
+
+        assertEquals(
+            CameraEnumerator.SYSTEM_PROFILER_FALLBACK,
+            enumerateCameras("mac os x", runner::run).facts.enumerator,
+        )
+    }
+
+    @Test
+    fun `an OS with no enumerator says so rather than looking like a machine with no camera`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        assertEquals(CameraEnumerator.UNSUPPORTED_OS, enumerateCameras("TestOS", runner::run).facts.enumerator)
+    }
+
+    @Test
+    fun `the pure enumeration never decides whether ffmpeg is installed`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        assertEquals(
+            false, enumerateCameras("windows 11", runner::run).facts.ffmpegAvailable,
+            "that is the impure caller's to fill in, which is what keeps this function drivable from a fake",
+        )
+    }
+
+    @Test
+    fun `the PowerShell query asks only for camera-class devices`() {
+        val runner = FakeCommandRunner.alwaysReturning("")
+
+        cameraDevicesFor("windows 11", runner::run)
+
+        val query = runner.calls.first { it.first() == "powershell" }.last()
+        assertTrue(query.contains("PNPClass -eq 'Camera'"), "cameras are what the picker offers")
+        assertTrue(
+            !query.contains("'Image'"),
+            "the Image class is scanners and other still-image devices, offered as cameras until now",
+        )
     }
 
     @Test

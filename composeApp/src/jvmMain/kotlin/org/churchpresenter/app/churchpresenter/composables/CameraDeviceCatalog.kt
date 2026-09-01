@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 
 /**
@@ -28,9 +29,54 @@ internal object CameraDeviceCatalog {
     /** Null until something has actually looked; an empty list means this machine has no camera. */
     val devices: StateFlow<List<CameraDevice>?> = _devices.asStateFlow()
 
+    /**
+     * What the last enumeration found, in shapes rather than names — null until one has run.
+     *
+     * Kept beside [devices] rather than in a singleton of its own so the two cannot disagree about
+     * the same enumeration. Read by camera failure reports, which need to say *how* a device was
+     * found in order to be answerable, and by the Save-diagnostic-info report.
+     *
+     * `@Volatile` because it is written on IO and read from capture coroutines on `Dispatchers.Default`.
+     */
+    @Volatile
+    private var _lastEnumeration: CameraEnumerationFacts? = null
+
+    internal val lastEnumeration: CameraEnumerationFacts? get() = _lastEnumeration
+
+    /** Bounds the blind-ffmpeg report to one per process — re-opening a picker re-enumerates. */
+    private val blindFfmpegReport = ReportOnce()
+
     /** Re-enumerates, on IO. Safe to call from a composition's `LaunchedEffect`. */
     suspend fun refresh(deckLinkDeviceFormat: String) {
-        _devices.value = withContext(Dispatchers.IO) { listCameraDevicesWithDeckLink(deckLinkDeviceFormat) }
+        val listing = withContext(Dispatchers.IO) { listCameraDevicesWithDeckLinkListing(deckLinkDeviceFormat) }
+        _lastEnumeration = listing.facts
+        _devices.value = listing.devices
+        reportBlindFfmpeg(listing.facts)
+    }
+
+    /**
+     * Says once that ffmpeg is installed and working, and still listed no DirectShow device, on a
+     * machine where Windows itself can see one.
+     *
+     * Today that state is only learnable if the operator goes on to pick one of those unopenable
+     * names and waits out five capture attempts. It is worth knowing on its own, because the picker
+     * is offering devices that cannot work.
+     *
+     * [shouldReportBlindFfmpeg] carries the conditions and the reasons for each; keeping the
+     * decision there rather than here is what lets it be tested without Sentry.
+     */
+    private fun reportBlindFfmpeg(facts: CameraEnumerationFacts) {
+        if (!shouldReportBlindFfmpeg(facts)) return
+        if (!blindFfmpegReport.claim()) return
+        CrashReporter.reportWarning(
+            "Camera: ffmpeg listed no DirectShow devices while Windows lists cameras",
+            tags = mapOf("subsystem" to "camera") +
+                cameraEnumerationTags(facts, deviceName = "", ffmpegAvailable = true),
+            extras = mapOf(
+                "camera_enumeration" to
+                    cameraEnumerationExtra(facts, deviceName = "", ffmpegAvailable = true)
+            )
+        )
     }
 }
 

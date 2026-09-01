@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -37,7 +38,14 @@ class PresenterCameraBackgroundTest {
     private fun cameraSong(camera: CameraDeviceRef = card) =
         SongBackground(type = SongBackgroundType.CAMERA, camera = camera)
 
-    /** Runs the resolver in a composition and hands back what it decided. */
+    /**
+     * Runs the resolver in a composition and hands back what it decided.
+     *
+     * [knownCameras] is passed explicitly on every call, and defaults to null — "nothing has
+     * enumerated". It must never be left to `CameraDeviceCatalog`: that is process-global and a
+     * composition fills it, so a camera property panel rendered by any earlier suite in this fork
+     * would decide these assertions instead of the arguments below.
+     */
     private fun resolve(
         settings: BackgroundSettings = BackgroundSettings(),
         config: BackgroundConfig = BackgroundConfig(),
@@ -45,6 +53,7 @@ class PresenterCameraBackgroundTest {
         showBackground: Boolean = true,
         transparentWhenBlank: Boolean = false,
         ownBackground: SongBackground = SongBackground(),
+        knownCameras: List<CameraDevice>? = null,
     ): ResolvedBackground {
         lateinit var resolved: ResolvedBackground
         runComposeUiTest {
@@ -56,6 +65,7 @@ class PresenterCameraBackgroundTest {
                     showBackground = showBackground,
                     transparentWhenBlank = transparentWhenBlank,
                     ownBackground = ownBackground,
+                    knownCameras = knownCameras,
                 )
             }
         }
@@ -151,9 +161,25 @@ class PresenterCameraBackgroundTest {
 
     @Test
     fun `a song's camera is dropped when this machine does not have the device`() {
-        // Nothing has enumerated in this test JVM, so the catalog is null and accepts — the
-        // rejecting case is CameraDeviceCatalogTest's, which drives the predicate directly.
-        val resolved = resolve(config = BackgroundConfig(), ownBackground = cameraSong())
+        val resolved = resolve(
+            config = BackgroundConfig(),
+            ownBackground = cameraSong(),
+            knownCameras = listOf(
+                CameraDevice(name = "Logitech BRIO", path = "avfoundation://1", displayName = "Logitech BRIO")
+            ),
+        )
+
+        assertFalse(resolved.usesCamera, "the song names a card this machine has not got")
+    }
+
+    /**
+     * Accepting before the first enumeration answers is deliberate — see `cameraResolves`. A cold
+     * start would otherwise drop a perfectly good camera to the settings background for as long as
+     * shelling out to ffmpeg takes.
+     */
+    @Test
+    fun `a song's camera is kept while this machine has not been asked`() {
+        val resolved = resolve(config = BackgroundConfig(), ownBackground = cameraSong(), knownCameras = null)
 
         assertTrue(resolved.usesCamera, "accepted while this machine has not been asked")
     }

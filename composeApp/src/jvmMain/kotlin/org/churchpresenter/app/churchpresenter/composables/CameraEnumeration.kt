@@ -59,7 +59,13 @@ internal data class CameraDevice(
     val deckLinkIndex: Int = -1
 )
 
-internal fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckLink: %1\$s"): List<CameraDevice> {
+internal fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckLink: %1\$s"): List<CameraDevice> =
+    listCameraDevicesWithDeckLinkListing(deckLinkDeviceFormat).devices
+
+/** [listCameraDevicesWithDeckLink], keeping what enumeration found — see [CameraEnumerationFacts]. */
+internal fun listCameraDevicesWithDeckLinkListing(
+    deckLinkDeviceFormat: String = "DeckLink: %1\$s",
+): CameraListing {
     val devices = mutableListOf<CameraDevice>()
 
     if (DeckLinkManager.isAvailable()) {
@@ -75,13 +81,15 @@ internal fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckL
         }
     }
 
+    val deckLinkCount = devices.size
     val hasDeckLink = devices.any { it.isDeckLink }
-    listCameraDevices().filterNot { cam ->
+    val listing = listCameraDevices()
+    listing.devices.filterNot { cam ->
         hasDeckLink && cam.name.lowercase().contains("decklink")
     }.let { devices.addAll(it) }
 
-    System.err.println("[Camera] Found ${devices.size} total device(s) (${devices.count { it.isDeckLink }} DeckLink)")
-    return devices
+    System.err.println("[Camera] Found ${devices.size} total device(s) ($deckLinkCount DeckLink)")
+    return CameraListing(devices, listing.facts.copy(deckLinkCount = deckLinkCount))
 }
 
 internal data class CameraFormat(
@@ -262,18 +270,69 @@ internal fun parseAvfoundationFormats(output: String): List<CameraFormat> {
 
 internal fun isFfmpegAvailable(): Boolean = FfmpegBinary.isAvailable
 
-private fun listCameraDevices(): List<CameraDevice> {
-    val devices = cameraDevicesFor(System.getProperty("os.name", "").lowercase(), ::readCommandOutput)
+/**
+ * The impure edge of enumeration: the real OS, the real commands, the real clock.
+ *
+ * [enumerateCameras] stays pure over its runner, so everything about *which* tool answers is driven
+ * from a fake in tests. The two facts that cannot be known there — whether ffmpeg resolved on this
+ * machine, and when this ran — are filled in here.
+ */
+private fun listCameraDevices(): CameraListing {
+    val listing = enumerateCameras(System.getProperty("os.name", "").lowercase(), ::readCommandOutput)
+    val devices = listing.devices
     System.err.println("[Camera] Found ${devices.size} camera device(s):")
     devices.forEach { System.err.println("[Camera]   ${it.displayName} -> ${it.path}") }
-    return devices
+    return listing.copy(
+        facts = listing.facts.copy(
+            ffmpegAvailable = isFfmpegAvailable(),
+            enumeratedAtMs = System.currentTimeMillis(),
+        )
+    )
 }
 
-internal fun cameraDevicesFor(osName: String, run: CommandRunner): List<CameraDevice> = when {
-    osName.contains("linux") -> listLinuxCameras()
-    osName.contains("win") -> windowsCamerasFrom(run)
-    osName.contains("mac") -> macCamerasFrom(run)
-    else -> emptyList()
+internal fun cameraDevicesFor(osName: String, run: CommandRunner): List<CameraDevice> =
+    enumerateCameras(osName, run).devices
+
+/**
+ * The cameras this machine has, and how they were found.
+ *
+ * [cameraDevicesFor] is this without the second half, and remains the entry point for everything
+ * that only wants the list. The facts exist so a camera that fails to open can be reported with the
+ * context that explains why — see [CameraEnumerationFacts].
+ *
+ * `ffmpegAvailable` and the timestamp are filled by the impure caller ([listCameraDevices]), not
+ * here: keeping this function a pure fold over the runner's output is what lets the whole
+ * enumeration be driven from a `FakeCommandRunner`.
+ */
+internal fun enumerateCameras(osName: String, run: CommandRunner): CameraListing = when {
+    osName.contains("linux") -> listLinuxCameras().asListing(CameraEnumerator.V4L2_SYSFS)
+    osName.contains("win") -> windowsListing(run)
+    osName.contains("mac") -> macListing(run)
+    else -> emptyList<CameraDevice>().asListing(CameraEnumerator.UNSUPPORTED_OS)
+}
+
+/**
+ * A listing from devices that came from one tool, with the counts filled in from which tool it was.
+ *
+ * A fallback enumerator's devices are counted as [CameraEnumerationFacts.fallbackListedCount] and
+ * ffmpeg's as [CameraEnumerationFacts.ffmpegListedCount], because the question a report has to
+ * answer is which of the two produced the name that failed.
+ */
+private fun List<CameraDevice>.asListing(enumerator: CameraEnumerator): CameraListing {
+    val fromFallback = enumerator == CameraEnumerator.PNP_FALLBACK ||
+        enumerator == CameraEnumerator.SYSTEM_PROFILER_FALLBACK
+    return CameraListing(
+        devices = this,
+        facts = CameraEnumerationFacts(
+            enumerator = enumerator,
+            ffmpegListedCount = if (fromFallback) 0 else size,
+            fallbackListedCount = if (fromFallback) size else 0,
+            deckLinkCount = 0,
+            ffmpegAvailable = false,
+            enumeratedAtMs = 0L,
+            names = mapTo(mutableSetOf()) { it.name.lowercase() },
+        ),
+    )
 }
 
 internal fun listLinuxCameras(
@@ -297,23 +356,100 @@ internal fun listLinuxCameras(
     } catch (_: Exception) { emptyList() }
 }
 
+/**
+ * Camera-class PnP devices, by their friendly name.
+ *
+ * `PNPClass = 'Image'` is deliberately **not** included. It covers flatbed scanners and other
+ * still-image devices, which were being offered to the operator as cameras. What it also covers is
+ * a handful of pre-UVC webcams that register under `Image` rather than `Camera`; losing those is
+ * acceptable because this query is only the fallback below, and on that path nothing is openable
+ * anyway.
+ */
 private const val PNP_CAMERA_QUERY =
-    "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' -or " +
-        "\$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name"
+    "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' } | " +
+        "Select-Object -ExpandProperty Name"
 
-internal fun windowsCamerasFrom(run: CommandRunner): List<CameraDevice> {
-    val dshowOutput = run(listOf(FfmpegBinary.path, "-list_devices", "true", "-f", "dshow", "-i", "dummy"), 0L).output
-    val pnpOutput = run(listOf("powershell", "-NoProfile", "-Command", PNP_CAMERA_QUERY), 0L).output
-    return parseWindowsCameras(dshowOutput, pnpOutput)
+/**
+ * How long to wait for ffmpeg's DirectShow listing.
+ *
+ * It instantiates and queries every registered DirectShow video filter, so a box carrying an OBS
+ * virtual camera, an NDI filter and a vendor capture driver genuinely takes a couple of seconds.
+ * This is a ceiling for a pathological machine, not a budget.
+ */
+private const val DSHOW_LIST_TIMEOUT_S = 10L
+
+/**
+ * How long to wait for the PnP query.
+ *
+ * More generous than the ffmpeg one because `powershell.exe` costs a second or three to start even
+ * with `-NoProfile`, and `Get-CimInstance Win32_PnPEntity` walks the whole device tree through WMI.
+ * Only ever paid on the fallback path.
+ */
+private const val PNP_QUERY_TIMEOUT_S = 15L
+
+/**
+ * The machine's cameras, preferring ffmpeg's DirectShow listing outright over the PnP one.
+ *
+ * **These two tools do not name devices in the same space, so their results must never be merged.**
+ * ffmpeg enumerates the DirectShow video filters it can open and prints the `FriendlyName` needed to
+ * open one; `Get-CimInstance Win32_PnPEntity` enumerates hardware Windows knows about and prints a
+ * PnP friendly name, which is a label rather than an address. [buildFfmpegCommand] turns whatever is
+ * stored here into `-f dshow -i video=<name>`, so a name ffmpeg never listed produces
+ * "Could not find video device" — which [classifyCameraFfmpegStderr] reads as
+ * `DEVICE_NOT_FOUND`, telling the operator their camera "is no longer connected" about a device that
+ * was never openable in the first place.
+ *
+ * The PnP query is therefore only a fallback for when ffmpeg listed nothing, which in practice means
+ * ffmpeg is not installed. Capture needs ffmpeg too, so those entries can never be opened; they
+ * exist so the operator still sees their camera named beside the `canvas_camera_ffmpeg_required`
+ * hint telling them what to install, rather than an empty list.
+ *
+ * This mirrors [parseMacCameras], which resolved the same conflict between ffmpeg and
+ * `system_profiler` the same way and for the same reason.
+ */
+internal fun windowsCamerasFrom(run: CommandRunner): List<CameraDevice> = windowsListing(run).devices
+
+/** [windowsCamerasFrom], keeping which tool answered. */
+internal fun windowsListing(run: CommandRunner): CameraListing {
+    val dshowOutput = run(
+        listOf(FfmpegBinary.path, "-list_devices", "true", "-f", "dshow", "-i", "dummy"),
+        DSHOW_LIST_TIMEOUT_S,
+    ).output
+    val fromDshow = dshowCameras(dshowOutput)
+    // Not merely discarded when ffmpeg answered — not run at all. It is the slowest call on this
+    // path and the common case has no use for it.
+    if (fromDshow.isNotEmpty()) return fromDshow.asListing(CameraEnumerator.DSHOW)
+
+    val pnpOutput = run(
+        listOf("powershell", "-NoProfile", "-Command", PNP_CAMERA_QUERY),
+        PNP_QUERY_TIMEOUT_S,
+    ).output
+    return pnpFallbackCameras(pnpOutput).asListing(CameraEnumerator.PNP_FALLBACK)
 }
 
-internal fun parseWindowsCameras(dshowOutput: String, pnpOutput: String): List<CameraDevice> {
+/** The pure form of [windowsCamerasFrom]'s decision, which is what the tests drive. */
+internal fun parseWindowsCameras(dshowOutput: String, pnpOutput: String): List<CameraDevice> =
+    windowsListingOf(dshowOutput, pnpOutput).devices
+
+/** [parseWindowsCameras], keeping which tool answered. */
+internal fun windowsListingOf(dshowOutput: String, pnpOutput: String): CameraListing {
+    val fromDshow = dshowCameras(dshowOutput)
+    return if (fromDshow.isNotEmpty()) fromDshow.asListing(CameraEnumerator.DSHOW)
+    else pnpFallbackCameras(pnpOutput).asListing(CameraEnumerator.PNP_FALLBACK)
+}
+
+/**
+ * The devices in ffmpeg's `-list_devices` output, in both shapes it has printed them.
+ *
+ * `(none)` counts alongside `(video)`: an untyped capture card is still a camera to us.
+ */
+private fun dshowCameras(dshowOutput: String): List<CameraDevice> {
     val devices = mutableListOf<CameraDevice>()
     val seenNames = mutableSetOf<String>()
 
     fun add(name: String) {
         if (name.lowercase() !in seenNames) {
-            devices.add(CameraDevice(name = name, path = "dshow://:dshow-vdev=$name", displayName = name))
+            devices.add(windowsCameraDevice(name))
             seenNames.add(name.lowercase())
         }
     }
@@ -321,7 +457,6 @@ internal fun parseWindowsCameras(dshowOutput: String, pnpOutput: String): List<C
     val namePattern = Regex("\"(.+?)\"\\s+\\((video|none)\\)")
     var isVideo = false
     for (line in dshowOutput.lines()) {
-
         val newMatch = namePattern.find(line)
         if (newMatch != null) {
             add(newMatch.groupValues[1])
@@ -334,20 +469,29 @@ internal fun parseWindowsCameras(dshowOutput: String, pnpOutput: String): List<C
             Regex("\"(.+?)\"").find(line)?.let { add(it.groupValues[1]) }
         }
     }
-
-    pnpOutput.lines()
-        .map { it.trim() }
-        .filter { it.isNotBlank() }
-        .forEach { add(it) }
-
     return devices
 }
 
-internal fun macCamerasFrom(run: CommandRunner): List<CameraDevice> {
+/** The PnP names, when ffmpeg named nothing. Unopenable by construction — see [windowsCamerasFrom]. */
+private fun pnpFallbackCameras(pnpOutput: String): List<CameraDevice> {
+    val seenNames = mutableSetOf<String>()
+    return pnpOutput.lines()
+        .map { it.trim() }
+        .filter { it.isNotBlank() && seenNames.add(it.lowercase()) }
+        .map { windowsCameraDevice(it) }
+}
+
+private fun windowsCameraDevice(name: String) =
+    CameraDevice(name = name, path = "dshow://:dshow-vdev=$name", displayName = name)
+
+internal fun macCamerasFrom(run: CommandRunner): List<CameraDevice> = macListing(run).devices
+
+/** [macCamerasFrom], keeping which tool answered. */
+internal fun macListing(run: CommandRunner): CameraListing {
     val profilerOutput = run(listOf("system_profiler", "SPCameraDataType", "-detailLevel", "mini"), 0L).output
     val listDevices = listOf(FfmpegBinary.path, "-f", "avfoundation", "-list_devices", "true", "-i", "")
     val ffmpegOutput = run(listDevices, 0L).output
-    return parseMacCameras(profilerOutput, ffmpegOutput)
+    return macListingOf(profilerOutput, ffmpegOutput)
 }
 
 /** Adds an `[0] Camera name` line from ffmpeg's AVFoundation listing, if it names a new device. */
@@ -423,11 +567,15 @@ private fun systemProfilerCameraNames(systemProfilerOutput: String): List<String
  * they exist so the operator still sees their camera named beside the `canvas_camera_ffmpeg_hint`
  * telling them what to install, rather than an empty list.
  */
-internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String): List<CameraDevice> {
-    val fromFfmpeg = avfoundationCamerasFrom(ffmpegOutput)
-    if (fromFfmpeg.isNotEmpty()) return fromFfmpeg
+internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String): List<CameraDevice> =
+    macListingOf(systemProfilerOutput, ffmpegOutput).devices
 
-    return systemProfilerCameraNames(systemProfilerOutput).mapIndexed { index, name ->
-        CameraDevice(name = name, path = "avfoundation://$index", displayName = name)
-    }
+/** [parseMacCameras], keeping which tool answered. */
+internal fun macListingOf(systemProfilerOutput: String, ffmpegOutput: String): CameraListing {
+    val fromFfmpeg = avfoundationCamerasFrom(ffmpegOutput)
+    if (fromFfmpeg.isNotEmpty()) return fromFfmpeg.asListing(CameraEnumerator.AVFOUNDATION)
+
+    return systemProfilerCameraNames(systemProfilerOutput)
+        .mapIndexed { index, name -> CameraDevice(name = name, path = "avfoundation://$index", displayName = name) }
+        .asListing(CameraEnumerator.SYSTEM_PROFILER_FALLBACK)
 }
