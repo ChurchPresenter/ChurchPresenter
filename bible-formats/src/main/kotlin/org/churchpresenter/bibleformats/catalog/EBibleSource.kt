@@ -19,6 +19,23 @@ import org.xml.sax.SAXException
 import java.nio.channels.UnresolvedAddressException
 
 /**
+ * The outcome for a catalogue fetch that did not complete: the list as it was last seen, or a
+ * failure.
+ *
+ * One function rather than a body per catch arm — the three of them (network, DNS, a body that
+ * stopped short) differ only in the exception they name, and writing the mapping once is what keeps
+ * `fetchCatalog` readable as the sequence it is. Top-level rather than a member because the object
+ * is already at detekt's function ceiling, and this is a mapping rather than part of its interface.
+ */
+private fun catalogFetchFailed(e: Throwable, cached: List<BibleModule>?): BibleCatalogOutcome =
+    BibleInstallSupport.reported(
+        "eBible catalogue fetch failed",
+        e,
+        mapOf("subsystem" to "ebible_catalog"),
+        cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
+    )
+
+/**
  * eBible.org — the primary archive: around 1,300 translations across a thousand languages.
  *
  * Two things make it the better source. Its catalogue publishes a `Redistributable` flag and a
@@ -132,20 +149,17 @@ object EBibleSource : BibleSource {
             // without it, closing the browser filed "eBible catalogue fetch failed" against
             // someone who had merely changed their mind.
             currentCoroutineContext().ensureActive()
-            BibleInstallSupport.reported(
-                "eBible catalogue fetch failed",
-                e,
-                mapOf("subsystem" to "ebible_catalog"),
-                cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
-            )
+            catalogFetchFailed(e, cached)
         } catch (e: UnresolvedAddressException) {
             currentCoroutineContext().ensureActive()
-            BibleInstallSupport.reported(
-                "eBible catalogue fetch failed",
-                e,
-                mapOf("subsystem" to "ebible_catalog"),
-                cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
-            )
+            catalogFetchFailed(e, cached)
+        } catch (e: IllegalStateException) {
+            // A catalogue body is buffered whole, so a connection that drops mid-response surfaces
+            // as ktor's own Content-Length check rather than as an IOException — and, uncaught,
+            // as a crash out of this coroutine.
+            if (!with(BibleInstallSupport) { e.isContentLengthMismatch() }) throw e
+            currentCoroutineContext().ensureActive()
+            catalogFetchFailed(e, cached)
         }
     }
 

@@ -425,14 +425,18 @@ object SharedCameraFrameCache {
             lastFailure = when {
                 attempt == null -> CameraFailure.UNKNOWN
                 lastStderr.isEmpty() -> CameraFailure.NO_FRAMES
-                else -> classifyCameraFfmpegStderr(lastStderr)
+                else -> classifyCameraFfmpegStderr(lastStderr, deviceScheme(source.devicePath))
                     .takeIf { it != CameraFailure.UNKNOWN } ?: CameraFailure.NO_FRAMES
             }
             entry.error.value = lastFailure
 
             // A privacy refusal is the operator's to resolve in System Settings; four more attempts
-            // over eight seconds change nothing and only delay telling them so.
-            if (lastFailure == CameraFailure.PERMISSION_DENIED) {
+            // over eight seconds change nothing and only delay telling them so. The macOS pair is
+            // here for the same reason: whichever of its two causes applies, neither is something a
+            // retry two seconds later resolves.
+            if (lastFailure == CameraFailure.PERMISSION_DENIED ||
+                lastFailure == CameraFailure.PERMISSION_OR_UNAVAILABLE
+            ) {
                 stoppedEarly = true
                 return
             }
@@ -590,11 +594,16 @@ internal fun deviceScheme(devicePath: String): String =
 /**
  * Merges [override] into the `-video_size`/`-framerate` args [requested] by the chosen format.
  *
+ * [CaptureOverride.DEVICE_DEFAULTS] discards [requested] outright rather than merging into it: it
+ * is the attempt that asks the device for nothing, so the size and rate the source asked for are
+ * exactly what has to go.
+ *
  * `-framerate` is replaced rather than appended: ffmpeg takes the last occurrence of an input
  * option, but two of them in one argv is a command nobody can read in a bug report. `-pixel_format`
  * has no counterpart in the requested args, so it is simply added.
  */
 internal fun applyCaptureOverride(requested: List<String>, override: CaptureOverride): List<String> {
+    if (override.useDeviceDefaults) return emptyList()
     val withoutFramerate = if (override.framerate == null) requested else buildList {
         var i = 0
         while (i < requested.size) {

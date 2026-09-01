@@ -1053,7 +1053,7 @@
     <string name="ndi_runtime_missing_help">NDI output needs the free NDI Runtime, which is installed separately — this app does not include it. Install it, then check again.</string>
     <string name="ndi_runtime_install_link">Get the NDI Runtime</string>
     <string name="ndi_runtime_check_again">Check again</string>
-    <string name="ndi_runtime_unsupported_cpu">This computer\'s processor does not meet NDI\'s requirements (SSE4.2).</string>
+    <string name="ndi_runtime_unsupported_cpu">This computer's processor does not meet NDI's requirements (SSE4.2).</string>
     <string name="ndi_runtime_load_failed">An NDI Runtime was found at %1$s but could not be loaded. It may be for a different processor architecture, or too old.</string>
     <string name="ndi_runtime_ready">NDI Runtime %1$s</string>
     <string name="ndi_runtime_path">NDI Runtime folder</string>
@@ -1324,6 +1324,8 @@
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
     <string name="web_engine_unavailable_title">Web browser unavailable</string>
     <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
+    <string name="web_engine_unavailable_policy_title">Web browser blocked by a policy on this computer</string>
+    <string name="web_engine_unavailable_policy_body">A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask whoever manages the computer to allow ChurchPresenter, or use a computer without that restriction — the Web tab and browser sources need it.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
     <string name="web_live_badge">LIVE</string>
@@ -1499,6 +1501,8 @@
     <string name="canvas_camera_error_unsupported_format">This device does not accept the video format that was requested. Choose a specific one under Video Format.</string>
     <string name="canvas_camera_error_unsupported_framerate">This device does not accept the frame rate that was requested. Choose a specific format under Video Format.</string>
     <string name="canvas_camera_error_device_busy">This camera is already in use by another application.</string>
+    <string name="canvas_camera_error_config_refused">This camera would not accept the video format that was requested and sent nothing. Set Video Format to Auto, or choose one of the formats it lists.</string>
+    <string name="canvas_camera_error_permission_or_unavailable">macOS would not send video from this camera. Check System Settings → Privacy &amp; Security → Camera that ChurchPresenter is switched on, and that no other app is using the camera.</string>
     <string name="canvas_camera_error_device_not_found">This camera is no longer connected.</string>
     <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
     <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
@@ -1847,8 +1851,8 @@
     <string name="bible_catalog_license_unknown">This archive states no copyright for this translation.</string>
     <string name="bible_catalog_license_source_ebible">eBible.org lists this translation as redistributable and publishes the copyright shown above.</string>
     <string name="bible_catalog_license_source_zefania">The Zefania archive publishes no licence details, so this translation’s copyright only becomes visible once it is installed. Its modules are community-contributed and have not been checked.</string>
-    <string name="bible_catalog_license_source_beblia">The Holy Bible XML archive republishes each translation\'s own copyright statement, shown above, but its files are community-contributed and none of the statements have been checked.</string>
-    <string name="bible_catalog_book_names_english">Book names will appear in English for this translation — the archive\'s files identify books by number only. Verse text is unaffected.</string>
+    <string name="bible_catalog_license_source_beblia">The Holy Bible XML archive republishes each translation's own copyright statement, shown above, but its files are community-contributed and none of the statements have been checked.</string>
+    <string name="bible_catalog_book_names_english">Book names will appear in English for this translation — the archive's files identify books by number only. Verse text is unaffected.</string>
     <string name="bible_catalog_license_accept">I understand — Download</string>
     <string name="bible_catalog_subtitle">Browse free translations and add them to your library</string>
     <string name="bible_catalog_installed_count">%1$d installed</string>

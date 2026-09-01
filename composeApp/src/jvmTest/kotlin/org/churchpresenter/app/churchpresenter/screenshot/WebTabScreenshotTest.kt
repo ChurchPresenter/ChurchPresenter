@@ -44,6 +44,7 @@ class WebTabScreenshotTest {
         selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
         cefInitialized: Boolean = true,
         cefMacOsUnsupported: Boolean = false,
+        cefBlockedByPolicy: Boolean = false,
         schedule: Boolean = true,
         width: Dp? = null,
         drive: ComposeUiTest.(PresenterManager) -> Unit = {},
@@ -53,6 +54,7 @@ class WebTabScreenshotTest {
             selectedWebsiteItem = selectedWebsiteItem,
             cefInitialized = cefInitialized,
             cefMacOsUnsupported = cefMacOsUnsupported,
+            cefBlockedByPolicy = cefBlockedByPolicy,
             includeAddToSchedule = schedule,
             width = width,
             themeMode = mode,
@@ -174,6 +176,10 @@ class WebTabScreenshotTest {
     @Test
     fun `the browser engine needs a newer macOS`() =
         shoot("engine_unavailable_macos", cefInitialized = false, cefMacOsUnsupported = true)
+
+    @Test
+    fun `the browser engine is blocked by a policy on this computer`() =
+        shoot("engine_unavailable_policy", cefInitialized = false, cefBlockedByPolicy = true)
 
     // ── Toolbar widths ──────────────────────────────────────────────────────────────────────────
 

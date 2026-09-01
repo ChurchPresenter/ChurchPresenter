@@ -105,10 +105,29 @@ object BibleInstallSupport {
             this is SocketTimeoutException ||
             this is HttpRequestTimeoutException ||
             this is TruncatedBodyException ||
+            isContentLengthMismatch() ||
             this is InsufficientDiskSpaceException ||
             this is SSLException ||
             this is EOFException ||
             (depth < MAX_CAUSE_DEPTH && cause?.isOperatorEnvironment(depth + 1) == true)
+
+    /**
+     * True when [this] is ktor reporting a body that ended before its `Content-Length` promised.
+     *
+     * The one thing here matched on wording rather than type, and only because ktor leaves no
+     * choice: `checkContentLength` raises a bare [IllegalStateException]. The string is ktor's own
+     * and not the operating system's, so unlike the disk-full case it does not change with the
+     * machine's language. It is checked narrowly for that reason — an [IllegalStateException] is
+     * otherwise exactly the kind of thing that means this code has a bug, and swallowing all of
+     * them would hide it.
+     *
+     * It reaches a catalogue fetch rather than a download: an install streams its body and catches
+     * a short one itself ([TruncatedBodyException]), while `response.body<String>()` buffers the
+     * whole thing and lets ktor do the check. Uncaught, it came out of a coroutine and took the app
+     * down with it, from the Bible tab of a church whose connection had dropped mid-catalogue.
+     */
+    internal fun Throwable.isContentLengthMismatch(): Boolean =
+        this is IllegalStateException && message?.contains("Content-Length mismatch") == true
 
     const val COPY_BUFFER_BYTES = 64 * 1024
     private const val MAX_ARCHIVE_ENTRIES = 64

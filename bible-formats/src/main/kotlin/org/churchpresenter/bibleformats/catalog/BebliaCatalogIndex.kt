@@ -197,6 +197,16 @@ object BebliaCatalogIndex {
                 mapOf("subsystem" to "beblia_catalog"),
                 cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
             )
+        } catch (e: IllegalStateException) {
+            // See EBibleSource: a buffered body that stops early is ktor's Content-Length check,
+            // not an IOException, and nothing above catches it.
+            if (!with(BibleInstallSupport) { e.isContentLengthMismatch() }) throw e
+            BibleInstallSupport.reported(
+                "Holy Bible XML catalogue fetch failed",
+                e,
+                mapOf("subsystem" to "beblia_catalog"),
+                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+            )
         }
     }
 

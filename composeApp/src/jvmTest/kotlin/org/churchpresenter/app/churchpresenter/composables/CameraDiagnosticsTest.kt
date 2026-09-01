@@ -161,9 +161,71 @@ class CameraDiagnosticsTest {
     @Test
     fun `failures that retrying cannot fix yield no next attempt`() {
         val formats = listOf(CameraFormat(640, 480, 30))
-        listOf(CameraFailure.PERMISSION_DENIED, CameraFailure.NO_FRAMES, CameraFailure.DEVICE_BUSY).forEach {
+        listOf(
+            CameraFailure.PERMISSION_DENIED,
+            CameraFailure.PERMISSION_OR_UNAVAILABLE,
+            CameraFailure.DEVICE_BUSY,
+        ).forEach {
             assertNull(nextCaptureOverride(it, unsupportedPixelFormat, formats, emptySet()), "$it")
         }
+    }
+
+    @Test
+    fun `a device that sent no video is asked again for nothing in particular`() {
+        // The failure that issue #464 was reported as: five identical attempts, then a grey
+        // rectangle. What the device refused is what was asked of it, so the next attempt asks for
+        // nothing — there is no format in the stderr to parse, and none is needed.
+        listOf(CameraFailure.NO_FRAMES, CameraFailure.DEVICE_CONFIG_REFUSED).forEach {
+            assertEquals(
+                CaptureOverride.DEVICE_DEFAULTS,
+                nextCaptureOverride(it, emptyList(), emptyList(), emptySet()),
+                "$it",
+            )
+        }
+    }
+
+    @Test
+    fun `asking for nothing is attempted once, not on every remaining retry`() {
+        assertNull(
+            nextCaptureOverride(
+                CameraFailure.NO_FRAMES,
+                emptyList(),
+                emptyList(),
+                setOf(CaptureOverride.DEVICE_DEFAULTS),
+            ),
+            "the loop has four attempts left and no reason to spend them identically",
+        )
+    }
+
+    @Test
+    fun `a device that refused the requested mode and fell back is not called busy`() {
+        val fellBack = listOf(
+            "[AVFoundation indev @ 0x7fe465804b40] Configuration of video device failed, " +
+                "falling back to default."
+        )
+        assertEquals(CameraFailure.DEVICE_CONFIG_REFUSED, classifyCameraFfmpegStderr(fellBack, "avfoundation"))
+    }
+
+    @Test
+    fun `on macos an IO error names permission as well as availability, and nowhere else does`() {
+        // AVFoundation prints this for a privacy refusal — which carries no authorization string,
+        // so PERMISSION_DENIED cannot match it — as well as for a device it cannot open. Calling it
+        // DEVICE_BUSY put "already in use by another application" in front of an operator whose
+        // camera nothing was using. dshow and v4l2 emit it only for a device another process holds.
+        val ioError = listOf("[in#0 @ 0x12b007d90] Error opening input: Input/output error")
+
+        assertEquals(
+            CameraFailure.PERMISSION_OR_UNAVAILABLE,
+            classifyCameraFfmpegStderr(ioError, "avfoundation"),
+        )
+        assertEquals(CameraFailure.DEVICE_BUSY, classifyCameraFfmpegStderr(ioError, "dshow"))
+        assertEquals(CameraFailure.DEVICE_BUSY, classifyCameraFfmpegStderr(ioError, "v4l2"))
+    }
+
+    @Test
+    fun `an explicitly busy device stays busy on every platform`() {
+        val busy = listOf("[AVFoundation indev @ 0x7fb2] Cannot open device: already in use")
+        assertEquals(CameraFailure.DEVICE_BUSY, classifyCameraFfmpegStderr(busy, "avfoundation"))
     }
 
     @Test
