@@ -68,7 +68,7 @@ internal fun CustomizeRail(
         modifier = Modifier
             .width(RAIL_WIDTH)
             .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

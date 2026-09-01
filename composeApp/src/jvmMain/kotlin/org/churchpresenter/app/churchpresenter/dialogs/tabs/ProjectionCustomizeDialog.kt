@@ -219,6 +219,11 @@ internal fun OutputCustomizeDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.width(DIALOG_WIDTH),
         shape = RoundedCornerShape(14.dp),
+        // The card layer of the settings ramp, so the rail and the control column read as one
+        // sheet with the preview column's page tone beside them — the same three layers the
+        // Background, Song and Bible tabs are built from. M3's default is the field tone, which
+        // would put the element chips on exactly the color they sit on.
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         properties = DialogProperties(usePlatformDefaultWidth = false),
         title = {
             CustomizeDialogHeader(

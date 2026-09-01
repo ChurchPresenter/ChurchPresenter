@@ -208,7 +208,7 @@ fun BackgroundSettingsTab(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     BackgroundStagePreview(
                         config = backgrounds.resolvedConfigFor(scope),
@@ -238,7 +238,7 @@ private fun BackgroundScopeRail(
     onSelect: (BackgroundScope) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
+    Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainer)) {
         Box(
             modifier = Modifier.fillMaxWidth().height(SECTION_HEADER_HEIGHT).padding(horizontal = 11.dp),
             contentAlignment = Alignment.CenterStart
@@ -369,7 +369,7 @@ private fun BackgroundEditorHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(EDITOR_HEADER_HEIGHT)
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(11.dp)
@@ -471,7 +471,7 @@ private fun BackgroundStagePreview(
         val stageScale = width.value / BACKGROUND_REFERENCE_WIDTH
         TvScreenBox(
             modifier = Modifier.width(width).height(width / stageAspect),
-            bezelColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            bezelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             screenColor = Color.Black
         ) {
             BackgroundCoverageFill(
@@ -670,7 +670,7 @@ private fun QuickBackgroundsRail(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 13.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -686,7 +686,7 @@ private fun QuickBackgroundsRail(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .clip(RoundedCornerShape(5.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 6.dp, vertical = 1.dp)
             )
         }
