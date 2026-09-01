@@ -75,6 +75,7 @@ import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
@@ -237,6 +238,9 @@ private fun SingleDisplayPreview(
     onToggleLock: (Presenting?) -> Unit = {},
     label: String,
 ) {
+    // This preview must show what the real output shows, so it resolves the same per-output
+    // override the presenter window does. Identical to [appSettings] when uncustomized.
+    val outputSettings = appSettings.resolvedFor(screenAssignment)
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
@@ -344,7 +348,7 @@ private fun SingleDisplayPreview(
         if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
             ScaledPresenterContent {
                 StageMonitorScreen(
-                    sm = appSettings.stageMonitorSettings,
+                    sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
                     showChords = screenAssignment.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
@@ -359,9 +363,9 @@ private fun SingleDisplayPreview(
                     presenterNotes = presenterNotes,
                     activeScene = activeScene,
                     displayedQuestion = displayedQuestion,
-                    qaSettings = appSettings.qaSettings,
+                    qaSettings = outputSettings.qaSettings,
                     displayedDictionaryEntry = displayedDictionaryEntry,
-                    dictionarySettings = appSettings.dictionarySettings,
+                    dictionarySettings = outputSettings.dictionarySettings,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -372,35 +376,38 @@ private fun SingleDisplayPreview(
         if (effectiveMode != Presenting.WEBSITE) {
             ScaledPresenterContent {
                 PresenterScreen(
-                    appSettings = appSettings,
+                    appSettings = outputSettings,
                     outputRole = primaryRole,
                     isLowerThird = isLowerThird,
                     showBackground = showsBackground,
                 ) {
                     if (effectiveMode != Presenting.NONE && showsContent) {
-                        val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
+                        val modeCrossfadeOn = outputSettings.bibleSettings.crossfade ||
+                            outputSettings.songSettings.crossfade
                         val modeCrossfadeDur = maxOf(
-                            if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
-                            if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
+                            if (outputSettings.bibleSettings.crossfade)
+                                outputSettings.bibleSettings.transitionDuration.toInt() else 0,
+                            if (outputSettings.songSettings.crossfade)
+                                outputSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
                         Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
                                     selectedVerses = displayedVerses,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
                                     showBackground = showsBackground && screenAssignment.showBibleBackground,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                    crossfadeEnabled = outputSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
                                     lyricSection = displayedLyricSection,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
@@ -410,7 +417,7 @@ private fun SingleDisplayPreview(
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
                                     showBackground = showsBackground && screenAssignment.showSongsBackground,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                    crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
                                 )
                             Presenting.PICTURES ->
@@ -444,7 +451,7 @@ private fun SingleDisplayPreview(
                             Presenting.ANNOUNCEMENTS ->
                                 AnnouncementsPresenter(
                                     text = displayedAnnouncementText,
-                                    appSettings = appSettings,
+                                    appSettings = outputSettings,
                                     outputRole = primaryRole,
                                     transitionAlpha = announcementTransitionAlpha
                                 )
@@ -453,9 +460,12 @@ private fun SingleDisplayPreview(
                             Presenting.QA -> {
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
-                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
+                                    QAQRCodePresenter(
+                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
+                                        qaSettings = outputSettings.qaSettings,
+                                    )
                                 } else {
-                                    QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
+                                    QAPresenter(question = displayedQuestion, qaSettings = outputSettings.qaSettings)
                                 }
                             }
                             Presenting.STT -> {
@@ -466,7 +476,7 @@ private fun SingleDisplayPreview(
                                         translationSegments = sttManager.translationSegments,
                                         inProgressTranslation = sttManager.inProgressTranslation.value,
                                         highlightedWords = sttManager.highlightedWords,
-                                        sttSettings = appSettings.sttSettings,
+                                        sttSettings = outputSettings.sttSettings,
                                         outputRole = primaryRole,
                                     )
                                 }
@@ -474,7 +484,7 @@ private fun SingleDisplayPreview(
                             Presenting.DICTIONARY ->
                                 DictionaryPresenter(
                                     entry = displayedDictionaryEntry,
-                                    dictionarySettings = appSettings.dictionarySettings,
+                                    dictionarySettings = outputSettings.dictionarySettings,
                                     outputRole = primaryRole,
                                     transitionAlpha = 1f,
                                 )

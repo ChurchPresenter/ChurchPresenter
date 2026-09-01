@@ -126,9 +126,9 @@ class ProjectionSettingsTabGridTest {
 
     @Test
     fun `the display mode dropdown stores each mode`() = projectionTab { get ->
+        // One Lower Third entry, not two: the orientation moved into the Customize dialog.
         val modes = listOf(
-            "Horizontal Lower Third" to Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            "Vertical Lower Third" to Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL,
+            "Lower Third" to Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
             "Stage Monitor" to Constants.DISPLAY_MODE_STAGE_MONITOR,
             "Full Screen" to Constants.DISPLAY_MODE_FULLSCREEN,
         )
@@ -150,17 +150,39 @@ class ProjectionSettingsTabGridTest {
     fun `a lower-third display mode is reported as such`() = projectionTab { get ->
         gridButton(Grid.displayMode(row = 0)).performScrollTo().performClick()
         waitForIdle()
-        onAllNodesWithText("Vertical Lower Third").onLast().performClick()
+        onAllNodesWithText("Lower Third").onLast().performClick()
         waitForIdle()
 
         val assignment = get().projectionSettings.screenAssignments[0]
-        assertTrue(assignment.isLowerThird, "a vertical band still counts as a lower third")
-        assertTrue(assignment.isLowerThirdVertical, "and specifically as the vertical one")
+        assertTrue(assignment.isLowerThird, "the row must count as a lower third")
         assertEquals(
             Constants.DISPLAY_MODE_FULLSCREEN,
             get().projectionSettings.screenAssignments[1].displayMode,
             "the other row must be untouched",
         )
+    }
+
+    @Test
+    fun `a vertical output still reads as Lower Third and keeps its orientation`() {
+        val vertical = ProjectionSettings(
+            screenAssignments = listOf(
+                ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL),
+                ScreenAssignment(),
+            ),
+        )
+        projectionTab(AppSettings(projectionSettings = vertical)) { get ->
+            // The dropdown offers one Lower Third entry, so a vertical output has to resolve to it
+            // rather than falling through to the Full Screen label.
+            gridButton(Grid.displayMode(row = 0)).performScrollTo().assertTextEquals("Lower Third")
+
+            gridButton(Grid.displayMode(row = 0)).performClick()
+            waitForIdle()
+            onAllNodesWithText("Lower Third").onLast().performClick()
+            waitForIdle()
+
+            val assignment = get().projectionSettings.screenAssignments[0]
+            assertTrue(assignment.isLowerThirdVertical, "re-picking Lower Third must not flip it")
+        }
     }
 
     // ── Numeric fields ──────────────────────────────────────────────────────────────────────────

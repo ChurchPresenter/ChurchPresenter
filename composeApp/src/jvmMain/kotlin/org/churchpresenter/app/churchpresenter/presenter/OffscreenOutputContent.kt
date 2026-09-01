@@ -26,6 +26,7 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 
@@ -75,8 +76,12 @@ internal fun OffscreenOutputContent(
             LocalTransparentBlanking provides transparentBlanking,
             LocalMediaViewModel provides mediaViewModel
         ) {
-            val appSettings by appSettingsState
+            val globalSettings by appSettingsState
             val screenAssignment by screenAssignmentState
+            // What THIS output renders with: the same per-output override resolution the presenter
+            // windows do in PresenterOutputContent. An output with no override of its own gets the
+            // global instance straight back, so nothing recomposes that did not before.
+            val appSettings = globalSettings.resolvedFor(screenAssignment)
             val effectiveMode by effectiveModeState
             val isIdentifying = when (context.kind) {
                 OffscreenOutputKind.BROWSER_SOURCE ->

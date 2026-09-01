@@ -42,6 +42,9 @@ import churchpresenter.composeapp.generated.resources.bible_miscellaneous
 import churchpresenter.composeapp.generated.resources.bible_split_long_verses
 import churchpresenter.composeapp.generated.resources.bible_translation
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
+import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
+import churchpresenter.composeapp.generated.resources.bilingual_left_right
+import churchpresenter.composeapp.generated.resources.bilingual_layout
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bible_translations
 import churchpresenter.composeapp.generated.resources.bottom
@@ -429,6 +432,43 @@ private fun TranslationRow(
  * Spacing and the divider are about how the translations sit against each other; split browse and
  * cross references are about the Bible tab. Too mixed a set to name for any one of them.
  */
+/**
+ * One shape's translation arrangement: a caption, then Left/Right against Top/Bottom.
+ *
+ * A vertical band ignores it and always stacks, having no width to split -- `BiblePresenter` routes
+ * it to the stacked branch regardless, exactly as it did before this setting existed.
+ */
+@Composable
+private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = "$label \u00b7 ${stringResource(Res.string.bilingual_layout).removeSuffix(":")}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SegmentedButton(
+            items = listOf(
+                SegmentedButtonItem(
+                    Constants.BILINGUAL_SIDE_BY_SIDE,
+                    stringResource(Res.string.bilingual_left_right),
+                ),
+                SegmentedButtonItem(
+                    Constants.BILINGUAL_TOP_BOTTOM,
+                    stringResource(Res.string.bilingual_top_bottom),
+                ),
+            ),
+            selectedValue = selected,
+            onValueChange = onSelect,
+            buttonWidth = 120.dp,
+            buttonHeight = 32.dp,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+        )
+    }
+}
+
 @Composable
 private fun MiscellaneousSection(
     settings: AppSettings,
@@ -455,6 +495,25 @@ private fun MiscellaneousSection(
                 range = 0..SPACING_MAX,
             )
         }
+        // Where two or more translations sit relative to each other, per output shape. Two
+        // controls rather than one because the two shapes have always disagreed -- a full screen
+        // stacks, a band splits 50/50 -- and both of those defaults are kept.
+        BibleLayoutRow(
+            label = stringResource(Res.string.full_screen),
+            selected = settings.bibleSettings.bilingualLayout,
+            onSelect = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayout = value)) }
+            },
+        )
+        BibleLayoutRow(
+            label = stringResource(Res.string.lower_third_size),
+            selected = settings.bibleSettings.bilingualLayoutLowerThird,
+            onSelect = { value ->
+                onSettingsChange { s ->
+                    s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayoutLowerThird = value))
+                }
+            },
+        )
         LabeledCheckbox(
             checked = settings.bibleSettings.multiTranslationDivider,
             onCheckedChange = { enabled ->

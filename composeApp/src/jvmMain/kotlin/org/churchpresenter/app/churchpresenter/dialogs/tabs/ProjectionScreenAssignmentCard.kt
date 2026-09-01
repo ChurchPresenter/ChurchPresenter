@@ -530,6 +530,11 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             }
 
             // Display mode dropdown (fixed column)
+            val screenLabel = proj.screenLabelOr(
+                assignment,
+                if (devWindowedFallback && i == 0) stringResource(Res.string.dev_window_label)
+                else stringResource(Res.string.screen_col_label, i + 1),
+            )
             @OptIn(ExperimentalMaterial3Api::class)
             Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
                 var displayModeExpanded by remember { mutableStateOf(false) }
@@ -540,7 +545,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = displayModes.find { it.second == assignment.displayMode }?.first ?: fullScreenLabel,
+                        text = displayModes.find { it.second == shownDisplayMode(assignment.displayMode) }?.first
+                                ?: fullScreenLabel,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -555,7 +561,9 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                             text = { Text(label, style = MaterialTheme.typography.bodySmall) },
                             onClick = {
                                 displayModeExpanded = false
-                                val updated = assignment.copy(displayMode = modeValue)
+                                val updated = assignment.copy(
+                                    displayMode = pickedDisplayMode(modeValue, assignment.displayMode),
+                                )
                                 onSettingsChange { s ->
                                     s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                 }
@@ -572,7 +580,14 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             var showContentDialog by remember { mutableStateOf(false) }
             val enabledCount = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
             val totalCount = contentOutputsTotalCount(assignment, contentGroup, backgroundGroup)
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+            // Customize sits beside it rather than at the row's right edge: the two are the row's
+            // pair of "open a dialog about this output" buttons, and separating them would read as
+            // Customize belonging to whatever column it drifted next to.
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { showContentDialog = true },
@@ -585,13 +600,18 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
+                CustomizeOutputCell(
+                    assignment = assignment,
+                    screenLabel = screenLabel,
+                    settings = settings,
+                    onApply = { updated ->
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                        }
+                    },
+                )
             }
             if (showContentDialog) {
-                val screenLabel = proj.screenLabelOr(
-                    assignment,
-                    if (devWindowedFallback && i == 0) stringResource(Res.string.dev_window_label)
-                    else stringResource(Res.string.screen_col_label, i + 1),
-                )
                 ContentOutputsDialog(
                     title = stringResource(Res.string.content_outputs_for, screenLabel),
                     screenLabel = screenLabel,

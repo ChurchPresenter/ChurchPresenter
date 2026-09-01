@@ -65,11 +65,11 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
@@ -227,24 +227,24 @@ internal fun OptionsDialogContent(
                                 text = { Text(stringResource(Res.string.server_settings)) }
                             )
                             Tab(
-                                selected = safeTabIndex == 6,
-                                onClick = { selectedTabIndex = 6 },
+                                selected = safeTabIndex == TAB_STAGE_MONITOR,
+                                onClick = { selectedTabIndex = TAB_STAGE_MONITOR },
                                 text = { Text(stringResource(Res.string.stage_monitor)) }
                             )
                             Tab(
-                                selected = safeTabIndex == 7,
-                                onClick = { selectedTabIndex = 7 },
+                                selected = safeTabIndex == TAB_ATEM,
+                                onClick = { selectedTabIndex = TAB_ATEM },
                                 text = { Text(stringResource(Res.string.atem_settings)) }
                             )
                             Tab(
-                                selected = safeTabIndex == 8,
-                                onClick = { selectedTabIndex = 8 },
+                                selected = safeTabIndex == TAB_DICTIONARY,
+                                onClick = { selectedTabIndex = TAB_DICTIONARY },
                                 text = { Text(stringResource(Res.string.tab_dictionary)) }
                             )
                             if (obsManager != null) {
                                 Tab(
-                                    selected = safeTabIndex == 9,
-                                    onClick = { selectedTabIndex = 9 },
+                                    selected = safeTabIndex == TAB_INTEGRATIONS,
+                                    onClick = { selectedTabIndex = TAB_INTEGRATIONS },
                                     text = { Text(stringResource(Res.string.obs_settings)) }
                                 )
                             }
@@ -347,7 +347,7 @@ internal fun OptionsDialogContent(
                                     viewModel = companionSatelliteViewModel
                                 )
                             }
-                            // Past index 10 the numbering depends on whether the OBS tab is
+                            // Past the OBS tab the numbering depends on whether it is
                             // present, so this is matched by its computed index rather than by a
                             // literal that would be right in only one of the two cases.
                             companionSatelliteTabIndex -> CompanionSatelliteSettingsTab(

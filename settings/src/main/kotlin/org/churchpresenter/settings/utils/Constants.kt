@@ -22,6 +22,19 @@ object Constants {
     const val TIMER_MODE_CLOCK_DISPLAY = TimerModes.CLOCK_DISPLAY
 
     const val NONE = "None"
+
+    /**
+     * How presented text is re-cased on its way to the screen.
+     *
+     * Stored rather than applied at edit time: a song's own words keep whatever case they were
+     * written in, and the screen decides how to show them — so switching back to [TEXT_TRANSFORM_NONE]
+     * gives the original text, which re-casing the source could never do.
+     */
+    const val TEXT_TRANSFORM_NONE = "None"
+    const val TEXT_TRANSFORM_UPPERCASE = "Uppercase"
+    const val TEXT_TRANSFORM_LOWERCASE = "Lowercase"
+    const val TEXT_TRANSFORM_CAPITALIZE = "Capitalize"
+
     const val FIRST_PAGE = "First Page"
     const val EVERY_PAGE = "Every Page"
     const val TOP = "Top"
@@ -68,13 +81,6 @@ object Constants {
     // Position Options
     const val POSITION_ABOVE = "Above"
     const val POSITION_BELOW = "Below"
-
-    // Text Transform Options -- applied to a verse or its reference as it is drawn, so the stored
-    // scripture text is never altered and turning the transform back off restores the original case.
-    const val TEXT_TRANSFORM_NONE = "None"
-    const val TEXT_TRANSFORM_UPPERCASE = "Uppercase"
-    const val TEXT_TRANSFORM_LOWERCASE = "Lowercase"
-    const val TEXT_TRANSFORM_CAPITALIZE = "Capitalize"
 
     // Language Options
     const val LANGUAGE_INTERFACE = "Interface"

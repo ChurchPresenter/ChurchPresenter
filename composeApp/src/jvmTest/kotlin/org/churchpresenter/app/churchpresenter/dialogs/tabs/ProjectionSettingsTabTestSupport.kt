@@ -164,11 +164,11 @@ internal fun ComposeUiTest.translationRow(index: Int): SemanticsNodeInteraction 
 
 /**
  * Where each control sits among the tab's labelled buttons, in composition order: the Identify
- * button, then four per assignment row, then the buttons below the grid.
+ * button, then five per assignment row, then the buttons below the grid.
  */
 internal object Grid {
     const val IDENTIFY = 0
-    const val CONTROLS_PER_ROW = 4
+    const val CONTROLS_PER_ROW = 5
 
     /** The target-display dropdown for assignment row [row]. */
     fun targetDisplay(row: Int) = 1 + row * CONTROLS_PER_ROW
@@ -181,6 +181,9 @@ internal object Grid {
 
     /** The "N of M enabled" content-outputs button for assignment row [row]. */
     fun contentOutputs(row: Int) = 4 + row * CONTROLS_PER_ROW
+
+    /** The Customize button for assignment row [row], which sits beside the content-outputs one. */
+    fun customize(row: Int) = 5 + row * CONTROLS_PER_ROW
 
     /** The first button after the grid, given [rows] assignment rows: "Add Output". */
     fun addOutput(rows: Int) = 1 + rows * CONTROLS_PER_ROW
