@@ -420,6 +420,112 @@ private val MochaColorScheme = darkColorScheme(
     inverseOnSurface = Color.Black,
 )
 
+// Slate light theme — cool desaturated blue-grey, held apart from Ocean by having far less
+// saturation and from Light by having any hue at all.
+private val SlateColorScheme = lightColorScheme(
+    primary = Color(0xFF44607A),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD3E0EC),
+    onPrimaryContainer = Color(0xFF10202E),
+    secondary = Color(0xFF5C7789),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFCCDAE3),
+    onSecondaryContainer = Color(0xFF13242E),
+    tertiary = Color(0xFF7A91A4),
+    onTertiary = Color.White,
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    errorContainer = Color(0xFFFDE7E7),
+    onErrorContainer = Color(0xFF790000),
+    background = Color(0xFFEAEEF3),
+    onBackground = Color(0xFF141A20),
+    surface = Color(0xFFDFE5EC),
+    onSurface = Color(0xFF141A20),
+    surfaceVariant = Color(0xFFCFD6DE),
+    onSurfaceVariant = Color(0xFF3D4A56),
+    surfaceContainer = Color(0xFFF4F7FA),
+    surfaceContainerHigh = Color(0xFFE2E8EF),
+    outline = Color(0xFF7C8B9A),
+    outlineVariant = Color(0xFFB6C2CF),
+    inverseSurface = Color(0xFF4CAF50),
+    inverseOnSurface = Color.White,
+)
+
+// Sand light theme — a warm neutral taupe. Warm is a cream with a yellow cast; this is greyer and
+// browner, so the two do not read as the same theme at a glance.
+private val SandColorScheme = lightColorScheme(
+    primary = Color(0xFF6B5D4B),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE7DECF),
+    onPrimaryContainer = Color(0xFF241C11),
+    secondary = Color(0xFF7D7160),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE2D8C9),
+    onSecondaryContainer = Color(0xFF241C11),
+    tertiary = Color(0xFF978975),
+    onTertiary = Color.White,
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    errorContainer = Color(0xFFFDE7E7),
+    onErrorContainer = Color(0xFF790000),
+    background = Color(0xFFF7F4EF),
+    onBackground = Color(0xFF1F1A14),
+    surface = Color(0xFFF1ECE4),
+    onSurface = Color(0xFF1F1A14),
+    surfaceVariant = Color(0xFFE0D9CE),
+    onSurfaceVariant = Color(0xFF4C443A),
+    surfaceContainer = Color(0xFFFAF8F5),
+    surfaceContainerHigh = Color(0xFFEEE9E1),
+    outline = Color(0xFF938A7C),
+    outlineVariant = Color(0xFFCFC5B7),
+    inverseSurface = Color(0xFF4CAF50),
+    inverseOnSurface = Color.White,
+)
+
+// Plum dark theme — a deep aubergine with a warm pink accent. The dark set had no red-purple:
+// Mocha is a cool lilac over a blue-grey ground, this is a warm magenta over an aubergine one.
+private val PlumColorScheme = darkColorScheme(
+    primary = Color(0xFFE3A6CE),
+    onPrimary = Color(0xFF2C0A22),
+    primaryContainer = Color(0xFF4A1638),
+    onPrimaryContainer = Color(0xFFFAD8EC),
+    secondary = Color(0xFFD9A8BE),
+    onSecondary = Color(0xFF2E0E1E),
+    secondaryContainer = Color(0xFF482032),
+    onSecondaryContainer = Color(0xFFF8D9E5),
+    tertiary = Color(0xFFE8B98C),
+    onTertiary = Color(0xFF33190A),
+    error = Color(0xFFF38BA8),
+    onError = Color(0xFF300010),
+    errorContainer = Color(0xFF4A0020),
+    onErrorContainer = Color(0xFFFFB3C6),
+    background = Color(0xFF1F1520),
+    onBackground = Color(0xFFEEDCE8),
+    surface = Color(0xFF1A1019),
+    onSurface = Color(0xFFEEDCE8),
+    surfaceVariant = Color(0xFF33222F),
+    onSurfaceVariant = Color(0xFFD3BCCA),
+    surfaceContainer = Color(0xFF3E2C3A),
+    surfaceContainerHigh = Color(0xFF4A3646),
+    outline = Color(0xFF8A7182),
+    outlineVariant = Color(0xFF5E4759),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
+/**
+ * Whether a theme paints a light ground.
+ *
+ * Answered here rather than by a list the settings screens keep, so a theme added above is sorted
+ * correctly by every picker without each one being remembered. [ThemeMode.SYSTEM] is neither — it
+ * is whichever the machine is set to — and is the reason this returns null rather than a boolean.
+ */
+fun ThemeMode.isLightTheme(): Boolean? = when (this) {
+    ThemeMode.SYSTEM -> null
+    ThemeMode.LIGHT, ThemeMode.WARM, ThemeMode.OCEAN, ThemeMode.ROSE, ThemeMode.SLATE, ThemeMode.SAND -> true
+    ThemeMode.DARK, ThemeMode.MIDNIGHT, ThemeMode.FOREST, ThemeMode.MOCHA, ThemeMode.STUDIO, ThemeMode.PLUM -> false
+}
+
 /**
  * The palette a [ThemeMode] paints with, without applying it.
  *
@@ -439,6 +545,9 @@ fun colorSchemeFor(themeMode: ThemeMode, systemDark: Boolean = true): ColorSchem
     ThemeMode.FOREST -> ForestColorScheme
     ThemeMode.MOCHA -> MochaColorScheme
     ThemeMode.STUDIO -> StudioColorScheme
+    ThemeMode.SLATE -> SlateColorScheme
+    ThemeMode.SAND -> SandColorScheme
+    ThemeMode.PLUM -> PlumColorScheme
 }
 
 @Composable

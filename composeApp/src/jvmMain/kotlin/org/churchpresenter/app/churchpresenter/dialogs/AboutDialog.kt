@@ -64,6 +64,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
+import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
 import org.churchpresenter.lottiegen.App as LottieGenApp
@@ -300,7 +301,7 @@ internal fun AboutDialogContent(
 }
 
 @Composable
-fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
+fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onClose: () -> Unit) {
     val language = LocalLanguage.current
     // The converter is a separate module with its own `ResourceBundle`, which it initialises from
     // the OS locale — so without this it answers in the machine's language and ignores the one
@@ -314,7 +315,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
         AppWindowRoot(theme = theme) {
-            ConverterApp()
+            ConverterApp(initialTab = initialTab)
         }
     }
 }

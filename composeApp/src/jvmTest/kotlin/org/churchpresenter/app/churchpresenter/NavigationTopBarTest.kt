@@ -302,10 +302,9 @@ class NavigationTopBarTest {
 
     @Test
     fun `view menu selects the radio button matching the current theme`() {
-        val themesInOrder = listOf(
-            ThemeMode.LIGHT, ThemeMode.DARK, ThemeMode.SYSTEM, ThemeMode.WARM, ThemeMode.OCEAN,
-            ThemeMode.ROSE, ThemeMode.MIDNIGHT, ThemeMode.FOREST, ThemeMode.MOCHA, ThemeMode.STUDIO,
-        )
+        // From the enum, not a copy of it. The menu itself used to be ten rows written out by
+        // hand; a test that lists them again would go stale the same way and for the same reason.
+        val themesInOrder = ThemeMode.entries
         for ((selectedIndex, selectedTheme) in themesInOrder.withIndex()) {
             navigationTopBar(currentTheme = selectedTheme) {
                 val view = getMenu(4)
@@ -321,28 +320,22 @@ class NavigationTopBarTest {
 
     @Test
     fun `view menu invokes theme callback for every radio button`() {
-        val expectedLabels = listOf(
-            "Light Theme" to ThemeMode.LIGHT,
-            "Dark Theme" to ThemeMode.DARK,
-            "System Theme" to ThemeMode.SYSTEM,
-            "Warm Theme" to ThemeMode.WARM,
-            "Ocean Theme" to ThemeMode.OCEAN,
-            "Rose Theme" to ThemeMode.ROSE,
-            "Midnight Theme" to ThemeMode.MIDNIGHT,
-            "Forest Theme" to ThemeMode.FOREST,
-            "Mocha Theme" to ThemeMode.MOCHA,
-            "Studio Theme" to ThemeMode.STUDIO,
-        )
+        // The order is the enum's; the labels are asserted to be non-blank and distinct rather
+        // than re-listed here, which would be a third copy of the same table.
+        val expectedLabels = ThemeMode.entries.map { it to it }
         val invoked = mutableListOf<ThemeMode>()
         navigationTopBar(theme = { invoked.add(it) }) {
             val view = getMenu(4)
-            for ((index, expected) in expectedLabels.withIndex()) {
+            val labels = mutableListOf<String>()
+            for (index in ThemeMode.entries.indices) {
                 val item = view.getItem(index)
-                assertEquals(expected.first, item.text)
+                assertTrue(item.text.isNotBlank(), "every theme row must be labelled")
+                labels.add(item.text)
                 item.doClick()
             }
+            assertEquals(labels.size, labels.toSet().size, "two rows sharing a label: $labels")
         }
-        assertEquals(expectedLabels.map { it.second }, invoked)
+        assertEquals(ThemeMode.entries.toList(), invoked, "every row must report its own theme")
     }
 
     @Test

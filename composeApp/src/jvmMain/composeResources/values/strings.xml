@@ -371,6 +371,9 @@
     <string name="forest_theme">Forest Theme</string>
     <string name="mocha_theme">Mocha Theme</string>
     <string name="studio_theme">Studio Theme</string>
+    <string name="slate_theme">Slate Theme</string>
+    <string name="sand_theme">Sand Theme</string>
+    <string name="plum_theme">Plum Theme</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>
     <string name="text_settings_tab_content">Text Settings and Colors tab content will be implemented</string>
@@ -2669,4 +2672,63 @@
     <string name="shortcut_description_quick_background_8">Quick background 8</string>
     <string name="shortcut_description_quick_background_9">Quick background 9</string>
     <string name="shortcut_description_quick_background_10">Quick background 10</string>
+    <!-- ============================================================================
+         Setup wizard v2 — the two-column Getting Started window.
+         English only: non-English locales are managed separately (see AGENT.md).
+         ============================================================================ -->
+
+    <!-- Shell: the left rail and the panel footer -->
+    <string name="setup_rail_appearance">Appearance</string>
+    <string name="setup_rail_welcome">Welcome</string>
+    <string name="setup_rail_songs">Song books</string>
+    <string name="setup_rail_ready">All set</string>
+    <string name="setup_step_count">%1$d steps</string>
+
+    <!-- Step 1: language -->
+    <string name="setup_language_search">Search %1$d languages...</string>
+    <string name="setup_language_count">%1$d of %2$d languages</string>
+    <string name="setup_language_none">No languages match "%1$s".</string>
+
+    <!-- Step 2: appearance -->
+    <string name="setup_theme_section_system">Follows your system</string>
+    <string name="setup_theme_section_light">Light</string>
+    <string name="setup_theme_section_dark">Dark</string>
+    <string name="setup_theme_count">%1$d themes</string>
+
+    <!-- Step 3: welcome — three cards, each pointing at a later step -->
+    <string name="setup_welcome_card_step">Step %1$d</string>
+    <string name="setup_welcome_bible_title">Scripture on screen</string>
+    <string name="setup_welcome_bible_body">Install translations once, then search any verse and send it live in two keystrokes.</string>
+    <string name="setup_welcome_songs_title">Your song library</string>
+    <string name="setup_welcome_songs_body">Point at a folder of songs — lyrics, chords and second languages all come along.</string>
+    <string name="setup_welcome_projection_title">Every screen covered</string>
+    <string name="setup_welcome_projection_body">Main projector, lower third and stage monitor, each with its own look.</string>
+
+    <!-- Step 4: Bible. Replaces setup_step2_step3/4 (merged) and setup_step2_step6, which
+         named only the primary translation and so predated multi-translation mode. -->
+    <string name="setup_bible_choose_folder">Click "Browse..." next to Bible Storage Directory and choose a folder to keep your Bible files in.</string>
+    <string name="setup_bible_pick_translations">Go to the Bible tab and pick your translations — the first one is the primary.</string>
+
+    <!-- Step 5: song books. setup_step3_tip claimed the library folder reads OpenLyrics and
+         SongPro; it reads .song only, and the other formats go through the Converter. -->
+    <string name="setup_songs_format_note">The song library folder reads .song files. Songs saved in another format need converting first.</string>
+    <string name="setup_songs_converter_body">Coming from SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm or SoftProjector? The built-in Converter reads all of them — and lyrics out of PDF, Word, PowerPoint and Keynote — and writes the .song files this folder expects.</string>
+    <string name="setup_songs_converter_button">Open Converter</string>
+    <string name="setup_songs_samples_note">No songs yet? "Add Song Samples" on the System tab fills the folder with a working set to try.</string>
+
+    <!-- Step 6: projection. setup_proj_step3 told the user to set a window count; there is no
+         such control — "Presenter windows" is a read-only status line. -->
+    <string name="setup_proj_rows_note">Each connected display gets its own row below. The presenter window count follows from what you assign there, so there is nothing to set by hand.</string>
+    <string name="setup_proj_assign_note">For each screen pick a target display and a Display Mode, then use Content Outputs to choose what appears there. Overwrite Styles gives that screen its own look.</string>
+
+    <!-- Step 7: media -->
+    <string name="setup_media_why_title">Why VLC?</string>
+    <string name="setup_media_why_body">It decodes the video and audio in your slides and background loops.</string>
+    <string name="setup_media_ready">Ready to go</string>
+
+    <!-- Step 8: the summary, filled from what is actually on disk -->
+    <string name="setup_summary_bible">Bible translations</string>
+    <string name="setup_summary_bible_value">%1$d installed</string>
+    <string name="setup_summary_songs_value">%1$d books · %2$d songs</string>
+
 </resources>

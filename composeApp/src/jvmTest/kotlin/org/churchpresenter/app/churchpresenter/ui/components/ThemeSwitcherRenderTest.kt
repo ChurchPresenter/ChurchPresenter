@@ -45,6 +45,9 @@ class ThemeSwitcherRenderTest {
         ThemeMode.FOREST to ("Forest Theme" to "🌲"),
         ThemeMode.MOCHA to ("Mocha Theme" to "☕"),
         ThemeMode.STUDIO to ("Studio Theme" to "🎬"),
+        ThemeMode.SLATE to ("Slate Theme" to "🪨"),
+        ThemeMode.SAND to ("Sand Theme" to "🏜"),
+        ThemeMode.PLUM to ("Plum Theme" to "🍇"),
     )
 
     private fun label(mode: ThemeMode) = themes.getValue(mode).first
