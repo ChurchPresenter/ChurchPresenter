@@ -322,7 +322,6 @@ class NavigationTopBarTest {
     fun `view menu invokes theme callback for every radio button`() {
         // The order is the enum's; the labels are asserted to be non-blank and distinct rather
         // than re-listed here, which would be a third copy of the same table.
-        val expectedLabels = ThemeMode.entries.map { it to it }
         val invoked = mutableListOf<ThemeMode>()
         navigationTopBar(theme = { invoked.add(it) }) {
             val view = getMenu(4)
