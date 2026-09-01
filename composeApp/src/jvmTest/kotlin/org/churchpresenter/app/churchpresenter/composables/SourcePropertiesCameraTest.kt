@@ -33,8 +33,10 @@ import kotlin.test.assertEquals
  *    and the mode dropdown — all of which need `DeckLinkManager.isAvailable()` to be true, and that
  *    needs the native `decklink_jni` library the suite does not ship.
  *  * **The ffmpeg format dropdown**, which needs a non-DeckLink device path to enumerate against.
- *  * **The two "install the tools" hints**: whether they render depends on whether the machine has
- *    `ffmpeg` on its PATH, so neither their presence nor their absence can be asserted.
+ *  * **The rendering of the "install the tools" hints**, which still depends on whether the machine
+ *    running the suite has `ffmpeg` on its PATH. *Which* hint each platform should get no longer
+ *    depends on the host and is pinned in `CameraToolHintsTest`; only the act of drawing the list
+ *    is uncovered here.
  */
 class SourcePropertiesCameraTest {
 
@@ -68,6 +70,13 @@ class SourcePropertiesCameraTest {
     fun `the refresh button is the panel's only button`() = cameraPanel { _ ->
         roleButtons().assertCountEquals(1)
         onNodeWithText("Refresh Cameras").assertHasClickAction()
+    }
+
+    @Test
+    fun `an unknown platform is offered no privacy settings button`() = cameraPanel { _ ->
+        // Neither the macOS nor the Windows privacy button belongs on an OS that is neither, and
+        // the count above is what would catch one appearing — this says why that number is 1.
+        onNodeWithText("Open Camera Privacy Settings").assertDoesNotExist()
     }
 
     // ── Refresh ───────────────────────────────────────────────────────────────

@@ -276,15 +276,41 @@ class SourcePropertiesDeviceListingTest {
     }
 
     @Test
-    fun `PowerShell fills in cameras ffmpeg did not report`() {
+    fun `PowerShell names are ignored when ffmpeg listed any DirectShow device`() {
         val devices = parseWindowsCameras(
             dshowOutput = "\"Integrated Webcam\" (video)",
             pnpOutput = "Integrated Webcam\nSurface Camera Front\n",
         )
 
         assertEquals(
+            listOf("Integrated Webcam"), devices.map { it.name },
+            "a PnP friendly name is not a DirectShow filter name — ffmpeg enumerates every filter " +
+                "it can open, so a device missing from its listing cannot be opened by name, and " +
+                "offering it produces \"could not find video device\" reported as an unplugged camera",
+        )
+    }
+
+    @Test
+    fun `PowerShell names the cameras when ffmpeg listed none`() {
+        val devices = parseWindowsCameras(
+            dshowOutput = "",
+            pnpOutput = "Integrated Webcam\nSurface Camera Front\n",
+        )
+
+        assertEquals(
             listOf("Integrated Webcam", "Surface Camera Front"), devices.map { it.name },
-            "the one both listings know is offered once, under ffmpeg's name for it",
+            "which in practice means ffmpeg is not installed: the names are unopenable either way, " +
+                "and exist so the operator sees their camera beside the hint saying what to install",
+        )
+    }
+
+    @Test
+    fun `a PnP-only name is still addressed as a dshow device`() {
+        val devices = parseWindowsCameras(dshowOutput = "", pnpOutput = "Surface Camera Front")
+
+        assertEquals(
+            listOf("dshow://:dshow-vdev=Surface Camera Front"), devices.map { it.path },
+            "the fallback changes which names are offered, not the shape of the path they carry",
         )
     }
 
@@ -294,7 +320,18 @@ class SourcePropertiesDeviceListingTest {
 
         assertEquals(
             listOf("Integrated Webcam"), devices.map { it.name },
-            "matching is case-insensitive, and ffmpeg's spelling is the one that must be kept",
+            "ffmpeg's spelling is the one that must be kept, and here it wins by being the only " +
+                "listing consulted at all",
+        )
+    }
+
+    @Test
+    fun `the PnP fallback does not offer one camera twice`() {
+        val devices = parseWindowsCameras("", "Surface Camera Front\nSURFACE CAMERA FRONT")
+
+        assertEquals(
+            listOf("Surface Camera Front"), devices.map { it.name },
+            "dedupe is case-insensitive on the fallback path too",
         )
     }
 

@@ -318,11 +318,17 @@ object SharedCameraFrameCache {
 
         // ffmpeg is an optional external tool, not something shipped with the app, and a machine
         // without it fails every attempt for the same knowable reason. Discovering that five times
-        // over ten seconds tells the operator nothing the canvas has not already told them
-        // (canvas_camera_ffmpeg_hint), so the loop does not run and nothing is reported: a tool the
-        // user has not installed is not a fault in the app.
+        // over ten seconds tells the operator nothing, so the loop does not run and nothing is
+        // reported to Sentry: a tool the user has not installed is not a fault in the app.
+        //
+        // The failure is still put on `entry.error`, which is new. It used to return silently, so
+        // the canvas drew the ordinary grey placeholder with the device's name on it and the
+        // operator was told nothing at all — on Windows, where the PnP fallback fills the picker
+        // with names even when ffmpeg is absent, that is a camera that looks selectable, selects
+        // fine, and then shows nothing for no stated reason.
         if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
             System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
+            entry.error.value = CameraFailure.FFMPEG_MISSING
             return
         }
 

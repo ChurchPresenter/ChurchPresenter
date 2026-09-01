@@ -20,10 +20,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
-import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_open_privacy_settings
-import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
-import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_camera_format
 import churchpresenter.composeapp.generated.resources.canvas_camera_format_auto
@@ -199,7 +196,6 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
 
     val deckLinkDeviceFormat = stringResource(Res.string.canvas_decklink_device)
     var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLinkDeviceFormat)) }
-    val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
 
     Button(
         onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
@@ -313,34 +309,54 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    } else {
-        Text(
-            noCamerasLabel,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 
     val osName = System.getProperty("os.name", "").lowercase()
-    if (osName.contains("linux") && devices.isEmpty()) {
+    // Probed off the composition thread: `isFfmpegAvailable()` runs `ffmpeg -version` against each
+    // candidate install path in turn, with a five-second timeout each. It starts `true` so the
+    // "install ffmpeg" sentence never flashes up on a machine that has it.
+    var ffmpegAvailable by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { ffmpegAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+
+    CameraToolHints(osName, devices, ffmpegAvailable)
+
+    if (osName.contains("mac") || osName.contains("darwin")) {
+        MacCameraPrivacyHint()
+    }
+    if (osName.contains("win")) {
+        WindowsCameraPrivacyHint()
+    }
+}
+
+/** Whatever [cameraHintStringRes] decides is worth saying about this machine's camera tooling. */
+@Composable
+private fun CameraToolHints(osName: String, devices: List<CameraDevice>?, ffmpegAvailable: Boolean) {
+    cameraHintStringRes(osName, devices, ffmpegAvailable).forEach { hint ->
         Text(
-            stringResource(Res.string.canvas_camera_v4l2_hint),
+            stringResource(hint),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-    if (!osName.contains("linux")) {
-        val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
-        if (!ffmpegAvailable) {
-            Text(
-                stringResource(Res.string.canvas_camera_ffmpeg_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-    if (osName.contains("mac") || osName.contains("darwin")) {
-        MacCameraPrivacyHint()
+}
+
+/** The Windows Camera privacy page, opened for the same reason as [MAC_CAMERA_PRIVACY_URI]. */
+internal const val WINDOWS_CAMERA_PRIVACY_URI = "ms-settings:privacy-webcam"
+
+/**
+ * The way out of a privacy refusal on Windows — the twin of [MacCameraPrivacyHint], and there for
+ * the same reasons, which are written out at that one.
+ *
+ * Windows has two separate switches on that page (camera access at all, and desktop apps in
+ * particular) and blocks with either off, which is why the button leads there rather than the text
+ * trying to describe the sequence.
+ */
+@Composable
+private fun WindowsCameraPrivacyHint(
+    onOpenPrivacySettings: () -> Unit = { UrlOpener.open(WINDOWS_CAMERA_PRIVACY_URI) },
+) {
+    Button(onClick = onOpenPrivacySettings, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(Res.string.canvas_camera_open_privacy_settings), fontSize = 12.sp)
     }
 }
 
