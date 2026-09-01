@@ -18,6 +18,12 @@ import kotlin.test.assertTrue
  * Also not covered here: the retry loop that consumes [CaptureOverride], the stderr drain feeding
  * it, and the `CrashReporter` report at the end — each needs a real process and a real device. The
  * decisions they make live in `CameraDiagnostics.kt` and are tested in `CameraDiagnosticsTest`.
+ *
+ * The same goes for the ffmpeg-missing report added for issue #462: reaching the call needs
+ * `FfmpegBinary.isAvailable` to be false, and that is a `by lazy` which must not grow a mutable seam
+ * (`CameraToolHints.kt` says why). What the report *says* is a pure function and is asserted whole in
+ * `CameraReportFactsTest`; that it fires at most once is `ReportOnce`'s test in the same file. Only
+ * the three lines wiring the two together are unexercised.
  */
 class SharedCameraFrameCacheTest {
 

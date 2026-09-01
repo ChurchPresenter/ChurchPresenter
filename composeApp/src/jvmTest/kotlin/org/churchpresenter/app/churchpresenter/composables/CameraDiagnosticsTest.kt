@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -219,7 +220,36 @@ class CameraDiagnosticsTest {
 
     @Test
     fun `every failure the app can reach has its own sentence for the operator`() {
-        val resources = CameraFailure.entries.map { cameraFailureStringRes(it) }
-        assertEquals(CameraFailure.entries.size, resources.toSet().size, resources.toString())
+        listOf("Mac OS X", "Windows 11", "Linux").forEach { os ->
+            val resources = CameraFailure.entries.map { cameraFailureStringRes(it, os) }
+            assertEquals(CameraFailure.entries.size, resources.toSet().size, "$os: $resources")
+        }
+    }
+
+    @Test
+    fun `windows is sent to the windows camera settings, not the mac ones`() {
+        assertNotEquals(
+            cameraFailureStringRes(CameraFailure.PERMISSION_DENIED, "Mac OS X"),
+            cameraFailureStringRes(CameraFailure.PERMISSION_DENIED, "Windows 11"),
+            "naming the wrong platform's settings pane is worse than saying nothing",
+        )
+    }
+
+    @Test
+    fun `windows is told a name may not match rather than that the camera was unplugged`() {
+        assertNotEquals(
+            cameraFailureStringRes(CameraFailure.DEVICE_NOT_FOUND, "Mac OS X"),
+            cameraFailureStringRes(CameraFailure.DEVICE_NOT_FOUND, "Windows 11"),
+            "on windows the likelier cause is a name DirectShow does not answer to",
+        )
+    }
+
+    @Test
+    fun `a failure with no platform remedy reads the same everywhere`() {
+        assertEquals(
+            cameraFailureStringRes(CameraFailure.DEVICE_BUSY, "Mac OS X"),
+            cameraFailureStringRes(CameraFailure.DEVICE_BUSY, "Windows 11"),
+            "only the two whose remedy is a place in the platform's settings diverge",
+        )
     }
 }

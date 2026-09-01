@@ -43,6 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
@@ -104,6 +106,9 @@ private const val PREVIEW_BACKGROUND = 0xFF121212
 private const val LIVE_BADGE_COLOR = 0xFF2196F3
 private const val LOCK_BADGE_COLOR = 0xFFFFC107
 private const val AUDIO_LEVEL_COLOR = 0xFF4CAF50
+
+/** Half a pulse of the LIVE badge, in milliseconds; it reverses, so a full cycle is twice this. */
+private const val LIVE_PULSE_MS = 550
 
 /**
  * A scaled-down preview of whatever is currently live on the presenter windows.
@@ -299,16 +304,6 @@ private fun SingleDisplayPreview(
     }
 
     val isLive = effectiveMode != Presenting.NONE && showsContent
-    val liveTransition = rememberInfiniteTransition(label = "live")
-    val livePulse by liveTransition.animateFloat(
-        initialValue = 0.70f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(550, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "live_pulse"
-    )
     val borderColor by animateColorAsState(
         targetValue = if (isLive) Color.Red.copy(alpha = 0.85f)
                       else MaterialTheme.colorScheme.outlineVariant,
@@ -532,16 +527,7 @@ private fun SingleDisplayPreview(
 
         // "LIVE" badge — only when this screen is showing content
         if (isLive) {
-            Text(
-                text = stringResource(Res.string.live_preview_title),
-                color = Color.White,
-                fontSize = 10.sp,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(4.dp)
-                    .background(Color.Red.copy(alpha = livePulse), RoundedCornerShape(3.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            )
+            LiveBadge(Modifier.align(Alignment.TopStart))
         }
 
         // FILL badge when key output is configured
@@ -627,6 +613,46 @@ private fun SingleDisplayPreview(
         }
         }
     }
+}
+
+/**
+ * The pulsing LIVE badge.
+ *
+ * Its own composable, and its own animation, on purpose. The pulse used to be read at the top of
+ * [SingleDisplayPreview]'s scope, which invalidated that whole scope — the nested `PresenterScreen`
+ * and every source under it — on every animation frame, for every output, whether or not the output
+ * was live. With one preview per display, per Browser Source and per NDI output, that was the app
+ * re-rendering all of its outputs twice over at 60fps while sitting idle.
+ *
+ * The alpha is read inside `drawBehind`, so a pulse now costs a redraw of this one badge and no
+ * recomposition at all.
+ */
+@Composable
+private fun LiveBadge(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "live")
+    val pulse = transition.animateFloat(
+        initialValue = 0.70f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(LIVE_PULSE_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "live_pulse"
+    )
+    Text(
+        text = stringResource(Res.string.live_preview_title),
+        color = Color.White,
+        fontSize = 10.sp,
+        modifier = modifier
+            .padding(4.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = Color.Red.copy(alpha = pulse.value),
+                    cornerRadius = CornerRadius(3.dp.toPx()),
+                )
+            }
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    )
 }
 
 @Composable

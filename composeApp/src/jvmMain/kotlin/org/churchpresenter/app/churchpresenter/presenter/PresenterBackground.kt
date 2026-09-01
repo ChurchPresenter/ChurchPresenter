@@ -28,6 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.CameraBackground
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -134,11 +136,17 @@ internal fun resolveBackground(
     transparentWhenBlank: Boolean,
     /** The background this content carries itself, if any. Bible verses carry none. */
     ownBackground: SongBackground = SongBackground(),
+    /** The cameras this machine has; see [songBackgroundResolves]. Passed explicitly only by tests. */
+    knownCameras: List<CameraDevice>? = CameraDeviceCatalog.devices.value,
 ): ResolvedBackground {
     val override = if (isLowerThird) settings.quickLowerThirdBackground else settings.quickBackground
     // Both remembered unconditionally: a `&&` short-circuit here would be a conditional remember.
-    val overrideDraws = remember(override) { override != null && songBackgroundResolves(override) }
-    val ownDraws = remember(ownBackground) { ownBackground.isCustom && songBackgroundResolves(ownBackground) }
+    val overrideDraws = remember(override, knownCameras) {
+        override != null && songBackgroundResolves(override, knownCameras)
+    }
+    val ownDraws = remember(ownBackground, knownCameras) {
+        ownBackground.isCustom && songBackgroundResolves(ownBackground, knownCameras)
+    }
 
     val live = when {
         !showBackground -> null

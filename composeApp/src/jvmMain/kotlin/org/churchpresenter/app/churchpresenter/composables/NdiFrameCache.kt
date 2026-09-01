@@ -106,6 +106,7 @@ open class NdiFrameCache(
     @Synchronized
     fun acquire(source: SceneSource.NdiSource): NdiFlows {
         val entry = entries.getOrPut(keyFor(source)) { CacheEntry() }
+        ResourceCensus.record(SharedResource.NDI_RECEIVER, entries.size)
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch { capture(source, entry) }
@@ -137,7 +138,11 @@ open class NdiFrameCache(
     // same throw uncaught takes down the coroutine that would have closed the receiver, mid-service.
     @Suppress("TooGenericExceptionCaught")
     private suspend fun capture(source: SceneSource.NdiSource, entry: CacheEntry) {
-        val receiver = withContext(Dispatchers.IO) {
+        // NonCancellable around the open for the same reason the close below has it: the last layer
+        // can let go while the receiver is still being opened, and a cancellable open throws out of
+        // here with the native receiver already alive and nothing holding it — the sender goes on
+        // encoding for a subscriber that no longer exists.
+        val receiver = withContext(NonCancellable + Dispatchers.IO) {
             openReceiver(infoFor(source), NdiBandwidth.of(source.lowBandwidth))?.takeIf { it.open() }
         }
         if (receiver == null) {
