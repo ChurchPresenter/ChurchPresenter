@@ -39,6 +39,8 @@ class ThemeTest {
         ThemeMode.WARM to "WarmColorScheme",
         ThemeMode.OCEAN to "OceanColorScheme",
         ThemeMode.ROSE to "RoseColorScheme",
+        ThemeMode.SLATE to "SlateColorScheme",
+        ThemeMode.SAND to "SandColorScheme",
     )
 
     private val darkThemes = mapOf(
@@ -47,6 +49,7 @@ class ThemeTest {
         ThemeMode.FOREST to "ForestColorScheme",
         ThemeMode.MOCHA to "MochaColorScheme",
         ThemeMode.STUDIO to "StudioColorScheme",
+        ThemeMode.PLUM to "PlumColorScheme",
     )
 
     private val allThemes get() = lightThemes + darkThemes

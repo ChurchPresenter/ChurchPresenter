@@ -122,9 +122,22 @@ private val ButtonShape = RoundedCornerShape(6.dp)
 /** Cards and forms stop widening past this — on a wide window a full-bleed row reads as empty band. */
 private val CONTENT_MAX_WIDTH = 820.dp
 
+/**
+ * Which tab the converter opens on.
+ *
+ * Named because callers outside this module choose one: the setup wizard's song step sends the user
+ * straight to [SONGS], and landing them on Bibles instead reads as the button having missed.
+ */
+object ConverterTab {
+    const val BIBLES = 0
+    const val SONGS = 1
+    const val DUPLICATES = 2
+    const val RENAME = 3
+}
+
 @Composable
-fun App() {
-    var selectedTab by remember { mutableStateOf(0) }
+fun App(initialTab: Int = ConverterTab.BIBLES) {
+    var selectedTab by remember { mutableStateOf(initialTab) }
     val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename)
 
     Scaffold { padding ->

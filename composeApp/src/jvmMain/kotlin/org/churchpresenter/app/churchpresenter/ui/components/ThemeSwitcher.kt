@@ -21,20 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.dark_theme
-import churchpresenter.composeapp.generated.resources.forest_theme
-import churchpresenter.composeapp.generated.resources.light_theme
-import churchpresenter.composeapp.generated.resources.midnight_theme
-import churchpresenter.composeapp.generated.resources.mocha_theme
-import churchpresenter.composeapp.generated.resources.studio_theme
-import churchpresenter.composeapp.generated.resources.ocean_theme
-import churchpresenter.composeapp.generated.resources.rose_theme
-import churchpresenter.composeapp.generated.resources.system_theme
-import churchpresenter.composeapp.generated.resources.warm_theme
+import org.churchpresenter.app.churchpresenter.ui.theme.themeDisplayName
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.rememberThemeManager
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ThemeSwitcher(
@@ -89,18 +78,7 @@ fun ThemeSwitcher(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                text = stringResource(when (mode) {
-                                    ThemeMode.LIGHT -> Res.string.light_theme
-                                    ThemeMode.DARK -> Res.string.dark_theme
-                                    ThemeMode.SYSTEM -> Res.string.system_theme
-                                    ThemeMode.WARM -> Res.string.warm_theme
-                                    ThemeMode.OCEAN -> Res.string.ocean_theme
-                                    ThemeMode.ROSE -> Res.string.rose_theme
-                                    ThemeMode.MIDNIGHT -> Res.string.midnight_theme
-                                    ThemeMode.FOREST -> Res.string.forest_theme
-                                    ThemeMode.MOCHA -> Res.string.mocha_theme
-                                    ThemeMode.STUDIO -> Res.string.studio_theme
-                                }),
+                                text = themeDisplayName(mode),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -128,5 +106,8 @@ private fun themeIcon(mode: ThemeMode): String = when (mode) {
     ThemeMode.FOREST -> "🌲"
     ThemeMode.MOCHA -> "☕"
     ThemeMode.STUDIO -> "🎬"
+    ThemeMode.SLATE -> "🪨"
+    ThemeMode.SAND -> "🏜"
+    ThemeMode.PLUM -> "🍇"
 }
 

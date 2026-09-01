@@ -76,6 +76,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
+import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
@@ -773,6 +774,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var contactDialogInitialType by remember { mutableStateOf<String?>(null) }
     var showStoryPrompt by remember { mutableStateOf(false) }
     var showConverterWindow by remember { mutableStateOf(false) }
+    // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
+    // song step wants Songs, because that is the format problem it just described.
+    var converterInitialTab by remember { mutableStateOf(ConverterTab.BIBLES) }
     var showSongLibraryWindow by remember { mutableStateOf(false) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
@@ -1251,7 +1255,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 isInstanceLinkConnected = isInstanceLinkActive(
                                     instanceLinkViewModel.connectionStatus.collectAsState().value
                                 ),
-                                onConverter = { showConverterWindow = true },
+                                onConverter = {
+                                    converterInitialTab = ConverterTab.BIBLES
+                                    showConverterWindow = true
+                                },
                                 onSongLibrary = { showSongLibraryWindow = true },
                                 onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
                                 onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
@@ -1695,6 +1702,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             if (showConverterWindow) {
                                 ConverterWindow(
                                     theme = theme,
+                                    initialTab = converterInitialTab,
                                     onClose = { showConverterWindow = false }
                                 )
                             }
@@ -1867,7 +1875,13 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         SetupWizardDialog(
             theme = theme,
             selectedLanguage = currentLanguage,
-            alwaysOnTop = !showOptionsDialog,
+            // Stands down for the windows its own steps open. The wizard floats so it is not lost
+            // behind the main window, but that same flag puts it in front of anything it sends the
+            // user to — Settings from any step, the Converter from the song books step — which
+            // reads as the button having done nothing.
+            alwaysOnTop = !showOptionsDialog && !showConverterWindow,
+            bibleDirectory = appSettings.bibleSettings.storageDirectory,
+            songsDirectory = appSettings.songSettings.storageDirectory,
             onLanguageSelected = { language ->
                 currentLanguage = language
                 appSettings = appSettings.copy(language = language.code)
@@ -1880,6 +1894,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 settingsManager.saveSettings(appSettings)
             },
             onOpenSettings = { openOptionsDialog(0) },
+            onOpenConverter = {
+                converterInitialTab = ConverterTab.SONGS
+                showConverterWindow = true
+            },
             onDismiss = {
                 val updated = appSettings.copy(setupWizardShown = true)
                 settingsManager.saveSettings(updated)

@@ -6,15 +6,6 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.MenuBarScope
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.dark_theme
-import churchpresenter.composeapp.generated.resources.forest_theme
-import churchpresenter.composeapp.generated.resources.light_theme
-import churchpresenter.composeapp.generated.resources.midnight_theme
-import churchpresenter.composeapp.generated.resources.mocha_theme
-import churchpresenter.composeapp.generated.resources.studio_theme
-import churchpresenter.composeapp.generated.resources.ocean_theme
-import churchpresenter.composeapp.generated.resources.rose_theme
-import churchpresenter.composeapp.generated.resources.warm_theme
 import churchpresenter.composeapp.generated.resources.language_arabic
 import churchpresenter.composeapp.generated.resources.language_belarusian
 import churchpresenter.composeapp.generated.resources.language_chinese
@@ -86,10 +77,10 @@ import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
 import churchpresenter.composeapp.generated.resources.menu_schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
 import churchpresenter.composeapp.generated.resources.menu_statistics
-import churchpresenter.composeapp.generated.resources.system_theme
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.app.churchpresenter.ui.theme.themeDisplayName
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -289,56 +280,15 @@ private fun MenuBarScope.ConnectMenu(
 @Composable
 private fun MenuBarScope.ViewMenu(theme: (ThemeMode) -> Unit, currentTheme: ThemeMode) {
     Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
-        RadioButtonItem(
-            text = stringResource(Res.string.light_theme),
-            selected = currentTheme == ThemeMode.LIGHT,
-            onClick = { theme.invoke(ThemeMode.LIGHT) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.dark_theme),
-            selected = currentTheme == ThemeMode.DARK,
-            onClick = { theme.invoke(ThemeMode.DARK) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.system_theme),
-            selected = currentTheme == ThemeMode.SYSTEM,
-            onClick = { theme.invoke(ThemeMode.SYSTEM) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.warm_theme),
-            selected = currentTheme == ThemeMode.WARM,
-            onClick = { theme.invoke(ThemeMode.WARM) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.ocean_theme),
-            selected = currentTheme == ThemeMode.OCEAN,
-            onClick = { theme.invoke(ThemeMode.OCEAN) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.rose_theme),
-            selected = currentTheme == ThemeMode.ROSE,
-            onClick = { theme.invoke(ThemeMode.ROSE) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.midnight_theme),
-            selected = currentTheme == ThemeMode.MIDNIGHT,
-            onClick = { theme.invoke(ThemeMode.MIDNIGHT) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.forest_theme),
-            selected = currentTheme == ThemeMode.FOREST,
-            onClick = { theme.invoke(ThemeMode.FOREST) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.mocha_theme),
-            selected = currentTheme == ThemeMode.MOCHA,
-            onClick = { theme.invoke(ThemeMode.MOCHA) }
-        )
-        RadioButtonItem(
-            text = stringResource(Res.string.studio_theme),
-            selected = currentTheme == ThemeMode.STUDIO,
-            onClick = { theme.invoke(ThemeMode.STUDIO) }
-        )
+        // Every theme, from the enum. This was ten RadioButtonItems written out by hand, which
+        // compiled perfectly while silently offering fewer themes than the app shipped.
+        ThemeMode.entries.forEach { mode ->
+            RadioButtonItem(
+                text = themeDisplayName(mode),
+                selected = currentTheme == mode,
+                onClick = { theme.invoke(mode) }
+            )
+        }
     }
 }
 
