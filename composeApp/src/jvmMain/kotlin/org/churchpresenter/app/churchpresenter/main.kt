@@ -314,14 +314,21 @@ fun main() {
 
     Thread { AutoStartManager.syncRegistration() }.apply { isDaemon = true }.start()
 
+    // Warm-up only, and the whole of it is optional: what it saves is the first font picker
+    // enumerating the machine's fonts on the UI thread. It is wrapped because everything in it goes
+    // through AWT's font stack, which raises an Error rather than an Exception when the platform's
+    // native font manager will not load — reported as a fatal crash from this thread even though
+    // the app itself carried on. See LiveMapReporter.detectScreenCount for the same lesson.
     Thread {
-        LottieFonts.bundledFontResources().forEach { resource ->
-            LottieFonts::class.java.getResourceAsStream(resource)?.let {
-                SlideFontRegistry.registerFontStream(it)
+        runCatching {
+            LottieFonts.bundledFontResources().forEach { resource ->
+                LottieFonts::class.java.getResourceAsStream(resource)?.let {
+                    SlideFontRegistry.registerFontStream(it)
+                }
             }
+            SlideFontRegistry.initialize()
+            SystemFonts.families()
         }
-        SlideFontRegistry.initialize()
-        SystemFonts.families()
     }.apply { isDaemon = true }.start()
 
     vlcCustomPath = startupSettings.projectionSettings.vlcPath

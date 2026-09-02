@@ -29,6 +29,26 @@ class SystemFontsTest {
     }
 
     @Test
+    fun `a font stack that will not load leaves no fonts rather than an error`() {
+        // AWT's native font manager failing to load raises ExceptionInInitializerError — an Error,
+        // which `catch (Exception)` does not see. It reached Sentry as a fatal crash from the
+        // startup warm-up thread of a bundle whose runtime linked libfontmanager against a copy of
+        // harfbuzz the machine did not have. Every picker already renders an empty list.
+        assertEquals(
+            emptyList(),
+            SystemFonts.enumerate { throw ExceptionInInitializerError("no font manager") },
+        )
+    }
+
+    @Test
+    fun `the enumerated families are sorted before anyone sees them`() {
+        assertEquals(
+            listOf("Andale Mono", "arial", "Zapfino"),
+            SystemFonts.enumerate { arrayOf("Zapfino", "arial", "Andale Mono") },
+        )
+    }
+
+    @Test
     fun `families are sorted case-insensitively`() {
         // Every picker shows this list as-is, so the order is the menu's order. Five of the call
         // sites used to skip the sort and show AWT's own order instead.

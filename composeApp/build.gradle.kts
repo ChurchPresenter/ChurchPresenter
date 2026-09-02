@@ -1615,3 +1615,58 @@ fun sha256Of(file: File): String =
 tasks.matching { it.name == "prepareAppResources" || it.name == "run" }.configureEach {
     dependsOn(fetchBundledFfmpeg)
 }
+
+// ── The runtime jpackage will bundle has to be self-contained ─────────────────
+// jpackage copies the JDK it is given into the .app, and a JDK from a package manager is not
+// self-contained: Homebrew's builds `libfontmanager.dylib` against Homebrew's own harfbuzz and
+// links it by absolute path. On the machine that built it everything works; on anyone else's the
+// first thing to touch a font dies with
+//   Library not loaded: /usr/local/opt/harfbuzz/lib/libharfbuzz.0.dylib
+// and takes the app with it. That reached Sentry from a bundle built exactly that way.
+//
+// The toolchain API resolves *any* registered JDK 21, Homebrew's included, so which one is picked
+// is not something the build states — it is whatever the machine happens to have. This checks the
+// one that was actually chosen, and checks the thing that matters rather than the vendor's name:
+// every absolute load path must be macOS's own, because nothing else travels inside the bundle.
+val checkMacRuntimeSelfContained by tasks.registering {
+    description = "Fails when the JDK about to be bundled links to libraries outside macOS's own."
+    group = "verification"
+
+    val javaHome = resolvedJdk21Home
+    onlyIf { System.getProperty("os.name", "").lowercase().contains("mac") && javaHome != null }
+
+    doLast {
+        val fontManager = File(javaHome!!, "lib/libfontmanager.dylib")
+        if (!fontManager.exists()) return@doLast   // A JDK laid out differently; nothing to judge.
+
+        val otool = ProcessBuilder("otool", "-L", fontManager.absolutePath)
+            .redirectErrorStream(true).start()
+        val output = otool.inputStream.bufferedReader().readText()
+        if (otool.waitFor() != 0) {
+            logger.warn("Could not check the bundled runtime: otool said\n$output")
+            return@doLast
+        }
+
+        // Skip the first line, which is the file's own name rather than a dependency.
+        val foreign = output.lineSequence().drop(1)
+            .map { it.trim().substringBefore(" (") }
+            .filter { it.startsWith("/") }
+            .filterNot { it.startsWith("/usr/lib/") || it.startsWith("/System/") }
+            .toList()
+
+        check(foreign.isEmpty()) {
+            """
+            The JDK this build would bundle is not self-contained, and the app would crash on every
+            machine but this one. $javaHome
+            links to:
+            ${foreign.joinToString("\n            ")}
+
+            Those paths do not exist inside a packaged .app. Use a distribution JDK — Temurin 21 —
+            rather than one from Homebrew or MacPorts, and check `/usr/libexec/java_home -V`.
+            """.trimIndent()
+        }
+    }
+}
+
+tasks.matching { it.name in setOf("packageDmg", "packageReleaseDmg", "createDistributable", "createReleaseDistributable") }
+    .configureEach { dependsOn(checkMacRuntimeSelfContained) }

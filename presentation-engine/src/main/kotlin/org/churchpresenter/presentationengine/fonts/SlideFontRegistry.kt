@@ -211,9 +211,13 @@ object SlideFontRegistry {
             GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.forEach {
                 availableFamilies.putIfAbsent(it.lowercase(), it)
             }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             // Headless environments without fontconfig can throw; the registry then only knows
             // explicitly registered fonts, which is still correct behavior.
+            //
+            // [Throwable] rather than [Exception] because the platform's native font manager
+            // failing to load raises an `ExceptionInInitializerError`, which is an [Error] — and
+            // this call is made from a startup thread, so not catching it ends the app.
         }
     }
 

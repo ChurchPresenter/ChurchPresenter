@@ -199,6 +199,9 @@ class InstallHelpersTest {
         // download did not finish" — a fact about the church's network, not about the app.
         assertTrue(isEnvironment(UnresolvedAddressException()))
         assertTrue(isEnvironment(ConnectException("refused")))
+        // A reset mid-fetch is the same fact as a refusal, and was reported separately until
+        // SocketException — which ConnectException extends — replaced the narrower type.
+        assertTrue(isEnvironment(java.net.SocketException("Connection reset")))
         assertTrue(isEnvironment(SocketTimeoutException("timed out")))
         assertTrue(isEnvironment(SSLException("bad certificate")))
     }

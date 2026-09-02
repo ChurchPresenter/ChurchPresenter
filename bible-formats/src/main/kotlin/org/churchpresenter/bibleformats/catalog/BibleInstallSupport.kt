@@ -21,7 +21,7 @@ import java.io.EOFException
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.ConnectException
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.nio.channels.UnresolvedAddressException
 import java.nio.file.Files
@@ -90,6 +90,11 @@ object BibleInstallSupport {
      * one of them did — a closed Bible download browser filed "eBible catalogue fetch failed"
      * against a user who had merely changed their mind.
      *
+     * [SocketException] rather than the narrower `ConnectException` it replaced, which it is the
+     * parent of: a connection *reset* mid-fetch is the same fact about the church's line as a
+     * connection refused, and it was reaching Sentry as "eBible catalogue fetch failed" from a
+     * church in Xi'an. Broad on purpose — every subclass of it is the socket, not this code.
+     *
      * [EOFException] is here for the connection that stops mid-response — ktor CIO raises it as
      * "the server prematurely closed the connection", which reached Sentry from a church on a
      * network that does that to `raw.githubusercontent.com`. It is the same fact as
@@ -101,7 +106,7 @@ object BibleInstallSupport {
     internal fun Throwable.isOperatorEnvironment(depth: Int = 0): Boolean =
         this is CancellationException ||
             this is UnresolvedAddressException ||
-            this is ConnectException ||
+            this is SocketException ||
             this is SocketTimeoutException ||
             this is HttpRequestTimeoutException ||
             this is TruncatedBodyException ||

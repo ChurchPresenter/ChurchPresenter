@@ -311,6 +311,21 @@ class LiveMapReporterTest {
         assertEquals(0 to 0, LiveMapReporter.gatherSongCounts(AppSettings()))
     }
 
+    @Test
+    fun `a graphics stack that will not come up counts no screens rather than ending the app`() {
+        // The usage ping asks how many displays are attached, and bringing AWT's graphics
+        // environment up loads the platform's native font manager. When that cannot load the JVM
+        // raises ExceptionInInitializerError — an Error, which `catch (Exception)` does not see —
+        // so a line that exists to put a number in a ping killed the app before its window opened.
+        assertEquals(0, LiveMapReporter.detectScreenCount { throw ExceptionInInitializerError("no GE") })
+        assertEquals(0, LiveMapReporter.detectScreenCount { throw NoClassDefFoundError("LocalGE") })
+    }
+
+    @Test
+    fun `a machine that answers is reported as it answered`() {
+        assertEquals(3, LiveMapReporter.detectScreenCount { 3 })
+    }
+
     private fun pingThatFails(times: Int): Pair<suspend () -> Boolean, () -> Int> {
         var calls = 0
         val ping: suspend () -> Boolean = {
