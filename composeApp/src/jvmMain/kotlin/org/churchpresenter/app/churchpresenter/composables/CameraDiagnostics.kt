@@ -25,6 +25,28 @@ internal enum class CameraFailure {
     /** The device is open in another application. */
     DEVICE_BUSY,
 
+    /**
+     * The device refused the size, rate and pixel format asked of it, and opened on its own instead.
+     *
+     * AVFoundation's way of saying so is `Configuration of video device failed, falling back to
+     * default`, after which it frequently delivers nothing at all — a camera that "opened" and then
+     * shows a grey rectangle for ever. Distinct from [UNSUPPORTED_PIXEL_FORMAT] and
+     * [UNSUPPORTED_FRAMERATE] because the device names no alternative here: there is nothing to
+     * parse out of the message, and the only useful next attempt is to ask for nothing at all.
+     */
+    DEVICE_CONFIG_REFUSED,
+
+    /**
+     * macOS would not deliver video, and did not say which of the two reasons applies.
+     *
+     * AVFoundation reports a bare `Input/output error` both when the system has refused camera
+     * access — a TCC denial prints no authorization string, so [PERMISSION_DENIED] never matches —
+     * and when the device genuinely cannot be opened. Reporting that as [DEVICE_BUSY] is what put
+     * "this camera is already in use by another application" on screen for an operator whose camera
+     * nothing else was using (issue #464), so the two are named together rather than guessed at.
+     */
+    PERMISSION_OR_UNAVAILABLE,
+
     /** The device named on the command line is gone — unplugged since it was enumerated. */
     DEVICE_NOT_FOUND,
 
@@ -83,7 +105,10 @@ private val PREFERRED_PIXEL_FORMATS = listOf("uyvy422", "yuyv422", "nv12", "mjpe
  * makes every later complaint meaningless, and the specific causes come before the generic
  * "something went wrong on the wire" that each of them also produces.
  */
-internal fun classifyCameraFfmpegStderr(stderrTail: List<String>): CameraFailure {
+internal fun classifyCameraFfmpegStderr(
+    stderrTail: List<String>,
+    scheme: String = "",
+): CameraFailure {
     val text = stderrTail.joinToString("\n").lowercase()
     return when {
         text.containsAny(
@@ -104,14 +129,27 @@ internal fun classifyCameraFfmpegStderr(stderrTail: List<String>): CameraFailure
             "cannot find a device", "could not find video device"
         ) -> CameraFailure.DEVICE_NOT_FOUND
 
+        text.contains("configuration of video device failed") -> CameraFailure.DEVICE_CONFIG_REFUSED
+
         text.containsAny(
-            "device or resource busy", "could not run graph", "input/output error", "i/o error",
+            "device or resource busy", "could not run graph",
             "resource temporarily unavailable", "already in use"
         ) -> CameraFailure.DEVICE_BUSY
+
+        // An I/O error means "busy" on the two APIs that only ever emit it for a device another
+        // process holds. On AVFoundation it does not: the same line is what a privacy refusal
+        // produces, and telling someone whose camera is idle that another application has it sends
+        // them looking for a program that does not exist. See [PERMISSION_OR_UNAVAILABLE].
+        text.containsAny("input/output error", "i/o error") ->
+            if (scheme == AVFOUNDATION_SCHEME) CameraFailure.PERMISSION_OR_UNAVAILABLE
+            else CameraFailure.DEVICE_BUSY
 
         else -> CameraFailure.UNKNOWN
     }
 }
+
+/** The macOS capture scheme, whose stderr has to be read differently from dshow's and v4l2's. */
+internal const val AVFOUNDATION_SCHEME = "avfoundation"
 
 private fun String.containsAny(vararg needles: String): Boolean = needles.any { contains(it) }
 
@@ -206,9 +244,18 @@ private fun redactDeviceName(line: String, deviceName: String): String {
 internal data class CaptureOverride(
     val pixelFormat: String? = null,
     val framerate: String? = null,
+    /**
+     * Ask for nothing and let the device choose, discarding even what the source requested.
+     *
+     * The last resort, and the only answer to a device that refuses a combination without naming
+     * an alternative. Distinct from [NONE], which means "nothing has been overridden yet" and so
+     * still passes the source's own `videoFormat` through.
+     */
+    val useDeviceDefaults: Boolean = false,
 ) {
     companion object {
         val NONE = CaptureOverride()
+        val DEVICE_DEFAULTS = CaptureOverride(useDeviceDefaults = true)
     }
 }
 
@@ -235,6 +282,13 @@ internal fun nextCaptureOverride(
             (parseSupportedFramerates(stderrTail).firstOrNull()?.toInt()
                 ?: knownFormats.firstOrNull()?.fps)
                 ?.let { CaptureOverride(framerate = it.toString()) }
+
+        // Neither of these names anything to try instead, and both are states a device reaches
+        // *because* of what was asked of it — so the one attempt left worth making is to ask for
+        // nothing. Without it the loop retried the identical command line five times over and gave
+        // up, which is the no-frames half of issue #464.
+        CameraFailure.DEVICE_CONFIG_REFUSED, CameraFailure.NO_FRAMES ->
+            CaptureOverride.DEVICE_DEFAULTS
 
         else -> null
     }

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_config_refused
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_in_use
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_device_busy
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_device_not_found
@@ -9,6 +10,7 @@ import churchpresenter.composeapp.generated.resources.canvas_camera_error_ffmpeg
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_no_frames
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_permission_denied
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_permission_denied_windows
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_permission_or_unavailable
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_unknown
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_unsupported_format
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_unsupported_framerate
@@ -40,6 +42,11 @@ internal fun cameraFailureStringRes(
         CameraFailure.UNSUPPORTED_PIXEL_FORMAT -> Res.string.canvas_camera_error_unsupported_format
         CameraFailure.UNSUPPORTED_FRAMERATE -> Res.string.canvas_camera_error_unsupported_framerate
         CameraFailure.DEVICE_BUSY -> Res.string.canvas_camera_error_device_busy
+        CameraFailure.DEVICE_CONFIG_REFUSED -> Res.string.canvas_camera_error_config_refused
+        // Only reachable on macOS — it is what an avfoundation I/O error classifies to — so it does
+        // not branch on [osName] the way the two above it do.
+        CameraFailure.PERMISSION_OR_UNAVAILABLE ->
+            Res.string.canvas_camera_error_permission_or_unavailable
         CameraFailure.DEVICE_NOT_FOUND ->
             // Windows gets its own sentence because there the likeliest cause is not an unplugged
             // camera but a name that DirectShow does not answer to — see `windowsCamerasFrom`.

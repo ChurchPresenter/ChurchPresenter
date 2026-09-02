@@ -12,6 +12,7 @@
     <string name="columns_show_all">Show all</string>
     <string name="columns_always">always</string>
     <string name="new_song">New Song</string>
+    <string name="no_song_folder">No songs folder is set yet — choose one in Settings → Songs, and songs can be added here.</string>
     <string name="selected_count">%1$s selected</string>
     <string name="batch_edit_menu">Batch Edit…</string>
     <string name="delete">Delete</string>

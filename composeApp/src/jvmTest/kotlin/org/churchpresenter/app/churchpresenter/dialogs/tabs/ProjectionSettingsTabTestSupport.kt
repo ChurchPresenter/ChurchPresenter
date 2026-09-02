@@ -64,6 +64,12 @@ internal fun projectionTab(
      * and these tests count the tab's controls, so that would decide whether they pass.
      */
     ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
+    /**
+     * Pinned for the same reason, and to the state a packaged app is in: the Camera Capture card
+     * draws a download button when ffmpeg is missing, and whether it is missing is a property of
+     * the machine running the suite rather than of anything under test.
+     */
+    ffmpegStatus: FfmpegStatus = PINNED_FFMPEG,
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -78,12 +84,22 @@ internal fun projectionTab(
                 detectScreens = { screens },
                 ndiStatus = { ndiStatus },
                 ndiReceiverCount = { 0 },
+                ffmpegProbe = { ffmpegStatus },
             )
         }
     }
     awaitAudioDevices()
     block { current }
 }
+
+/**
+ * The ffmpeg every packaged app has: present, and the copy that shipped with it.
+ *
+ * Every suite that composes the tab pins this. Left to the real probe the Camera Capture card would
+ * draw a download button on a machine without ffmpeg and not on one with it, so the tab's control
+ * count would depend on the developer's laptop.
+ */
+internal val PINNED_FFMPEG = FfmpegStatus(available = true, path = "/app/ffmpeg", bundled = true)
 
 /** The audio device entry every machine has, and so the signal that VLC's probe has come back. */
 internal const val SYSTEM_DEFAULT_DEVICE = "System Default"
@@ -201,7 +217,16 @@ internal object Grid {
      */
     const val NDI_BUTTONS = 3
 
-    val trailing: Int get() = (if (isVlcAvailable) 3 else 2) + NDI_BUTTONS
+    /**
+     * The Camera Capture card's contribution: "Choose ffmpeg" and "Check again".
+     *
+     * Fixed, unlike the VLC term above, because [projectionTab] pins the ffmpeg probe to a working
+     * bundled binary — the "Get ffmpeg" button and the "Use bundled" one both appear only in states
+     * that pinning rules out, so no count here depends on what the machine has installed.
+     */
+    const val FFMPEG_BUTTONS = 2
+
+    val trailing: Int get() = (if (isVlcAvailable) 3 else 2) + NDI_BUTTONS + FFMPEG_BUTTONS
 }
 
 /**

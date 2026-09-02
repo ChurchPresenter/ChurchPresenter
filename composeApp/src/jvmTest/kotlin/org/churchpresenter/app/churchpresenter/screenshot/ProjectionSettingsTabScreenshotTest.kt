@@ -23,6 +23,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.Grid
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.PINNED_FFMPEG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.TranslationPickerTags
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.awaitAudioDevices
@@ -443,6 +444,7 @@ class ProjectionSettingsTabScreenshotTest {
                                 detectScreens = { screens },
                                 ndiStatus = { ndiStatus },
                                 ndiReceiverCount = { ndiReceivers },
+                                ffmpegProbe = { PINNED_FFMPEG },
                             )
                         }
                     }

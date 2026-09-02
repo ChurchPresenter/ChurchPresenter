@@ -31,6 +31,29 @@ class WebTabEngineUnavailableTest {
     }
 
     @Test
+    fun `WebTab blocked by a machine policy says so instead of naming a redistributable`() = webTab(
+        cefInitialized = false,
+        cefBlockedByPolicy = true,
+    ) { _, _ ->
+        // Twelve reports across five churches, on managed Windows installs where Application
+        // Control blocks the downloaded jcef.dll. Installing the Visual C++ redistributable — what
+        // the generic message asks for — does nothing about it.
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_POLICY_BODY).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_POLICY_TITLE).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unsupported macOS outranks a policy block, since neither can be acted on together`() = webTab(
+        cefInitialized = false,
+        cefMacOsUnsupported = true,
+        cefBlockedByPolicy = true,
+    ) { _, _ ->
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_MACOS_TITLE).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_POLICY_TITLE).assertDoesNotExist()
+    }
+
+    @Test
     fun `WebEngineUnavailable defaults to the real CefManager state`() = runComposeUiTest {
         setContent { MaterialTheme { WebEngineUnavailable() } }
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertExists()

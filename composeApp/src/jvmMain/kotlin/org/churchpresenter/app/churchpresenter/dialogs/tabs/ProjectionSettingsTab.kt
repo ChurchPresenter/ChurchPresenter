@@ -222,6 +222,12 @@ fun ProjectionSettingsTab(
      */
     ndiStatus: @Composable () -> NdiRuntimeStatus = { NdiManager.status.collectAsState().value },
     ndiReceiverCount: (Int) -> Int = NdiManager::connectionCount,
+    /**
+     * Which ffmpeg the Camera Capture card reports, for the same reason [ndiStatus] is a parameter:
+     * it runs `ffmpeg -version` against the machine, and whether that machine has one decides how
+     * many buttons the card draws.
+     */
+    ffmpegProbe: () -> FfmpegStatus = ::probeFfmpeg,
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
@@ -683,7 +689,11 @@ fun ProjectionSettingsTab(
         }
 
     }
-    // ── Card 3: Window Position ──────────────────────────────────────────────
+
+    // ── Card 3: Camera Capture ───────────────────────────────────────────────
+    FfmpegCard(settings = settings, onSettingsChange = onSettingsChange, onProbe = ffmpegProbe)
+
+    // ── Card 4: Window Position ──────────────────────────────────────────────
     SettingsSection(title = stringResource(Res.string.window_position)) {
 
         // Visual representation box with position fields

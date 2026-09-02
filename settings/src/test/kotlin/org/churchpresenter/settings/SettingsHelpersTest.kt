@@ -244,6 +244,11 @@ class ProjectionSettingsTest {
     fun `the ndi runtime path is empty until the operator overrides it`() {
         assertEquals("", ProjectionSettings().ndiRuntimePath, "auto-detect, exactly as vlcPath does")
     }
+
+    @Test
+    fun `the ffmpeg path is empty until the operator overrides it`() {
+        assertEquals("", ProjectionSettings().ffmpegPath, "empty means the ffmpeg bundled with the app")
+    }
 }
 
 /**

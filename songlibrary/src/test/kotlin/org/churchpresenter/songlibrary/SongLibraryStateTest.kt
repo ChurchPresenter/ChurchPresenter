@@ -284,6 +284,28 @@ class SongLibraryStateTest {
     }
 
     @Test
+    fun `a library with no folder set writes nothing and says so`() {
+        // The window can be opened before a songs folder has ever been chosen: `storageDirectory`
+        // defaults to "", every path built from it resolves to the filesystem root, and New Song
+        // threw AccessDeniedException("C:\\New Song.song") out of a coroutine and took the app
+        // down with it. Reported to Sentry from two churches on the day it shipped.
+        val unset = SongLibraryState(File(""))
+
+        assertFalse(unset.canWrite, "the header disables New Song on this, and explains why")
+
+        unset.newSongNow("Untitled")
+
+        assertTrue(unset.songs.isEmpty(), "nothing was written, and nothing was added to the grid")
+        assertFalse(File("/Untitled.song").exists(), "and the root was never even attempted")
+        assertEquals(1, unset.lastOutcome?.errors?.size, "and the failure is shown, not thrown")
+    }
+
+    @Test
+    fun `a configured library may be written to`() {
+        assertTrue(state.canWrite)
+    }
+
+    @Test
     fun `a song that cannot be written is reported rather than silently dropped`() {
         // A songbook whose folder cannot be created, because a song file of that name is already
         // there. Deterministic and cross-platform, unlike leaning on file permissions -- and a

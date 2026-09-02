@@ -89,6 +89,20 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 
 ---
 
+### The bundled ffmpeg
+
+Cameras and capture cards are opened by running **ffmpeg**, and the app ships its own copy rather
+than asking anyone to install one. It is **not committed** — `:composeApp:fetchBundledFfmpeg`
+downloads the build pinned in `gradle/ffmpeg-builds.properties`, verifies its SHA-256 and writes the
+single `ffmpeg` program into `composeApp/src/jvmMain/appResources/<os>/`, which is what packaging
+and `run` both read. Packaging and `run` depend on that task, so there is nothing to do by hand.
+
+A target with no URL configured is not an error: the app then falls back to whatever ffmpeg is
+installed on the machine, and Settings → Projection → Camera Capture says which one it is using.
+Licensing and the written offer of source are in [THIRD_PARTY_FFMPEG.md](THIRD_PARTY_FFMPEG.md).
+
+---
+
 ### Build and Run Desktop (JVM) Application
 
 To build and run the development version of the desktop app, use the run configuration from the run widget

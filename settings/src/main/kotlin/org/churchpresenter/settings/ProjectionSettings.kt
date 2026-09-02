@@ -21,6 +21,10 @@ data class ProjectionSettings(
     // Custom NDI Runtime directory (empty = auto-detect), the exact counterpart of vlcPath. The
     // runtime is installed separately — this app ships no NDI binaries and may not.
     val ndiRuntimePath: String = "",
+    // Custom ffmpeg executable (empty = use the copy bundled with the app). Unlike vlcPath and
+    // ndiRuntimePath this is an override rather than a way to find something we do not ship: the
+    // app carries its own ffmpeg, and this exists for an operator who wants a different build.
+    val ffmpegPath: String = "",
     // Number of simulated dev-fallback presenter windows to open when there is no real output
     // (single-monitor dev machine). Lets several independent outputs be simulated on one screen
     // for developing/testing per-output features. Only takes effect in the dev fallback; ignored

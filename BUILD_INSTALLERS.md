@@ -7,7 +7,18 @@ This guide explains how to build DMG (macOS), EXE (Windows), and other installer
 ### For macOS (DMG)
 - macOS operating system
 - Xcode Command Line Tools installed: `xcode-select --install`
-- Java JDK 17 or higher
+- **A distribution JDK 21 — Temurin. Not Homebrew's, not MacPorts'.**
+
+  jpackage copies the JDK it is given straight into the `.app`, and a package manager's JDK is not
+  self-contained: Homebrew builds `libfontmanager.dylib` against Homebrew's own harfbuzz and links
+  it by absolute path. The bundle then works perfectly on the machine that built it and dies on
+  every other one, at the first thing that touches a font, with
+  `Library not loaded: /usr/local/opt/harfbuzz/lib/libharfbuzz.0.dylib`.
+
+  Gradle's toolchain API resolves *any* registered JDK 21, so which one gets bundled is whatever
+  the machine happens to have — check with `/usr/libexec/java_home -V`. The
+  `checkMacRuntimeSelfContained` task runs before every macOS packaging task and fails the build
+  when the chosen JDK links outside `/usr/lib` and `/System`, so this is caught rather than shipped.
 
 ### For Windows (EXE/MSI)
 - Windows operating system

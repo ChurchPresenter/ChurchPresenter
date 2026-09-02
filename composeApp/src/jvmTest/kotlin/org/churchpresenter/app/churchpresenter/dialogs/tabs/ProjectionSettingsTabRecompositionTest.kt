@@ -59,6 +59,7 @@ class ProjectionSettingsTabRecompositionTest {
                         onSettingsChange = inertCallback,
                         companionServer = CompanionServer(),
                         detectScreens = { twoExternalScreens() },
+                        ffmpegProbe = { PINNED_FFMPEG },
                     )
                 }
             }
@@ -98,6 +99,7 @@ class ProjectionSettingsTabRecompositionTest {
                         onSettingsChange = inertCallback,
                         companionServer = CompanionServer(),
                         detectScreens = { twoExternalScreens() },
+                        ffmpegProbe = { PINNED_FFMPEG },
                     )
                 }
             }
@@ -137,6 +139,7 @@ class ProjectionSettingsTabRecompositionTest {
                     onSettingsChange = { transform -> state = transform(state) },
                     companionServer = CompanionServer(),
                     detectScreens = { screens },
+                    ffmpegProbe = { PINNED_FFMPEG },
                 )
             }
         }
@@ -192,6 +195,7 @@ class ProjectionSettingsTabRecompositionTest {
                         onSettingsChange = inertCallback,
                         companionServer = CompanionServer(),
                         detectScreens = { twoExternalScreens() },
+                        ffmpegProbe = { PINNED_FFMPEG },
                     )
                 }
             }
@@ -227,6 +231,7 @@ class ProjectionSettingsTabRecompositionTest {
                     onSettingsChange = { transform -> settings = transform(settings) },
                     companionServer = CompanionServer(),
                     detectScreens = { twoExternalScreens() },
+                    ffmpegProbe = { PINNED_FFMPEG },
                 )
             }
         }
@@ -261,6 +266,7 @@ class ProjectionSettingsTabRecompositionTest {
                     onSettingsChange = inertCallback,
                     companionServer = CompanionServer(),
                     detectScreens = { twoExternalScreens() },
+                    ffmpegProbe = { PINNED_FFMPEG },
                 )
             }
         }
@@ -291,6 +297,7 @@ class ProjectionSettingsTabRecompositionTest {
                     onSettingsChange = inertCallback,
                     companionServer = CompanionServer(),
                     detectScreens = { twoExternalScreens() },
+                    ffmpegProbe = { PINNED_FFMPEG },
                 )
             }
         }
@@ -320,6 +327,7 @@ class ProjectionSettingsTabRecompositionTest {
                     onSettingsChange = inertCallback,
                     companionServer = CompanionServer(),
                     detectScreens = { twoExternalScreens() },
+                    ffmpegProbe = { PINNED_FFMPEG },
                 )
             }
         }

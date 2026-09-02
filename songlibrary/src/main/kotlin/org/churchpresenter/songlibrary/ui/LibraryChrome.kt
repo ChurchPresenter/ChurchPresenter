@@ -49,6 +49,7 @@ import org.churchpresenter.songlibrary.generated.resources.done
 import org.churchpresenter.songlibrary.generated.resources.footer_songs
 import org.churchpresenter.songlibrary.generated.resources.loading
 import org.churchpresenter.songlibrary.generated.resources.new_song
+import org.churchpresenter.songlibrary.generated.resources.no_song_folder
 import org.churchpresenter.songlibrary.generated.resources.new_song_book_menu
 import org.churchpresenter.songlibrary.generated.resources.no_song_book
 import org.churchpresenter.songlibrary.generated.resources.revert
@@ -84,7 +85,9 @@ internal fun LibraryHeader(state: SongLibraryState, io: CoroutineDispatcher, onN
             val scope = rememberCoroutineScope()
             PrimaryButton(
                 label = newSongTitle,
-                enabled = !state.isWriting,
+                // Disabled without a songs folder rather than left to fail: every path built from
+                // an unset folder aims at the filesystem root, which the OS refuses.
+                enabled = !state.isWriting && state.canWrite,
                 onClick = { scope.launch { state.newSong(newSongTitle, io) } },
                 icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = scheme.onPrimary) },
             )
@@ -96,6 +99,7 @@ internal fun LibraryHeader(state: SongLibraryState, io: CoroutineDispatcher, onN
 @Composable
 private fun subhead(state: SongLibraryState): String =
     if (state.isLoading) stringResource(Res.string.loading)
+    else if (!state.canWrite) stringResource(Res.string.no_song_folder)
     else if (state.view.isFiltered) stringResource(Res.string.subhead_filtered, state.rows.size, state.songs.size)
     else stringResource(Res.string.subhead_counts, state.songs.size, state.songbooks.size)
 
