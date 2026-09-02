@@ -440,9 +440,10 @@ private fun TranslationRow(
  */
 @Composable
 private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    // Caption above rather than beside: the pane is narrow enough that a label plus two 120.dp
+    // segments overflows, and the overflow clips the second segment off the right edge.
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = "$label \u00b7 ${stringResource(Res.string.bilingual_layout).removeSuffix(":")}",

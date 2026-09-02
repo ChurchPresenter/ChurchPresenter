@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Tuma ripoti</string>
     <string name="crash_feedback_dismiss">Si sasa</string>
     <string name="song_folder_with_count">%1$s (nyimbo %2$d)</string>
+    <string name="system_storage">Hifadhi</string>
+    <string name="system_storage_subtitle">Mahali Church Presenter hutafuta maudhui yako</string>
+    <string name="system_storage_linked_count">%1$d zimeunganishwa</string>
+    <string name="system_storage_needs_attention_count">%1$d zinahitaji uangalizi</string>
+    <string name="system_storage_status_not_set">Haijawekwa</string>
+    <string name="system_storage_status_not_found">Folda haikupatikana</string>
+    <string name="system_storage_status_read_only">Kusoma tu</string>
+    <string name="system_storage_status_linked">Imeunganishwa</string>
+    <string name="system_storage_status_file_count">Faili %1$d</string>
+    <string name="system_storage_status_needs_converting">%1$d zinahitaji kubadilishwa</string>
+    <string name="system_manage_settings">Dhibiti mipangilio</string>
+    <string name="analytics_reporting_hint">Hutusaidia kupata matatizo haraka. Hakuna maudhui au maneno ya nyimbo yanayotumwa.</string>
+    <string name="file_not_supported_short">haitumiki</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Namba kabla ya kichwa</string>

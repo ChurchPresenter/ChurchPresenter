@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Raporu gönder</string>
     <string name="crash_feedback_dismiss">Şimdi değil</string>
     <string name="song_folder_with_count">%1$s (%2$d ilahi)</string>
+    <string name="system_storage">Depolama</string>
+    <string name="system_storage_subtitle">Church Presenter içeriğinizi nerede arıyor</string>
+    <string name="system_storage_linked_count">%1$d bağlı</string>
+    <string name="system_storage_needs_attention_count">%1$d ilgi gerektiriyor</string>
+    <string name="system_storage_status_not_set">Atanmadı</string>
+    <string name="system_storage_status_not_found">Klasör bulunamadı</string>
+    <string name="system_storage_status_read_only">Salt okunur</string>
+    <string name="system_storage_status_linked">Bağlı</string>
+    <string name="system_storage_status_file_count">%1$d dosya</string>
+    <string name="system_storage_status_needs_converting">%1$d dönüştürülmeli</string>
+    <string name="system_manage_settings">Ayarları yönet</string>
+    <string name="analytics_reporting_hint">Sorunları daha hızlı bulmamıza yardımcı olur. İçerik veya şarkı sözleri asla gönderilmez.</string>
+    <string name="file_not_supported_short">desteklenmiyor</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numara başlıktan önce</string>

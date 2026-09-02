@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">فرستادن گزارش</string>
     <string name="crash_feedback_dismiss">اکنون نه</string>
     <string name="song_folder_with_count">%1$s (%2$d سرود)</string>
+    <string name="system_storage">فضای ذخیره‌سازی</string>
+    <string name="system_storage_subtitle">Church Presenter محتوای شما را کجا جست‌وجو می‌کند</string>
+    <string name="system_storage_linked_count">%1$d متصل</string>
+    <string name="system_storage_needs_attention_count">%1$d نیاز به توجه دارد</string>
+    <string name="system_storage_status_not_set">تعیین نشده</string>
+    <string name="system_storage_status_not_found">پوشه پیدا نشد</string>
+    <string name="system_storage_status_read_only">فقط خواندنی</string>
+    <string name="system_storage_status_linked">متصل</string>
+    <string name="system_storage_status_file_count">%1$d فایل</string>
+    <string name="system_storage_status_needs_converting">%1$d نیاز به تبدیل دارد</string>
+    <string name="system_manage_settings">مدیریت تنظیمات</string>
+    <string name="analytics_reporting_hint">به ما کمک می‌کند مشکلات را سریع‌تر پیدا کنیم. هیچ محتوا یا متن ترانه‌ای هرگز ارسال نمی‌شود.</string>
+    <string name="file_not_supported_short">پشتیبانی نمی‌شود</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">شماره پیش از عنوان</string>

@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">報告を送信</string>
     <string name="crash_feedback_dismiss">今はしない</string>
     <string name="song_folder_with_count">%1$s（%2$d 曲）</string>
+    <string name="system_storage">ストレージ</string>
+    <string name="system_storage_subtitle">Church Presenter がコンテンツを探す場所</string>
+    <string name="system_storage_linked_count">%1$d 件リンク済み</string>
+    <string name="system_storage_needs_attention_count">%1$d 件が要確認</string>
+    <string name="system_storage_status_not_set">未設定</string>
+    <string name="system_storage_status_not_found">フォルダーが見つかりません</string>
+    <string name="system_storage_status_read_only">読み取り専用</string>
+    <string name="system_storage_status_linked">リンク済み</string>
+    <string name="system_storage_status_file_count">%1$d 件のファイル</string>
+    <string name="system_storage_status_needs_converting">%1$d 件が変換待ち</string>
+    <string name="system_manage_settings">設定の管理</string>
+    <string name="file_not_supported_short">非対応</string>
+    <string name="analytics_reporting_hint">問題の早期発見に役立ちます。コンテンツや歌詞が送信されることはありません。</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">番号をタイトルの前に表示</string>

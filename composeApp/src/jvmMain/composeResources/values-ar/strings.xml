@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">إرسال التقرير</string>
     <string name="crash_feedback_dismiss">ليس الآن</string>
     <string name="song_folder_with_count">%1$s (%2$d ترنيمة)</string>
+    <string name="system_storage">التخزين</string>
+    <string name="system_storage_subtitle">أين يبحث Church Presenter عن المحتوى الخاص بك</string>
+    <string name="system_storage_linked_count">%1$d مرتبط</string>
+    <string name="system_storage_needs_attention_count">%1$d يحتاج إلى انتباه</string>
+    <string name="system_storage_status_not_set">غير محدد</string>
+    <string name="system_storage_status_not_found">لم يتم العثور على المجلد</string>
+    <string name="system_storage_status_read_only">للقراءة فقط</string>
+    <string name="system_storage_status_linked">مرتبط</string>
+    <string name="system_storage_status_file_count">%1$d ملفات</string>
+    <string name="system_storage_status_needs_converting">%1$d بحاجة إلى تحويل</string>
+    <string name="system_manage_settings">إدارة الإعدادات</string>
+    <string name="analytics_reporting_hint">يساعدنا في العثور على المشكلات بشكل أسرع. لا يتم إرسال أي محتوى أو كلمات أغانٍ إطلاقًا.</string>
+    <string name="file_not_supported_short">غير مدعوم</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">الرقم قبل العنوان</string>

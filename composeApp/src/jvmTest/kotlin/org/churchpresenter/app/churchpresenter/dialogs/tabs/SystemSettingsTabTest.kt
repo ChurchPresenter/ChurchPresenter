@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import io.mockk.every
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -42,6 +43,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.math.abs
 import kotlin.test.assertTrue
 import java.nio.file.Path as NioPath
 
@@ -442,15 +444,17 @@ class SystemSettingsTabTest {
         }
 
         listOf(
-            "Bible Storage Directory",
-            "Songs Storage Directory",
-            "Pictures Storage Directory",
-            "Lower Third Storage Directory",
-            "Presentation Storage Directory",
-            "Media Storage Directory",
+            "Storage",
+            "Bible",
+            "Songs",
+            "Pictures",
+            "Lower Third",
+            "Presentation",
+            "Media",
             "General",
+            "Manage settings",
         ).forEach { title ->
-            onAllNodesWithText(title).onFirst().assertExists("the $title section must render")
+            onAllNodesWithText(title).onFirst().assertExists("the $title heading must render")
         }
         onAllNodesWithText("Browse...").assertCountEquals(6)
         onAllNodesWithText("Set All").assertCountEquals(6)
@@ -496,9 +500,14 @@ class SystemSettingsTabTest {
             }
         }
 
-        waitUntil { onAllNodesWithText("asv.spb", substring = true).fetchSemanticsNodes().isNotEmpty() }
-        onAllNodesWithText("Detected: asv.spb, kjv1769.spb").onFirst()
-            .assertExists("both bible files are listed, sorted, and the non-bible file is not")
+        waitUntil { onAllNodesWithText("asv.spb").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("Detected:").onFirst().assertExists("the strip says what it is listing")
+        onAllNodesWithText("kjv1769.spb").onFirst().assertExists("every bible file gets its own chip")
+        onAllNodesWithText("notes.txt").assertCountEquals(0)
+        // Sorted, which one chip per file no longer says on its own: asv is drawn left of kjv1769.
+        val asv = onAllNodesWithText("asv.spb")[0].fetchSemanticsNode().boundsInRoot
+        val kjv = onAllNodesWithText("kjv1769.spb")[0].fetchSemanticsNode().boundsInRoot
+        assertTrue(asv.left < kjv.left, "the chips are in the order the scan sorted them")
     }
 
     @Test
@@ -533,8 +542,8 @@ class SystemSettingsTabTest {
         }
 
         waitUntil { onAllNodesWithText("Convert").fetchSemanticsNodes().isNotEmpty() }
-        onAllNodesWithText("old-songbook.sps (not supported)").onFirst()
-            .assertExists("the legacy file is named and flagged")
+        onAllNodesWithText("old-songbook.sps").onFirst().assertExists("the legacy file is named")
+        onAllNodesWithText("not supported").onFirst().assertExists("and flagged beside its name")
         onAllNodesWithText("Convert").assertCountEquals(1)
     }
 
@@ -1040,18 +1049,18 @@ class SystemSettingsTabTest {
     }
 
     /**
-     * Hovers the first picker's status dot and returns once its tooltip has had time to appear.
+     * Hovers the status dot beside [path] and returns once its tooltip has had time to appear.
      *
-     * The dot carries no semantics of its own, so it cannot be found by a matcher. It is laid out
-     * immediately before the "Browse…" button in a row with `Arrangement.spacedBy(8.dp)` and is 12dp
-     * wide, which puts its centre 14dp to the left of that button — derived from the button's real
-     * measured bounds rather than from a fixed coordinate.
+     * The dot carries no semantics of its own, so it cannot be found by a matcher. It sits at the
+     * left end of the path field, before the path itself in a row with `Arrangement.spacedBy(8.dp)`,
+     * and is 7dp wide — so its centre is 11.5dp to the left of the path's own measured bounds rather
+     * than at a fixed coordinate.
      */
-    private fun ComposeUiTest.hoverFirstStatusDot() {
+    private fun ComposeUiTest.hoverStatusDotBeside(path: String) {
         waitForIdle()
-        val browse = onAllNodesWithText("Browse...")[0].fetchSemanticsNode()
-        val bounds = browse.boundsInRoot
-        val dotCentre = Offset(bounds.left - 14f * browse.layoutInfo.density.density, bounds.center.y)
+        val pathText = onAllNodesWithText(path)[0].fetchSemanticsNode()
+        val bounds = pathText.boundsInRoot
+        val dotCentre = Offset(bounds.left - 11.5f * pathText.layoutInfo.density.density, bounds.center.y)
 
         onRoot().performMouseInput { moveTo(dotCentre) }
         mainClock.advanceTimeBy(1_000)   // TooltipArea holds the tooltip back for 500ms
@@ -1072,9 +1081,10 @@ class SystemSettingsTabTest {
 
     @Test
     fun `the dot on a usable folder explains that it is writable`() = runComposeUiTest {
-        showBibleFolder(tempDir().path)
+        val dir = tempDir()
+        showBibleFolder(dir.path)
 
-        hoverFirstStatusDot()
+        hoverStatusDotBeside(dir.path)
 
         onAllNodesWithText("Directory is writable").onFirst()
             .assertExists("hovering a green dot must explain what it means")
@@ -1087,7 +1097,7 @@ class SystemSettingsTabTest {
 
         onAllNodesWithText(missing.path).onFirst()
             .assertExists("the configured path is still shown even though it is gone")
-        hoverFirstStatusDot()
+        hoverStatusDotBeside(missing.path)
 
         onAllNodesWithText("Directory not found. Create it or choose a different location.").onFirst()
             .assertExists("a red dot on a missing folder tells the operator how to fix it")
@@ -1101,7 +1111,7 @@ class SystemSettingsTabTest {
         if (!dir.setWritable(false) || canWriteInto(dir)) return@runComposeUiTest
         showBibleFolder(dir.path)
 
-        hoverFirstStatusDot()
+        hoverStatusDotBeside(dir.path)
 
         onAllNodesWithText(
             "Cannot write to this directory. Choose a different location or change permissions."
@@ -1116,7 +1126,7 @@ class SystemSettingsTabTest {
 
         // Unreadable is a distinct state internally (INVALID rather than READ_ONLY) but reads as the
         // same advice to the operator: this folder cannot be written to, choose another.
-        hoverFirstStatusDot()
+        hoverStatusDotBeside(dir.path)
 
         onAllNodesWithText(
             "Cannot write to this directory. Choose a different location or change permissions."
@@ -1124,4 +1134,129 @@ class SystemSettingsTabTest {
         onAllNodesWithText("No files detected").onFirst()
             .assertExists("and the section reports nothing found rather than failing")
     }
+
+    // ── The storage list's own reporting ──────────────────────────────────────
+
+    /** Renders the tab with all six folders pointed at real directories, one of them gone. */
+    private fun ComposeUiTest.showAllFolders(bible: String, missing: String) {
+        val other = tempDir().path
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(
+                    settings = AppSettings(
+                        bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = bible),
+                        songSettings = AppSettings().songSettings.copy(storageDirectory = other),
+                        pictureSettings = AppSettings().pictureSettings.copy(storageDirectory = other),
+                        streamingSettings = AppSettings().streamingSettings.copy(lowerThirdFolder = other),
+                        presentationStorageDirectory = missing,
+                        mediaStorageDirectory = other,
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `the storage header counts what is linked and what needs attention`() = runComposeUiTest {
+        val bible = tempDir()
+        val missing = File(tempDir(), "moved-away")
+        showAllFolders(bible.path, missing.path)
+
+        waitUntil { onAllNodesWithText("5 linked").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("1 need attention").onFirst()
+            .assertExists("the folder that is gone is counted as needing attention")
+    }
+
+    @Test
+    fun `nothing needs attention when every folder is usable`() = runComposeUiTest {
+        val dir = tempDir()
+        showAllFolders(dir.path, tempDir().path)
+
+        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("need attention", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun `an unset folder says so under its name`() = runComposeUiTest {
+        setContent { MaterialTheme { SystemSettingsTab() } }
+
+        waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
+        onAllNodesWithText("0 linked").onFirst().assertExists("nothing is linked before anything is chosen")
+    }
+
+    @Test
+    fun `a folder holding bibles reports how many it found`() = runComposeUiTest {
+        val dir = tempDir()
+        File(dir, "kjv.spb").writeText("x")
+        File(dir, "asv.spb").writeText("x")
+        showBibleFolder(dir.path)
+
+        waitUntil { onAllNodesWithText("2 files").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("2 files").onFirst().assertExists("the bible row counts what the scan found")
+    }
+
+    @Test
+    fun `a folder with nothing to report just says it is linked`() = runComposeUiTest {
+        val dir = tempDir()
+        showAllFolders(dir.path, dir.path)
+
+        waitUntil { onAllNodesWithText("Linked").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test
+    fun `the songs row reports how many files still need converting`() = runComposeUiTest {
+        val dir = tempDir()
+        File(dir, "old-songbook.sps").writeText("x")
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(
+                    settings = AppSettings(
+                        songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
+                    ),
+                )
+            }
+        }
+
+        waitUntil { onAllNodesWithText("1 need converting").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("1 need attention").onFirst()
+            .assertExists("a folder full of files the app cannot read is counted in the header too")
+    }
+
+    // ── Where the cards sit ───────────────────────────────────────────────────
+
+    /** The top-left corner of the heading naming a card. */
+    private fun ComposeUiTest.cardCorner(title: String): Offset =
+        onAllNodesWithText(title)[0].fetchSemanticsNode().boundsInRoot.topLeft
+
+    @Test
+    fun `the cards sit side by side in a wide dialog`() =
+        runDesktopComposeUiTest(width = 1400, height = 900) {
+            setContent { MaterialTheme { SystemSettingsTab() } }
+            waitForIdle()
+
+            val storage = cardCorner("Storage")
+            val general = cardCorner("General")
+
+            assertTrue(general.x > storage.x, "General must be drawn to the right of Storage")
+            assertTrue(
+                abs(general.y - storage.y) < 4f,
+                "the two headings must line up, which is what makes them read as columns",
+            )
+        }
+
+    @Test
+    fun `the cards stack once the dialog is too narrow for two columns`() =
+        runDesktopComposeUiTest(width = 1000, height = 800) {
+            setContent { MaterialTheme { SystemSettingsTab() } }
+            waitForIdle()
+
+            val storage = cardCorner("Storage")
+            val general = cardCorner("General")
+
+            assertTrue(general.y > storage.y, "General must fall below Storage rather than beside it")
+            assertTrue(
+                abs(general.x - storage.x) < 4f,
+                "and share its left edge, since both are full width",
+            )
+        }
 }

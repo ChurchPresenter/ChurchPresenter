@@ -1386,6 +1386,19 @@
     <string name="crash_feedback_send">Rapport verzenden</string>
     <string name="crash_feedback_dismiss">Niet nu</string>
     <string name="song_folder_with_count">%1$s (%2$d liederen)</string>
+    <string name="system_storage">Opslag</string>
+    <string name="system_storage_subtitle">Waar Church Presenter naar je content zoekt</string>
+    <string name="system_storage_linked_count">%1$d gekoppeld</string>
+    <string name="system_storage_needs_attention_count">%1$d vereisen aandacht</string>
+    <string name="system_storage_status_not_set">Niet ingesteld</string>
+    <string name="system_storage_status_not_found">Map niet gevonden</string>
+    <string name="system_storage_status_read_only">Alleen-lezen</string>
+    <string name="system_storage_status_linked">Gekoppeld</string>
+    <string name="system_storage_status_file_count">%1$d bestanden</string>
+    <string name="system_storage_status_needs_converting">%1$d te converteren</string>
+    <string name="system_manage_settings">Instellingen beheren</string>
+    <string name="analytics_reporting_hint">Helpt ons problemen sneller te vinden. Er wordt nooit inhoud of songtekst verzonden.</string>
+    <string name="file_not_supported_short">niet ondersteund</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer voor titel</string>

@@ -1386,6 +1386,19 @@
     <string name="crash_feedback_send">Enviar informe</string>
     <string name="crash_feedback_dismiss">Ahora no</string>
     <string name="song_folder_with_count">%1$s (%2$d cantos)</string>
+    <string name="system_storage">Almacenamiento</string>
+    <string name="system_storage_subtitle">Dónde busca Church Presenter tu contenido</string>
+    <string name="system_storage_linked_count">%1$d vinculadas</string>
+    <string name="system_storage_needs_attention_count">%1$d requieren atención</string>
+    <string name="system_storage_status_not_set">Sin asignar</string>
+    <string name="system_storage_status_not_found">Carpeta no encontrada</string>
+    <string name="system_storage_status_read_only">Solo lectura</string>
+    <string name="system_storage_status_linked">Vinculada</string>
+    <string name="system_storage_status_file_count">%1$d archivos</string>
+    <string name="system_storage_status_needs_converting">%1$d por convertir</string>
+    <string name="system_manage_settings">Administrar ajustes</string>
+    <string name="analytics_reporting_hint">Nos ayuda a encontrar problemas más rápido. Nunca se envía contenido ni letras.</string>
+    <string name="file_not_supported_short">no compatible</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Número antes del título</string>

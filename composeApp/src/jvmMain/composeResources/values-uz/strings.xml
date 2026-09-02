@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Hisobotni yuborish</string>
     <string name="crash_feedback_dismiss">Hozir emas</string>
     <string name="song_folder_with_count">%1$s (%2$d qoʻshiq)</string>
+    <string name="system_storage">Saqlash</string>
+    <string name="system_storage_subtitle">Church Presenter kontentingizni qayerdan qidiradi</string>
+    <string name="system_storage_linked_count">%1$d ulangan</string>
+    <string name="system_storage_needs_attention_count">%1$d e'tibor talab qiladi</string>
+    <string name="system_storage_status_not_set">Belgilanmagan</string>
+    <string name="system_storage_status_not_found">Papka topilmadi</string>
+    <string name="system_storage_status_read_only">Faqat o'qish</string>
+    <string name="system_storage_status_linked">Ulangan</string>
+    <string name="system_storage_status_file_count">%1$d fayl</string>
+    <string name="system_storage_status_needs_converting">%1$d konvertatsiya qilinishi kerak</string>
+    <string name="system_manage_settings">Sozlamalarni boshqarish</string>
+    <string name="analytics_reporting_hint">Muammolarni tezroq topishimizga yordam beradi. Kontent va qo'shiq matnlari hech qachon yuborilmaydi.</string>
+    <string name="file_not_supported_short">qoʻllab-quvvatlanmaydi</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Raqam sarlavhadan oldin</string>

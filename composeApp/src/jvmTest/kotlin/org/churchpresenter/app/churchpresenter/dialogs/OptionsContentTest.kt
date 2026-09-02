@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -103,35 +104,44 @@ class OptionsContentTest {
         }
     }
 
+    /**
+     * The tab named [label], rather than any text on the tab it opens.
+     *
+     * The open tab's own content names the same things its tabs do — the System tab lists a Bible
+     * folder, a Song folder — so a bare text match finds two nodes and fails on the ambiguity.
+     * Only the tab itself is selectable.
+     */
+    private fun ComposeUiTest.tab(label: String) = onNode(hasText(label) and isSelectable())
+
     @Test
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
             "System", "Bible", "Song", "Background", "Projection",
             "Server", "Stage Monitor", "ATEM", "Dictionary", "Companion Satellite",
-        ).forEach { onNodeWithText(it).assertExists() }
+        ).forEach { tab(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
     }
 
     @Test
     fun `the System tab is selected by default`() = dialog {
-        onNodeWithText("System").assertIsSelected()
+        tab("System").assertIsSelected()
     }
 
     @Test
     fun `clicking a different tab switches the selection`() = dialog {
-        onNodeWithText("Bible").performClick()
-        onNodeWithText("Bible").assertIsSelected()
-        onNodeWithText("System").assertIsNotSelected()
+        tab("Bible").performClick()
+        tab("Bible").assertIsSelected()
+        tab("System").assertIsNotSelected()
     }
 
     @Test
     fun `initialTab opens directly on that tab`() = dialog(initialTab = 3) {
-        onNodeWithText("Background").assertIsSelected()
+        tab("Background").assertIsSelected()
     }
 
     @Test
     fun `an out-of-range initialTab is coerced onto the last real tab`() = dialog(initialTab = 999) {
-        onNodeWithText("Companion Satellite").assertIsSelected()
+        tab("Companion Satellite").assertIsSelected()
     }
 
     @Test
