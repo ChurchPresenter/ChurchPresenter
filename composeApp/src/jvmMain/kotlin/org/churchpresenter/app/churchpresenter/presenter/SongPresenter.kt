@@ -63,6 +63,8 @@ import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBackdrop
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
@@ -821,6 +823,12 @@ fun SongPresenter(
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
                     val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
+                    // Two blocks over the same lines: a lyric line and a look-ahead line are drawn
+                    // by one composable but styled by two profiles, and each carries its own band
+                    // and its own box. Both containers go on the same column below -- each paints
+                    // only the lines that reported to it.
+                    val lyricsBlock = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
+                    val laBlock = rememberTextBlockBackdrop(laStyleProfile.backdrop)
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
@@ -846,8 +854,9 @@ fun SongPresenter(
                         } else {
                             lyricsHorizontalAlignment
                         }
+                        val lineBlock = if (isLookAheadLine) laBlock else lyricsBlock
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
                             textAlign = lineAlign,
                             fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
                             fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
@@ -859,7 +868,8 @@ fun SongPresenter(
                                 spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
                             ),
                             color = if (isLookAheadLine) laColor else lyricsColor,
-                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
+                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled,
+                            onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
                         )
                     }
 
@@ -950,8 +960,10 @@ fun SongPresenter(
 
                     @Composable
                     fun NumberPart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val numberPainter = rememberTextBackdropPainter(numberStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(numberPainter.modifier),
+                            onTextLayout = numberPainter::onTextLayout,
                             textAlign = songNumberHorizontalAlignment,
                             fontFamily = songNumberFontFamily,
                             fontSize = scaledSongNumberFontSize,
@@ -968,8 +980,10 @@ fun SongPresenter(
 
                     @Composable
                     fun TitlePart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val titlePainter = rememberTextBackdropPainter(titleStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
+                            onTextLayout = titlePainter::onTextLayout,
                             textAlign = titleHorizontalAlignment,
                             fontFamily = titleFontFamily,
                             fontSize = scaledTitleFontSize,
@@ -1027,7 +1041,12 @@ fun SongPresenter(
                             (numberConfigured && effectiveSongNumberPosition == Constants.BELOW_VERSE)
 
                     // Outer column fills the content area; title/number at edges, lyrics centered
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(lyricsBlock.containerModifier)
+                            .then(laBlock.containerModifier)
+                    ) {
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 

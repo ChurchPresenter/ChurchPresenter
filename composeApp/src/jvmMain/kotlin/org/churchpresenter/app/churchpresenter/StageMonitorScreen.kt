@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
@@ -551,6 +552,7 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
         verticalArrangement = resolveColumnVerticalArrangement(style.verticalAlignment),
         horizontalAlignment = resolveColumnHorizontalAlignment(style.horizontalAlignment)
     ) {
+        val painter = rememberTextBackdropPainter(style.backdrop)
         Text(
             text = text,
             style = buildTextStyle(
@@ -565,7 +567,8 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
                 shadowSize = style.shadowSize,
                 shadowOpacity = style.shadowOpacity
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            onTextLayout = painter::onTextLayout,
             textAlign = resolveTextAlign(style.horizontalAlignment)
         )
     }
@@ -609,6 +612,7 @@ private fun SlideContent(bitmap: ImageBitmap?) {
 
 @Composable
 private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
+    val painter = rememberTextBackdropPainter(style.backdrop)
     Text(
         text = text,
         style = buildTextStyle(
@@ -623,6 +627,8 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
             shadowSize = style.shadowSize,
             shadowOpacity = style.shadowOpacity
         ),
+        modifier = painter.modifier,
+        onTextLayout = painter::onTextLayout,
         textAlign = TextAlign.Center
     )
 }

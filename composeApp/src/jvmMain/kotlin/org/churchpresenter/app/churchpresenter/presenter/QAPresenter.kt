@@ -39,6 +39,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qr_code
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.Question
 import org.jetbrains.compose.resources.stringResource
@@ -115,7 +116,10 @@ fun QAPresenter(
                     .padding(48.dp),
                 contentAlignment = Alignment.Center
             ) {
+                val painter = rememberTextBackdropPainter(qaSettings.backdrop)
                 Text(
+                    modifier = painter.modifier,
+                    onTextLayout = painter::onTextLayout,
                     text = question.text,
                     style = textStyle,
                     fontSize = fontSize.sp,

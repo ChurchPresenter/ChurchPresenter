@@ -2,6 +2,7 @@ package org.churchpresenter.core.models.scene
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 import java.util.UUID
 
 /**
@@ -57,6 +58,8 @@ sealed class SceneSource {
         val italic: Boolean = false,
         val underline: Boolean = false,
         val strikethrough: Boolean = false,
+        /** The band behind each line and the box around the block. */
+        val backdrop: TextBackdrop = TextBackdrop(),
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
         val lineSpacing: Int = 100,
@@ -163,6 +166,8 @@ sealed class SceneSource {
         val italic: Boolean = false,
         val underline: Boolean = false,
         val strikethrough: Boolean = false,
+        /** The band behind each line and the box around the block. */
+        val backdrop: TextBackdrop = TextBackdrop(),
         /** The length a [ClockModes.COUNTDOWN] counts down from. Not a time of day. */
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
@@ -281,6 +286,9 @@ sealed class SceneSource {
         val referenceItalic: Boolean = false,
         val referenceUnderline: Boolean = false,
         val referenceStrikethrough: Boolean = false,
+        /** The band and box behind the verse, and behind its reference line. */
+        val backdrop: TextBackdrop = TextBackdrop(),
+        val referenceBackdrop: TextBackdrop = TextBackdrop(),
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
         val lineSpacing: Int = 100,

@@ -417,7 +417,12 @@ fun AnnouncementsTab(
                 onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
                 onItalicChange = { viewModel.setItalic(it); viewModel.saveToSettings(onSettingsChange) },
                 onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
-                onShadowChange = { viewModel.setShadow(it); viewModel.saveToSettings(onSettingsChange) }
+                onShadowChange = { viewModel.setShadow(it); viewModel.saveToSettings(onSettingsChange) },
+                backdrop = viewModel.backdrop,
+                onBackdropChange = { updated ->
+                    viewModel.setBackdrop(updated)
+                    viewModel.saveToSettings(onSettingsChange)
+                },
             )
             HorizontalAlignmentButtons(
                 selectedAlignment = viewModel.horizontalAlignment,

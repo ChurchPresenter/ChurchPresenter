@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 
 /** A type of content that can be routed to a zone on the stage monitor screen. */
@@ -175,6 +176,8 @@ data class StageMonitorZoneStyle(
     val shadowColor: String = "#000000",
     val shadowSize: Int = 100,
     val shadowOpacity: Int = 80,
+    /** The band behind each line and the box around the block, for this zone's text. */
+    val backdrop: TextBackdrop = TextBackdrop(),
     val verticalAlignment: String = Constants.TOP,
     val horizontalAlignment: String = Constants.LEFT,
     /**

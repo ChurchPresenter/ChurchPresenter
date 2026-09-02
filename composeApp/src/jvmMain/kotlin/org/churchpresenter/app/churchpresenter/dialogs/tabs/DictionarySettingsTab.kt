@@ -99,7 +99,13 @@ fun DictionarySettingsTab(
                         onBoldChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } },
                         onItalicChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } },
                         onUnderlineChange = { },
-                        onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }
+                        onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } },
+                        backdrop = ds.wordBackdrop,
+                        onBackdropChange = { updated ->
+                            onSettingsChange { s ->
+                                s.copy(dictionarySettings = s.dictionarySettings.copy(wordBackdrop = updated))
+                            }
+                        },
                     )
                 }
                 AnimatedVisibility(visible = ds.wordShadow) {
@@ -221,7 +227,15 @@ fun DictionarySettingsTab(
                             onBoldChange = { },
                             onItalicChange = { },
                             onUnderlineChange = { },
-                            onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }
+                            onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } },
+                            backdrop = ds.referenceBackdrop,
+                            onBackdropChange = { updated ->
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        dictionarySettings = s.dictionarySettings.copy(referenceBackdrop = updated),
+                                    )
+                                }
+                            },
                         )
                     }
                     AnimatedVisibility(visible = ds.referenceShadow) {
