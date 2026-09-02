@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">发送报告</string>
     <string name="crash_feedback_dismiss">暂不</string>
     <string name="song_folder_with_count">%1$s（%2$d 首诗歌）</string>
+    <string name="system_storage">存储</string>
+    <string name="system_storage_subtitle">Church Presenter 在哪里查找您的内容</string>
+    <string name="system_storage_linked_count">已链接 %1$d 个</string>
+    <string name="system_storage_needs_attention_count">%1$d 个需要处理</string>
+    <string name="system_storage_status_not_set">未设置</string>
+    <string name="system_storage_status_not_found">未找到文件夹</string>
+    <string name="system_storage_status_read_only">只读</string>
+    <string name="system_storage_status_linked">已链接</string>
+    <string name="system_storage_status_file_count">%1$d 个文件</string>
+    <string name="system_storage_status_needs_converting">%1$d 个待转换</string>
+    <string name="system_manage_settings">管理设置</string>
+    <string name="file_not_supported_short">不支持</string>
+    <string name="analytics_reporting_hint">帮助我们更快发现问题。绝不会发送任何内容或歌词。</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">编号在标题之前</string>

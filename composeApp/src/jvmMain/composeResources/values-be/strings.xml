@@ -1138,6 +1138,19 @@
     <string name="crash_feedback_send">Даслаць справаздачу</string>
     <string name="crash_feedback_dismiss">Не зараз</string>
     <string name="song_folder_with_count">%1$s (%2$d песень)</string>
+    <string name="system_storage">Сховішча</string>
+    <string name="system_storage_subtitle">Дзе Church Presenter шукае ваш кантэнт</string>
+    <string name="system_storage_linked_count">%1$d падлучана</string>
+    <string name="system_storage_needs_attention_count">%1$d патрабуе ўвагі</string>
+    <string name="system_storage_status_not_set">Не зададзена</string>
+    <string name="system_storage_status_not_found">Папка не знойдзена</string>
+    <string name="system_storage_status_read_only">Толькі чытанне</string>
+    <string name="system_storage_status_linked">Падлучана</string>
+    <string name="system_storage_status_file_count">%1$d файлаў</string>
+    <string name="system_storage_status_needs_converting">%1$d патрабуе канвертацыі</string>
+    <string name="system_manage_settings">Кіраванне наладамі</string>
+    <string name="analytics_reporting_hint">Дапамагае нам хутчэй знаходзіць праблемы. Змест і тэксты песень ніколі не адпраўляюцца.</string>
+    <string name="file_not_supported_short">не падтрымліваецца</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Нумар перад назвай</string>

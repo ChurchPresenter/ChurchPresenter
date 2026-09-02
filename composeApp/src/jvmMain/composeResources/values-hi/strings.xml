@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">रिपोर्ट भेजें</string>
     <string name="crash_feedback_dismiss">अभी नहीं</string>
     <string name="song_folder_with_count">%1$s (%2$d गीत)</string>
+    <string name="system_storage">संग्रहण</string>
+    <string name="system_storage_subtitle">Church Presenter आपकी सामग्री कहाँ खोजता है</string>
+    <string name="system_storage_linked_count">%1$d जुड़े</string>
+    <string name="system_storage_needs_attention_count">%1$d पर ध्यान चाहिए</string>
+    <string name="system_storage_status_not_set">सेट नहीं</string>
+    <string name="system_storage_status_not_found">फ़ोल्डर नहीं मिला</string>
+    <string name="system_storage_status_read_only">केवल पढ़ने योग्य</string>
+    <string name="system_storage_status_linked">जुड़ा हुआ</string>
+    <string name="system_storage_status_file_count">%1$d फ़ाइलें</string>
+    <string name="system_storage_status_needs_converting">%1$d को बदलना है</string>
+    <string name="system_manage_settings">सेटिंग्स प्रबंधित करें</string>
+    <string name="analytics_reporting_hint">समस्याएँ तेज़ी से खोजने में हमारी मदद करता है। कोई सामग्री या गीत कभी नहीं भेजे जाते।</string>
+    <string name="file_not_supported_short">समर्थित नहीं</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">शीर्षक से पहले नंबर</string>

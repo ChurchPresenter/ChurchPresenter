@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Lähetä raportti</string>
     <string name="crash_feedback_dismiss">Ei nyt</string>
     <string name="song_folder_with_count">%1$s (%2$d laulua)</string>
+    <string name="system_storage">Tallennus</string>
+    <string name="system_storage_subtitle">Mistä Church Presenter etsii sisältösi</string>
+    <string name="system_storage_linked_count">%1$d linkitetty</string>
+    <string name="system_storage_needs_attention_count">%1$d vaatii huomiota</string>
+    <string name="system_storage_status_not_set">Ei asetettu</string>
+    <string name="system_storage_status_not_found">Kansiota ei löydy</string>
+    <string name="system_storage_status_read_only">Vain luku</string>
+    <string name="system_storage_status_linked">Linkitetty</string>
+    <string name="system_storage_status_file_count">%1$d tiedostoa</string>
+    <string name="system_storage_status_needs_converting">%1$d muunnettavaa</string>
+    <string name="system_manage_settings">Hallitse asetuksia</string>
+    <string name="analytics_reporting_hint">Auttaa meitä löytämään ongelmat nopeammin. Sisältöä tai sanoituksia ei koskaan lähetetä.</string>
+    <string name="file_not_supported_short">ei tuettu</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero ennen otsikkoa</string>

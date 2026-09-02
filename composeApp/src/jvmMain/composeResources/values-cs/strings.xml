@@ -1187,6 +1187,19 @@
     <string name="crash_feedback_send">Odeslat hlášení</string>
     <string name="crash_feedback_dismiss">Teď ne</string>
     <string name="song_folder_with_count">%1$s (%2$d písní)</string>
+    <string name="system_storage">Úložiště</string>
+    <string name="system_storage_subtitle">Kde Church Presenter hledá váš obsah</string>
+    <string name="system_storage_linked_count">%1$d propojeno</string>
+    <string name="system_storage_needs_attention_count">%1$d vyžaduje pozornost</string>
+    <string name="system_storage_status_not_set">Nenastaveno</string>
+    <string name="system_storage_status_not_found">Složka nenalezena</string>
+    <string name="system_storage_status_read_only">Jen pro čtení</string>
+    <string name="system_storage_status_linked">Propojeno</string>
+    <string name="system_storage_status_file_count">%1$d souborů</string>
+    <string name="system_storage_status_needs_converting">%1$d k převodu</string>
+    <string name="system_manage_settings">Spravovat nastavení</string>
+    <string name="analytics_reporting_hint">Pomáhá nám rychleji najít problémy. Obsah ani texty písní se nikdy neodesílají.</string>
+    <string name="file_not_supported_short">není podporováno</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo před názvem</string>

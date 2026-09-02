@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">ສົ່ງລາຍງານ</string>
     <string name="crash_feedback_dismiss">ຍັງບໍ່ເທື່ອ</string>
     <string name="song_folder_with_count">%1$s (%2$d ເພງ)</string>
+    <string name="system_storage">ບ່ອນເກັບຂໍ້ມູນ</string>
+    <string name="system_storage_subtitle">Church Presenter ຄົ້ນຫາເນື້ອຫາຂອງທ່ານຢູ່ໃສ</string>
+    <string name="system_storage_linked_count">ເຊື່ອມຕໍ່ແລ້ວ %1$d</string>
+    <string name="system_storage_needs_attention_count">ຕ້ອງກວດສອບ %1$d</string>
+    <string name="system_storage_status_not_set">ຍັງບໍ່ໄດ້ຕັ້ງ</string>
+    <string name="system_storage_status_not_found">ບໍ່ພົບໂຟນເດີ</string>
+    <string name="system_storage_status_read_only">ອ່ານໄດ້ຢ່າງດຽວ</string>
+    <string name="system_storage_status_linked">ເຊື່ອມຕໍ່ແລ້ວ</string>
+    <string name="system_storage_status_file_count">%1$d ໄຟລ໌</string>
+    <string name="system_storage_status_needs_converting">ຕ້ອງແປງ %1$d</string>
+    <string name="system_manage_settings">ຈັດການການຕັ້ງຄ່າ</string>
+    <string name="analytics_reporting_hint">ຊ່ວຍໃຫ້ພວກເຮົາພົບບັນຫາໄວຂຶ້ນ. ບໍ່ມີການສົ່ງເນື້ອຫາ ຫຼື ເນື້ອເພງໃດໆ.</string>
+    <string name="file_not_supported_short">ບໍ່ຮອງຮັບ</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">ໝາຍເລກກ່ອນຊື່</string>

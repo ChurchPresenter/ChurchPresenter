@@ -1,41 +1,32 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import kotlinx.serialization.json.Json
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,86 +34,44 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_song_samples
 import churchpresenter.composeapp.generated.resources.analytics_reporting
-import churchpresenter.composeapp.generated.resources.bible_catalog_button
-import churchpresenter.composeapp.generated.resources.bible_storage_directory
-import churchpresenter.composeapp.generated.resources.browse_directory
+import churchpresenter.composeapp.generated.resources.analytics_reporting_hint
 import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
 import churchpresenter.composeapp.generated.resources.clear_remote_uploads
 import churchpresenter.composeapp.generated.resources.clear_remote_uploads_confirm
-import churchpresenter.composeapp.generated.resources.remote_uploads_cleared
-import churchpresenter.composeapp.generated.resources.conversion_complete
-import churchpresenter.composeapp.generated.resources.conversion_complete_message
-import churchpresenter.composeapp.generated.resources.conversion_complete_with_errors
-import churchpresenter.composeapp.generated.resources.convert
-import churchpresenter.composeapp.generated.resources.detected_files_label
 import churchpresenter.composeapp.generated.resources.export_settings
-import churchpresenter.composeapp.generated.resources.folder_already_exists
-import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
+import churchpresenter.composeapp.generated.resources.general
 import churchpresenter.composeapp.generated.resources.import_settings
 import churchpresenter.composeapp.generated.resources.import_settings_confirm
-import churchpresenter.composeapp.generated.resources.general
 import churchpresenter.composeapp.generated.resources.launch_on_login
-import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
-import churchpresenter.composeapp.generated.resources.media_storage_directory
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.no_files_detected
-import churchpresenter.composeapp.generated.resources.scanning_directory
-import churchpresenter.composeapp.generated.resources.pictures_storage_directory
-import churchpresenter.composeapp.generated.resources.presentation_storage_directory
+import churchpresenter.composeapp.generated.resources.remote_uploads_cleared
 import churchpresenter.composeapp.generated.resources.reset_settings
 import churchpresenter.composeapp.generated.resources.reset_settings_confirm
 import churchpresenter.composeapp.generated.resources.send_test_event
+import churchpresenter.composeapp.generated.resources.settings_export_failed
+import churchpresenter.composeapp.generated.resources.settings_exported
+import churchpresenter.composeapp.generated.resources.settings_import_failed
+import churchpresenter.composeapp.generated.resources.system_manage_settings
 import churchpresenter.composeapp.generated.resources.test_event_dev_only
 import churchpresenter.composeapp.generated.resources.test_event_failed
 import churchpresenter.composeapp.generated.resources.test_event_sent
 import churchpresenter.composeapp.generated.resources.test_event_title
-import churchpresenter.composeapp.generated.resources.set_all_directories
-import churchpresenter.composeapp.generated.resources.settings_export_failed
-import churchpresenter.composeapp.generated.resources.settings_exported
-import churchpresenter.composeapp.generated.resources.settings_import_failed
-import churchpresenter.composeapp.generated.resources.song_folder_with_count
-import churchpresenter.composeapp.generated.resources.song_samples
-import churchpresenter.composeapp.generated.resources.song_samples_copied
-import churchpresenter.composeapp.generated.resources.song_samples_overwrite_confirm
-import churchpresenter.composeapp.generated.resources.songs_storage_directory
-import churchpresenter.composeapp.generated.resources.sps_file_not_supported
-import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
-import churchpresenter.composeapp.generated.resources.tooltip_directory_not_writable
-import churchpresenter.composeapp.generated.resources.tooltip_directory_writable
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.withInstalledBible
-import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.data.SpsConverter
-import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
-import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import org.churchpresenter.theme.semantic
+import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Window
 import javax.swing.JOptionPane
-import javax.swing.SwingUtilities
-import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.io.path.extension
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
-
-private val exportJsonFormat = Json {
-    encodeDefaults = true
-    prettyPrint = true
-}
 
 @Composable
 fun SystemSettingsTab(
@@ -130,17 +79,7 @@ fun SystemSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     companionServer: CompanionServer? = null
 ) {
-    val scope = rememberCoroutineScope()
     val fileManager = FileManager()
-    val setAllText = stringResource(Res.string.set_all_directories)
-    val folderAlreadyExistsTitle = stringResource(Res.string.folder_already_exists)
-    val songSamplesTitle = stringResource(Res.string.song_samples)
-    val songSamplesOverwriteMsg = stringResource(Res.string.song_samples_overwrite_confirm)
-    val songSamplesCopiedFmt = stringResource(Res.string.song_samples_copied)
-    val folderOverwriteConfirmFmt = stringResource(Res.string.folder_overwrite_confirm)
-    val conversionCompleteTitle = stringResource(Res.string.conversion_complete)
-    val conversionCompleteMsgFmt = stringResource(Res.string.conversion_complete_message)
-    val conversionCompleteErrorsFmt = stringResource(Res.string.conversion_complete_with_errors)
 
     val setAllDirectories: (String) -> Unit = { dir ->
         onSettingsChange { s ->
@@ -160,343 +99,99 @@ fun SystemSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(14.dp)
     ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(end = SettingsScrollbarGutter),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Bible Storage Directory
-        SettingsSection(title = stringResource(Res.string.bible_storage_directory)) {
-        // null until the scan lands — see DetectedFilesList.
-        var bibleFiles by remember(settings.bibleSettings.storageDirectory) { mutableStateOf<List<String>?>(null) }
-        LaunchedEffect(settings.bibleSettings.storageDirectory) {
-            bibleFiles = withContext(Dispatchers.IO) {
-                fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
-            }
-        }
-        DirectoryPicker(
-            label = stringResource(Res.string.bible_storage_directory),
-            currentPath = settings.bibleSettings.storageDirectory,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(bibleSettings = s.bibleSettings.copy(storageDirectory = dir))
-                }
-            },
-            onSetAll = setAllDirectories
-        )
-        DetectedFilesList(
-            files = bibleFiles,
-            directorySet = settings.bibleSettings.storageDirectory.isNotEmpty(),
-            detectedLabel = stringResource(Res.string.detected_files_label),
-            noFilesText = stringResource(Res.string.no_files_detected),
-            scanningText = stringResource(Res.string.scanning_directory)
-        )
-        // Sits beside the folder picker because that is where someone with no Bibles ends up.
-        // Offered only once a real folder is in place: downloads are written the moment they
-        // finish, so there must be no doubt about where they are going.
-        val bibleDir = settings.bibleSettings.storageDirectory
-        if (bibleDir.isNotEmpty() && java.io.File(bibleDir).isDirectory) {
-            var showBibleCatalog by remember(bibleDir) { mutableStateOf(false) }
-            Row(
-                modifier = Modifier.padding(top = 2.dp, start = 2.dp).height(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    shape = RoundedCornerShape(6.dp),
-                    onClick = { showBibleCatalog = true },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                ) {
-                    Text(stringResource(Res.string.bible_catalog_button), style = MaterialTheme.typography.labelSmall)
-                }
-            }
-            if (showBibleCatalog) {
-                BibleCatalogBrowserDialog(
-                    storageDirectory = bibleDir,
-                    onDismiss = { showBibleCatalog = false },
-                    onBibleInstalled = { fileName ->
-                        onSettingsChange { s -> s.withInstalledBible(fileName) }
-                        bibleFiles = bibleFiles.orEmpty() + fileName
-                    }
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(start = 16.dp, top = 16.dp, bottom = 22.dp)
+                .padding(end = SettingsScrollbarGutter)
+        ) {
+            // Side by side once there is room for the storage rows at full width beside the
+            // switches: a folder row is a path plus two buttons, and squeezing it to make space for
+            // a column of toggles is the wrong trade. Below that the two stack, as they always did.
+            val sideBySide = maxWidth >= SIDE_BY_SIDE_MIN_WIDTH
+            val storage: @Composable () -> Unit = {
+                SystemStorageCard(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    fileManager = fileManager,
+                    onSetAll = setAllDirectories
                 )
             }
-        }
-        } // end Bible SettingsSection
-
-        // Songs Storage Directory
-        SettingsSection(title = stringResource(Res.string.songs_storage_directory)) {
-        DirectoryPicker(
-            label = stringResource(Res.string.songs_storage_directory),
-            currentPath = settings.songSettings.storageDirectory,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(storageDirectory = dir))
-                }
-            },
-            onSetAll = setAllDirectories
-        )
-        if (settings.songSettings.storageDirectory.isNotEmpty()) {
-            var convertingFile by remember { mutableStateOf<String?>(null) }
-            val coroutineScope = rememberCoroutineScope()
-            var spsFiles by remember(settings.songSettings.storageDirectory) { mutableStateOf(emptyList<String>()) }
-            var songFolders by remember(settings.songSettings.storageDirectory) { mutableStateOf(emptyList<Pair<String, Int>>()) }
-            // Two scans, one verdict: "no songs here" is only true once BOTH have landed, so this
-            // stays true across the pair rather than flickering between them.
-            var scanningSongs by remember(settings.songSettings.storageDirectory) { mutableStateOf(true) }
-            LaunchedEffect(settings.songSettings.storageDirectory) {
-                val dir = settings.songSettings.storageDirectory
-                scanningSongs = true
-                try {
-                    spsFiles = withContext(Dispatchers.IO) { fileManager.getSongFilesInDirectory(dir) }
-                    songFolders = withContext(Dispatchers.IO) { fileManager.getSongFoldersInDirectory(dir) }
-                } finally {
-                    // finally, so a cancelled or failed scan does not leave the spinner up forever.
-                    scanningSongs = false
-                }
-            }
-
-            // Add Song Samples button
-            val sampleScope = rememberCoroutineScope()
-            var copyingSamples by remember { mutableStateOf(false) }
-
-            Row(
-                modifier = Modifier.padding(top = 2.dp, start = 2.dp).height(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (scanningSongs) {
-                    ScanningRow(stringResource(Res.string.scanning_directory))
-                } else if (spsFiles.isEmpty() && songFolders.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.no_files_detected),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.detected_files_label),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                    TextButton(
-                        shape = RoundedCornerShape(6.dp),
-                        onClick = {
-                            val samplesDir = java.io.File(settings.songSettings.storageDirectory, "Song Samples")
-                            val proceed = if (samplesDir.exists()) {
-                                JOptionPane.showConfirmDialog(
-                                    null,
-                                    songSamplesOverwriteMsg,
-                                    folderAlreadyExistsTitle,
-                                    JOptionPane.YES_NO_OPTION,
-                                    JOptionPane.WARNING_MESSAGE
-                                ) == JOptionPane.YES_OPTION
-                            } else true
-                            if (proceed) {
-                                copyingSamples = true
-                                sampleScope.launch {
-                                    val count = withContext(Dispatchers.IO) {
-                                        copySongSamples(settings.songSettings.storageDirectory)
-                                    }
-                                    copyingSamples = false
-                                    JOptionPane.showMessageDialog(
-                                        null,
-                                        String.format(songSamplesCopiedFmt, count),
-                                        songSamplesTitle,
-                                        JOptionPane.INFORMATION_MESSAGE
-                                    )
-                                }
-                            }
-                        },
-                        enabled = !copyingSamples,
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+            if (sideBySide) {
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Box(modifier = Modifier.weight(1f)) { storage() }
+                    Column(
+                        modifier = Modifier.width(SIDE_COLUMN_WIDTH),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Text(stringResource(Res.string.add_song_samples), style = MaterialTheme.typography.labelSmall)
-                    }
-                if (copyingSamples) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                }
-            }
-
-            for (spsFile in spsFiles) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 2.dp, top = 2.dp).height(32.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.sps_file_not_supported, spsFile),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                    )
-                    if (convertingFile == spsFile) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(start = 8.dp).size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        TextButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = {
-                                val converter = SpsConverter()
-                                val spsPath = java.io.File(settings.songSettings.storageDirectory, spsFile).absolutePath
-
-                                // Check if target folder already exists
-                                if (converter.targetFolderExists(spsPath, settings.songSettings.storageDirectory)) {
-                                    val folderName = converter.getTargetFolderName(spsPath) ?: spsFile
-                                    val confirm = JOptionPane.showConfirmDialog(
-                                        null,
-                                        String.format(folderOverwriteConfirmFmt, folderName),
-                                        folderAlreadyExistsTitle,
-                                        JOptionPane.YES_NO_OPTION,
-                                        JOptionPane.WARNING_MESSAGE
-                                    )
-                                    if (confirm != JOptionPane.YES_OPTION) return@TextButton
-                                }
-
-                                convertingFile = spsFile
-                                coroutineScope.launch {
-                                    val result = withContext(Dispatchers.IO) {
-                                        converter.convertSpsToSongFiles(spsPath, settings.songSettings.storageDirectory)
-                                    }
-                                    convertingFile = null
-                                    if (result.errors.isEmpty()) {
-                                        JOptionPane.showMessageDialog(
-                                            null,
-                                            String.format(conversionCompleteMsgFmt, result.songsConverted, java.io.File(result.songbookFolder).name),
-                                            conversionCompleteTitle,
-                                            JOptionPane.INFORMATION_MESSAGE
-                                        )
-                                    } else {
-                                        JOptionPane.showMessageDialog(
-                                            null,
-                                            String.format(conversionCompleteErrorsFmt, result.songsConverted, result.errors.joinToString("\n")),
-                                            conversionCompleteTitle,
-                                            JOptionPane.WARNING_MESSAGE
-                                        )
-                                    }
-                                }
-                            },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                        ) {
-                            Text(stringResource(Res.string.convert), style = MaterialTheme.typography.labelSmall)
-                        }
+                        GeneralCard(settings, onSettingsChange)
+                        ManageSettingsCard(companionServer)
                     }
                 }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    storage()
+                    GeneralCard(settings, onSettingsChange)
+                    ManageSettingsCard(companionServer)
+                }
             }
+        }
+        SettingsScrollbar(scrollState)
+    }
+}
 
-            for (folder in songFolders) {
+/** Below this the storage rows lose more than the second column gains, so the cards stack. */
+private val SIDE_BY_SIDE_MIN_WIDTH = 1100.dp
+
+/** The right-hand column: wide enough for a switch row's label and its explanation. */
+private val SIDE_COLUMN_WIDTH = 400.dp
+
+/** One switch, with the sentence explaining what turning it on means. */
+@Composable
+private fun GeneralToggleRow(
+    label: String,
+    hint: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 11.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (hint != null) {
                 Text(
-                    text = stringResource(Res.string.song_folder_with_count, folder.first, folder.second),
+                    text = hint,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp, start = 2.dp)
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }
-        } // end Songs SettingsSection
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
 
-        // Pictures + Lower Third (2-column grid)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SettingsSection(
-                title = stringResource(Res.string.pictures_storage_directory),
-                modifier = Modifier.weight(1f)
-            ) {
-                DirectoryPicker(
-                    label = stringResource(Res.string.pictures_storage_directory),
-                    currentPath = settings.pictureSettings.storageDirectory,
-                    noDirectoryText = stringResource(Res.string.no_directory_selected),
-                    browseText = stringResource(Res.string.browse_directory),
-                    setAllText = setAllText,
-                    fileManager = fileManager,
-                    onDirectorySelected = { dir ->
-                        onSettingsChange { s ->
-                            s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir))
-                        }
-                    },
-                    onSetAll = setAllDirectories
-                )
-            }
-            SettingsSection(
-                title = stringResource(Res.string.lower_third_storage_directory),
-                modifier = Modifier.weight(1f)
-            ) {
-                DirectoryPicker(
-                    label = stringResource(Res.string.lower_third_storage_directory),
-                    currentPath = settings.streamingSettings.lowerThirdFolder,
-                    noDirectoryText = stringResource(Res.string.no_directory_selected),
-                    browseText = stringResource(Res.string.browse_directory),
-                    setAllText = setAllText,
-                    fileManager = fileManager,
-                    onDirectorySelected = { dir ->
-                        onSettingsChange { s ->
-                            s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
-                        }
-                    },
-                    onSetAll = setAllDirectories
-                )
-            }
-        }
-
-        // Presentation + Media (2-column grid)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SettingsSection(
-                title = stringResource(Res.string.presentation_storage_directory),
-                modifier = Modifier.weight(1f)
-            ) {
-                DirectoryPicker(
-                    label = stringResource(Res.string.presentation_storage_directory),
-                    currentPath = settings.presentationStorageDirectory,
-                    noDirectoryText = stringResource(Res.string.no_directory_selected),
-                    browseText = stringResource(Res.string.browse_directory),
-                    setAllText = setAllText,
-                    fileManager = fileManager,
-                    onDirectorySelected = { dir ->
-                        onSettingsChange { s ->
-                            s.copy(presentationStorageDirectory = dir)
-                        }
-                    },
-                    onSetAll = setAllDirectories
-                )
-            }
-            SettingsSection(
-                title = stringResource(Res.string.media_storage_directory),
-                modifier = Modifier.weight(1f)
-            ) {
-                DirectoryPicker(
-                    label = stringResource(Res.string.media_storage_directory),
-                    currentPath = settings.mediaStorageDirectory,
-                    noDirectoryText = stringResource(Res.string.no_directory_selected),
-                    browseText = stringResource(Res.string.browse_directory),
-                    setAllText = setAllText,
-                    fileManager = fileManager,
-                    onDirectorySelected = { dir ->
-                        onSettingsChange { s ->
-                            s.copy(mediaStorageDirectory = dir)
-                        }
-                    },
-                    onSetAll = setAllDirectories
-                )
-            }
-        }
-
-        // General section
-        val generalLabel = stringResource(Res.string.general)
-        SettingsSection(title = generalLabel) {
-
-        // Launch at login — the OS registration is the source of truth, not settings.json
-        var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
-        SettingRow(label = stringResource(Res.string.launch_on_login)) {
-            Switch(
+@Composable
+private fun GeneralCard(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    SettingsCard(title = stringResource(Res.string.general)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Launch at login — the OS registration is the source of truth, not settings.json
+            var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
+            GeneralToggleRow(
+                label = stringResource(Res.string.launch_on_login),
                 checked = autoStartEnabled,
                 onCheckedChange = { enabled ->
                     scope.launch {
@@ -505,455 +200,140 @@ fun SystemSettingsTab(
                     }
                 }
             )
-        }
-
-        // Analytics / crash reporting opt-out
-        SettingRow(label = stringResource(Res.string.analytics_reporting), width = 260.dp) {
-            Switch(
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.analytics_reporting),
+                hint = stringResource(Res.string.analytics_reporting_hint),
                 checked = settings.analyticsReportingEnabled,
                 onCheckedChange = { enabled ->
                     CrashReporter.setReportingEnabled(enabled)
                     onSettingsChange { s -> s.copy(analyticsReportingEnabled = enabled) }
                 }
             )
-        }
-
-        // Send a diagnostic test event to Sentry to verify the crash-reporting pipeline.
-        // Developer-only affordance — hidden in packaged installer releases.
-        if (!BuildConfig.IS_RELEASE && settings.analyticsReportingEnabled) {
-            val testEventTitle = stringResource(Res.string.test_event_title)
-            val testEventSentMsg = stringResource(Res.string.test_event_sent)
-            val testEventFailedMsg = stringResource(Res.string.test_event_failed)
-            SettingRow(label = stringResource(Res.string.send_test_event), width = 260.dp) {
-                Button(
-                    onClick = {
-                        scope.launch {
-                            val ok = withContext(Dispatchers.IO) { CrashReporter.sendTestEvent() }
-                            JOptionPane.showMessageDialog(
-                                Window.getWindows().firstOrNull { it.isActive },
-                                if (ok) testEventSentMsg else testEventFailedMsg,
-                                testEventTitle,
-                                if (ok) JOptionPane.INFORMATION_MESSAGE else JOptionPane.WARNING_MESSAGE
-                            )
-                        }
-                    }
-                ) {
-                    Text(stringResource(Res.string.send_test_event))
-                }
+            // Send a diagnostic test event to Sentry to verify the crash-reporting pipeline.
+            // Developer-only affordance — hidden in packaged installer releases.
+            if (!BuildConfig.IS_RELEASE && settings.analyticsReportingEnabled) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                TestEventRow(scope)
             }
+        }
+    }
+}
+
+@Composable
+private fun TestEventRow(scope: CoroutineScope) {
+    val testEventTitle = stringResource(Res.string.test_event_title)
+    val testEventSentMsg = stringResource(Res.string.test_event_sent)
+    val testEventFailedMsg = stringResource(Res.string.test_event_failed)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 11.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(Res.string.send_test_event),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Text(
                 text = stringResource(Res.string.test_event_dev_only),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp)
             )
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 8.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp
-        )
-
-        // Export / Import / Reset Settings
-        val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
-        val resetTitle = stringResource(Res.string.reset_settings)
-        val clearLottieCacheMsg = stringResource(Res.string.clear_lottie_cache_confirm)
-        val clearRemoteUploadsTitle = stringResource(Res.string.clear_remote_uploads)
-        val clearRemoteUploadsConfirmMsg = stringResource(Res.string.clear_remote_uploads_confirm)
-        val remoteUploadsClearedMsg = stringResource(Res.string.remote_uploads_cleared)
-        val exportTitle = stringResource(Res.string.export_settings)
-        val importTitle = stringResource(Res.string.import_settings)
-        val importConfirmMsg = stringResource(Res.string.import_settings_confirm)
-        val settingsExportedMsg = stringResource(Res.string.settings_exported)
-        val settingsExportFailedMsg = stringResource(Res.string.settings_export_failed)
-        val settingsImportFailedMsg = stringResource(Res.string.settings_import_failed)
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Export Settings
-            Button(
-                onClick = {
-                    scope.launch {
-                        var file = FileChooser.platformInstance.save(
-                            location = null,
-                            suggestedName = "churchpresenter-settings.json",
-                            title = exportTitle,
-                            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
-                        )
-                        if (file != null) {
-                            try {
-                                val settingsManager = SettingsManager()
-                                val currentSettings = settingsManager.loadSettings()
-                                val json = exportJsonFormat.encodeToString(AppSettings.serializer(), currentSettings)
-                                if (file.extension != "json") {
-                                    file = file.resolveSibling("${file.nameWithoutExtension}.json")
-                                }
-                                file.writeText(json)
-                                JOptionPane.showMessageDialog(
-                                    Window.getWindows().firstOrNull { it.isActive },
-                                    settingsExportedMsg,
-                                    exportTitle,
-                                    JOptionPane.INFORMATION_MESSAGE
-                                )
-                            } catch (_: Exception) {
-                                JOptionPane.showMessageDialog(
-                                    Window.getWindows().firstOrNull { it.isActive },
-                                    settingsExportFailedMsg,
-                                    exportTitle,
-                                    JOptionPane.ERROR_MESSAGE
-                                )
-                            }
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                shape = RoundedCornerShape(6.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = exportTitle, style = MaterialTheme.typography.labelMedium)
-            }
-
-            // Import Settings
-            Button(
-                shape = RoundedCornerShape(6.dp),
-                onClick = {
-                    scope.launch {
-                        val file = FileChooser.platformInstance.chooseSingle(
-                            path = null,
-                            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json")),
-                            title = importTitle,
-                            selectDirectory = false
-                        )
-                        if (file != null) {
-                            val confirmResult = JOptionPane.showConfirmDialog(
-                                Window.getWindows().firstOrNull { it.isActive },
-                                importConfirmMsg,
-                                importTitle,
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE
-                            )
-                            if (confirmResult == JOptionPane.YES_OPTION) {
-                                try {
-                                    val json = file.readText()
-                                    val settingsManager = SettingsManager()
-                                    // Migrate on import, not just on startup — an export taken
-                                    // from an older build is in an older schema, and decoding it
-                                    // directly would drop every field a migration converts.
-                                    val imported = settingsManager.migrateAndDecode(json)
-                                    settingsManager.saveSettings(imported)
-                                    // Stop the server gracefully so in-flight WebSocket sessions
-                                    // (e.g. a connected companion app) close cleanly instead of
-                                    // hitting a ping timeout when the JVM exits below.
-                                    try { companionServer?.stop() } catch (_: Exception) {}
-                                    // Restart the application
-                                    val javaBin = System.getProperty("java.home") + "/bin/java"
-                                    val command = ProcessHandle.current().info().command().orElse(javaBin)
-                                    val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
-                                    try {
-                                        ProcessBuilder(listOf(command) + args.toList()).start()
-                                    } catch (_: Exception) {}
-                                    Runtime.getRuntime().exit(0)
-                                } catch (_: Exception) {
-                                    JOptionPane.showMessageDialog(
-                                        Window.getWindows().firstOrNull { it.isActive },
-                                        settingsImportFailedMsg,
-                                        importTitle,
-                                        JOptionPane.ERROR_MESSAGE
-                                    )
-                                }
-                            }
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = importTitle, style = MaterialTheme.typography.labelMedium)
-            }
-
-            // Reset All Settings
-            Button(
-                onClick = {
-                    SwingUtilities.invokeLater {
-                        val result2 = JOptionPane.showConfirmDialog(
-                            Window.getWindows().firstOrNull { it.isActive },
-                            resetConfirmMsg,
-                            resetTitle,
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.WARNING_MESSAGE
-                        )
-                        if (result2 == JOptionPane.YES_OPTION) {
-                            val settingsManager = SettingsManager()
-                            val clearCache = JOptionPane.showConfirmDialog(
-                                Window.getWindows().firstOrNull { it.isActive },
-                                clearLottieCacheMsg,
-                                resetTitle,
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE
-                            )
-                            if (clearCache == JOptionPane.YES_OPTION) {
-                                settingsManager.lottiePresetsDir.deleteRecursively()
-                            }
-                            settingsManager.saveSettings(AppSettings())
-                            // Stop the server gracefully so in-flight WebSocket sessions
-                            // (e.g. a connected companion app) close cleanly instead of
-                            // hitting a ping timeout when the JVM exits below.
-                            try { companionServer?.stop() } catch (_: Exception) {}
-                            // Restart the application
-                            val javaBin = System.getProperty("java.home") + "/bin/java"
-                            val command = ProcessHandle.current().info().command().orElse(javaBin)
-                            val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
-                            try {
-                                ProcessBuilder(listOf(command) + args.toList()).start()
-                            } catch (_: Exception) {}
-                            Runtime.getRuntime().exit(0)
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                shape = RoundedCornerShape(6.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
-            }
-
-            // Clear Remote Uploads
-            Button(
-                onClick = {
-                    SwingUtilities.invokeLater {
-                        val result = JOptionPane.showConfirmDialog(
-                            Window.getWindows().firstOrNull { it.isActive },
-                            clearRemoteUploadsConfirmMsg,
-                            clearRemoteUploadsTitle,
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.WARNING_MESSAGE
-                        )
-                        if (result == JOptionPane.YES_OPTION) {
-                            val uploadsDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
-                            uploadsDir.deleteRecursively()
-                            JOptionPane.showMessageDialog(
-                                Window.getWindows().firstOrNull { it.isActive },
-                                remoteUploadsClearedMsg,
-                                clearRemoteUploadsTitle,
-                                JOptionPane.INFORMATION_MESSAGE
-                            )
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                shape = RoundedCornerShape(6.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = clearRemoteUploadsTitle, style = MaterialTheme.typography.labelMedium)
-            }
-        }
-        } // end General SettingsSection
-    }
-    SettingsScrollbar(scrollState)
-    }
-}
-
-private enum class DirStatus { CHECKING, WRITABLE, READ_ONLY, NOT_FOUND, INVALID }
-
-private fun isWritableDir(dir: java.io.File): Boolean = try {
-    // File.createTempFile generates a unique name per call — concurrent checks
-    // from multiple pickers on the same directory cannot collide
-    val tmp = java.io.File.createTempFile(".cp_write_test", ".tmp", dir)
-    if (!tmp.delete()) tmp.deleteOnExit()
-    true
-} catch (_: Exception) {
-    false
-}
-
-private fun isReadableDir(dir: java.io.File): Boolean = try {
-    // File.canRead() ignores ACLs on Windows; actually opening a directory
-    // stream surfaces access-denied errors reliably
-    java.nio.file.Files.newDirectoryStream(dir.toPath()).use { }
-    true
-} catch (_: Exception) {
-    false
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun DirectoryPicker(
-    label: String,
-    currentPath: String,
-    noDirectoryText: String,
-    browseText: String,
-    setAllText: String,
-    fileManager: FileManager,
-    onDirectorySelected: (String) -> Unit,
-    onSetAll: (String) -> Unit
-) {
-    val scope = rememberCoroutineScope()
-    Text(
-        text = label,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = currentPath.ifEmpty { noDirectoryText },
-            modifier = Modifier
-                .weight(1f)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (currentPath.isNotEmpty()) {
-            val dirFile = remember(currentPath) { java.io.File(currentPath) }
-            var status by remember(currentPath) { mutableStateOf(DirStatus.CHECKING) }
-            LaunchedEffect(currentPath) {
-                status = withContext(Dispatchers.IO) {
-                    try {
-                        when {
-                            !dirFile.isDirectory -> DirStatus.NOT_FOUND
-                            isWritableDir(dirFile) -> DirStatus.WRITABLE
-                            isReadableDir(dirFile) -> DirStatus.READ_ONLY
-                            else -> DirStatus.INVALID
-                        }
-                    } catch (_: Exception) {
-                        DirStatus.INVALID
-                    }
-                }
-            }
-            TooltipArea(
-                tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(
-                            when (status) {
-                                DirStatus.CHECKING -> "…"
-                                DirStatus.WRITABLE -> stringResource(Res.string.tooltip_directory_writable)
-                                DirStatus.READ_ONLY -> stringResource(Res.string.tooltip_directory_not_writable)
-                                DirStatus.NOT_FOUND -> stringResource(Res.string.tooltip_directory_not_found)
-                                DirStatus.INVALID -> stringResource(Res.string.tooltip_directory_not_writable)
-                            },
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .background(
-                            when (status) {
-                                DirStatus.CHECKING -> MaterialTheme.colorScheme.onSurfaceVariant
-                                DirStatus.WRITABLE -> MaterialTheme.semantic.success
-                                DirStatus.READ_ONLY -> MaterialTheme.semantic.warning
-                                DirStatus.NOT_FOUND, DirStatus.INVALID -> MaterialTheme.colorScheme.error
-                            },
-                            shape = CircleShape
-                        )
-                )
-            }
         }
         Button(
             onClick = {
                 scope.launch {
-                    val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = currentPath
+                    val ok = withContext(Dispatchers.IO) { CrashReporter.sendTestEvent() }
+                    JOptionPane.showMessageDialog(
+                        activeWindow(),
+                        if (ok) testEventSentMsg else testEventFailedMsg,
+                        testEventTitle,
+                        if (ok) JOptionPane.INFORMATION_MESSAGE else JOptionPane.WARNING_MESSAGE
                     )
-                    selectedDir?.let { onDirectorySelected(it) }
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-            shape = RoundedCornerShape(6.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            Text(text = browseText, style = MaterialTheme.typography.labelMedium)
-        }
-        Button(
-            onClick = { if (currentPath.isNotEmpty()) onSetAll(currentPath) },
-            enabled = currentPath.isNotEmpty(),
+            modifier = Modifier.height(32.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ),
-            shape = RoundedCornerShape(6.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 15.dp)
         ) {
-            Text(text = setAllText, style = MaterialTheme.typography.labelMedium)
+            Text(stringResource(Res.string.send_test_event), style = MaterialTheme.typography.labelMedium)
         }
     }
 }
 
-/**
- * Detected files under a chosen folder, or a spinner while the scan is still running.
- *
- * [files] is null until the scan finishes. That distinction is the whole point: the scan runs on
- * Dispatchers.IO and takes seconds against a network share, and rendering "no files detected" for
- * that whole time reads as a verdict rather than a wait — someone who has just picked the right
- * folder is told, in red, that it is empty.
- */
+/** Everything that acts on the settings file as a whole — kept apart, since two of them restart the app. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DetectedFilesList(
-    files: List<String>?,
-    directorySet: Boolean,
-    detectedLabel: String,
-    noFilesText: String,
-    scanningText: String
-) {
-    if (!directorySet) return
-    if (files == null) {
-        ScanningRow(scanningText)
-        return
-    }
-    Text(
-        text = if (files.isNotEmpty()) "$detectedLabel ${files.joinToString(", ")}"
-               else noFilesText,
-        style = MaterialTheme.typography.bodySmall,
-        color = if (files.isNotEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-        modifier = Modifier.padding(top = 4.dp, start = 2.dp)
-    )
-}
+private fun ManageSettingsCard(companionServer: CompanionServer?) {
+    val scope = rememberCoroutineScope()
+    val exportTitle = stringResource(Res.string.export_settings)
+    val importTitle = stringResource(Res.string.import_settings)
+    val resetTitle = stringResource(Res.string.reset_settings)
+    val clearUploadsTitle = stringResource(Res.string.clear_remote_uploads)
+    val exportedMsg = stringResource(Res.string.settings_exported)
+    val exportFailedMsg = stringResource(Res.string.settings_export_failed)
+    val importConfirmMsg = stringResource(Res.string.import_settings_confirm)
+    val importFailedMsg = stringResource(Res.string.settings_import_failed)
+    val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
+    val clearCacheMsg = stringResource(Res.string.clear_lottie_cache_confirm)
+    val clearUploadsConfirmMsg = stringResource(Res.string.clear_remote_uploads_confirm)
+    val uploadsClearedMsg = stringResource(Res.string.remote_uploads_cleared)
 
-private suspend fun copySongSamples(storageDirectory: String): Int {
-    val targetDir = java.io.File(storageDirectory, "Song Samples")
-    if (!targetDir.exists()) targetDir.mkdirs()
-
-    val indexBytes = Res.readBytes("files/song_samples/index.txt")
-    val filenames = indexBytes.toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
-
-    var count = 0
-    for (filename in filenames) {
-        try {
-            val songBytes = Res.readBytes("files/song_samples/$filename")
-            val targetFile = java.io.File(targetDir, filename)
-            targetFile.writeBytes(songBytes)
-            count++
-        } catch (_: Exception) {
-            // Skip files that can't be read
+    SettingsCard(title = stringResource(Res.string.system_manage_settings)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 13.dp, bottom = 15.dp),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+            itemVerticalAlignment = Alignment.CenterVertically
+        ) {
+            ManageButton(exportTitle) {
+                scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
+            }
+            ManageButton(importTitle) {
+                scope.launch { importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer) }
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            ManageButton(clearUploadsTitle, danger = true) {
+                clearRemoteUploads(clearUploadsTitle, clearUploadsConfirmMsg, uploadsClearedMsg)
+            }
+            ManageButton(resetTitle, danger = true) {
+                resetAllSettings(resetTitle, resetConfirmMsg, clearCacheMsg, companionServer)
+            }
         }
     }
-    return count
 }
 
+@Composable
+private fun ManageButton(text: String, danger: Boolean = false, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.height(34.dp),
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = PaddingValues(horizontal = 15.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (danger) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            },
+            contentColor = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+        ),
+        border = BorderStroke(
+            1.dp,
+            if (danger) {
+                MaterialTheme.colorScheme.error.copy(alpha = 0.42f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            }
+        )
+    ) {
+        Text(text = text, style = MaterialTheme.typography.labelMedium)
+    }
+}

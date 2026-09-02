@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -22,11 +22,11 @@ import kotlin.test.Test
 /**
  * The System tab of the settings dialog, in both themes.
  *
- * **Most of this tab is below the fold.** It is one scrolling column of eight sections inside a
- * 1400x900 dialog, so what opens is the first two and nothing else. Shooting only the top would
- * leave six sections — every storage folder past Songs, and the whole General block with the theme,
- * the language, analytics, launch-at-login, import/export and reset — unreviewed. So each section
- * each section gets its own image, scrolled to by the same `performScrollTo` the behaviour tests use.
+ * **Shot at the size the dialog actually opens at.** The tab lays its three cards out in two
+ * columns once there is room for them — storage on the left, the switches and the settings-file
+ * buttons on the right — and stacks them below that, so a capture at the test window's default size
+ * would only ever show the layout nobody with a normal display sees. The wide shots are 1400x900,
+ * the dialog's own size; the narrow pair pins the stacked fallback.
  *
  * Directories are real temp folders holding real files: the tab scans whatever path it is given and
  * draws what it finds, so a made-up path would only ever show the empty state.
@@ -51,20 +51,24 @@ class SystemSettingsTabScreenshotTest {
     private fun shoot(
         name: String,
         settings: AppSettings = AppSettings(),
+        width: Int = WIDE_WIDTH,
+        height: Int = WIDE_HEIGHT,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
-        systemSettingsTab(settings = settings, themeMode = mode) {
+        systemSettingsTab(settings = settings, themeMode = mode, width = width, height = height) {
             drive()
             waitForIdle()
             captureTo(file)
         }
     }
 
-    /** Scrolls [label]'s section into view and shoots it. */
-    private fun section(name: String, label: String, settings: AppSettings = filledSettings()) =
-        shoot(name, settings = settings) {
-            onAllNodesWithText(label)[0].performScrollTo()
-            waitForIdle()
+    /** Shoots the stacked fallback, scrolling [label] into view first when it is below the fold. */
+    private fun narrow(name: String, label: String? = null, settings: AppSettings = filledSettings()) =
+        shoot(name, settings = settings, width = NARROW_WIDTH, height = NARROW_HEIGHT) {
+            if (label != null) {
+                onAllNodesWithText(label)[0].performScrollTo()
+                waitForIdle()
+            }
         }
 
     // ── What opens ──────────────────────────────────────────────────────────────────────────────
@@ -75,22 +79,16 @@ class SystemSettingsTabScreenshotTest {
     @Test
     fun `as it opens, with folders already set`() = shoot("top_filled", settings = filledSettings())
 
-    // ── Below the fold ──────────────────────────────────────────────────────────────────────────
-    // Three distinct scroll positions, no more: the folder sections from Bible through Media all sit
-    // in the first viewport, so scrolling to any one of them lands where the tab already was and
-    // produces the same picture as `top_filled`. Only the General block and the destructive controls
-    // under it are genuinely below the fold.
+    // ── The stacked fallback ────────────────────────────────────────────────────────────────────
+    // Everything fits one screen in two columns, so there is nothing below the fold to scroll to
+    // there. Narrow is the layout that still scrolls: storage fills the window and the switches and
+    // the settings-file buttons follow underneath it.
 
     @Test
-    fun `scrolled to the general block`() = section("general", ANALYTICS)
+    fun `stacked, as it opens`() = narrow("narrow_top")
 
     @Test
-    fun `scrolled to the bottom`() = section("bottom", RESET)
-
-    // Not shot: the whole column in one tall image. A capture is the *window* root, and the test
-    // window is a fixed size whatever the composable is given — a 2600dp box produced a picture
-    // identical to the 820dp one. Below-the-fold content is reachable only by scrolling to it, which
-    // is what every section shot above does.
+    fun `stacked, scrolled to the bottom`() = narrow("narrow_bottom", RESET)
 
     // ── Folder states ───────────────────────────────────────────────────────────────────────────
 
@@ -154,12 +152,14 @@ class SystemSettingsTabScreenshotTest {
         return dir
     }
 
-    /** Composes the tab at [height] on the dialog's own ground and runs [block]. */
+    /** Composes the tab in a [width] by [height] window on the dialog's own ground, then runs [block]. */
     private fun systemSettingsTab(
         settings: AppSettings,
         themeMode: ThemeMode,
+        width: Int = WIDE_WIDTH,
+        height: Int = WIDE_HEIGHT,
         block: ComposeUiTest.() -> Unit,
-    ) = runComposeUiTest {
+    ) = runDesktopComposeUiTest(width = width, height = height) {
         setContent {
             ChurchPresenterTheme(themeMode = themeMode) {
                 Surface(color = MaterialTheme.colorScheme.background) {
@@ -178,6 +178,14 @@ class SystemSettingsTabScreenshotTest {
     private companion object {
         const val SECTION = "systemSettingsTab"
 
+        /** The options dialog's own size, where the cards sit side by side. */
+        const val WIDE_WIDTH = 1400
+        const val WIDE_HEIGHT = 900
+
+        /** Under the two-column threshold, where they stack instead. */
+        const val NARROW_WIDTH = 1000
+        const val NARROW_HEIGHT = 800
+
         /**
          * `/tmp` where there is one, the JVM's temp directory otherwise (Windows).
          *
@@ -190,7 +198,6 @@ class SystemSettingsTabScreenshotTest {
             ?: File(System.getProperty("java.io.tmpdir"), "churchpresenter-screenshots/system")
 
         /** As the tab renders them — the scroll targets for each section below the fold. */
-        const val ANALYTICS = "Share anonymous crash & analytics reports"
         const val RESET = "Reset All Settings"
     }
 }

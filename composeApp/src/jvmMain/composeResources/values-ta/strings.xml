@@ -1648,6 +1648,19 @@
     <string name="crash_feedback_send">அறிக்கையை அனுப்பு</string>
     <string name="crash_feedback_dismiss">இப்போது வேண்டாம்</string>
     <string name="song_folder_with_count">%1$s (%2$d பாடல்கள்)</string>
+    <string name="system_storage">சேமிப்பு</string>
+    <string name="system_storage_subtitle">Church Presenter உங்கள் உள்ளடக்கத்தை எங்கே தேடுகிறது</string>
+    <string name="system_storage_linked_count">%1$d இணைக்கப்பட்டது</string>
+    <string name="system_storage_needs_attention_count">%1$d கவனம் தேவை</string>
+    <string name="system_storage_status_not_set">அமைக்கப்படவில்லை</string>
+    <string name="system_storage_status_not_found">கோப்புறை கிடைக்கவில்லை</string>
+    <string name="system_storage_status_read_only">படிக்க மட்டும்</string>
+    <string name="system_storage_status_linked">இணைக்கப்பட்டது</string>
+    <string name="system_storage_status_file_count">%1$d கோப்புகள்</string>
+    <string name="system_storage_status_needs_converting">%1$d மாற்ற வேண்டும்</string>
+    <string name="system_manage_settings">அமைப்புகளை நிர்வகி</string>
+    <string name="analytics_reporting_hint">சிக்கல்களை விரைவாகக் கண்டறிய உதவுகிறது. உள்ளடக்கமோ பாடல் வரிகளோ ஒருபோதும் அனுப்பப்படுவதில்லை.</string>
+    <string name="file_not_supported_short">ஆதரிக்கப்படவில்லை</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">தலைப்புக்கு முன் எண்</string>

@@ -1125,4 +1125,19 @@ class BibleSettingsTabTest {
             "delete must follow the reorder button directly, not across a button-sized gap: $gap",
         )
     }
+
+    @Test
+    fun `both bilingual layout rows offer both arrangements`() = runComposeUiTest {
+        showTab()
+        waitForIdle()
+
+        onAllNodesWithText("Full Screen \u00b7 Bilingual Layout").onFirst()
+            .assertExists("the full-screen arrangement is named")
+        onAllNodesWithText("Lower Third \u00b7 Bilingual Layout").onFirst()
+            .assertExists("the lower-third arrangement is named")
+        // Both options of both rows: the caption used to sit beside the buttons, which pushed the
+        // second option of each pair off the pane and out of the layout entirely.
+        onAllNodesWithText("Left / Right").assertCountEquals(2)
+        onAllNodesWithText("Top / Bottom").assertCountEquals(2)
+    }
 }

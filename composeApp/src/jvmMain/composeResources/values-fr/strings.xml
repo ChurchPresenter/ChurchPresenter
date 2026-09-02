@@ -1386,6 +1386,19 @@
     <string name="crash_feedback_send">Envoyer le rapport</string>
     <string name="crash_feedback_dismiss">Pas maintenant</string>
     <string name="song_folder_with_count">%1$s (%2$d cantiques)</string>
+    <string name="system_storage">Stockage</string>
+    <string name="system_storage_subtitle">Où Church Presenter cherche votre contenu</string>
+    <string name="system_storage_linked_count">%1$d liés</string>
+    <string name="system_storage_needs_attention_count">%1$d à vérifier</string>
+    <string name="system_storage_status_not_set">Non défini</string>
+    <string name="system_storage_status_not_found">Dossier introuvable</string>
+    <string name="system_storage_status_read_only">Lecture seule</string>
+    <string name="system_storage_status_linked">Lié</string>
+    <string name="system_storage_status_file_count">%1$d fichiers</string>
+    <string name="system_storage_status_needs_converting">%1$d à convertir</string>
+    <string name="system_manage_settings">Gérer les paramètres</string>
+    <string name="analytics_reporting_hint">Nous aide à trouver les problèmes plus vite. Aucun contenu ni parole n'est jamais envoyé.</string>
+    <string name="file_not_supported_short">non pris en charge</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numéro avant le titre</string>

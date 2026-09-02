@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Sūtīt ziņojumu</string>
     <string name="crash_feedback_dismiss">Ne tagad</string>
     <string name="song_folder_with_count">%1$s (%2$d dziesmas)</string>
+    <string name="system_storage">Krātuve</string>
+    <string name="system_storage_subtitle">Kur Church Presenter meklē jūsu saturu</string>
+    <string name="system_storage_linked_count">%1$d saistītas</string>
+    <string name="system_storage_needs_attention_count">%1$d nepieciešama uzmanība</string>
+    <string name="system_storage_status_not_set">Nav iestatīts</string>
+    <string name="system_storage_status_not_found">Mape nav atrasta</string>
+    <string name="system_storage_status_read_only">Tikai lasāms</string>
+    <string name="system_storage_status_linked">Saistīta</string>
+    <string name="system_storage_status_file_count">%1$d faili</string>
+    <string name="system_storage_status_needs_converting">%1$d jākonvertē</string>
+    <string name="system_manage_settings">Pārvaldīt iestatījumus</string>
+    <string name="analytics_reporting_hint">Palīdz mums ātrāk atrast problēmas. Saturs un dziesmu vārdi nekad netiek nosūtīti.</string>
+    <string name="file_not_supported_short">netiek atbalstīts</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numurs pirms nosaukuma</string>

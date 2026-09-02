@@ -59,6 +59,18 @@ data class SemanticColors(
     val chordChorus: Color,
     val chordBridge: Color,
     val chordTag: Color,
+    /**
+     * The six kinds of content the app stores, colour-coded where they are listed side by side —
+     * the storage folders in System settings. They carry no state: the hue says *which kind of
+     * content this row is about*, never whether it is healthy, which `success`/`warning`/`error`
+     * say beside them.
+     */
+    val contentBible: Color,
+    val contentSongs: Color,
+    val contentPictures: Color,
+    val contentLowerThird: Color,
+    val contentPresentation: Color,
+    val contentMedia: Color,
 )
 
 private val LightSemanticColors = SemanticColors(
@@ -79,6 +91,12 @@ private val LightSemanticColors = SemanticColors(
     chordChorus = Color(0xFF7B3FA6),
     chordBridge = Color(0xFF13704C),
     chordTag = Color(0xFF9E3B26),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
 )
 
 private val DarkSemanticColors = SemanticColors(
@@ -99,6 +117,12 @@ private val DarkSemanticColors = SemanticColors(
     chordChorus = Color(0xFFD9A0F0),
     chordBridge = Color(0xFF6FD69A),
     chordTag = Color(0xFFF5A08E),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
 )
 
 /**

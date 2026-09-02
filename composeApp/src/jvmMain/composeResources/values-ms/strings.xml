@@ -1643,6 +1643,19 @@
     <string name="crash_feedback_send">Hantar laporan</string>
     <string name="crash_feedback_dismiss">Bukan sekarang</string>
     <string name="song_folder_with_count">%1$s (%2$d lagu)</string>
+    <string name="system_storage">Storan</string>
+    <string name="system_storage_subtitle">Tempat Church Presenter mencari kandungan anda</string>
+    <string name="system_storage_linked_count">%1$d dipautkan</string>
+    <string name="system_storage_needs_attention_count">%1$d perlu perhatian</string>
+    <string name="system_storage_status_not_set">Tidak ditetapkan</string>
+    <string name="system_storage_status_not_found">Folder tidak dijumpai</string>
+    <string name="system_storage_status_read_only">Baca sahaja</string>
+    <string name="system_storage_status_linked">Dipautkan</string>
+    <string name="system_storage_status_file_count">%1$d fail</string>
+    <string name="system_storage_status_needs_converting">%1$d perlu ditukar</string>
+    <string name="system_manage_settings">Urus tetapan</string>
+    <string name="analytics_reporting_hint">Membantu kami mencari masalah dengan lebih cepat. Kandungan atau lirik tidak pernah dihantar.</string>
+    <string name="file_not_supported_short">tidak disokong</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nombor sebelum tajuk</string>
