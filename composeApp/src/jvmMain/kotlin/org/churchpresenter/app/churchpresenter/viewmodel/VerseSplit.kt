@@ -2,15 +2,16 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.bible.SelectedVerse
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Showing a long verse as two halves instead of one shrunken block.
  *
  * `BiblePresenter` never cuts scripture off -- it shrinks until the whole of it fits (issue #97) --
  * so the longest verses in the Bible arrive on screen unreadably small, which is worst over a busy
- * background image. With `BibleSettings.splitLongVerses` on, a verse past [LONG_VERSE_WORD_COUNT]
- * words is shown as two pages instead, and the existing next/previous-verse keys step through them
- * before moving on to the next verse.
+ * background image. With `BibleSettings.splitLongVerses` on, a verse past
+ * `BibleSettings.longVerseWordCount` words is shown as two pages instead, and the existing
+ * next/previous-verse keys step through them before moving on to the next verse.
  *
  * The break is taken at the word boundary nearest the middle **by character count**, not by word
  * count: halves of equal word count are not halves of equal length, and the point of the setting is
@@ -20,14 +21,63 @@ import kotlin.math.abs
  * so anything that selects something else starts from a first half on its own.
  */
 
-/** How many words a verse needs before it is worth splitting. Esther 8:9, the longest, has 92. */
-private const val LONG_VERSE_WORD_COUNT = 45
+/**
+ * The tunable range of `BibleSettings.longVerseWordCount`, in words.
+ *
+ * The floor is not arbitrary: 25 is where Tamil splits about as often as English does at the
+ * default of 45 (4.2% of TAM_BSI against 5.5% of the KJV), so a Tamil church sits mid-scale rather
+ * than pinned at the end of the track and still splitting five times less. Below that the top of
+ * the range would be the footgun -- 20 splits 60.6% of the KJV. The ceiling is where there is
+ * nothing left to tune: at 60 the KJV is down to 0.48% and its longest verse is 90 words.
+ */
+internal const val LONG_VERSE_WORDS_MIN = 25
+internal const val LONG_VERSE_WORDS_MAX = 60
+
+/** The slider's increment. Five words is finer than the measured difference between two settings. */
+internal const val LONG_VERSE_WORDS_STEP = 5
+
+/**
+ * The stop below [LONG_VERSE_WORDS_MIN] at which splitting is off altogether.
+ *
+ * The setting is one slider rather than a checkbox and a slider, so "never split" has to be a
+ * position on the track. It writes `BibleSettings.splitLongVerses = false` and leaves the word count
+ * alone, which is what lets the operator turn splitting off and back on without losing the number
+ * they had tuned.
+ */
+internal const val LONG_VERSE_WORDS_OFF = LONG_VERSE_WORDS_MIN - LONG_VERSE_WORDS_STEP
+
+/**
+ * Where the threshold slider's handle sits for a stored setting.
+ *
+ * Splitting turned off is a *position* on this slider rather than a checkbox beside it, so "off" has
+ * to be expressible as a number; it is [LONG_VERSE_WORDS_OFF], one step below the usable range.
+ */
+internal fun longVerseSliderPosition(splitting: Boolean, wordCount: Int): Int =
+    if (splitting) wordCount.coerceIn(LONG_VERSE_WORDS_MIN, LONG_VERSE_WORDS_MAX) else LONG_VERSE_WORDS_OFF
+
+/**
+ * What dropping the handle at [raw] should store: whether splitting is on, and the word count.
+ *
+ * At the Off stop the count returned is [currentWordCount] unchanged, so turning splitting off and
+ * back on returns the operator to the threshold they had tuned rather than to the default.
+ */
+internal fun longVerseSliderStop(raw: Float, currentWordCount: Int): Pair<Boolean, Int> {
+    val snapped = (raw / LONG_VERSE_WORDS_STEP).roundToInt() * LONG_VERSE_WORDS_STEP
+    val splitting = snapped >= LONG_VERSE_WORDS_MIN
+    return splitting to if (splitting) snapped.coerceAtMost(LONG_VERSE_WORDS_MAX) else currentWordCount
+}
 
 private val WHITESPACE = Regex("\\s+")
 
-/** Whether [text] is long enough to be worth showing as two pages. */
-internal fun isLongVerse(text: String): Boolean =
-    text.split(WHITESPACE).count { it.isNotBlank() } > LONG_VERSE_WORD_COUNT
+/**
+ * Whether [text] is long enough to be worth showing as two pages.
+ *
+ * [wordThreshold] is the operator's setting, clamped -- a hand-edited settings file holding 0 would
+ * otherwise split every verse in the Bible, including "Jesus wept".
+ */
+internal fun isLongVerse(text: String, wordThreshold: Int): Boolean =
+    text.split(WHITESPACE).count { it.isNotBlank() } >
+        wordThreshold.coerceIn(LONG_VERSE_WORDS_MIN, LONG_VERSE_WORDS_MAX)
 
 /**
  * [text] broken at the word boundary closest to its middle.
@@ -79,9 +129,13 @@ internal fun BibleViewModel.publishVersePage(page: Int) {
 internal val BibleViewModel.splitLongVersesEnabled: Boolean
     get() = appSettings.bibleSettings.splitLongVerses
 
+/** The word count a verse must pass to be split -- likewise read where it is needed. */
+internal val BibleViewModel.longVerseWordCount: Int
+    get() = appSettings.bibleSettings.longVerseWordCount
+
 /** Whether [text] is shown as two pages, so a caller has a half to step to. */
 internal fun BibleViewModel.pagesInTwo(text: String): Boolean =
-    splitLongVersesEnabled && isLongVerse(text)
+    splitLongVersesEnabled && isLongVerse(text, longVerseWordCount)
 
 /**
  * Steps the verse [text] to its other half, if there is one to step to.
@@ -110,10 +164,14 @@ internal fun BibleViewModel.publishLandingPage(text: String, fromBehind: Boolean
  * [this] as its [page], when the verse is long enough to split. A no-op otherwise, and a no-op for
  * every verse when the setting is off -- callers pass [enabled] rather than checking themselves.
  */
-internal fun List<SelectedVerse>.versePage(page: Int, enabled: Boolean): List<SelectedVerse> {
+internal fun List<SelectedVerse>.versePage(
+    page: Int,
+    enabled: Boolean,
+    wordThreshold: Int,
+): List<SelectedVerse> {
     if (!enabled) return this
     val primary = firstOrNull() ?: return this
-    if (!isLongVerse(primary.verseText)) return this
+    if (!isLongVerse(primary.verseText, wordThreshold)) return this
     return map { verse ->
         val (first, second) = splitAtWordMidpoint(verse.verseText)
         verse.copy(verseText = if (page == VERSE_PAGE_SECOND) second else first)

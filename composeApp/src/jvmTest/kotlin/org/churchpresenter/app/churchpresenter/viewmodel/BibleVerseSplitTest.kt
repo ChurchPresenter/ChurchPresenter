@@ -13,6 +13,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/** The setting's default; the suite's fixture verse is 60 words, on the far side of it. */
+private const val DEFAULT_WORD_COUNT = 45
+
 class BibleVerseSplitTest {
 
     private lateinit var dir: File
@@ -20,6 +23,14 @@ class BibleVerseSplitTest {
 
     /** 60 words, past the threshold. Numbered so a half can be named by the words at its edges. */
     private val longVerse = (1..60).joinToString(" ") { "word$it" }
+
+    /**
+     * 36 words -- the length of Esther 8:9 in Tamil, against 90 in the KJV.
+     *
+     * The verse the tunable threshold exists for: long on screen, short by word count, and left
+     * whole by the English-shaped default of 45.
+     */
+    private val tamilLengthVerse = (1..36).joinToString(" ") { "sol$it" }
 
     @BeforeTest
     fun loadBible() {
@@ -42,15 +53,17 @@ class BibleVerseSplitTest {
             SpbFixture.Verse(17, 1, 1, "Short verse one"),
             SpbFixture.Verse(17, 1, 2, longVerse),
             SpbFixture.Verse(17, 1, 3, "Short verse three"),
+            SpbFixture.Verse(17, 1, 4, tamilLengthVerse),
         ),
     )
 
-    private fun viewModel(split: Boolean) = BibleViewModel(
+    private fun viewModel(split: Boolean, words: Int = DEFAULT_WORD_COUNT) = BibleViewModel(
         AppSettings(
             bibleSettings = BibleSettings(
                 storageDirectory = dir.absolutePath,
                 primaryBible = "test.spb",
                 splitLongVerses = split,
+                longVerseWordCount = words,
             ),
         ),
     ).also {
@@ -91,8 +104,8 @@ class BibleVerseSplitTest {
 
     @Test
     fun `a short verse is not long enough to split`() {
-        assertFalse(isLongVerse("Jesus wept"))
-        assertTrue(isLongVerse(longVerse))
+        assertFalse(isLongVerse("Jesus wept", DEFAULT_WORD_COUNT))
+        assertTrue(isLongVerse(longVerse, DEFAULT_WORD_COUNT))
     }
 
     @Test
@@ -183,6 +196,72 @@ class BibleVerseSplitTest {
         val whole = vm.getSelectedVerses().first().copy(verseNumber = 2, verseText = longVerse)
         assertNull(vm.liveVerseSplitMark(whole), "a whole verse on screen is not half of one")
         assertNull(vm.liveVerseSplitMark(null))
+    }
+
+
+    // ── The threshold is the operator's, not a constant ─────────────────────────
+
+    @Test
+    fun `the threshold decides, so the same verse splits at one setting and not another`() {
+        assertFalse(isLongVerse(tamilLengthVerse, DEFAULT_WORD_COUNT), "36 words is short at 45")
+        assertTrue(isLongVerse(tamilLengthVerse, 30), "the same verse is long at 30")
+        assertFalse(isLongVerse(tamilLengthVerse, 36), "the bound is exclusive: 36 words is not past 36")
+        assertTrue(isLongVerse(tamilLengthVerse, 35), "and is past 35")
+    }
+
+    @Test
+    fun `a threshold outside the slider's range is clamped rather than obeyed`() {
+        assertFalse(isLongVerse("Jesus wept", 0), "0 must not split every verse in the Bible")
+        assertTrue(isLongVerse(longVerse, 0), "clamped to the floor, not ignored")
+        assertFalse(isLongVerse(longVerse, 500), "60 words is the ceiling, so 60 is what 500 means")
+        assertTrue(isLongVerse((1..61).joinToString(" ") { "w$it" }, 500))
+    }
+
+    @Test
+    fun `lowering the threshold splits a verse the default leaves whole`() {
+        val whole = viewModel(split = true)
+        openChapter(whole)
+        whole.selectVerse(3)
+        assertEquals(tamilLengthVerse, liveText(whole), "36 words is whole at the default of 45")
+        whole.dispose()
+
+        val split = viewModel(split = true, words = 30)
+        openChapter(split)
+        split.selectVerse(3)
+        val (first, second) = splitAtWordMidpoint(tamilLengthVerse)
+        assertEquals(first, liveText(split), "at 30 the same verse opens on its first half")
+        assertTrue(split.navigateNextVerse())
+        assertEquals(second, liveText(split), "and the next-verse key steps to the second")
+        split.dispose()
+    }
+
+    // ── The one slider that carries both the on/off and the number ──────────────
+
+    @Test
+    fun `the handle sits at the stored threshold, and at Off when splitting is off`() {
+        assertEquals(35, longVerseSliderPosition(splitting = true, wordCount = 35))
+        assertEquals(LONG_VERSE_WORDS_OFF, longVerseSliderPosition(splitting = false, wordCount = 35))
+        assertEquals(
+            LONG_VERSE_WORDS_MIN,
+            longVerseSliderPosition(splitting = true, wordCount = 5),
+            "a stored value below the range still has to land on the track",
+        )
+        assertEquals(LONG_VERSE_WORDS_MAX, longVerseSliderPosition(splitting = true, wordCount = 900))
+    }
+
+    @Test
+    fun `dropping the handle snaps to a stop and only the Off stop turns splitting off`() {
+        assertEquals(true to 35, longVerseSliderStop(34.4f, currentWordCount = 45))
+        assertEquals(true to 35, longVerseSliderStop(35.6f, currentWordCount = 45))
+        assertEquals(true to LONG_VERSE_WORDS_MIN, longVerseSliderStop(24.9f, currentWordCount = 45))
+        assertEquals(true to LONG_VERSE_WORDS_MAX, longVerseSliderStop(60f, currentWordCount = 45))
+    }
+
+    @Test
+    fun `the Off stop keeps the tuned threshold rather than resetting it`() {
+        val (splitting, words) = longVerseSliderStop(LONG_VERSE_WORDS_OFF.toFloat(), currentWordCount = 30)
+        assertFalse(splitting)
+        assertEquals(30, words, "coming back off Off must return the operator to 30, not to the default")
     }
 
     // ── Off by default ──────────────────────────────────────────────────────────

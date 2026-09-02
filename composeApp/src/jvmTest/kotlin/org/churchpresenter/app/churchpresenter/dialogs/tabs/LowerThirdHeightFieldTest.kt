@@ -15,12 +15,27 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runSkikoComposeUiTest
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
+/**
+ * A surface tall enough to lay the whole rail out at once, for the two order assertions.
+ *
+ * `assertAboveTextMargins` compares two nodes' `boundsInRoot`, and a node the rail has not laid out
+ * reports `Rect(0, 0, 0, 0)` -- which is above everything, so the assertion stops describing the
+ * order and starts describing the viewport. `runComposeUiTest`'s default surface is smaller than
+ * this rail and `Modifier.size` on the content cannot grow it, so the surface itself is set instead.
+ * The Bible rail outgrew the default when its Miscellaneous section gained the split-threshold
+ * slider; the height here is given room rather than trimmed to the current content.
+ */
+private val RAIL_SURFACE = Size(1400f, 1800f)
 
 /**
  * The band height, in the two tabs it moved to.
@@ -100,7 +115,8 @@ class LowerThirdHeightFieldTest {
         val margins = onNodeWithText("Text Margins", substring = true).fetchSemanticsNode().boundsInRoot
         assertTrue(
             band.bottom <= margins.top,
-            "on the $tab tab the band height belongs above the margins, not below",
+            "on the $tab tab the band height belongs above the margins, not below " +
+                "(band=$band margins=$margins)",
         )
     }
 
@@ -111,18 +127,20 @@ class LowerThirdHeightFieldTest {
     // margins*, which is what an operator moving between the tabs actually sees.
 
     @Test
-    fun `the song tab puts it above its text margins`() = runComposeUiTest {
-        songTab()
+    fun `the song tab puts it above its text margins`() =
+        runSkikoComposeUiTest(size = RAIL_SURFACE, density = Density(1f)) {
+            songTab()
 
-        assertAboveTextMargins("Song")
-    }
+            assertAboveTextMargins("Song")
+        }
 
     @Test
-    fun `the bible tab puts it above its text margins`() = runComposeUiTest {
-        bibleTab()
+    fun `the bible tab puts it above its text margins`() =
+        runSkikoComposeUiTest(size = RAIL_SURFACE, density = Density(1f)) {
+            bibleTab()
 
-        assertAboveTextMargins("Bible")
-    }
+            assertAboveTextMargins("Bible")
+        }
 
     // ── Writing ─────────────────────────────────────────────────────────────────────────────────
 

@@ -10,7 +10,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
  */
 
 internal fun BibleViewModel.getSelectedVerses(): List<SelectedVerse> {
-    return selectedVersesUnsplit().versePage(currentVersePage(), splitLongVersesEnabled)
+    return selectedVersesUnsplit().versePage(currentVersePage(), splitLongVersesEnabled, longVerseWordCount)
 }
 
 /** The selection as the modules hold it, before a long verse is broken into pages. */
@@ -175,7 +175,7 @@ internal fun BibleViewModel.getNextVerses(): List<SelectedVerse> {
         firstVersesOfNextChapter()
     }
     // The verse after this one is looked ahead to at its own first half, for the same reason.
-    return next.versePage(VERSE_PAGE_FIRST, splitLongVersesEnabled)
+    return next.versePage(VERSE_PAGE_FIRST, splitLongVersesEnabled, longVerseWordCount)
 }
 
 /** The other half of the verse on screen, when it is split and its first half is what is showing. */
@@ -183,8 +183,12 @@ private fun BibleViewModel.secondHalfOfLiveVerse(): List<SelectedVerse>? {
     if (!splitLongVersesEnabled) return null
     val current = selectedVersesUnsplit()
     val onFirstHalf = currentVersePage() == VERSE_PAGE_FIRST
-    val splits = current.firstOrNull()?.let { isLongVerse(it.verseText) } == true
-    return if (onFirstHalf && splits) current.versePage(VERSE_PAGE_SECOND, enabled = true) else null
+    val splits = current.firstOrNull()?.let { isLongVerse(it.verseText, longVerseWordCount) } == true
+    return if (onFirstHalf && splits) {
+        current.versePage(VERSE_PAGE_SECOND, enabled = true, wordThreshold = longVerseWordCount)
+    } else {
+        null
+    }
 }
 
 private fun BibleViewModel.firstVersesOfNextChapter(): List<SelectedVerse> {

@@ -83,6 +83,8 @@
     <string name="hold_live">लाइव होल्ड करें</string>
     <string name="bible_split_browse_mode">स्प्लिट ब्राउज़ मोड</string>
     <string name="bible_split_long_verses">लंबी आयतों को दो स्लाइड में विभाजित करें</string>
+    <string name="bible_split_long_verses_off">बंद</string>
+    <string name="words_suffix">शब्द</string>
     <string name="bible_cross_references">क्रॉस-संदर्भ</string>
     <string name="bible_cross_references_title">संदर्भ</string>
     <string name="bible_cross_references_enable">क्रॉस-संदर्भ लिंक दिखाएँ</string>

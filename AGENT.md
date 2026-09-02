@@ -368,6 +368,24 @@ JAVA_TOOL_OPTIONS="-Dchurchpresenter.singleInstancePort=47633 -Duser.home=$HOME/
 
 ## Tests
 
+### **NEVER write tests or re-record screenshots before the UI is approved**
+On a change that touches the UI, **stop when it compiles and the existing suites still pass, show
+what it looks like, and wait.** Do not write new unit tests, do not write new screenshot tests, and
+do not run `recordRoborazziJvm` until the person running the work has looked at the UI and said it
+is right.
+
+The reason is cost, not principle: a screenshot recording and a suite of assertions both pin the
+design in place, and every round of "move that, make it bigger" after they exist means rewriting
+them. A control's spacing, wording and sizing typically change two or three times between the first
+working version and the approved one. Tests written against the first are thrown away.
+
+What still holds while you wait: **existing** tests must keep passing, and a test your change
+invalidated (a checkbox that is now a slider, a signature that gained a parameter) is fixed or
+deleted as part of the change — that is maintenance, not new work. Run `detekt` as always.
+
+The go-ahead is explicit. "Looks good", "ship it", "add tests now" — until one of those, the
+deliverable is the working UI and a note saying tests and screenshots are pending.
+
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`.
 CI is `.github/workflows/test.yml` (push/PR); it runs these plus each module's own suite, invoked
 one at a time through the module's own wrapper — and only for the modules whose own directory the

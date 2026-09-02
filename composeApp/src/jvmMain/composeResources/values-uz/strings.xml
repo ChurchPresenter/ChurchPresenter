@@ -83,6 +83,8 @@
     <string name="hold_live">Ekranni ushlab turish</string>
     <string name="bible_split_browse_mode">Alohida koʻrib chiqish rejimi</string>
     <string name="bible_split_long_verses">Uzun oyatlarni ikkita slaydga boʻlish</string>
+    <string name="bible_split_long_verses_off">Oʻchiq</string>
+    <string name="words_suffix">soʻz</string>
     <string name="bible_cross_references">Parallel oyatlar</string>
     <string name="bible_cross_references_title">Havolalar</string>
     <string name="bible_cross_references_enable">Parallel oyat havolalarini koʻrsatish</string>

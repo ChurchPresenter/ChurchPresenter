@@ -83,6 +83,8 @@
     <string name="hold_live">نگه‌داشتن زنده</string>
     <string name="bible_split_browse_mode">حالت مرور جداگانه</string>
     <string name="bible_split_long_verses">تقسیم آیات طولانی به دو اسلاید</string>
+    <string name="bible_split_long_verses_off">خاموش</string>
+    <string name="words_suffix">کلمه</string>
     <string name="bible_cross_references">ارجاعات متقابل</string>
     <string name="bible_cross_references_title">ارجاعات</string>
     <string name="bible_cross_references_enable">نمایش پیوند ارجاعات متقابل</string>

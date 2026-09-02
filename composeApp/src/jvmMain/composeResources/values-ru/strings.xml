@@ -60,6 +60,8 @@
     <string name="hold_live">Удержать эфир</string>
     <string name="bible_split_browse_mode">Режим раздельного просмотра</string>
     <string name="bible_split_long_verses">Разделять длинные стихи на два слайда</string>
+    <string name="bible_split_long_verses_off">Выкл</string>
+    <string name="words_suffix">слов</string>
     <string name="bible_cross_references">Перекрёстные ссылки</string>
     <string name="bible_cross_references_title">Ссылки</string>
     <string name="bible_cross_references_enable">Показывать перекрёстные ссылки</string>

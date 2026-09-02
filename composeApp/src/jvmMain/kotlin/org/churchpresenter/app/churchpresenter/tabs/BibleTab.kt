@@ -177,8 +177,10 @@ fun BibleTab(
         appSettings.bibleSettings.customNameKey(),
         // Likewise: splitting changes neither the folder nor the selection nor a name, so without
         // it here the view model keeps the snapshot it was constructed with and the setting does
-        // nothing until the app is restarted.
+        // nothing until the app is restarted. The threshold is a key for the same reason -- moving
+        // the slider without crossing its Off stop changes only this number.
         appSettings.bibleSettings.splitLongVerses,
+        appSettings.bibleSettings.longVerseWordCount,
     ) {
         if (isFirstComposition.value) {
             isFirstComposition.value = false
