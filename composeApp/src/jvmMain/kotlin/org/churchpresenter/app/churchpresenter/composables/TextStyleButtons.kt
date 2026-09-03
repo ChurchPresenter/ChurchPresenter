@@ -4,18 +4,21 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -31,23 +35,23 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.arrow_down
+import churchpresenter.composeapp.generated.resources.backdrop_title
+import churchpresenter.composeapp.generated.resources.text_style_backdrop
 import churchpresenter.composeapp.generated.resources.text_style_bold
-import churchpresenter.composeapp.generated.resources.text_style_border
 import churchpresenter.composeapp.generated.resources.text_style_italic
-import churchpresenter.composeapp.generated.resources.text_style_line_background
 import churchpresenter.composeapp.generated.resources.text_style_shadow
 import churchpresenter.composeapp.generated.resources.text_style_strikethrough
 import churchpresenter.composeapp.generated.resources.text_style_underline
+import churchpresenter.composeapp.generated.resources.tooltip_backdrop_options
 import churchpresenter.composeapp.generated.resources.tooltip_bold
-import churchpresenter.composeapp.generated.resources.tooltip_border
 import churchpresenter.composeapp.generated.resources.tooltip_italic
-import churchpresenter.composeapp.generated.resources.tooltip_line_background
 import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
 import churchpresenter.composeapp.generated.resources.tooltip_underline
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.foundation.clickable
 
 /**
  * A row of toggle buttons for text style: Bold, Italic, Underline, Shadow.
@@ -58,10 +62,10 @@ import androidx.compose.foundation.clickable
  * wants neither is unchanged; the Bible settings tab passes a strikethrough handler and turns the
  * shadow button off, having a labelled shadow row of its own.
  *
- * The last two buttons -- the border box and the line background -- appear together when
- * [backdrop] and [onBackdropChange] are given. Neither is a plain toggle: each turns its half on
- * and opens a dialog holding that half's colour and measurements, so a panel gains the feature
- * without gaining a single row. Turning one off again is the switch at the top of its dialog.
+ * Passing [backdrop] and [onBackdropChange] adds the text-backing control at the end: one split
+ * button, not two toggles. Its left half turns the last look on and off the way Bold does, and its
+ * caret opens [TextBackdropDialog], where the fill behind the lines and the box around the block
+ * are picked together.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -82,8 +86,6 @@ fun TextStyleButtons(
     backdrop: TextBackdrop? = null,
     onBackdropChange: ((TextBackdrop) -> Unit)? = null,
 ) {
-    var showBorderDialog by remember { mutableStateOf(false) }
-    var showLineBackgroundDialog by remember { mutableStateOf(false) }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -133,45 +135,125 @@ fun TextStyleButtons(
             )
         }
         if (backdrop != null && onBackdropChange != null) {
-            TextStyleToggleButton(
-                label = stringResource(Res.string.text_style_border),
-                tooltip = stringResource(Res.string.tooltip_border),
-                isActive = backdrop.border,
+            TextBackdropButton(
+                backdrop = backdrop,
+                onBackdropChange = onBackdropChange,
                 buttonSize = buttonSize,
-                boxedLabel = true,
-                onClick = {
-                    // Switching it on is what the click means; the dialog is where it is shaped.
-                    if (!backdrop.border) onBackdropChange(backdrop.copy(border = true))
-                    showBorderDialog = true
-                }
-            )
-            TextStyleToggleButton(
-                label = stringResource(Res.string.text_style_line_background),
-                tooltip = stringResource(Res.string.tooltip_line_background),
-                isActive = backdrop.lineBackground,
-                buttonSize = buttonSize,
-                filledLabel = true,
-                onClick = {
-                    if (!backdrop.lineBackground) onBackdropChange(backdrop.copy(lineBackground = true))
-                    showLineBackgroundDialog = true
-                }
             )
         }
     }
-    if (backdrop != null && onBackdropChange != null) {
-        if (showBorderDialog) {
-            TextBorderDialog(
+}
+
+/**
+ * The text-backing control: a chip of the current look, and a caret onto the dialog behind it.
+ *
+ * Clicking the chip flips the last style off and on without opening anything, so it behaves like
+ * the four buttons beside it; the caret is for changing the look rather than for having one. That
+ * split is why the whole feature fits where two toggles used to, and why the button reports its
+ * state — the chip is drawn with the settings in force, so a maroon plate looks maroon here.
+ *
+ * The last style is remembered rather than stored: it only has to survive the panel being open, and
+ * a backdrop that has never been on falls back to a plain fill.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TextBackdropButton(
+    backdrop: TextBackdrop,
+    onBackdropChange: (TextBackdrop) -> Unit,
+    buttonSize: Dp,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val mode = backdrop.mode
+    var lastMode by remember {
+        mutableStateOf(if (mode == TextBackdropMode.OFF) TextBackdropMode.FILL else mode)
+    }
+    LaunchedEffect(mode) { if (mode != TextBackdropMode.OFF) lastMode = mode }
+
+    val isActive = mode != TextBackdropMode.OFF
+    val title = stringResource(Res.string.backdrop_title)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BackdropSegment(
+            tooltip = title,
+            isActive = isActive,
+            shape = segmentShape(index = 0, count = 2),
+            modifier = Modifier.width(buttonSize + CHIP_SEGMENT_EXTRA).height(buttonSize),
+            onClick = {
+                onBackdropChange(backdrop.withMode(if (isActive) TextBackdropMode.OFF else lastMode))
+            },
+        ) { content ->
+            TextBackdropChip(
                 backdrop = backdrop,
-                onChange = onBackdropChange,
-                onDismiss = { showBorderDialog = false },
+                emptyOutline = content.copy(alpha = OUTLINE_ALPHA),
+                emptyInk = content,
+                modifier = Modifier.width(CHIP_WIDTH).height(CHIP_HEIGHT),
+                label = stringResource(Res.string.text_style_backdrop),
+                fontSize = (buttonSize.value * CHIP_LABEL_SCALE).sp,
             )
         }
-        if (showLineBackgroundDialog) {
-            LineBackgroundDialog(
-                backdrop = backdrop,
-                onChange = onBackdropChange,
-                onDismiss = { showLineBackgroundDialog = false },
+        BackdropSegment(
+            tooltip = stringResource(Res.string.tooltip_backdrop_options),
+            isActive = isActive,
+            shape = segmentShape(index = 1, count = 2),
+            modifier = Modifier.width(CARET_SEGMENT_WIDTH).height(buttonSize),
+            onClick = { showDialog = true },
+        ) { content ->
+            Icon(
+                painter = painterResource(Res.drawable.arrow_down),
+                contentDescription = null,
+                tint = content,
+                modifier = Modifier.size(CARET_SIZE),
             )
+        }
+    }
+    if (showDialog) {
+        TextBackdropDialog(
+            backdrop = backdrop,
+            onChange = onBackdropChange,
+            onDismiss = { showDialog = false },
+        )
+    }
+}
+
+/** One half of the split button, coloured exactly as the toggles beside it. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun BackdropSegment(
+    tooltip: String,
+    isActive: Boolean,
+    shape: RoundedCornerShape,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    content: @Composable (contentColor: Color) -> Unit,
+) {
+    val activeBackground = MaterialTheme.colorScheme.primary
+    val contentColor =
+        if (isActive) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    TooltipArea(
+        tooltip = { BackdropTooltip(tooltip) },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        )
+    ) {
+        Surface(
+            modifier = modifier
+                .clip(shape)
+                .border(
+                    width = 1.dp,
+                    color = if (isActive) {
+                        activeBackground
+                    } else {
+                        MaterialTheme.colorScheme.outline.copy(alpha = OUTLINE_ALPHA)
+                    },
+                    shape = shape,
+                )
+                .clickable { onClick() },
+            color = if (isActive) activeBackground else MaterialTheme.colorScheme.surfaceVariant,
+            shape = shape,
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                content(contentColor)
+            }
         }
     }
 }
@@ -186,10 +268,6 @@ private fun TextStyleToggleButton(
     fontStyle: FontStyle = FontStyle.Normal,
     textDecoration: TextDecoration? = null,
     buttonSize: Dp = 28.dp,
-    /** Draws the outline the button stands for around its own letter, rather than naming it. */
-    boxedLabel: Boolean = false,
-    /** Draws the band the button stands for behind its own letter. */
-    filledLabel: Boolean = false,
     onClick: () -> Unit
 ) {
     val activeBackground = MaterialTheme.colorScheme.primary
@@ -198,20 +276,7 @@ private fun TextStyleToggleButton(
     val inactiveContent = MaterialTheme.colorScheme.onSurfaceVariant
 
     TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    text = tooltip,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        },
+        tooltip = { BackdropTooltip(tooltip) },
         tooltipPlacement = TooltipPlacement.ComponentRect(
             anchor = Alignment.BottomCenter,
             offset = DpOffset(0.dp, 4.dp)
@@ -223,7 +288,11 @@ private fun TextStyleToggleButton(
                 .clip(RoundedCornerShape(8.dp))
                 .border(
                     width = 1.dp,
-                    color = if (isActive) activeBackground else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                    color = if (isActive) {
+                        activeBackground
+                    } else {
+                        MaterialTheme.colorScheme.outline.copy(alpha = OUTLINE_ALPHA)
+                    },
                     shape = RoundedCornerShape(8.dp)
                 )
                 .clickable { onClick() },
@@ -234,31 +303,24 @@ private fun TextStyleToggleButton(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                val content = if (isActive) activeContent else inactiveContent
-                val container = if (isActive) activeBackground else inactiveBackground
                 Text(
                     text = label,
                     fontSize = (buttonSize.value * 0.36f).sp,
                     fontWeight = fontWeight,
                     fontStyle = fontStyle,
                     textDecoration = textDecoration,
-                    // The banded button knocks its letter out of a solid block, the way a
-                    // highlighter icon does — a translucent wash behind it read as "disabled"
-                    // rather than as a background.
-                    color = if (filledLabel) container else content,
+                    color = if (isActive) activeContent else inactiveContent,
                     maxLines = 1,
-                    modifier = when {
-                        boxedLabel -> Modifier
-                            .border(1.dp, content, RoundedCornerShape(2.dp))
-                            .padding(horizontal = 3.dp)
-                        filledLabel -> Modifier
-                            .background(content, RoundedCornerShape(2.dp))
-                            .padding(horizontal = 3.dp)
-                        else -> Modifier
-                    },
                 )
             }
         }
     }
 }
 
+/** How much wider than a plain toggle the chip half is, so the swatch is not cramped. */
+private val CHIP_SEGMENT_EXTRA = 6.dp
+private val CHIP_WIDTH = 22.dp
+private val CHIP_HEIGHT = 15.dp
+private val CARET_SEGMENT_WIDTH = 16.dp
+private val CARET_SIZE = 10.dp
+private const val CHIP_LABEL_SCALE = 0.32f

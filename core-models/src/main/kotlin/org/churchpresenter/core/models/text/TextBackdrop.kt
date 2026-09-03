@@ -17,6 +17,11 @@ import kotlinx.serialization.Serializable
  *  * **The border** — one box around the whole block, [borderPadding] away from the text on every
  *    side.
  *
+ * With **both** on they stop being two drawings and become one: the box is filled as well as
+ * stroked, so the fill is the block's shape rather than a band per line. A stack of outlined bands
+ * is not a look anybody sets out to produce — the strokes of one line run through the line above
+ * it. The renderer decides that; here they are still just two flags.
+ *
  * Both carry their own opacity rather than an alpha in the colour: the colour picker these fields
  * are edited with produces opaque `#RRGGBB`, so a translucent band needs a number of its own —
  * exactly as the shadow settings beside them already do.

@@ -485,9 +485,16 @@ private fun SongStylePane(
     // one to whichever the tab is styling for its duration, so a hall with a single full-screen
     // projector can still be shown what its lower third would look like.
     val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    // What the preview is handed, which is not quite what is stored: an element switched off is
+    // turned on while its own tab is selected, so styling it is never styling something invisible.
+    // See `shownForPreview`. Everything below still reads `settings` -- this copy is for the
+    // picture only, exactly as `previewLookAhead` is.
+    val previewSettings = remember(settings, element, target) {
+        settings.copy(songSettings = settings.songSettings.shownForPreview(element, target))
+    }
     OnScreenPreviewEffect(
         active = previewOnScreen,
-        settings = settings,
+        settings = previewSettings,
         presenterManager = presenterManager,
         outputs = PreviewOutputState(
             lowerThird = target.isLowerThird,
@@ -515,7 +522,7 @@ private fun SongStylePane(
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             SongPreviewPanel(
-                settings = settings,
+                settings = previewSettings,
                 target = target,
                 showLookAhead = previewLookAhead,
                 showChords = false,

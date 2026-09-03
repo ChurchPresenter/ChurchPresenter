@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Whether [element] appears on no slide, the first only, or every one -- for [target]'s output.
@@ -49,3 +50,24 @@ internal fun SongSettings.withShow(
     element == SongStyleElement.TITLE -> copy(titleDisplay = value)
     else -> this
 }
+
+/**
+ * [this], with [element] turned on if it is switched off — for a preview, never for the output.
+ *
+ * The number and the title can be set to "None", and then selecting their tab styles something the
+ * preview does not draw: the colour picker and the backing button write to a profile nothing on
+ * screen is using. That is the same trap the look-ahead switch above the preview already avoids by
+ * forcing itself on for the two look-ahead elements, and it wants the same answer.
+ *
+ * The stored setting is untouched. This says "here is what the title would look like", not "the
+ * title is now shown"; the Show control keeps reading None and keeps deciding the real output.
+ */
+internal fun SongSettings.shownForPreview(
+    element: SongStyleElement,
+    target: SongStyleTarget,
+): SongSettings =
+    if (showFor(element, target) == Constants.NONE) {
+        withShow(element, target, Constants.EVERY_PAGE)
+    } else {
+        this
+    }
