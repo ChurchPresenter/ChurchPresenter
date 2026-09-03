@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">编号在标题之前</string>
+    <string name="song_number_corner">角落</string>
+    <string name="song_number_corner_off">关闭</string>
     <string name="fullscreen_display">全屏显示</string>
     <string name="display_mode_label">显示方式：</string>
     <string name="display_mode_one_verse">每次 1 段</string>

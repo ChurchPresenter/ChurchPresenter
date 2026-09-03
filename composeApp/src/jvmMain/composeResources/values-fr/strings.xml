@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numéro avant le titre</string>
+    <string name="song_number_corner">Coin</string>
+    <string name="song_number_corner_off">Désactivé</string>
     <string name="fullscreen_display">Plein écran</string>
     <string name="display_mode_label">Mode d'affichage :</string>
     <string name="display_mode_one_verse">1 verset</string>

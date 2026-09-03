@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero bago ang pamagat</string>
+    <string name="song_number_corner">Sulok</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen na Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Talata</string>

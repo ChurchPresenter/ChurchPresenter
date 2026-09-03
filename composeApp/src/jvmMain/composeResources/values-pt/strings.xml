@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Número antes do título</string>
+    <string name="song_number_corner">Canto</string>
+    <string name="song_number_corner_off">Desligado</string>
     <string name="fullscreen_display">Exibição em Tela Cheia</string>
     <string name="display_mode_label">Modo de Exibição:</string>
     <string name="display_mode_one_verse">1 Verso</string>

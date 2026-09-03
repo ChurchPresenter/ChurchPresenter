@@ -60,8 +60,7 @@ import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
-import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
-import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
@@ -314,8 +313,11 @@ private fun SingleDisplayPreview(
     val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
     val displayModeChipLabel = when (screenAssignment.displayMode) {
         Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
-        Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL -> stringResource(Res.string.display_lower_third_horizontal)
-        Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third_vertical)
+        // One label for both stored modes. A lower third is a lower third -- the horizontal/vertical
+        // split it was once named for is gone from the output, and the Customize rail already calls
+        // them both this.
+        Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+        Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third)
         else -> null
     }
 

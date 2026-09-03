@@ -1205,6 +1205,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo před názvem</string>
+    <string name="song_number_corner">Roh</string>
+    <string name="song_number_corner_off">Vypnuto</string>
     <string name="fullscreen_display">Zobrazení na celou obrazovku</string>
     <string name="display_mode_label">Režim zobrazení:</string>
     <string name="display_mode_one_verse">1 sloka</string>

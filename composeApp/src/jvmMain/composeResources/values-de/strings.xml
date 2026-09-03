@@ -1154,6 +1154,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer vor dem Titel</string>
+    <string name="song_number_corner">Ecke</string>
+    <string name="song_number_corner_off">Aus</string>
     <string name="fullscreen_display">Vollbildanzeige</string>
     <string name="display_mode_label">Anzeigemodus:</string>
     <string name="display_mode_one_verse">1 Strophe</string>

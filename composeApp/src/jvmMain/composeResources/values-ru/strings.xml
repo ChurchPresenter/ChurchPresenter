@@ -1194,6 +1194,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Номер перед названием</string>
+    <string name="song_number_corner">Угол</string>
+    <string name="song_number_corner_off">Выкл.</string>
     <string name="fullscreen_display">Полноэкранный режим</string>
     <string name="display_mode_label">Режим отображения:</string>
     <string name="display_mode_one_verse">1 куплет</string>

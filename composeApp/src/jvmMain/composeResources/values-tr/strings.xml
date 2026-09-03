@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numara başlıktan önce</string>
+    <string name="song_number_corner">Köşe</string>
+    <string name="song_number_corner_off">Kapalı</string>
     <string name="fullscreen_display">Tam ekran gösterim</string>
     <string name="display_mode_label">Gösterim biçimi:</string>
     <string name="display_mode_one_verse">1 kıta</string>

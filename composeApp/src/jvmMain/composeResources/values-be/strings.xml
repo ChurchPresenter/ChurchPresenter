@@ -1154,6 +1154,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Нумар перад назвай</string>
+    <string name="song_number_corner">Кут</string>
+    <string name="song_number_corner_off">Выкл.</string>
     <string name="fullscreen_display">Паўнаэкранны рэжым</string>
     <string name="display_mode_label">Рэжым адлюстравання:</string>
     <string name="display_mode_one_verse">1 куплет</string>

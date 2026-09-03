@@ -1909,6 +1909,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>
+    <string name="song_number_corner">Corner</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Verse</string>

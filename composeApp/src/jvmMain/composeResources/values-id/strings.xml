@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nomor sebelum judul</string>
+    <string name="song_number_corner">Sudut</string>
+    <string name="song_number_corner_off">Mati</string>
     <string name="fullscreen_display">Tampilan Layar Penuh</string>
     <string name="display_mode_label">Mode Tampilan:</string>
     <string name="display_mode_one_verse">1 Ayat</string>

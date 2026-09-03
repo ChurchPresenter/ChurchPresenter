@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">شماره پیش از عنوان</string>
+    <string name="song_number_corner">گوشه</string>
+    <string name="song_number_corner_off">خاموش</string>
     <string name="fullscreen_display">نمایش تمام‌صفحه</string>
     <string name="display_mode_label">شیوهٔ نمایش:</string>
     <string name="display_mode_one_verse">۱ بند</string>

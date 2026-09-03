@@ -129,12 +129,80 @@ class SongAppearanceControlsTest {
         onNodeWithTag("song_songNumberBeforeTitle").assertDoesNotExist()
     }
 
+    // ── The corner the number is pinned to ─────────────────────────────────────────────────────
+
+    @Test
+    fun `the corner dropdown writes the full screen's corner`() = runComposeUiTest {
+        val harness = showTab()
+
+        selectElement("Number")
+        onNodeWithTag("song_number_corner").performClick()
+        onNodeWithText("Top Left").performClick()
+        waitForIdle()
+
+        assertEquals(Constants.TOP_LEFT, harness.current.songSettings.songNumberCorner)
+        assertEquals(
+            SongSettings().songNumberLowerThirdCorner,
+            harness.current.songSettings.songNumberLowerThirdCorner,
+            "and the lower third keeps its own corner",
+        )
+    }
+
+    @Test
+    fun `the corner dropdown writes the lower third's corner`() = runComposeUiTest {
+        val harness = showTab()
+
+        onNodeWithText("Lower Third").performClick()
+        selectElement("Number")
+        onNodeWithTag("song_number_corner").performClick()
+        onNodeWithText("Off").performClick()
+        waitForIdle()
+
+        assertEquals(Constants.NONE, harness.current.songSettings.songNumberLowerThirdCorner)
+        assertEquals(
+            SongSettings().songNumberCorner,
+            harness.current.songSettings.songNumberCorner,
+            "and the full screen keeps its own corner",
+        )
+    }
+
+    @Test
+    fun `the corner dropdown is the number's alone`() = runComposeUiTest {
+        // Nothing else on a slide is pinned to a corner, and the title least of all -- it is the
+        // element the number is being taken out of the row of.
+        showTab()
+
+        selectElement("Title")
+
+        onNodeWithTag("song_number_corner").assertDoesNotExist()
+    }
+
+    @Test
+    fun `number-before-title stays absent while a corner is set, even sharing a position`() =
+        runComposeUiTest {
+            val cornered = AppSettings(
+                songSettings = SongSettings(
+                    songNumberPosition = SongSettings().titlePosition,
+                    songNumberHorizontalAlignment = SongSettings().titleHorizontalAlignment,
+                    songNumberCorner = Constants.TOP_RIGHT,
+                ),
+            )
+            showTab(cornered)
+
+            selectElement("Number")
+
+            onNodeWithTag("song_songNumberBeforeTitle").assertDoesNotExist()
+        }
+
     @Test
     fun `number-before-title writes when the two do share a position`() = runComposeUiTest {
         val together = AppSettings(
             songSettings = SongSettings(
                 songNumberPosition = SongSettings().titlePosition,
                 songNumberHorizontalAlignment = SongSettings().titleHorizontalAlignment,
+                // Off the corner it defaults to: a cornered number is drawn over the slide and
+                // never in the title's row, so the ordering switch is absent while one is set.
+                songNumberCorner = Constants.NONE,
             ),
         )
         val harness = showTab(together)
