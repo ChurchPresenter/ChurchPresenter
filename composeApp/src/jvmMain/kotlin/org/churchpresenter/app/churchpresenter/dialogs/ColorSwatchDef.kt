@@ -1,6 +1,6 @@
 /*
- * What the Background panel's Colors category offers, exactly as the design draws it: four solids,
- * four gradients, and the custom colour that follows them.
+ * What the Background panel's Colors category offers: the custom color first, then four solids and
+ * four gradients.
  */
 package org.churchpresenter.app.churchpresenter.dialogs
 
@@ -66,6 +66,9 @@ internal data class ColorSwatchDef(
 }
 
 internal val SONG_BACKGROUND_COLORS = listOf(
+    // The custom tile leads: it is the one tile that is not a fixed choice, so it should not be
+    // hunted for at the end of a scrolled grid.
+    ColorSwatchDef(Res.string.song_background_custom_color, "#1b2436", own = true),
     ColorSwatchDef(Res.string.song_background_color_black, "#000000"),
     ColorSwatchDef(Res.string.song_background_color_navy, "#0d1b2a"),
     ColorSwatchDef(Res.string.song_background_color_plum, "#2a1130"),
@@ -74,7 +77,6 @@ internal val SONG_BACKGROUND_COLORS = listOf(
     ColorSwatchDef(Res.string.song_background_color_dusk, "#131a3a", "#3a2352"),
     ColorSwatchDef(Res.string.song_background_color_teal, "#062a2e", "#0d4f52"),
     ColorSwatchDef(Res.string.song_background_color_slate, "#1a1f26", "#2f3945"),
-    ColorSwatchDef(Res.string.song_background_custom_color, "#1b2436", own = true),
 )
 
 /** The named solids, so the custom tile can tell it is holding a colour of the user's own. */

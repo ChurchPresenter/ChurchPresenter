@@ -8,9 +8,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_COLORS
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_HEIGHT
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundPanel
@@ -37,13 +42,14 @@ class SongBackgroundPanelScreenshotTest {
         background: SongBackground = SongBackground(),
         lowerThirdBackground: SongBackground = SongBackground(),
         applyToSongbook: (() -> Unit)? = {},
+        height: Dp = SONG_BACKGROUND_PANEL_HEIGHT,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
                 ChurchPresenterTheme(themeMode = mode) {
                     Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, SONG_BACKGROUND_PANEL_HEIGHT)) {
+                        Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, height)) {
                             SongBackgroundPanel(
                                 background = background,
                                 lowerThirdBackground = lowerThirdBackground,
@@ -103,6 +109,23 @@ class SongBackgroundPanelScreenshotTest {
         waitForIdle()
     }
 
+    // ── The library's scrollbar ─────────────────────────────────────────────────────────────────
+
+    /**
+     * A panel too short for its grid, scrolled to the last tile: the scrollbar beside the library,
+     * with its thumb at the bottom and the custom tile that leads the grid scrolled off the top.
+     *
+     * Shot on Colors rather than on Pictures because a colour tile is a solid fill — a picture's
+     * thumbnail is decoded off the test's own dispatcher, so a scrolled picture grid photographs
+     * whichever thumbnails happened to arrive first.
+     */
+    @Test
+    fun `the colours grid scrolled on a short panel`() =
+        shoot("scrollbar", background = NAVY, height = SHORT_PANEL) {
+            onNode(hasScrollToIndexAction()).performScrollToIndex(LAST_COLOUR_TILE)
+            waitForIdle()
+        }
+
     // ── The lower third's own background ────────────────────────────────────────────────────────
 
     /** Switching target shows the band's background, which here is set while the full screen is not. */
@@ -125,6 +148,10 @@ class SongBackgroundPanelScreenshotTest {
         const val IMAGES = "Images"
         const val VIDEOS = "Videos"
         const val LOWER_THIRD = "Lower third"
+
+        /** Short enough that the Colors grid does not fit and the library has to scroll. */
+        val SHORT_PANEL = 260.dp
+        val LAST_COLOUR_TILE = SONG_BACKGROUND_COLORS.lastIndex
 
         val NAVY = SongBackground(type = SongBackgroundType.COLOR, color = "#0d1b2a", dim = 25, blur = 3)
         val DUSK = SongBackground(
