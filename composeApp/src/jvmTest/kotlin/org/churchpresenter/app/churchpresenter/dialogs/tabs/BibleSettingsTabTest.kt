@@ -229,13 +229,12 @@ class BibleSettingsTabTest {
     private object Box {
         const val SHOW_IN_LOWER_THIRD = 0
         const val SPLIT_BROWSE = 1
-        const val SPLIT_LONG_VERSES = 2
-        const val CROSS_REFERENCES = 3
-        const val FADE_IN = 4
-        const val FADE_OUT = 5
-        const val CROSSFADE = 6
-        const val PRIMARY_ABBREVIATION = 7
-        const val SECONDARY_ABBREVIATION = 8
+        const val CROSS_REFERENCES = 2
+        const val FADE_IN = 3
+        const val FADE_OUT = 4
+        const val CROSSFADE = 5
+        const val PRIMARY_ABBREVIATION = 6
+        const val SECONDARY_ABBREVIATION = 7
     }
 
     /** Clicks checkbox [index] and returns the bible settings that produced. */
@@ -264,16 +263,19 @@ class BibleSettingsTabTest {
     }
 
     @Test
-    fun `split long verses toggles only its own flag`() = runComposeUiTest {
-        val harness = showTab()
-        val before = harness.current.bibleSettings
+    fun `the split threshold reads Off until splitting is on, then names its word count`() = runComposeUiTest {
+        showBibleTab(BibleSettings())
+        onNodeWithText("Off").assertExists()
 
-        val after = toggle(Box.SPLIT_LONG_VERSES, harness)
-        if (after.splitLongVerses) onAllNodes(isToggleable())[Box.SPLIT_LONG_VERSES].assertIsOn()
-        else onAllNodes(isToggleable())[Box.SPLIT_LONG_VERSES].assertIsOff()
+        showBibleTab(BibleSettings(splitLongVerses = true, longVerseWordCount = 35))
+        onNodeWithText("35 words").assertExists()
+        onAllNodesWithText("Off").assertCountEquals(0)
+    }
 
-        assertEquals(true, after.splitLongVerses, "splitting starts off and turns on")
-        assertEquals(before.copy(splitLongVerses = true), after)
+    @Test
+    fun `a stored threshold outside the slider's range is shown at the end of the track`() = runComposeUiTest {
+        showBibleTab(BibleSettings(splitLongVerses = true, longVerseWordCount = 900))
+        onNodeWithText("60 words").assertExists()
     }
 
     @Test
@@ -1131,10 +1133,13 @@ class BibleSettingsTabTest {
         showTab()
         waitForIdle()
 
-        onAllNodesWithText("Full Screen \u00b7 Bilingual Layout").onFirst()
+        // The caption is two runs -- the scope in accent uppercase, then the setting name shared by
+        // both rows -- so the scope is what tells one row from the other and is asserted on its own.
+        onAllNodesWithText("FULL SCREEN").onFirst()
             .assertExists("the full-screen arrangement is named")
-        onAllNodesWithText("Lower Third \u00b7 Bilingual Layout").onFirst()
+        onAllNodesWithText("LOWER THIRD").onFirst()
             .assertExists("the lower-third arrangement is named")
+        onAllNodesWithText("Bilingual Layout").assertCountEquals(2)
         // Both options of both rows: the caption used to sit beside the buttons, which pushed the
         // second option of each pair off the pane and out of the layout entirely.
         onAllNodesWithText("Left / Right").assertCountEquals(2)

@@ -232,6 +232,25 @@ class PresenterLowerThirdScreenshotTest {
         ),
     )
 
+    /**
+     * The number pinned to the band's other top corner, clear of the title's row.
+     *
+     * The corners here are the *band's*, not the screen's -- the default bottom right is what every
+     * other band shot above carries, so this is the one that shows the difference.
+     */
+    @Test
+    fun `a number cornered at the band's top left`() = shootSong(
+        "song_number_corner_top_left",
+        song(),
+        songSettings(
+            titleLowerThirdDisplay = Constants.EVERY_PAGE,
+            titleLowerThirdPosition = Constants.ABOVE_VERSE,
+            showNumberLowerThird = Constants.EVERY_PAGE,
+            songNumberLowerThirdCorner = Constants.TOP_LEFT,
+            songNumberLowerThirdColor = "#FFD54F",
+        ),
+    )
+
     @Test
     fun `a title set apart in the band`() = shootSong(
         "song_title_styled",
@@ -500,6 +519,7 @@ class PresenterLowerThirdScreenshotTest {
         titleLowerThirdColor: String = SongSettings().titleLowerThirdColor,
         titleLowerThirdFontSize: Int = SongSettings().titleLowerThirdFontSize,
         titleLowerThirdShadow: Boolean = false,
+        songNumberLowerThirdCorner: String = SongSettings().songNumberLowerThirdCorner,
         songNumberLowerThirdColor: String = SongSettings().songNumberLowerThirdColor,
         songNumberLowerThirdFontSize: Int = SongSettings().songNumberLowerThirdFontSize,
         songNumberLowerThirdShadow: Boolean = false,
@@ -521,6 +541,7 @@ class PresenterLowerThirdScreenshotTest {
             titleLowerThirdColor = titleLowerThirdColor,
             titleLowerThirdFontSize = titleLowerThirdFontSize,
             titleLowerThirdShadow = titleLowerThirdShadow,
+            songNumberLowerThirdCorner = songNumberLowerThirdCorner,
             songNumberLowerThirdColor = songNumberLowerThirdColor,
             songNumberLowerThirdFontSize = songNumberLowerThirdFontSize,
             songNumberLowerThirdShadow = songNumberLowerThirdShadow,

@@ -288,6 +288,26 @@ class CefManagerTest {
     }
 
     @Test
+    fun `a machine policy blocking the engine is named, and nothing else is`() {
+        // Windows Application Control (WDAC/AppLocker) blocks jcef.dll on managed installs, which
+        // this app cannot fix: JCEF is downloaded at first use rather than shipped signed by us.
+        // Twelve reports across five churches, every launch, and the Web tab meanwhile told them to
+        // install a Visual C++ redistributable that would not have helped.
+        assertEquals(
+            "policy",
+            CefManager.jcefPolicyBlock(
+                "C:\\ProgramData\\ChurchPresenter\\jcef\\jcef.dll: " +
+                    "An Application Control policy has blocked this file"
+            ),
+        )
+
+        // Everything else keeps being reported. Matching a message is a weak test and this only
+        // ever suppresses an event, so falling through is the safe direction to be wrong in.
+        assertNull(CefManager.jcefPolicyBlock("The specified module could not be found"))
+        assertNull(CefManager.jcefPolicyBlock(null))
+    }
+
+    @Test
     fun `no CefApp means no client, and no throw`() {
         // The suite never initialises JCEF, so this is the uninitialised branch — the one that has
         // to answer null rather than dereference. The failed-native branch beside it cannot be

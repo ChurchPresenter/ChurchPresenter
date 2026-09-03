@@ -199,6 +199,17 @@ class SettingsProjectionMigrationTest {
     }
 
     @Test
+    fun `a settings file written before ffmpeg could be overridden still decodes`() {
+        val decoded = SettingsManager().migrateAndDecode(
+            """{"projectionSettings":{"vlcPath":"/opt/vlc","ndiRuntimePath":"/opt/ndi"}}"""
+        ).projectionSettings
+
+        assertEquals("", decoded.ffmpegPath, "no entry means the bundled ffmpeg, not a broken path")
+        assertEquals("/opt/vlc", decoded.vlcPath)
+        assertEquals("/opt/ndi", decoded.ndiRuntimePath)
+    }
+
+    @Test
     fun `migrating the screens keeps the rest of the settings file`() {
         val decoded = SettingsManager().migrateAndDecode(
             """{"language":"ru","projectionSettings":{"screenAssignments":[{"showSongs":false}]}}"""

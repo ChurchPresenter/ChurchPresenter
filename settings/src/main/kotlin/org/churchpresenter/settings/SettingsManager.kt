@@ -85,6 +85,7 @@ class SettingsManager {
         // unreleased change, so they share a version rather than spending two on one release.
         7 to ::migrateStageMonitorZoneNames,
         8 to ::migrateLowerThirdHeight,
+        9 to ::migrateSongNumberCorner,
     )
 
     fun loadSettings(): AppSettings {
@@ -503,6 +504,33 @@ class SettingsManager {
         return buildJsonObject {
             root.forEach { (k, v) -> if (k !in carriers) put(k, v) }
             carriers.forEach { put(it, carried(it)) }
+        }.toString()
+    }
+
+    /**
+     * The song number gained a corner it can be pinned to, defaulting to bottom right -- which is
+     * where `songNumberPosition` and `songNumberHorizontalAlignment` already put it out of the box.
+     *
+     * A migration and not just a default, because a corner overrides those two fields. A fresh
+     * install sees no difference either way, but an operator who had moved the number -- above the
+     * verse, or left of it -- would have found it snapped to the bottom right corner on first
+     * launch, with the controls they set it with still reading what they had chosen. So an existing
+     * document is pinned to [Constants.NONE] and keeps drawing the number exactly where it was; the
+     * corner is offered to them in settings rather than applied to them.
+     */
+    private fun migrateSongNumberCorner(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val song = root["songSettings"]?.jsonObject ?: return raw
+        val keys = listOf("songNumberCorner", "songNumberLowerThirdCorner")
+        // Only where the document does not already carry one: a file written by a newer build,
+        // opened by an older one and rolled forward again must keep the corner it chose.
+        if (keys.all { it in song }) return raw
+        val newSong = buildJsonObject {
+            song.forEach { (k, v) -> put(k, v) }
+            keys.forEach { if (it !in song) put(it, JsonPrimitive(Constants.NONE)) }
+        }
+        return buildJsonObject {
+            root.forEach { (k, v) -> if (k == "songSettings") put(k, newSong) else put(k, v) }
         }.toString()
     }
 

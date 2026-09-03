@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo pred názvom</string>
+    <string name="song_number_corner">Roh</string>
+    <string name="song_number_corner_off">Vypnuté</string>
     <string name="fullscreen_display">Zobrazenie na celú obrazovku</string>
     <string name="display_mode_label">Režim zobrazenia:</string>
     <string name="display_mode_one_verse">1 verš</string>
@@ -1808,6 +1810,8 @@
     <string name="style">Štýl</string>
     <string name="bible_split_browse_mode">Rozdelený režim prehliadania</string>
     <string name="bible_split_long_verses">Rozdeliť dlhé verše na dva snímky</string>
+    <string name="bible_split_long_verses_off">Vypnuté</string>
+    <string name="words_suffix">slov</string>
     <string name="bible_cross_references">Krížové odkazy</string>
     <string name="bible_cross_references_title">Odkazy</string>
     <string name="bible_cross_references_enable">Zobrazovať krížové odkazy</string>

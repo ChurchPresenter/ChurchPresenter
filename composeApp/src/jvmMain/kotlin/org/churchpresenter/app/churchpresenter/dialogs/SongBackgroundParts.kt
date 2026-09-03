@@ -21,6 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -180,8 +185,8 @@ internal fun SwatchTile(
         ) {
             fill()
             when (badge) {
-                SwatchBadge.PLAY -> GlyphBadge("▶")
-                SwatchBadge.PLUS -> GlyphBadge("+")
+                SwatchBadge.PLAY -> GlyphBadge(Icons.Default.PlayArrow)
+                SwatchBadge.PLUS -> GlyphBadge(Icons.Default.Add)
                 SwatchBadge.NONE -> Unit
             }
             if (selected) {
@@ -209,13 +214,22 @@ internal fun SwatchTile(
 /** Which of the design's two centre badges a tile carries, if either. */
 internal enum class SwatchBadge { NONE, PLAY, PLUS }
 
+/**
+ * The badge over a tile: a real icon rather than a text glyph, which a font's line box centers by
+ * its baseline and so draws visibly high in the circle.
+ */
 @Composable
-private fun GlyphBadge(glyph: String) {
+private fun GlyphBadge(glyph: ImageVector) {
     Box(
         modifier = Modifier.size(19.dp).clip(CircleShape).background(Color.Black.copy(alpha = BADGE_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
-        Text(glyph, fontSize = 10.sp, color = Color.White)
+        Icon(
+            imageVector = glyph,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+            tint = Color.White,
+        )
     }
 }
 

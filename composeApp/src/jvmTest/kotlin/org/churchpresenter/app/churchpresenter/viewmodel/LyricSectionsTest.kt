@@ -529,6 +529,24 @@ class LyricSectionsTest {
         assertTrue(sections[2].secondaryLines.isEmpty())
     }
 
+    /**
+     * A header with nothing under it is how an import holds a place for a verse the source never
+     * translated — the VideoPsalm books are written that way — so it has to count as a section.
+     */
+    @Test
+    fun `an empty section in the translation keeps the ones after it in step`() {
+        val sections = vm.getLyricSections(
+            song(
+                lyrics = listOf("[Verse 1]", "one", "[Verse 2]", "two", "[Verse 3]", "three"),
+                secondary = listOf("[Verse 1]", "[Verse 2]", "dos", "[Verse 3]", "tres"),
+            ),
+        )
+        assertEquals(3, sections.size)
+        assertTrue(sections[0].secondaryLines.isEmpty(), "the untranslated verse")
+        assertEquals(listOf("dos"), sections[1].secondaryLines)
+        assertEquals(listOf("tres"), sections[2].secondaryLines, "verse 3 still meets its translation")
+    }
+
     @Test
     fun `matching breaks in both languages pair slide for slide`() {
         val sections = asWritten.getLyricSections(

@@ -103,14 +103,29 @@ object LiveMapReporter {
     internal fun gatherSongCounts(settings: AppSettings): Pair<Int, Int> = try {
         val folders = FileManager().getSongFoldersInDirectory(settings.songSettings.storageDirectory)
         folders.size to folders.sumOf { it.second }
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
+        // As in [detectScreenCount]: a count for a ping is never worth taking the app down for,
+        // and what goes wrong at this depth is not always an Exception.
         0 to 0
     }
 
-    /** Displays attached right now, or 0 when they can't be enumerated (headless, no window server). */
-    internal fun detectScreenCount(): Int = try {
-        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
-    } catch (_: Exception) {
+    /**
+     * Displays attached right now, or 0 when they can't be enumerated (headless, no window server).
+     *
+     * **[Throwable], not [Exception].** Bringing AWT's graphics environment up loads the platform's
+     * native font manager, and when *that* cannot load the JVM raises an
+     * `ExceptionInInitializerError` — an [Error]. A `catch (Exception)` does not see it, so this
+     * line, which exists only to put a number in a usage ping, killed the app before its window
+     * ever opened: `libfontmanager.dylib` in one bundle's runtime was linked against a Homebrew
+     * copy of harfbuzz that the machine running it did not have.
+     *
+     * Nothing here is worth a crash. The same reasoning already governs `CefManager.init`.
+     */
+    internal fun detectScreenCount(
+        probe: () -> Int = { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size },
+    ): Int = try {
+        probe()
+    } catch (_: Throwable) {
         0
     }
 

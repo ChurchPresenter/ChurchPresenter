@@ -35,6 +35,7 @@ internal fun webTab(
     settings: (AppSettings) -> AppSettings = { it },
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
+    cefBlockedByPolicy: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -68,6 +69,7 @@ internal fun webTab(
                         onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
+                        cefBlockedByPolicy = cefBlockedByPolicy,
                     )
                 }
             }
@@ -150,6 +152,11 @@ internal object WebLabel {
     const val ENGINE_UNAVAILABLE_MACOS_BODY =
             "ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 " +
                 "(Monterey) or later to use the Web tab and browser sources."
+    const val ENGINE_UNAVAILABLE_POLICY_TITLE = "Web browser blocked by a policy on this computer"
+    const val ENGINE_UNAVAILABLE_POLICY_BODY =
+            "A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask " +
+                "whoever manages the computer to allow ChurchPresenter, or use a computer without that " +
+                "restriction — the Web tab and browser sources need it."
     const val SNAPSHOT_WAITING = "Waiting for snapshot..."
     const val SNAPSHOT_SCREEN_RECORDING_HINT =
         "If this persists, grant Screen Recording permission\n" +

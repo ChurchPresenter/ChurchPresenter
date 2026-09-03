@@ -431,16 +431,16 @@ class LivePreviewPanelTest {
             }
         }
         onNodeWithText("Stage Monitor").assertDoesNotExist()
-        onNodeWithText("Horizontal Lower Third").assertDoesNotExist()
-        onNodeWithText("Vertical Lower Third").assertDoesNotExist()
+        onNodeWithText("Lower Third").assertDoesNotExist()
     }
 
     @Test
     fun `each non-fullscreen display mode shows its own chip`() = runComposeUiTest {
         val cases = listOf(
             Constants.DISPLAY_MODE_STAGE_MONITOR to "Stage Monitor",
-            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL to "Horizontal Lower Third",
-            Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Vertical Lower Third",
+            // Both stored modes carry the one label: a lower third is a lower third.
+            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL to "Lower Third",
+            Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Lower Third",
         )
         for ((mode, chipText) in cases) {
             val settings = AppSettings(

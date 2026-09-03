@@ -1153,6 +1153,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numer przed tytułem</string>
+    <string name="song_number_corner">Róg</string>
+    <string name="song_number_corner_off">Wyłączone</string>
     <string name="fullscreen_display">Wyświetlanie pełnoekranowe</string>
     <string name="display_mode_label">Tryb wyświetlania:</string>
     <string name="display_mode_one_verse">1 zwrotka</string>
@@ -1786,6 +1788,8 @@
     <string name="style">Styl</string>
     <string name="bible_split_browse_mode">Tryb podzielonego przeglądania</string>
     <string name="bible_split_long_verses">Dziel długie wersety na dwa slajdy</string>
+    <string name="bible_split_long_verses_off">Wyłączone</string>
+    <string name="words_suffix">słów</string>
     <string name="bible_cross_references">Odsyłacze</string>
     <string name="bible_cross_references_title">Odsyłacze</string>
     <string name="bible_cross_references_enable">Pokaż odsyłacze</string>

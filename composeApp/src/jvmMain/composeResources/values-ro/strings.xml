@@ -71,6 +71,8 @@
     <string name="hold_live">Menține Proiectat</string>
     <string name="bible_split_browse_mode">Mod Navigare Divizat</string>
     <string name="bible_split_long_verses">Împarte versetele lungi pe două diapozitive</string>
+    <string name="bible_split_long_verses_off">Dezactivat</string>
+    <string name="words_suffix">cuvinte</string>
     <string name="bible_cross_references">Referințe încrucișate</string>
     <string name="bible_cross_references_title">Referințe</string>
     <string name="bible_cross_references_enable">Afișează referințele încrucișate</string>
@@ -1441,6 +1443,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numărul înaintea titlului</string>
+    <string name="song_number_corner">Colț</string>
+    <string name="song_number_corner_off">Oprit</string>
     <string name="fullscreen_display">Afișare Ecran Complet</string>
     <string name="display_mode_label">Mod Afișare:</string>
     <string name="display_mode_one_verse">1 Strofă</string>

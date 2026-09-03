@@ -194,21 +194,30 @@ object ZefaniaRepositoryIndex {
             // An offline hall still sees the list it saw last time; the failure then surfaces on the
             // install, which is far more useful than an empty dialog.
         } catch (e: IOException) {
-            BibleInstallSupport.reported(
-                "Zefania index fetch failed",
-                e,
-                mapOf("subsystem" to "zefania_index"),
-                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
-            )
+            indexFetchFailed(e, cached)
         } catch (e: UnresolvedAddressException) {
-            BibleInstallSupport.reported(
-                "Zefania index fetch failed",
-                e,
-                mapOf("subsystem" to "zefania_index"),
-                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
-            )
+            indexFetchFailed(e, cached)
+        } catch (e: IllegalStateException) {
+            // See EBibleSource: a buffered body that stops early is ktor's Content-Length check,
+            // not an IOException, and nothing above catches it.
+            if (!with(BibleInstallSupport) { e.isContentLengthMismatch() }) throw e
+            indexFetchFailed(e, cached)
         }
     }
+
+    /**
+     * The outcome for a fetch that did not complete: the index as it was last seen, or a failure.
+     *
+     * One function rather than a body per catch arm — the three of them differ only in the
+     * exception they name. The eBible source has the same shape, for the same reason.
+     */
+    private fun indexFetchFailed(e: Throwable, cached: Index?): IndexOutcome =
+        BibleInstallSupport.reported(
+            "Zefania index fetch failed",
+            e,
+            mapOf("subsystem" to "zefania_index"),
+            cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+        )
 
     /**
      * The outcome for a response that carries no new index — not-modified, rate-limited or an error

@@ -21,8 +21,18 @@ internal class FakeCommandRunner(private val answer: (List<String>) -> CommandRe
     /** The timeout each call asked for, positionally matching [calls]. */
     val timeouts = mutableListOf<Long>()
 
-    /** The first token of each command, which is usually all a test needs to assert on. */
-    val programs: List<String> get() = calls.map { it.firstOrNull() ?: "" }
+    /**
+     * The program each command ran, by name, which is usually all a test needs to assert on.
+     *
+     * The **name**, not the token: ffmpeg is resolved to a real path before it is run — the copy
+     * bundled with the app, an operator's override, or one found on the machine — so the token is
+     * whatever this particular machine happens to have. Which tool was consulted is the question
+     * these tests are asking; where it lives is not.
+     */
+    val programs: List<String>
+        get() = calls.map { call ->
+            call.firstOrNull()?.substringAfterLast('/')?.substringAfterLast('\\') ?: ""
+        }
 
     fun run(command: List<String>, timeoutSeconds: Long): CommandResult {
         calls += command

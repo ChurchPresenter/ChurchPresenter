@@ -192,9 +192,35 @@ class SongLibraryState(private val root: File) {
         refresh()
     }
 
+    /**
+     * True when the library has a folder to write into, and so when anything here may be attempted.
+     *
+     * The window can be opened before a songs folder has ever been chosen. It reads an empty
+     * library and looks ordinary, and every write then aims at the filesystem root — see
+     * [SongLibrary.isConfigured].
+     */
+    val canWrite: Boolean get() = library.isConfigured
+
     suspend fun newSong(titleForNew: String, io: CoroutineDispatcher = Dispatchers.IO) = writing {
+        // Refused rather than attempted: with no folder set the write aims at the filesystem root,
+        // which most machines reject and a few — a container running as root — would accept,
+        // scattering songs where nobody will look for them.
+        if (!canWrite) {
+            lastOutcome = SaveOutcome(0, listOf(titleForNew))
+            return@writing
+        }
         val blank = edits.blank(root, view.songbook.orEmpty(), titleForNew)
-        edits.add(withContext(io) { library.writeNew(blank) })
+        // Reported rather than thrown: this runs in a coroutine started from a click handler, so an
+        // exception here is uncaught and fatal, and a folder that cannot be written to is the
+        // operator's environment rather than a defect. The header already shows `lastOutcome`.
+        runCatching { withContext(io) { library.writeNew(blank) } }
+            .onSuccess {
+                edits.add(it)
+                lastOutcome = null
+            }
+            .onFailure {
+                lastOutcome = SaveOutcome(0, listOf("${blank.title}: ${it.message ?: it::class.simpleName}"))
+            }
         refresh()
     }
 

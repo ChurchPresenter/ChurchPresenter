@@ -83,6 +83,8 @@
     <string name="hold_live">ライブを保持</string>
     <string name="bible_split_browse_mode">分割ブラウズモード</string>
     <string name="bible_split_long_verses">長い聖句を2枚のスライドに分割</string>
+    <string name="bible_split_long_verses_off">オフ</string>
+    <string name="words_suffix">単語</string>
     <string name="bible_cross_references">引照</string>
     <string name="bible_cross_references_title">引照</string>
     <string name="bible_cross_references_enable">引照のリンクを表示する</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">番号をタイトルの前に表示</string>
+    <string name="song_number_corner">角</string>
+    <string name="song_number_corner_off">オフ</string>
     <string name="fullscreen_display">全画面表示</string>
     <string name="display_mode_label">表示方法:</string>
     <string name="display_mode_one_verse">1 節ずつ</string>

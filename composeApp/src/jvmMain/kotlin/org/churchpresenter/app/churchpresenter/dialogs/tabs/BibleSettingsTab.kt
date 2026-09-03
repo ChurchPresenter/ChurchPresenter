@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,24 +30,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_bible_translation
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.bible_block_and_transition
 import churchpresenter.composeapp.generated.resources.bible_cross_references_enable
 import churchpresenter.composeapp.generated.resources.bible_editing
-import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_miscellaneous
-import churchpresenter.composeapp.generated.resources.bible_split_long_verses
+import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_translation
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
-import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
-import churchpresenter.composeapp.generated.resources.bilingual_left_right
-import churchpresenter.composeapp.generated.resources.bilingual_layout
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bible_translations
+import churchpresenter.composeapp.generated.resources.bilingual_layout
+import churchpresenter.composeapp.generated.resources.bilingual_left_right
+import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
@@ -71,9 +73,9 @@ import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
-import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
@@ -112,6 +114,22 @@ private const val TRANSITION_MAX_MS = 2000f
 private const val TRANSITION_STEP_MS = 50f
 
 private val TARGET_BUTTON_WIDTH = 110.dp
+
+/** The gap between a layout row's caption and the segmented button under it. */
+private val LAYOUT_ROW_CAPTION_GAP = 8.dp
+
+/** A layout row offers exactly Left/Right and Top/Bottom, and the two share the row's width. */
+private const val BILINGUAL_SEGMENTS = 2
+private val LAYOUT_SEGMENT_HEIGHT = 34.dp
+
+/** Tracking on the small uppercase scope word, which needs air to read as a label and not a word. */
+private val SCOPE_LETTER_SPACING = 0.9.sp
+
+/** Between one block of the Miscellaneous section and the next, against 8.dp inside a block. */
+private val MISC_BLOCK_GAP = 11.dp
+
+/** Between two checkboxes, which carry 2.dp of their own padding on top of it. */
+private val MISC_CHECKBOX_GAP = 5.dp
 
 /** The gap between a slot's picker and the buttons beside it. */
 private val ROW_GAP = 6.dp
@@ -440,16 +458,33 @@ private fun TranslationRow(
  */
 @Composable
 private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -> Unit) {
-    // Caption above rather than beside: the pane is narrow enough that a label plus two 120.dp
-    // segments overflows, and the overflow clips the second segment off the right edge.
+    // Caption above rather than beside: the pane is narrow enough that a label plus two segments
+    // overflows, and the overflow clips the second segment off the right edge.
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(LAYOUT_ROW_CAPTION_GAP),
     ) {
-        Text(
-            text = "$label \u00b7 ${stringResource(Res.string.bilingual_layout).removeSuffix(":")}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // Which output shape this row is for, then what it sets. Two runs rather than one string:
+        // both rows say "Bilingual layout" and only the scope tells them apart, so the scope is the
+        // half that carries the accent and the setting name is the half that repeats.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            Text(
+                text = label.removeSuffix(":").uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = SCOPE_LETTER_SPACING,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = stringResource(Res.string.bilingual_layout).removeSuffix(":"),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val segmentWidth = maxWidth / BILINGUAL_SEGMENTS
         SegmentedButton(
             items = listOf(
                 SegmentedButtonItem(
@@ -463,10 +498,16 @@ private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -
             ),
             selectedValue = selected,
             onValueChange = onSelect,
-            buttonWidth = 120.dp,
-            buttonHeight = 32.dp,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            // Half the row each, so the pair fills the rail exactly rather than leaving a ragged
+            // margin that changes with its width. `SegmentedButton` takes a fixed segment width and
+            // clips its label at one line, so the width is measured here instead: at `bodyMedium`,
+            // sized to match the captions and checkbox labels around it, the longest shipped label
+            // ("Слева / Справа") no longer fits the 120.dp this used to be pinned at.
+            buttonWidth = segmentWidth,
+            buttonHeight = LAYOUT_SEGMENT_HEIGHT,
+            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         )
+        }
     }
 }
 
@@ -476,6 +517,10 @@ private fun MiscellaneousSection(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     SettingsSection(title = stringResource(Res.string.bible_miscellaneous)) {
+        // The section is a stack of separated blocks rather than a flush list: a caption belongs to
+        // the control under it, so the gap inside a block has to read as smaller than the gap
+        // between blocks. `SettingsSection`'s own column has no arrangement, hence this one.
+        Column(verticalArrangement = Arrangement.spacedBy(MISC_BLOCK_GAP)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -484,6 +529,9 @@ private fun MiscellaneousSection(
                 text = stringResource(Res.string.bible_translation_spacing),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                // Pushes the field to the right edge, so the numeric controls of the section line
+                // up with each other instead of each sitting wherever its label ends.
+                modifier = Modifier.weight(1f),
             )
             NumberSettingsTextField(
                 label = stringResource(Res.string.pixels_short),
@@ -515,6 +563,10 @@ private fun MiscellaneousSection(
                 }
             },
         )
+        LongVerseSplitSlider(settings, onSettingsChange)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        // The plain on/off flags, kept together below the rule -- everything above it is a value.
+        Column(verticalArrangement = Arrangement.spacedBy(MISC_CHECKBOX_GAP)) {
         LabeledCheckbox(
             checked = settings.bibleSettings.multiTranslationDivider,
             onCheckedChange = { enabled ->
@@ -540,17 +592,6 @@ private fun MiscellaneousSection(
             color = MaterialTheme.colorScheme.onSurface,
         )
         LabeledCheckbox(
-            checked = settings.bibleSettings.splitLongVerses,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitLongVerses = enabled)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.bible_split_long_verses),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        LabeledCheckbox(
             checked = settings.bibleSettings.crossReferencesEnabled,
             onCheckedChange = { enabled ->
                 onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossReferencesEnabled = enabled)) }
@@ -561,6 +602,8 @@ private fun MiscellaneousSection(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
+        }
+        }
     }
 }
 

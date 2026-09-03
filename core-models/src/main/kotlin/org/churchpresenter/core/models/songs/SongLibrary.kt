@@ -18,6 +18,20 @@ data class SaveOutcome(val saved: Int, val errors: List<String>)
  */
 class SongLibrary(private val root: File, private val parser: SongFileParser = SongFileParser()) {
 
+    /**
+     * True when [root] names a folder songs can be written into.
+     *
+     * An unconfigured song folder arrives here as `File("")`, and every path built from it resolves
+     * to the filesystem root: `File("", "New Song.song")` is `/New Song.song` on macOS and Linux
+     * and `C:\New Song.song` on Windows. The OS refuses both, so New Song threw
+     * `AccessDeniedException` out of a coroutine and took the app down with it — on a machine where
+     * the operator had simply not chosen a songs folder yet, which is not an error state.
+     *
+     * Checked rather than repaired: writing songs into some guessed default would scatter a
+     * library across the disk, and where they go is the operator's to say.
+     */
+    val isConfigured: Boolean get() = root.path.isNotBlank()
+
     /** Every song under the root, in the order a person reads them: by songbook, then by number. */
     fun load(): List<SongItem> =
         parser.loadSongsFromDirectory(root.absolutePath)

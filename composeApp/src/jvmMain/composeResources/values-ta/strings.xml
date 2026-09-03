@@ -83,6 +83,8 @@
     <string name="hold_live">நேரலையில் நிறுத்து</string>
     <string name="bible_split_browse_mode">பிரித்து உலாவும் பயன்முறை</string>
     <string name="bible_split_long_verses">நீண்ட வசனங்களை இரண்டு ஸ்லைடுகளாகப் பிரிக்கவும்</string>
+    <string name="bible_split_long_verses_off">நிறுத்தம்</string>
+    <string name="words_suffix">சொற்கள்</string>
     <string name="bible_cross_references">குறுக்குக் குறிப்புகள்</string>
     <string name="bible_cross_references_title">குறிப்புகள்</string>
     <string name="bible_cross_references_enable">குறுக்குக் குறிப்பு இணைப்புகளைக் காட்டு</string>
@@ -1664,6 +1666,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">தலைப்புக்கு முன் எண்</string>
+    <string name="song_number_corner">மூலை</string>
+    <string name="song_number_corner_off">நிறுத்தம்</string>
     <string name="fullscreen_display">முழுத்திரைக் காட்சி</string>
     <string name="display_mode_label">காட்சிப் பயன்முறை:</string>
     <string name="display_mode_one_verse">1 பத்தி</string>

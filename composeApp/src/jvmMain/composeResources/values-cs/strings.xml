@@ -60,6 +60,8 @@
     <string name="hold_live">Podržet živě</string>
     <string name="bible_split_browse_mode">Režim rozděleného prohlížení</string>
     <string name="bible_split_long_verses">Rozdělit dlouhé verše na dva snímky</string>
+    <string name="bible_split_long_verses_off">Vypnuto</string>
+    <string name="words_suffix">slov</string>
     <string name="bible_cross_references">Křížové odkazy</string>
     <string name="bible_cross_references_title">Odkazy</string>
     <string name="bible_cross_references_enable">Zobrazovat křížové odkazy</string>
@@ -1203,6 +1205,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo před názvem</string>
+    <string name="song_number_corner">Roh</string>
+    <string name="song_number_corner_off">Vypnuto</string>
     <string name="fullscreen_display">Zobrazení na celou obrazovku</string>
     <string name="display_mode_label">Režim zobrazení:</string>
     <string name="display_mode_one_verse">1 sloka</string>

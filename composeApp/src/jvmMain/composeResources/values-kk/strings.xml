@@ -1154,6 +1154,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Тақырыптың алдындағы нөмір</string>
+    <string name="song_number_corner">Бұрыш</string>
+    <string name="song_number_corner_off">Өшірулі</string>
     <string name="fullscreen_display">Толық экран режимі</string>
     <string name="display_mode_label">Көрсету режимі:</string>
     <string name="display_mode_one_verse">1 шумақ</string>
@@ -1786,6 +1788,8 @@
     <string name="style">Стиль</string>
     <string name="bible_split_browse_mode">Бөлінген шолу режимі</string>
     <string name="bible_split_long_verses">Ұзын аяттарды екі слайдқа бөлу</string>
+    <string name="bible_split_long_verses_off">Өшірулі</string>
+    <string name="words_suffix">сөз</string>
     <string name="bible_cross_references">Айқас сілтемелер</string>
     <string name="bible_cross_references_title">Сілтемелер</string>
     <string name="bible_cross_references_enable">Айқас сілтемелерді көрсету</string>

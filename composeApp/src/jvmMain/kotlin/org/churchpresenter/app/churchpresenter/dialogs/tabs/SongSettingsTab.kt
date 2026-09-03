@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +34,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bible_editing
 import churchpresenter.composeapp.generated.resources.bilingual_layout
 import churchpresenter.composeapp.generated.resources.bilingual_left_right
 import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
@@ -73,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.song_language_secondary
 import churchpresenter.composeapp.generated.resources.song_language_single
 import churchpresenter.composeapp.generated.resources.song_languages
 import churchpresenter.composeapp.generated.resources.song_lyrics_layout
+import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.song_preview_label
 import churchpresenter.composeapp.generated.resources.song_preview_look_ahead
 import churchpresenter.composeapp.generated.resources.song_title_slide
@@ -82,7 +81,9 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
@@ -115,6 +116,9 @@ private const val TRANSITION_STEP_MS = 50f
 private val TARGET_BUTTON_WIDTH = 110.dp
 private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
+
+/** Wide enough for "Bottom Right" and the chevron, so no corner reads ellipsized. */
+private val CORNER_DROPDOWN_WIDTH = 118.dp
 
 /** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
 private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
@@ -542,42 +546,15 @@ private fun SongStylePane(
             onScreenChange = { previewOnScreen = it },
             onScreenEnabled = presenterManager != null && hasOutputForTarget,
         )
-        val style = settings.songSettings.elementStyle(element, target)
-        SettingsSection(title = stringResource(Res.string.bible_editing)) {
-            SongElementRow(
-                settings = settings,
-                onSettingsChange = onSettingsChange,
-                element = element,
-                onElementChange = onElementChange,
-                target = target,
-            )
-            // Keyed on what the panel is pointed at: the controls below are one set standing for ten
-            // stored profiles, and without this Compose keeps the subtree across a switch and hands
-            // each control the state of whichever control held its slot before.
-            key(element, target) {
-                SongTypographyPanel(
-                    element = element,
-                    style = style,
-                    onStyleChange = { edited ->
-                        onSettingsChange { s ->
-                            s.copy(songSettings = s.songSettings.withElementStyle(element, target, edited))
-                        }
-                    },
-                    onReset = {
-                        onSettingsChange { s ->
-                            s.copy(
-                                songSettings = s.songSettings.withElementStyle(
-                                    element,
-                                    target,
-                                    defaultSongElementStyle(element, target),
-                                ),
-                            )
-                        }
-                    },
-                    availableFonts = availableFonts,
-                )
-            }
-        }
+        SongEditingCard(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            element = element,
+            onElementChange = onElementChange,
+            target = target,
+            availableFonts = availableFonts,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+        )
     }
 }
 
@@ -633,8 +610,9 @@ private fun SongTargetSwitchRow(
 }
 
 /** The element tabs, and the two things the lyrics carry that the other elements do not. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SongElementRow(
+internal fun SongElementRow(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     element: SongStyleElement,
@@ -671,16 +649,19 @@ private fun SongElementRow(
     // rather than to an element, so they sit under the tabs rather than in the grid -- and on a row
     // of their own, because five element tabs plus both of these is wider than the pane and left
     // them crushed to a column of single letters.
-    Row(
+    //
+    // Flowing rather than a hard row: the two labelled groups are wider than a narrow pane, and a
+    // `Row` clips rather than wraps, so the last option lost its right-hand half ("Secondary" drawn
+    // as "Seco") with nothing to say the control continued past the edge. Each label is wrapped
+    // with its own control so the pair moves as one -- flowing them separately puts a lone "Lang"
+    // at the end of the first line and its buttons at the start of the next.
+    FlowRow(
         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.song_chunk),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        LabeledControl(stringResource(Res.string.song_chunk)) {
         SegmentedButton(
             items = listOf(
                 SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_VERSE, stringResource(Res.string.song_chunk_verse)),
@@ -694,11 +675,8 @@ private fun SongElementRow(
             buttonHeight = 30.dp,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
         )
-        Text(
-            text = stringResource(Res.string.song_language_scope),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        }
+        LabeledControl(stringResource(Res.string.song_language_scope)) {
         SegmentedButton(
             items = listOf(
                 SegmentedButtonItem(Constants.SONG_LANG_BOTH, stringResource(Res.string.song_language_both)),
@@ -713,9 +691,11 @@ private fun SongElementRow(
             buttonHeight = 30.dp,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
         )
+        }
     }
     SongAppearanceRow(settings, onSettingsChange, element, target)
 }
+
 
 /**
  * When the number or the title appears on [target]'s output, and which of the two leads.
@@ -728,6 +708,7 @@ private fun SongElementRow(
  * left in the tree unreferenced, so the song number kept appearing on the lower third with nothing
  * anywhere in settings to turn it off.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SongAppearanceRow(
     settings: AppSettings,
@@ -736,18 +717,21 @@ private fun SongAppearanceRow(
     target: SongStyleTarget,
 ) {
     val show = settings.songSettings.showFor(element, target) ?: return
-    Row(
+    // Flowing for the same reason as the chunk/language row above, and it matters most here: this
+    // row exists only for the Number and Title elements, so those two were the only ones that ran
+    // off the right edge of a narrow pane -- three options plus the ordering checkbox is the widest
+    // line the card ever draws.
+    FlowRow(
         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text = stringResource(
+        LabeledControl(
+            stringResource(
                 if (element == SongStyleElement.NUMBER) Res.string.show_number else Res.string.show_title,
             ),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        ) {
         SegmentedButton(
             items = listOf(
                 SegmentedButtonItem(Constants.NONE, stringResource(Res.string.none)),
@@ -765,6 +749,25 @@ private fun SongAppearanceRow(
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
             modifier = Modifier.testTag("song_show_${element.name.lowercase()}"),
         )
+        }
+        // The number only. A corner takes it out of the row it shares with the title, so there is
+        // no such choice to offer for the title itself.
+        if (element == SongStyleElement.NUMBER) {
+            LabeledControl(stringResource(Res.string.song_number_corner)) {
+                DropdownSelector(
+                    label = "",
+                    value = settings.songSettings.numberCorner(target.isLowerThird),
+                    options = songNumberCornerOptions(),
+                    onValueChange = { corner ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.withNumberCorner(target.isLowerThird, corner))
+                        }
+                    },
+                    compact = true,
+                    modifier = Modifier.width(CORNER_DROPDOWN_WIDTH).testTag("song_number_corner"),
+                )
+            }
+        }
         // Only where the two share a position, which is the only case in which their order is a
         // question at all -- elsewhere the slide's own layout already answers it.
         if (element == SongStyleElement.NUMBER && settings.songSettings.numberSharesTitlePosition(target)) {
@@ -778,7 +781,6 @@ private fun SongAppearanceRow(
                 modifier = Modifier.testTag("song_songNumberBeforeTitle"),
             )
         }
-        Spacer(Modifier.weight(1f))
     }
 }
 

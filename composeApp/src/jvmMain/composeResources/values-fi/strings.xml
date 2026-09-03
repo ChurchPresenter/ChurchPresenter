@@ -83,6 +83,8 @@
     <string name="hold_live">Pidä livenä</string>
     <string name="bible_split_browse_mode">Jaettu selaustila</string>
     <string name="bible_split_long_verses">Jaa pitkät jakeet kahdelle dialle</string>
+    <string name="bible_split_long_verses_off">Pois</string>
+    <string name="words_suffix">sanaa</string>
     <string name="bible_cross_references">Ristiviitteet</string>
     <string name="bible_cross_references_title">Viitteet</string>
     <string name="bible_cross_references_enable">Näytä ristiviitelinkit</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero ennen otsikkoa</string>
+    <string name="song_number_corner">Kulma</string>
+    <string name="song_number_corner_off">Pois</string>
     <string name="fullscreen_display">Koko näytön esitys</string>
     <string name="display_mode_label">Näyttötila:</string>
     <string name="display_mode_one_verse">1 säkeistö</string>

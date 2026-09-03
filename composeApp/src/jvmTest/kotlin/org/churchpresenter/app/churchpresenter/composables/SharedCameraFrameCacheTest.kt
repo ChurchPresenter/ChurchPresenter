@@ -264,6 +264,22 @@ class SharedCameraFrameCacheTest {
     }
 
     @Test
+    fun `the last attempt asks the device for nothing at all`() {
+        // What a device that took the request and then sent no video refused is the request itself,
+        // so the retry that follows drops every input flag — including the size and rate the source
+        // asked for, which no merge of an override would remove. Issue #464.
+        val cmd = buildFfmpegCommand(
+            camera(devicePath = "avfoundation://0", videoFormat = "1024x576@30"),
+            CaptureOverride.DEVICE_DEFAULTS,
+        )!!
+
+        assertTrue(cmd.none { it == "-video_size" || it == "-framerate" || it == "-pixel_format" }, cmd.toString())
+        // Everything that is not a negotiated input flag stays: this is the same capture, asked for
+        // less specifically, not a different one.
+        assertTrue(cmd.containsAll(listOf("-f", "avfoundation", "-i", "0:none", "rawvideo")), cmd.toString())
+    }
+
+    @Test
     fun `ffmpeg is looked for where it is installed, not only where PATH points`() {
         // A desktop app does not inherit the shell's PATH: a Finder-launched macOS .app gets
         // launchd's default, which has neither Homebrew prefix on it. Resolving only the bare name

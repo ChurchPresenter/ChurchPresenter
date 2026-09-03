@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer voor titel</string>
+    <string name="song_number_corner">Hoek</string>
+    <string name="song_number_corner_off">Uit</string>
     <string name="fullscreen_display">Volledig scherm weergave</string>
     <string name="display_mode_label">Weergavemodus:</string>
     <string name="display_mode_one_verse">1 vers</string>
@@ -1808,6 +1810,8 @@
     <string name="style">Stijl</string>
     <string name="bible_split_browse_mode">Gesplitste bladermodus</string>
     <string name="bible_split_long_verses">Lange verzen over twee dia's verdelen</string>
+    <string name="bible_split_long_verses_off">Uit</string>
+    <string name="words_suffix">woorden</string>
     <string name="bible_cross_references">Kruisverwijzingen</string>
     <string name="bible_cross_references_title">Verwijzingen</string>
     <string name="bible_cross_references_enable">Kruisverwijzingen tonen</string>

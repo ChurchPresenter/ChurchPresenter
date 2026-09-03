@@ -83,6 +83,8 @@
     <string name="hold_live">Panatilihing Live</string>
     <string name="bible_split_browse_mode">Mode ng Split Browse</string>
     <string name="bible_split_long_verses">Hatiin ang mahahabang talata sa dalawang slide</string>
+    <string name="bible_split_long_verses_off">Off</string>
+    <string name="words_suffix">salita</string>
     <string name="bible_cross_references">Mga Cross Reference</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Ipakita ang mga link ng cross reference</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero bago ang pamagat</string>
+    <string name="song_number_corner">Sulok</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen na Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Talata</string>

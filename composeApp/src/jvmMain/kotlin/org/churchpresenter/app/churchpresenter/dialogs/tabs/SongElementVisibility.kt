@@ -30,7 +30,11 @@ internal fun SongSettings.showFor(element: SongStyleElement, target: SongStyleTa
  * which comes first, and offering a switch for it would be offering a choice with no effect.
  */
 internal fun SongSettings.numberSharesTitlePosition(target: SongStyleTarget): Boolean =
-    if (target.isLowerThird) {
+    // A cornered number is drawn over the slide and never in the title's row, so their order is not
+    // a question there either -- see [numberCorner].
+    if (numberCorner(target.isLowerThird) != Constants.NONE) {
+        false
+    } else if (target.isLowerThird) {
         songNumberLowerThirdPosition == titleLowerThirdPosition &&
             songNumberLowerThirdHorizontalAlignment == titleLowerThirdHorizontalAlignment
     } else {

@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -175,6 +176,20 @@ class SongSettingsTabScreenshotTest {
     @Test
     fun `the colour picker open`() = shoot("colour_picker", rootIndex = 1) {
         onAllNodesWithText(WHITE_HEX)[0].performClick()
+        waitForIdle()
+    }
+
+    /**
+     * The corner dropdown open, on the Number element -- the only element that carries one.
+     *
+     * A fixed list of five, unlike the font dropdown below, so the image belongs to the control
+     * rather than to the machine that recorded it.
+     */
+    @Test
+    fun `the number's corner dropdown open`() = shoot("element_number_corner_open", rootIndex = 1) {
+        onNodeWithText("Number").performClick()
+        waitForIdle()
+        onNodeWithTag("song_number_corner").performClick()
         waitForIdle()
     }
 

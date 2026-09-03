@@ -329,6 +329,22 @@ data class BibleSettings(
      * next/previous-verse keys step through both halves before moving on.
      */
     val splitLongVerses: Boolean = false,
+
+    /**
+     * How many words a verse must exceed before [splitLongVerses] breaks it in two.
+     *
+     * Tunable rather than fixed because the number is only meaningful against a language. At the
+     * default of 45 the rule fires on 5.5% of KJV verses and on 0.02% of the Tamil BSI -- five
+     * verses in the whole Bible -- even though the Tamil ones average *more* characters. Tamil is
+     * agglutinative: one word carries what English spreads over two or three, so Esther 8:9 is 90
+     * words in the KJV and 36 in Tamil and only the English one was ever split. 25 is the Tamil
+     * equivalent of the English default, which is why the slider reaches it.
+     *
+     * Word count cannot be made to work for a script written without spaces at all -- Chinese,
+     * Japanese, Thai, Lao -- where a verse is one "word" at every setting. Those need the split
+     * decided on length instead, which this does not do.
+     */
+    val longVerseWordCount: Int = 45,
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.

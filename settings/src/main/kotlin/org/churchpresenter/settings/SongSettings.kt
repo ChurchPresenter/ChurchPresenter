@@ -116,6 +116,22 @@ data class SongSettings(
     val songNumberLowerThirdFontSize: Int = 28,
     val showNumber: String = Constants.FIRST_PAGE,
     val songNumberPosition: String = Constants.BELOW_VERSE,
+    /**
+     * Pins the number to a corner of the slide instead of letting it flow with the title.
+     *
+     * [Constants.NONE] leaves it in the row above or below the lyrics that [songNumberPosition] and
+     * [songNumberHorizontalAlignment] describe. Any of [Constants.TOP_LEFT], [Constants.TOP_RIGHT],
+     * [Constants.BOTTOM_LEFT] or [Constants.BOTTOM_RIGHT] takes it out of that row and draws it over
+     * the slide in that corner, inside the configured margins -- so it costs the lyrics no height
+     * and never moves when the title does.
+     *
+     * Bottom right by default, which is where [songNumberPosition] and
+     * [songNumberHorizontalAlignment] already put it out of the box -- so a fresh install looks the
+     * same either way, and a corner is what the number is now pinned by rather than a row it shares.
+     * Documents written before this field existed are pinned to [Constants.NONE] by the schema 9
+     * migration instead, so an operator who had moved the number keeps where they put it.
+     */
+    val songNumberCorner: String = Constants.BOTTOM_RIGHT,
     val songNumberHorizontalAlignment: String = Constants.RIGHT,
     val songNumberColor: String = "#FFFFFF", // White
     val songNumberBold: Boolean = false,
@@ -127,6 +143,8 @@ data class SongSettings(
     val showNumberLowerThird: String = Constants.FIRST_PAGE,
     val songNumberLowerThirdColor: String = "#FFFFFF",
     val songNumberLowerThirdPosition: String = Constants.BELOW_VERSE,
+    /** [songNumberCorner] for the lower third; the corners are the band's, not the screen's. */
+    val songNumberLowerThirdCorner: String = Constants.BOTTOM_RIGHT,
     val songNumberLowerThirdHorizontalAlignment: String = Constants.RIGHT,
     val songNumberLowerThirdBold: Boolean = false,
     val songNumberLowerThirdItalic: Boolean = false,

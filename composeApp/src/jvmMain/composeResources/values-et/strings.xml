@@ -77,6 +77,8 @@
     <string name="hold_live">Hoia eetris</string>
     <string name="bible_split_browse_mode">Jagatud sirvimisrežiim</string>
     <string name="bible_split_long_verses">Jaga pikad salmid kahele slaidile</string>
+    <string name="bible_split_long_verses_off">Väljas</string>
+    <string name="words_suffix">sõna</string>
     <string name="bible_cross_references">Ristviited</string>
     <string name="bible_cross_references_title">Viited</string>
     <string name="bible_cross_references_enable">Näita ristviiteid</string>
@@ -1491,6 +1493,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number enne pealkirja</string>
+    <string name="song_number_corner">Nurk</string>
+    <string name="song_number_corner_off">Väljas</string>
     <string name="fullscreen_display">Täisekraankuva</string>
     <string name="display_mode_label">Kuvarežiim:</string>
     <string name="display_mode_one_verse">1 salm</string>

@@ -372,7 +372,7 @@ class BibleViewModel(
                     )
                 }
             }
-            verseList.versePage(currentVersePage(), splitLongVersesEnabled)
+            verseList.versePage(currentVersePage(), splitLongVersesEnabled, longVerseWordCount)
         }
     }
 

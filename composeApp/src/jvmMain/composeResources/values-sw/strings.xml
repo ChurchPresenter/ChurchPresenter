@@ -83,6 +83,8 @@
     <string name="hold_live">Shikilia Live</string>
     <string name="bible_split_browse_mode">Hali ya Kuvinjari Iliyogawanywa</string>
     <string name="bible_split_long_verses">Gawanya mistari mirefu katika slaidi mbili</string>
+    <string name="bible_split_long_verses_off">Zima</string>
+    <string name="words_suffix">maneno</string>
     <string name="bible_cross_references">Marejeleo Mtambuka</string>
     <string name="bible_cross_references_title">Marejeleo</string>
     <string name="bible_cross_references_enable">Onyesha viungo vya marejeleo mtambuka</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Namba kabla ya kichwa</string>
+    <string name="song_number_corner">Pembe</string>
+    <string name="song_number_corner_off">Zima</string>
     <string name="fullscreen_display">Onyesho la skrini nzima</string>
     <string name="display_mode_label">Namna ya kuonyesha:</string>
     <string name="display_mode_one_verse">Ubeti 1</string>

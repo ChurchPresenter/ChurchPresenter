@@ -83,6 +83,8 @@
     <string name="hold_live">Tahan Langsung</string>
     <string name="bible_split_browse_mode">Mod Semak Berasingan</string>
     <string name="bible_split_long_verses">Bahagikan ayat panjang kepada dua slaid</string>
+    <string name="bible_split_long_verses_off">Mati</string>
+    <string name="words_suffix">kata</string>
     <string name="bible_cross_references">Rujukan Silang</string>
     <string name="bible_cross_references_title">Ruj.</string>
     <string name="bible_cross_references_enable">Tunjukkan pautan rujukan silang</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nombor sebelum tajuk</string>
+    <string name="song_number_corner">Sudut</string>
+    <string name="song_number_corner_off">Mati</string>
     <string name="fullscreen_display">Paparan Skrin Penuh</string>
     <string name="display_mode_label">Mod Paparan:</string>
     <string name="display_mode_one_verse">1 Rangkap</string>

@@ -70,6 +70,18 @@ object CefManager {
         private set
 
     /**
+     * True when the machine's own software policy refused to load the browser engine.
+     *
+     * A managed Windows build can carry an Application Control (WDAC/AppLocker) rule that blocks
+     * unsigned or unknown binaries, and JCEF's `jcef.dll` is downloaded at first use rather than
+     * shipped signed by us — so it is exactly what such a rule stops. Nothing the app does changes
+     * that, and the operator cannot act on "install the Visual C++ Redistributable", which is what
+     * the Web tab otherwise tells them.
+     */
+    var blockedByPolicy = false
+        private set
+
+    /**
      * Chromium 139+ (bundled here as CEF 143, see build.gradle.kts) dropped support for
      * macOS 11 (Big Sur) — Chrome 138 was the last version to run there. CefApp.startup()
      * fails on unsupported macOS versions with no exception cause (just returns false deep in
@@ -210,6 +222,20 @@ object CefManager {
         else -> null
     }
 
+    /**
+     * "policy" when [message] is a machine refusing to load the library, or null for a real failure.
+     *
+     * Matched on the message because it is only knowable after the load has been attempted — unlike
+     * [jcefInstallBlocker], whose two causes can be asked about beforehand. Matching English
+     * wording is a real limitation and the reason this only ever *suppresses* an event: a localised
+     * Windows falls through and is reported as before, which is the safe direction to be wrong in.
+     */
+    internal fun jcefPolicyBlock(message: String?): String? {
+        val text = message?.lowercase() ?: return null
+        val blocked = listOf("application control policy", "blocked by group policy", "blocked this file")
+        return if (blocked.any { it in text }) "policy" else null
+    }
+
     fun init() {
         if (initialized) return
         if (isUnsupportedMacOS()) {
@@ -279,6 +305,16 @@ object CefManager {
                     "os" to (System.getProperty("os.name") ?: ""),
                     "arch" to (System.getProperty("os.arch") ?: "")
                 ))
+            }
+            // A policy block is the machine, not a defect, and it recurs on every launch of every
+            // affected install — so it is tagged and told to the operator rather than reported,
+            // exactly as the two blockers checked before the download are.
+            val policy = jcefPolicyBlock(t.message)
+            if (policy != null) {
+                blockedByPolicy = true
+                System.err.println("[JCEF] Blocked by this machine's software policy: ${t.message}")
+                runCatching { CrashReporter.setTag("jcef.blocked", policy) }
+                return
             }
             CrashReporter.reportException(t, context = "CefManager.init")
         }

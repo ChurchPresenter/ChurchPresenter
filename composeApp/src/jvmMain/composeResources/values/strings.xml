@@ -109,6 +109,8 @@
     <string name="hold_live">Hold Live</string>
     <string name="bible_split_browse_mode">Split Browse Mode</string>
     <string name="bible_split_long_verses">Split long verses across two slides</string>
+    <string name="bible_split_long_verses_off">Off</string>
+    <string name="words_suffix">words</string>
     <string name="bible_cross_references">Cross References</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Show cross reference links</string>
@@ -1075,12 +1077,23 @@
     <string name="ndi_runtime_missing_help">NDI output needs the free NDI Runtime, which is installed separately — this app does not include it. Install it, then check again.</string>
     <string name="ndi_runtime_install_link">Get the NDI Runtime</string>
     <string name="ndi_runtime_check_again">Check again</string>
-    <string name="ndi_runtime_unsupported_cpu">This computer\'s processor does not meet NDI\'s requirements (SSE4.2).</string>
+    <string name="ndi_runtime_unsupported_cpu">This computer's processor does not meet NDI's requirements (SSE4.2).</string>
     <string name="ndi_runtime_load_failed">An NDI Runtime was found at %1$s but could not be loaded. It may be for a different processor architecture, or too old.</string>
     <string name="ndi_runtime_ready">NDI Runtime %1$s</string>
     <string name="ndi_runtime_path">NDI Runtime folder</string>
     <string name="ndi_runtime_browse">Choose Folder</string>
     <string name="ndi_runtime_path_help">Leave empty to detect automatically. NDI_RUNTIME_DIR_V6 and NDI_RUNTIME_DIR_V5 are honoured.</string>
+    <string name="ffmpeg_section_title">Camera Capture</string>
+    <string name="ffmpeg_ready">Using ffmpeg at %1$s</string>
+    <string name="ffmpeg_bundled_ready">Using the ffmpeg included with ChurchPresenter</string>
+    <string name="ffmpeg_missing_title">ffmpeg was not found</string>
+    <string name="ffmpeg_missing_help">Cameras and capture cards are opened with ffmpeg. This build should include one — choose an ffmpeg below, or install ffmpeg and check again.</string>
+    <string name="ffmpeg_path_hint">Choose an ffmpeg program</string>
+    <string name="ffmpeg_browse">Choose ffmpeg</string>
+    <string name="ffmpeg_check_again">Check again</string>
+    <string name="ffmpeg_clear">Use bundled</string>
+    <string name="ffmpeg_download_link">Get ffmpeg</string>
+    <string name="ffmpeg_path_help">Leave empty to use the ffmpeg included with ChurchPresenter.</string>
     <string name="ndi_trademark">NDI® is a registered trademark of Vizrt NDI AB.</string>
 
     <!-- Background Settings Tab -->
@@ -1335,6 +1348,8 @@
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
     <string name="web_engine_unavailable_title">Web browser unavailable</string>
     <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
+    <string name="web_engine_unavailable_policy_title">Web browser blocked by a policy on this computer</string>
+    <string name="web_engine_unavailable_policy_body">A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask whoever manages the computer to allow ChurchPresenter, or use a computer without that restriction — the Web tab and browser sources need it.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
     <string name="web_live_badge">LIVE</string>
@@ -1500,7 +1515,7 @@
          virtual cameras. Kept defined because fourteen locales translate it: removing it here would
          orphan every one of those, which LocaleStringsTest gates against. -->
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
-    <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg. Until ffmpeg is installed, no camera can be shown — install it, then press Refresh Cameras.</string>
+    <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg, and this build could not find its copy. Open Settings → Projection to point at an ffmpeg, then check again.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
     <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ffmpeg is not installed. Install ffmpeg, then select the camera again.</string>
@@ -1510,6 +1525,8 @@
     <string name="canvas_camera_error_unsupported_format">This device does not accept the video format that was requested. Choose a specific one under Video Format.</string>
     <string name="canvas_camera_error_unsupported_framerate">This device does not accept the frame rate that was requested. Choose a specific format under Video Format.</string>
     <string name="canvas_camera_error_device_busy">This camera is already in use by another application.</string>
+    <string name="canvas_camera_error_config_refused">This camera would not accept the video format that was requested and sent nothing. Set Video Format to Auto, or choose one of the formats it lists.</string>
+    <string name="canvas_camera_error_permission_or_unavailable">macOS would not send video from this camera. Check System Settings → Privacy &amp; Security → Camera that ChurchPresenter is switched on, and that no other app is using the camera.</string>
     <string name="canvas_camera_error_device_not_found">This camera is no longer connected.</string>
     <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
     <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
@@ -1858,8 +1875,8 @@
     <string name="bible_catalog_license_unknown">This archive states no copyright for this translation.</string>
     <string name="bible_catalog_license_source_ebible">eBible.org lists this translation as redistributable and publishes the copyright shown above.</string>
     <string name="bible_catalog_license_source_zefania">The Zefania archive publishes no licence details, so this translation’s copyright only becomes visible once it is installed. Its modules are community-contributed and have not been checked.</string>
-    <string name="bible_catalog_license_source_beblia">The Holy Bible XML archive republishes each translation\'s own copyright statement, shown above, but its files are community-contributed and none of the statements have been checked.</string>
-    <string name="bible_catalog_book_names_english">Book names will appear in English for this translation — the archive\'s files identify books by number only. Verse text is unaffected.</string>
+    <string name="bible_catalog_license_source_beblia">The Holy Bible XML archive republishes each translation's own copyright statement, shown above, but its files are community-contributed and none of the statements have been checked.</string>
+    <string name="bible_catalog_book_names_english">Book names will appear in English for this translation — the archive's files identify books by number only. Verse text is unaffected.</string>
     <string name="bible_catalog_license_accept">I understand — Download</string>
     <string name="bible_catalog_subtitle">Browse free translations and add them to your library</string>
     <string name="bible_catalog_installed_count">%1$d installed</string>
@@ -1914,6 +1931,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>
+    <string name="song_number_corner">Corner</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Verse</string>

@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Número antes del título</string>
+    <string name="song_number_corner">Esquina</string>
+    <string name="song_number_corner_off">Apagado</string>
     <string name="fullscreen_display">Pantalla completa</string>
     <string name="display_mode_label">Modo de visualización:</string>
     <string name="display_mode_one_verse">1 versículo</string>
@@ -1808,6 +1810,8 @@
     <string name="style">Estilo</string>
     <string name="bible_split_browse_mode">Modo de navegación dividida</string>
     <string name="bible_split_long_verses">Dividir versículos largos en dos diapositivas</string>
+    <string name="bible_split_long_verses_off">Apagado</string>
+    <string name="words_suffix">palabras</string>
     <string name="bible_cross_references">Referencias cruzadas</string>
     <string name="bible_cross_references_title">Referencias</string>
     <string name="bible_cross_references_enable">Mostrar referencias cruzadas</string>

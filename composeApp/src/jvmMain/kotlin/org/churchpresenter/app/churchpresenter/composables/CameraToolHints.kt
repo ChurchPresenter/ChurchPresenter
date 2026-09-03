@@ -24,8 +24,8 @@ import org.jetbrains.compose.resources.StringResource
  * on, and enumeration takes a noticeable moment.
  *
  * [ffmpegAvailable] is a parameter rather than a call to [isFfmpegAvailable] so this is a pure
- * decision a test can drive. `FfmpegBinary` resolves its path in a `by lazy` and must not grow a
- * mutable seam for testing.
+ * decision a test can drive. `FfmpegBinary` caches what it resolved and must not grow a mutable
+ * seam for testing — its `recheck` is for the settings row, not for a test.
  */
 internal fun cameraHintStringRes(
     osName: String,

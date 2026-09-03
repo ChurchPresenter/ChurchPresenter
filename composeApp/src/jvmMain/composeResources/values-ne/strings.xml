@@ -83,6 +83,8 @@
     <string name="hold_live">प्रस्तुतिमा राख्नुहोस्</string>
     <string name="bible_split_browse_mode">छुट्टै हेर्ने मोड</string>
     <string name="bible_split_long_verses">लामो पदहरूलाई दुई स्लाइडमा विभाजन गर्नुहोस्</string>
+    <string name="bible_split_long_verses_off">बन्द</string>
+    <string name="words_suffix">शब्द</string>
     <string name="bible_cross_references">सम्बन्धित सन्दर्भ</string>
     <string name="bible_cross_references_title">सन्दर्भ</string>
     <string name="bible_cross_references_enable">सम्बन्धित सन्दर्भका लिङ्क देखाउनुहोस्</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">शीर्षकभन्दा अघि नम्बर</string>
+    <string name="song_number_corner">कुना</string>
+    <string name="song_number_corner_off">बन्द</string>
     <string name="fullscreen_display">पूरा पर्दामा देखाउने</string>
     <string name="display_mode_label">देखाउने तरिका:</string>
     <string name="display_mode_one_verse">१ पद</string>

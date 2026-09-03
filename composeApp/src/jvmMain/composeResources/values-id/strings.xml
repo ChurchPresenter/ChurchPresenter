@@ -83,6 +83,8 @@
     <string name="hold_live">Tahan Tayangan</string>
     <string name="bible_split_browse_mode">Mode Telusur Terpisah</string>
     <string name="bible_split_long_verses">Bagi ayat panjang menjadi dua slide</string>
+    <string name="bible_split_long_verses_off">Mati</string>
+    <string name="words_suffix">kata</string>
     <string name="bible_cross_references">Referensi Silang</string>
     <string name="bible_cross_references_title">Ref</string>
     <string name="bible_cross_references_enable">Tampilkan tautan referensi silang</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nomor sebelum judul</string>
+    <string name="song_number_corner">Sudut</string>
+    <string name="song_number_corner_off">Mati</string>
     <string name="fullscreen_display">Tampilan Layar Penuh</string>
     <string name="display_mode_label">Mode Tampilan:</string>
     <string name="display_mode_one_verse">1 Ayat</string>

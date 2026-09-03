@@ -199,6 +199,9 @@ class InstallHelpersTest {
         // download did not finish" — a fact about the church's network, not about the app.
         assertTrue(isEnvironment(UnresolvedAddressException()))
         assertTrue(isEnvironment(ConnectException("refused")))
+        // A reset mid-fetch is the same fact as a refusal, and was reported separately until
+        // SocketException — which ConnectException extends — replaced the narrower type.
+        assertTrue(isEnvironment(java.net.SocketException("Connection reset")))
         assertTrue(isEnvironment(SocketTimeoutException("timed out")))
         assertTrue(isEnvironment(SSLException("bad certificate")))
     }
@@ -218,6 +221,24 @@ class InstallHelpersTest {
         // bytes stop arriving. Reported once from a church whose network does that to
         // raw.githubusercontent.com; it is TruncatedBodyException's fact, one layer lower.
         assertTrue(isEnvironment(java.io.EOFException("the server prematurely closed the connection")))
+    }
+
+    @Test
+    fun `a catalogue body that stopped short is the operator's line, and is recognised at all`() {
+        // ktor's own check on a buffered body, and a plain IllegalStateException — so no catch in
+        // any of the three catalogue sources saw it and it came out of the coroutine as a fatal
+        // crash from the Bible tab. Matched on ktor's wording, which unlike an OS message is the
+        // same in every locale; anything else with that type still has to be thrown.
+        val truncated = IllegalStateException(
+            "Content-Length mismatch: expected 731082 bytes, but received 20192 bytes"
+        )
+
+        assertTrue(with(BibleInstallSupport) { truncated.isContentLengthMismatch() })
+        assertTrue(isEnvironment(truncated), "the church's connection, not a defect to file")
+        assertFalse(
+            with(BibleInstallSupport) { IllegalStateException("not initialised").isContentLengthMismatch() },
+            "an ordinary IllegalStateException means this code has a bug and must not be swallowed",
+        )
     }
 
     @Test

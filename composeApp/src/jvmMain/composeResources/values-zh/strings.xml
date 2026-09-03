@@ -83,6 +83,8 @@
     <string name="hold_live">保持上屏</string>
     <string name="bible_split_browse_mode">分屏浏览模式</string>
     <string name="bible_split_long_verses">将长经文拆分为两张幻灯片</string>
+    <string name="bible_split_long_verses_off">关闭</string>
+    <string name="words_suffix">词</string>
     <string name="bible_cross_references">串珠</string>
     <string name="bible_cross_references_title">串珠</string>
     <string name="bible_cross_references_enable">显示串珠链接</string>
@@ -1659,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">编号在标题之前</string>
+    <string name="song_number_corner">角落</string>
+    <string name="song_number_corner_off">关闭</string>
     <string name="fullscreen_display">全屏显示</string>
     <string name="display_mode_label">显示方式：</string>
     <string name="display_mode_one_verse">每次 1 段</string>

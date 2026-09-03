@@ -16,6 +16,7 @@ import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.song_element_title
 import churchpresenter.composeapp.generated.resources.song_element_number
+import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
@@ -240,6 +241,13 @@ private fun SongNumberGroup(
                 onSelect = { v ->
                     update { if (lowerThird) it.copy(showNumberLowerThird = v) else it.copy(showNumber = v) }
                 },
+            )
+        }
+        CustomizeRow(stringResource(Res.string.song_number_corner)) {
+            DropdownControl(
+                value = ss.numberCorner(lowerThird),
+                options = songNumberCornerOptions(),
+                onValueChange = { v -> update { it.withNumberCorner(lowerThird, v) } },
             )
         }
     }

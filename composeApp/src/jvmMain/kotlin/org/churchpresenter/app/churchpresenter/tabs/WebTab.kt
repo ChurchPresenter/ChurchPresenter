@@ -72,6 +72,8 @@ import churchpresenter.composeapp.generated.resources.web_back
 import churchpresenter.composeapp.generated.resources.web_clear_typed_text
 import churchpresenter.composeapp.generated.resources.web_clear_url
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_policy_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_policy_title
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_title
@@ -141,13 +143,14 @@ fun WebTab(
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
     /** Overridable so tests can reach both branches without touching the real JCEF singleton. */
     cefInitialized: Boolean = CefManager.initialized,
-    cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported
+    cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
+    cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
 ) {
     // JCEF's native engine can fail to load at startup (broken chrome_elf.dll, missing
     // VC++ runtime, etc.). CefManager.init() catches that and leaves the engine down for
     // the whole session, so show an actionable panel instead of dead browser chrome.
     if (!cefInitialized) {
-        WebEngineUnavailable(modifier, cefMacOsUnsupported)
+        WebEngineUnavailable(modifier, cefMacOsUnsupported, cefBlockedByPolicy)
         return
     }
 
@@ -877,7 +880,10 @@ fun WebTab(
 @Composable
 internal fun WebEngineUnavailable(
     modifier: Modifier = Modifier,
-    macOsUnsupported: Boolean = CefManager.macOsUnsupported
+    macOsUnsupported: Boolean = CefManager.macOsUnsupported,
+    // A managed Windows build can block the downloaded engine outright, and telling someone in that
+    // position to install a redistributable sends them after something that will not help.
+    blockedByPolicy: Boolean = CefManager.blockedByPolicy,
 ) {
     Column(
         modifier = modifier
@@ -896,8 +902,11 @@ internal fun WebEngineUnavailable(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(
-                if (macOsUnsupported) Res.string.web_engine_unavailable_macos_title
-                else Res.string.web_engine_unavailable_title
+                when {
+                    macOsUnsupported -> Res.string.web_engine_unavailable_macos_title
+                    blockedByPolicy -> Res.string.web_engine_unavailable_policy_title
+                    else -> Res.string.web_engine_unavailable_title
+                }
             ),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -906,8 +915,11 @@ internal fun WebEngineUnavailable(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(
-                if (macOsUnsupported) Res.string.web_engine_unavailable_macos_body
-                else Res.string.web_engine_unavailable_body
+                when {
+                    macOsUnsupported -> Res.string.web_engine_unavailable_macos_body
+                    blockedByPolicy -> Res.string.web_engine_unavailable_policy_body
+                    else -> Res.string.web_engine_unavailable_body
+                }
             ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
