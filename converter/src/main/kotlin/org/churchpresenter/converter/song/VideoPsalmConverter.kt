@@ -11,6 +11,14 @@ data class VideoPsalmSong(
     val ccli: String = "",
     val sequence: List<String> = emptyList(),
     val sections: List<SongSection> = emptyList(),
+    /** The book's second language, one section per entry of [sections]; empty for a book with one. */
+    val secondarySections: List<SongSection> = emptyList(),
+)
+
+/** A song's sections in each of its languages; [secondary] is empty for a book that has only one. */
+data class BookSections(
+    val primary: List<SongSection>,
+    val secondary: List<SongSection> = emptyList(),
 )
 
 data class VideoPsalmBook(
@@ -35,6 +43,13 @@ data class VideoPsalmBook(
  *    and 12 instead of stacking three "Verse 1"s.
  *  - **The last verse carries the book's end marker** — a line of `***` or `<><><>` — which is
  *    punctuation for the operator, not a lyric.
+ *  - **The text carries the book's own colors.** A bilingual book wraps its second language in
+ *    `<cAARRGGBB>` … `</c>`, which is styling from another program's slides — and which hides the
+ *    end marker when the marker is written inside it. See [colorMarkup].
+ *  - **A bilingual verse is one block with a rule through it.** The two languages are separated by
+ *    a row of dashes inside the same verse, so they become the `.song` file's `[Primary]` and
+ *    `[Secondary]` halves rather than one section with a line of dashes in the middle. See
+ *    [languageSeparator].
  *
  * `Sequence` ("V1 C1 V2 C1 V3 C2") is read for the preview only. It is authored separately from the
  * verses and drifts from them — 117 of the 2,564 songs in one real book disagree — so it is not
@@ -64,6 +79,27 @@ object VideoPsalmConverter {
     /** A line of nothing but `*` or `<>`: how a book marks the end of a song inside its last verse. */
     private val endMarker = Regex("""^[*<>\s]+$""")
 
+    /**
+     * VideoPsalm's inline color markup: `<cAARRGGBB>` … `</c>`, which a bilingual book wraps its
+     * second language in to give it a color of its own.
+     *
+     * It is one program's slide styling rather than a lyric, and ChurchPresenter colors a song from
+     * its own background settings — so it is dropped rather than carried across. Dropping it
+     * also puts the end marker back within reach of [endMarker]: a book that writes the marker
+     * inside the colour it just used, as `<cFF00D800>***</c>`, was leaving a line of asterisks at
+     * the end of the last verse because the tags around it are not `*`, `<` or `>`.
+     */
+    private val colorMarkup = Regex("""</?c[0-9a-fA-F]*>""")
+
+    /**
+     * The rule a bilingual book draws between its two languages: a line of nothing but dashes,
+     * inside the verse both languages share.
+     *
+     * Everything above it is the verse, everything below it the translation — which is what the
+     * `.song` format keeps in separate halves, so the app can show either language or both.
+     */
+    private val languageSeparator = Regex("""^-{2,}$""")
+
     private val runsOfWhitespace = Regex("""\s+""")
     private val sequenceSeparators = Regex("""[\s,]+""")
 
@@ -89,6 +125,7 @@ object VideoPsalmConverter {
                     composer = song.composer,
                     ccli = song.ccli,
                     sections = song.sections,
+                    secondarySections = song.secondarySections,
                 ),
                 taken,
                 song.number,
@@ -103,36 +140,58 @@ object VideoPsalmConverter {
         return title.ifBlank { input.nameWithoutExtension }
     }
 
-    private fun songOf(node: LooseJson): VideoPsalmSong = VideoPsalmSong(
-        // `Alias` is the number the book prints; `ID` is its position, and they differ in a book
-        // that numbers from something other than one.
-        number = node.text("Alias").ifBlank { node.text("ID") }.trim(),
-        title = flattened(node.text("Text")),
-        author = flattened(node.text("Author")),
-        composer = flattened(node.text("Composer")),
-        copyright = flattened(node.text("Copyright")),
-        ccli = node.text("CCLI").trim(),
-        sequence = sequenceLabels(node.text("Sequence")),
-        sections = sectionsOf(node.children("Verses")),
-    )
+    private fun songOf(node: LooseJson): VideoPsalmSong {
+        val sections = sectionsOf(node.children("Verses"))
+        return VideoPsalmSong(
+            // `Alias` is the number the book prints; `ID` is its position, and they differ in a book
+            // that numbers from something other than one.
+            number = node.text("Alias").ifBlank { node.text("ID") }.trim(),
+            title = flattened(node.text("Text")),
+            author = flattened(node.text("Author")),
+            composer = flattened(node.text("Composer")),
+            copyright = flattened(node.text("Copyright")),
+            ccli = node.text("CCLI").trim(),
+            sequence = sequenceLabels(node.text("Sequence")),
+            sections = sections.primary,
+            secondarySections = sections.secondary,
+        )
+    }
 
     /** One line: an author or a copyright is stored with the line breaks its slide had. */
-    private fun flattened(value: String): String = value.replace(runsOfWhitespace, " ").trim()
+    private fun flattened(value: String): String =
+        withoutMarkup(value).replace(runsOfWhitespace, " ").trim()
 
-    internal fun sectionsOf(verses: List<LooseJson>): List<SongSection> {
+    /** [text] with the book's color markup taken out. */
+    private fun withoutMarkup(text: String): String = text.replace(colorMarkup, "")
+
+    internal fun sectionsOf(verses: List<LooseJson>): BookSections {
         val alreadySung = mutableSetOf<String>()
         val used = mutableSetOf<String>()
-        val sections = mutableListOf<SongSection>()
+        val primary = mutableListOf<SongSection>()
+        val secondary = mutableListOf<SongSection>()
         for (verse in verses) {
             val lines = linesOf(verse.text("Text"))
-            if (lines.isEmpty()) continue
             // A chorus stored once per singing is one section: the repeats are matched on their
-            // lyrics, so only the first singing claims a label.
-            val firstSinging = alreadySung.add(lines.joinToString("\n").lowercase())
-            if (firstSinging) sections.add(SongSection(labelOf(verse, used), lines))
+            // lyrics — both languages of them, since a verse that differs only in translation is
+            // still a different verse.
+            if (lines.isEmpty() || !alreadySung.add(lines.joinToString("\n").lowercase())) continue
+            val label = labelOf(verse, used)
+            val rule = lines.indexOfFirst { languageSeparator.matches(it) }
+            primary.add(SongSection(label, if (rule < 0) lines else lines.take(rule)))
+            secondary.add(SongSection(label, if (rule < 0) emptyList() else lines.drop(rule + 1)))
         }
-        val tidied = SectionLabel.tidy(sections.map { it.label })
-        return sections.mapIndexed { index, section -> section.copy(label = tidied[index]) }
+        val tidied = SectionLabel.tidy(primary.map { it.label })
+        return BookSections(
+            primary = primary.mapIndexed { index, section -> section.copy(label = tidied[index]) },
+            // One for one with the primary sections and under the same labels: the app pairs the
+            // two halves by position, so a verse the book never translated has to hold its place
+            // as an empty section rather than be left out.
+            secondary = if (secondary.any { it.lines.isNotEmpty() }) {
+                secondary.mapIndexed { index, section -> section.copy(label = tidied[index]) }
+            } else {
+                emptyList()
+            },
+        )
     }
 
     /** This verse's kind and the first number of that kind [used] has not claimed. */
@@ -145,7 +204,7 @@ object VideoPsalmConverter {
     }
 
     private fun linesOf(text: String): List<String> =
-        text.lines().map { it.trim() }.filterNot { it.isEmpty() || endMarker.matches(it) }
+        withoutMarkup(text).lines().map { it.trim() }.filterNot { it.isEmpty() || endMarker.matches(it) }
 
     /** Turns `V1 C1 V2 C2` into the section names it calls for. */
     internal fun sequenceLabels(sequence: String): List<String> =
