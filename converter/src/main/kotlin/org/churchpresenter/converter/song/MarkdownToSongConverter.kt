@@ -8,7 +8,15 @@ data class ParsedSong(
     val copyright: String = "",
     val composer: String = "",
     val sections: List<SongSection> = emptyList(),
-    val ccli: String = ""
+    val ccli: String = "",
+    /**
+     * The same song in a second language, written as the `.song` file's `[Secondary]` half.
+     *
+     * The app pairs the two halves **by position**, so this is either empty or one section per
+     * entry of [sections], under the same labels — a section the source left untranslated carries
+     * no lines rather than being left out.
+     */
+    val secondarySections: List<SongSection> = emptyList(),
 )
 
 data class SongSection(
@@ -104,16 +112,28 @@ object MarkdownToSongConverter {
 
         sb.appendLine("[Primary]")
         sb.appendLine("title: ${song.title}")
+        appendSections(sb, song.sections)
 
-        for (section in song.sections) {
+        // A second language, when the source carried one. A section with no lines is still written,
+        // header and all: the app matches the two halves by position, and a missing one would slide
+        // every later translation under the wrong verse.
+        if (song.secondarySections.any { it.lines.isNotEmpty() }) {
+            sb.appendLine()
+            sb.appendLine("[Secondary]")
+            appendSections(sb, song.secondarySections)
+        }
+
+        return sb.toString()
+    }
+
+    private fun appendSections(sb: StringBuilder, sections: List<SongSection>) {
+        for (section in sections) {
             sb.appendLine()
             sb.appendLine("[${section.label}]")
             for (line in section.lines) {
                 sb.appendLine(line)
             }
         }
-
-        return sb.toString()
     }
 
     // One song that cannot be written -- a name the filesystem refuses, a full disk -- is reported
