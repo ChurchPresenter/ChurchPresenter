@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Broj prije naslova</string>
+    <string name="song_number_corner">Kut</string>
+    <string name="song_number_corner_off">Isključeno</string>
     <string name="fullscreen_display">Prikaz na cijelom zaslonu</string>
     <string name="display_mode_label">Način prikaza:</string>
     <string name="display_mode_one_verse">1 stih</string>

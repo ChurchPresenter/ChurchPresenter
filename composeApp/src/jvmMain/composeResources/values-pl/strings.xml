@@ -1153,6 +1153,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numer przed tytułem</string>
+    <string name="song_number_corner">Róg</string>
+    <string name="song_number_corner_off">Wyłączone</string>
     <string name="fullscreen_display">Wyświetlanie pełnoekranowe</string>
     <string name="display_mode_label">Tryb wyświetlania:</string>
     <string name="display_mode_one_verse">1 zwrotka</string>

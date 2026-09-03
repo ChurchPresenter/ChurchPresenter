@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Namba kabla ya kichwa</string>
+    <string name="song_number_corner">Pembe</string>
+    <string name="song_number_corner_off">Zima</string>
     <string name="fullscreen_display">Onyesho la skrini nzima</string>
     <string name="display_mode_label">Namna ya kuonyesha:</string>
     <string name="display_mode_one_verse">Ubeti 1</string>

@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">शीर्षक से पहले नंबर</string>
+    <string name="song_number_corner">कोना</string>
+    <string name="song_number_corner_off">बंद</string>
     <string name="fullscreen_display">पूरी स्क्रीन पर दिखाना</string>
     <string name="display_mode_label">डिस्प्ले मोड:</string>
     <string name="display_mode_one_verse">1 वचन</string>

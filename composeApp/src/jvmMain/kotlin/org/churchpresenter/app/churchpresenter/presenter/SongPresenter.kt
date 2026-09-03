@@ -476,6 +476,7 @@ fun SongPresenter(
                 val fitTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val fitNumberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
                 val fitNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                val fitNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
                 val fitTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
                 val fitNumberFontSize = if (isLowerThird) ss.songNumberLowerThirdFontSize else ss.songNumberFontSize
 
@@ -489,7 +490,11 @@ fun SongPresenter(
                         reserved += autoFitTextMeasurer.measure(longestTitle, titleStyle, density = referenceDensity).size.height
                     }
                 }
-                if (fitNumberDisplay != Constants.NONE && fitNumberPosition == Constants.ABOVE_VERSE) {
+                // A cornered number is drawn over the slide rather than in the row above it, so it
+                // takes no height from the lyrics and reserves none here.
+                if (fitNumberDisplay != Constants.NONE && fitNumberCorner == Constants.NONE &&
+                    fitNumberPosition == Constants.ABOVE_VERSE
+                ) {
                     val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
                     val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
                     if (maxNum > 0) {
@@ -637,6 +642,9 @@ fun SongPresenter(
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
                 val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                // Which corner the number is pinned to, or NONE for the row it shares with the title.
+                val songNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
+                val numberInCorner = numberConfigured && songNumberCorner != Constants.NONE
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
@@ -988,7 +996,8 @@ fun SongPresenter(
                     fun TitleAndNumberRow(position: String, invisible: Boolean = false) {
                         // "configured" = setting is not None (could appear on some slides)
                         val hasTitleHere = titleConfigured && effectiveTitlePosition == position
-                        val hasNumberHere = numberConfigured && effectiveSongNumberPosition == position
+                        val hasNumberHere = numberConfigured && !numberInCorner &&
+                                effectiveSongNumberPosition == position
                         if (!hasTitleHere && !hasNumberHere) return
 
                         // Alpha: fully invisible when used as a balancing spacer,
@@ -1024,7 +1033,8 @@ fun SongPresenter(
 
                     // Determine which positions have content for balancing
                     val hasBottomContent = (titleConfigured && effectiveTitlePosition == Constants.BELOW_VERSE) ||
-                            (numberConfigured && effectiveSongNumberPosition == Constants.BELOW_VERSE)
+                            (numberConfigured && !numberInCorner &&
+                                    effectiveSongNumberPosition == Constants.BELOW_VERSE)
 
                     // Outer column fills the content area; title/number at edges, lyrics centered
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -1121,6 +1131,22 @@ fun SongPresenter(
                                 }
                             }
                         }
+                    }
+
+                    // The number pinned to a corner, drawn over the slide rather than in the row it
+                    // would otherwise share with the title: it costs the lyrics no height and does
+                    // not shift when the title's row grows or is left off a slide.
+                    if (numberInCorner && shouldShowSongNumber) {
+                        NumberPart(
+                            modifier = Modifier.align(
+                                when (songNumberCorner) {
+                                    Constants.TOP_LEFT -> Alignment.TopStart
+                                    Constants.TOP_RIGHT -> Alignment.TopEnd
+                                    Constants.BOTTOM_LEFT -> Alignment.BottomStart
+                                    else -> Alignment.BottomEnd
+                                },
+                            ),
+                        )
                     }
                 }
             }

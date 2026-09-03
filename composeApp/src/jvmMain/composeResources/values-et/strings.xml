@@ -1493,6 +1493,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number enne pealkirja</string>
+    <string name="song_number_corner">Nurk</string>
+    <string name="song_number_corner_off">Väljas</string>
     <string name="fullscreen_display">Täisekraankuva</string>
     <string name="display_mode_label">Kuvarežiim:</string>
     <string name="display_mode_one_verse">1 salm</string>

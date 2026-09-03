@@ -336,8 +336,73 @@ class PresenterFullScreenScreenshotTest {
                 showNumber = Constants.EVERY_PAGE,
                 songNumberColor = "#8A8A94",
                 songNumberFontSize = 28,
-                songNumberHorizontalAlignment = Constants.LEFT,
+                songNumberCorner = Constants.TOP_LEFT,
+            ),
+        )
+    }
+
+    // ── The corner the number is pinned to ──────────────────────────────────────────────────────
+    // The default is the bottom right, which every shot above already carries. These are the three
+    // other corners and the row a number falls back into with no corner at all -- and each is shot
+    // with the title above the verse, because clearing the title's row is the point of a corner.
+
+    @Test
+    fun `the number in the top left corner`() = shoot("song_number_corner_top_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                showNumber = Constants.EVERY_PAGE,
+                songNumberCorner = Constants.TOP_LEFT,
+                songNumberColor = "#FFD54F",
+            ),
+        )
+    }
+
+    @Test
+    fun `the number in the top right corner, beside the title's row`() =
+        shoot("song_number_corner_top_right") {
+            SongPresenter(
+                lyricSection = song(),
+                appSettings = songSettings(
+                    titleDisplay = Constants.EVERY_PAGE,
+                    titlePosition = Constants.ABOVE_VERSE,
+                    showNumber = Constants.EVERY_PAGE,
+                    songNumberCorner = Constants.TOP_RIGHT,
+                    songNumberColor = "#FFD54F",
+                ),
+            )
+        }
+
+    @Test
+    fun `the number in the bottom left corner`() = shoot("song_number_corner_bottom_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                showNumber = Constants.EVERY_PAGE,
+                songNumberCorner = Constants.BOTTOM_LEFT,
+                songNumberColor = "#FFD54F",
+            ),
+        )
+    }
+
+    /** No corner: the number goes back into the row the title is in, ahead of it. */
+    @Test
+    fun `the number sharing the title's row`() = shoot("song_number_in_title_row") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                showNumber = Constants.EVERY_PAGE,
+                songNumberCorner = Constants.NONE,
                 songNumberPosition = Constants.ABOVE_VERSE,
+                songNumberHorizontalAlignment = Constants.CENTER,
+                songNumberColor = "#FFD54F",
+                songNumberFontSize = 44,
             ),
         )
     }
@@ -951,6 +1016,7 @@ class PresenterFullScreenScreenshotTest {
         songNumberColor: String = SongSettings().songNumberColor,
         songNumberBold: Boolean = false,
         songNumberPosition: String = SongSettings().songNumberPosition,
+        songNumberCorner: String = SongSettings().songNumberCorner,
         songNumberHorizontalAlignment: String = SongSettings().songNumberHorizontalAlignment,
         songNumberShadow: Boolean = false,
         titleShadow: Boolean = false,
@@ -988,6 +1054,7 @@ class PresenterFullScreenScreenshotTest {
             songNumberColor = songNumberColor,
             songNumberBold = songNumberBold,
             songNumberPosition = songNumberPosition,
+            songNumberCorner = songNumberCorner,
             songNumberHorizontalAlignment = songNumberHorizontalAlignment,
             songNumberShadow = songNumberShadow,
             titleShadow = titleShadow,

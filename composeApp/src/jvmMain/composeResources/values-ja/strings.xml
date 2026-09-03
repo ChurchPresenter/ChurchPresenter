@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">番号をタイトルの前に表示</string>
+    <string name="song_number_corner">角</string>
+    <string name="song_number_corner_off">オフ</string>
     <string name="fullscreen_display">全画面表示</string>
     <string name="display_mode_label">表示方法:</string>
     <string name="display_mode_one_verse">1 節ずつ</string>

@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Número antes del título</string>
+    <string name="song_number_corner">Esquina</string>
+    <string name="song_number_corner_off">Apagado</string>
     <string name="fullscreen_display">Pantalla completa</string>
     <string name="display_mode_label">Modo de visualización:</string>
     <string name="display_mode_one_verse">1 versículo</string>

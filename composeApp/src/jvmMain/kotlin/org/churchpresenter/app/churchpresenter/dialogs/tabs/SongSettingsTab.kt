@@ -71,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.song_language_secondary
 import churchpresenter.composeapp.generated.resources.song_language_single
 import churchpresenter.composeapp.generated.resources.song_languages
 import churchpresenter.composeapp.generated.resources.song_lyrics_layout
+import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.song_preview_label
 import churchpresenter.composeapp.generated.resources.song_preview_look_ahead
 import churchpresenter.composeapp.generated.resources.song_title_slide
@@ -80,6 +81,7 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -114,6 +116,9 @@ private const val TRANSITION_STEP_MS = 50f
 private val TARGET_BUTTON_WIDTH = 110.dp
 private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
+
+/** Wide enough for "Bottom Right" and the chevron, so no corner reads ellipsized. */
+private val CORNER_DROPDOWN_WIDTH = 118.dp
 
 /** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
 private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
@@ -737,6 +742,24 @@ private fun SongAppearanceRow(
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
             modifier = Modifier.testTag("song_show_${element.name.lowercase()}"),
         )
+        }
+        // The number only. A corner takes it out of the row it shares with the title, so there is
+        // no such choice to offer for the title itself.
+        if (element == SongStyleElement.NUMBER) {
+            LabeledControl(stringResource(Res.string.song_number_corner)) {
+                DropdownSelector(
+                    label = "",
+                    value = settings.songSettings.numberCorner(target.isLowerThird),
+                    options = songNumberCornerOptions(),
+                    onValueChange = { corner ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.withNumberCorner(target.isLowerThird, corner))
+                        }
+                    },
+                    compact = true,
+                    modifier = Modifier.width(CORNER_DROPDOWN_WIDTH).testTag("song_number_corner"),
+                )
+            }
         }
         // Only where the two share a position, which is the only case in which their order is a
         // question at all -- elsewhere the slide's own layout already answers it.

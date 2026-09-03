@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer före titel</string>
+    <string name="song_number_corner">Hörn</string>
+    <string name="song_number_corner_off">Av</string>
     <string name="fullscreen_display">Helskärmsvisning</string>
     <string name="display_mode_label">Visningsläge:</string>
     <string name="display_mode_one_verse">1 vers</string>

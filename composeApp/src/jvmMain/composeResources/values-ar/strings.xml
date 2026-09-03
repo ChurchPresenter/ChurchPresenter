@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">الرقم قبل العنوان</string>
+    <string name="song_number_corner">الزاوية</string>
+    <string name="song_number_corner_off">إيقاف</string>
     <string name="fullscreen_display">عرض ملء الشاشة</string>
     <string name="display_mode_label">طريقة العرض:</string>
     <string name="display_mode_one_verse">مقطع واحد</string>

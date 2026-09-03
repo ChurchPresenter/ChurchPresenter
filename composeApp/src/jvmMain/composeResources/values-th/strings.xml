@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">หมายเลขอยู่หน้าชื่อ</string>
+    <string name="song_number_corner">มุม</string>
+    <string name="song_number_corner_off">ปิด</string>
     <string name="fullscreen_display">แสดงเต็มจอ</string>
     <string name="display_mode_label">วิธีแสดง:</string>
     <string name="display_mode_one_verse">ครั้งละ 1 ท่อน</string>

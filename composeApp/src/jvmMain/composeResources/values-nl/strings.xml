@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer voor titel</string>
+    <string name="song_number_corner">Hoek</string>
+    <string name="song_number_corner_off">Uit</string>
     <string name="fullscreen_display">Volledig scherm weergave</string>
     <string name="display_mode_label">Weergavemodus:</string>
     <string name="display_mode_one_verse">1 vers</string>

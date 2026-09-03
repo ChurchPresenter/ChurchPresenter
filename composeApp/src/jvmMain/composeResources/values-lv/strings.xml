@@ -1661,6 +1661,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numurs pirms nosaukuma</string>
+    <string name="song_number_corner">Stūris</string>
+    <string name="song_number_corner_off">Izslēgts</string>
     <string name="fullscreen_display">Pilnekrāna rādīšana</string>
     <string name="display_mode_label">Rādīšanas veids:</string>
     <string name="display_mode_one_verse">1 pants</string>
