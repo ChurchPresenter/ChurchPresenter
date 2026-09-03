@@ -32,8 +32,11 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
     }
     applyTranslationOrder()
 
-    // Turning splitting on or off re-cuts whatever is already on screen, from its first half.
-    if (previous.bibleSettings.splitLongVerses != newSettings.bibleSettings.splitLongVerses) {
+    // Turning splitting on or off -- or moving the threshold across what is on screen -- re-cuts
+    // whatever is already up, from its first half.
+    if (previous.bibleSettings.splitLongVerses != newSettings.bibleSettings.splitLongVerses ||
+        previous.bibleSettings.longVerseWordCount != newSettings.bibleSettings.longVerseWordCount
+    ) {
         publishVersePage(VERSE_PAGE_FIRST)
     }
 

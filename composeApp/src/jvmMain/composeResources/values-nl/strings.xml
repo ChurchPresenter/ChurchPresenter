@@ -1808,6 +1808,8 @@
     <string name="style">Stijl</string>
     <string name="bible_split_browse_mode">Gesplitste bladermodus</string>
     <string name="bible_split_long_verses">Lange verzen over twee dia's verdelen</string>
+    <string name="bible_split_long_verses_off">Uit</string>
+    <string name="words_suffix">woorden</string>
     <string name="bible_cross_references">Kruisverwijzingen</string>
     <string name="bible_cross_references_title">Verwijzingen</string>
     <string name="bible_cross_references_enable">Kruisverwijzingen tonen</string>

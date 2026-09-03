@@ -170,3 +170,28 @@ private fun LabelText(
         }
     }
 }
+
+/**
+ * A small caption and the control it names, held on one line.
+ *
+ * For a caption inside a `FlowRow`: flowed as two children the pair splits across the wrap, leaving
+ * a label stranded at the end of one line and its control at the start of the next. Wrapped like
+ * this the pair is one item and moves together.
+ */
+@Composable
+fun LabeledControl(label: String, content: @Composable () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(LABELED_CONTROL_GAP),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        content()
+    }
+}
+
+/** The gap between a caption and its control, matching the rows [LabeledControl] was pulled from. */
+private val LABELED_CONTROL_GAP = 10.dp

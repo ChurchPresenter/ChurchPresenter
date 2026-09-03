@@ -40,7 +40,7 @@ private fun BibleViewModel.liveVerseLine(live: SelectedVerse): String? {
 internal fun BibleViewModel.liveVerseSplitMark(live: SelectedVerse?): VerseSplitMark? {
     val line = live?.takeIf { splitLongVersesEnabled }?.let { liveVerseLine(it) } ?: return null
     val text = verseTextOf(line)
-    if (!isLongVerse(text)) return null
+    if (!isLongVerse(text, longVerseWordCount)) return null
     val (first, second) = splitAtWordMidpoint(text)
     val secondHalfLive = when (live.verseText) {
         second -> true

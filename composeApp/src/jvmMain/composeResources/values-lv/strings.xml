@@ -83,6 +83,8 @@
     <string name="hold_live">Noturēt ekrānā</string>
     <string name="bible_split_browse_mode">Dalītās pārlūkošanas režīms</string>
     <string name="bible_split_long_verses">Sadalīt garus pantus divos slaidos</string>
+    <string name="bible_split_long_verses_off">Izslēgts</string>
+    <string name="words_suffix">vārdi</string>
     <string name="bible_cross_references">Paralēlvietas</string>
     <string name="bible_cross_references_title">Paral.</string>
     <string name="bible_cross_references_enable">Rādīt paralēlvietu saites</string>

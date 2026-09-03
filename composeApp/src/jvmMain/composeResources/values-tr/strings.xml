@@ -83,6 +83,8 @@
     <string name="hold_live">Yayında Tut</string>
     <string name="bible_split_browse_mode">Ayrık Gözatma Modu</string>
     <string name="bible_split_long_verses">Uzun ayetleri iki slayta böl</string>
+    <string name="bible_split_long_verses_off">Kapalı</string>
+    <string name="words_suffix">kelime</string>
     <string name="bible_cross_references">Çapraz Referanslar</string>
     <string name="bible_cross_references_title">Ref.</string>
     <string name="bible_cross_references_enable">Çapraz referans bağlantılarını göster</string>

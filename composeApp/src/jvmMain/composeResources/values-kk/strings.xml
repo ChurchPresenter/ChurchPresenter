@@ -1786,6 +1786,8 @@
     <string name="style">Стиль</string>
     <string name="bible_split_browse_mode">Бөлінген шолу режимі</string>
     <string name="bible_split_long_verses">Ұзын аяттарды екі слайдқа бөлу</string>
+    <string name="bible_split_long_verses_off">Өшірулі</string>
+    <string name="words_suffix">сөз</string>
     <string name="bible_cross_references">Айқас сілтемелер</string>
     <string name="bible_cross_references_title">Сілтемелер</string>
     <string name="bible_cross_references_enable">Айқас сілтемелерді көрсету</string>

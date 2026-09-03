@@ -107,6 +107,23 @@ class BibleSettingsTabScreenshotTest {
     // ── What the one control set is pointed at ──────────────────────────────────────────────────
 
     /** The lower third: a band on the floor of the screen, and its own styling profile. */
+    /**
+     * The verse-splitting threshold turned on and set below its default.
+     *
+     * The one state of the Miscellaneous section that is not visible in every other shot: at rest
+     * the slider reads "Off" and its track is empty, so nothing here shows the filled track, the
+     * handle position, or the word count beside the caption.
+     */
+    @Test
+    fun `the split threshold set below its default`() = shoot(
+        "split_threshold",
+        settings = withTranslations(2).let {
+            it.copy(
+                bibleSettings = it.bibleSettings.copy(splitLongVerses = true, longVerseWordCount = 30),
+            )
+        },
+    )
+
     @Test
     fun `the lower third`() = shoot("lower_third", settings = withTranslations(2)) {
         onNodeWithText("Lower Third").performClick()

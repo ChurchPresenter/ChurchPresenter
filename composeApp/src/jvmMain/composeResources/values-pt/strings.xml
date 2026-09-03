@@ -1808,6 +1808,8 @@
     <string name="style">Estilo</string>
     <string name="bible_split_browse_mode">Modo de navegação dividida</string>
     <string name="bible_split_long_verses">Dividir versículos longos em dois slides</string>
+    <string name="bible_split_long_verses_off">Desativado</string>
+    <string name="words_suffix">palavras</string>
     <string name="bible_cross_references">Referências cruzadas</string>
     <string name="bible_cross_references_title">Referências</string>
     <string name="bible_cross_references_enable">Mostrar referências cruzadas</string>

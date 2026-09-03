@@ -1808,6 +1808,8 @@
     <string name="style">Style</string>
     <string name="bible_split_browse_mode">Mode de navigation partagé</string>
     <string name="bible_split_long_verses">Diviser les versets longs sur deux diapositives</string>
+    <string name="bible_split_long_verses_off">Désactivé</string>
+    <string name="words_suffix">mots</string>
     <string name="bible_cross_references">Références croisées</string>
     <string name="bible_cross_references_title">Références</string>
     <string name="bible_cross_references_enable">Afficher les références croisées</string>
