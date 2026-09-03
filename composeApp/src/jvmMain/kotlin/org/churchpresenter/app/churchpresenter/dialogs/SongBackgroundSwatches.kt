@@ -6,6 +6,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,12 +14,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -100,34 +104,52 @@ internal fun SongBackgroundLibrary(
             )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(TILE_MIN_WIDTH),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 9.dp, bottom = 11.dp),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            if (category == SongBackgroundType.COLOR) {
-                items(SONG_BACKGROUND_COLORS) { entry ->
-                    SwatchTile(
-                        label = stringResource(entry.label),
-                        selected = entry.selects(background, SONG_BACKGROUND_NAMED_COLORS),
-                        badge = if (entry.own) SwatchBadge.PLUS else SwatchBadge.NONE,
-                        onClick = { onChange(entry.applyTo(background)) },
-                    ) {
-                        ColorTileFill(entry, background)
+        // A grid state per category: the scrollbar and the grid have to agree about which list is
+        // under them, and a category change starts at the top rather than at the old offset.
+        val gridState = remember(category) { LazyGridState() }
+        Box(Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(TILE_MIN_WIDTH),
+                state = gridState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 10.dp,
+                    end = 10.dp + SCROLLBAR_GUTTER,
+                    top = 9.dp,
+                    bottom = 11.dp,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
+            ) {
+                if (category == SongBackgroundType.COLOR) {
+                    items(SONG_BACKGROUND_COLORS) { entry ->
+                        SwatchTile(
+                            label = stringResource(entry.label),
+                            selected = entry.selects(background, SONG_BACKGROUND_NAMED_COLORS),
+                            badge = if (entry.own) SwatchBadge.PLUS else SwatchBadge.NONE,
+                            onClick = { onChange(entry.applyTo(background)) },
+                        ) {
+                            ColorTileFill(entry, background)
+                        }
                     }
+                } else if (category == SongBackgroundType.CAMERA) {
+                    cameraTiles(cameras, background, onChange)
+                } else {
+                    mediaTiles(category, entries, background, onChange)
                 }
-            } else if (category == SongBackgroundType.CAMERA) {
-                cameraTiles(cameras, background, onChange)
-            } else {
-                mediaTiles(category, entries, background, onChange)
             }
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(vertical = 4.dp),
+                adapter = rememberScrollbarAdapter(gridState),
+            )
         }
     }
 }
 
-/** The tiles for Images and Videos: the stock library, with Browse… as the last tile. */
+/** What the grid keeps clear on its right so a tile never sits under the scrollbar. */
+private val SCROLLBAR_GUTTER = 8.dp
+
+/** The tiles for Images and Videos: Browse… first, then the stock library. */
 private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
     category: String,
     entries: List<LibraryEntry>,
@@ -136,26 +158,6 @@ private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
 ) {
     val isVideo = category == SongBackgroundType.VIDEO
     val chosen = if (isVideo) background.video else background.image
-    items(entries) { entry ->
-        val scope = rememberCoroutineScope()
-        val path = (entry as? DownloadedEntry)?.file?.absolutePath
-        SwatchTile(
-            label = entry.name,
-            selected = path != null && path == chosen,
-            badge = if (isVideo) SwatchBadge.PLAY else SwatchBadge.NONE,
-            onClick = {
-                scope.launch {
-                    val file = when (entry) {
-                        is DownloadedEntry -> entry.file
-                        is BundledEntry -> materializeBundledEntry(entry.name)
-                    }
-                    onChange(mediaBackground(background, isVideo, file.absolutePath))
-                }
-            },
-        ) {
-            MediaTileFill(entry, isVideo)
-        }
-    }
     item {
         val scope = rememberCoroutineScope()
         val label = stringResource(Res.string.song_background_browse)
@@ -177,6 +179,26 @@ private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
             } else {
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHighest))
             }
+        }
+    }
+    items(entries) { entry ->
+        val scope = rememberCoroutineScope()
+        val path = (entry as? DownloadedEntry)?.file?.absolutePath
+        SwatchTile(
+            label = entry.name,
+            selected = path != null && path == chosen,
+            badge = if (isVideo) SwatchBadge.PLAY else SwatchBadge.NONE,
+            onClick = {
+                scope.launch {
+                    val file = when (entry) {
+                        is DownloadedEntry -> entry.file
+                        is BundledEntry -> materializeBundledEntry(entry.name)
+                    }
+                    onChange(mediaBackground(background, isVideo, file.absolutePath))
+                }
+            },
+        ) {
+            MediaTileFill(entry, isVideo)
         }
     }
 }
