@@ -61,8 +61,12 @@ internal enum class CameraFailure {
      *
      * Decided before ffmpeg runs rather than classified from its stderr, which is why
      * [classifyCameraFfmpegStderr] has no marker for it: there is no stderr, because there is no
-     * process. Not a defect in the app — but the operator has to be told, or the canvas is simply
-     * black with no reason given.
+     * process.
+     *
+     * It stopped meaning "the operator has not installed ffmpeg" when the app started shipping one.
+     * On a build that carries a binary this **is** a defect — the app could not find or execute its
+     * own — and the remaining innocent causes are an architecture we publish nothing for, a package
+     * that stripped it, or an override pointing at something that will not run.
      */
     FFMPEG_MISSING,
 

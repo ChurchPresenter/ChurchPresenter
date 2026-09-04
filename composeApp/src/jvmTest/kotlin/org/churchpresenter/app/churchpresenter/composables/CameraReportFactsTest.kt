@@ -193,6 +193,15 @@ class CameraReportFactsTest {
     }
 
     @Test
+    fun `the mac fallback is reported too, not just the windows one`() {
+        assertTrue(
+            shouldReportBlindFfmpeg(facts(CameraEnumerator.SYSTEM_PROFILER_FALLBACK, fallbackListed = 1)),
+            "macOS reaches the identical state through system_profiler, and carries almost all of " +
+                "this app's camera traffic — the Windows-only form was silent where the users are",
+        )
+    }
+
+    @Test
     fun `a machine where ffmpeg answered is not reported`() {
         assertFalse(shouldReportBlindFfmpeg(facts(CameraEnumerator.DSHOW, ffmpegListed = 2)))
     }

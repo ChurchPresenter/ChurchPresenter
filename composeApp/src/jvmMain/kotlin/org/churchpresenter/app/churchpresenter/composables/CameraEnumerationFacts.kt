@@ -29,6 +29,23 @@ internal enum class CameraEnumerator {
 
     /** Nothing has enumerated in this process yet — a real state on the presenter restore path. */
     NOT_RUN,
+
+    ;
+
+    /**
+     * Whether devices this enumerator named can be opened at all.
+     *
+     * The fallbacks name hardware the platform knows about, in a namespace ffmpeg does not accept —
+     * a PnP friendly name is not a DirectShow filter name, and a `system_profiler` position is not
+     * an AVFoundation index. Capture goes through ffmpeg either way, so those entries are decoration
+     * whatever else is true of the machine.
+     *
+     * One property rather than the same `== PNP_FALLBACK || == SYSTEM_PROFILER_FALLBACK` in two
+     * places: the hint and the blind-ffmpeg report ask the identical question, and they disagreed
+     * once already — the report was Windows-only while the hint keyed on something else entirely.
+     */
+    val listsUnopenableDevices: Boolean
+        get() = this == PNP_FALLBACK || this == SYSTEM_PROFILER_FALLBACK
 }
 
 /**

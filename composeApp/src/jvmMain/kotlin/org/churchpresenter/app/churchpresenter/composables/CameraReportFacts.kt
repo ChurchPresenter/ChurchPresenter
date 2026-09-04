@@ -97,27 +97,38 @@ internal fun cameraEnumerationExtra(
 private const val MILLIS_PER_SECOND = 1000L
 
 /**
- * Whether a listing is the "ffmpeg works, Windows sees a camera, ffmpeg does not" state.
+ * Whether a listing is the "ffmpeg works, the platform sees a camera, ffmpeg does not" state.
  *
  * A pure predicate rather than a report call so the decision is testable without standing up Sentry.
- * All three clauses matter: ffmpeg resolved (so this is not simply a machine without it), the
- * fallback won (so ffmpeg listed no DirectShow device), and the fallback found something (so this is
- * not a machine with no camera at all — reporting that would make the operator's own hardware
- * inventory look like a defect).
+ * All three clauses matter: ffmpeg resolved, the fallback won (so ffmpeg listed nothing), and the
+ * fallback found something — that last one is what keeps a machine with no camera at all from being
+ * reported, which would make the operator's own hardware inventory look like a defect.
+ *
+ * Not Windows-only. It was, and macOS reaches the identical state through `system_profiler` — where
+ * the likeliest cause is a privacy refusal, since a TCC denial makes AVFoundation enumerate nothing.
+ * macOS carries almost all of this app's camera traffic, so the Windows-only form was silent exactly
+ * where the users are.
+ *
+ * The first clause no longer discriminates on a build that bundles ffmpeg, where it is always true.
+ * It is kept for the builds that ship no binary — an unpinned architecture, or a package that
+ * stripped it — where "no ffmpeg" and "ffmpeg that sees nothing" are still different problems.
  */
 internal fun shouldReportBlindFfmpeg(facts: CameraEnumerationFacts?): Boolean =
     facts != null &&
         facts.ffmpegAvailable &&
-        facts.enumerator == CameraEnumerator.PNP_FALLBACK &&
+        facts.enumerator.listsUnopenableDevices &&
         facts.fallbackListedCount > 0
 
 /**
  * A gate that lets exactly one report through per process.
  *
- * For facts that cannot change while the app runs — whether ffmpeg resolved is a `by lazy` — so a
- * second event would carry nothing the first did not. Atomic because captures start on
- * `Dispatchers.Default` and two canvas tiles can reach the same gate at once; a plain `var` would
- * let both through.
+ * For facts that are worth saying once and no more, so a second event would carry nothing the first
+ * did not. Atomic because captures start on `Dispatchers.Default` and two canvas tiles can reach the
+ * same gate at once; a plain `var` would let both through.
+ *
+ * This used to lean on ffmpeg availability being a `by lazy` that could not change within a process.
+ * It can now — the settings card re-resolves it — so the gate is the whole of the bound rather than
+ * a belt beside a brace.
  */
 internal class ReportOnce {
     private val fired = AtomicBoolean(false)
@@ -139,17 +150,18 @@ internal fun reportCameraFfmpegMissing(
     source: SceneSource.CameraSource,
     facts: CameraEnumerationFacts?,
     gate: ReportOnce,
+    ffmpegAvailable: Boolean = false,
 ) {
     if (!gate.claim()) return
     CrashReporter.reportWarning(
-        "Camera: ffmpeg is not installed, so the selected camera cannot be opened",
+        "Camera: ChurchPresenter could not find an ffmpeg to open the selected camera with",
         tags = mapOf(
             "subsystem" to "camera",
             "device_scheme" to deviceScheme(source.devicePath),
             "failure_cause" to CameraFailure.FFMPEG_MISSING.name.lowercase(),
-        ) + cameraEnumerationTags(facts, source.deviceName, ffmpegAvailable = false),
+        ) + cameraEnumerationTags(facts, source.deviceName, ffmpegAvailable),
         extras = mapOf(
-            "camera_enumeration" to cameraEnumerationExtra(facts, source.deviceName, ffmpegAvailable = false)
+            "camera_enumeration" to cameraEnumerationExtra(facts, source.deviceName, ffmpegAvailable)
         )
     )
 }

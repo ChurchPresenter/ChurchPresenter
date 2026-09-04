@@ -409,10 +409,15 @@ private const val PNP_QUERY_TIMEOUT_S = 15L
  * `DEVICE_NOT_FOUND`, telling the operator their camera "is no longer connected" about a device that
  * was never openable in the first place.
  *
- * The PnP query is therefore only a fallback for when ffmpeg listed nothing, which in practice means
- * ffmpeg is not installed. Capture needs ffmpeg too, so those entries can never be opened; they
- * exist so the operator still sees their camera named beside the `canvas_camera_ffmpeg_required`
- * hint telling them what to install, rather than an empty list.
+ * The PnP query is therefore only a fallback for when ffmpeg listed nothing. Capture needs ffmpeg
+ * whatever named the device, so those entries can never be opened; they exist so the operator sees
+ * their camera named beside a hint explaining that, rather than an empty list.
+ *
+ * What that hint has to say changed when the app started shipping ffmpeg. "Install ffmpeg" was the
+ * answer while the fallback meant a machine without it; now ffmpeg is present and listed nothing
+ * anyway, which is a different problem — a driver that exposes no DirectShow filter, or a device the
+ * frame server has claimed. `canvas_camera_unopenable_listing` is the sentence for that state, and
+ * `CameraEnumerator.listsUnopenableDevices` is what selects it.
  *
  * This mirrors [parseMacCameras], which resolved the same conflict between ffmpeg and
  * `system_profiler` the same way and for the same reason.
@@ -572,10 +577,15 @@ private fun systemProfilerCameraNames(systemProfilerOutput: String): List<String
  * by position invents an address, and an invented address opens the wrong device rather than
  * failing — see [avfoundationCamerasFrom].
  *
- * `system_profiler` is therefore only a fallback for when ffmpeg listed nothing, which in practice
- * means ffmpeg is not installed. Capture needs ffmpeg too, so those entries can never be opened;
- * they exist so the operator still sees their camera named beside the `canvas_camera_ffmpeg_hint`
- * telling them what to install, rather than an empty list.
+ * `system_profiler` is therefore only a fallback for when ffmpeg listed nothing. Capture needs ffmpeg
+ * whatever named the device, so those entries can never be opened; they exist so the operator sees
+ * their camera named beside a hint explaining that, rather than an empty list.
+ *
+ * Since the app ships ffmpeg, reaching this on a Mac most often means AVFoundation enumerated
+ * nothing — and the usual cause of that is a privacy refusal, which is what makes the camera
+ * privacy button beside this picker the useful thing on screen. The accompanying sentence is
+ * `canvas_camera_unopenable_listing`; this doc used to name `canvas_camera_ffmpeg_hint`, which was
+ * superseded and is kept defined only so fourteen locales' translations are not orphaned.
  */
 internal fun parseMacCameras(systemProfilerOutput: String, ffmpegOutput: String): List<CameraDevice> =
     macListingOf(systemProfilerOutput, ffmpegOutput).devices

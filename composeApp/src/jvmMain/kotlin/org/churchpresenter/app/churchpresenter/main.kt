@@ -166,6 +166,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
@@ -290,6 +291,17 @@ fun main() {
             if (previousSessionMinutes > 0) UsageEvents.clearSessionMinutes()
         }
     )
+
+    // One camera enumeration at startup, so a capture that fails before any picker has been opened
+    // can still report what the machine had. A fifth of camera reports arrived carrying
+    // `camera.enumerator=not_run` — nothing had looked, because only a picker enumerates and the
+    // presenter restores a scene without one.
+    //
+    // Its own daemon thread, like the font warm-up above: this shells out to ffmpeg, and on Windows
+    // to PowerShell as well, so it must not be on the path that opens the window.
+    Thread {
+        runCatching { runBlocking { CameraDeviceCatalog.refresh() } }
+    }.apply { isDaemon = true }.start()
 
     val sessionStartedAt = System.currentTimeMillis()
     Runtime.getRuntime().addShutdownHook(Thread {
