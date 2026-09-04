@@ -26,28 +26,49 @@ import org.churchpresenter.core.models.text.TextBackdrop
  * Kept apart from [BackdropText] because the call sites that most want a backdrop are also the ones
  * that cannot use a wrapper — the presenters measure their own text to fit it, and already pass an
  * `onTextLayout` of their own. Those chain onto this; everything else uses [BackdropText].
+ *
+ * **The settings are state on one long-lived painter, not a new painter per setting.** A painter
+ * draws from the last [TextLayoutResult] its `Text` handed it, and a `Text` only produces one when
+ * something it actually measures changes — turning a backdrop on changes nothing it measures. So a
+ * painter rebuilt on every settings change starts with no layout and never gets one: the backdrop
+ * silently does not appear until the text itself happens to change. For the same reason the
+ * `drawBehind` is always installed and the emptiness check happens inside it, rather than the
+ * modifier being `Modifier` while the backdrop is off — a modifier that appears later would have
+ * the same problem.
  */
 @Stable
-class TextBackdropPainter internal constructor(private val backdrop: TextBackdrop) {
+class TextBackdropPainter internal constructor() {
     private var layout by mutableStateOf<TextLayoutResult?>(null)
 
+    internal var backdrop by mutableStateOf(TextBackdrop())
+    internal var scale by mutableStateOf(1f)
+
     /** Paints the bands and the box, behind whatever the text draws. */
-    val modifier: Modifier = if (backdrop.isEmpty) {
-        Modifier
-    } else {
-        Modifier.drawBehind { layout?.let { drawTextBackdrop(it, backdrop) } }
+    val modifier: Modifier = Modifier.drawBehind {
+        val current = backdrop
+        if (!current.isEmpty) layout?.let { drawTextBackdrop(it, current, scale) }
     }
 
     /** Pass to `Text(onTextLayout = …)`, chaining any callback the call site already had. */
     fun onTextLayout(result: TextLayoutResult) {
-        if (!backdrop.isEmpty) layout = result
+        layout = result
     }
 }
 
-/** Remembers a painter for [backdrop], rebuilding it when the settings behind it change. */
+/**
+ * Remembers a painter for [backdrop].
+ *
+ * [scale] shrinks every measurement by the same factor the call site shrank its font size by — for
+ * the tab previews, which draw the presenter's text inside a thumbnail. Leave it at 1 wherever the
+ * text is drawn at the size it was configured for.
+ */
 @Composable
-fun rememberTextBackdropPainter(backdrop: TextBackdrop): TextBackdropPainter =
-    remember(backdrop) { TextBackdropPainter(backdrop) }
+fun rememberTextBackdropPainter(backdrop: TextBackdrop, scale: Float = 1f): TextBackdropPainter {
+    val painter = remember { TextBackdropPainter() }
+    painter.backdrop = backdrop
+    painter.scale = scale
+    return painter
+}
 
 /**
  * [Text] with a [TextBackdrop] painted behind it.

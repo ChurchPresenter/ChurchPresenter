@@ -36,30 +36,27 @@ import org.churchpresenter.core.models.text.TextBackdrop
  * the modifier from [lineModifier] gives where that `Text` sits inside the container.
  */
 @Stable
-class TextBlockBackdrop internal constructor(internal val backdrop: TextBackdrop) {
+class TextBlockBackdrop internal constructor() {
     private var container by mutableStateOf<LayoutCoordinates?>(null)
     private val lineCoordinates = mutableStateMapOf<Any, LayoutCoordinates>()
     private val lineLayouts = mutableStateMapOf<Any, TextLayoutResult>()
+    private val lineModifiers = mutableMapOf<Any, Modifier>()
+
+    internal var backdrop by mutableStateOf(TextBackdrop())
 
     /** Put on the container that should carry the border. */
-    val containerModifier: Modifier = if (backdrop.isEmpty) {
-        Modifier
-    } else {
-        Modifier
-            .onGloballyPositioned { container = it }
-            .drawBehind { drawBlockBackdrop() }
-    }
+    val containerModifier: Modifier = Modifier
+        .onGloballyPositioned { container = it }
+        .drawBehind { drawBlockBackdrop() }
 
     /** Put on each `Text` of the block, with a [key] stable for that line. */
-    fun lineModifier(key: Any): Modifier = if (backdrop.isEmpty) {
-        Modifier
-    } else {
+    fun lineModifier(key: Any): Modifier = lineModifiers.getOrPut(key) {
         Modifier.onGloballyPositioned { lineCoordinates[key] = it }
     }
 
     /** Pass each `Text`'s own layout result, under the same [key]. */
     fun onTextLayout(key: Any, result: TextLayoutResult) {
-        if (!backdrop.isEmpty) lineLayouts[key] = result
+        lineLayouts[key] = result
     }
 
     /** Where [key]'s text sits in the container, or null while either half is still missing. */
@@ -70,13 +67,15 @@ class TextBlockBackdrop internal constructor(internal val backdrop: TextBackdrop
     }
 
     private fun DrawScope.drawBlockBackdrop() {
+        val current = backdrop
+        if (current.isEmpty) return
         // A fill on its own is per line, and each line paints its own. Anything with a border in it
         // is one shape for the block, which only the container can place -- so it takes the union
         // of where the lines landed and paints that instead.
-        if (backdrop.lineBackground && !backdrop.border) {
+        if (current.lineBackground && !current.border) {
             for ((key, layout) in lineLayouts) {
                 val offset = offsetOf(key) ?: continue
-                translate(offset.x, offset.y) { drawTextBackdrop(layout, backdrop) }
+                translate(offset.x, offset.y) { drawTextBackdrop(layout, current) }
             }
             return
         }
@@ -85,14 +84,23 @@ class TextBlockBackdrop internal constructor(internal val backdrop: TextBackdrop
             val bounds = offsetOf(key)?.let { layout.drawnTextBounds()?.translate(it) }
             if (bounds != null) union = union?.expandToInclude(bounds) ?: bounds
         }
-        union?.let { drawBlockBacking(it, backdrop) }
+        union?.let { drawBlockBacking(it, current) }
     }
 }
 
-/** Remembers a block backdrop for [backdrop], rebuilt when the settings behind it change. */
+/**
+ * Remembers a block backdrop, updating it with [backdrop] rather than replacing it.
+ *
+ * Same reason as [rememberTextBackdropPainter]: this draws from positions and layouts its lines
+ * reported, and none of them report again just because a setting changed — so an instance rebuilt
+ * per settings change would have nothing to draw until the lyrics themselves changed.
+ */
 @Composable
-fun rememberTextBlockBackdrop(backdrop: TextBackdrop): TextBlockBackdrop =
-    remember(backdrop) { TextBlockBackdrop(backdrop) }
+fun rememberTextBlockBackdrop(backdrop: TextBackdrop): TextBlockBackdrop {
+    val block = remember { TextBlockBackdrop() }
+    block.backdrop = backdrop
+    return block
+}
 
 /** The rectangle a laid-out text actually covers, or null when it drew nothing. */
 internal fun TextLayoutResult.drawnTextBounds(): Rect? {

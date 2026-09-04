@@ -229,7 +229,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 modifier = Modifier.fillMaxSize().padding(4.dp)
             )
         } else {
-            val painter = rememberTextBackdropPainter(source.backdrop)
+            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
             Text(
                 text = source.text,
                 color = textColor,
@@ -600,7 +600,7 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
             // box to band and no block to box: the backdrop is skipped rather than misplaced.
             CurvedText(displayText, source.curve, style, Modifier.fillMaxSize())
         } else {
-            val painter = rememberTextBackdropPainter(source.backdrop)
+            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
             Text(
                 text = displayText,
                 style = style,
@@ -1136,8 +1136,8 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 else -> Alignment.CenterHorizontally
             }
         ) {
-            val versePainter = rememberTextBackdropPainter(source.backdrop)
-            val refPainter = rememberTextBackdropPainter(source.referenceBackdrop)
+            val versePainter = rememberTextBackdropPainter(source.backdrop, fontScale)
+            val refPainter = rememberTextBackdropPainter(source.referenceBackdrop, fontScale)
             Text(
                 text = source.verseText.ifEmpty { "Select a verse..." },
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,

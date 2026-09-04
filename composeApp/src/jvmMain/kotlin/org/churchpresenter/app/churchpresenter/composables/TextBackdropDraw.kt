@@ -32,20 +32,29 @@ import org.churchpresenter.core.models.text.TextBackdrop
  * that survives three lines of text.
  *
  * The measurements are read as `sp`, so they scale with the type exactly as the font size does.
+ *
+ * [scale] is for the call sites that draw the same text smaller than the output does — the tab
+ * previews, which shrink the font by the ratio between the preview box and the presenter screen.
+ * The measurements are multiplied by it in `Float` px, so a 3sp outline stays a hairline in a
+ * preview instead of rounding away to nothing or being drawn at full output size around tiny type.
  */
-internal fun DrawScope.drawTextBackdrop(layout: TextLayoutResult, backdrop: TextBackdrop) {
+internal fun DrawScope.drawTextBackdrop(
+    layout: TextLayoutResult,
+    backdrop: TextBackdrop,
+    scale: Float = 1f,
+) {
     if (backdrop.isEmpty || layout.lineCount == 0) return
     if (backdrop.lineBackground && !backdrop.border) {
-        drawLineBands(layout, backdrop)
+        drawLineBands(layout, backdrop, scale)
     } else {
-        layout.drawnTextBounds()?.let { drawBlockBacking(it, backdrop) }
+        layout.drawnTextBounds()?.let { drawBlockBacking(it, backdrop, scale) }
     }
 }
 
-private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBackdrop) {
+private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBackdrop, scale: Float) {
     val fill = backdrop.lineBackgroundColor.toBackdropColor(backdrop.lineBackgroundOpacity)
-    val grow = backdrop.lineBackgroundHeight.sp.toPx()
-    val shift = backdrop.lineBackgroundOffset.sp.toPx()
+    val grow = backdrop.lineBackgroundHeight.sp.toPx() * scale
+    val shift = backdrop.lineBackgroundOffset.sp.toPx() * scale
     for (line in 0 until layout.lineCount) {
         val left = layout.getLineLeft(line)
         val right = layout.getLineRight(line)
@@ -72,11 +81,11 @@ private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBack
  * offset still apply on top of it, which is how a plate is grown or slid onto a face whose glyphs
  * do not sit centred in their line box.
  */
-internal fun DrawScope.drawBlockBacking(bounds: Rect, backdrop: TextBackdrop) {
-    val stroke = if (backdrop.border) backdrop.borderWidth.sp.toPx() else 0f
-    val pad = backdrop.borderPadding.sp.toPx() + stroke / 2f
-    val growY = if (backdrop.lineBackground) backdrop.lineBackgroundHeight.sp.toPx() else 0f
-    val shift = if (backdrop.lineBackground) backdrop.lineBackgroundOffset.sp.toPx() else 0f
+internal fun DrawScope.drawBlockBacking(bounds: Rect, backdrop: TextBackdrop, scale: Float = 1f) {
+    val stroke = if (backdrop.border) backdrop.borderWidth.sp.toPx() * scale else 0f
+    val pad = backdrop.borderPadding.sp.toPx() * scale + stroke / 2f
+    val growY = if (backdrop.lineBackground) backdrop.lineBackgroundHeight.sp.toPx() * scale else 0f
+    val shift = if (backdrop.lineBackground) backdrop.lineBackgroundOffset.sp.toPx() * scale else 0f
     // Deliberately NOT clamped to the draw area. `size` here is the text's own box, not the
     // output's, so pinning the plate inside it eats the padding on every side that the text
     // reaches -- which is all four of them, since the box is measured from the text. That is how
@@ -89,7 +98,8 @@ internal fun DrawScope.drawBlockBacking(bounds: Rect, backdrop: TextBackdrop) {
         bottom = bounds.bottom + pad + growY + shift,
     )
     if (rect.width <= 0f || rect.height <= 0f) return
-    val radius = CornerRadius(backdrop.borderRadius.sp.toPx(), backdrop.borderRadius.sp.toPx())
+    val radiusPx = backdrop.borderRadius.sp.toPx() * scale
+    val radius = CornerRadius(radiusPx, radiusPx)
     if (backdrop.lineBackground) {
         drawRoundRect(
             color = backdrop.lineBackgroundColor.toBackdropColor(backdrop.lineBackgroundOpacity),

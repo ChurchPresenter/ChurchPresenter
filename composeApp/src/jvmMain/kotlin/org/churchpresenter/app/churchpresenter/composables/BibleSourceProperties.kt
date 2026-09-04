@@ -300,8 +300,6 @@ internal fun BibleProperties(
         strikethrough = source.strikethrough,
         onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
         showShadow = false,
-        backdrop = source.backdrop,
-        onBackdropChange = { onUpdate(source.copy(backdrop = it)) },
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -338,8 +336,6 @@ internal fun BibleProperties(
         strikethrough = source.referenceStrikethrough,
         onStrikethroughChange = { onUpdate(source.copy(referenceStrikethrough = it)) },
         showShadow = false,
-        backdrop = source.referenceBackdrop,
-        onBackdropChange = { onUpdate(source.copy(referenceBackdrop = it)) },
     )
 
     Spacer(modifier = Modifier.height(4.dp))

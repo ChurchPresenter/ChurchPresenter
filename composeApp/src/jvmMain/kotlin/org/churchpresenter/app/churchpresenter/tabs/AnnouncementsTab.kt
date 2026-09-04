@@ -171,6 +171,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
@@ -993,6 +994,12 @@ fun AnnouncementsTab(
                                             .padding(horizontal = scaledPadH, vertical = scaledPadV),
                                         contentAlignment = Alignment.Center
                                     ) {
+                                        // The preview draws the presenter's text at `scaleFactor` of
+                                        // its output size, so the backdrop is drawn at that factor
+                                        // too — otherwise an outline configured against a 1080p
+                                        // screen is painted full size around thumbnail type.
+                                        val previewBackdrop =
+                                            rememberTextBackdropPainter(viewModel.backdrop, scaleFactor)
                                         Text(
                                             text = previewText.ifBlank { stringResource(Res.string.preview) },
                                             style = previewTextStyle,
@@ -1000,6 +1007,8 @@ fun AnnouncementsTab(
                                             color = Utils.parseHexColor(viewModel.textColor),
                                             textAlign = previewTextAlign,
                                             softWrap = !isHorizontal,
+                                            modifier = previewBackdrop.modifier,
+                                            onTextLayout = previewBackdrop::onTextLayout,
                                         )
                                     }
                                 }
@@ -1062,12 +1071,16 @@ fun AnnouncementsTab(
                                                 .padding(horizontal = scaledPadH, vertical = scaledPadV),
                                             contentAlignment = Alignment.Center
                                         ) {
+                                            val previewBackdrop =
+                                                rememberTextBackdropPainter(viewModel.backdrop, scaleFactor)
                                             Text(
                                                 text = text.ifBlank { stringResource(Res.string.preview) },
                                                 style = previewTextStyle,
                                                 fontSize = scaledFontSize,
                                                 color = Utils.parseHexColor(viewModel.textColor),
                                                 textAlign = previewTextAlign,
+                                                modifier = previewBackdrop.modifier,
+                                                onTextLayout = previewBackdrop::onTextLayout,
                                             )
                                         }
                                     }
