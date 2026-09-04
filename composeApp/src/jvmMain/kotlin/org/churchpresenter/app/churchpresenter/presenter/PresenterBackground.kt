@@ -89,11 +89,37 @@ internal fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when
  * density twice, so the same setting came out twice as soft on a retina output as on a projector,
  * and neither agreed with the Background tab's preview.
  *
- * The presenters' `scaleFactor` keeps its pixel measurement: it sizes text and margins, which is a
- * separate question from this one.
+ * [presenterScale] measures the same way and for the same reason.
  */
 internal fun backgroundBlurRadius(blurReferencePx: Int, width: Dp): Dp =
     (blurReferencePx * (width.value / BACKGROUND_REFERENCE_WIDTH)).dp
+
+/** The output height every stored size is measured against, as [BACKGROUND_REFERENCE_WIDTH] is. */
+internal const val REFERENCE_HEIGHT = 1080f
+
+/** The range a presenter's scale is held to, so an absurd output cannot produce absurd type. */
+internal const val MIN_PRESENTER_SCALE = 0.5f
+internal const val MAX_PRESENTER_SCALE = 3.0f
+
+/**
+ * The factor the song and Bible presenters multiply every stored size by: type, margins, window
+ * insets, shadows and the gaps between blocks, all of which are authored against a 1920x1080
+ * output and drawn on one [width] by [height].
+ *
+ * Takes dp and not pixels, for the reason [backgroundBlurRadius] states. Everything it scales is
+ * applied as `.dp` or `.sp`, which the platform already multiplies by the output's density, so
+ * measuring the output in pixels counted that density a second time and a HiDPI output -- a Retina
+ * Mac, or Windows at 150% -- drew everything `density` times too large. Auto-fit was not the part
+ * that was wrong: it computes in the 1920x1080 reference space and picked a size that genuinely
+ * fitted, which was then drawn at twice that and ran off the side of the screen.
+ *
+ * The two presenters had this inline and identical; it is one function so it can be checked
+ * directly rather than only through a rendered screen.
+ */
+internal fun presenterScale(width: Dp, height: Dp): Float = minOf(
+    width.value / BACKGROUND_REFERENCE_WIDTH,
+    height.value / REFERENCE_HEIGHT,
+).coerceIn(MIN_PRESENTER_SCALE, MAX_PRESENTER_SCALE)
 
 /** What a presenter actually draws, once every source has had its say. */
 internal data class ResolvedBackground(

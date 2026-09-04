@@ -61,7 +61,6 @@ import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackgroun
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import kotlin.math.min
 
 private const val SHADOW_OFFSET_PX = 6f
 
@@ -479,9 +478,7 @@ fun BiblePresenter(
             .then(if (!isLowerThird && !resolvedBg.isBlurred) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-        val widthScale = with(density) { maxWidth.toPx() / 1920f }
-        val heightScale = with(density) { maxHeight.toPx() / 1080f }
-        val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
         val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
         PresenterBackgroundLayers(
             background = resolvedBg,
