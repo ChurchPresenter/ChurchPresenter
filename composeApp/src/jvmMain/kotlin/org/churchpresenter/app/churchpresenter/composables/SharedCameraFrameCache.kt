@@ -153,6 +153,9 @@ object SharedCameraFrameCache {
     /** Bounds the ffmpeg-missing report to one per process — see [runFfmpegCapture]. */
     private val ffmpegMissingReport = ReportOnce()
 
+    /** The same, for a stored AVFoundation index that has drifted — see [avfSourceToOpen]. */
+    private val avfIndexDriftReport = ReportOnce()
+
     // ── DeckLink capture ────────────────────────────────────────────
 
     /** Puts one polled DeckLink frame on screen; false when the poll returned no usable frame. */
@@ -361,7 +364,9 @@ object SharedCameraFrameCache {
             return
         }
 
-        val loop = CaptureLoop(source, entry)
+        val opening = avfSourceToOpen(source, avfIndexDriftReport) { entry.error.value = it } ?: return
+
+        val loop = CaptureLoop(opening, entry)
         loop.run()
         loop.reportIfGaveUp()
     }
