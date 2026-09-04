@@ -819,8 +819,6 @@
     <string name="display_mode">காட்சிப் பயன்முறை</string>
     <string name="display_fullscreen">முழுத்திரை</string>
     <string name="display_lower_third">கீழ்ப்பட்டை</string>
-    <string name="display_lower_third_horizontal">கிடைமட்டக் கீழ்ப்பட்டை</string>
-    <string name="display_lower_third_vertical">செங்குத்துக் கீழ்ப்பட்டை</string>
     <string name="lower_third_height">கீழ்ப்பட்டை உயரம் % (வேதாகமம் மற்றும் பாடல்களுக்கு)</string>
     <string name="full_screen">முழுத்திரை</string>
     <string name="lower_third_size">கீழ்ப்பட்டை</string>

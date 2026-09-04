@@ -812,8 +812,6 @@
     <string name="display_mode">Görüntüleme Modu</string>
     <string name="display_fullscreen">Tam Ekran</string>
     <string name="display_lower_third">Alt Bant</string>
-    <string name="display_lower_third_horizontal">Yatay Alt Bant</string>
-    <string name="display_lower_third_vertical">Dikey Alt Bant</string>
     <string name="lower_third_height">Alt Bant Yüksekliği % (Kutsal Kitap ve Şarkılar için)</string>
     <string name="full_screen">Tam Ekran</string>
     <string name="lower_third_size">Alt Bant</string>

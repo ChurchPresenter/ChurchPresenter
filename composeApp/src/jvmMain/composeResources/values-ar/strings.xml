@@ -812,8 +812,6 @@
     <string name="display_mode">وضع العرض</string>
     <string name="display_fullscreen">شاشة كاملة</string>
     <string name="display_lower_third">الثلث السفلي</string>
-    <string name="display_lower_third_horizontal">ثلث سفلي أفقي</string>
-    <string name="display_lower_third_vertical">ثلث سفلي رأسي</string>
     <string name="lower_third_height">نسبة ارتفاع الثلث السفلي % (للكتاب المقدس والترانيم)</string>
     <string name="full_screen">شاشة كاملة</string>
     <string name="lower_third_size">الثلث السفلي</string>

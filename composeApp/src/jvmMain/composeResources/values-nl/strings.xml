@@ -2185,8 +2185,6 @@
     <string name="presentation_focus_lost">Toetsenbordfocus verloren — klik hier om pijltjestoetsen en clicker weer in te schakelen</string>
     <string name="tab_focus_lost">Toetsenbordfocus verloren — klik hier om pijltjestoetsen weer in te schakelen</string>
     <string name="dev_window_label">Dev-venster</string>
-    <string name="display_lower_third_horizontal">Horizontale lower third</string>
-    <string name="display_lower_third_vertical">Verticale lower third</string>
     <string name="remote_api_remove_from_schedule">Verwijderen uit programma</string>
     <string name="remote_activity_removed_from_schedule">Verwijderd uit programma</string>
     <string name="instance_link_follower_badge">Instance Link — momenteel verbonden</string>

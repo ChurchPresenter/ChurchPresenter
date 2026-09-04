@@ -2158,8 +2158,6 @@
     <string name="presentation_focus_lost">Пернетақта фокусы жоғалды — көрсеткі пернелері мен кликерді қайта қосу үшін осы жерді басыңыз</string>
     <string name="tab_focus_lost">Пернетақта фокусы жоғалды — көрсеткі пернелерін қайта қосу үшін осы жерді басыңыз</string>
     <string name="dev_window_label">Әзірлеуші терезесі</string>
-    <string name="display_lower_third_horizontal">Көлденең төменгі үштен бір</string>
-    <string name="display_lower_third_vertical">Тік төменгі үштен бір</string>
     <string name="remote_api_remove_from_schedule">Кестеден жою</string>
     <string name="remote_activity_removed_from_schedule">Кестеден жойылды</string>
     <string name="instance_link_follower_badge">Instance Link — қазір қосылған</string>

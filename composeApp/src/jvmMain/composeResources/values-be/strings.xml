@@ -2157,8 +2157,6 @@
     <string name="presentation_focus_lost">Фокус клавіятуры страчаны — націсніце тут, каб зноў уключыць стрэлкі і клікер</string>
     <string name="tab_focus_lost">Фокус клавіятуры страчаны — націсніце тут, каб зноў уключыць стрэлкі</string>
     <string name="dev_window_label">Акно распрацоўшчыка</string>
-    <string name="display_lower_third_horizontal">Гарызантальная ніжняя траціна</string>
-    <string name="display_lower_third_vertical">Вертыкальная ніжняя траціна</string>
     <string name="remote_api_remove_from_schedule">Выдаліць з праграмы</string>
     <string name="remote_activity_removed_from_schedule">Выдалена з праграмы</string>
     <string name="instance_link_follower_badge">Instance Link — падключана</string>

@@ -2186,8 +2186,6 @@
     <string name="presentation_focus_lost">Foco do teclado perdido — clique aqui para reativar as teclas de seta e o clicker</string>
     <string name="tab_focus_lost">Foco do teclado perdido — clique aqui para reativar as teclas de seta</string>
     <string name="dev_window_label">Janela Dev</string>
-    <string name="display_lower_third_horizontal">Lower Third Horizontal</string>
-    <string name="display_lower_third_vertical">Lower Third Vertical</string>
     <string name="remote_api_remove_from_schedule">Remover do Roteiro</string>
     <string name="remote_activity_removed_from_schedule">Removido do Roteiro</string>
     <string name="instance_link_follower_badge">Instance Link — conectado no momento</string>

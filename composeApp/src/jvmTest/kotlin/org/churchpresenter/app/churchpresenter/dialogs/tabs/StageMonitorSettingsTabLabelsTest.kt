@@ -80,6 +80,8 @@ class StageMonitorSettingsTabLabelsTest {
         "SIZE (%)" to 6,
         "INTENSITY (%)" to 6,
         "B" to 6, "I" to 6, "U" to 6, "S" to 6,
+        // The backdrop split button: a chip drawing "A", and a caret beside it.
+        "A" to 6,
 
         // "COLOR" is now only the shadow colour's caption: the text colour has a name of its own,
         // and every zone but the full screen also carries a chord colour.
@@ -141,9 +143,10 @@ class StageMonitorSettingsTabLabelsTest {
     }
 
     /**
-     * The only content descriptions on the tab: the stepper arrows and the vertical-alignment
-     * buttons. The horizontal-alignment buttons deliberately appear nowhere here — they publish
-     * none, which is the accessibility gap the support file records.
+     * The only content descriptions on the tab: the stepper arrows, the vertical-alignment
+     * buttons, and the two halves of the backdrop button. The horizontal-alignment buttons
+     * deliberately appear nowhere here — they publish none, which is the accessibility gap the
+     * support file records.
      */
     @Test
     fun `every content description the tab publishes is accounted for`() = stageMonitorTab { _ ->
@@ -162,7 +165,10 @@ class StageMonitorSettingsTabLabelsTest {
             .flatten()
             .toSet()
         assertEquals(
-            listOf("Align Bottom", "Align Middle", "Align Top", "Decrement", "Increment"),
+            listOf(
+                "Align Bottom", "Align Middle", "Align Top", "Decrement", "Increment",
+                "Text backing", "Text backing options",
+            ),
             described.sorted(),
             "the tab publishes a content description the inventory does not list",
         )

@@ -2157,8 +2157,6 @@
     <string name="presentation_focus_lost">Фокус клавіатури втрачено — натисніть тут, щоб знову увімкнути стрілки та клікер</string>
     <string name="tab_focus_lost">Фокус клавіатури втрачено — натисніть тут, щоб знову увімкнути стрілки</string>
     <string name="dev_window_label">Вікно розробника</string>
-    <string name="display_lower_third_horizontal">Горизонтальний нижній титр</string>
-    <string name="display_lower_third_vertical">Вертикальний нижній титр</string>
     <string name="remote_api_remove_from_schedule">Видалити з програми</string>
     <string name="remote_activity_removed_from_schedule">Видалено з програми</string>
     <string name="instance_link_follower_badge">Instance Link — зараз підключено</string>

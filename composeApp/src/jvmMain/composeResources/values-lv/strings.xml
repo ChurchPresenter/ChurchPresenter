@@ -812,8 +812,6 @@
     <string name="display_mode">Attēlošanas režīms</string>
     <string name="display_fullscreen">Pilnekrāns</string>
     <string name="display_lower_third">Apakšjosla</string>
-    <string name="display_lower_third_horizontal">Horizontāla apakšjosla</string>
-    <string name="display_lower_third_vertical">Vertikāla apakšjosla</string>
     <string name="lower_third_height">Apakšjoslas augstums % (Bībelei un dziesmām)</string>
     <string name="full_screen">Pilnekrāns</string>
     <string name="lower_third_size">Apakšjosla</string>

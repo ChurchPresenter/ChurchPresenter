@@ -2160,8 +2160,6 @@
     <string name="presentation_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки и кликер</string>
     <string name="tab_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки</string>
     <string name="dev_window_label">Окно разработчика</string>
-    <string name="display_lower_third_horizontal">Горизонтальная нижняя треть</string>
-    <string name="display_lower_third_vertical">Вертикальная нижняя треть</string>
     <string name="remote_api_remove_from_schedule">Удалить из расписания</string>
     <string name="remote_activity_removed_from_schedule">Удалено из программы</string>
     <string name="instance_link_follower_badge">Instance Link — подключено</string>

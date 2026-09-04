@@ -118,7 +118,15 @@ data class ScheduleTabActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, shadowColor: String, shadowSize: Int, shadowOpacity: Int, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, loopCount: Int, isTimer: Boolean, timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int, targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+    val addAnnouncement: (
+        text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String,
+        bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, shadowColor: String,
+        shadowSize: Int, shadowOpacity: Int, horizontalAlignment: String, position: String,
+        animationType: String, animationDuration: Int, loopCount: Int, isTimer: Boolean,
+        timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String,
+        timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int,
+        targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop,
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
@@ -235,8 +243,21 @@ fun ScheduleTab(
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
                 addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
-                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position, animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour, targetMinute, targetSecond, liveClockFormat, backdrop ->
-                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position, animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour, targetMinute, targetSecond, liveClockFormat, backdrop)
+                addAnnouncement  = {
+                    text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline,
+                    shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position,
+                    animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes,
+                    timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour,
+                    targetMinute, targetSecond, liveClockFormat, backdrop,
+                    ->
+                    viewModel.addAnnouncement(
+                        text, textColor, backgroundColor, fontSize, fontType, bold, italic,
+                        underline, shadow, shadowColor, shadowSize, shadowOpacity,
+                        horizontalAlignment, position, animationType, animationDuration, loopCount,
+                        isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor,
+                        timerExpiredText, timerMode, targetHour, targetMinute, targetSecond,
+                        liveClockFormat, backdrop,
+                    )
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },

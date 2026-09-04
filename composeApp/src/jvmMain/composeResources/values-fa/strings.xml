@@ -812,8 +812,6 @@
     <string name="display_mode">حالت نمایش</string>
     <string name="display_fullscreen">تمام‌صفحه</string>
     <string name="display_lower_third">نوار پایین</string>
-    <string name="display_lower_third_horizontal">نوار پایین افقی</string>
-    <string name="display_lower_third_vertical">نوار پایین عمودی</string>
     <string name="lower_third_height">ارتفاع نوار پایین % (برای کتاب‌مقدس و سرودها)</string>
     <string name="full_screen">تمام‌صفحه</string>
     <string name="lower_third_size">نوار پایین</string>

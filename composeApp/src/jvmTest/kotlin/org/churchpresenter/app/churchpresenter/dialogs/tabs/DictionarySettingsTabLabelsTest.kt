@@ -48,11 +48,12 @@ class DictionarySettingsTabLabelsTest {
         "#AAAAAA" to 1,   // KJV usage
         "#1A1A2E" to 1,   // card background
 
-        // Style buttons — one set for Word, one for Reference.
+        // Style buttons — one set for Word, one for Reference, each ending in the backdrop chip.
         "B" to 2,
         "I" to 2,
         "U" to 2,
         "S" to 2,
+        "A" to 2,
 
         // Font controls and their stored values.
         "FONT TYPE" to 2,

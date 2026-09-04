@@ -812,8 +812,6 @@
     <string name="display_mode">प्रदर्शन मोड</string>
     <string name="display_fullscreen">पूरा पर्दा</string>
     <string name="display_lower_third">तल्लो पट्टी</string>
-    <string name="display_lower_third_horizontal">तेर्सो तल्लो पट्टी</string>
-    <string name="display_lower_third_vertical">ठाडो तल्लो पट्टी</string>
     <string name="lower_third_height">तल्लो पट्टीको उचाइ % (बाइबल र गीतका लागि)</string>
     <string name="full_screen">पूरा पर्दा</string>
     <string name="lower_third_size">तल्लो पट्टी</string>
