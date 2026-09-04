@@ -165,3 +165,41 @@ internal fun reportCameraFfmpegMissing(
         )
     )
 }
+
+/**
+ * Says once that a saved AVFoundation index was refused because the name it was stored under is no
+ * longer at it.
+ *
+ * The tag worth having is [refusedName]: an index that now holds `Capture screen 0` means the app
+ * was one call away from recording the operator's display and asking macOS for permission to do it
+ * on every launch — issue #478 — while an index holding another camera, or nothing, is the ordinary
+ * "that device is gone". They are one decision (see `resolveAvfoundationDevice`) and two very
+ * different reports.
+ *
+ * Once per process, like [reportCameraFfmpegMissing], because a canvas layer and a background on
+ * the same stale device would otherwise each send one.
+ */
+internal fun reportAvfIndexDrift(
+    source: SceneSource.CameraSource,
+    refusedName: String,
+    facts: CameraEnumerationFacts?,
+    gate: ReportOnce,
+) {
+    if (!gate.claim()) return
+    CrashReporter.reportWarning(
+        "Camera: saved AVFoundation index no longer holds the saved device",
+        tags = mapOf(
+            "subsystem" to "camera",
+            "device_scheme" to deviceScheme(source.devicePath),
+            "failure_cause" to CameraFailure.DEVICE_NOT_FOUND.name.lowercase(),
+            "avf_index_now" to when {
+                refusedName.isBlank() -> "out_of_range"
+                isScreenCaptureDevice(refusedName) -> "screen_capture"
+                else -> "other_camera"
+            },
+        ) + cameraEnumerationTags(facts, source.deviceName, ffmpegAvailable = true),
+        extras = mapOf(
+            "camera_enumeration" to cameraEnumerationExtra(facts, source.deviceName, ffmpegAvailable = true)
+        )
+    )
+}
