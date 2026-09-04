@@ -1309,7 +1309,8 @@ fun MainDesktop(
                                             item.loopCount, item.isTimer, item.timerHours,
                                             item.timerMinutes, item.timerSeconds, item.timerTextColor,
                                             item.timerExpiredText, item.timerMode, item.targetHour,
-                                            item.targetMinute, item.targetSecond, item.liveClockFormat
+                                            item.targetMinute, item.targetSecond, item.liveClockFormat,
+                                            item.backdrop
                                         )
                                     },
                                     addWebsite = actions.addWebsite
@@ -1647,7 +1648,8 @@ fun MainDesktop(
                                         settings.targetHour,
                                         settings.targetMinute,
                                         settings.targetSecond,
-                                        settings.liveClockFormat
+                                        settings.liveClockFormat,
+                                        settings.backdrop
                                     )
                                 }
                             )

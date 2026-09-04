@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -393,5 +394,11 @@ class SourcePropertiesTextTest {
             assertEquals(false, source.bold)
             assertEquals(true, source.italic, "the other faces are untouched")
         }
+    }
+
+    @Test
+    fun `the style row carries no text-backing control`() = sourcePanel(Fixture.text()) { _ ->
+        onAllNodesWithText("B").assertCountEquals(1)
+        onAllNodesWithText("A").assertCountEquals(0)
     }
 }

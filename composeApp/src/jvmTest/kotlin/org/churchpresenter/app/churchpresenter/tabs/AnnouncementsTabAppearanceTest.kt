@@ -2,10 +2,14 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -116,5 +120,37 @@ class AnnouncementsTabAppearanceTest {
         waitForIdle()
 
         assertEquals(1, reports.settings?.loopCount)
+    }
+
+    // ── Backdrop ──────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the preview paints the backdrop behind the announcement`() {
+        fun magentaPixels(backdrop: TextBackdrop): Int {
+            var found = 0
+            announcementsTab(
+                initial = AnnouncementsSettings(
+                    text = "Welcome",
+                    animationType = Constants.ANIMATION_NONE,
+                    backdrop = backdrop,
+                ),
+            ) { _, _ ->
+                waitForIdle()
+                val map = onRoot().captureToImage().toPixelMap()
+                for (y in 0 until map.height) for (x in 0 until map.width) {
+                    val p = map[x, y]
+                    if (p.red > 0.6f && p.blue > 0.6f && p.green < 0.35f) found++
+                }
+            }
+            return found
+        }
+
+        assertEquals(0, magentaPixels(TextBackdrop()), "nothing is painted while the backdrop is off")
+        val band = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#FF00FF",
+            lineBackgroundOpacity = 100,
+        )
+        assertTrue(magentaPixels(band) > 0, "the preview must paint the band the presenter will draw")
     }
 }

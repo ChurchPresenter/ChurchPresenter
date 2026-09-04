@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -237,6 +239,9 @@ private fun BackdropSegment(
     ) {
         Surface(
             modifier = modifier
+                // The chip draws a letter and the caret draws an arrow; neither is a name, so the
+                // tooltip is also the accessible one.
+                .semantics { contentDescription = tooltip }
                 .clip(shape)
                 .border(
                     width = 1.dp,
