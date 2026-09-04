@@ -1167,7 +1167,7 @@
     <string name="audio_output_device">Output device</string>
     <string name="audio_output_default">System Default</string>
     <string name="media_vlc_required">VLC media player is required for media playback</string>
-    <string name="background_camera_required">A camera or capture device is required. Install ffmpeg, or connect a Blackmagic DeckLink card.</string>
+    <string name="background_camera_required">A camera or capture device is required. Connect a camera or a Blackmagic DeckLink card, or check Settings → Projection if ffmpeg could not be found.</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
     <string name="media_vlc_arch_mismatch">Wrong VLC architecture. Your Mac uses Apple Silicon (arm64) but the installed VLC is Intel-only (x86_64). Download the Apple Silicon build of VLC from videolan.org and restart.</string>
     <string name="media_vlc_load_failed">VLC was found but could not be loaded. Try reinstalling VLC from videolan.org (on Windows, also install the Microsoft Visual C++ Redistributable), then restart the application.</string>
@@ -1493,10 +1493,11 @@
          virtual cameras. Kept defined because fourteen locales translate it: removing it here would
          orphan every one of those, which LocaleStringsTest gates against. -->
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
+    <string name="canvas_camera_unopenable_listing">ffmpeg could not list any camera on this machine. The cameras below were found by the system instead, and none of them will show a picture.</string>
     <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg, and this build could not find its copy. Open Settings → Projection to point at an ffmpeg, then check again.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
-    <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ffmpeg is not installed. Install ffmpeg, then select the camera again.</string>
+    <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ChurchPresenter could not find its copy of ffmpeg. Open Settings → Projection to point at an ffmpeg, then select the camera again.</string>
     <string name="canvas_camera_error_permission_denied_windows">Windows is blocking camera access for ChurchPresenter. Open Settings → Privacy &amp; security → Camera, turn on camera access and "Let desktop apps access your camera", then select the camera again.</string>
     <string name="canvas_camera_error_device_not_found_windows">Windows could not open a camera with this name. It may have been unplugged, or its driver may name it differently than Windows does — press Refresh Cameras and pick it again.</string>
     <string name="canvas_camera_error_permission_denied">macOS is blocking camera access for ChurchPresenter. Open System Settings → Privacy &amp; Security → Camera, switch ChurchPresenter on, then select the camera again.</string>
