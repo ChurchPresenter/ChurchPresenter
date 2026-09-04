@@ -345,7 +345,12 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
 /** Whatever [cameraHintStringRes] decides is worth saying about this machine's camera tooling. */
 @Composable
 private fun CameraToolHints(osName: String, devices: List<CameraDevice>?, ffmpegAvailable: Boolean) {
-    cameraHintStringRes(osName, devices, ffmpegAvailable).forEach { hint ->
+    cameraHintStringRes(
+        osName,
+        devices,
+        ffmpegAvailable,
+        CameraDeviceCatalog.lastEnumeration?.enumerator,
+    ).forEach { hint ->
         Text(
             stringResource(hint),
             style = MaterialTheme.typography.bodySmall,

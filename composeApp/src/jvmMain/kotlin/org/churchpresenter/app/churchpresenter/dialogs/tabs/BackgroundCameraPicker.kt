@@ -79,7 +79,12 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
         // Above the dropdown rather than instead of it: on Windows without ffmpeg the PnP fallback
         // fills the list with names that cannot be opened, so a hint shown only when the list is
         // empty is a hint the operator who needs it never sees.
-        cameraHintStringRes(System.getProperty("os.name", ""), devices, ffmpegAvailable).forEach { hint ->
+        cameraHintStringRes(
+            System.getProperty("os.name", ""),
+            devices,
+            ffmpegAvailable,
+            CameraDeviceCatalog.lastEnumeration?.enumerator,
+        ).forEach { hint ->
             Text(
                 text = stringResource(hint),
                 style = MaterialTheme.typography.bodySmall,

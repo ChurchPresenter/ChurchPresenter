@@ -153,6 +153,9 @@ object SharedCameraFrameCache {
     /** Bounds the ffmpeg-missing report to one per process — see [runFfmpegCapture]. */
     private val ffmpegMissingReport = ReportOnce()
 
+    /** The same, for a stored AVFoundation index that has drifted — see [avfSourceToOpen]. */
+    private val avfIndexDriftReport = ReportOnce()
+
     // ── DeckLink capture ────────────────────────────────────────────
 
     /** Puts one polled DeckLink frame on screen; false when the poll returned no usable frame. */
@@ -340,28 +343,34 @@ object SharedCameraFrameCache {
             return
         }
 
-        // ffmpeg is an optional external tool, and a machine without it fails every attempt for the
-        // same knowable reason. Discovering that five times over ten seconds tells the operator
-        // nothing, so the retry loop does not run.
+        // ffmpeg ships with the app now, so reaching this is no longer an operator who has not
+        // installed something — it is a build that could not carry or execute its own binary, an
+        // architecture we publish no binary for, or an override pointing at something that will not
+        // run. Retrying five times over ten seconds answers none of those, so the loop does not run.
         //
-        // It is reported, though, which it did not used to be. The old reasoning — a tool the user
-        // has not installed is not a fault in the app — is right about a *tool* and wrong about this
-        // state: the app listed this device in its own picker, the operator chose it, and the app
-        // then produced nothing. On Windows the picker deliberately offers unopenable names beside a
-        // hint saying what to install, so whether that hint is doing its job is a question about our
-        // own UI. Issue #462 is the evidence that it was not, and the reason we could not see it is
-        // that this path was silent.
+        // It is reported, which it did not used to be. The old reasoning — a tool the user has not
+        // installed is not a fault in the app — was right about a *tool* and wrong about this state
+        // even then: the app listed the device in its own picker, the operator chose it, and the app
+        // produced nothing. It reads more plainly now that we ship the tool.
         //
-        // Bounded hard: `FfmpegBinary.isAvailable` is a `by lazy`, so a second report in the same
-        // process would carry nothing the first did not.
+        // The `ReportOnce` gate is what bounds this, and it has to be: `FfmpegBinary.isAvailable`
+        // used to be a `by lazy` that could not change in a process, and is now a cached value the
+        // settings card's Check again clears.
         if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
-            System.err.println("[Camera] ffmpeg is not on PATH — cannot capture $path")
+            System.err.println("[Camera] no usable ffmpeg found — cannot capture $path")
             entry.error.value = CameraFailure.FFMPEG_MISSING
-            reportCameraFfmpegMissing(source, CameraDeviceCatalog.lastEnumeration, ffmpegMissingReport)
+            reportCameraFfmpegMissing(
+                source,
+                CameraDeviceCatalog.lastEnumeration,
+                ffmpegMissingReport,
+                ffmpegAvailable = false,
+            )
             return
         }
 
-        val loop = CaptureLoop(source, entry)
+        val opening = avfSourceToOpen(source, avfIndexDriftReport) { entry.error.value = it } ?: return
+
+        val loop = CaptureLoop(opening, entry)
         loop.run()
         loop.reportIfGaveUp()
     }
