@@ -479,9 +479,7 @@ fun BiblePresenter(
             .then(if (!isLowerThird && !resolvedBg.isBlurred) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-        val widthScale = with(density) { maxWidth.toPx() / 1920f }
-        val heightScale = with(density) { maxHeight.toPx() / 1080f }
-        val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        val scaleFactor = with(density) { minOf(maxWidth.toPx() / 1920f, maxHeight.toPx() / 1080f) }.coerceIn(0.5f, 3.0f)
         val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
         PresenterBackgroundLayers(
             background = resolvedBg,

@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -345,10 +344,8 @@ fun SongPresenter(
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
             .then(if (!isLowerThird && !blurred) bgModifier else Modifier)
     ) {
-        val density = LocalDensity.current
-        val widthScale = with(density) { maxWidth.toPx() / 1920f }
-        val heightScale = with(density) { maxHeight.toPx() / 1080f }
-        val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val scaleFactor = with(density) { minOf(maxWidth.toPx() / 1920f, maxHeight.toPx() / 1080f) }.coerceIn(0.5f, 3.0f)
         // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
         val blurRadius = backgroundBlurRadius(bgBlurReferencePx, maxWidth)
         PresenterBackgroundLayers(

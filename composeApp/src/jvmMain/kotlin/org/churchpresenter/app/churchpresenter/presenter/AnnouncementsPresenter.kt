@@ -28,7 +28,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +42,10 @@ import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+
+/** The inset the announcement text is drawn inside, and so the inset auto-fit measures against. */
+private val TEXT_PADDING_HORIZONTAL = 32.dp
+private val TEXT_PADDING_VERTICAL = 16.dp
 
 @Composable
 fun AnnouncementsPresenter(
@@ -124,23 +127,24 @@ fun AnnouncementsPresenter(
             .background(Color.Transparent)
             .graphicsLayer { alpha = transitionAlpha }
     ) {
-        val density = LocalDensity.current
-        val horizontalPaddingPx = with(density) { (32.dp * 2).roundToPx() }
-        val availableWidthPx = constraints.maxWidth - horizontalPaddingPx
-
-        val verticalPaddingPx = with(density) { (16.dp * 2).roundToPx() }
-        val availableHeightPx = constraints.maxHeight - verticalPaddingPx
+        // Measured in dp, not in pixels. `calculateAutoFitFontSize` measures at `Density(1f)` and
+        // returns a size that is then drawn as `.sp`, which the platform scales by the output's
+        // density -- so fitting against a pixel width let a HiDPI output take a size `density`
+        // times too large for the space it was fitted to, and the text overran the slide.
+        val d = androidx.compose.ui.platform.LocalDensity.current
+        val availableWidth = constraints.maxWidth - with(d) { (TEXT_PADDING_HORIZONTAL * 2).roundToPx() }
+        val availableHeight = constraints.maxHeight - with(d) { (TEXT_PADDING_VERTICAL * 2).roundToPx() }
 
         val effectiveFontSize = if (!isDirectional) {
             // Static/fade: fit to both width and height
-            remember(text, settings.fontSize, availableWidthPx, availableHeightPx, textStyle.fontFamily, textStyle.fontWeight) {
-                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, availableHeightPx)
+            remember(text, settings.fontSize, availableWidth, availableHeight, textStyle.fontFamily, textStyle.fontWeight) {
+                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidth, availableHeight)
                     .coerceAtMost(settings.fontSize)
             }
         } else if (!isHorizontal) {
             // Vertical slide: fit to width only (scrolls vertically)
-            remember(text, settings.fontSize, availableWidthPx, textStyle.fontFamily, textStyle.fontWeight) {
-                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, Int.MAX_VALUE)
+            remember(text, settings.fontSize, availableWidth, textStyle.fontFamily, textStyle.fontWeight) {
+                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidth, Int.MAX_VALUE)
                     .coerceAtMost(settings.fontSize)
             }
         } else {
@@ -155,7 +159,7 @@ fun AnnouncementsPresenter(
                     .then(if (!wrap) Modifier.wrapContentWidth(unbounded = true) else Modifier)
                     .wrapContentHeight()
                     .background(bgColor)
-                    .padding(horizontal = 32.dp, vertical = 16.dp),
+                    .padding(horizontal = TEXT_PADDING_HORIZONTAL, vertical = TEXT_PADDING_VERTICAL),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

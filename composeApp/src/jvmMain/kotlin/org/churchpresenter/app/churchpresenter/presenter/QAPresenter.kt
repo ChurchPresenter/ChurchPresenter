@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +47,13 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import java.awt.image.BufferedImage
+
+/** The card the question is drawn in, and so the space auto-fit measures against. */
+private val CARD_PADDING = 64.dp
+private val CARD_INNER_PADDING = 48.dp
+
+/** How much of the output's height a question may take before auto-fit shrinks it. */
+private const val QUESTION_HEIGHT_FRACTION = 0.6f
 
 @Composable
 fun QAPresenter(
@@ -97,23 +103,25 @@ fun QAPresenter(
     ) {
         if (question != null) {
             val textMeasurer = rememberTextMeasurer()
-            val density = LocalDensity.current
-            val cardPaddingPx = with(density) { (64.dp * 2).roundToPx() }
-            val innerPaddingPx = with(density) { (48.dp * 2).roundToPx() }
-            val availableWidthPx = constraints.maxWidth - cardPaddingPx - innerPaddingPx
-            val availableHeightPx = (constraints.maxHeight * 0.6f).toInt()
+            // Measured in dp, not in pixels. `calculateAutoFitFontSize` measures at `Density(1f)`
+            // and returns a size that is then drawn as `.sp`, which the platform scales by the
+            // output's density -- so fitting against a pixel width let a HiDPI output take a size
+            // `density` times too large for the card it was fitted to, and the question overran it.
+            val d = androidx.compose.ui.platform.LocalDensity.current
+            val availableWidth = constraints.maxWidth - with(d) { ((CARD_PADDING + CARD_INNER_PADDING) * 2).roundToPx() }
+            val availableHeight = (constraints.maxHeight * QUESTION_HEIGHT_FRACTION).toInt()
 
-            val fontSize = remember(question.text, availableWidthPx, availableHeightPx, qaSettings.fontSize) {
-                calculateAutoFitFontSize(textMeasurer, question.text, textStyle, availableWidthPx, availableHeightPx)
+            val fontSize = remember(question.text, availableWidth, availableHeight, qaSettings.fontSize) {
+                calculateAutoFitFontSize(textMeasurer, question.text, textStyle, availableWidth, availableHeight)
                     .coerceAtMost(qaSettings.fontSize)
             }
 
             Box(
                 modifier = Modifier
-                    .padding(64.dp)
+                    .padding(CARD_PADDING)
                     .clip(RoundedCornerShape(24.dp))
                     .background(cardBg)
-                    .padding(48.dp),
+                    .padding(CARD_INNER_PADDING),
                 contentAlignment = Alignment.Center
             ) {
                 val painter = rememberTextBackdropPainter(qaSettings.backdrop)
