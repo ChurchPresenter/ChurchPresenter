@@ -812,8 +812,6 @@
     <string name="display_mode">โหมดการแสดงผล</string>
     <string name="display_fullscreen">เต็มจอ</string>
     <string name="display_lower_third">แถบล่าง</string>
-    <string name="display_lower_third_horizontal">แถบล่างแนวนอน</string>
-    <string name="display_lower_third_vertical">แถบล่างแนวตั้ง</string>
     <string name="lower_third_height">ความสูงแถบล่าง % (สำหรับพระคัมภีร์และเพลง)</string>
     <string name="full_screen">เต็มจอ</string>
     <string name="lower_third_size">แถบล่าง</string>

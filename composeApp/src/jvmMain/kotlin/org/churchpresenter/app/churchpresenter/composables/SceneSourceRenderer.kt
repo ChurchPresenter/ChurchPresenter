@@ -229,6 +229,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 modifier = Modifier.fillMaxSize().padding(4.dp)
             )
         } else {
+            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
             Text(
                 text = source.text,
                 color = textColor,
@@ -241,7 +242,8 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
                 letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(4.dp).then(painter.modifier),
+                onTextLayout = painter::onTextLayout,
             )
         }
     }
@@ -594,9 +596,17 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
         contentAlignment = Alignment.Center
     ) {
         if (source.curve != 0f) {
+            // A bent line is drawn glyph by glyph rather than laid out as text, so there is no line
+            // box to band and no block to box: the backdrop is skipped rather than misplaced.
             CurvedText(displayText, source.curve, style, Modifier.fillMaxSize())
         } else {
-            Text(text = displayText, style = style)
+            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
+            Text(
+                text = displayText,
+                style = style,
+                modifier = painter.modifier,
+                onTextLayout = painter::onTextLayout,
+            )
         }
     }
 }
@@ -1126,6 +1136,8 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 else -> Alignment.CenterHorizontally
             }
         ) {
+            val versePainter = rememberTextBackdropPainter(source.backdrop, fontScale)
+            val refPainter = rememberTextBackdropPainter(source.referenceBackdrop, fontScale)
             Text(
                 text = source.verseText.ifEmpty { "Select a verse..." },
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
@@ -1138,7 +1150,8 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
                 letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().then(versePainter.modifier),
+                onTextLayout = versePainter::onTextLayout,
             )
             if (source.referenceText.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -1155,7 +1168,8 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                     ),
                     textAlign = align,
                     letterSpacing = trackingOf(source.letterSpacing),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().then(refPainter.modifier),
+                    onTextLayout = refPainter::onTextLayout,
                 )
             }
         }

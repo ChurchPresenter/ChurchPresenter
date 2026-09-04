@@ -79,6 +79,33 @@
     <string name="tooltip_shadow">Shadow</string>
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Strikethrough</string>
+    <string name="text_style_backdrop">A</string>
+    <string name="tooltip_backdrop_options">Text backing options</string>
+
+    <!-- Text backing: the fill drawn behind each line and the border drawn around the block -->
+    <string name="backdrop_title">Text backing</string>
+    <string name="backdrop_style">Style</string>
+    <string name="backdrop_mode_off">Off</string>
+    <string name="backdrop_mode_fill">Fill</string>
+    <string name="backdrop_mode_border">Border</string>
+    <string name="backdrop_mode_both">Both</string>
+    <string name="backdrop_mode_hint">Pick Fill, Border or Both to start. Off is the first choice here, and the toolbar button flips between Off and the last style you used.</string>
+    <string name="backdrop_presets">Presets</string>
+    <string name="backdrop_save_preset">Save as Preset</string>
+    <string name="backdrop_saved_look">Saved preset</string>
+    <string name="backdrop_preset_saved_already">This look is already saved</string>
+    <string name="backdrop_preset_black_bar">Black bar</string>
+    <string name="backdrop_preset_soft_shade">Soft shade</string>
+    <string name="backdrop_preset_thin_outline">Thin outline</string>
+    <string name="backdrop_preset_rounded_plate">Rounded plate</string>
+    <string name="backdrop_fill_color">Fill color</string>
+    <string name="backdrop_opacity">Opacity %</string>
+    <string name="backdrop_height_offset">Height offset</string>
+    <string name="backdrop_vertical_offset">Vertical offset</string>
+    <string name="backdrop_border_color">Border color</string>
+    <string name="backdrop_border_width">Thickness</string>
+    <string name="backdrop_border_padding">Padding</string>
+    <string name="backdrop_border_radius">Corner radius</string>
     <string name="shadow_settings">Shadow</string>
     <string name="shadow_size">Size (%)</string>
     <string name="shadow_opacity">Intensity (%)</string>
@@ -905,8 +932,6 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Horizontal Lower Third</string>
-    <string name="display_lower_third_vertical">Vertical Lower Third</string>
     <string name="lower_third_height">Band height %</string>
     <string name="lower_third_band">Lower Third Band</string>
     <string name="full_screen">Full Screen</string>

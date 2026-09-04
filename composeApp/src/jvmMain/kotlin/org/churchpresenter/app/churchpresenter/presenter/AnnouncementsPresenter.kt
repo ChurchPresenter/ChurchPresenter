@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
@@ -147,6 +148,7 @@ fun AnnouncementsPresenter(
             settings.fontSize
         }
 
+        val painter = rememberTextBackdropPainter(settings.backdrop)
         val textBlock: @Composable (Boolean) -> Unit = { wrap ->
             Box(
                 modifier = Modifier
@@ -157,6 +159,8 @@ fun AnnouncementsPresenter(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
+                    modifier = painter.modifier,
+                    onTextLayout = painter::onTextLayout,
                     text     = text,
                     style    = textStyle,
                     fontSize = effectiveFontSize.sp,

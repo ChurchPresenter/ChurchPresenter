@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -74,6 +75,8 @@ internal data class SongElementStyle(
     val chordColor: String = "#4FD3E8",
     /** Only meaningful where [SongStyleElement.hasAutoFit]; the rest read and write nothing. */
     val autoFit: Boolean = true,
+    /** The line background and the border box, both drawn behind and around this element. */
+    val backdrop: TextBackdrop = TextBackdrop(),
 )
 
 /** What this song draws [element] with on [target]. */
@@ -140,6 +143,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = songNumberLowerThirdWordSpacing,
             transform = songNumberLowerThirdTransform,
             position = songNumberLowerThirdPosition,
+            backdrop = songNumberLowerThirdBackdrop,
         )
     } else {
         SongElementStyle(
@@ -159,6 +163,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = songNumberWordSpacing,
             transform = songNumberTransform,
             position = songNumberPosition,
+            backdrop = songNumberBackdrop,
         )
     }
 
@@ -181,6 +186,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             wordSpacing = titleLowerThirdWordSpacing,
             transform = titleLowerThirdTransform,
             position = titleLowerThirdPosition,
+            backdrop = titleLowerThirdBackdrop,
         )
     } else {
         SongElementStyle(
@@ -200,6 +206,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             wordSpacing = titleWordSpacing,
             transform = titleTransform,
             position = titlePosition,
+            backdrop = titleBackdrop,
         )
     }
 
@@ -223,6 +230,7 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             transform = lyricsLowerThirdTransform,
             chordColor = lyricsLowerThirdChordColor,
         autoFit = lyricsLowerThirdFontSizeAutoFit,
+            backdrop = lyricsLowerThirdBackdrop,
         )
     } else {
         SongElementStyle(
@@ -243,6 +251,7 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             transform = lyricsTransform,
             chordColor = lyricsChordColor,
         autoFit = lyricsFontSizeAutoFit,
+            backdrop = lyricsBackdrop,
         )
     }
 
@@ -265,6 +274,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             wordSpacing = lowerThirdLookAheadWordSpacing,
             transform = lowerThirdLookAheadTransform,
             autoFit = lowerThirdLookAheadFontSizeAutoFit,
+            backdrop = lowerThirdLookAheadBackdrop,
         )
     } else {
         SongElementStyle(
@@ -284,6 +294,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             wordSpacing = lookAheadWordSpacing,
             transform = lookAheadTransform,
             autoFit = lookAheadFontSizeAutoFit,
+            backdrop = lookAheadBackdrop,
         )
     }
 
@@ -306,6 +317,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             wordSpacing = lowerThirdLookAheadNextWordSpacing,
             transform = lowerThirdLookAheadNextTransform,
             autoFit = lowerThirdLookAheadNextFontSizeAutoFit,
+            backdrop = lowerThirdLookAheadNextBackdrop,
         )
     } else {
         SongElementStyle(
@@ -325,6 +337,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             wordSpacing = lookAheadNextWordSpacing,
             transform = lookAheadNextTransform,
             autoFit = lookAheadNextFontSizeAutoFit,
+            backdrop = lookAheadNextBackdrop,
         )
     }
 

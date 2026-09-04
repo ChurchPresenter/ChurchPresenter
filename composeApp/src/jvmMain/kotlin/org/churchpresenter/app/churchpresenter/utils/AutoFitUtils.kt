@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import org.churchpresenter.songchords.ChordTransposer
 
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Constraints
@@ -68,6 +69,12 @@ fun calculateAutoFitFontSize(
 /**
  * Finds the largest font size that fits ALL sections of a song without line wrapping.
  * Checks every line in every section against both width (no wrap) and height (fits vertically).
+ *
+ * [styleText] must turn a stored line into exactly what the presenter draws. A fit measured against
+ * anything narrower is not a fit: an uppercase transform, letter spacing or word spacing all widen
+ * the line *after* the search has settled, and the presenter draws its lyrics with `softWrap` off,
+ * so the size that "fitted" then runs off the side of the screen with the end of every line cut.
+ * The default measures the raw string, which is right only for a profile that styles nothing.
  */
 fun calculateAutoFitForAllSections(
     textMeasurer: TextMeasurer,
@@ -77,6 +84,7 @@ fun calculateAutoFitForAllSections(
     availableHeight: Int,
     reservedHeight: Int = 0,
     includeEndIndicator: Boolean = false,
+    styleText: (String) -> AnnotatedString = { AnnotatedString(it) },
 ): Int {
     if (sections.isEmpty() || availableWidth <= 0 || availableHeight <= 0) return MIN_AUTO_FIT_FONT_SIZE
     val allLines = sections.flatMap { it.lines }
@@ -97,6 +105,7 @@ fun calculateAutoFitForAllSections(
                 textMeasurer, section, style, unconstrainedConstraints, referenceDensity,
                 availableWidth, effectiveHeight,
                 withEndIndicator = includeEndIndicator && sectionIdx == sections.lastIndex,
+                styleText = styleText,
             )
         }
         if (fits) low = mid else high = mid
@@ -191,6 +200,7 @@ private fun sectionFits(
     availableWidth: Int,
     effectiveHeight: Int,
     withEndIndicator: Boolean,
+    styleText: (String) -> AnnotatedString,
 ): Boolean {
     // Check both primary and secondary lines so bilingual text also fits
     val lineSets = if (section.secondaryLines.isNotEmpty()) {
@@ -200,7 +210,9 @@ private fun sectionFits(
     }
     return lineSets.filter { it.isNotEmpty() }.all { lines ->
         val measured = lines.map {
-            textMeasurer.measure(text = it, style = style, constraints = constraints, density = density).size
+            textMeasurer.measure(
+                text = styleText(it), style = style, constraints = constraints, density = density,
+            ).size
         }
         // Reserve space for end-of-song indicator on the last section: spacer + indicator height
         val indicatorHeight = if (withEndIndicator) {

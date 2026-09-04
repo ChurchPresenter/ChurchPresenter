@@ -446,7 +446,9 @@ private fun ZoneStyleSection(
                 onBoldChange = { v -> onStyleChange { copy(bold = v) } },
                 onItalicChange = { v -> onStyleChange { copy(italic = v) } },
                 onUnderlineChange = { v -> onStyleChange { copy(underline = v) } },
-                onShadowChange = { v -> onStyleChange { copy(shadow = v) } }
+                onShadowChange = { v -> onStyleChange { copy(shadow = v) } },
+                backdrop = style.backdrop,
+                onBackdropChange = { v -> onStyleChange { copy(backdrop = v) } },
             )
             VerticalAlignmentButtons(
                 selectedAlignment = style.verticalAlignment,

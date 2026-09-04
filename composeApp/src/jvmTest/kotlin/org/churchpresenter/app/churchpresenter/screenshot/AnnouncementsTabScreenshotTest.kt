@@ -6,6 +6,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
@@ -105,6 +106,24 @@ class AnnouncementsTabScreenshotTest {
     fun `the shadow row open`() = shoot(
         "shadow_on",
         initial = notice(shadow = true),
+    )
+
+    /** The band and box the preview paints behind the text, as the presenter will draw them. */
+    @Test
+    fun `a backdrop behind the text`() = shoot(
+        "backdrop_plate",
+        initial = notice(
+            backdrop = TextBackdrop(
+                lineBackground = true,
+                lineBackgroundColor = "#000000",
+                lineBackgroundOpacity = 80,
+                border = true,
+                borderColor = "#FFD54F",
+                borderWidth = 6,
+                borderPadding = 18,
+                borderRadius = 12,
+            ),
+        ),
     )
 
     /** A transparent background collapses the colour field to a single chip offering to pick one. */
@@ -360,6 +379,7 @@ class AnnouncementsTabScreenshotTest {
         shadow: Boolean = false,
         horizontalAlignment: String = Constants.CENTER,
         position: String = Constants.CENTER,
+        backdrop: TextBackdrop = TextBackdrop(),
     ) = AnnouncementsSettings(
         text = NOTICE,
         textColor = textColor,
@@ -371,6 +391,7 @@ class AnnouncementsTabScreenshotTest {
         shadow = shadow,
         horizontalAlignment = horizontalAlignment,
         position = position,
+        backdrop = backdrop,
     )
 
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────

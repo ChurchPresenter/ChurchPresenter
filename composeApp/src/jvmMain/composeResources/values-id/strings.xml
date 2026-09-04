@@ -812,8 +812,6 @@
     <string name="display_mode">Mode Tampilan</string>
     <string name="display_fullscreen">Layar Penuh</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Lower Third Horizontal</string>
-    <string name="display_lower_third_vertical">Lower Third Vertikal</string>
     <string name="lower_third_height">Tinggi Lower Third % (untuk Alkitab dan Lagu)</string>
     <string name="full_screen">Layar Penuh</string>
     <string name="lower_third_size">Lower Third</string>

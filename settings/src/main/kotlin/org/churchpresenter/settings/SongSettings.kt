@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 
 @Serializable
@@ -359,7 +360,21 @@ data class SongSettings(
     val lowerThirdLookAheadNextStrikethrough: Boolean = false,
     val lowerThirdLookAheadNextLetterSpacing: Int = 0,
     val lowerThirdLookAheadNextWordSpacing: Int = 0,
-    val lowerThirdLookAheadNextTransform: String = Constants.TEXT_TRANSFORM_NONE
+    val lowerThirdLookAheadNextTransform: String = Constants.TEXT_TRANSFORM_NONE,
+
+    // The band behind each line and the box around the block, one record per profile. Nested
+    // rather than ten more families of flat fields: these are eleven numbers each, and a
+    // hundred and ten fields is not a settings class anyone can read.
+    val songNumberBackdrop: TextBackdrop = TextBackdrop(),
+    val songNumberLowerThirdBackdrop: TextBackdrop = TextBackdrop(),
+    val titleBackdrop: TextBackdrop = TextBackdrop(),
+    val titleLowerThirdBackdrop: TextBackdrop = TextBackdrop(),
+    val lyricsBackdrop: TextBackdrop = TextBackdrop(),
+    val lyricsLowerThirdBackdrop: TextBackdrop = TextBackdrop(),
+    val lookAheadBackdrop: TextBackdrop = TextBackdrop(),
+    val lowerThirdLookAheadBackdrop: TextBackdrop = TextBackdrop(),
+    val lookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
+    val lowerThirdLookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
 )
 
 /**

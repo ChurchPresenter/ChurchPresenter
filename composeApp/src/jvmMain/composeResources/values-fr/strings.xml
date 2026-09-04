@@ -2185,8 +2185,6 @@
     <string name="presentation_focus_lost">Focus clavier perdu — cliquez ici pour réactiver les flèches et le clicker</string>
     <string name="tab_focus_lost">Focus clavier perdu — cliquez ici pour réactiver les flèches</string>
     <string name="dev_window_label">Fenêtre Dev</string>
-    <string name="display_lower_third_horizontal">Bandeau inférieur horizontal</string>
-    <string name="display_lower_third_vertical">Bandeau inférieur vertical</string>
     <string name="remote_api_remove_from_schedule">Retirer du programme</string>
     <string name="remote_activity_removed_from_schedule">Retiré du programme</string>
     <string name="instance_link_follower_badge">Instance Link — actuellement connecté</string>

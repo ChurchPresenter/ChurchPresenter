@@ -812,8 +812,6 @@
     <string name="display_mode">Koʻrsatish rejimi</string>
     <string name="display_fullscreen">Toʻliq ekran</string>
     <string name="display_lower_third">Pastki titr</string>
-    <string name="display_lower_third_horizontal">Gorizontal pastki titr</string>
-    <string name="display_lower_third_vertical">Vertikal pastki titr</string>
     <string name="lower_third_height">Pastki titr balandligi % (Muqaddas Kitob va qoʻshiqlar uchun)</string>
     <string name="full_screen">Toʻliq ekran</string>
     <string name="lower_third_size">Pastki titr</string>

@@ -2190,8 +2190,6 @@
     <string name="presentation_focus_lost">Klaviatuurifookus kadus — klõpsa siia, et taasaktiveerida nooleklahvid ja slaidipult</string>
     <string name="tab_focus_lost">Klaviatuurifookus kadus — klõpsa siia, et taasaktiveerida nooleklahvid</string>
     <string name="dev_window_label">Arendusaken</string>
-    <string name="display_lower_third_horizontal">Horisontaalne alumine kolmandik</string>
-    <string name="display_lower_third_vertical">Vertikaalne alumine kolmandik</string>
     <string name="remote_api_remove_from_schedule">Eemalda kavast</string>
     <string name="remote_activity_removed_from_schedule">Eemaldatud kavast</string>
     <string name="instance_link_follower_badge">Instance Link — praegu ühendatud</string>

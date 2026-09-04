@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
@@ -123,6 +125,14 @@ internal fun binarySearchFitScale(
  * replaced always emitted its leading space, so a translation with no abbreviation drew
  * " John 3:16".
  */
+/** The line background and border box [BibleTranslationSettings] keeps for the verse, per output. */
+internal fun BibleTranslationSettings.textBackdropFor(lowerThird: Boolean): TextBackdrop =
+    if (lowerThird) lowerThirdTextBackdrop else textBackdrop
+
+/** The same for the reference line. */
+internal fun BibleTranslationSettings.referenceBackdropFor(lowerThird: Boolean): TextBackdrop =
+    if (lowerThird) lowerThirdReferenceBackdrop else referenceBackdrop
+
 internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
     val label = if (translation.showAbbreviation) {
         translation.customAbbreviation.trim().ifBlank { verse.bibleAbbreviation.trim() }
@@ -349,6 +359,13 @@ fun BiblePresenter(
         if (isLowerThird) t1.lowerThirdReferenceShadowSize else t1.referenceShadowSize,
         if (isLowerThird) t1.lowerThirdReferenceShadowOpacity else t1.referenceShadowOpacity
     )
+
+    // One painter per profile: each holds the last layout its Text reported, which is what lets the
+    // bands and the box be drawn from the measured lines without a wrapper that would take up room.
+    val pTextPainter = rememberTextBackdropPainter(t0.textBackdropFor(isLowerThird))
+    val pRefPainter = rememberTextBackdropPainter(t0.referenceBackdropFor(isLowerThird))
+    val sTextPainter = rememberTextBackdropPainter(t1.textBackdropFor(isLowerThird))
+    val sRefPainter = rememberTextBackdropPainter(t1.referenceBackdropFor(isLowerThird))
 
     // Text styles from settings
     val primaryBibleTextStyle = TextStyle(
@@ -809,36 +826,45 @@ fun BiblePresenter(
                                 val textAlign = alignment(item.textHorizontalAlignment)
                                 val refAlign = alignment(item.referenceHorizontalAlignment)
                                 val refPosition = item.referencePosition
+                                // Per translation, not per profile: every one in the stack draws
+                                // from its own settings, so each needs a painter of its own.
+                                val itemTextPainter =
+                                    rememberTextBackdropPainter(item.textBackdropFor(isLowerThird))
+                                val itemRefPainter =
+                                    rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
                                 Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                     if (refPosition == Constants.POSITION_ABOVE) {
                                         Text(
                                             itemRefText(item, buildRefText(verse, item)),
-                                            Modifier.fillMaxWidth(),
+                                            Modifier.fillMaxWidth().then(itemRefPainter.modifier),
                                             color = refColor,
                                             fontFamily = refFont,
                                             fontSize = refSize,
                                             textAlign = refAlign,
                                             style = referenceStyle(item),
+                                            onTextLayout = itemRefPainter::onTextLayout,
                                         )
                                     }
                                     Text(
                                         itemText(item, verse.verseText),
-                                        Modifier.fillMaxWidth(),
+                                        Modifier.fillMaxWidth().then(itemTextPainter.modifier),
                                         color = textColor,
                                         fontFamily = textFont,
                                         fontSize = textSize,
                                         textAlign = textAlign,
                                         style = textStyle(item),
+                                        onTextLayout = itemTextPainter::onTextLayout,
                                     )
                                     if (refPosition == Constants.POSITION_BELOW) {
                                         Text(
                                             itemRefText(item, buildRefText(verse, item)),
-                                            Modifier.fillMaxWidth(),
+                                            Modifier.fillMaxWidth().then(itemRefPainter.modifier),
                                             color = refColor,
                                             fontFamily = refFont,
                                             fontSize = refSize,
                                             textAlign = refAlign,
                                             style = referenceStyle(item),
+                                            onTextLayout = itemRefPainter::onTextLayout,
                                         )
                                     }
                                 }
@@ -1004,33 +1030,36 @@ fun BiblePresenter(
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
                                         fontFamily = primaryBibleReferenceFontStyle,
                                         fontSize = scaledPrimaryRefSize,
                                         text = prText(primaryRefText),
                                         color = primaryBibleReferenceTextColor,
                                         style = primaryReferenceTextStyleScaled,
+                                        onTextLayout = pRefPainter::onTextLayout,
                                     )
                                 }
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
                                     textAlign = primaryBibleHorizontalAlignment,
                                     fontFamily = primaryBibleFontStyle,
                                     fontSize = matchedBibleSize,
                                     text = pText(primary.verseText),
                                     color = primaryBibleTextColor,
                                     style = primaryBibleTextStyleScaled,
+                                    onTextLayout = pTextPainter::onTextLayout,
                                 )
                                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
                                         fontFamily = primaryBibleReferenceFontStyle,
                                         fontSize = scaledPrimaryRefSize,
                                         text = prText(primaryRefText),
                                         color = primaryBibleReferenceTextColor,
                                         style = primaryReferenceTextStyleScaled,
+                                        onTextLayout = pRefPainter::onTextLayout,
                                     )
                                 }
                             }
@@ -1038,33 +1067,36 @@ fun BiblePresenter(
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = scaledSecondaryRefSize,
                                         text = srText(secondaryRefText),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
+                                        onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
                                     textAlign = secondaryBibleHorizontalAlignment,
                                     fontFamily = secondaryBibleFontStyle,
                                     fontSize = matchedBibleSize,
                                     text = sText(sec.verseText),
                                     color = secondaryBibleTextColor,
                                     style = secondaryBibleTextStyleScaled,
+                                    onTextLayout = sTextPainter::onTextLayout,
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = scaledSecondaryRefSize,
                                         text = srText(secondaryRefText),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
+                                        onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
                             }
@@ -1146,65 +1178,71 @@ fun BiblePresenter(
                         ) {
                             if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
                                     text = prText(buildRefText(primary, t0)),
                                     color = primaryBibleReferenceTextColor,
                                     style = primaryReferenceTextStyleScaled,
+                                    onTextLayout = pRefPainter::onTextLayout,
                                 )
                             }
                             Text(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
                                 textAlign = primaryBibleHorizontalAlignment,
                                 fontFamily = primaryBibleFontStyle,
                                 fontSize = matchedFittedSize,
                                 text = pText(primary.verseText),
                                 color = primaryBibleTextColor,
                                 style = primaryBibleTextStyleScaled,
+                                onTextLayout = pTextPainter::onTextLayout,
                             )
                             if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
                                     text = prText(buildRefText(primary, t0)),
                                     color = primaryBibleReferenceTextColor,
                                     style = primaryReferenceTextStyleScaled,
+                                    onTextLayout = pRefPainter::onTextLayout,
                                 )
                             }
                             if (showSecondary) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
                                         text = srText(buildRefText(secondary, t1)),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
+                                        onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
                                     textAlign = secondaryBibleHorizontalAlignment,
                                     fontFamily = secondaryBibleFontStyle,
                                     fontSize = matchedFittedSize,
                                     text = sText(secondary.verseText),
                                     color = secondaryBibleTextColor,
                                     style = secondaryBibleTextStyleScaled,
+                                    onTextLayout = sTextPainter::onTextLayout,
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     Text(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
                                         text = srText(buildRefText(secondary, t1)),
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled,
+                                        onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
                             }

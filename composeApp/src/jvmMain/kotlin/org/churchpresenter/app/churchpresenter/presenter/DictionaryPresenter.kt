@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.utils.Constants
@@ -108,8 +109,17 @@ fun DictionaryPresenter(
                 verticalArrangement = Arrangement.spacedBy(itemSpacing)
             ) {
                 // Strong's number badge (part of Reference section)
+                // Three painters, one per element the settings tab styles. The number and the
+                // transliteration are both "reference", so they share one -- only one of them is
+                // ever the last to lay out, and both draw the same band.
+                val numberPainter = rememberTextBackdropPainter(ds.referenceBackdrop)
+                val wordPainter = rememberTextBackdropPainter(ds.wordBackdrop)
+                val translitPainter = rememberTextBackdropPainter(ds.referenceBackdrop)
+                val definitionPainter = rememberTextBackdropPainter(ds.definitionBackdrop)
                 if (ds.showReference) {
                     Text(
+                        modifier = numberPainter.modifier,
+                        onTextLayout = numberPainter::onTextLayout,
                         text = entry.number,
                         color = referenceColor,
                         fontSize = ds.referenceFontSize.sp,
@@ -123,6 +133,8 @@ fun DictionaryPresenter(
                 // Original word
                 if (ds.showWord && entry.word.isNotBlank()) {
                     Text(
+                        modifier = wordPainter.modifier,
+                        onTextLayout = wordPainter::onTextLayout,
                         text = entry.word,
                         color = wordColor,
                         fontSize = ds.wordFontSize.sp,
@@ -145,6 +157,8 @@ fun DictionaryPresenter(
                     }
                     if (translit.isNotBlank()) {
                         Text(
+                            modifier = translitPainter.modifier,
+                            onTextLayout = translitPainter::onTextLayout,
                             text = translit,
                             color = referenceColor,
                             fontSize = (ds.referenceFontSize * 0.85f).sp,
@@ -160,6 +174,8 @@ fun DictionaryPresenter(
                 if (ds.showDefinition && entry.definition.isNotBlank()) {
                     Spacer(Modifier.height((itemSpacing.value / 2).coerceAtLeast(2f).dp))
                     Text(
+                        modifier = definitionPainter.modifier,
+                        onTextLayout = definitionPainter::onTextLayout,
                         text = entry.definition,
                         color = definitionColor,
                         fontSize = ds.definitionFontSize.sp,

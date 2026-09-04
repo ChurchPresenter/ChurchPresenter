@@ -812,8 +812,6 @@
     <string name="display_mode">Način prikaza</string>
     <string name="display_fullscreen">Cijeli zaslon</string>
     <string name="display_lower_third">Donja traka</string>
-    <string name="display_lower_third_horizontal">Vodoravna donja traka</string>
-    <string name="display_lower_third_vertical">Okomita donja traka</string>
     <string name="lower_third_height">Visina donje trake % (za Bibliju i pjesme)</string>
     <string name="full_screen">Cijeli zaslon</string>
     <string name="lower_third_size">Donja traka</string>

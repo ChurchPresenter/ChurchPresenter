@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.song_background_look
 import churchpresenter.composeapp.generated.resources.song_background_sample_line
 import churchpresenter.composeapp.generated.resources.song_background_your_color
 import churchpresenter.composeapp.generated.resources.unit_px
+import org.churchpresenter.app.churchpresenter.composables.RecentColors
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_MAX_BLUR
 import org.churchpresenter.core.models.songs.SongBackground
@@ -212,7 +213,7 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            SONG_BACKGROUND_SUGGESTIONS.forEach { hex ->
+            backgroundSwatches(RecentColors.colors).forEach { hex ->
                 val selected = background.color.equals(hex, ignoreCase = true)
                 Box(
                     Modifier.weight(1f).height(16.dp).clip(RoundedCornerShape(4.dp))

@@ -2157,8 +2157,6 @@
     <string name="presentation_focus_lost">Utracono fokus klawiatury — kliknij tutaj, aby ponownie włączyć klawisze strzałek i pilota</string>
     <string name="tab_focus_lost">Utracono fokus klawiatury — kliknij tutaj, aby ponownie włączyć klawisze strzałek</string>
     <string name="dev_window_label">Okno deweloperskie</string>
-    <string name="display_lower_third_horizontal">Pozioma dolna trzecia</string>
-    <string name="display_lower_third_vertical">Pionowa dolna trzecia</string>
     <string name="remote_api_remove_from_schedule">Usuń z planu</string>
     <string name="remote_activity_removed_from_schedule">Usunięto z harmonogramu</string>
     <string name="instance_link_follower_badge">Instance Link — obecnie połączono</string>

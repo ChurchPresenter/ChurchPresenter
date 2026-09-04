@@ -812,8 +812,6 @@
     <string name="display_mode">डिस्प्ले मोड</string>
     <string name="display_fullscreen">पूरी स्क्रीन</string>
     <string name="display_lower_third">लोअर थर्ड</string>
-    <string name="display_lower_third_horizontal">क्षैतिज लोअर थर्ड</string>
-    <string name="display_lower_third_vertical">लंबवत लोअर थर्ड</string>
     <string name="lower_third_height">लोअर थर्ड की ऊँचाई % (बाइबल और गीत के लिए)</string>
     <string name="full_screen">पूरी स्क्रीन</string>
     <string name="lower_third_size">लोअर थर्ड</string>

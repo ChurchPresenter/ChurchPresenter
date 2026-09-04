@@ -812,8 +812,6 @@
     <string name="display_mode">Hali ya Onyesho</string>
     <string name="display_fullscreen">Skrini Kamili</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Lower Third Mlalo</string>
-    <string name="display_lower_third_vertical">Lower Third Wima</string>
     <string name="lower_third_height">Kimo cha Lower Third % (kwa Biblia na Nyimbo)</string>
     <string name="full_screen">Skrini Kamili</string>
     <string name="lower_third_size">Lower Third</string>

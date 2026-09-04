@@ -2187,8 +2187,6 @@
     <string name="presentation_focus_lost">Focus tastatură pierdut — faceți clic aici pentru a reactiva săgețile și clicker-ul</string>
     <string name="tab_focus_lost">Focus tastatură pierdut — faceți clic aici pentru a reactiva săgețile</string>
     <string name="dev_window_label">Fereastră Dev</string>
-    <string name="display_lower_third_horizontal">Lower Third Orizontal</string>
-    <string name="display_lower_third_vertical">Lower Third Vertical</string>
     <string name="remote_api_remove_from_schedule">Elimină din Program</string>
     <string name="remote_activity_removed_from_schedule">Eliminat din Program</string>
     <string name="instance_link_follower_badge">Instance Link — conectat momentan</string>

@@ -812,8 +812,6 @@
     <string name="display_mode">表示モード</string>
     <string name="display_fullscreen">全画面</string>
     <string name="display_lower_third">下部テロップ</string>
-    <string name="display_lower_third_horizontal">横型の下部テロップ</string>
-    <string name="display_lower_third_vertical">縦型の下部テロップ</string>
     <string name="lower_third_height">下部テロップの高さ %（聖書と賛美歌用）</string>
     <string name="full_screen">全画面</string>
     <string name="lower_third_size">下部テロップ</string>

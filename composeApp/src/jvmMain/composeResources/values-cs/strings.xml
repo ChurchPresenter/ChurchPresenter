@@ -2167,8 +2167,6 @@
     <string name="presentation_focus_lost">Ztraceno zaměření klávesnice — klikněte sem pro obnovení šipek a klikátka</string>
     <string name="tab_focus_lost">Ztraceno zaměření klávesnice — klikněte sem pro obnovení šipek</string>
     <string name="dev_window_label">Vývojářské okno</string>
-    <string name="display_lower_third_horizontal">Vodorovná dolní třetina</string>
-    <string name="display_lower_third_vertical">Svislá dolní třetina</string>
     <string name="remote_api_remove_from_schedule">Odebrat z plánu</string>
     <string name="remote_activity_removed_from_schedule">Odebráno z programu</string>
     <string name="instance_link_follower_badge">Instance Link — aktuálně připojeno</string>

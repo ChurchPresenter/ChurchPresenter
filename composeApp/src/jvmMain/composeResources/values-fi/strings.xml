@@ -812,8 +812,6 @@
     <string name="display_mode">Näyttötila</string>
     <string name="display_fullscreen">Koko näyttö</string>
     <string name="display_lower_third">Alapalkki</string>
-    <string name="display_lower_third_horizontal">Vaakasuuntainen alapalkki</string>
-    <string name="display_lower_third_vertical">Pystysuuntainen alapalkki</string>
     <string name="lower_third_height">Alapalkin korkeus % (Raamattu ja laulut)</string>
     <string name="full_screen">Koko näyttö</string>
     <string name="lower_third_size">Alapalkki</string>

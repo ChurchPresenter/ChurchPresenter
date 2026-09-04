@@ -2158,8 +2158,6 @@
     <string name="presentation_focus_lost">Tastaturfokus verloren — klicken Sie hier, um Pfeiltasten und Fernbedienung wieder zu aktivieren</string>
     <string name="tab_focus_lost">Tastaturfokus verloren — klicken Sie hier, um die Pfeiltasten wieder zu aktivieren</string>
     <string name="dev_window_label">Dev-Fenster</string>
-    <string name="display_lower_third_horizontal">Horizontales unteres Drittel</string>
-    <string name="display_lower_third_vertical">Vertikales unteres Drittel</string>
     <string name="remote_api_remove_from_schedule">Aus Programm entfernen</string>
     <string name="remote_activity_removed_from_schedule">Aus Programm entfernt</string>
     <string name="instance_link_follower_badge">Instance Link — aktuell verbunden</string>

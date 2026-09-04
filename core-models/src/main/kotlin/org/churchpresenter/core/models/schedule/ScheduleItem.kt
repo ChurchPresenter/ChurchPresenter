@@ -2,6 +2,7 @@ package org.churchpresenter.core.models.schedule
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 
 private const val TEXT_PREVIEW_CHARS = 50
 private const val TITLE_PREVIEW_CHARS = 60
@@ -133,6 +134,8 @@ sealed class ScheduleItem {
         val targetMinute: Int = 0,
         val targetSecond: Int = 0,
         val liveClockFormat: String = "HH:mm:ss",
+        /** The band and box drawn behind the text, kept with the rest of its look. */
+        val backdrop: TextBackdrop = TextBackdrop(),
         override val displayText: String = if (isTimer) {
             when (timerMode) {
                 TimerModes.CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)

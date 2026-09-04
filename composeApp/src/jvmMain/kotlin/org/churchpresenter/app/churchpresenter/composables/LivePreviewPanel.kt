@@ -313,9 +313,10 @@ private fun SingleDisplayPreview(
     val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
     val displayModeChipLabel = when (screenAssignment.displayMode) {
         Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
-        // One label for both stored modes. A lower third is a lower third -- the horizontal/vertical
-        // split it was once named for is gone from the output, and the Customize rail already calls
-        // them both this.
+        // One label for both stored modes. Vertical is an orientation the app works out from the
+        // output's own shape, not a mode the operator picks -- the Display Mode dropdown offers a
+        // single "Lower Third" entry -- so naming it here invented a distinction the rest of the UI
+        // does not have.
         Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
         Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third)
         else -> null

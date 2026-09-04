@@ -812,8 +812,6 @@
     <string name="display_mode">Visningsläge</string>
     <string name="display_fullscreen">Helskärm</string>
     <string name="display_lower_third">Nedre tredjedel</string>
-    <string name="display_lower_third_horizontal">Vågrät nedre tredjedel</string>
-    <string name="display_lower_third_vertical">Lodrät nedre tredjedel</string>
     <string name="lower_third_height">Höjd på nedre tredjedel i % (för Bibel och Sånger)</string>
     <string name="full_screen">Helskärm</string>
     <string name="lower_third_size">Nedre tredjedel</string>

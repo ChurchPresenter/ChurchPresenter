@@ -812,8 +812,6 @@
     <string name="display_mode">显示模式</string>
     <string name="display_fullscreen">全屏</string>
     <string name="display_lower_third">字幕条</string>
-    <string name="display_lower_third_horizontal">横向字幕条</string>
-    <string name="display_lower_third_vertical">纵向字幕条</string>
     <string name="lower_third_height">字幕条高度 %（用于圣经和歌曲）</string>
     <string name="full_screen">全屏</string>
     <string name="lower_third_size">字幕条</string>

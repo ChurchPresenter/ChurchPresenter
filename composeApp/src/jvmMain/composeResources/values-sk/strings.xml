@@ -2187,8 +2187,6 @@
     <string name="presentation_focus_lost">Fokus klávesnice bol stratený — kliknite sem pre opätovné povolenie šípok a klikača</string>
     <string name="tab_focus_lost">Fokus klávesnice bol stratený — kliknite sem pre opätovné povolenie šípok</string>
     <string name="dev_window_label">Vývojárske okno</string>
-    <string name="display_lower_third_horizontal">Horizontálny Lower Third</string>
-    <string name="display_lower_third_vertical">Vertikálny Lower Third</string>
     <string name="remote_api_remove_from_schedule">Odstrániť z programu</string>
     <string name="remote_activity_removed_from_schedule">Odstránené z programu</string>
     <string name="instance_link_follower_badge">Instance Link — momentálne pripojené</string>

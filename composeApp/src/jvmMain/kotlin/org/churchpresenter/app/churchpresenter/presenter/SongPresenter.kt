@@ -63,6 +63,8 @@ import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBackdrop
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
@@ -425,9 +427,16 @@ fun SongPresenter(
                 }
                 // In top/bottom bilingual mode, each language gets half the height
                 val refHeight = if (topBottom) fullHeight / 2 else fullHeight
+                // The same tracking the lines are drawn with. Spacing is stored in pixels against
+                // the profile's own font size and converted to `em`, so the value does not change
+                // as the search tries sizes -- it scales with whichever one it settles on, exactly
+                // as the rendered line does.
+                val fitLetterEm = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize)
+                val fitWordEm = spacingEm(lyricsStyleProfile.wordSpacing, lyricsStyleProfile.fontSize)
                 val baseStyle = TextStyle(
                     fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                    letterSpacing = fitLetterEm.em,
                     fontFamily = lyricsFontFamily
                 )
                 // Resolve display mode to know if we're in line mode
@@ -509,7 +518,11 @@ fun SongPresenter(
                     availableWidth = refWidth,
                     availableHeight = refHeight,
                     reservedHeight = reserved,
-                    includeEndIndicator = true
+                    includeEndIndicator = true,
+                    // Measure what `LyricLine` draws, not the stored line: an uppercase transform
+                    // and the word spacing below are both applied at render, and a fit that did not
+                    // include them chose a size whose lines then ran off the side of the output.
+                    styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
                 )
             }
         }
@@ -829,6 +842,17 @@ fun SongPresenter(
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
                     val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
+                    // Four blocks over the same lines, because two things divide them and each
+                    // division wants its own box. A lyric line and a look-ahead line are drawn by
+                    // one composable but styled by two profiles; and on a bilingual slide each
+                    // language is its own block of text, so the two translations get a box each
+                    // rather than one box drawn around the pair of them. All four containers go on
+                    // the same column below -- each paints only the lines that reported to it, and
+                    // a block nobody reported to draws nothing.
+                    val lyricsBlock = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
+                    val lyricsBlockSecondary = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
+                    val laBlock = rememberTextBlockBackdrop(laStyleProfile.backdrop)
+                    val laBlockSecondary = rememberTextBlockBackdrop(laStyleProfile.backdrop)
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
@@ -843,8 +867,15 @@ fun SongPresenter(
                     } else laFontSize
                     val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
+                    /**
+                     * [secondary] says which language this line belongs to, and so which backdrop
+                     * block it reports to. Both languages are drawn by this one composable with the
+                     * same `lineIdx`, so sharing a block would have the second overwrite the first
+                     * line for line -- and would frame the two of them as one block of text, which
+                     * they are not.
+                     */
                     @Composable
-                    fun LyricLine(lineIdx: Int, line: String, laStart: Int) {
+                    fun LyricLine(lineIdx: Int, line: String, laStart: Int, secondary: Boolean = false) {
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
                         val lineProfile = if (isLookAheadLine) laStyleProfile else lyricsStyleProfile
                         // The next-section lines take their own alignment once one is set; blank
@@ -854,8 +885,14 @@ fun SongPresenter(
                         } else {
                             lyricsHorizontalAlignment
                         }
+                        val lineBlock = when {
+                            isLookAheadLine && secondary -> laBlockSecondary
+                            isLookAheadLine -> laBlock
+                            secondary -> lyricsBlockSecondary
+                            else -> lyricsBlock
+                        }
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
                             textAlign = lineAlign,
                             fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
                             fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
@@ -867,7 +904,8 @@ fun SongPresenter(
                                 spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
                             ),
                             color = if (isLookAheadLine) laColor else lyricsColor,
-                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
+                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled,
+                            onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
                         )
                     }
 
@@ -958,8 +996,10 @@ fun SongPresenter(
 
                     @Composable
                     fun NumberPart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val numberPainter = rememberTextBackdropPainter(numberStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(numberPainter.modifier),
+                            onTextLayout = numberPainter::onTextLayout,
                             textAlign = songNumberHorizontalAlignment,
                             fontFamily = songNumberFontFamily,
                             fontSize = scaledSongNumberFontSize,
@@ -976,8 +1016,10 @@ fun SongPresenter(
 
                     @Composable
                     fun TitlePart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val titlePainter = rememberTextBackdropPainter(titleStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
+                            onTextLayout = titlePainter::onTextLayout,
                             textAlign = titleHorizontalAlignment,
                             fontFamily = titleFontFamily,
                             fontSize = scaledTitleFontSize,
@@ -1037,7 +1079,14 @@ fun SongPresenter(
                                     effectiveSongNumberPosition == Constants.BELOW_VERSE)
 
                     // Outer column fills the content area; title/number at edges, lyrics centered
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(lyricsBlock.containerModifier)
+                            .then(lyricsBlockSecondary.containerModifier)
+                            .then(laBlock.containerModifier)
+                            .then(laBlockSecondary.containerModifier)
+                    ) {
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 
@@ -1064,7 +1113,7 @@ fun SongPresenter(
                                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
                                                 combinedSecondaryLines.forEachIndexed { idx, line ->
                                                     LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart)
+                                                    LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                 }
                                                 EndOfSongIndicator()
                                                 LookAheadPlaceholder()
@@ -1081,7 +1130,7 @@ fun SongPresenter(
                                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                                                 combinedSecondaryLines.forEachIndexed { idx, line ->
                                                     LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart)
+                                                    LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                 }
                                                 EndOfSongIndicator()
                                                 LookAheadPlaceholder()
@@ -1102,7 +1151,7 @@ fun SongPresenter(
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                         combinedSecondaryLines.forEachIndexed { idx, line ->
                                                             LookAheadSpacer(idx, secondaryLaStart)
-                                                            LyricLine(idx, line, secondaryLaStart)
+                                                            LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                         }
                                                         EndOfSongIndicator()
                                                         LookAheadPlaceholder()

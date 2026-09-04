@@ -2185,8 +2185,6 @@
     <string name="presentation_focus_lost">Foco de teclado perdido — haga clic aquí para reactivar las flechas y el control remoto</string>
     <string name="tab_focus_lost">Foco de teclado perdido — haga clic aquí para reactivar las flechas</string>
     <string name="dev_window_label">Ventana de desarrollo</string>
-    <string name="display_lower_third_horizontal">Tercio inferior horizontal</string>
-    <string name="display_lower_third_vertical">Tercio inferior vertical</string>
     <string name="remote_api_remove_from_schedule">Eliminar del programa</string>
     <string name="remote_activity_removed_from_schedule">Eliminado del programa</string>
     <string name="instance_link_follower_badge">Instance Link — conectado actualmente</string>

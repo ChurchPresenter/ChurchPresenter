@@ -812,8 +812,6 @@
     <string name="display_mode">ຮູບແບບການສະແດງ</string>
     <string name="display_fullscreen">ເຕັມຈໍ</string>
     <string name="display_lower_third">ແຖບລຸ່ມ</string>
-    <string name="display_lower_third_horizontal">ແຖບລຸ່ມແນວນອນ</string>
-    <string name="display_lower_third_vertical">ແຖບລຸ່ມແນວຕັ້ງ</string>
     <string name="lower_third_height">ຄວາມສູງແຖບລຸ່ມ % (ສຳລັບພຣະຄຳພີ ແລະ ເພງ)</string>
     <string name="full_screen">ເຕັມຈໍ</string>
     <string name="lower_third_size">ແຖບລຸ່ມ</string>
