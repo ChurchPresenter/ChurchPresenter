@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
-import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.AppSettings
 
@@ -344,8 +343,7 @@ fun SongPresenter(
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
             .then(if (!isLowerThird && !blurred) bgModifier else Modifier)
     ) {
-        val density = androidx.compose.ui.platform.LocalDensity.current
-        val scaleFactor = with(density) { minOf(maxWidth.toPx() / 1920f, maxHeight.toPx() / 1080f) }.coerceIn(0.5f, 3.0f)
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
         // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
         val blurRadius = backgroundBlurRadius(bgBlurReferencePx, maxWidth)
         PresenterBackgroundLayers(

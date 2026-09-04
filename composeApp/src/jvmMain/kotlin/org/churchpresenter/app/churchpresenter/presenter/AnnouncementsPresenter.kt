@@ -44,8 +44,8 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 
 /** The inset the announcement text is drawn inside, and so the inset auto-fit measures against. */
-private val TEXT_PADDING_HORIZONTAL = 32.dp
-private val TEXT_PADDING_VERTICAL = 16.dp
+internal val TEXT_PADDING_HORIZONTAL = 32.dp
+internal val TEXT_PADDING_VERTICAL = 16.dp
 
 @Composable
 fun AnnouncementsPresenter(
@@ -131,9 +131,8 @@ fun AnnouncementsPresenter(
         // returns a size that is then drawn as `.sp`, which the platform scales by the output's
         // density -- so fitting against a pixel width let a HiDPI output take a size `density`
         // times too large for the space it was fitted to, and the text overran the slide.
-        val d = androidx.compose.ui.platform.LocalDensity.current
-        val availableWidth = constraints.maxWidth - with(d) { (TEXT_PADDING_HORIZONTAL * 2).roundToPx() }
-        val availableHeight = constraints.maxHeight - with(d) { (TEXT_PADDING_VERTICAL * 2).roundToPx() }
+        val availableWidth = (maxWidth - TEXT_PADDING_HORIZONTAL * 2).value.toInt()
+        val availableHeight = (maxHeight - TEXT_PADDING_VERTICAL * 2).value.toInt()
 
         val effectiveFontSize = if (!isDirectional) {
             // Static/fade: fit to both width and height

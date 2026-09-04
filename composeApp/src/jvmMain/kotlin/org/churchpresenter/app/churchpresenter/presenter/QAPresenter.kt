@@ -49,11 +49,11 @@ import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import java.awt.image.BufferedImage
 
 /** The card the question is drawn in, and so the space auto-fit measures against. */
-private val CARD_PADDING = 64.dp
-private val CARD_INNER_PADDING = 48.dp
+internal val CARD_PADDING = 64.dp
+internal val CARD_INNER_PADDING = 48.dp
 
 /** How much of the output's height a question may take before auto-fit shrinks it. */
-private const val QUESTION_HEIGHT_FRACTION = 0.6f
+internal const val QUESTION_HEIGHT_FRACTION = 0.6f
 
 @Composable
 fun QAPresenter(
@@ -107,9 +107,8 @@ fun QAPresenter(
             // and returns a size that is then drawn as `.sp`, which the platform scales by the
             // output's density -- so fitting against a pixel width let a HiDPI output take a size
             // `density` times too large for the card it was fitted to, and the question overran it.
-            val d = androidx.compose.ui.platform.LocalDensity.current
-            val availableWidth = constraints.maxWidth - with(d) { ((CARD_PADDING + CARD_INNER_PADDING) * 2).roundToPx() }
-            val availableHeight = (constraints.maxHeight * QUESTION_HEIGHT_FRACTION).toInt()
+            val availableWidth = (maxWidth - (CARD_PADDING + CARD_INNER_PADDING) * 2).value.toInt()
+            val availableHeight = (maxHeight.value * QUESTION_HEIGHT_FRACTION).toInt()
 
             val fontSize = remember(question.text, availableWidth, availableHeight, qaSettings.fontSize) {
                 calculateAutoFitFontSize(textMeasurer, question.text, textStyle, availableWidth, availableHeight)
