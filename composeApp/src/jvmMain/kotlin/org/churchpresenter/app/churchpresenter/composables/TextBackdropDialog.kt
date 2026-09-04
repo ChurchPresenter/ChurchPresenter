@@ -9,11 +9,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +47,10 @@ import churchpresenter.composeapp.generated.resources.backdrop_fill_color
 import churchpresenter.composeapp.generated.resources.backdrop_height_offset
 import churchpresenter.composeapp.generated.resources.backdrop_mode_hint
 import churchpresenter.composeapp.generated.resources.backdrop_opacity
+import churchpresenter.composeapp.generated.resources.backdrop_preset_saved_already
 import churchpresenter.composeapp.generated.resources.backdrop_presets
+import churchpresenter.composeapp.generated.resources.backdrop_save_preset
+import churchpresenter.composeapp.generated.resources.backdrop_saved_look
 import churchpresenter.composeapp.generated.resources.backdrop_style
 import churchpresenter.composeapp.generated.resources.backdrop_vertical_offset
 import churchpresenter.composeapp.generated.resources.close
@@ -54,8 +62,20 @@ import org.jetbrains.compose.resources.stringResource
 private val DIALOG_WIDTH = 320.dp
 private val OPACITY_FIELD_WIDTH = 104.dp
 private val MODE_BUTTON_HEIGHT = 44.dp
+
+/** Breathing room above the swatch and below the caption, inside the button's own border. */
+private val MODE_BUTTON_PADDING = 6.dp
 private val PRESET_HEIGHT = 32.dp
+
+/** Four across, which is the width the dialog was built for; the rest wrap under them. */
+private const val PRESETS_PER_ROW = 4
 private val SECTION_PADDING = 12.dp
+
+/** The close button, at the size the rest of the app draws a close icon at rather than the
+ *  10dp glyph in a 20dp target this opened with -- which was smaller than anything else in
+ *  the dialog and hard to hit. */
+private val CLOSE_BUTTON_SIZE = 28.dp
+private val CLOSE_ICON_SIZE = 14.dp
 private const val SELECTED_FILL_ALPHA = 0.18f
 
 /**
@@ -92,12 +112,12 @@ fun TextBackdropDialog(
                 Column(Modifier.padding(SECTION_PADDING)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
+                        IconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_close),
                                 contentDescription = stringResource(Res.string.close),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(10.dp),
+                                modifier = Modifier.size(CLOSE_ICON_SIZE),
                             )
                         }
                     }
@@ -116,7 +136,7 @@ fun TextBackdropDialog(
                     Column(Modifier.padding(SECTION_PADDING)) {
                         SectionLabel(stringResource(Res.string.backdrop_presets))
                         Spacer(Modifier.height(7.dp))
-                        BackdropPresetRow { onChange(it.applyTo(backdrop)) }
+                        BackdropPresetRow(current = backdrop, onPick = onChange)
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     // No height cap: the dialog is as tall as the fields the chosen mode has, so
@@ -155,7 +175,10 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .height(MODE_BUTTON_HEIGHT)
+                    // Grows rather than clips, and keeps a gap of its own above the swatch. Fixed at
+                    // 44dp the chip and its caption came to within a hair of the height, so the
+                    // swatch's own border sat on the button's top edge and read as one line.
+                    .heightIn(min = MODE_BUTTON_HEIGHT)
                     .background(
                         if (selected) {
                             accent.copy(alpha = SELECTED_FILL_ALPHA)
@@ -165,7 +188,8 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
                         shape,
                     )
                     .border(1.dp, if (selected) accent else outline, shape)
-                    .clickable { onModeChange(mode) },
+                    .clickable { onModeChange(mode) }
+                    .padding(vertical = MODE_BUTTON_PADDING),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -191,41 +215,88 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
     }
 }
 
-/** The four finished looks, each drawn as the thing it produces. */
-@OptIn(ExperimentalFoundationApi::class)
+/**
+ * The presets row: the operator's own saved looks first, then whichever built-ins still fit.
+ *
+ * Flowing rather than a fixed row of four. The list grows as looks are saved -- up to
+ * [SavedTextBackdrops.MAX] -- and a `Row` would squeeze eight swatches into the width of four
+ * rather than wrapping onto a second line.
+ *
+ * The Save button underneath is what puts the current look in the list. It is deliberately explicit
+ * rather than a history the dialog collects on its own: half of what passes through this dialog is
+ * a look being tuned or abandoned, and an automatic list would push the looks somebody meant to
+ * keep off the end with the ones they were only trying. Saving one already stored would move it to
+ * the front and nothing else, so the button says so and does nothing instead.
+ */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun BackdropPresetRow(onPick: (TextBackdropPreset) -> Unit) {
+private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> Unit) {
     val outline = MaterialTheme.colorScheme.outline.copy(alpha = OUTLINE_ALPHA)
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        TEXT_BACKDROP_PRESETS.forEach { preset ->
-            val name = stringResource(preset.label)
-            TooltipArea(
-                tooltip = { BackdropTooltip(name) },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter),
-                modifier = Modifier.weight(1f),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(PRESET_HEIGHT)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(7.dp))
-                        .border(1.dp, outline, RoundedCornerShape(7.dp))
-                        .clickable { onPick(preset) }
-                        .padding(3.dp),
+    val saved = SavedTextBackdrops.looks
+    val choices = backdropChoices(saved.toList())
+    val savedName = stringResource(Res.string.backdrop_saved_look)
+    Column {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+            maxItemsInEachRow = PRESETS_PER_ROW,
+        ) {
+            choices.forEach { choice ->
+                val name = choice.label?.let { stringResource(it) } ?: savedName
+                TooltipArea(
+                    tooltip = { BackdropTooltip(name) },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter),
+                    // Weighted against a fixed row of four rather than filling the line it lands on,
+                    // so a second row holding one swatch draws it the size of the four above it.
+                    modifier = Modifier.weight(1f),
                 ) {
-                    TextBackdropChip(
-                        backdrop = preset.preview,
-                        emptyOutline = outline,
-                        emptyInk = ink,
-                        modifier = Modifier.fillMaxSize(),
-                        label = "Aa",
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(PRESET_HEIGHT)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(7.dp))
+                            .border(1.dp, outline, RoundedCornerShape(7.dp))
+                            .clickable { onPick(choice.apply(current)) }
+                            .padding(3.dp),
+                    ) {
+                        TextBackdropChip(
+                            backdrop = choice.preview,
+                            emptyOutline = outline,
+                            emptyInk = ink,
+                            modifier = Modifier.fillMaxSize(),
+                            label = "Aa",
+                        )
+                    }
                 }
             }
+            // Keeps the last line's swatches at the width of a full row instead of stretching them
+            // across it -- `weight` divides what is on the line, not what the row can hold.
+            repeat(emptyTrailingSlots(choices.size)) { Spacer(Modifier.weight(1f)) }
+        }
+        val alreadySaved = saved.firstOrNull() == current
+        Spacer(Modifier.height(2.dp))
+        TextButton(
+            onClick = { SavedTextBackdrops.add(current) },
+            enabled = !alreadySaved,
+            shape = RoundedCornerShape(6.dp),
+            modifier = Modifier.height(28.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+        ) {
+            Text(
+                text = stringResource(
+                    if (alreadySaved) Res.string.backdrop_preset_saved_already else Res.string.backdrop_save_preset,
+                ),
+                style = MaterialTheme.typography.labelSmall,
+            )
         }
     }
 }
+
+/** How many slots the last line is short of a full row, so its swatches keep the row's width. */
+private fun emptyTrailingSlots(count: Int): Int =
+    (PRESETS_PER_ROW - count % PRESETS_PER_ROW) % PRESETS_PER_ROW
 
 @Composable
 private fun FillFields(backdrop: TextBackdrop, onChange: (TextBackdrop) -> Unit) {

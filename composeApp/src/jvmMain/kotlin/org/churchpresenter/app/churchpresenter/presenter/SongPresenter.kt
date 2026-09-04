@@ -427,9 +427,16 @@ fun SongPresenter(
                 }
                 // In top/bottom bilingual mode, each language gets half the height
                 val refHeight = if (topBottom) fullHeight / 2 else fullHeight
+                // The same tracking the lines are drawn with. Spacing is stored in pixels against
+                // the profile's own font size and converted to `em`, so the value does not change
+                // as the search tries sizes -- it scales with whichever one it settles on, exactly
+                // as the rendered line does.
+                val fitLetterEm = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize)
+                val fitWordEm = spacingEm(lyricsStyleProfile.wordSpacing, lyricsStyleProfile.fontSize)
                 val baseStyle = TextStyle(
                     fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                    letterSpacing = fitLetterEm.em,
                     fontFamily = lyricsFontFamily
                 )
                 // Resolve display mode to know if we're in line mode
@@ -511,7 +518,11 @@ fun SongPresenter(
                     availableWidth = refWidth,
                     availableHeight = refHeight,
                     reservedHeight = reserved,
-                    includeEndIndicator = true
+                    includeEndIndicator = true,
+                    // Measure what `LyricLine` draws, not the stored line: an uppercase transform
+                    // and the word spacing below are both applied at render, and a fit that did not
+                    // include them chose a size whose lines then ran off the side of the output.
+                    styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
                 )
             }
         }

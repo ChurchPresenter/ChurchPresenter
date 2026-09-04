@@ -110,3 +110,37 @@ internal val TEXT_BACKDROP_PRESETS = listOf(
         )
     },
 )
+
+/**
+ * One swatch in the presets row: what it draws, what it is called, and what picking it produces.
+ *
+ * The row mixes two kinds of entry and they do not behave the same. A saved look is applied
+ * *whole*, mode included, because it is a finished thing the operator kept. A built-in replaces
+ * only its own half and leaves the other alone -- see [TextBackdropPreset.applyTo] -- so picking
+ * "Thin outline" over a plate keeps the plate's fill. Rather than teach the row about both, each
+ * entry carries its own [apply].
+ */
+internal class BackdropChoice(
+    /** What the swatch draws, and for a saved look what it is compared by. */
+    val preview: TextBackdrop,
+    /** A built-in's name; `null` marks one of the operator's own. */
+    val label: StringResource?,
+    val apply: (TextBackdrop) -> TextBackdrop,
+)
+
+/**
+ * [saved] first, then as many of [TEXT_BACKDROP_PRESETS] as still fit.
+ *
+ * A built-in that matches a saved look is left out rather than drawn twice -- saving the black bar
+ * unchanged should move it to the front of the row, not put a second copy at the back of it.
+ */
+internal fun backdropChoices(
+    saved: List<TextBackdrop>,
+    limit: Int = SavedTextBackdrops.MAX,
+): List<BackdropChoice> {
+    val mine = saved.map { look -> BackdropChoice(look, null) { look } }
+    val builtIn = TEXT_BACKDROP_PRESETS
+        .filterNot { it.preview in saved }
+        .map { preset -> BackdropChoice(preset.preview, preset.label) { current -> preset.applyTo(current) } }
+    return (mine + builtIn).take(limit)
+}

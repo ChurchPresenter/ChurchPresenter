@@ -91,6 +91,9 @@
     <string name="backdrop_mode_both">Both</string>
     <string name="backdrop_mode_hint">Pick Fill, Border or Both to start. Off is the first choice here, and the toolbar button flips between Off and the last style you used.</string>
     <string name="backdrop_presets">Presets</string>
+    <string name="backdrop_save_preset">Save as Preset</string>
+    <string name="backdrop_saved_look">Saved preset</string>
+    <string name="backdrop_preset_saved_already">This look is already saved</string>
     <string name="backdrop_preset_black_bar">Black bar</string>
     <string name="backdrop_preset_soft_shade">Soft shade</string>
     <string name="backdrop_preset_thin_outline">Thin outline</string>
