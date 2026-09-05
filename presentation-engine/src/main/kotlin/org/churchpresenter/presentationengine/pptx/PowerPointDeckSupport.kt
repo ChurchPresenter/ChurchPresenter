@@ -43,10 +43,19 @@ internal sealed interface PowerPointMetadataResult {
 
 internal object PowerPointDeckSupport {
 
-    /** Opens a slide show with format auto-detection (works for both .pptx and .ppt). */
-    fun open(file: File): SlideShow<*, *> = SlideShowFactory.create(file, null, true)
-        .also { registerEmbeddedFonts(it) }
-        .also { show -> (show as? XMLSlideShow)?.let { stripUnsupportedHighlights(it) } }
+    /**
+     * Opens a slide show with format auto-detection (works for both .pptx and .ppt).
+     *
+     * Every POI `SlideShow` in this module is created here, which is what makes it the place to
+     * apply [PoiLimits] — the alternative, initialising from the app's startup thread, races the
+     * first deck load.
+     */
+    fun open(file: File): SlideShow<*, *> {
+        PoiLimits.apply()
+        return SlideShowFactory.create(file, null, true)
+            .also { registerEmbeddedFonts(it) }
+            .also { show -> (show as? XMLSlideShow)?.let { stripUnsupportedHighlights(it) } }
+    }
 
     /**
      * Registers fonts embedded in the document (the fntdata parts under ppt/fonts — plain TTF

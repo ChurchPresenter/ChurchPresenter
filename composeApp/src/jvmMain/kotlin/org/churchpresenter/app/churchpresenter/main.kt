@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
@@ -304,12 +305,12 @@ fun main() {
     }.apply { isDaemon = true }.start()
 
     val sessionStartedAt = System.currentTimeMillis()
-    Runtime.getRuntime().addShutdownHook(Thread {
+    addGuardedShutdownHook("session") {
         UsageEvents.recordSessionMinutes(((System.currentTimeMillis() - sessionStartedAt) / MILLIS_PER_MINUTE).toInt())
         // Shutdown is when the high-water marks are final. Reports only when they are higher than a
         // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
         ResourceCensus.reportIfLeaky()
-    })
+    }
 
     val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")

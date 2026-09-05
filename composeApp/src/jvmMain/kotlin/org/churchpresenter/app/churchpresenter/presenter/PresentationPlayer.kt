@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.utils.reportDegradedSlide
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.DeckRasterizer
 import org.churchpresenter.presentationengine.model.Deck
@@ -88,7 +89,7 @@ class PresentationPlayer(
     )
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val rasterizer = DeckRasterizer(deck, renderWidthPx)
+    private val rasterizer = DeckRasterizer(deck, renderWidthPx, onDegraded = ::reportDegradedSlide)
     private val rasterLock = Any()
 
     private val slideCache = ConcurrentHashMap<Int, SlideLayers>()
