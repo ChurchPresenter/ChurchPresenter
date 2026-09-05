@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 
@@ -141,9 +142,9 @@ object DeckLinkManager {
     private fun registerShutdownHook() {
         if (shutdownHookRegistered) return
         shutdownHookRegistered = true
-        Runtime.getRuntime().addShutdownHook(Thread {
+        addGuardedShutdownHook("decklink") {
             closeAllOutputs()
-        })
+        }
     }
 
     /** Send black frames and close all open DeckLink outputs. */

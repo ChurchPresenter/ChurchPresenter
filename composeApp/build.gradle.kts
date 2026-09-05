@@ -354,8 +354,12 @@ kotlin {
             // Logging backend + Sentry log forwarding (WARN/ERROR → breadcrumbs/events)
             implementation(libs.logback.classic)
             implementation(libs.sentry.logback)
-            implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
-            implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
+            // ImageIO readers for what Skia refuses — see PictureDecoder. jpeg covers CMYK/YCCK
+            // JPEGs out of print workflows; psd covers Photoshop files, which reach picture
+            // folders under a .jpg name often enough to have been reported from the field.
+            implementation(libs.twelvemonkeys.imageio.core)
+            implementation(libs.twelvemonkeys.imageio.jpeg)
+            implementation(libs.twelvemonkeys.imageio.psd)
             // Apache PDFBox for PDF slide extraction
             implementation(libs.pdfbox)
             // Apache POI for PowerPoint slide extraction.

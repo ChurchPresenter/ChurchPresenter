@@ -8,6 +8,7 @@ import org.churchpresenter.ndi.NdiReceiver
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 
 /**
  * The app's single NDI runtime: the senders opened over it, and the receivers taking sources back
@@ -63,6 +64,6 @@ object NdiManager {
     private fun registerShutdownHook() {
         if (shutdownHookRegistered) return
         shutdownHookRegistered = true
-        Runtime.getRuntime().addShutdownHook(Thread { registry.stopAll() })
+        addGuardedShutdownHook("ndi") { registry.stopAll() }
     }
 }

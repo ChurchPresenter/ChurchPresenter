@@ -58,41 +58,156 @@ class CefManagerTest {
     }
 
     @Test
-    fun `jcefRootDir on Windows uses a writable ProgramData path`() {
-        val root = CefManager.jcefRootDir(
+    fun `rootCandidates on Windows offers ProgramData first and the home directory second`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val roots = JcefInstall.rootCandidates(
             osName = "Windows 11",
             programData = dir.absolutePath,
-            homeDir = "/should-not-be-used",
-        )
-        assertEquals(File(dir, "ChurchPresenter").absolutePath, root.absolutePath)
-        assertTrue(root.isDirectory, "jcefRootDir must actually create the ProgramData directory")
-    }
-
-    @Test
-    fun `jcefRootDir on Windows falls back to the home directory when ProgramData is unusable`() {
-        val programData = File(dir, "programdata").apply { mkdirs() }
-        // A plain file blocks mkdirs() at the exact "ChurchPresenter" path, forcing the writable check to fail.
-        File(programData, "ChurchPresenter").writeText("not a directory")
-        val home = File(dir, "home").apply { mkdirs() }
-
-        val root = CefManager.jcefRootDir(
-            osName = "Windows 11",
-            programData = programData.absolutePath,
             homeDir = home.absolutePath,
         )
-
-        assertEquals(File(home, ".churchpresenter").absolutePath, root.absolutePath)
+        assertEquals(
+            listOf(File(dir, "ChurchPresenter").absolutePath, File(home, ".churchpresenter").absolutePath),
+            roots.map { it.absolutePath },
+        )
     }
 
     @Test
-    fun `jcefRootDir on non-Windows always uses the home directory`() {
+    fun `rootCandidates on non-Windows offers only the home directory`() {
         val home = File(dir, "home").apply { mkdirs() }
-        val root = CefManager.jcefRootDir(
+        val roots = JcefInstall.rootCandidates(
             osName = "Mac OS X",
             programData = dir.absolutePath,
             homeDir = home.absolutePath,
         )
-        assertEquals(File(home, ".churchpresenter").absolutePath, root.absolutePath)
+        assertEquals(listOf(File(home, ".churchpresenter").absolutePath), roots.map { it.absolutePath })
+    }
+
+    @Test
+    fun `rootCandidates falls back to the literal ProgramData path when the variable is unset`() {
+        val roots = JcefInstall.rootCandidates(
+            osName = "Windows 10",
+            programData = null,
+            homeDir = File(dir, "home").absolutePath,
+        )
+        assertEquals("ChurchPresenter", roots.first().name)
+        assertTrue(roots.first().absolutePath.contains("ProgramData"))
+    }
+
+    @Test
+    fun `directoryIsWritable is true for a real directory and leaves no probe behind`() {
+        val target = File(dir, "writable")
+        assertTrue(JcefInstall.directoryIsWritable(target))
+        assertTrue(target.isDirectory, "the probe creates the directory it is asked about")
+        assertEquals(emptyList(), target.listFiles()!!.map { it.name }, "the probe file must be removed")
+    }
+
+    @Test
+    fun `directoryIsWritable is false when a plain file sits at the path`() {
+        val target = File(dir, "occupied")
+        target.writeText("not a directory")
+        assertFalse(JcefInstall.directoryIsWritable(target))
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot installs into the first root when it works`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "first")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, File(dir, "second")),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(first), outcome)
+        assertEquals(listOf(first), attempted, "a working first root must not cost a second attempt")
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot retries the next root when the first attempt throws`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "programdata")
+        val second = File(dir, "home")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, second),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { root ->
+                attempted += root
+                if (root == first) throw java.io.FileNotFoundException("chrome_elf.dll (Access is denied)")
+            },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(second), outcome)
+        assertEquals(listOf(first, second), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot skips a blocked root without attempting it`() {
+        val attempted = mutableListOf<File>()
+        val blocked = File(dir, "blocked")
+        val usable = File(dir, "usable")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(blocked, usable),
+            blockerFor = { if (it == blocked) "permission_denied" else null },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(usable), outcome)
+        assertEquals(listOf(usable), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports the last blocker when every root is ruled out`() {
+        val attempted = mutableListOf<File>()
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(File(dir, "a"), File(dir, "b")),
+            blockerFor = { if (it.name == "a") "permission_denied" else "disk_space" },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Blocked("disk_space"), outcome)
+        assertEquals(emptyList(), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot stops after a failure the machine will repeat`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "first")
+        val policy = IllegalStateException("blocked by group policy")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, File(dir, "second")),
+            blockerFor = { null },
+            stopRetrying = { JcefInstall.policyBlock(it.message) != null },
+            attempt = { root ->
+                attempted += root
+                throw policy
+            },
+        )
+        assertEquals(JcefInstall.Outcome.Failed(first, policy), outcome)
+        assertEquals(listOf(first), attempted, "a policy block applies machine-wide; a second root cannot help")
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports the last failure when every root throws`() {
+        val second = File(dir, "second")
+        val last = RuntimeException("second failed")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(File(dir, "first"), second),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { root -> throw if (root == second) last else RuntimeException("first failed") },
+        )
+        assertEquals(JcefInstall.Outcome.Failed(second, last), outcome)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports a blocker when there is nothing to try`() {
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = emptyList(),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { error("must not be called") },
+        )
+        assertEquals(JcefInstall.Outcome.Blocked("no_install_dir"), outcome)
     }
 
     @Test
@@ -151,10 +266,10 @@ class CefManagerTest {
     }
 
     @Test
-    fun `jcefRootDir with no arguments resolves to a churchpresenter directory`() {
-        assertTrue(
-            CefManager.jcefRootDir().name == ".churchpresenter" || CefManager.jcefRootDir().name == "ChurchPresenter",
-        )
+    fun `rootCandidates with no arguments resolves to churchpresenter directories`() {
+        val roots = JcefInstall.rootCandidates()
+        assertTrue(roots.isNotEmpty())
+        assertTrue(roots.all { it.name == ".churchpresenter" || it.name == "ChurchPresenter" }, "got $roots")
     }
 
     @Test
@@ -254,7 +369,7 @@ class CefManagerTest {
         // ProgramData ACLs vary and a locked-down corporate build is normal, not a defect.
         assertEquals(
             "permission_denied",
-            CefManager.jcefInstallBlocker(writable = false, usableSpaceBytes = plentyOfSpace),
+            JcefInstall.installBlocker(writable = false, usableSpaceBytes = plentyOfSpace),
         )
     }
 
@@ -262,13 +377,13 @@ class CefManagerTest {
     fun `a disk without room for a bundled Chromium blocks the install`() {
         assertEquals(
             "disk_space",
-            CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = 50L * 1024 * 1024),
+            JcefInstall.installBlocker(writable = true, usableSpaceBytes = 50L * 1024 * 1024),
         )
     }
 
     @Test
     fun `a writable directory with room goes ahead`() {
-        assertNull(CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = plentyOfSpace))
+        assertNull(JcefInstall.installBlocker(writable = true, usableSpaceBytes = plentyOfSpace))
     }
 
     @Test
@@ -276,14 +391,14 @@ class CefManagerTest {
         // File.usableSpace answers 0 when it cannot determine the figure, which is not the same as
         // a full disk — reading it that way would block the install wherever the filesystem does
         // not report one. The real attempt decides instead.
-        assertNull(CefManager.jcefInstallBlocker(writable = true, usableSpaceBytes = 0))
+        assertNull(JcefInstall.installBlocker(writable = true, usableSpaceBytes = 0))
     }
 
     @Test
     fun `permission is answered before space when neither is available`() {
         assertEquals(
             "permission_denied",
-            CefManager.jcefInstallBlocker(writable = false, usableSpaceBytes = 0),
+            JcefInstall.installBlocker(writable = false, usableSpaceBytes = 0),
         )
     }
 
@@ -295,7 +410,7 @@ class CefManagerTest {
         // install a Visual C++ redistributable that would not have helped.
         assertEquals(
             "policy",
-            CefManager.jcefPolicyBlock(
+            JcefInstall.policyBlock(
                 "C:\\ProgramData\\ChurchPresenter\\jcef\\jcef.dll: " +
                     "An Application Control policy has blocked this file"
             ),
@@ -303,8 +418,8 @@ class CefManagerTest {
 
         // Everything else keeps being reported. Matching a message is a weak test and this only
         // ever suppresses an event, so falling through is the safe direction to be wrong in.
-        assertNull(CefManager.jcefPolicyBlock("The specified module could not be found"))
-        assertNull(CefManager.jcefPolicyBlock(null))
+        assertNull(JcefInstall.policyBlock("The specified module could not be found"))
+        assertNull(JcefInstall.policyBlock(null))
     }
 
     @Test

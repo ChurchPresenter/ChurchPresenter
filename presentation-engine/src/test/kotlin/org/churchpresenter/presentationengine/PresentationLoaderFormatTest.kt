@@ -14,6 +14,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -62,6 +63,19 @@ class PresentationLoaderFormatTest {
             val file = File(temp, name).apply { writeText("this is not a presentation at all") }
             val result = assertIs<LoadResult.Failure>(PresentationLoader.load(file), "$name should fail")
             assertEquals(DeckLoadError.PARSE_FAILED, result.error, "$name")
+        }
+    }
+
+    @Test
+    fun `a parse failure says why, not just that it failed`() {
+        // PARSE_FAILED on its own is the same event for every cause, which is what made the
+        // companion API's "No slides extracted" report unactionable. The detail is where the
+        // reason lives, so it has to actually be there for the reporting to carry it.
+        for (name in listOf("why.pptx", "why.ppt", "why.pdf")) {
+            val file = File(temp, name).apply { writeText("this is not a presentation at all") }
+            val result = assertIs<LoadResult.Failure>(PresentationLoader.load(file), name)
+            assertNotNull(result.detail, "$name failed with no reason attached")
+            assertTrue(result.detail!!.isNotBlank(), "$name attached a blank reason")
         }
     }
 

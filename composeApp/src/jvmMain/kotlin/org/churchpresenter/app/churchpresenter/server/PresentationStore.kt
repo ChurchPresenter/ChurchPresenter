@@ -16,6 +16,7 @@ import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
 import org.churchpresenter.presentationengine.cache.SlideDiskCache
+import org.churchpresenter.app.churchpresenter.utils.reportDegradedSlide
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -136,12 +137,20 @@ internal class PresentationStore(
         if (slideDiskCache.isWriting(file)) return null
         val deck = when (val result = PresentationLoader.load(file)) {
             is LoadResult.Failure -> {
+                // The detail is the message the loader caught, and without it every distinct
+                // cause files as the same unactionable "parse_failed". It goes in extras and not
+                // in the context sentence: the sentence is what Sentry groups on, and an
+                // exception message can carry a file path.
                 CrashReporter.reportWarning(
                     "Presentation: No slides extracted from ${file.extension.lowercase()} file (server)",
                     tags = mapOf(
                         "subsystem" to "presentation",
                         "file.type" to file.extension.lowercase(),
                         "failure.reason" to result.error.name.lowercase()
+                    ),
+                    extras = mapOf(
+                        "detail" to (result.detail ?: "none"),
+                        "file.size" to file.length().toString(),
                     )
                 )
                 return null
@@ -152,7 +161,7 @@ internal class PresentationStore(
         var committed = false
         return try {
             val jpegSlides = CrashReporter.trace("server.render", "Server render presentation") {
-                DeckRasterizer(deck).use { rasterizer ->
+                DeckRasterizer(deck, onDegraded = ::reportDegradedSlide).use { rasterizer ->
                     deck.slides.map { slide ->
                         val slideFile = writer.putSlide(
                             index = slide.index,

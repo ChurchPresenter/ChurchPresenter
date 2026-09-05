@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.presentation.PresentationLoadError
+import org.churchpresenter.app.churchpresenter.utils.reportDegradedSlide
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.DeckRasterizer
 import org.churchpresenter.presentationengine.LoadResult
@@ -398,7 +399,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             val cacheWriter = diskCache.beginWrite(file, deck.format, renderWidth)
             writer = cacheWriter
             var reportedSlideFailure = false
-            DeckRasterizer(deck, renderWidth).use { rasterizer ->
+            DeckRasterizer(deck, renderWidth, onDegraded = ::reportDegradedSlide).use { rasterizer ->
                 for (slide in deck.slides) {
                     try {
                         val frame = renderSlideFrame(rasterizer, slide.index)

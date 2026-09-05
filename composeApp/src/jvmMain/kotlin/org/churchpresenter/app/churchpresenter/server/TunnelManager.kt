@@ -20,6 +20,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 
 private const val HTTP_OK = 200
 private const val TUNNEL_READY_TIMEOUT_MS = 30_000L
@@ -94,9 +95,9 @@ class TunnelManager {
     private val downloadUrl = cloudflaredDownloadUrl(isWin, isMac, isArm)
 
     init {
-        Runtime.getRuntime().addShutdownHook(Thread {
+        addGuardedShutdownHook("tunnel") {
             process?.destroyForcibly()
-        })
+        }
     }
 
     fun start(localPort: Int) {

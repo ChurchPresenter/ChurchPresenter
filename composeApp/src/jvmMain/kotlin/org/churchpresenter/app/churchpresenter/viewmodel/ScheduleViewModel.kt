@@ -8,6 +8,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -104,7 +105,7 @@ class ScheduleViewModel(
         // exitProcess/System.exit shutdown (e.g. the self-updater relaunching an installer),
         // so this loop could otherwise wake up mid-shutdown and try to classload ScheduleFileV2
         // after the installer has started overwriting the app's own files.
-        Runtime.getRuntime().addShutdownHook(Thread { scope.cancel() })
+        addGuardedShutdownHook("schedule") { scope.cancel() }
         scope.launch {
             while (true) {
                 delay(AUTOSAVE_INTERVAL_MS)

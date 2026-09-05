@@ -411,6 +411,10 @@ fun VideoPlayer(
     // their first frame before the player is paused.
     val firstFrameCaptured = remember { mutableStateOf(false) }
 
+    // Native-handle lifetime guard and the deferred pause it protects — see PlayerReleaseGate.
+    val gate = remember { PlayerReleaseGate() }
+    val pauseTimer = remember { mutableStateOf<javax.swing.Timer?>(null) }
+
     DisposableEffect(Unit) {
         mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
             override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
@@ -421,11 +425,15 @@ fun VideoPlayer(
                     if (!firstFrameCaptured.value) {
                         // Delay pause by 200 ms so VLC can decode and render the first frame
                         // before being paused. Without this, portrait/MOV videos stay black.
-                        javax.swing.Timer(POSITION_POLL_MS) {
-                            if (!viewModel.isPlaying) mediaPlayer.controls().pause()
+                        // The timer is held so onDispose can stop it: switching media disposes
+                        // this composable well inside those 200 ms, and the callback would
+                        // otherwise pause a player that has already been released.
+                        pauseTimer.value?.stop()
+                        pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
+                            gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
                         }.also { it.isRepeats = false; it.start() }
                     } else {
-                        SwingUtilities.invokeLater { mediaPlayer.controls().pause() }
+                        SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
                     }
                 }
             }
@@ -443,8 +451,13 @@ fun VideoPlayer(
             }
         })
         onDispose {
-            mp.controls().stop()
-            component.releasePlayer()
+            // Before releasePlayer(), so anything already queued sees the player as gone.
+            gate.release()
+            pauseTimer.value?.stop()
+            try {
+                mp.controls().stop()
+                component.releasePlayer()
+            } catch (_: Throwable) { }
         }
     }
 
@@ -591,6 +604,10 @@ fun SoftwareVideoPlayer(
         }
     }
 
+    // Native-handle lifetime guard and the deferred pause it protects — see PlayerReleaseGate.
+    val gate = remember { PlayerReleaseGate() }
+    val pauseTimer = remember { mutableStateOf<javax.swing.Timer?>(null) }
+
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
         val bufferFormatCallback = object : uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback {
@@ -632,11 +649,13 @@ fun SoftwareVideoPlayer(
                         // Give VLC up to 200 ms to decode and deliver the first frame to the
                         // render callback before pausing. This is critical for portrait/rotated
                         // videos (e.g. iPhone MOV) where the decoder may take longer to start.
-                        javax.swing.Timer(POSITION_POLL_MS) {
-                            if (!viewModel.isPlaying) mediaPlayer.controls().pause()
+                        // Held so onDispose can stop it — see the embedded player above.
+                        pauseTimer.value?.stop()
+                        pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
+                            gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
                         }.also { it.isRepeats = false; it.start() }
                     } else {
-                        SwingUtilities.invokeLater { mediaPlayer.controls().pause() }
+                        SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
                     }
                 }
             }
@@ -650,6 +669,9 @@ fun SoftwareVideoPlayer(
         })
 
         onDispose {
+            // Before releasePlayer(), so anything already queued sees the player as gone.
+            gate.release()
+            pauseTimer.value?.stop()
             try {
                 mp.controls().stop()
                 component.releasePlayer()
