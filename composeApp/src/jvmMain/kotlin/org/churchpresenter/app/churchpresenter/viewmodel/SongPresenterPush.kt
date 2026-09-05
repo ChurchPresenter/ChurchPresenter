@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.settings.utils.Constants
@@ -34,7 +35,7 @@ internal fun titleSlideSection(
 ): LyricSection = LyricSection(
     type = "title_slide",
     title = song.title,
-    secondaryTitle = song.secondaryTitle,
+    translations = song.titleTranslations(),
     songNumber = song.number.toIntOrNull() ?: 0,
     lines = buildList {
         add(songTitleLine(song, showSongNumber))
@@ -64,10 +65,9 @@ internal fun resolveEditedSongPush(
     val sectionIndex = liveSectionIndex.coerceIn(-1, sections.size - 1)
     val section = sections.getOrNull(sectionIndex) ?: LyricSection(
         title = editedSong.title,
-        secondaryTitle = editedSong.secondaryTitle,
+        translations = editedSong.presentableTranslations(),
         songNumber = editedSong.number.toIntOrNull() ?: 0,
         lines = editedSong.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
-        secondaryLines = editedSong.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
         type = Constants.SECTION_TYPE_SONG,
     )
     val lineIndex = liveLineIndex.coerceIn(0, (section.lines.size - 1).coerceAtLeast(0))
@@ -77,3 +77,25 @@ internal fun resolveEditedSongPush(
         section.copy(bpm = tuning.bpm, capo = tuning.capo).withBackgroundsOf(editedSong),
     )
 }
+
+/**
+ * Every language beside the primary as slide translations, background directives stripped.
+ *
+ * For the slides built straight from a song rather than by splitting it into sections — the
+ * whole-song slide and the live-edit fallback. A directive is configuration written among the
+ * lyrics, and putting one on screen is never right.
+ *
+ * Here rather than beside [LyricSection] in `:core-models` because [songBackgroundDirectiveOf] is
+ * an app-level rule, and that module may not depend on this one.
+ */
+internal fun SongItem.presentableTranslations(): List<SectionTranslation> =
+    extraTranslations().map { translation ->
+        SectionTranslation(
+            title = translation.title,
+            lines = translation.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+        )
+    }
+
+/** Each language's title with no lines, for a slide that carries only titles — the title slide. */
+internal fun SongItem.titleTranslations(): List<SectionTranslation> =
+    extraTranslations().map { SectionTranslation(title = it.title) }

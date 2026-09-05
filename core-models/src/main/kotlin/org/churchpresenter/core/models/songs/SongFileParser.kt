@@ -33,10 +33,116 @@ data class SongCache(
 
 private const val TITLE_KEY_LENGTH = 6
 
+/** The offset between a `[Translation n]` tag's number and the extra-language slot it names. */
+private const val FIRST_NUMBERED_TAG = 2
+
+/** The three alternatives of [LANGUAGE_TAG] that say *which* language: primary, secondary, numbered. */
+private const val TAG_KIND_GROUPS = 3
+
+/** [lines] with its leading and trailing blank lines dropped, in place. */
+private fun trimBlankLines(lines: MutableList<String>) {
+    while (lines.isNotEmpty() && lines.first().isBlank()) {
+        lines.removeFirst()
+    }
+    while (lines.isNotEmpty() && lines.last().isBlank()) {
+        lines.removeLast()
+    }
+}
+
 /** The extension every song in a library carries. */
 const val SONG_EXTENSION = "song"
 
 private val BACKGROUND_PREFIXES = listOf(SONG_BACKGROUND_PREFIX, SONG_LOWER_THIRD_BACKGROUND_PREFIX)
+
+/**
+ * A language tag opening a half of a `.song` body.
+ *
+ * `[Primary]`, `[Secondary]` and `[Translation 3]`..`[Translation N]`, each optionally carrying
+ * a label after a colon — `[Translation 3: Ukrainian]`. Deliberately a closed set: a lyric
+ * section header is written the same way (`[Verse 1]`, `[Chorus]`), so anything not matched
+ * here has to stay a line of lyrics rather than open a language nobody asked for.
+ */
+private val LANGUAGE_TAG = Regex(
+    """^\[\s*(?:(primary)|(secondary)|translation\s+(\d+))\s*(?::\s*([^\]]*))?\s*]$""",
+    RegexOption.IGNORE_CASE,
+)
+
+/**
+ * Which language a tag opens: `-1` for the primary, `0` for the secondary, `n` for the
+ * `n + 2`th translation. `null` when the tag names a language this build does not carry, which
+ * is dropped rather than folded into another one — silently merging a fifth language into the
+ * fourth would corrupt both.
+ */
+private fun languageSlotOf(match: MatchResult): Int? {
+    val (primary, secondary, numbered) = match.destructured.toList().take(TAG_KIND_GROUPS)
+    return when {
+        primary.isNotEmpty() -> -1
+        secondary.isNotEmpty() -> 0
+        // `[Translation 3]` is the second extra language, so the tag's number is two ahead of
+        // the slot it names.
+        else -> numbered.toIntOrNull()?.minus(FIRST_NUMBERED_TAG)
+            ?.takeIf { it in 1 until MAX_SONG_EXTRA_TRANSLATIONS }
+    }
+}
+
+/**
+ * The tag that opens extra language [index] — the inverse of [LANGUAGE_TAG].
+ *
+ * Language 0 stays `[Secondary]` rather than becoming `[Translation 2]` so a file this build
+ * writes is still read by one that only knows the two-language format.
+ */
+private fun languageTagFor(index: Int, label: String): String {
+    val name = if (index == 0) "Secondary" else "Translation ${index + 2}"
+    return if (label.isBlank()) name else "$name: $label"
+}
+
+/** One language's half of a .song body, filled a line at a time. */
+private class BodyHalf(val label: String) {
+    var title = ""
+    val lines = mutableListOf<String>()
+}
+
+/** The language halves of a .song body, filled a line at a time. */
+private class SongBody {
+    private val primary = BodyHalf("")
+    /** Sparse by slot, so a file that writes `[Translation 4]` and no `[Secondary]` keeps the
+     *  gap rather than sliding the fourth language into the second one's place. */
+    private val extras = sortedMapOf<Int, BodyHalf>()
+    private var target: BodyHalf? = null
+
+    val primaryTitle: String get() = primary.title
+    val primaryLines: List<String> get() = primary.lines
+
+    fun consume(line: String) {
+        val tag = LANGUAGE_TAG.matchEntire(line.trim())
+        if (tag != null) {
+            val slot = languageSlotOf(tag)
+            val label = tag.groupValues[4].trim()
+            target = when {
+                slot == null -> null
+                slot < 0 -> primary
+                else -> extras.getOrPut(slot) { BodyHalf(label) }
+            }
+            return
+        }
+        val half = target ?: return
+        val trimmed = line.trim()
+        // Title line right after the section tag
+        if (trimmed.startsWith("title:", ignoreCase = true)) {
+            half.title = trimmed.substring(TITLE_KEY_LENGTH).trim()
+        } else {
+            // Lyric lines (including section headers like [Verse 1], empty lines, etc.)
+            half.lines.add(line)
+        }
+    }
+
+    /** The extra languages, blank-trimmed, packed down to the ones that carry anything. */
+    fun extraTranslations(): List<SongTranslation> = extras.values.mapNotNull { half ->
+        trimBlankLines(half.lines)
+        SongTranslation(label = half.label, title = half.title, lyrics = half.lines.toList())
+            .takeUnless { it.isEmpty }
+    }
+}
 
 class SongFileParser {
 
@@ -62,39 +168,6 @@ class SongFileParser {
             val key = line.substring(0, colonIndex).trim().lowercase()
             if (key !in known) null else key to line.substring(colonIndex + 1).trim()
         }.toMap()
-    }
-
-    /** The [Primary]/[Secondary] halves of a .song body, filled a line at a time. */
-    private class SongBody(
-        private val primaryLyrics: MutableList<String>,
-        private val secondaryLyrics: MutableList<String>,
-    ) {
-        var primaryTitle = ""
-        var secondaryTitle = ""
-        private var section: String? = null // null, "primary", "secondary"
-        private var target: MutableList<String>? = null
-
-        fun consume(line: String) {
-            val trimmed = line.trim()
-            when {
-                trimmed.equals("[Primary]", ignoreCase = true) -> {
-                    section = "primary"
-                    target = primaryLyrics
-                }
-                trimmed.equals("[Secondary]", ignoreCase = true) -> {
-                    section = "secondary"
-                    target = secondaryLyrics
-                }
-                section == null || target == null -> Unit
-                // Title line right after the section tag
-                trimmed.startsWith("title:", ignoreCase = true) -> {
-                    val titleValue = trimmed.substring(TITLE_KEY_LENGTH).trim()
-                    if (section == "primary") primaryTitle = titleValue else secondaryTitle = titleValue
-                }
-                // Lyric lines (including section headers like [Verse 1], empty lines, etc.)
-                else -> target?.add(line)
-            }
-        }
     }
 
     fun parseSongContent(content: String, filePath: String = "", songbook: String = ""): SongItem? {
@@ -128,19 +201,14 @@ class SongFileParser {
             // Parse body after header
             val bodyLines = if (headerEndIndex > 0) lines.subList(headerEndIndex, lines.size) else lines
 
-            var primaryTitle = ""
-            var secondaryTitle = ""
-            val primaryLyrics = mutableListOf<String>()
-            val secondaryLyrics = mutableListOf<String>()
-
-            val body = SongBody(primaryLyrics, secondaryLyrics)
+            val body = SongBody()
             for (line in bodyLines) body.consume(line)
-            primaryTitle = body.primaryTitle
-            secondaryTitle = body.secondaryTitle
+            val primaryTitle = body.primaryTitle
+            val primaryLyrics = body.primaryLines.toMutableList()
 
             // Trim leading/trailing blank lines from lyrics
             trimBlankLines(primaryLyrics)
-            trimBlankLines(secondaryLyrics)
+            val extraTranslations = body.extraTranslations()
 
             // Extract song number from filename if present (e.g., "0001 - Title.song")
             val fileName = File(filePath).nameWithoutExtension
@@ -157,13 +225,11 @@ class SongFileParser {
                 author = author,
                 composer = composer,
                 lyrics = primaryLyrics,
-                secondaryTitle = secondaryTitle,
-                secondaryLyrics = secondaryLyrics,
                 sourceFile = filePath,
                 ccliNumber = ccli,
                 background = background,
                 lowerThirdBackground = lowerThirdBackground
-            )
+            ).withTranslations(extraTranslations)
         } catch (_: Exception) {
             return null
         }
@@ -200,15 +266,18 @@ class SongFileParser {
             sb.appendLine(line)
         }
 
-        // Write secondary section if present
-        if (song.secondaryTitle.isNotEmpty() || song.secondaryLyrics.isNotEmpty()) {
+        // Write each extra language, tagged by its position. Only the ones that carry something,
+        // so a one- or two-language song still writes exactly the file it always did and a whole
+        // library does not churn on the first save after upgrading.
+        song.extraTranslations().forEachIndexed { index, translation ->
+            if (translation.isEmpty) return@forEachIndexed
             sb.appendLine()
-            sb.appendLine("[Secondary]")
-            if (song.secondaryTitle.isNotEmpty()) {
-                sb.appendLine("title: ${song.secondaryTitle}")
+            sb.appendLine("[${languageTagFor(index, translation.label)}]")
+            if (translation.title.isNotEmpty()) {
+                sb.appendLine("title: ${translation.title}")
             }
             sb.appendLine()
-            for (line in song.secondaryLyrics) {
+            for (line in translation.lyrics) {
                 sb.appendLine(line)
             }
         }
@@ -222,15 +291,6 @@ class SongFileParser {
         // Match patterns like "0001 - Title" or "0001- Title" or "0001-Title"
         val match = Regex("""^(\d+)\s*-\s*""").find(fileName)
         return match?.groupValues?.get(1) ?: ""
-    }
-
-    private fun trimBlankLines(lines: MutableList<String>) {
-        while (lines.isNotEmpty() && lines.first().isBlank()) {
-            lines.removeFirst()
-        }
-        while (lines.isNotEmpty() && lines.last().isBlank()) {
-            lines.removeLast()
-        }
     }
 
     fun loadSongsFromDirectory(

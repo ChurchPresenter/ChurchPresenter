@@ -17,6 +17,7 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.songBackgroundFrom
@@ -438,12 +439,11 @@ class SongsViewModel(
         val song = items[idx]
         return LyricSection(
             title = song.title,
-            secondaryTitle = song.secondaryTitle,
             songNumber = song.number.toIntOrNull() ?: 0,
             // The whole-song slide is the lyrics verbatim, headers and all — but a directive is
             // configuration rather than words, and putting one on screen is never right.
             lines = song.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
-            secondaryLines = song.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+            translations = song.presentableTranslations(),
             type = Constants.SECTION_TYPE_SONG
         ).withBackgroundsOf(song)
     }
@@ -461,25 +461,30 @@ class SongsViewModel(
     fun getLyricSections(song: SongItem): List<LyricSection> {
         // Split primary lyrics into sections
         val primarySections = splitLyricsIntoSections(song.lyrics, song.title, song.number)
-        // Split secondary lyrics into sections (matched by order)
-        val secondarySections = if (song.secondaryLyrics.isNotEmpty()) {
-            splitLyricsIntoSections(song.secondaryLyrics, song.secondaryTitle, song.number)
-        } else {
-            emptyList()
+        // Split each further language into sections (matched by order), keeping a language that has
+        // no lyrics as an empty group rather than dropping it — position is what identifies a
+        // language to an output, so a gap has to stay a gap.
+        val extras = song.extraTranslations()
+        val extraGroups = extras.map { translation ->
+            if (translation.lyrics.isEmpty()) emptyList()
+            else slideGroupsOf(splitLyricsIntoSections(translation.lyrics, translation.title, song.number))
         }
 
-        // Merge primary and secondary by section first and by slide within it, rather than by a
-        // single running index. The two are the same thing until one language uses a manual slide
-        // break the other does not — and then a flat index would slide every later section under
-        // the wrong translation. Pairing per section keeps the damage inside the section that
-        // disagrees: its extra slides come out untranslated, and verse 3 still meets verse 3.
-        val secondaryGroups = slideGroupsOf(secondarySections)
+        // Merge the languages by section first and by slide within it, rather than by a single
+        // running index. They are the same thing until one language uses a manual slide break
+        // another does not — and then a flat index would slide every later section under the wrong
+        // translation. Pairing per section keeps the damage inside the section that disagrees: its
+        // extra slides come out untranslated, and verse 3 still meets verse 3.
         val sections = slideGroupsOf(primarySections).flatMapIndexed { group, slides ->
-            val secondarySlides = secondaryGroups.getOrNull(group)
             slides.mapIndexed { slide, section ->
                 section.copy(
-                    secondaryTitle = song.secondaryTitle,
-                    secondaryLines = secondarySlides?.getOrNull(slide)?.lines ?: emptyList(),
+                    translations = extras.mapIndexed { language, translation ->
+                        SectionTranslation(
+                            title = translation.title,
+                            lines = extraGroups[language].getOrNull(group)?.getOrNull(slide)?.lines
+                                ?: emptyList(),
+                        )
+                    },
                 )
             }
         }

@@ -19,6 +19,8 @@ import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
+import org.churchpresenter.core.models.songs.withSecondaryLines
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
@@ -122,7 +124,7 @@ internal fun songSampleSections(slot: PreviewSampleSlot): List<LyricSection> {
     val title = stringResource(Res.string.song_preview_sample_title)
     val verse = LyricSection(
         title = title,
-        secondaryTitle = title,
+        translations = listOf(SectionTranslation(title = title)),
         songNumber = SAMPLE_SONG_NUMBER,
         type = "verse",
         labelName = "Verse 1",
@@ -136,6 +138,23 @@ internal fun songSampleSections(slot: PreviewSampleSlot): List<LyricSection> {
 }
 
 /**
+ * One sample slide: the primary's lines, the second language's, and the chart the band would read.
+ *
+ * A helper rather than three `copy` calls because the second language is no longer a field on
+ * [LyricSection] -- it is one entry of its translation list, and filling it by hand at six call
+ * sites would say six times what this says once.
+ *
+ * The samples stay bilingual even though a song may now carry four languages: they exist to show
+ * what the styling controls do, and a third and fourth column of the same hymn would shrink the
+ * type without demonstrating anything the second does not.
+ */
+private fun LyricSection.sample(
+    lines: List<String>,
+    secondary: List<String>,
+    chords: List<String>,
+): LyricSection = copy(lines = lines, chordLines = chords).withSecondaryLines(secondary)
+
+/**
  * One short line a side.
  *
  * Short in **both** senses, and it has to be: with the display mode set to line -- which is the
@@ -145,44 +164,44 @@ internal fun songSampleSections(slot: PreviewSampleSlot): List<LyricSection> {
  * as the number of them.
  */
 private fun shortSample(verse: LyricSection, chorus: LyricSection) = listOf(
-    verse.copy(
+    verse.sample(
         lines = listOf("How sweet the sound"),
-        secondaryLines = listOf("О, благодать!"),
-        chordLines = listOf("[C]How sweet the [G]sound"),
+        secondary = listOf("О, благодать!"),
+        chords = listOf("[C]How sweet the [G]sound"),
     ),
-    chorus.copy(
+    chorus.sample(
         lines = listOf("That saved a wretch"),
-        secondaryLines = listOf("Спасён я Богом"),
-        chordLines = listOf("[Em]That saved a [D]wretch"),
+        secondary = listOf("Спасён я Богом"),
+        chords = listOf("[Em]That saved a [D]wretch"),
     ),
 )
 
 /** Two lines a side, of ordinary length -- a normal slide, and what the preview opens on. */
 private fun mediumSample(verse: LyricSection, chorus: LyricSection) = listOf(
-    verse.copy(
+    verse.sample(
         lines = listOf(
             "Amazing grace! How sweet the sound",
             "That saved a wretch like me",
         ),
-        secondaryLines = listOf(
+        secondary = listOf(
             "О, благодать! Спасён я",
             "Тобой из бездны зла",
         ),
-        chordLines = listOf(
+        chords = listOf(
             "[G]Amazing [G7]grace! How [C]sweet the [G]sound",
             "[G]That saved a [Em]wretch [D]like [G]me",
         ),
     ),
-    chorus.copy(
+    chorus.sample(
         lines = listOf(
             "Twas grace that taught my heart to fear",
             "And grace my fears relieved",
         ),
-        secondaryLines = listOf(
+        secondary = listOf(
             "И благодать научит нас",
             "Страх сердца побеждать",
         ),
-        chordLines = listOf(
+        chords = listOf(
             "[C]Twas grace that [G]taught my heart to [D]fear",
             "[G]And grace my [D]fears re[G]lieved",
         ),
@@ -196,7 +215,7 @@ private fun mediumSample(verse: LyricSection, chorus: LyricSection) = listOf(
  * line-mode output where the other five lines are never drawn.
  */
 private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
-    verse.copy(
+    verse.sample(
         lines = listOf(
             "Through many dangers, toils and snares I have already come",
             "Tis grace hath brought me safe thus far, and grace will lead me home",
@@ -205,7 +224,7 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
             "Twas grace that taught my heart to fear, and grace my fears relieved",
             "How precious did that grace appear the hour I first believed",
         ),
-        secondaryLines = listOf(
+        secondary = listOf(
             "Сквозь много бед, трудов и сетей я уже прошёл",
             "Меня хранила благодать, она домой введёт",
             "О, благодать! Спасён я был Тобой из бездны зла",
@@ -213,7 +232,7 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
             "И благодать научит нас страх сердца побеждать",
             "Как драгоценна благодать в тот час, когда я верил",
         ),
-        chordLines = listOf(
+        chords = listOf(
             "[G]Through many [G7]dangers, [C]toils and snares I have al[G]ready come",
             "[G]Tis grace hath [Em]brought me safe thus far, and [D]grace will lead me [G]home",
             "[G]Amazing [G7]grace! How [C]sweet the sound that saved a [G]wretch like me",
@@ -222,7 +241,7 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
             "[G]How precious [G7]did that [C]grace appear the hour I [G]first believed",
         ),
     ),
-    chorus.copy(
+    chorus.sample(
         lines = listOf(
             "Tis grace hath brought me safe thus far, and grace will lead me home",
             "Through many dangers, toils and snares I have already come",
@@ -231,7 +250,7 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
             "My chains are gone, I've been set free, my God my Saviour has ransomed me",
             "And like a flood His mercy reigns, unending love, amazing grace",
         ),
-        secondaryLines = listOf(
+        secondary = listOf(
             "Меня хранила благодать, она домой введёт",
             "Сквозь много бед, трудов и сетей я уже прошёл",
             "Когда пройдёт десять тысяч лет, сияющих как солнце",
@@ -239,7 +258,7 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
             "Оковы пали, я свободен, мой Бог, Спаситель, искупил",
             "И как поток течёт Его любовь, о, благодать!",
         ),
-        chordLines = listOf(
+        chords = listOf(
             "[G]Tis grace hath [Em]brought me safe thus far, and [D]grace will lead me [G]home",
             "[G]Through many [G7]dangers, [C]toils and snares I have al[G]ready come",
             "[G]When we've been [G7]there ten [C]thousand years, bright shining as the [G]sun",

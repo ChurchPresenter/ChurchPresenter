@@ -90,25 +90,29 @@ import churchpresenter.composeapp.generated.resources.duplicate_song_error
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.enter_lyrics_here
 import churchpresenter.composeapp.generated.resources.enter_secondary_lyrics_here
+import churchpresenter.composeapp.generated.resources.enter_translation_lyrics_here
 import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.secondary_title
+import churchpresenter.composeapp.generated.resources.song_add_translation
+import churchpresenter.composeapp.generated.resources.song_background_untitled_section
+import churchpresenter.composeapp.generated.resources.song_background_whole_song
 import churchpresenter.composeapp.generated.resources.song_book
 import churchpresenter.composeapp.generated.resources.song_capo
 import churchpresenter.composeapp.generated.resources.song_chords
 import churchpresenter.composeapp.generated.resources.song_chords_toggle
-import churchpresenter.composeapp.generated.resources.song_background_untitled_section
-import churchpresenter.composeapp.generated.resources.song_background_whole_song
 import churchpresenter.composeapp.generated.resources.song_insert_section
 import churchpresenter.composeapp.generated.resources.song_insert_slide_break
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
+import churchpresenter.composeapp.generated.resources.song_pane_translation
 import churchpresenter.composeapp.generated.resources.song_stats
 import churchpresenter.composeapp.generated.resources.song_syntax
 import churchpresenter.composeapp.generated.resources.song_syntax_chord_hint
 import churchpresenter.composeapp.generated.resources.song_tempo
 import churchpresenter.composeapp.generated.resources.song_title
+import churchpresenter.composeapp.generated.resources.song_translation_title
 import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.unit_bpm
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -123,6 +127,8 @@ import org.churchpresenter.app.churchpresenter.composables.buildPreviewSections
 import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
+import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
@@ -193,7 +199,41 @@ fun EditSongDialog(
 }
 
 /** Which set of lyrics the single editor pane is currently showing. */
-internal enum class LyricPane { PRIMARY, SECONDARY }
+/**
+ * One language of the song as it is being typed.
+ *
+ * The lyrics are a [TextFieldValue] rather than a `String` because the box needs to keep its
+ * selection and cursor across a pane switch — going to another language and back must not put the
+ * caret at the top.
+ */
+internal data class TranslationDraft(
+    val label: String = "",
+    val title: String = "",
+    val lyrics: TextFieldValue = TextFieldValue(""),
+) {
+    /**
+     * The saved form. Lyrics that are nothing but section headers count as empty, which is what
+     * stops an untouched pane — the editor pre-fills none, but a template might — from being
+     * written out as a language the song does not actually have.
+     */
+    fun toTranslation(): SongTranslation {
+        val lines = lyrics.text.split("\n")
+        val blank = lines.all { it.isBlank() || it.trim().startsWith("[") }
+        return SongTranslation(
+            label = label.trim(),
+            title = title.trim(),
+            lyrics = if (blank) emptyList() else lines,
+        )
+    }
+}
+
+/** What a language's pane tab says: its own name where it has one, its position otherwise. */
+@Composable
+internal fun translationPaneLabel(index: Int, label: String): String = when {
+    label.isNotBlank() -> label
+    index == 0 -> stringResource(Res.string.song_pane_secondary)
+    else -> stringResource(Res.string.song_pane_translation, index + 2)
+}
 
 /**
  * Puts [snippet] in at the caret, replacing whatever is selected, and leaves the caret after it.
@@ -275,9 +315,25 @@ internal fun EditSongContent(
     var editedLyrics by remember(isVisible, song) {
         mutableStateOf(TextFieldValue(song.lyrics.joinToString("\n")))
     }
-    var editedSecondaryTitle by remember(isVisible, song) { mutableStateOf(song.secondaryTitle) }
-    var editedSecondaryLyrics by remember(isVisible, song) {
-        mutableStateOf(TextFieldValue(song.secondaryLyrics.joinToString("\n")))
+    // One draft per language beside the primary, always [MAX_SONG_EXTRA_TRANSLATIONS] of them so a
+    // pane's state does not move when a language before it is emptied. Which ones are *shown* is
+    // [visibleTranslations] below.
+    var editedTranslations by remember(isVisible, song) {
+        mutableStateOf(
+            List(MAX_SONG_EXTRA_TRANSLATIONS) { index ->
+                val translation = song.extraTranslations().getOrNull(index)
+                TranslationDraft(
+                    label = translation?.label.orEmpty(),
+                    title = translation?.title.orEmpty(),
+                    lyrics = TextFieldValue(translation?.lyrics?.joinToString("\n").orEmpty()),
+                )
+            }
+        )
+    }
+    // How many extra languages have a tab. Always at least one, so a monolingual song still opens
+    // with the Secondary pane it has always had; more when the song already carries them.
+    var visibleTranslations by remember(isVisible, song) {
+        mutableStateOf(song.extraTranslations().size.coerceIn(1, MAX_SONG_EXTRA_TRANSLATIONS))
     }
 
     var editedBackground by remember(isVisible, song) { mutableStateOf(song.background) }
@@ -288,7 +344,8 @@ internal fun EditSongContent(
     // because the sections come from the lyrics box and can be deleted while the panel is open.
     var backgroundScope by remember(isVisible, song) { mutableStateOf(0) }
 
-    var pane by remember(isVisible, song) { mutableStateOf(LyricPane.PRIMARY) }
+    // 0 is the primary; 1.. are the extra languages, in the order they are written.
+    var pane by remember(isVisible, song) { mutableStateOf(0) }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
@@ -305,10 +362,12 @@ internal fun EditSongContent(
     val scopedBackground = sectionSlots.getOrNull(scope - 1)
         ?: SectionBackgroundSlot("", -1, editedBackground, editedLowerThirdBackground)
 
-    val paneValue = if (pane == LyricPane.PRIMARY) editedLyrics else editedSecondaryLyrics
+    val paneValue = if (pane == 0) editedLyrics else editedTranslations[pane - 1].lyrics
     fun setPaneValue(v: TextFieldValue) {
-        if (pane == LyricPane.SECONDARY) {
-            editedSecondaryLyrics = v
+        if (pane > 0) {
+            editedTranslations = editedTranslations.mapIndexed { index, draft ->
+                if (index == pane - 1) draft.copy(lyrics = v) else draft
+            }
             return
         }
         editedLyrics = v
@@ -358,10 +417,19 @@ internal fun EditSongContent(
                             weight = 2.4f,
                             emphasis = true,
                         )
+                        // Follows the open pane, so editing language three's lyrics puts language
+                        // three's title beside them. Parked on the first language while the primary
+                        // pane is open, which is where it always was.
+                        val titleSlot = (pane - 1).coerceAtLeast(0)
                         FieldCard(
-                            label = stringResource(Res.string.secondary_title),
-                            value = editedSecondaryTitle,
-                            onValueChange = { editedSecondaryTitle = it },
+                            label = if (titleSlot == 0) stringResource(Res.string.secondary_title)
+                            else stringResource(Res.string.song_translation_title, titleSlot + 2),
+                            value = editedTranslations[titleSlot].title,
+                            onValueChange = { value ->
+                                editedTranslations = editedTranslations.mapIndexed { index, draft ->
+                                    if (index == titleSlot) draft.copy(title = value) else draft
+                                }
+                            },
                             weight = 1f,
                         )
                         SongbookCard(
@@ -440,11 +508,18 @@ internal fun EditSongContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             PaneTabRow {
-                                PaneTab(stringResource(Res.string.song_pane_lyrics), pane == LyricPane.PRIMARY) {
-                                    pane = LyricPane.PRIMARY
+                                PaneTab(stringResource(Res.string.song_pane_lyrics), pane == 0) { pane = 0 }
+                                repeat(visibleTranslations) { index ->
+                                    val paneLabel = translationPaneLabel(index, editedTranslations[index].label)
+                                    PaneTab(paneLabel, pane == index + 1) {
+                                        pane = index + 1
+                                    }
                                 }
-                                PaneTab(stringResource(Res.string.song_pane_secondary), pane == LyricPane.SECONDARY) {
-                                    pane = LyricPane.SECONDARY
+                                if (visibleTranslations < MAX_SONG_EXTRA_TRANSLATIONS) {
+                                    PaneTab(stringResource(Res.string.song_add_translation), selected = false) {
+                                        visibleTranslations += 1
+                                        pane = visibleTranslations
+                                    }
                                 }
                             }
                             Spacer(Modifier.weight(1f))
@@ -520,10 +595,11 @@ internal fun EditSongContent(
                             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp),
                             placeholder = {
                                 Text(
-                                    stringResource(
-                                        if (pane == LyricPane.PRIMARY) Res.string.enter_lyrics_here
-                                        else Res.string.enter_secondary_lyrics_here
-                                    )
+                                    when (pane) {
+                                        0 -> stringResource(Res.string.enter_lyrics_here)
+                                        1 -> stringResource(Res.string.enter_secondary_lyrics_here)
+                                        else -> stringResource(Res.string.enter_translation_lyrics_here, pane + 1)
+                                    }
                                 )
                             },
                             visualTransformation = rememberLyricsHighlight(),
@@ -584,15 +660,11 @@ internal fun EditSongContent(
                                 author = editedAuthor,
                                 composer = editedComposer,
                                 lyrics = editedLyrics.text.split("\n"),
-                                secondaryTitle = editedSecondaryTitle,
-                                secondaryLyrics = editedSecondaryLyrics.text.split("\n").let {
-                                    if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList() else it
-                                },
                                 sourceFile = song.sourceFile,
                                 ccliNumber = editedCcli,
                                 background = editedBackground,
                                 lowerThirdBackground = editedLowerThirdBackground
-                            )
+                            ).withTranslations(editedTranslations.map { it.toTranslation() })
                             onSave(
                                 updatedSong,
                                 SongTuning(

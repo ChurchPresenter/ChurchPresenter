@@ -1,6 +1,11 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+<<<<<<< Updated upstream
+=======
+import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
+import org.churchpresenter.core.models.text.TextBackdrop
+>>>>>>> Stashed changes
 import org.churchpresenter.settings.utils.Constants
 
 @Serializable
@@ -207,7 +212,23 @@ data class SongSettings(
     val endOfSongIndicatorSpacing: Int = 2,
 
     // Bilingual layout: "side_by_side" or "top_bottom"
+    //
+    // Named for the two-language case it was written for; it now arranges however many languages
+    // the song carries -- side by side is that many columns, top/bottom that many bands. The name
+    // is kept because it is a stored key, and renaming it would silently reset the choice on every
+    // machine that has one.
     val bilingualLayout: String = Constants.BILINGUAL_SIDE_BY_SIDE,
+
+    /**
+     * The languages beside the primary, in order -- how each is labelled and, where it asks for it,
+     * how it is drawn. Up to [MAX_SONG_EXTRA_TRANSLATIONS] of them.
+     *
+     * Position `n` here is language `n + 1` of the song, which is the index an output's
+     * [ScreenAssignment.songTranslations] names. Absent or short is normal and means "no styling of
+     * its own": a language with no entry draws exactly like the primary, which is what every
+     * bilingual song did before this list existed.
+     */
+    val translations: List<SongTranslationSettings> = emptyList(),
 
     // Look-ahead styling — fullscreen
     val lookAheadDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE,
@@ -386,4 +407,44 @@ fun SongSettings.migrateSongNumberStyle(): SongSettings {
         songNumberLowerThirdShadowSize = titleLowerThirdShadowSize,
         songNumberLowerThirdShadowOpacity = titleLowerThirdShadowOpacity,
     )
+
+}
+
+/**
+ * How language [index] is configured -- `0` being the first language beside the primary.
+ *
+ * A default record for one that has never been configured, so every reader can treat the list as
+ * though it were always [MAX_SONG_EXTRA_TRANSLATIONS] long.
+ */
+fun SongSettings.translationSettings(index: Int): SongTranslationSettings =
+    translations.getOrNull(index) ?: SongTranslationSettings()
+
+/** These settings with language [index] rebuilt by [transform], the list grown to reach it. */
+fun SongSettings.withTranslationSettings(
+    index: Int,
+    transform: (SongTranslationSettings) -> SongTranslationSettings,
+): SongSettings {
+    if (index !in 0 until MAX_SONG_EXTRA_TRANSLATIONS) return this
+    val grown = List(maxOf(translations.size, index + 1)) { translationSettings(it) }
+    return copy(translations = grown.mapIndexed { i, t -> if (i == index) transform(t) else t })
+}
+
+/**
+ * What language [translation] draws [element] with on this output -- `0` is the primary.
+ *
+ * The inheritance rule in one place: a language draws with its own profile only where it has asked
+ * to, and otherwise with the primary's, which is [primaryStyle]'s job to supply. Callers pass the
+ * primary's resolver in rather than this module reaching for it, because the flat field families it
+ * reads are unpacked in `:composeApp`.
+ */
+fun SongSettings.translationStyle(
+    translation: Int,
+    element: SongTranslationElement,
+    lowerThird: Boolean,
+    primaryStyle: (SongTranslationElement, Boolean) -> SongTextStyle,
+): SongTextStyle {
+    if (translation <= 0) return primaryStyle(element, lowerThird)
+    val settings = translationSettings(translation - 1)
+    return if (settings.overrideStyle) settings.style(element, lowerThird)
+    else primaryStyle(element, lowerThird)
 }

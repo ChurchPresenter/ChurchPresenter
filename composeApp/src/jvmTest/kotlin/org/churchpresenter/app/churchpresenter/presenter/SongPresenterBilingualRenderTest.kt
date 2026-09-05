@@ -21,6 +21,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,11 +56,10 @@ class SongPresenterBilingualRenderTest {
     ) = LyricSection(
         header = header,
         title = "Amazing Grace",
-        secondaryTitle = "Chudnaya blagodat",
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = primary,
-        secondaryLines = secondary,
+        translations = listOf(SectionTranslation(title = "Chudnaya blagodat", lines = secondary)),
         isLastSection = isLast,
     )
 

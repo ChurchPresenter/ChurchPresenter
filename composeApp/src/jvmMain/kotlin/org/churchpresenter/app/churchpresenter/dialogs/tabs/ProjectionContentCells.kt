@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.triStateToggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -56,13 +55,9 @@ import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all_selected
 import churchpresenter.composeapp.generated.resources.content_bible_translations_count_enabled
-import churchpresenter.composeapp.generated.resources.content_bible_translations_enabled
-import churchpresenter.composeapp.generated.resources.content_bible_translations_footer
-import churchpresenter.composeapp.generated.resources.content_bible_translations_header
 import churchpresenter.composeapp.generated.resources.content_bible_translations_more
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.top
-import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val DIMMED_ALPHA = 0.55f
@@ -132,15 +127,35 @@ internal fun ContentToggleCell(
  * current selection, and each row shows a code and title read out of the .spb file — so a caption
  * is not a stable way to address any of them. These tags name what a control *is* instead.
  */
-internal object TranslationPickerTags {
+/**
+ * The test tags of one translation picker.
+ *
+ * Per-picker rather than constant because the Content Outputs dialog now draws two of them — the
+ * Bible's translations and the song's languages — and a tag that named neither matched both, which
+ * a `onNodeWithTag` can only report as "expected 1 node, found 2".
+ *
+ * The Bible's values are exactly the strings the tags have always been, so every existing test that
+ * names one still finds the picker it was written against.
+ */
+internal class TranslationPickerTags(private val prefix: String) {
     /** The collapsed trigger segment that opens the picker. */
-    const val TRIGGER = "contentOutputs_bibleTranslationTrigger"
+    val trigger = "contentOutputs_${prefix}Trigger"
 
     /** The master on/off row at the top of the open picker. */
-    const val MASTER = "contentOutputs_bibleTranslationMaster"
+    val master = "contentOutputs_${prefix}Master"
 
     /** The row for the translation at stack position [index]. */
-    fun row(index: Int) = "contentOutputs_bibleTranslationRow_$index"
+    fun row(index: Int) = "contentOutputs_${prefix}Row_$index"
+
+    companion object {
+        val BIBLE = TranslationPickerTags("bibleTranslation")
+        val SONG = TranslationPickerTags("songLanguage")
+
+        /** What the Bible picker's tags used to be reachable as, kept for the suites that use them. */
+        const val TRIGGER = "contentOutputs_bibleTranslationTrigger"
+        const val MASTER = "contentOutputs_bibleTranslationMaster"
+        fun row(index: Int) = "contentOutputs_bibleTranslationRow_$index"
+    }
 }
 
 /**
@@ -153,8 +168,19 @@ internal object TranslationPickerTags {
 internal fun ContentTranslationCell(
     modifier: Modifier,
     label: String,
+    /** Which picker this is, so the two on the dialog are separately addressable in a test. */
+    tags: TranslationPickerTags = TranslationPickerTags.BIBLE,
+    /** What the open panel calls the thing being picked -- translations, or song languages. */
+    headerText: String,
+    /**
+     * The "%1$d of %2$d enabled" template for the master row -- the two pickers count different
+     * nouns. A template rather than a finished string because the counts are worked out in here.
+     */
+    enabledFormat: String,
+    /** The grey note under the list, explaining what picking more than one does. */
+    footerText: String,
     /** The configured stack, in order; selection indices below refer to this order. */
-    translations: List<BibleTranslationDisplay>,
+    translations: List<TranslationChoiceDisplay>,
     showing: Boolean,
     selected: List<Int>,
     onShowingChange: (Boolean) -> Unit,
@@ -254,7 +280,7 @@ internal fun ContentTranslationCell(
                     // Tagged rather than found by caption: this segment's text is a derived summary
                     // ("All Bibles", a code, "+N more") that changes with the selection, and a
                     // single-selection caption repeats the code its own menu row shows.
-                    .testTag(TranslationPickerTags.TRIGGER)
+                    .testTag(tags.trigger)
                     .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -291,7 +317,7 @@ internal fun ContentTranslationCell(
                     // Otherwise unlabelled when there's nothing configured to name (primary/
                     // secondary text both blank) -- this is also what tests target to open the
                     // dropdown in that case.
-                    contentDescription = stringResource(Res.string.content_bible_translations_header),
+                    contentDescription = headerText,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
@@ -315,7 +341,7 @@ internal fun ContentTranslationCell(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ContentOutputsSectionHeader(stringResource(Res.string.content_bible_translations_header))
+            ContentOutputsSectionHeader(headerText)
             Spacer(modifier = Modifier.weight(1f))
             // Plain clickable Text pills rather than Button/OutlinedButton: those enforce a 58dp
             // minWidth floor that, in this narrow card, starved whichever pill measured last down
@@ -367,7 +393,7 @@ internal fun ContentTranslationCell(
                     },
                     onClick = { if (showing) onShowingChange(false) else selectAll() },
                 )
-                .testTag(TranslationPickerTags.MASTER)
+                .testTag(tags.master)
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(11.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -389,7 +415,7 @@ internal fun ContentTranslationCell(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = stringResource(Res.string.content_bible_translations_enabled, enabledCount, translations.size),
+                    text = enabledFormat.format(enabledCount, translations.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -462,7 +488,7 @@ internal fun ContentTranslationCell(
                             .clickable(onClick = toggle)
                             // Tagged by stack position, which is what a selection actually stores;
                             // the code and title beside it are file-derived and repeat elsewhere.
-                            .testTag(TranslationPickerTags.row(index))
+                            .testTag(tags.row(index))
                             .padding(start = 30.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -555,7 +581,7 @@ internal fun ContentTranslationCell(
 
         HorizontalDivider(color = dividerColor)
         Text(
-            text = stringResource(Res.string.content_bible_translations_footer),
+            text = footerText,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
@@ -565,134 +591,4 @@ internal fun ContentTranslationCell(
         )
         } // DropdownMenu
     } // outer Box
-}
-
-/**
- * Songs content cell: a collapsed trigger (current mode + chevron) that opens a floating panel
- * listing every mode -- styled to match [ContentTranslationCell] so the two cells read as one
- * family rather than two different pickers side by side. Unlike Bible's checklist, mode selection
- * is single-choice (Off counts as a mode, not a separate on/off dimension), so each row is a plain
- * radio-style pick that both selects and closes the panel.
- */
-@Composable
-internal fun ContentLangCell(
-    modifier: Modifier,
-    label: String,
-    modes: List<Pair<String, String>>,
-    currentMode: String,
-    onSelect: (String) -> Unit,
-) {
-    var dropdownOpen by remember { mutableStateOf(false) }
-    val currentLabel = modes.find { it.first == currentMode }?.second ?: modes.first().second
-    val isOff = currentMode == Constants.SONG_LANG_OFF
-    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-
-    Box(modifier = modifier) {
-        // Left segment is a plain label, not a click target -- matching Bible's trigger, where
-        // only the value/chevron side opens anything.
-        val triggerShape = RoundedCornerShape(10.dp)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .alpha(if (isOff) DIMMED_ALPHA else 1f)
-                .clip(triggerShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxHeight().padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    softWrap = false,
-                )
-            }
-            Box(modifier = Modifier.fillMaxHeight().width(1.dp).background(dividerColor))
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable { dropdownOpen = true }
-                    .padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = currentLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
-
-        DropdownMenu(
-            expanded = dropdownOpen,
-            onDismissRequest = { dropdownOpen = false },
-            modifier = Modifier.width(220.dp),
-            shape = RoundedCornerShape(12.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            tonalElevation = 0.dp,
-        ) {
-            ContentOutputsSectionHeader(
-                text = label,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-            )
-            HorizontalDivider(color = dividerColor)
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                modes.forEach { (value, modeLabel) ->
-                    val isSelected = value == currentMode
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.09f) else Color.Transparent)
-                            .clickable {
-                                dropdownOpen = false
-                                onSelect(value)
-                            }
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = modeLabel,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
-                        // Radio, not checkbox: modes are mutually exclusive (a single pick, Off
-                        // included), unlike Bible's independently-toggleable translations.
-                        Box(
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clip(CircleShape)
-                                .border(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, CircleShape),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (isSelected) {
-                                Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

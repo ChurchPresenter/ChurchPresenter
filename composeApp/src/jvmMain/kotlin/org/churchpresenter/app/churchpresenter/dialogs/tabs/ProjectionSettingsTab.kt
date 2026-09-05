@@ -75,10 +75,9 @@ import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_chords
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.screen_lang_language_n
 import churchpresenter.composeapp.generated.resources.screen_lang_language_1
 import churchpresenter.composeapp.generated.resources.screen_lang_language_2
-import churchpresenter.composeapp.generated.resources.screen_lang_off
-import churchpresenter.composeapp.generated.resources.song_language_both
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
@@ -109,6 +108,7 @@ import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -144,7 +144,17 @@ data class DetectedScreen(
  * [Bible.readTranslationSummary]'s cheap header-only read and fall back to [code] / blank when a
  * file can't be read.
  */
-data class BibleTranslationDisplay(
+/**
+ * One pickable language in a per-output content cell.
+ *
+ * Shared by Bible translations and song languages: both are "an ordered stack, pick which of them
+ * this output shows", and `ContentTranslationCell` draws either from these three fields. It was
+ * `BibleTranslationDisplay` while the Bible was the only thing with a stack.
+ *
+ * [code] is the short badge on the collapsed trigger — a Bible's abbreviation, a song language's
+ * position. [portion] is the grey detail line, which songs leave blank.
+ */
+data class TranslationChoiceDisplay(
     val code: String,
     val title: String,
     val portion: String,
@@ -408,10 +418,8 @@ fun ProjectionSettingsTab(
         stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
     )
 
-    // Shared Bible/Songs language-mode dropdown options — used by both the Screen Assignment
-    // table (Card 1) and the Browser Source Outputs table (Card 1.5).
-    val offLabel = stringResource(Res.string.screen_lang_off)
-    val bothLabel = stringResource(Res.string.song_language_both)
+    // What the first two song languages are called on this tab when nobody has named them. Used by
+    // the Screen Assignment table (Card 1) and the Browser Source Outputs table (Card 1.5).
     val lang1Label = stringResource(Res.string.screen_lang_language_1)
     val lang2Label = stringResource(Res.string.screen_lang_language_2)
     // translationNames stays the plain file-stem list: it's what every count/index computation
@@ -431,13 +439,13 @@ fun ProjectionSettingsTab(
     // each named by its file stem. Same shape and length as the finished list, so the picker's row
     // count and the positions a selection stores are right from the first frame.
     val unreadTranslationDisplays = remember(translationStack, storageDirectory) {
-        translationNames.map { BibleTranslationDisplay(code = it, title = it, portion = "") }
+        translationNames.map { TranslationChoiceDisplay(code = it, title = it, portion = "") }
     }
     // Reading a header is file I/O and has no business happening during composition. Kept null while
     // in flight -- and reset to null whenever the stack changes -- so a list read for the previous
     // stack is never shown against the current one, which would put the wrong number of rows in the
     // picker and misalign the positions a selection is stored as.
-    val readTranslationDisplays by produceState<List<BibleTranslationDisplay>?>(
+    val readTranslationDisplays by produceState<List<TranslationChoiceDisplay>?>(
         initialValue = null,
         translationStack, storageDirectory, otNtPortionLabel, ntPortionLabel, otPortionLabel,
     ) {
@@ -453,7 +461,7 @@ fun ProjectionSettingsTab(
                     summary?.hasOldTestament == true -> otPortionLabel
                     else -> ""
                 }
-                BibleTranslationDisplay(
+                TranslationChoiceDisplay(
                     code = code,
                     title = summary?.title?.takeIf { it.isNotBlank() } ?: code,
                     portion = portion,
@@ -462,7 +470,22 @@ fun ProjectionSettingsTab(
         }
     }
     val translationDisplays = readTranslationDisplays ?: unreadTranslationDisplays
-    val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
+    // The song's languages as pickable choices, in the order a song carries them. Named from the
+    // Song settings tab where the operator has given one a name, and positionally otherwise --
+    // "Language 1"/"Language 2" are the names these two have always had on this tab.
+    val songLanguageChoices = List(MAX_SONG_TRANSLATIONS) { position ->
+        val configured = settings.songSettings.translations.getOrNull(position - 1)?.label.orEmpty()
+        val fallback = when (position) {
+            0 -> lang1Label
+            1 -> lang2Label
+            else -> stringResource(Res.string.screen_lang_language_n, position + 1)
+        }
+        TranslationChoiceDisplay(
+            code = (position + 1).toString(),
+            title = configured.ifBlank { fallback },
+            portion = "",
+        )
+    }
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
@@ -501,7 +524,7 @@ fun ProjectionSettingsTab(
         contentGroup = contentGroup,
         backgroundGroup = backgroundGroup,
         displayModes = displayModes,
-        songLangModes = songLangModes,
+        songLanguageChoices = songLanguageChoices,
         translationDisplays = translationDisplays,
         translationNames = translationNames,
     )
@@ -514,7 +537,7 @@ fun ProjectionSettingsTab(
         contentGroup = contentGroup,
         backgroundGroup = backgroundGroup,
         displayModes = displayModes,
-        songLangModes = songLangModes,
+        songLanguageChoices = songLanguageChoices,
         translationDisplays = translationDisplays,
         translationNames = translationNames,
     )
@@ -528,7 +551,7 @@ fun ProjectionSettingsTab(
         contentGroup = contentGroup,
         backgroundGroup = backgroundGroup,
         displayModes = displayModes,
-        songLangModes = songLangModes,
+        songLanguageChoices = songLanguageChoices,
         translationDisplays = translationDisplays,
         translationNames = translationNames,
     )

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -191,7 +192,10 @@ class ProjectionSettingsTabAudioAndLabelsTest {
         // the chip is counted rather than matched uniquely. It carries a count instead of a mode
         // name, and with a single translation configured there is nothing to count.
         onAllNodesWithText("Bible").assertCountEquals(2)
-        onNodeWithText("Songs · Both").assertExists("and the Songs mode")
+        // Songs reads like the Bible chip now: the languages it shows, not a mode name. With every
+        // language on, that is all four of them.
+        onNodeWithText("Songs (Language 1, Language 2, Language 3, Language 4)")
+            .assertExists("and the Songs languages")
     }
 
     @Test
@@ -217,14 +221,18 @@ class ProjectionSettingsTabAudioAndLabelsTest {
     }
 
     @Test
-    fun `the Songs language dropdown offers every mode`() = projectionTab { _ ->
+    fun `the Songs language picker lists every language`() = projectionTab { _ ->
         gridButton(Grid.contentOutputs(row = 0)).performScrollTo().performClick()
         waitForIdle()
-        // Songs keeps its dropdown, and is now the only one in the dialog.
-        onAllNodesWithText("Both")[0].performClick()
+        // Songs now gets the same checklist the Bible has: a song may carry up to four languages
+        // and an output may want any subset of them, which the old single-choice dropdown could
+        // not express.
+        onNodeWithTag(TranslationPickerTags.SONG.trigger).performScrollTo().performClick()
         waitForIdle()
-        for (option in listOf("Off", "Language 1", "Language 2")) {
-            onNodeWithText(option).assertExists("the Songs dropdown must offer $option")
+        // The panel header is drawn uppercase, like every other section header in this dialog.
+        onNodeWithText("SONG LANGUAGES").assertExists("the open picker must name itself")
+        for (option in listOf("Language 1", "Language 2", "Language 3", "Language 4")) {
+            onNodeWithText(option).assertExists("the Songs picker must offer $option")
         }
     }
 

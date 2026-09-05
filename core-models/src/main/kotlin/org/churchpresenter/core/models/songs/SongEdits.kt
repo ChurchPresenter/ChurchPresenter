@@ -31,7 +31,7 @@ enum class SongField {
     fun set(song: SongItem, value: String): SongItem = when (this) {
         NUMBER -> song.copy(number = value.trim())
         TITLE -> song.copy(title = value.trim())
-        SECONDARY_TITLE -> song.copy(secondaryTitle = value.trim())
+        SECONDARY_TITLE -> song.withTranslation(0) { it.copy(title = value.trim()) }
         SONGBOOK -> song.copy(songbook = value.trim().trim('/'))
         AUTHOR -> song.copy(author = value.trim())
         COMPOSER -> song.copy(composer = value.trim())
@@ -77,7 +77,7 @@ class SongEdits(loaded: List<SongItem>) {
     /** The lyrics of the song in [sourceFile], which a grid does not show but an editor changes. */
     fun editLyrics(sourceFile: String, lyrics: List<String>, secondaryLyrics: List<String>) {
         val song = current[sourceFile] ?: return
-        current[sourceFile] = song.copy(lyrics = lyrics, secondaryLyrics = secondaryLyrics)
+        current[sourceFile] = song.copy(lyrics = lyrics).withTranslation(0) { it.copy(lyrics = secondaryLyrics) }
     }
 
     /**

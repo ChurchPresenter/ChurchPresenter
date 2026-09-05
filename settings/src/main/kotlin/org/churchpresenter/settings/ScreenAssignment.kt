@@ -46,6 +46,18 @@ data class ScreenAssignment(
      */
     val bibleTranslations: List<Int> = emptyList(),
     val songMode: String = Constants.SONG_LANG_BOTH,   // "off" | "primary" | "secondary" | "both"
+    /**
+     * Which of a song's languages this output shows, by position — `0` being the primary.
+     *
+     * Empty means "whatever [songMode] says", which is what every output written before songs had
+     * more than two languages holds, and what a new one holds until someone picks. That is the only
+     * reason [songMode] is still read: the two are not kept in step, the list simply wins when it
+     * has anything in it. [songLanguages] is the one place that resolves the pair, and nothing
+     * should be deciding it a second time.
+     *
+     * Shaped after [bibleTranslations] deliberately — the same question, the same answer.
+     */
+    val songTranslations: List<Int> = emptyList(),
     val showPictures: Boolean = true,
     val showMedia: Boolean = true,
     val showStreaming: Boolean = true,
@@ -155,6 +167,21 @@ data class ScreenAssignment(
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
+    /**
+     * The languages this output draws, in order, for a song carrying [available] of them.
+     *
+     * Positions the song does not have are dropped rather than drawn blank — an output configured
+     * for languages 1 and 3 shows one language when handed a monolingual song, not one language and
+     * two empty columns.
+     *
+     * Falls back to [songMode] while [songTranslations] is empty, which is what keeps every existing
+     * output presenting exactly as it did: "primary" is the first language, "secondary" the second,
+     * "both" everything the song has. Note "both" reaching past two is deliberate — an output left
+     * on the default should show a four-language song's four languages, not silently drop two.
+     */
+    fun songLanguages(available: Int): List<Int> =
+        songLanguageSelection(songMode, songTranslations, available)
+
     /** True if [displayMode] is either lower-third band orientation (horizontal or vertical). */
     val isLowerThird: Boolean
         get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL ||
@@ -197,4 +224,31 @@ data class ScreenAssignment(
      * advertised under a name of nothing but spaces is one an operator cannot pick out of a list.
      */
     fun ndiLabelOr(default: String): String = ndiName.trim().ifBlank { default }
+}
+
+/**
+ * Which of a song's [available] languages to draw, given a [songMode] and a [songTranslations] list.
+ *
+ * Free-standing because `SongPresenter` resolves the same question from what it was handed rather
+ * than from a [ScreenAssignment] — the preview and the offscreen outputs pass the two values
+ * straight in. One implementation, so an output and its preview can never disagree.
+ *
+ * [songTranslations] wins whenever it has anything in it; [songMode] is the fallback that keeps
+ * every output written before songs had more than two languages presenting exactly as it did.
+ */
+fun songLanguageSelection(songMode: String, songTranslations: List<Int>, available: Int): List<Int> {
+    if (songMode == Constants.SONG_LANG_OFF || available <= 0) return emptyList()
+    val chosen = when {
+        songTranslations.isNotEmpty() -> songTranslations
+        songMode == Constants.SONG_LANG_PRIMARY -> listOf(0)
+        songMode == Constants.SONG_LANG_SECONDARY -> listOf(1)
+        // "both" reaching past two is deliberate: an output left on the default should show a
+        // four-language song's four languages, not silently drop two of them.
+        else -> List(available) { it }
+    }
+    // A "secondary" output handed a monolingual song falls back to the primary rather than going
+    // blank -- `SongPresenter` has always done this (`mainSecondaryLines.ifEmpty { … }`), and a
+    // screen showing nothing because the song was never translated is a worse answer than one
+    // showing the words.
+    return chosen.filter { it in 0 until available }.distinct().ifEmpty { listOf(0) }
 }

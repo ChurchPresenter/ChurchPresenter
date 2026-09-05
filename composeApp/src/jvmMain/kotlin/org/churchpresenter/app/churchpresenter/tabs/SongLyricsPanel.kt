@@ -69,7 +69,6 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.viewmodel.songCreditLine
 import org.churchpresenter.app.churchpresenter.viewmodel.songTitleLine
@@ -409,10 +408,10 @@ internal fun RowScope.SongLyricsPanel(
                                 )
                             }
 
-                            // Lyrics panel always shows both — language filtering only applies to presenter
-                            val langDisplay = Constants.SONG_LANG_BOTH
-                            val showPrimary = langDisplay != Constants.SONG_LANG_SECONDARY
-                            val showSecondary = langDisplay != Constants.SONG_LANG_PRIMARY && section.secondaryLines.isNotEmpty()
+                            // The panel always shows every language the song carries — what an
+                            // output shows is that output's business, and the operator needs to see
+                            // all of it to know what is going where.
+                            val panelLanguages = section.allLanguageLines().filter { it.isNotEmpty() }
 
                             val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
                                 onSectionSelected(sectionIndex)
@@ -431,19 +430,22 @@ internal fun RowScope.SongLyricsPanel(
                                 onPresenting(Presenting.LYRICS)
                             } else null
 
-                            if (showPrimary && showSecondary) {
+                            if (panelLanguages.size > 1) {
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
-                                    }
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                    panelLanguages.forEach { languageLines ->
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            LyricLines(
+                                                languageLines, textColor, activeLineIndex,
+                                                lineClickHandler, lineDoubleClickHandler,
+                                            )
+                                        }
                                     }
                                 }
-                            } else if (showSecondary) {
-                                LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
                             } else {
-                                LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                LyricLines(
+                                    panelLanguages.firstOrNull() ?: section.lines,
+                                    textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler,
+                                )
                             }
                         }
                         // No separator between sections: each one opens with its own labelled

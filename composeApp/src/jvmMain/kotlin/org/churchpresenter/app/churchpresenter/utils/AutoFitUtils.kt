@@ -192,12 +192,10 @@ private fun sectionFits(
     effectiveHeight: Int,
     withEndIndicator: Boolean,
 ): Boolean {
-    // Check both primary and secondary lines so bilingual text also fits
-    val lineSets = if (section.secondaryLines.isNotEmpty()) {
-        listOf(section.lines, section.secondaryLines)
-    } else {
-        listOf(section.lines)
-    }
+    // Every language's lines, so the size that is settled on fits the longest line of whichever
+    // language has it -- not just of the first two. `allLanguageLines` puts the primary first and
+    // then each translation in order; the empty ones are dropped on the next line.
+    val lineSets = section.allLanguageLines()
     return lineSets.filter { it.isNotEmpty() }.all { lines ->
         val measured = lines.map {
             textMeasurer.measure(text = it, style = style, constraints = constraints, density = density).size

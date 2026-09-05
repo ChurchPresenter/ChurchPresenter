@@ -106,8 +106,8 @@ internal fun BrowserSourceOutputsCard(
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
     displayModes: List<Pair<String, String>>,
-    songLangModes: List<Pair<String, String>>,
-    translationDisplays: List<BibleTranslationDisplay>,
+    songLanguageChoices: List<TranslationChoiceDisplay>,
+    translationDisplays: List<TranslationChoiceDisplay>,
     translationNames: List<String>,
 ) {
     val proj = settings.projectionSettings
@@ -491,7 +491,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                 songsLabel = songsLabel,
                                 translationNames = translationNames,
                                 translationDisplays = translationDisplays,
-                                songLangModes = songLangModes,
+                                songLanguageChoices = songLanguageChoices,
                                 webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
                                 webSnapshotTooltip = stringResource(Res.string.browser_source_website_snapshot_tooltip),
                                 isBrowserSource = true,

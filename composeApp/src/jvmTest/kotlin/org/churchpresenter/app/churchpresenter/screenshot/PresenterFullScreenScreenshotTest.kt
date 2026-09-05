@@ -27,6 +27,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -918,7 +919,7 @@ class PresenterFullScreenScreenshotTest {
         songNumber = 42,
         type = type,
         lines = lines,
-        secondaryLines = secondary,
+        translations = listOf(SectionTranslation(lines = secondary)),
         chordLines = chords,
     )
 

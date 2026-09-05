@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
@@ -28,7 +29,7 @@ class SongPresenterLayoutRenderTest {
 
     private fun section(
         lines: List<String> = listOf("Amazing grace how sweet the sound"),
-        secondaryLines: List<String> = emptyList(),
+        translations: List<SectionTranslation> = emptyList(),
         title: String = "Amazing Grace",
         number: Int = 42,
         header: String = "[Verse 1]",
@@ -38,7 +39,7 @@ class SongPresenterLayoutRenderTest {
         songNumber = number,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
-        secondaryLines = secondaryLines,
+        translations = translations,
     )
 
     private fun present(
@@ -182,7 +183,7 @@ class SongPresenterLayoutRenderTest {
         val settings = AppSettings(songSettings = SongSettings(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
         val first = section(
             lines = listOf("first line", "second line"),
-            secondaryLines = listOf("first other", "second other"),
+            translations = listOf(SectionTranslation(lines = listOf("first other", "second other"))),
         )
         val second = section(lines = listOf("third line"), header = "[Verse 2]")
         present(
@@ -219,7 +220,7 @@ class SongPresenterLayoutRenderTest {
         val settings = AppSettings(songSettings = SongSettings(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE))
         val bilingual = section(
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Chudnaya blagodat"),
+            translations = listOf(SectionTranslation(lines = listOf("Chudnaya blagodat"))),
         )
         present(settings, lyricSection = bilingual, allSections = listOf(bilingual)) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
@@ -232,7 +233,7 @@ class SongPresenterLayoutRenderTest {
         val settings = AppSettings(songSettings = SongSettings(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM))
         val bilingual = section(
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Chudnaya blagodat"),
+            translations = listOf(SectionTranslation(lines = listOf("Chudnaya blagodat"))),
         )
         present(settings, lyricSection = bilingual, allSections = listOf(bilingual), isLowerThird = true) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
@@ -321,7 +322,7 @@ class SongPresenterLayoutRenderTest {
         )
         val bilingual = section(
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Удивительная благодать"),
+            translations = listOf(SectionTranslation(lines = listOf("Удивительная благодать"))),
         )
 
         present(settings, lyricSection = bilingual, allSections = listOf(bilingual)) {
@@ -335,7 +336,7 @@ class SongPresenterLayoutRenderTest {
         val first = section()
         val second = section(
             lines = listOf("a considerably longer second section line that needs more room"),
-            secondaryLines = listOf("вторая строка"),
+            translations = listOf(SectionTranslation(lines = listOf("вторая строка"))),
             header = "[Verse 2]",
         )
 

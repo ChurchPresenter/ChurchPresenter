@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
@@ -36,7 +37,7 @@ class SongPresenterModeRenderTest {
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines.toList(),
-        secondaryLines = emptyList(),
+        translations = listOf(SectionTranslation(lines = emptyList())),
     )
 
     @Test
@@ -149,7 +150,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = emptyList(),
-            secondaryLines = emptyList(),
+            translations = listOf(SectionTranslation(lines = emptyList())),
         )
         setContent {
             Box(screen) {
@@ -239,7 +240,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Удивительная благодать"),
+            translations = listOf(SectionTranslation(lines = listOf("Удивительная благодать"))),
         )
         setContent {
             Box(screen) {
@@ -263,7 +264,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Удивительная благодать"),
+            translations = listOf(SectionTranslation(lines = listOf("Удивительная благодать"))),
         )
         setContent {
             Box(screen) {
@@ -287,7 +288,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Удивительная благодать"),
+            translations = listOf(SectionTranslation(lines = listOf("Удивительная благодать"))),
         )
         val next = LyricSection(
             header = "[Verse 2]",
@@ -295,7 +296,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = listOf("That saved a wretch like me"),
-            secondaryLines = listOf("Спасён я ею был"),
+            translations = listOf(SectionTranslation(lines = listOf("Спасён я ею был"))),
         )
         setContent {
             Box(screen) {
@@ -321,7 +322,7 @@ class SongPresenterModeRenderTest {
             songNumber = 42,
             type = Constants.SECTION_TYPE_VERSE,
             lines = listOf("Amazing grace how sweet the sound"),
-            secondaryLines = listOf("Удивительная благодать"),
+            translations = listOf(SectionTranslation(lines = listOf("Удивительная благодать"))),
         )
         setContent {
             Box(screen) {

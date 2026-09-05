@@ -140,6 +140,8 @@ fun SongSettingsTab(
     val availableFonts = rememberSystemFonts()
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
+    // Which language the style controls are pointed at; 0 is the primary.
+    var translation by remember { mutableStateOf(0) }
     var showLookAhead by remember { mutableStateOf(false) }
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
@@ -184,6 +186,8 @@ fun SongSettingsTab(
                     onTargetChange = { target = it },
                     element = element,
                     onElementChange = { element = it },
+                    translation = translation,
+                    onTranslationChange = { translation = it },
                     showLookAhead = showLookAhead,
                     onShowLookAheadChange = { showLookAhead = it },
                     availableFonts = availableFonts,
@@ -465,6 +469,8 @@ private fun SongStylePane(
     onTargetChange: (SongStyleTarget) -> Unit,
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
+    translation: Int,
+    onTranslationChange: (Int) -> Unit,
     showLookAhead: Boolean,
     onShowLookAheadChange: (Boolean) -> Unit,
     availableFonts: List<String>,
@@ -540,6 +546,8 @@ private fun SongStylePane(
             element = element,
             onElementChange = onElementChange,
             target = target,
+            translation = translation,
+            onTranslationChange = onTranslationChange,
             availableFonts = availableFonts,
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
