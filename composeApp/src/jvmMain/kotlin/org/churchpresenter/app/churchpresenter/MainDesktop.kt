@@ -742,7 +742,11 @@ fun MainDesktop(
         val folder = pictureFolder ?: return@LaunchedEffect
         if (pictureImages.isEmpty()) return@LaunchedEffect
         val folderId = stableFileId(folder)
-        currentOnPicturesLoaded?.invoke(folderId, folder.name, folder.absolutePath, pictureImages.toList())
+        // Through the ViewModel's own lock: walking the state list directly races the download
+        // coroutine and the folder watcher, and the CME lands on the event thread.
+        currentOnPicturesLoaded?.invoke(
+            folderId, folder.name, folder.absolutePath, picturesViewModel.imagesSnapshot(),
+        )
     }
 
     // Load picture folder when a picture schedule item is selected (works even before Pictures tab is composed)

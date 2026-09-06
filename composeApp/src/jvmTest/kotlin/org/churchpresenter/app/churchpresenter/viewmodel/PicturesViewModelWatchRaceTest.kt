@@ -139,4 +139,35 @@ class PicturesViewModelWatchRaceTest {
         assertEquals(false, removed, "a cancelled watcher reports no change")
         assertTrue(file in viewModel.images, "and leaves the file in the list")
     }
+
+    /**
+     * A whole-list read is a copy, taken under the same lock every write takes.
+     *
+     * Sentry CHURCH-PRESENTER-DESKTOP-67: `MainDesktop` walked `images` directly to report the
+     * folder to the companion server. Every *write* took the lock, that read did not, and taking a
+     * `SnapshotStateList`'s iterator while another thread mutates it throws
+     * `ConcurrentModificationException` — on the event thread, where it is fatal. A single-index
+     * read cannot fail that way, which is why only the whole-list read moved behind
+     * [PicturesViewModel.imagesSnapshot].
+     *
+     * **The interleaving itself is not covered.** The two tests above can be driven into their race
+     * from the public API; this one cannot — several hundred rounds of reading against a lane doing
+     * nothing but clearing and refilling never reproduced it, so a stress test here would pass just
+     * as happily on the unlocked version and would be worse than no test at all. What is pinned is
+     * the property that makes the fix work: the result is a detached copy, so nothing the caller
+     * does with it can be walking live state.
+     */
+    @Test
+    fun `a whole-list read hands back a detached copy`() {
+        val viewModel = vm()
+        val files = (0 until 4).map { image("photo%02d.png".format(it)) }
+        viewModel.loadImagesFromFolder(folder)
+
+        val snapshot = viewModel.imagesSnapshot()
+        assertEquals(files.size, snapshot.size, "the copy is what the list held when it was taken")
+
+        viewModel.clearImages()
+        assertTrue(viewModel.images.isEmpty(), "the list itself emptied")
+        assertEquals(files.size, snapshot.size, "and the copy did not follow it")
+    }
 }
