@@ -93,8 +93,13 @@ class NdiRuntimeHost(
     }
 
     /**
-     * Takes the runtime down. The caller is responsible for having closed its senders, finders and
-     * receivers first.
+     * Takes the runtime down. The caller is responsible for having closed **and quiesced** its
+     * senders, finders and receivers first.
+     *
+     * Quiesced, not merely closed: a finder with a look still parked inside it is not closed, and
+     * destroying the runtime under one is the same use-after-free `NdiSourceDirectory` defends
+     * against. Nothing calls this in the app today — the shutdown hook stops renderers only — so
+     * there is no interlock here; a real caller would need one.
      */
     fun shutdown() {
         library?.destroy()

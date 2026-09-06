@@ -101,26 +101,31 @@ internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource
         return
     }
 
-    val scope = rememberCoroutineScope()
     var discovered by remember { mutableStateOf<List<NdiSourceInfo>>(emptyList()) }
     var looked by remember { mutableStateOf(false) }
+    // The panel looks the moment it opens, so it starts out busy — otherwise Refresh is live during
+    // the first second, which is exactly when an impatient operator reaches for it.
+    var looking by remember { mutableStateOf(true) }
+    var looks by remember { mutableStateOf(0) }
 
     DisposableEffect(Unit) {
         SharedNdiSources.acquire()
         onDispose { SharedNdiSources.release() }
     }
-    LaunchedEffect(Unit) {
+    // One effect for the opening look and every refresh, so the two cannot drift apart — and so
+    // both are cancelled with the panel rather than outliving it on a scope of their own.
+    LaunchedEffect(looks) {
+        looking = true
         discovered = withContext(Dispatchers.IO) { SharedNdiSources.sources() }
         looked = true
+        looking = false
     }
 
     Button(
-        onClick = {
-            scope.launch {
-                discovered = withContext(Dispatchers.IO) { SharedNdiSources.sources() }
-                looked = true
-            }
-        },
+        onClick = { looks++ },
+        // Looks are serialised on the one finder, so a second press only queues another second of
+        // waiting behind the first, with nothing on screen to say anything happened.
+        enabled = !looking,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
     ) {

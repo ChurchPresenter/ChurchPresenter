@@ -3,6 +3,11 @@ package org.churchpresenter.app.churchpresenter.composables
 import org.churchpresenter.ndi.FakeNdiLibrary
 import org.churchpresenter.ndi.NdiFinder
 import org.churchpresenter.ndi.NdiSourceInfo
+import java.util.Collections
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -148,6 +153,108 @@ class NdiSourceDirectoryTest {
 
         assertFalse(directory.isRunning)
         assertEquals(emptyList(), directory.sources())
+        directory.release()
+    }
+
+    // ── The finder's lifetime under a live look ─────────────────────────────────
+
+    /**
+     * The crash this class exists to stop: Sentry CHURCH-PRESENTER-DESKTOP-66.
+     *
+     * A look blocks inside the runtime for up to a second and JNA cannot be interrupted, so the
+     * composition disposing a properties panel could destroy the handle under it -- a fatal native
+     * fault on Windows, not an exception. The latch stands in for that second.
+     */
+    @Test
+    fun `a finder is not destroyed while a look is still inside it`() {
+        val lib = FakeNdiLibrary().apply { discoverable += CAMERA }
+        val directory = directory(lib)
+        val inside = CountDownLatch(1)
+        val letGo = CountDownLatch(1)
+        lib.duringFindSources = {
+            inside.countDown()
+            assertTrue(letGo.await(1, TimeUnit.SECONDS), "the test never released the look")
+        }
+        directory.acquire()
+
+        val look = thread { directory.sources() }
+        assertTrue(inside.await(1, TimeUnit.SECONDS), "the look never reached the runtime")
+
+        directory.release()
+        assertFalse(directory.isRunning, "the panel let go, so no new look may start")
+        assertTrue(
+            lib.findersDestroyed.isEmpty(),
+            "destroying a finder a look is parked inside is the native crash this exists to stop",
+        )
+
+        letGo.countDown()
+        look.join(1_000)
+        assertFalse(look.isAlive, "the look never came back")
+        assertEquals(lib.findersCreated, lib.findersDestroyed, "the last look out closes the finder")
+    }
+
+    /** The reason the lock and the count belong to the finder rather than to the directory. */
+    @Test
+    fun `a look inside a retired finder never reaches the one that replaced it`() {
+        val lib = FakeNdiLibrary().apply { discoverable += CAMERA }
+        val directory = directory(lib)
+        val inside = CountDownLatch(1)
+        val letGo = CountDownLatch(1)
+        lib.duringFindSources = {
+            inside.countDown()
+            assertTrue(letGo.await(1, TimeUnit.SECONDS), "the test never released the look")
+        }
+        directory.acquire()
+        val look = thread { directory.sources() }
+        assertTrue(inside.await(1, TimeUnit.SECONDS), "the look never reached the runtime")
+
+        // Another panel opens before the old look has come back.
+        directory.release()
+        directory.acquire()
+        assertEquals(2, lib.findersCreated.size, "the second panel gets a finder of its own")
+        assertTrue(lib.findersDestroyed.isEmpty(), "the live finder is not the retired one")
+
+        letGo.countDown()
+        look.join(1_000)
+        assertFalse(look.isAlive, "the look never came back")
+        assertEquals(
+            listOf(lib.findersCreated.first()),
+            lib.findersDestroyed,
+            "the retired finder, exactly once -- and never the one now answering",
+        )
+
+        directory.release()
+        assertEquals(lib.findersCreated, lib.findersDestroyed, "and both are closed in the end")
+    }
+
+    /**
+     * One look at a time through one finder.
+     *
+     * The runtime owns the array it hands back until the next call on the same finder, so two looks
+     * overlapping would leave the first reading what the second had already replaced.
+     */
+    @Test
+    fun `two panels looking at once do not enter the finder together`() {
+        val lib = FakeNdiLibrary().apply { discoverable += CAMERA }
+        val directory = directory(lib)
+        val entered = AtomicInteger()
+        val order = Collections.synchronizedList(mutableListOf<Int>())
+        val second = CountDownLatch(1)
+        lib.duringFindSources = {
+            val n = entered.incrementAndGet()
+            order += n
+            // The first look waits for a second to arrive. Serialised, none can, and it carries on
+            // after the bound; unserialised, the second walks straight in and the order records it.
+            if (n == 1) second.await(200, TimeUnit.MILLISECONDS) else second.countDown()
+            order += -n
+        }
+        directory.acquire()
+
+        val looks = listOf(thread { directory.sources() }, thread { directory.sources() })
+        looks.forEach { it.join(1_000) }
+        looks.forEach { assertFalse(it.isAlive, "a look never came back") }
+
+        assertEquals(listOf(1, -1, 2, -2), order.toList(), "one look at a time through one finder")
         directory.release()
     }
 }
