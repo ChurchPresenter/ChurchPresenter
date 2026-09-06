@@ -285,4 +285,44 @@ class InstallHelpersTest {
         assertFalse(isEnvironment(deep), "a cause buried past the bound is not searched for")
     }
 
+    // ── Which stalls are worth reporting ────────────────────────────────────────
+
+    /**
+     * A stall that never received a byte is the church's line, not this code.
+     *
+     * Sentry CHURCH-PRESENTER-DESKTOP-63 was exactly that shape — `bytes_written=0`, cause a
+     * `SocketTimeoutException` against ebible.org, which [isOperatorEnvironment] already rules out
+     * everywhere else. The user is separately told the download kept stopping and given the
+     * dialog's only Retry button, so the event added nothing, and it fires once per attempt across
+     * three catalogue sources.
+     */
+    @Test
+    fun `a stall that never moved is not worth reporting`() {
+        val stalled = BibleInstallSupport.DownloadStalledException(
+            attempts = 3,
+            bytesWritten = 0,
+            cause = SocketTimeoutException("timed out"),
+        )
+        with(BibleInstallSupport) {
+            assertFalse(stalled.isWorthReporting(), "never connecting is the operator's network")
+        }
+    }
+
+    /**
+     * A stall that moved and then gave up is the case the reporting was built for.
+     *
+     * The link works, so resuming should have finished it — that is the half that can be ours, and
+     * it is the distinction the original change set out to capture.
+     */
+    @Test
+    fun `a stall that made progress is still reported`() {
+        val stalled = BibleInstallSupport.DownloadStalledException(
+            attempts = 3,
+            bytesWritten = 4_096,
+            cause = SocketTimeoutException("timed out"),
+        )
+        with(BibleInstallSupport) {
+            assertTrue(stalled.isWorthReporting(), "a download that moved and stopped may be ours")
+        }
+    }
 }

@@ -30,6 +30,7 @@ import java.security.MessageDigest
 import java.util.zip.ZipFile
 import javax.net.ssl.SSLException
 import kotlin.random.Random
+import io.sentry.SentryLevel
 import org.churchpresenter.diagnostics.CrashReporter
 
 private const val JITTER_MIN = 0.8
@@ -68,6 +69,46 @@ object BibleInstallSupport {
     internal fun <T> reported(message: String, e: Throwable, tags: Map<String, String>, outcome: T): T {
         if (!e.isOperatorEnvironment()) {
             CrashReporter.reportWarning(message, throwable = e, tags = tags)
+        }
+        return outcome
+    }
+
+    /**
+     * Whether a stall says anything about this code, as opposed to about the church's line.
+     *
+     * A stall that never received a byte is the connection, not the download: the same
+     * `SocketTimeoutException` [isOperatorEnvironment] already rules out everywhere else, and the
+     * user is separately told "the download kept stopping" and given the dialog's only Retry
+     * button. Reporting it as well says nothing they are not already being told, and it fires once
+     * per attempt across three catalogue sources -- one church on a bad line becomes a wall of
+     * identical issues.
+     *
+     * A stall that *did* move and then gave up is the case the reporting was built for, and the one
+     * that can be ours: the link works, so resuming should have finished it. That still reports.
+     */
+    internal fun DownloadStalledException.isWorthReporting(): Boolean = bytesWritten > 0
+
+    /**
+     * Reports a stalled download only when it got far enough to be about this code.
+     *
+     * [message] must stay constant -- Sentry groups on it, and what varies belongs in [tags]. The
+     * silent case still leaves the fact behind, so a session that reports something else carries it.
+     */
+    internal fun <T> reportedStall(
+        message: String,
+        e: DownloadStalledException,
+        tags: Map<String, String>,
+        outcome: T,
+    ): T {
+        if (e.isWorthReporting()) {
+            CrashReporter.reportWarning(message, throwable = e, tags = tags)
+        } else {
+            CrashReporter.setTag("bible_install.stalled", "true")
+            CrashReporter.breadcrumb(
+                "$message — no bytes arrived in ${e.attempts} attempts",
+                category = "bible_install",
+                level = SentryLevel.WARNING,
+            )
         }
         return outcome
     }
