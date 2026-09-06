@@ -54,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.content_outputs_quick_sele
 import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
 import churchpresenter.composeapp.generated.resources.content_outputs_section_content
 import churchpresenter.composeapp.generated.resources.content_outputs_select_all
+import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -116,12 +117,21 @@ internal fun ContentOutputsSectionHeader(text: String, modifier: Modifier = Modi
  * Bible/Songs language mode) is drawn as a chip inside a 16:9 screen, so the operator can read the
  * result at a glance instead of scanning a long checkbox list.
  */
+/**
+ * Cap on the monitor mock's screen height.
+ *
+ * The mock sits at a fixed 280dp width beside a scrollable column capped at 520dp inside an 840dp
+ * dialog, so an uncapped portrait output would be the thing that decides how tall the dialog is.
+ */
+private val CONTENT_PREVIEW_MAX_SCREEN = 400.dp
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ContentOutputsMonitorPreview(
     modifier: Modifier,
     screenLabel: String,
     assignment: ScreenAssignment,
+    outputSize: OutputSize,
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
     bibleLabel: String,
@@ -164,9 +174,11 @@ internal fun ContentOutputsMonitorPreview(
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                 .padding(6.dp)
         ) {
-            // 16:9 is the MINIMUM height — with many content types enabled the chips need more
-            // room, and a hard aspectRatio would clip them out of sight.
-            val screenMinHeight = maxWidth * 9f / 16f
+            // The output's own shape is the MINIMUM height — with many content types enabled the
+            // chips need more room, and a hard aspectRatio would clip them out of sight. Capped so
+            // a portrait output cannot push this column past the scrollable half beside it and grow
+            // the dialog.
+            val screenMinHeight = minOf(maxWidth / outputSize.aspectRatio, CONTENT_PREVIEW_MAX_SCREEN)
             // Screen
             Column(
                 modifier = Modifier
@@ -268,6 +280,7 @@ internal fun ContentOutputsDialog(
     title: String,
     screenLabel: String,
     assignment: ScreenAssignment,
+    outputSize: OutputSize,
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
     bibleLabel: String,
@@ -437,6 +450,7 @@ internal fun ContentOutputsDialog(
                 modifier = Modifier.width(280.dp),
                 screenLabel = screenLabel,
                 assignment = assignment,
+                outputSize = outputSize,
                 contentGroup = contentGroup,
                 backgroundGroup = backgroundGroup,
                 bibleLabel = bibleLabel,

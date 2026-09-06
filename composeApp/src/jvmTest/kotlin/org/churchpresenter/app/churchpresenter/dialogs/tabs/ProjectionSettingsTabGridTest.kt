@@ -217,7 +217,7 @@ class ProjectionSettingsTabGridTest {
 
             assertEquals(3, get().projectionSettings.devWindowCount, "the count must be stored")
             onNodeWithText("Presenter windows: 3").assertExists("and the tab must report three windows")
-            gridButtons().assertCountEquals(1 + 3 * Grid.CONTROLS_PER_ROW + Grid.trailing)
+            gridButtons().assertCountEquals(Grid.gridButtonCount(rows = 3, devFallback = true) + Grid.trailing)
             assertEquals(3, get().projectionSettings.screenAssignments.size, "with an assignment each")
         }
     }

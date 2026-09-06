@@ -22,6 +22,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
+import org.churchpresenter.app.churchpresenter.utils.FallbackOutputSize
+import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 
 /**
@@ -44,10 +47,6 @@ private const val GUIDE_DASH_PX = 4f
 private const val BADGE_ALPHA = 0.55f
 private const val BADGE_TEXT_ALPHA = 0.75f
 
-/** Fallback geometry for an output that has not reported its own bounds. */
-private const val DEFAULT_OUTPUT_WIDTH = 1920
-private const val DEFAULT_OUTPUT_HEIGHT = 1080
-
 /**
  * How tall either preview is allowed to get.
  *
@@ -68,10 +67,13 @@ internal val SETTINGS_PREVIEW_MAX_HEIGHT = 260.dp
  */
 const val SETTINGS_PREVIEW_SCALED_TAG = "settingsPreviewScaledContent"
 
-/** The resolution the styling is being designed against, in the output's own pixels. */
-internal data class PreviewOutputSize(val width: Int, val height: Int) {
-    val aspectRatio: Float get() = width.toFloat() / height.toFloat()
-}
+/**
+ * The resolution the styling is being designed against, in the output's own pixels.
+ *
+ * An alias rather than a type of its own: a preview and the output it stands for must agree on how
+ * big that output is, so both go through [OutputSize].
+ */
+internal typealias PreviewOutputSize = OutputSize
 
 /**
  * The screen this styling actually lands on.
@@ -83,11 +85,25 @@ internal data class PreviewOutputSize(val width: Int, val height: Int) {
 internal fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
     val assigned = settings.projectionSettings.screenAssignments
         .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
-    return if (assigned != null) {
-        PreviewOutputSize(assigned.targetBoundsW, assigned.targetBoundsH)
-    } else {
-        PreviewOutputSize(DEFAULT_OUTPUT_WIDTH, DEFAULT_OUTPUT_HEIGHT)
-    }
+    return if (assigned != null) OutputSize(assigned.targetBoundsW, assigned.targetBoundsH)
+    else FallbackOutputSize
+}
+
+/**
+ * The screen the **stage monitor** lands on.
+ *
+ * Deliberately not [previewOutputSize]: that returns the first assigned output, which is normally
+ * the congregation projector and a different shape from the confidence display on the platform.
+ * Previewing the stage layout against the projector's shape is exactly the confusion this exists to
+ * end, so when no stage monitor is assigned it falls back to 1920x1080 rather than borrowing the
+ * projector's.
+ */
+internal fun stageMonitorPreviewOutputSize(settings: AppSettings): PreviewOutputSize {
+    val assignments = settings.projectionSettings.screenAssignments
+    val stage = stageMonitorScreenIndices(assignments)
+        .mapNotNull(assignments::getOrNull)
+        .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
+    return stage?.let { OutputSize(it.targetBoundsW, it.targetBoundsH) } ?: FallbackOutputSize
 }
 
 /**

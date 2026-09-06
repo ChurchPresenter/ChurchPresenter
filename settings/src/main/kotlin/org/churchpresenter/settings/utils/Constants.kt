@@ -195,6 +195,23 @@ object Constants {
     const val DISPLAY_MODE_LOWER_THIRD_VERTICAL = "lower_third_vertical"
     const val DISPLAY_MODE_STAGE_MONITOR = "stage_monitor"
 
+    // ── Preview output selection ────────────────────────────────────────────────────────────────
+    // Which output a content tab previews. Stored in ProjectionSettings.previewOutputSelections,
+    // keyed by tab, valued by an output key that says which of the three output lists an entry
+    // came from as well as where in it -- index alone would confuse a Browser Source with a screen.
+
+    const val PREVIEW_TAB_MEDIA = "media"
+    const val PREVIEW_TAB_ANNOUNCEMENTS = "announcements"
+    const val PREVIEW_TAB_LOWER_THIRD = "lowerThird"
+    const val PREVIEW_TAB_WEB = "web"
+
+    const val PREVIEW_OUTPUT_SCREEN = "screen"
+    const val PREVIEW_OUTPUT_BROWSER_SOURCE = "browserSource"
+    const val PREVIEW_OUTPUT_NDI = "ndi"
+
+    /** The stored identity of one output: which list it came from, and its index in that list. */
+    fun previewOutputKey(kind: String, index: Int): String = "$kind:$index"
+
     // Screen assignment target types
     const val TARGET_TYPE_SCREEN = "screen"
     const val TARGET_TYPE_DECKLINK = "decklink"

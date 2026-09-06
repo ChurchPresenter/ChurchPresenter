@@ -91,8 +91,10 @@ import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -149,6 +151,7 @@ fun LivePreviewPanel(
             SingleDisplayPreview(
                 screenIndex = i,
                 screenAssignment = screenAssignment,
+                outputKind = OutputKind.SCREEN,
                 presenterManager = presenterManager,
                 appSettings = appSettings,
                 modifier = Modifier.fillMaxWidth(),
@@ -170,6 +173,7 @@ fun LivePreviewPanel(
             SingleDisplayPreview(
                 screenIndex = i,
                 screenAssignment = proj.browserSourceOutputs[i],
+                outputKind = OutputKind.BROWSER_SOURCE,
                 presenterManager = presenterManager,
                 appSettings = appSettings,
                 modifier = Modifier.fillMaxWidth(),
@@ -193,6 +197,7 @@ fun LivePreviewPanel(
             SingleDisplayPreview(
                 screenIndex = i,
                 screenAssignment = output,
+                outputKind = OutputKind.NDI,
                 presenterManager = presenterManager,
                 appSettings = appSettings,
                 modifier = Modifier.fillMaxWidth(),
@@ -227,6 +232,7 @@ fun LivePreviewPanel(
 private fun SingleDisplayPreview(
     screenIndex: Int,
     screenAssignment: ScreenAssignment,
+    outputKind: OutputKind,
     presenterManager: PresenterManager,
     appSettings: AppSettings,
     modifier: Modifier = Modifier,
@@ -287,20 +293,12 @@ private fun SingleDisplayPreview(
     val showsBackground = showsOutputBackground(screenAssignment)
 
     // Determine if this screen shows the current content
-    val showsContent = when (effectiveMode) {
-        Presenting.BIBLE -> screenAssignment.showBible
-        Presenting.LYRICS -> screenAssignment.showSongs
-        Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
-        Presenting.MEDIA -> screenAssignment.showMedia
-        Presenting.LOWER_THIRD -> screenAssignment.showStreaming
-        Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
-        Presenting.WEBSITE -> screenAssignment.showWebsite
-        Presenting.CANVAS -> screenAssignment.showCanvas
-        Presenting.QA -> screenAssignment.showQA
-        Presenting.STT -> screenAssignment.showSTT
-        Presenting.DICTIONARY -> screenAssignment.showDictionary
-        Presenting.NONE -> false
-    }
+    val showsContent = showsContentFor(effectiveMode, screenAssignment)
+
+    // This output's own size. Every preview used to take the first non-primary monitor's shape, so
+    // a booth running a 4:3 foyer TV beside a 16:9 projector -- or any Browser Source or NDI output
+    // configured to something else -- saw N previews that were all the wrong one of them.
+    val outputSize = outputSizeOf(screenAssignment, outputKind)
 
     val isLive = effectiveMode != Presenting.NONE && showsContent
     val borderColor by animateColorAsState(
@@ -341,7 +339,7 @@ private fun SingleDisplayPreview(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(presenterAspectRatio())
+                .aspectRatio(outputSize.aspectRatio)
                 .clip(RoundedCornerShape(6.dp))
                 .border(1.dp, borderColor, RoundedCornerShape(6.dp))
         ) {
@@ -349,7 +347,7 @@ private fun SingleDisplayPreview(
 
         // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
         if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
-            ScaledPresenterContent {
+            ScaledPresenterContent(output = outputSize) {
                 StageMonitorScreen(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
@@ -377,7 +375,7 @@ private fun SingleDisplayPreview(
         // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
         // so WEBSITE is handled separately below at native size.
         if (effectiveMode != Presenting.WEBSITE) {
-            ScaledPresenterContent {
+            ScaledPresenterContent(output = outputSize) {
                 PresenterScreen(
                     appSettings = outputSettings,
                     outputRole = primaryRole,
@@ -740,20 +738,23 @@ private fun MediaPreviewControls(
 }
 
 /**
- * Renders [content] at a fixed 1920×1080 logical size and scales it down
- * to fill whatever space its parent allocates — keeping all proportions intact.
+ * Renders [content] at [output]'s own logical size and scales it down to fill whatever space its
+ * parent allocates — keeping all proportions intact.
+ *
+ * The size must be the same one the surrounding frame is shaped by, or the content is measured
+ * against one screen and framed against another.
  */
 @Composable
 private fun ScaledPresenterContent(
+    output: OutputSize,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .layout { measurable, constraints ->
-                val screen = presenterScreenBounds()
-                val presenterWidth = screen.width
-                val presenterHeight = screen.height
+                val presenterWidth = output.width
+                val presenterHeight = output.height
 
                 val scaleX = constraints.maxWidth.toFloat() / presenterWidth
                 val scaleY = constraints.maxHeight.toFloat() / presenterHeight

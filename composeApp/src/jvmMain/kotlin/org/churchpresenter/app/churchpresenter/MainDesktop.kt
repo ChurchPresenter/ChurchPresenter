@@ -104,6 +104,7 @@ import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
@@ -1585,6 +1586,7 @@ fun MainDesktop(
                             Tabs.MEDIA -> MediaTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
@@ -1937,6 +1939,9 @@ private fun PreviewSidebar(
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
+                // A quick background is a full-screen background: its tile is a picture of the
+                // output, so it is that output's shape.
+                tileAspect = previewOutputSize(appSettings).aspectRatio,
                 activeId = activeQuickBackground?.id,
                 expanded = appSettings.quickBackgroundsExpanded,
                 onExpandedChange = { open ->

@@ -68,6 +68,7 @@ private const val TRAY_COLUMNS = 3
 @Composable
 internal fun QuickBackgroundTray(
     backgrounds: List<QuickBackground>,
+    tileAspect: Float,
     activeId: String?,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
@@ -88,7 +89,7 @@ internal fun QuickBackgroundTray(
         )
         if (expanded) {
             Spacer(Modifier.height(8.dp))
-            TrayGrid(slots = slots, activeId = activeId, onPick = onPick)
+            TrayGrid(tileAspect = tileAspect, slots = slots, activeId = activeId, onPick = onPick)
             Spacer(Modifier.height(8.dp))
             TrayHint()
         }
@@ -181,7 +182,12 @@ private fun TrayHeader(
 
 /** The open tray: every slot as a tile, [TRAY_COLUMNS] to a row. */
 @Composable
-private fun TrayGrid(slots: List<QuickBackground>, activeId: String?, onPick: (QuickBackground?) -> Unit) {
+private fun TrayGrid(
+    tileAspect: Float,
+    slots: List<QuickBackground>,
+    activeId: String?,
+    onPick: (QuickBackground?) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         slots.chunked(TRAY_COLUMNS).forEachIndexed { rowIndex, row ->
             Row(
@@ -191,6 +197,7 @@ private fun TrayGrid(slots: List<QuickBackground>, activeId: String?, onPick: (Q
                 row.forEachIndexed { columnIndex, entry ->
                     QuickBackgroundTile(
                         entry = entry,
+                        tileAspect = tileAspect,
                         slot = rowIndex * TRAY_COLUMNS + columnIndex + 1,
                         active = entry.id == activeId,
                         onPick = { onPick(entry) },
@@ -230,6 +237,7 @@ private fun TrayHint() {
 @Composable
 private fun QuickBackgroundTile(
     entry: QuickBackground,
+    tileAspect: Float,
     slot: Int,
     active: Boolean,
     onPick: () -> Unit,
@@ -241,7 +249,7 @@ private fun QuickBackgroundTile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(TILE_ASPECT)
+                    .aspectRatio(tileAspect)
                     .clip(RoundedCornerShape(7.dp))
                     .clickable(onClick = onPick)
                     .border(
@@ -336,7 +344,6 @@ private fun TrayTooltip(text: String) {
     }
 }
 
-private const val TILE_ASPECT = 16f / 10f
 private const val CARET_CLOSED_DEGREES = -90f
 private const val SLOT_INK_ALPHA = 0.85f
 private const val SLOT_SCRIM_ALPHA = 0.4f

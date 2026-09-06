@@ -332,18 +332,18 @@ class BrowserSourceVideoRendererTest {
     @Test
     fun `showsContentFor maps every content type to its own screen assignment flag`() {
         val allOn = ScreenAssignment()
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.BIBLE, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.LYRICS, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.PICTURES, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.PRESENTATION, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.ANNOUNCEMENTS, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.LOWER_THIRD, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.MEDIA, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.WEBSITE, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.CANVAS, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.QA, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.STT, allOn))
-        assertTrue(BrowserSourceVideoRenderer.showsContentFor(Presenting.DICTIONARY, allOn))
+        assertTrue(showsContentFor(Presenting.BIBLE, allOn))
+        assertTrue(showsContentFor(Presenting.LYRICS, allOn))
+        assertTrue(showsContentFor(Presenting.PICTURES, allOn))
+        assertTrue(showsContentFor(Presenting.PRESENTATION, allOn))
+        assertTrue(showsContentFor(Presenting.ANNOUNCEMENTS, allOn))
+        assertTrue(showsContentFor(Presenting.LOWER_THIRD, allOn))
+        assertTrue(showsContentFor(Presenting.MEDIA, allOn))
+        assertTrue(showsContentFor(Presenting.WEBSITE, allOn))
+        assertTrue(showsContentFor(Presenting.CANVAS, allOn))
+        assertTrue(showsContentFor(Presenting.QA, allOn))
+        assertTrue(showsContentFor(Presenting.STT, allOn))
+        assertTrue(showsContentFor(Presenting.DICTIONARY, allOn))
     }
 
     @Test
@@ -361,23 +361,23 @@ class BrowserSourceVideoRendererTest {
             showSTT = false,
             showDictionary = false,
         )
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.BIBLE, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.LYRICS, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.PICTURES, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.PRESENTATION, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.ANNOUNCEMENTS, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.LOWER_THIRD, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.MEDIA, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.WEBSITE, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.CANVAS, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.QA, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.STT, allOff))
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.DICTIONARY, allOff))
+        assertFalse(showsContentFor(Presenting.BIBLE, allOff))
+        assertFalse(showsContentFor(Presenting.LYRICS, allOff))
+        assertFalse(showsContentFor(Presenting.PICTURES, allOff))
+        assertFalse(showsContentFor(Presenting.PRESENTATION, allOff))
+        assertFalse(showsContentFor(Presenting.ANNOUNCEMENTS, allOff))
+        assertFalse(showsContentFor(Presenting.LOWER_THIRD, allOff))
+        assertFalse(showsContentFor(Presenting.MEDIA, allOff))
+        assertFalse(showsContentFor(Presenting.WEBSITE, allOff))
+        assertFalse(showsContentFor(Presenting.CANVAS, allOff))
+        assertFalse(showsContentFor(Presenting.QA, allOff))
+        assertFalse(showsContentFor(Presenting.STT, allOff))
+        assertFalse(showsContentFor(Presenting.DICTIONARY, allOff))
     }
 
     @Test
     fun `showsContentFor is false for NONE regardless of screen assignment`() {
-        assertFalse(BrowserSourceVideoRenderer.showsContentFor(Presenting.NONE, ScreenAssignment()))
+        assertFalse(showsContentFor(Presenting.NONE, ScreenAssignment()))
     }
 
     @Test

@@ -70,7 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.atem_upload_background_1_tooltip
@@ -175,6 +175,9 @@ fun BackgroundSettingsTab(
     // The band each surface's own content type draws, so the preview and the output agree. Bible
     // and Songs carry separate heights, which is why this is asked per surface rather than once.
     val bandFraction = settings.bandFractionFor(scope)
+    // The shape of the screen this goes out on. The band is a percentage of that screen's height,
+    // so a preview shaped like some other monitor moves the band and everything inside it.
+    val outputAspect = previewOutputSize(settings).aspectRatio
     val onConfigChange: (BackgroundConfig) -> Unit = { config ->
         viewModel.updateBackground(scope, config, onSettingsChange)
     }
@@ -214,6 +217,7 @@ fun BackgroundSettingsTab(
                         config = backgrounds.resolvedConfigFor(scope),
                         coverage = scope.coverage,
                         bandFraction = bandFraction,
+                        stageAspect = outputAspect,
                         modifier = Modifier.fillMaxWidth().weight(1f).padding(14.dp)
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -456,21 +460,23 @@ private fun BackgroundStagePreview(
     config: BackgroundConfig,
     coverage: BackgroundCoverage,
     bandFraction: Float,
+    stageAspect: Float,
     modifier: Modifier = Modifier
 ) {
-    // The shape of the screen this will actually go out on, not a fixed 16:10 guess — the band is
-    // a percentage of the height, so getting the height wrong moves the band and everything in it.
-    val stageAspect = remember { presenterAspectRatio() }
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         // Sized here rather than with an aspect-ratio modifier: the set has to fit the column in
-        // both directions at once, and stop growing once it is big enough to read.
-        val width = minOf(maxWidth, STAGE_MAX_WIDTH, maxHeight * stageAspect)
+        // both directions at once, and stop growing once it is big enough to read. The height goes
+        // through tvScreenBoxWidthFor because the bezel and the stand are 28dp of height that is
+        // not screen -- counting them as screen made the box short and put the band, which is a
+        // percentage of the screen's height, somewhere the projector will not put it.
+        val width = minOf(maxWidth, STAGE_MAX_WIDTH, tvScreenBoxWidthFor(maxHeight, stageAspect))
         // How much smaller this stage is than the 1920-wide output every stored size is measured
         // against. The blur goes through the presenters' own helper so there is one definition of
         // it; the sample line below is scaled by the same factor.
         val stageScale = width.value / BACKGROUND_REFERENCE_WIDTH
         TvScreenBox(
-            modifier = Modifier.width(width).height(width / stageAspect),
+            modifier = Modifier.width(width),
+            screenAspectRatio = stageAspect,
             bezelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             screenColor = Color.Black
         ) {
@@ -661,6 +667,10 @@ private fun QuickBackgroundsRail(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val entries = settings.quickBackgrounds
+    // A quick background is a full-screen background, so its tile is a picture of the output. It
+    // was drawn 16:10 here and 16:9 in the song background picker -- one object, two shapes,
+    // neither of them the screen's.
+    val tileAspect = previewOutputSize(settings).aspectRatio
     var openId by remember { mutableStateOf<String?>(null) }
     // A removal, or a settings import, can take the open entry away underneath the panel.
     LaunchedEffect(entries.map { it.id }) {
@@ -699,6 +709,7 @@ private fun QuickBackgroundsRail(
         )
         QuickBackgroundStrip(
             entries = entries,
+            tileAspect = tileAspect,
             openId = openId,
             onOpenChange = { openId = it },
             onAdd = {
@@ -1015,6 +1026,7 @@ internal fun VideoPickerRow(
 @Composable
 private fun QuickBackgroundStrip(
     entries: List<QuickBackground>,
+    tileAspect: Float,
     openId: String?,
     onOpenChange: (String?) -> Unit,
     onAdd: () -> Unit,
@@ -1036,6 +1048,7 @@ private fun QuickBackgroundStrip(
             QuickBackgroundStripTile(
                 entry = entry,
                 slot = index + 1,
+                tileAspect = tileAspect,
                 open = entry.id == openId,
                 dragging = index == draggedIndex,
                 onOpenChange = { open -> onOpenChange(if (open) entry.id else null) },
@@ -1071,7 +1084,7 @@ private fun QuickBackgroundStrip(
             )
         }
         if (entries.size < QUICK_BACKGROUND_SLOTS) {
-            QuickBackgroundAddTile(onClick = onAdd)
+            QuickBackgroundAddTile(tileAspect = tileAspect, onClick = onAdd)
         }
     }
 }
@@ -1081,6 +1094,7 @@ private fun QuickBackgroundStrip(
 private fun QuickBackgroundStripTile(
     entry: QuickBackground,
     slot: Int,
+    tileAspect: Float,
     open: Boolean,
     dragging: Boolean,
     onOpenChange: (Boolean) -> Unit,
@@ -1102,7 +1116,7 @@ private fun QuickBackgroundStripTile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(QUICK_TILE_ASPECT)
+                    .aspectRatio(tileAspect)
                     .clip(RoundedCornerShape(7.dp))
                     .clickable { onOpenChange(!open) }
                     .border(
@@ -1162,6 +1176,7 @@ private fun QuickBackgroundStripTile(
                         // A song book is a song idea; a tray tile belongs to no book.
                         onApplyToSongbook = null,
                         onDismiss = { onOpenChange(false) },
+                        stageAspect = tileAspect,
                         allowInherit = false,
                         footer = {
                             QuickBackgroundPanelFooter(
@@ -1203,7 +1218,7 @@ private fun QuickBackgroundPanelFooter(onCancel: () -> Unit, onConfirm: () -> Un
 
 /** The trailing tile: where a background gets into the tray in the first place. */
 @Composable
-private fun QuickBackgroundAddTile(onClick: () -> Unit) {
+private fun QuickBackgroundAddTile(tileAspect: Float, onClick: () -> Unit) {
     Column(
         modifier = Modifier.width(QUICK_STRIP_TILE_WIDTH),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -1211,7 +1226,7 @@ private fun QuickBackgroundAddTile(onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(QUICK_TILE_ASPECT)
+                .aspectRatio(tileAspect)
                 .clip(RoundedCornerShape(7.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))
@@ -1279,5 +1294,4 @@ internal fun <T> List<T>.moved(from: Int, to: Int): List<T> {
 internal const val QUICK_BACKGROUND_ADD_TAG = "quick_background_add"
 private val QUICK_STRIP_TILE_WIDTH = 92.dp
 private val QUICK_STRIP_GAP = 8.dp
-private const val QUICK_TILE_ASPECT = 16f / 10f
 private const val QUICK_SCRIM_ALPHA = 0.45f

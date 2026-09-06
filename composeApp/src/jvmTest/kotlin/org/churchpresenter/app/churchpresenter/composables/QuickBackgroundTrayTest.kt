@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
@@ -44,6 +45,7 @@ class QuickBackgroundTrayTest {
             MaterialTheme {
                 QuickBackgroundTray(
                     backgrounds = backgrounds,
+                    tileAspect = FALLBACK_STAGE_ASPECT,
                     activeId = activeId,
                     expanded = expanded,
                     onExpandedChange = onExpandedChange,

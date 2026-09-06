@@ -39,6 +39,8 @@ import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -135,10 +137,14 @@ internal fun PresenterWindows(
         when {
             isFallback -> {
                 val fallbackIndex = slotIndex
-                val fallbackWindowState = remember(fallbackIndex) {
+                // Keyed on the size too: without it, changing an output's resolution in settings
+                // did nothing until the app was restarted.
+                val devSize = outputSizeOf(screenAssignment, OutputKind.SCREEN)
+                val fallbackWindowState = remember(fallbackIndex, devSize) {
+                    val (windowWidth, windowHeight) = devFallbackWindowSizeDp(devSize.width, devSize.height)
                     WindowState(
-                        width = 960.dp,
-                        height = 540.dp,
+                        width = windowWidth.dp,
+                        height = windowHeight.dp,
                         position = WindowPosition(
                             x = devFallbackWindowOffsetDp(fallbackIndex).dp,
                             y = devFallbackWindowOffsetDp(fallbackIndex).dp,

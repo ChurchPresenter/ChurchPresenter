@@ -125,6 +125,8 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
@@ -143,7 +145,6 @@ import org.churchpresenter.app.churchpresenter.server.followerMediaUrl
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -163,6 +164,7 @@ private const val HANDLE_VISIBLE_ALPHA = 0.01f
 fun MediaTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings = AppSettings(),
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     /**
@@ -657,10 +659,21 @@ fun MediaTab(
         } else {
             if (viewModel.isLoaded) SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
 
+            // The shape of the output this media actually goes out on. Media can be routed to
+            // several differently-shaped outputs at once, so which one the preview stands for is
+            // the operator's to say -- the picker draws nothing until there is more than one.
+            val previewOutput = rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_MEDIA, Presenting.MEDIA)
+            PreviewOutputPicker(
+                settings = appSettings,
+                tabId = Constants.PREVIEW_TAB_MEDIA,
+                mode = Presenting.MEDIA,
+                onSettingsChange = onSettingsChange,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
             Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
-                        .aspectRatio(presenterAspectRatio())
+                        .aspectRatio(previewOutput.size.aspectRatio)
                         .background(Color.Black, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center

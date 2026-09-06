@@ -164,7 +164,7 @@ internal fun OffscreenOutputContent(
                         targetState = effectiveMode,
                         animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                     ) { mode ->
-                        val showsContent = BrowserSourceVideoRenderer.showsContentFor(mode, screenAssignment)
+                        val showsContent = showsContentFor(mode, screenAssignment)
                         if (mode != Presenting.NONE && showsContent) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(

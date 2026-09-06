@@ -158,14 +158,18 @@ internal fun PresetButton(label: String, selected: Boolean, modifier: Modifier =
 }
 
 /**
- * One tile of the library grid: a 16:9 preview drawn by [fill], the design's badges over it, and
- * the name beneath.
+ * One tile of the library grid: a preview drawn by [fill], the design's badges over it, and the
+ * name beneath.
+ *
+ * [swatchAspect] is the output's shape, not a fixed 16:9 -- a tile is a picture of a full-screen
+ * background, and the same background was drawn at two different ratios in two different pickers.
  */
 @Composable
 internal fun SwatchTile(
     label: String,
     selected: Boolean,
     badge: SwatchBadge,
+    swatchAspect: Float,
     onClick: () -> Unit,
     fill: @Composable () -> Unit,
 ) {
@@ -173,7 +177,7 @@ internal fun SwatchTile(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(SWATCH_ASPECT)
+                .aspectRatio(swatchAspect)
                 .clip(RoundedCornerShape(8.dp))
                 .border(
                     2.dp,
@@ -284,5 +288,4 @@ internal fun PanelSlider(label: String, readout: String, value: Int, max: Int, o
 }
 
 /** Every tile is drawn at the design's 16:9. */
-private const val SWATCH_ASPECT = 16f / 9f
 private const val BADGE_ALPHA = 0.55f

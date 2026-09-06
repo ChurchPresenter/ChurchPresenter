@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ class SongBackgroundLibraryTest {
                     SongBackgroundLibrary(
                         background = SongBackground(),
                         onChange = {},
+                        swatchAspect = FALLBACK_STAGE_ASPECT,
                         devices = emptyList(),
                     )
                 }

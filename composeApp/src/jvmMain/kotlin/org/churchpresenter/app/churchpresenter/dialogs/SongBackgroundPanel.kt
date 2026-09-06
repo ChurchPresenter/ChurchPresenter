@@ -48,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.song_background_full_scree
 import churchpresenter.composeapp.generated.resources.song_background_inherit
 import churchpresenter.composeapp.generated.resources.song_background_lower_third
 import churchpresenter.composeapp.generated.resources.song_background_own
+import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -143,6 +144,15 @@ internal fun SongBackgroundPanel(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     /**
+     * The shape of the output this background goes out on, for the preview at the top of the look
+     * column.
+     *
+     * Defaulted rather than required because the song editor route reaches here through four
+     * dialogs that carry no `AppSettings`; threading it that far to shape one preview is not worth
+     * the churn. The settings-side callers, which do have it, pass the real thing.
+     */
+    stageAspect: Float = FALLBACK_STAGE_ASPECT,
+    /**
      * Whether "Inherit" is on offer. False for a quick background, which exists only to override —
      * an inheriting one would be a tray tile that does nothing.
      */
@@ -202,6 +212,7 @@ internal fun SongBackgroundPanel(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(Modifier.weight(1f).fillMaxWidth()) {
                 SongBackgroundLibrary(
+                    swatchAspect = stageAspect,
                     background = current,
                     onChange = ::update,
                     modifier = Modifier.weight(1f).fillMaxHeight()
@@ -211,6 +222,7 @@ internal fun SongBackgroundPanel(
                 SongBackgroundLookColumn(
                     background = current,
                     sampleLine = sampleLine,
+                    stageAspect = stageAspect,
                     onChange = ::update,
                     onApplyToSongbook = onApplyToSongbook,
                     modifier = Modifier.width(LOOK_COLUMN_WIDTH).fillMaxHeight(),

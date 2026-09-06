@@ -95,6 +95,7 @@ import churchpresenter.composeapp.generated.resources.web_zoom_in
 import churchpresenter.composeapp.generated.resources.web_zoom_out
 import churchpresenter.composeapp.generated.resources.web_snapshot_screen_recording_hint
 import churchpresenter.composeapp.generated.resources.web_snapshot_waiting
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
@@ -103,7 +104,8 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -154,7 +156,11 @@ fun WebTab(
         return
     }
 
-    val previewAspectRatio = remember { presenterAspectRatio() }
+    // Recomputed as the settings change, not cached once: this was a keyless `remember`, so a
+    // projector plugged in mid-service never reached the preview. It also sizes a real JCEF native
+    // viewport, so the wrong shape lays the page out differently from the way it will go out.
+    val previewOutput = rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_WEB, Presenting.WEBSITE)
+    val previewAspectRatio = previewOutput.size.aspectRatio
 
     // Restore URL / title from PresenterManager so state survives tab switches
     val savedUrl = presenterManager?.websiteUrl?.value ?: ""
@@ -621,7 +627,14 @@ fun WebTab(
         }
 
         // ── Preview WebView ────────────────────────────────────────────────
-        // Fit preview to remaining space while keeping presenter aspect ratio
+        PreviewOutputPicker(
+            settings = appSettings,
+            tabId = Constants.PREVIEW_TAB_WEB,
+            mode = Presenting.WEBSITE,
+            onSettingsChange = onSettingsChange,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+        )
+        // Fit preview to remaining space while keeping the output's aspect ratio
         BoxWithConstraints(
             modifier = Modifier.weight(1f).fillMaxSize(),
             contentAlignment = Alignment.TopCenter
