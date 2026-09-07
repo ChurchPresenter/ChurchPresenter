@@ -307,22 +307,6 @@ class BrowserSourceVideoRenderer(
             previousMode: Presenting,
         ): Boolean = (bibleCrossfadeEnabled || songCrossfadeEnabled) &&
             currentMode != Presenting.NONE && previousMode != Presenting.NONE
-
-        /** Per-content-type visibility gate — the same mapping [main.kt]'s own output windows use. */
-        internal fun showsContentFor(mode: Presenting, screenAssignment: ScreenAssignment): Boolean = when (mode) {
-            Presenting.BIBLE -> screenAssignment.showBible
-            Presenting.LYRICS -> screenAssignment.showSongs
-            Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
-            Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
-            Presenting.LOWER_THIRD -> screenAssignment.showStreaming
-            Presenting.MEDIA -> screenAssignment.showMedia
-            Presenting.WEBSITE -> screenAssignment.showWebsite
-            Presenting.CANVAS -> screenAssignment.showCanvas
-            Presenting.QA -> screenAssignment.showQA
-            Presenting.STT -> screenAssignment.showSTT
-            Presenting.DICTIONARY -> screenAssignment.showDictionary
-            else -> false
-        }
     }
 
     internal data class DirtyRect(val x: Int, val y: Int, val w: Int, val h: Int)

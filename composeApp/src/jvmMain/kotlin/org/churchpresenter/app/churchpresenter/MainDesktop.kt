@@ -104,6 +104,7 @@ import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
@@ -741,7 +742,11 @@ fun MainDesktop(
         val folder = pictureFolder ?: return@LaunchedEffect
         if (pictureImages.isEmpty()) return@LaunchedEffect
         val folderId = stableFileId(folder)
-        currentOnPicturesLoaded?.invoke(folderId, folder.name, folder.absolutePath, pictureImages.toList())
+        // Through the ViewModel's own lock: walking the state list directly races the download
+        // coroutine and the folder watcher, and the CME lands on the event thread.
+        currentOnPicturesLoaded?.invoke(
+            folderId, folder.name, folder.absolutePath, picturesViewModel.imagesSnapshot(),
+        )
     }
 
     // Load picture folder when a picture schedule item is selected (works even before Pictures tab is composed)
@@ -1585,6 +1590,7 @@ fun MainDesktop(
                             Tabs.MEDIA -> MediaTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
@@ -1937,6 +1943,9 @@ private fun PreviewSidebar(
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
+                // A quick background is a full-screen background: its tile is a picture of the
+                // output, so it is that output's shape.
+                tileAspect = previewOutputSize(appSettings).aspectRatio,
                 activeId = activeQuickBackground?.id,
                 expanded = appSettings.quickBackgroundsExpanded,
                 onExpandedChange = { open ->

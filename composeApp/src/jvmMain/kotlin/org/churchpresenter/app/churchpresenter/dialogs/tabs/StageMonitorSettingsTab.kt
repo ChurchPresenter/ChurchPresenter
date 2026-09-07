@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.toAlignment
+import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.MetronomePosition
@@ -80,6 +80,17 @@ import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_FRACTION = 0.9f
+
+/**
+ * How tall the monitor mockup may get, stand included.
+ *
+ * A cap rather than a size: the mockup is the shape of the real stage monitor, and a portrait or
+ * rotated confidence display -- which churches do run -- would otherwise draw a preview taller than
+ * the dialog. Deliberately not [SETTINGS_PREVIEW_MAX_HEIGHT]: an ordinary 16:9 output already lands
+ * near 250dp, so sharing that 260dp number would leave the common case one dialog-resize away from
+ * silently clamping.
+ */
+private val STAGE_PREVIEW_MAX_HEIGHT = 360.dp
 private const val SHOWS_COLUMNS = 4
 private const val TRANSITION_LABEL_WIDTH = 120
 private const val TRANSITION_STEP_MS = 50f
@@ -98,6 +109,10 @@ fun StageMonitorSettingsTab(
     val availableFonts = rememberSystemFonts()
 
     val sm = settings.stageMonitorSettings
+
+    // The shape of the monitor this layout actually goes out on -- the stage monitor's own output,
+    // not the first assigned one, which is normally the congregation projector.
+    val previewAspect = stageMonitorPreviewOutputSize(settings).aspectRatio
     fun update(block: StageMonitorSettings.() -> StageMonitorSettings) {
         onSettingsChange { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.block()) }
     }
@@ -124,6 +139,7 @@ fun StageMonitorSettingsTab(
                     SettingsSection(title = stringResource(Res.string.stage_monitor_layout_section)) {
                         StageMonitorLayoutPicker(
                             layout = sm.layout,
+                            screenAspect = previewAspect,
                             onPick = { picked -> update { withLayout(picked) } },
                         )
                     }
@@ -135,7 +151,7 @@ fun StageMonitorSettingsTab(
                     modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    StageMonitorPreviewSection(sm = sm)
+                    StageMonitorPreviewSection(sm = sm, screenAspect = previewAspect)
 
                     // Every zone the layout draws gets its own editor, plus the full-screen
                     // override, so nothing has to be selected to be styled.
@@ -185,10 +201,13 @@ private fun MetronomeRow(
  * to be selectable to be edited or emptied.
  */
 @Composable
-private fun StageMonitorPreviewSection(sm: StageMonitorSettings) {
+private fun StageMonitorPreviewSection(sm: StageMonitorSettings, screenAspect: Float) {
     SettingsSection(title = stringResource(Res.string.stage_monitor_content_section)) {
         TvScreenBox(
-            modifier = Modifier.fillMaxWidth(PREVIEW_WIDTH_FRACTION).height(200.dp),
+            modifier = Modifier
+                .fillMaxWidth(PREVIEW_WIDTH_FRACTION)
+                .widthIn(max = tvScreenBoxWidthFor(STAGE_PREVIEW_MAX_HEIGHT, screenAspect)),
+            screenAspectRatio = screenAspect,
             bezelColor = stageMonitorBezelColor(),
             screenColor = Color.Black,
         ) {

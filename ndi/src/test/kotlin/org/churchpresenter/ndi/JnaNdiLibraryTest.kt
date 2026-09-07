@@ -81,6 +81,9 @@ private class FakeNdiLibC(
     /** The source array discovery hands back, held so its native strings stay alive. */
     private var sources: Array<NdiSourceStruct>? = null
 
+    /** What the runtime claims the array holds, when a test needs that to differ from the truth. */
+    var reportedSourceCount: Int? = null
+
     /** Publishes [names] as the sources a finder will report, in real native memory. */
     fun advertise(vararg names: Pair<String, String>) {
         if (names.isEmpty()) {
@@ -114,7 +117,7 @@ private class FakeNdiLibC(
 
     override fun NDIlib_find_get_current_sources(finder: Pointer, count: IntByReference): Pointer? {
         val found = sources ?: return null
-        count.value = found.size
+        count.value = reportedSourceCount ?: found.size
         return found.first().pointer
     }
 
@@ -439,6 +442,36 @@ class JnaNdiLibraryTest {
         lib.findSources(FINDER_HANDLE_VALUE, timeoutMs = 250)
         assertEquals(1, c.waits)
         assertEquals(250, c.lastWaitTimeout)
+    }
+
+    /**
+     * A count no real network could produce means the pointer and the count are not describing an
+     * array at all -- a stale or freed finder. Walking it is the fatal native read.
+     */
+    @Test
+    fun `an impossible source count is refused rather than read`() {
+        val c = FakeNdiLibC()
+        c.advertise("BOOTH (Camera 1)" to "")
+        c.reportedSourceCount = Int.MAX_VALUE
+
+        assertEquals(
+            emptyList(),
+            JnaNdiLibrary(c).findSources(FINDER_HANDLE_VALUE),
+            "walking a count that large off a one-entry array is the crash",
+        )
+    }
+
+    /** And the bound is a ceiling, not a fence around anything plausible. */
+    @Test
+    fun `a count within the bound is still read`() {
+        val c = FakeNdiLibC()
+        c.advertise("BOOTH (Camera 1)" to "192.168.1.20:5961", "BOOTH (Graphics)" to "")
+        c.reportedSourceCount = 1
+
+        assertEquals(
+            listOf(NdiSourceInfo("BOOTH (Camera 1)", "192.168.1.20:5961")),
+            JnaNdiLibrary(c).findSources(FINDER_HANDLE_VALUE),
+        )
     }
 
     @Test

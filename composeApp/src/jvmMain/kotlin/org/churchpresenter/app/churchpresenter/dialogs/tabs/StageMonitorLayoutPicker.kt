@@ -74,7 +74,6 @@ import org.churchpresenter.settings.toStyleZone
 import org.jetbrains.compose.resources.stringResource
 
 private const val VARIANT_CARD_WIDTH = 132
-private const val VARIANT_GRID_HEIGHT = 80
 private const val BEZEL_ALPHA = 0.38f
 private const val CELL_ALPHA = 0.40f
 
@@ -105,6 +104,7 @@ internal fun slotLabel(slot: StageMonitorStyleZone): String =
 @Composable
 internal fun StageMonitorLayoutPicker(
     layout: StageMonitorLayout,
+    screenAspect: Float,
     onPick: (StageMonitorLayout) -> Unit,
 ) {
     val counts = StageMonitorLayout.zoneCounts()
@@ -135,7 +135,12 @@ internal fun StageMonitorLayoutPicker(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         StageMonitorLayout.withZoneCount(activeCount).forEach { variant ->
-            LayoutVariantCard(variant = variant, selected = variant == layout, onPick = { onPick(variant) })
+            LayoutVariantCard(
+                variant = variant,
+                selected = variant == layout,
+                screenAspect = screenAspect,
+                onPick = { onPick(variant) },
+            )
         }
     }
 }
@@ -144,6 +149,7 @@ internal fun StageMonitorLayoutPicker(
 private fun LayoutVariantCard(
     variant: StageMonitorLayout,
     selected: Boolean,
+    screenAspect: Float,
     onPick: () -> Unit,
 ) {
     val border = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
@@ -158,7 +164,8 @@ private fun LayoutVariantCard(
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         TvScreenBox(
-            modifier = Modifier.fillMaxWidth().height(VARIANT_GRID_HEIGHT.dp),
+            modifier = Modifier.fillMaxWidth(),
+            screenAspectRatio = screenAspect,
             bezelColor = stageMonitorBezelColor(),
             screenColor = Color.Black,
         ) {

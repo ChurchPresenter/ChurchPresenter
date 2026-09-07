@@ -1042,6 +1042,36 @@ class MainLogicTest {
         assertTrue(devFallbackWindowOffsetDp(2) > devFallbackWindowOffsetDp(1))
     }
 
+    /**
+     * A simulated window is the shape of the output it stands for, fitted into the same box.
+     *
+     * 1920x1080 must still land on exactly the 960x540 this used to hardcode — that is the whole
+     * evidence that making the size configurable did not move the ordinary case.
+     */
+    @Test
+    fun `a dev fallback window takes the shape of the output it simulates`() {
+        assertEquals(960f to 540f, devFallbackWindowSizeDp(1920, 1080), "16:9 is unchanged")
+
+        val (fourThreeW, fourThreeH) = devFallbackWindowSizeDp(1024, 768)
+        assertEquals(4f / 3f, fourThreeW / fourThreeH, 0.001f, "a 4:3 output is simulated 4:3")
+        assertTrue(fourThreeW <= 960f && fourThreeH <= 540f, "and still fits the box")
+
+        val (portraitW, portraitH) = devFallbackWindowSizeDp(1080, 1920)
+        assertTrue(portraitH > portraitW, "a portrait output is simulated portrait")
+        assertTrue(portraitH <= 540f, "height is what binds it, not width")
+
+        val (ultraW, ultraH) = devFallbackWindowSizeDp(2560, 1080)
+        assertEquals(2560f / 1080f, ultraW / ultraH, 0.001f, "an ultrawide keeps its shape")
+        assertTrue(ultraW <= 960f, "and is bound by width")
+    }
+
+    /** A degenerate size must not divide by zero — the window still has to open. */
+    @Test
+    fun `a dev fallback window with no size falls back to the 16 by 9 box`() {
+        assertEquals(960f to 540f, devFallbackWindowSizeDp(0, 0))
+        assertEquals(960f to 540f, devFallbackWindowSizeDp(-1920, 1080))
+    }
+
     // ── DeckLink and key outputs ────────────────────────────────────────────────
 
     @Test

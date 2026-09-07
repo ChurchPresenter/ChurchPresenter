@@ -156,6 +156,8 @@ import churchpresenter.composeapp.generated.resources.top_center
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
@@ -168,8 +170,6 @@ import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -892,6 +892,19 @@ fun AnnouncementsTab(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Which output this preview stands for. Announcements can be routed to several
+                    // differently-shaped outputs at once, so the operator says which; the picker
+                    // draws nothing until there is more than one to choose between.
+                    val previewOutput = rememberPreviewOutput(
+                        appSettings, Constants.PREVIEW_TAB_ANNOUNCEMENTS, Presenting.ANNOUNCEMENTS
+                    )
+                    PreviewOutputPicker(
+                        settings = appSettings,
+                        tabId = Constants.PREVIEW_TAB_ANNOUNCEMENTS,
+                        mode = Presenting.ANNOUNCEMENTS,
+                        onSettingsChange = onSettingsChange,
+                    )
+
                     // All four timer/clock modes now share one play/pause control (isTimerRunning),
                     // mutually exclusive with the announcement text — so this preview must follow
                     // whichever one is actually running/live, not just which mode is selected, or it
@@ -908,8 +921,12 @@ fun AnnouncementsTab(
                     val isShowingLiveTimerValue = isTimerExpired || isTimerRunning
                     var previewWidthPx by remember { mutableStateOf(0) }
                     var previewHeightPx by remember { mutableStateOf(0) }
+                    // Both the frame and the type inside it are measured against the SAME output.
+                    // They used to read two different things -- the box took the first non-primary
+                    // monitor's ratio while the scale divided by that monitor's width -- so on any
+                    // rig where announcements go somewhere else the preview was wrong twice over.
                     val scaleFactor = if (previewWidthPx > 0)
-                        (previewWidthPx / density.density) / presenterScreenBounds().width.toFloat()
+                        (previewWidthPx / density.density) / previewOutput.size.width.toFloat()
                     else 0.1f
                     val scaledFontSize = (viewModel.fontSize * scaleFactor).coerceAtLeast(4f).sp
                     val scaledPadH = (32 * scaleFactor).coerceAtLeast(1f).dp
@@ -955,7 +972,7 @@ fun AnnouncementsTab(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(presenterAspectRatio())
+                            .aspectRatio(previewOutput.size.aspectRatio)
                             .clip(RoundedCornerShape(4.dp))
                             .background(Color.Black)
                             .border(

@@ -122,6 +122,15 @@ class FakeNdiLibrary(
     var lastFindTimeoutMs: Int = -1
         private set
 
+    /**
+     * Runs inside a look, before it answers — the seam a test uses to hold one in flight.
+     *
+     * It is what turns "was the handle freed under a live call" into an ordering assertion with no
+     * timing in it: block here, destroy the finder from another thread, and assert on what happened.
+     */
+    @Volatile
+    var duringFindSources: (Long) -> Unit = {}
+
     /** How many times a capture has been asked for — a positive signal a loop is running. */
     @Volatile
     var captureCount = 0
@@ -165,6 +174,7 @@ class FakeNdiLibrary(
 
     override fun findSources(finder: Long, timeoutMs: Int): List<NdiSourceInfo> {
         lastFindTimeoutMs = timeoutMs
+        duringFindSources(finder)
         return synchronized(discoverable) { discoverable.toList() }
     }
 

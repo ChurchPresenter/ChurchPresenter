@@ -108,13 +108,16 @@ class ProjectionSettingsTabStructureTest {
     }
 
     @Test
-    fun `the dev fallback row carries the same four controls`() {
+    fun `the dev fallback row carries the same controls plus a resolution`() {
         projectionTab(screens = noExternalScreens()) { _ ->
-            gridButtons().assertCountEquals(1 + 1 * Grid.CONTROLS_PER_ROW + Grid.trailing)
-            gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("None")
-            gridButton(Grid.keyOutput(row = 0)).assertTextEquals("None")
-            gridButton(Grid.displayMode(row = 0)).assertTextEquals("Full Screen")
-            gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("15 of 16 enabled")
+            gridButtons().assertCountEquals(Grid.gridButtonCount(rows = 1, devFallback = true) + Grid.trailing)
+            gridButton(Grid.targetDisplay(row = 0, devFallback = true)).assertTextEquals("None")
+            gridButton(Grid.keyOutput(row = 0, devFallback = true)).assertTextEquals("None")
+            gridButton(Grid.displayMode(row = 0, devFallback = true)).assertTextEquals("Full Screen")
+            // A simulated window has no monitor to take its size from, so it carries its own.
+            gridButton(Grid.resolution(row = 0)).assertTextEquals("1920×1080")
+            gridButton(Grid.contentOutputs(row = 0, devFallback = true))
+                .assertTextEquals("15 of 16 enabled")
         }
     }
 

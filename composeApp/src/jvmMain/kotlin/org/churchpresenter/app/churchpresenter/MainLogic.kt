@@ -23,6 +23,10 @@ import kotlin.math.roundToInt
 
 private const val DEFAULT_FADE_OUT_MS = 500
 private const val DEV_WINDOW_BASE_OFFSET_DP = 40
+
+/** The box a dev fallback window is fitted into, whatever shape the output it stands for is. */
+private const val DEV_WINDOW_MAX_WIDTH_DP = 960f
+private const val DEV_WINDOW_MAX_HEIGHT_DP = 540f
 private const val DEV_WINDOW_STEP_DP = 48
 private const val MILLIS_PER_SECOND_F = 1000f
 private const val MILLIS_PER_SECOND_L = 1000L
@@ -547,6 +551,22 @@ internal fun isDevWindowedFallback(
 /** How many fallback windows to open — at least one whenever they are used at all. */
 internal fun devFallbackWindowCount(devWindowedFallback: Boolean, configured: Int): Int =
     if (devWindowedFallback) configured.coerceAtLeast(1) else 0
+
+/**
+ * The on-screen size of a dev fallback window standing in for a [width] x [height] output.
+ *
+ * Scaled down to fit [DEV_WINDOW_MAX_WIDTH_DP] x [DEV_WINDOW_MAX_HEIGHT_DP] while keeping the
+ * output's shape, so a 4:3 projector and a portrait confidence display are simulated at the shape
+ * they actually are rather than all being drawn in one 16:9 box. 1920x1080 still lands on exactly
+ * the 960x540 this used to hardcode.
+ *
+ * A degenerate size falls back to 16:9 rather than dividing by zero.
+ */
+internal fun devFallbackWindowSizeDp(width: Int, height: Int): Pair<Float, Float> {
+    if (width <= 0 || height <= 0) return DEV_WINDOW_MAX_WIDTH_DP to DEV_WINDOW_MAX_HEIGHT_DP
+    val scale = minOf(DEV_WINDOW_MAX_WIDTH_DP / width, DEV_WINDOW_MAX_HEIGHT_DP / height)
+    return width * scale to height * scale
+}
 
 /** How far each extra fallback window is cascaded, so several do not stack exactly on each other. */
 internal fun devFallbackWindowOffsetDp(index: Int): Int = DEV_WINDOW_BASE_OFFSET_DP + index * DEV_WINDOW_STEP_DP

@@ -81,6 +81,17 @@ class PicturesViewModel(
     private val _images: SnapshotStateList<File> = mutableStateListOf()
     val images: List<File> get() = _images
 
+    /**
+     * A copy of [images] taken under [imagesLock], for a caller that needs to walk the whole list.
+     *
+     * Iterating the [androidx.compose.runtime.snapshots.SnapshotStateList] directly -- `toList()`,
+     * a `for` loop, anything that takes its iterator -- throws `ConcurrentModificationException`
+     * the moment one of the three writers below changes it mid-walk, and on the event thread that
+     * is fatal. Reading a single index cannot fail that way, which is why the other callers are
+     * fine; only a whole-list read needs this.
+     */
+    fun imagesSnapshot(): List<File> = synchronized(imagesLock) { _images.toList() }
+
     private val _thumbnails: SnapshotStateMap<File, ImageBitmap> = SnapshotStateMap()
     val thumbnails: Map<File, ImageBitmap> get() = _thumbnails
 

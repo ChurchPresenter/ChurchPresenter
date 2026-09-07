@@ -41,6 +41,7 @@ import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.app.churchpresenter.composables.SectionLabelRow
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.FocusHintBanner
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
@@ -59,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
+import churchpresenter.composeapp.generated.resources.songs_search_focus_hint
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.song_title_slide
@@ -96,6 +98,8 @@ internal fun RowScope.SongLyricsPanel(
     selectedSectionIndex: Int,
     selectedLineIndex: Int,
     searchQuery: String,
+    /** True while the caret is in the song search box, which is what the hint banner below says. */
+    searchFieldFocused: Boolean,
     isPresenting: Boolean,
     live: SongLiveState,
     dialogs: SongDialogRequests,
@@ -213,6 +217,21 @@ internal fun RowScope.SongLyricsPanel(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+            )
+        }
+
+        // The same banner for the other way the keys stop working: the caret is still in the search
+        // box, so the tab's key handler is standing down. Not a lost focus -- the tab still has it,
+        // which is why the rescue banner above cannot cover this -- so it says where to click, and
+        // clicking it does exactly that. It disappears on its own once typing stops.
+        //
+        // Sits here, directly above the words, rather than up with the rescue banner: it comes and
+        // goes on every search, and higher up it would shove the Back to Live button down the panel
+        // mid-service, which is the one control that must not move while something is live.
+        if (searchFieldFocused) {
+            FocusHintBanner(
+                text = stringResource(Res.string.songs_search_focus_hint),
+                onClick = { tabFocusRequester.requestFocus() },
             )
         }
 
@@ -334,8 +353,15 @@ internal fun RowScope.SongLyricsPanel(
                                     else Color.Transparent
                                 )
                                 .initialPassCombinedClickable(
-                                    onClick = { sendTitleSlide() },
-                                    onDoubleClick = { sendTitleSlide(); onPresenting(Presenting.LYRICS) }
+                                    // Clicking in this pane also takes the keyboard back: it is
+                                    // the operator saying "I am working here now", and a caret left
+                                    // in the search box means the verse keys still do nothing.
+                                    onClick = { sendTitleSlide(); tabFocusRequester.requestFocus() },
+                                    onDoubleClick = {
+                                        sendTitleSlide()
+                                        onPresenting(Presenting.LYRICS)
+                                        tabFocusRequester.requestFocus()
+                                    }
                                 )
                                 .padding(8.dp)
                         ) {
@@ -379,12 +405,14 @@ internal fun RowScope.SongLyricsPanel(
                                         onSectionSelected(sectionIndex)
                                         live.titleSlideSelected = false
                                         sendToPresenter(isPresenting)
+                                        tabFocusRequester.requestFocus()
                                     },
                                     onDoubleClick = {
                                         onSectionSelected(sectionIndex)
                                         live.titleSlideSelected = false
                                         sendToPresenter(true)
                                         onPresenting(Presenting.LYRICS)
+                                        tabFocusRequester.requestFocus()
                                     }
                                 )
                                 .padding(8.dp)
@@ -419,6 +447,7 @@ internal fun RowScope.SongLyricsPanel(
                                 onLineSelected(lineIdx)
                                 live.titleSlideSelected = false
                                 sendToPresenter(isPresenting)
+                                tabFocusRequester.requestFocus()
                             } else null
                             // Double-click on the words goes live too — at the clicked LINE,
                             // so per-line display mode stays line-accurate (the section's own
@@ -429,6 +458,7 @@ internal fun RowScope.SongLyricsPanel(
                                 live.titleSlideSelected = false
                                 sendToPresenter(true)
                                 onPresenting(Presenting.LYRICS)
+                                tabFocusRequester.requestFocus()
                             } else null
 
                             if (showPrimary && showSecondary) {

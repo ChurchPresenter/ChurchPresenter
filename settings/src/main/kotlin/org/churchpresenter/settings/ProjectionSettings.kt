@@ -31,6 +31,21 @@ data class ProjectionSettings(
     // when real displays/DeckLink devices exist. Clamped to at least 1 at the use sites.
     val devWindowCount: Int = 1,
     /**
+     * Which output each content tab previews, keyed by tab.
+     *
+     * Content can be routed to several outputs at once and they need not be the same shape -- a
+     * 16:9 projector and a 4:3 foyer TV can both show media, and Browser Source and NDI outputs
+     * carry resolutions of their own. So a tab preview has no single correct shape to take, and
+     * the operator picks; this remembers the pick so a rig is set up once rather than every
+     * service.
+     *
+     * Keys are the tab ids in `Constants.PREVIEW_TAB_*` and values the output keys built by
+     * `Constants.previewOutputKey`. An entry naming an output that no longer exists is ignored
+     * rather than repaired -- a monitor unplugged for one week should still be the choice when it
+     * comes back.
+     */
+    val previewOutputSelections: Map<String, String> = emptyMap(),
+    /**
      * What the operator calls each physical monitor -- "Sanctuary Left", "Foyer TV", "Balcony".
      *
      * Keyed by [screenKey], the monitor's own geometry, rather than by its index in the device list

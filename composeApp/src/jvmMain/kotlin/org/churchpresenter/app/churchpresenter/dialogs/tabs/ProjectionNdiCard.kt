@@ -99,6 +99,9 @@ import churchpresenter.composeapp.generated.resources.ndi_runtime_unsupported_cp
 import churchpresenter.composeapp.generated.resources.ndi_trademark
 import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.remove
+import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.addNdiOutput
@@ -117,7 +120,6 @@ import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
 private val PATH_FIELD_WIDTH = 320.dp
-private val NDI_RESOLUTIONS = listOf(1280 to 720, 1920 to 1080, 2560 to 1440, 3840 to 2160)
 private val NDI_FRAME_RATES = listOf(24, 25, 30, 50, 60)
 
 /**
@@ -549,16 +551,14 @@ private fun NdiOutputRow(
                     cellWidth = cellWidth,
                     labelHeight = labelHeight,
                 ) { update(output.copy(displayMode = it)) }
-                NdiDropdownCell(
+                ResolutionPicker(
                     label = stringResource(Res.string.ndi_resolution),
-                    value = "${output.ndiWidth}×${output.ndiHeight}",
-                    options = NDI_RESOLUTIONS.map { (w, h) -> "$w×$h" to "$w:$h" },
+                    width = output.ndiWidth,
+                    height = output.ndiHeight,
                     cellWidth = cellWidth,
                     labelHeight = labelHeight,
-                ) { chosen ->
-                    val (w, h) = chosen.split(':').map(String::toInt)
-                    update(output.copy(ndiWidth = w, ndiHeight = h))
-                }
+                    onChange = { w, h -> update(output.copy(ndiWidth = w, ndiHeight = h)) },
+                )
                 NdiDropdownCell(
                     label = stringResource(Res.string.ndi_fps),
                     value = output.ndiFps.toString(),
@@ -598,6 +598,7 @@ private fun NdiOutputRow(
                             title = stringResource(Res.string.content_outputs_for, outputLabel),
                             screenLabel = outputLabel,
                             assignment = output,
+                            outputSize = outputSizeOf(output, OutputKind.NDI),
                             contentGroup = contentGroup,
                             backgroundGroup = backgroundGroup,
                             bibleLabel = stringResource(Res.string.content_bible),

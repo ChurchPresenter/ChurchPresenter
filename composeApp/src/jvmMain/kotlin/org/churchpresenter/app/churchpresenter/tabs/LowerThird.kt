@@ -149,6 +149,7 @@ import kotlinx.coroutines.withContext
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.atem.AtemClient
@@ -157,9 +158,10 @@ import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
-import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
@@ -920,13 +922,31 @@ fun LowerThirdTab(
                 .weight(1f)
                 .fillMaxHeight()
         ) {
+            // Which output this lower third stands for. A lower-third Lottie fills the whole output
+            // surface -- LowerThirdPresenter draws it fillMaxSize/ContentScale.Fit and never reads
+            // isLowerThirdVertical, which is a text-stacking flag -- so the preview wants the
+            // output's full shape. The warning below must name the SAME screen the preview draws,
+            // or it reports a mismatch against a monitor the animation never reaches.
+            val previewOutput = rememberPreviewOutput(
+                appSettings, Constants.PREVIEW_TAB_LOWER_THIRD, Presenting.LOWER_THIRD
+            )
+
             // ── Title bar ─────────────────────────────────────────────
             val comp = composition
             val arMismatch = if (comp != null && comp.width > 0 && comp.height > 0) {
-                val screenBounds = presenterScreenBounds()
-                val screenAR = screenBounds.width.toFloat() / screenBounds.height.toFloat()
+                val outputWidth = previewOutput.size.width
+                val outputHeight = previewOutput.size.height
+                val screenAR = previewOutput.size.aspectRatio
                 if (kotlin.math.abs(comp.width / comp.height - screenAR) > 0.05f)
-                    stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()), screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height))
+                    stringResource(
+                        Res.string.aspect_ratio_mismatch,
+                        comp.width.toInt(),
+                        comp.height.toInt(),
+                        formatAspectRatio(comp.width.toInt(), comp.height.toInt()),
+                        outputWidth,
+                        outputHeight,
+                        formatAspectRatio(outputWidth, outputHeight),
+                    )
                 else null
             } else null
             // One bar: the preset name, then ATEM, then the Play · Add to Schedule · Go Live tail.
@@ -1114,11 +1134,20 @@ fun LowerThirdTab(
             }
 
             // ── Lottie preview ────────────────────────────────────────
+            PreviewOutputPicker(
+                settings = appSettings,
+                tabId = Constants.PREVIEW_TAB_LOWER_THIRD,
+                mode = Presenting.LOWER_THIRD,
+                onSettingsChange = onSettingsChange,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            )
             Box(modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp), contentAlignment = Alignment.Center) {
                 Box(
+                    // fillMaxSize first, so the ratio narrows the filled box rather than being
+                    // overridden by it -- the two were the other way round.
                     modifier = Modifier
-                        .aspectRatio(presenterAspectRatio())
                         .fillMaxSize()
+                        .aspectRatio(previewOutput.size.aspectRatio)
                         .background(Color.Black, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center

@@ -76,6 +76,9 @@ import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.addBrowserSourceOutput
 import org.churchpresenter.settings.removeBrowserSourceOutput
@@ -86,7 +89,6 @@ import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
-private val BROWSER_SOURCE_RESOLUTIONS = listOf(1280 to 720, 1920 to 1080, 2560 to 1440, 3840 to 2160)
 private val BROWSER_SOURCE_FRAME_RATES = listOf(10, 15, 24, 30, 60)
 
 /**
@@ -326,47 +328,19 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             }
                         }
                     }
-                    Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                            Text(
-                                text = stringResource(Res.string.browser_source_resolution),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        var resolutionExpanded by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { resolutionExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "${output.browserSourceWidth}\u00d7${output.browserSourceHeight}",
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = resolutionExpanded,
-                            onDismissRequest = { resolutionExpanded = false }
-                        ) {
-                            BROWSER_SOURCE_RESOLUTIONS.forEach { (w, h) ->
-                                DropdownMenuItem(
-                                    text = { Text("$w\u00d7$h", style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        resolutionExpanded = false
-                                        val updated = output.copy(browserSourceWidth = w, browserSourceHeight = h)
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                        }
-                                    }
-                                )
+                    ResolutionPicker(
+                        label = stringResource(Res.string.browser_source_resolution),
+                        width = output.browserSourceWidth,
+                        height = output.browserSourceHeight,
+                        cellWidth = langDropdownWidth,
+                        labelHeight = contentLabelHeight,
+                        onChange = { w, h ->
+                            val updated = output.copy(browserSourceWidth = w, browserSourceHeight = h)
+                            onSettingsChange { s ->
+                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
                             }
-                        }
-                    }
+                        },
+                    )
                     Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                             Text(
@@ -485,6 +459,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                 title = stringResource(Res.string.content_outputs_for, outputLabel),
                                 screenLabel = outputLabel,
                                 assignment = output,
+                                outputSize = outputSizeOf(output, OutputKind.BROWSER_SOURCE),
                                 contentGroup = contentGroup,
                                 backgroundGroup = backgroundGroup,
                                 bibleLabel = bibleLabel,
