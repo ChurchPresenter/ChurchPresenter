@@ -31,11 +31,14 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The Background pane: what this screen shows behind whatever is live.
  *
- * Type, colour and opacity for the full-screen background and for the lower-third band. The image
- * and video pickers, the stock-photo browser and the gradient controls stay on the global
- * Background tab — those choose a *file*, which is a library decision, where this pane is about how
- * one screen uses what the library already holds. An output set to Image or Video here keeps
- * showing the globally chosen file.
+ * Carries the same controls the global Background tab does — type, colour, the image and video
+ * pickers with the stock-photo browser behind them, the gradient ends, opacity, dim and blur — so a
+ * screen can be given a background of its own rather than only a different treatment of the shared
+ * one. It writes through the same [BackgroundConfig] that tab writes, so the two never disagree
+ * about what a surface means.
+ *
+ * What it does *not* offer is a choice of surface: [BackgroundSurfaceRows] is handed the one this
+ * output actually draws, for the reason given at that call.
  */
 @Composable
 internal fun BackgroundCustomizePane(
