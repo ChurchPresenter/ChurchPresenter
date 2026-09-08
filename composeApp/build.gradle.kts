@@ -1174,46 +1174,6 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
-        // Each floor is the measured value truncated to a whole percent and then dropped one point,
-        // capped at 85% -- close enough to bite on a real regression, loose enough that ordinary
-        // rounding does not. Measured on THIS task's scope, which excludes MainKt and so runs
-        // several points above the report's:
-        //
-        //   counter      measured   floor   margin
-        //   INSTRUCTION    86.92%    85%      +1.9
-        //   BRANCH         79.90%    78%      +1.9
-        //   LINE           90.09%    85%      +5.1
-        //   COMPLEXITY     76.15%    75%      +1.2
-        //   METHOD         85.03%    84%      +1.0
-        //   CLASS          88.54%    85%      +3.5
-        //
-        // The notes below describe why the numbers sit where they do; they are unchanged.
-        //
-        // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
-        // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
-        // under java.awt.headless and so cannot be covered at all. Inside main.kt those lines were
-        // invisible to this gate, because MainKt* is excluded above; in their own file they are
-        // counted, and they cost 0.84 points on their own. The testable parts of that file were
-        // extracted rather than left behind -- PresenterOutputContent, PresenterModeContent and
-        // PresenterTransitionEffects all came out of it and are covered -- so what remains really
-        // is display-only.
-        //
-        // The floor was lowered to 85% rather than excluding PresenterWindowsKt*, which would have
-        // kept the number at ~90% by hiding the same lines the old arrangement hid. 85% is what
-        // every other counter that can be honestly measured already sits at.
-        //
-        // BRANCH is now the tight one -- 0.8 points, a few dozen branches -- and WILL fail on a
-        // small regression. That is the point, but it also means a PR that adds a chunk of
-        // legitimately hard-to-cover code trips it. When that happens the fix is to cover it or to
-        // argue the floor down, not to widen an exclusion above: exclusions decide what the number
-        // means, floors decide how much of it we insist on. (COMPLEXITY used to be the tight one at
-        // +0.4; it is at +3.5 now.)
-        //
-        // BRANCH and COMPLEXITY sit lowest and cannot be pushed to where LINE is, for a structural
-        // reason rather than a testing gap: 396 classes are at 100% LINE and 88.6% BRANCH -- 757
-        // branches missed on code where every line ran. Those are the Compose compiler's `$changed`
-        // bitmask skip checks, emitted INSIDE each composable's own method, so no class-file
-        // exclusion can remove them. They are ~3.5% of the branch denominator.
         rule {
             limit {
                 counter = "INSTRUCTION"
