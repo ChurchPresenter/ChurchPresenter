@@ -210,6 +210,48 @@ class CrashReporterStartupTest {
         assertEquals("26.9.177", options.release, "the release is what groups events in Sentry")
     }
 
+    @Test
+    fun `the static tags carry the build provenance it was given`() {
+        startUp(
+            analyticsReportingEnabled = false,
+            BuildIdentity(isRelease = true, buildType = "release", buildChannel = "ci"),
+        )
+
+        val tags = CrashReporter.staticTags(osName = "Mac OS X", arch = "aarch64")
+
+        assertEquals("release", tags["build.type"])
+        assertEquals("ci", tags["build.channel"])
+        assertEquals("macos", tags["os.family"])
+        assertEquals("aarch64", tags["os.arch"])
+    }
+
+    @Test
+    fun `a locally packaged build is production but not ci`() {
+        // The whole point of build.channel: `isRelease` is "a packaging task ran", so this build
+        // and one CI shipped were indistinguishable, and both reported production.
+        startUp(
+            analyticsReportingEnabled = false,
+            BuildIdentity(isRelease = true, buildType = "dirty", buildChannel = "local"),
+        )
+        val options = SentryOptions()
+
+        CrashReporter.configureOptions(options, "https://key@example.org/1")
+
+        assertEquals("production", options.environment, "a packaged build is still a real install")
+        assertEquals("local", CrashReporter.staticTags()["build.channel"], "but it is not a CI one")
+        assertEquals("dirty", CrashReporter.staticTags()["build.type"])
+    }
+
+    @Test
+    fun `build provenance it was never told reads as unknown, not as a release`() {
+        startUp(analyticsReportingEnabled = false, BuildIdentity())
+
+        val tags = CrashReporter.staticTags()
+
+        assertEquals("unknown", tags["build.type"])
+        assertEquals("unknown", tags["build.channel"])
+    }
+
     // ── Sentry options ──────────────────────────────────────────────────────────
 
     @Test
