@@ -246,29 +246,39 @@ either; those are the images reviewers approve.
 widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
 `canvas_*`; `ScreenshotSupport` records what each one was.
 
-**Three churn sources are NOT fixed, and they fail 27 of the 914 images on a clean `main`** —
-the clock and camera rows measured 2026-08-22, the font rows added 2026-08-27, both times with
-`main` and a feature branch producing byte-identical failure sets:
+**One churn source is left, and it fails 2 of the 963 images on a clean `main`** — the font rows,
+added 2026-08-27. The clock and camera rows below **are fixed**: both now take the value they were
+leaking as a defaulted parameter, and their tests pin it, which is the remedy this section had
+always prescribed.
 
 | suite | images | why it changes every run |
 |---|---|---|
-| `StageMonitorScreenshotTest` | 22 | The stage monitor draws a **live wall clock**. The diff is literally `06:47:19 PM` against `01:56:04 AM`. |
-| `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 1 | Same clock, inside the settings preview. |
-| `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerates the host's **real capture devices**. Committed as "MacBook Pro Camera"; a machine without one renders "Capture screen 0". |
+| ~~`StageMonitorScreenshotTest`~~ | ~~22~~ | **Fixed.** Drew a live wall clock, *and* read the host's 12/24-hour locale. `StageMonitorScreen` now takes `now` and `use24Hour`; the test pins both. |
+| ~~`AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*`~~ | ~~1~~ | **Never the clock.** This is the Stage Monitor *settings tab*, which draws no clock and never calls `StageMonitorScreen`. Its diff was the text backdrop button — see below. |
+| ~~`CanvasTabScreenshotTest` → `source_camera`~~ | ~~1~~ | **Fixed.** Enumerated the host's real capture devices. `CameraProperties`/`SourcePropertiesPanel`/`CanvasTab` now take `cameraDevices`, and `canvasTab()` pins a fixed pair by default. |
 | `SettingsFieldsScreenshotTest` → `font_picker`, `font_picker_open` | 2 | The **font list is pinned but the glyphs are not**. The picker renders each name in its own typeface, so a machine missing one of `FONTS` draws that row in a fallback face. The test's own comment says the list is fixed "not the machine's", which is true and not enough. |
 | `AppPreviewSettingsScreenshotTest` → `settings_bible_light` | 1 | The same dropdown, inside the Bible settings preview. |
 
-All three are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside
-the composition leaking into the picture — and all want the same remedy: take the value as a
-parameter and let the test pin it. For the font rows that means rendering the sample names in a
+All of them are the same shape as the `about_*` git-hash case that *was* fixed — a value from
+outside the composition leaking into the picture — and all wanted the same remedy: take the value as
+a parameter and let the test pin it. For the font rows that means rendering the sample names in a
 bundled face rather than the installed one. Until then `verifyRoborazziJvm` cannot be read as
 pass/fail; check the failing names against this table first, and treat **anything else** as a real
 difference.
 
-**Clear `composeApp/screenshots/.parts` before reading a verify run.** The per-theme halves are
-written there before being stacked, and a run left over from an earlier invocation can be picked up
-by the next one — which surfaces as an extra failure that does not reproduce when the suite is run
-on its own. `BibleSettingsTabScreenshotTest → font_picker` appeared exactly this way and is *not* a
+**A whole suite failing is usually a re-record nobody did, not churn.** On 2026-09-06 five suites —
+`bibleSettingsTab`, `songSettingsTab`, `dictionarySettingsTab`, `qaRemoteDialog` and part of
+`previewApp`, 56 images — all failed with the same diff, and it was read as platform churn. It was
+not: the text backdrop button (`TextStyleButtons.kt`) had landed four days earlier and those five
+suites were never re-recorded. Every `*_compare.png` showed the same control appearing. Before
+calling anything churn, open one compare image and look at what actually moved.
+
+**`composeApp/screenshots/.parts` is git-ignored and cleaned up in a `finally`.** The per-theme
+halves are written there before being stacked. Cleanup used to run only on the happy path, so an
+interrupted run stranded them — and `git add -A` committed 30 of them three separate times, in
+commits whose messages were about something else entirely. A stranded half is also picked up by the
+*next* run's verify, surfacing as an extra failure that does not reproduce on its own.
+`BibleSettingsTabScreenshotTest → font_picker` appeared exactly this way and is *not* a
 churn source.
 
 Every state is shot in **both themes and stacked into one image**, light above dark — go through
@@ -425,7 +435,9 @@ produces a failure that only appears under load and only sometimes:
   `SnapshotStateObserver` and an off-screen one's, because `advanceGlobalSnapshot` fans out to every
   registered observer. `LowerThirdOffscreenRenderer` now confines its scene to the event queue, and
   `ComposeScenePump` still does not: a narrower form stays reachable while a Browser Source or NDI
-  output is live. That class's KDoc carries the cycle and what was ruled out first. The dump goes to stderr *and* to
+  output is live. The cycle and what was ruled out first are recorded in
+`LowerThirdOffscreenRenderer`'s own comment and in `HungTestReporter`, not in `ComposeScenePump` —
+which carries a pointer to them, and is tracked as issue #498. The dump goes to stderr *and* to
   `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
   as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
   it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has

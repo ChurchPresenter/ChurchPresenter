@@ -249,4 +249,40 @@ class ComposeScenePumpTest {
         // Otherwise parking would cost more wake-ups than rendering does.
         assertTrue(ComposeScenePump.IDLE_POLL_MS > ComposeScenePump(W, H, 60) {}.tickDelayMs)
     }
+
+    /**
+     * A slow frame callback eats into the tick, it does not extend it.
+     *
+     * NDI's own `clock_video` already paces the sender to the frame rate its frames declare, so
+     * `onFrame` blocks inside the runtime for most of a tick. Waiting a full `tickDelayMs` on top
+     * of that halved the delivered rate -- a 30fps output ran at about 15. The delay is now what is
+     * left of the tick, so the two pacers compose instead of adding.
+     */
+    @Test
+    fun `a slow frame callback does not add to the tick period`() {
+        val fps = 20                       // 50ms ticks, so a 40ms callback leaves 10ms
+        val callbackMs = 40L
+        val frames = java.util.concurrent.atomic.AtomicInteger()
+        val pump = ComposeScenePump(width = 8, height = 8, fps = fps) { Box(Modifier.fillMaxSize()) }
+        val scope = CoroutineScope(Dispatchers.Default)
+        try {
+            val startedAt = System.nanoTime()
+            pump.start(scope) { _, _, _, _ ->
+                delay(callbackMs)
+                frames.incrementAndGet()
+            }
+            // Six frames at 50ms is 300ms if the callback is absorbed, and 540ms if it is added on
+            // top. Waiting for the sixth is the positive signal; the assertion is on elapsed time.
+            waitFor("six frames") { frames.get() >= 6 }
+            val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000
+
+            assertTrue(
+                elapsedMs < 6 * (1_000L / fps + callbackMs) * 0.8,
+                "six frames took ${elapsedMs}ms; the callback is being added to the tick, not absorbed",
+            )
+        } finally {
+            pump.stop()
+            scope.cancel()
+        }
+    }
 }

@@ -194,7 +194,18 @@ internal fun ndiSourceOn(
 }
 
 @Composable
-internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+internal fun CameraProperties(
+    source: SceneSource.CameraSource,
+    onUpdate: (SceneSource) -> Unit,
+    /**
+     * The cameras to offer, or null to ask this machine.
+     *
+     * A test passes a list: enumeration reports whatever hardware the recording machine happens to
+     * have, so the committed image of this panel said "MacBook Pro Camera" on one and "Capture
+     * screen 0" on another. Same seam, same reason, as `SongBackgroundLibrary`'s.
+     */
+    devices: List<CameraDevice>? = null,
+) {
     Text(
         stringResource(Res.string.canvas_source_camera),
         style = MaterialTheme.typography.labelMedium,
@@ -209,10 +220,15 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
     // panel that hangs the app for seconds every time a camera source is selected is the reported
     // "Canvas tab is very hanging"; the catalog does the same work on IO and caches it.
     val known by CameraDeviceCatalog.devices.collectAsState()
-    val devices = known.orEmpty()
+    val supplied = devices
+    val offered = supplied ?: known.orEmpty()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(deckLinkDeviceFormat) { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) }
+    // Never enumerated when the caller supplied the list, or the real hardware would land a moment
+    // later and replace what the caller pinned.
+    LaunchedEffect(deckLinkDeviceFormat) {
+        if (supplied == null) CameraDeviceCatalog.refresh(deckLinkDeviceFormat)
+    }
 
     Button(
         onClick = { scope.launch { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) } },
@@ -222,14 +238,14 @@ internal fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (Scene
         Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
     }
 
-    if (devices.isNotEmpty()) {
-        val items = devices.map { it.displayName }
+    if (offered.isNotEmpty()) {
+        val items = offered.map { it.displayName }
         DropdownSelector(
             label = stringResource(Res.string.canvas_camera_device),
             items = items,
-            selected = selectedCameraName(devices, source),
+            selected = selectedCameraName(offered, source),
             onSelectedChange = { selected ->
-                val device = devices.find { it.displayName == selected }
+                val device = offered.find { it.displayName == selected }
                 if (device != null) {
                     onUpdate(cameraSourceOn(source, device))
                 }

@@ -6,6 +6,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import com.sun.jna.Pointer
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -62,6 +63,15 @@ typealias OnFrame = suspend (argb: IntArray, width: Int, height: Int, elapsedMs:
  * The scene is built once per [start] and closed when the job ends, so the composition — and every
  * `remember` in it — survives across frames. Restarting the pump is what discards it, which is why
  * callers `remember` an instance keyed on the dimensions and fps that would invalidate it.
+ *
+ * **This class is still exposed to the `SnapshotStateObserver` ABBA deadlock — issue #498.**
+ * `render` advances the global snapshot, and `advanceGlobalSnapshot` fans out to every registered
+ * apply observer, this scene's and the on-screen AWT scene's alike; two threads doing that at once
+ * take the two observers' locks in opposite orders. `LowerThirdOffscreenRenderer` was fixed by
+ * confining its scene to the event queue and explains the cycle at its own `withSession`;
+ * `HungTestReporter` records the proved lock owners. This one was left because it drives a *live*
+ * feed, so confining it moves a full-size render onto the event thread for the whole of a service —
+ * and nothing here measures what that costs.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 class ComposeScenePump(
@@ -192,12 +202,29 @@ class ComposeScenePump(
             }
             // A frame that could not be read back is skipped rather than sent: the buffer still
             // holds the previous one, and re-sending it would read as live content that has frozen.
+            val callbackStart = System.nanoTime()
             if (read) {
                 onFrame(intBuf, width, height, timeNanos / NANOS_PER_MILLI)
             } else {
                 reportUnreadableFrame()
             }
-            delay(tickDelayMs)
+            // Whatever the callback already waited comes off this tick. For NDI it waits a whole
+            // frame interval inside the runtime -- `clock_video` paces the sender to the rate its
+            // frames declare -- so delaying a full tick on top of that made a 30fps output deliver
+            // about 15, and a fill+key one about 10, since that mode clocks two senders per tick.
+            //
+            // Deliberately the callback's time and not the whole tick's: subtracting the render too
+            // would remove all pacing from any output whose render alone overruns its budget, and
+            // Browser Source has no downstream pacer to fall back on -- it would then render as
+            // fast as it possibly can, which is the opposite of what anyone wants from it.
+            //
+            // `yield` rather than `delay(0)` when nothing is left: `delay(0)` returns without
+            // suspending, so the loop would never reschedule -- it pins a dispatcher thread, and
+            // with no suspension point a `shouldRender` flag written by another thread may never
+            // be observed at all. The park test catches exactly that.
+            val callbackMs = (System.nanoTime() - callbackStart) / NANOS_PER_MILLI
+            val remainingMs = tickDelayMs - callbackMs
+            if (remainingMs > 0) delay(remainingMs) else yield()
         }
     }
 

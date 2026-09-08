@@ -193,6 +193,17 @@ fun StageMonitorScreen(
     qaSettings: QASettings = QASettings(),
     displayedDictionaryEntry: StrongsEntry? = null,
     dictionarySettings: DictionarySettings = DictionarySettings(),
+    /**
+     * What the clock zone reads, and whether it reads it as 24-hour.
+     *
+     * Parameters only so the screenshot of this screen can pin them -- the same reason
+     * [AboutDialogContent][org.churchpresenter.app.churchpresenter.dialogs.AboutDialogContent]
+     * takes its version line. A live wall clock and the host's locale are both values from outside
+     * the composition, and a committed image of a screen that draws them is stale the second it is
+     * recorded: 22 of them changed on every run. Nothing but the test passes anything here.
+     */
+    now: () -> LocalTime = { LocalTime.now() },
+    use24Hour: Boolean = isSystemUsing24HourFormat(),
     modifier: Modifier = Modifier
 ) {
     val currentText = stageCurrentText(presentingMode, currentLyricSection, displayedVerses)
@@ -205,10 +216,10 @@ fun StageMonitorScreen(
     }
 
     // Clock state — ticks every second
-    var clockText by remember { mutableStateOf(formatClock()) }
+    var clockText by remember { mutableStateOf(formatClock(now(), use24Hour)) }
     LaunchedEffect(Unit) {
         while (true) {
-            clockText = formatClock()
+            clockText = formatClock(now(), use24Hour)
             delay(CLOCK_TICK_MS)
         }
     }
@@ -633,9 +644,9 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
     )
 }
 
-private fun formatClock(): String {
-    val pattern = if (isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
-    return LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
+private fun formatClock(now: LocalTime, use24Hour: Boolean): String {
+    val pattern = if (use24Hour) "HH:mm:ss" else "hh:mm:ss a"
+    return now.format(DateTimeFormatter.ofPattern(pattern))
 }
 
 private fun buildTextStyle(

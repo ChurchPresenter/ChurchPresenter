@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -55,11 +56,31 @@ internal class CanvasReports {
  * `CanvasTab` over it, and runs [block].
  */
 @OptIn(ExperimentalTestApi::class)
+/** A camera and a capture card, so the picker is photographed with something in it. */
+internal val PINNED_CAMERAS = listOf(
+    CameraDevice(name = "Studio Camera", path = "0", displayName = "Studio Camera"),
+    CameraDevice(
+        name = "DeckLink Mini Recorder",
+        path = "1",
+        displayName = "DeckLink: Mini Recorder",
+        isDeckLink = true,
+        deckLinkIndex = 0,
+    ),
+)
+
 internal fun canvasTab(
     seed: SceneViewModel.() -> Unit = {},
     settings: (AppSettings) -> AppSettings = { it },
     width: Dp? = null,
     themeMode: ThemeMode? = null,
+    /**
+     * The cameras the source panel offers.
+     *
+     * Pinned by default, never read from the machine: the committed image of the camera picker
+     * otherwise named whatever hardware the recording machine had -- "MacBook Pro Camera" on one,
+     * "Capture screen 0" on another. Pass null to let a test exercise the real enumeration.
+     */
+    cameraDevices: List<CameraDevice>? = PINNED_CAMERAS,
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -81,6 +102,7 @@ internal fun canvasTab(
                             presenterManager = presenter,
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
+                            cameraDevices = cameraDevices,
                         )
                     }
                 }
