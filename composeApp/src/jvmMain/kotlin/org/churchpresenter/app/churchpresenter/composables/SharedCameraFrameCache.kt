@@ -70,6 +70,17 @@ object SharedCameraFrameCache {
     )
 
     /**
+     * The failure flow of every capture running right now, by cache key — read-only.
+     *
+     * A property and not a function because this object is at its `TooManyFunctions` threshold;
+     * [cameraFailureFlow] is the thing to call, and is top-level for the same reason
+     * [avfSourceToOpen] is.
+     */
+    @get:Synchronized
+    internal val liveFailures: Map<String, StateFlow<CameraFailure?>>
+        get() = entries.mapValues { (_, entry) -> entry.error }
+
+    /**
      * Acquire a shared frame flow for this camera source.
      * First subscriber starts the capture; subsequent subscribers share it.
      */
