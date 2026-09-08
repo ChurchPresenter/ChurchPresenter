@@ -37,9 +37,27 @@ data class BuildIdentity(
     val versionDisplay: String = UNKNOWN_VERSION,
     val appVersion: String = UNKNOWN_VERSION,
     val isRelease: Boolean = false,
+    /**
+     * `release`, `dirty`, `snapshot` or `nogit` — what the tree looked like, not merely whether a
+     * packaging task ran. Already computed for the live-map ping; carried here so a report can say
+     * the same thing.
+     */
+    val buildType: String = UNKNOWN_BUILD,
+    /**
+     * `ci` or `local`: where the build was produced.
+     *
+     * [isRelease] cannot answer that — it means "a packaging task ran", so a build packaged on a
+     * developer's machine is indistinguishable from one CI shipped, and both report
+     * `environment=production`. Over 30 days that left 224 of 234 camera reports labelled
+     * production, a tester's among them, with no way to separate them from an operator's.
+     */
+    val buildChannel: String = UNKNOWN_BUILD,
 )
 
 private const val UNKNOWN_VERSION = "unknown"
+
+/** What [BuildIdentity] reports for build provenance it was not told. */
+private const val UNKNOWN_BUILD = "unknown"
 
 /**
  * Global crash reporter that:
@@ -473,18 +491,37 @@ object CrashReporter {
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             Sentry.init { options -> configureOptions(options, dsn) }
-            // Static context that helps triage: OS family and arch, and dev/release build.
-            // Both are needed, and arch alone is a trap: Adoptium reports "aarch64" on Apple
-            // Silicon and on ARM Linux alike, and "x86_64" on Intel macOS against "amd64"
-            // elsewhere — so a report carrying only arch cannot say which OS a platform-specific
-            // path was taken on. Diagnosing the HEIC decode failures needed exactly that.
-            setTag("os.family", osFamily(System.getProperty("os.name", "")))
-            setTag("os.arch", System.getProperty("os.arch", "unknown"))
-            setTag("build.type", if (build.isRelease) "release" else "dev")
+            staticTags().forEach { (key, value) -> setTag(key, value) }
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
         }
     }
+
+    /**
+     * The context every event carries, whatever it is about.
+     *
+     * A function returning the pairs rather than a run of `setTag` calls inside [initSentry], for
+     * the reason [configureOptions] is split out: `Sentry.init` is the one call a test cannot make,
+     * and these are ordinary decisions about what a report should say. Tags land on the scope and
+     * not on [SentryOptions], so this is the only seam that can check them.
+     *
+     * Arch alone is a trap: Adoptium reports "aarch64" on Apple Silicon and on ARM Linux alike, and
+     * "x86_64" on Intel macOS against "amd64" elsewhere — so a report carrying only arch cannot say
+     * which OS a platform-specific path was taken on. Diagnosing the HEIC decode failures needed
+     * exactly that, which is why the family is sent beside it.
+     *
+     * `build.type` is the tree's own state and not the two-valued `isRelease`, which cannot tell a
+     * CI release from one packaged on a laptop; `build.channel` is what separates those.
+     */
+    internal fun staticTags(
+        osName: String = System.getProperty("os.name", ""),
+        arch: String = System.getProperty("os.arch", "unknown"),
+    ): Map<String, String> = mapOf(
+        "os.family" to osFamily(osName),
+        "os.arch" to arch,
+        "build.type" to build.buildType,
+        "build.channel" to build.buildChannel,
+    )
 
     /**
      * Which OS family [osName] names, as one of "macos", "windows", "linux" or "other".
@@ -513,6 +550,11 @@ object CrashReporter {
         options.dsn = dsn
         options.release = build.appVersion
         // Keep developer test runs out of production release-health stats.
+        //
+        // Deliberately still `isRelease` and not `buildChannel`: builds packaged by hand and passed
+        // to a church are real installs, and relabelling them `development` would hide operator
+        // data to tidy up a tester's. `environment:production build.channel:ci` is the narrower
+        // question, and it can now be asked without redefining this one.
         options.environment = if (build.isRelease) "production" else "development"
         options.isEnableUncaughtExceptionHandler = true
         options.isAttachThreads = false
