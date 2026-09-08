@@ -223,14 +223,22 @@ internal fun stackedThemes(
     shoot: (ThemeMode, File) -> Unit,
 ) {
     PARTS.mkdirs()
-    val parts = THEMES.map { (suffix, mode) ->
-        File(PARTS, "${section}_${name}_$suffix.png").also { shoot(mode, it) }
+    val parts = THEMES.map { (suffix, mode) -> File(PARTS, "${section}_${name}_$suffix.png") }
+    // Cleaned up even when a shot throws. Without the finally, an interrupted run stranded the
+    // halves here -- and a later `git add -A` committed 30 of them three separate times, none of
+    // those commits mentioning screenshots. A leftover half is also read by the *next* run's
+    // verify, which is the phantom failure AGENT.md warns about.
+    try {
+        parts.forEachIndexed { index, part -> shoot(THEMES[index].second, part) }
+        // Nothing was written: capture is inert outside the Roborazzi tasks, so an ordinary test
+        // run still composes every state (a throw there fails the test) without touching the images.
+        if (parts.all { it.exists() }) {
+            stackVertically(parts, File("$SCREENSHOT_ROOT/$section/$name.png"), trim)
+        }
+    } finally {
+        parts.forEach { it.delete() }
+        PARTS.delete()
     }
-    // Nothing was written: capture is inert outside the Roborazzi tasks, so an ordinary test run
-    // still composes every state (a throw there fails the test) without touching the images.
-    if (parts.all { it.exists() }) stackVertically(parts, File("$SCREENSHOT_ROOT/$section/$name.png"), trim)
-    parts.forEach { it.delete() }
-    PARTS.delete()
 }
 
 /**

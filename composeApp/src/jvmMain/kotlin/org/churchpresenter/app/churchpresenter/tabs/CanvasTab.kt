@@ -16,6 +16,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -164,6 +165,8 @@ fun CanvasTab(
     sceneViewModel: SceneViewModel,
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     dialogDismissSignal: Int = 0,
+    /** The cameras the source panel offers, or null to ask this machine — a test pins it. */
+    cameraDevices: List<CameraDevice>? = null,
 ) {
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -978,6 +981,7 @@ fun CanvasTab(
                     source = selectedSource,
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
+                    cameraDevices = cameraDevices,
                     onSourceUpdate = { updatedSource ->
                         sceneViewModel.updateSource(updatedSource.id) { updatedSource }
                     }

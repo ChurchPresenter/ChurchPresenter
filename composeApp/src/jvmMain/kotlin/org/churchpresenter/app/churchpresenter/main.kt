@@ -267,6 +267,8 @@ fun main() {
             versionDisplay = BuildConfig.VERSION_DISPLAY,
             appVersion = BuildConfig.APP_VERSION,
             isRelease = BuildConfig.IS_RELEASE,
+            buildType = BuildConfig.BUILD_TYPE,
+            buildChannel = BuildConfig.BUILD_CHANNEL,
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
