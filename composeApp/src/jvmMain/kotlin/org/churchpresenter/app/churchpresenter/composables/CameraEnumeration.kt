@@ -53,7 +53,14 @@ internal fun selectedFormatName(
     if (videoFormat.isEmpty()) autoLabel
     else formats.find { it.encodedValue == videoFormat }?.displayName ?: autoLabel
 
-internal data class CameraDevice(
+/**
+ * One camera or capture device this machine can open.
+ *
+ * Public, unlike the enumeration around it, because the Canvas tab and its source panel take a list
+ * of these as a parameter so a screenshot can pin what the picker shows -- the machine's real
+ * hardware would otherwise decide what the committed image says.
+ */
+data class CameraDevice(
     val name: String,
     val path: String,
     val displayName: String,

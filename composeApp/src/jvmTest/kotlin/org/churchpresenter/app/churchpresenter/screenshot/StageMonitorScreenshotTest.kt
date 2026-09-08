@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import java.time.LocalTime
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +57,9 @@ import kotlin.test.Test
  */
 class StageMonitorScreenshotTest {
 
+    /** What the clock zone reads in every shot. Arbitrary, and the point is that it never moves. */
+    private val PINNED_CLOCK: LocalTime = LocalTime.of(10, 42, 8)
+
     private val screen = Modifier.size(1920.dp, 1080.dp)
 
     private fun shoot(
@@ -100,6 +104,12 @@ class StageMonitorScreenshotTest {
                         displayedDictionaryEntry = entry,
                         qaSettings = QASettings(),
                         dictionarySettings = DictionarySettings(),
+                        // Pinned, never read from the machine. The clock zone drew the real wall
+                        // clock, so 22 of these images changed on every run and the suite could not
+                        // be read as pass/fail. 24-hour is pinned too: the host's locale decides
+                        // that, so a US mac and a CI box disagreed even with the instant fixed.
+                        now = { PINNED_CLOCK },
+                        use24Hour = false,
                     )
                 }
             }
