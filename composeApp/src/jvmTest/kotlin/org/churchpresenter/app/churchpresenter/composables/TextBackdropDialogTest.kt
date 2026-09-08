@@ -28,13 +28,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The one dialog behind the text-backing button: the four-way Style row, the presets, and the
- * fill/border fields the chosen style brings with it.
- *
- * The presets row mixes the operator's own saved looks with the built-ins, so every test here
- * starts from an empty [SavedTextBackdrops] — the same reset [ColorPickerDialogTest] does for
- * [RecentColors], and for the same reason: the list is a process-wide singleton backed by a file
- * under the fake home.
+ * The dialog behind the text-backing button: the Style row, the presets, and the fields the chosen
+ * style brings with it. [SavedTextBackdrops] is a singleton over a file under the fake home, so
+ * every test resets it. Field captions are matched upper-case — the fields draw `label.uppercase()`.
  */
 class TextBackdropDialogTest {
 
@@ -138,7 +134,7 @@ class TextBackdropDialogTest {
     }
 
     @Test
-    fun `turning a look off keeps every colour and measurement it had`() = dialog(tuned("both")) { get, _ ->
+    fun `turning a look off keeps every color and measurement it had`() = dialog(tuned("both")) { get, _ ->
         onNodeWithText("Off").performClick()
         waitForIdle()
         val off = get()

@@ -26,12 +26,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * What the Background panel calls the thing it is showing, and what its preview tile actually
- * paints.
- *
- * The three naming functions are `@Composable` — they resolve string resources — so each is read
- * back out of a composition rather than called directly. The fill is asserted in pixels: whether a
- * clip shows as black and an image shows as the image is the only thing that tile is for.
+ * What the Background panel calls the thing it is showing, and what its preview tile paints. The
+ * naming functions are `@Composable`, so each is read back out of a composition.
  */
 class SongBackgroundNamingTest {
 
@@ -76,7 +72,7 @@ class SongBackgroundNamingTest {
     // ── The name over the preview ─────────────────────────────────────────────
 
     @Test
-    fun `an inherited background says so instead of naming a colour`() {
+    fun `an inherited background says so instead of naming a color`() {
         assertEquals("Inherited", readComposed { songBackgroundName(SongBackground()) })
     }
 
@@ -111,17 +107,17 @@ class SongBackgroundNamingTest {
     }
 
     @Test
-    fun `a palette colour is named`() {
+    fun `a palette color is named`() {
         assertEquals("Solid Black", readComposed { songBackgroundName(color("#000000")) })
     }
 
     @Test
-    fun `a palette colour is matched whatever case it was stored in`() {
+    fun `a palette color is matched whatever case it was stored in`() {
         assertEquals("Deep Navy", readComposed { songBackgroundName(color("#0D1B2A")) })
     }
 
     @Test
-    fun `a colour outside the palette is the operator's own`() {
+    fun `a color outside the palette is the operator's own`() {
         assertEquals("Custom color", readComposed { songBackgroundName(color("#123456")) })
     }
 
@@ -195,17 +191,17 @@ class SongBackgroundNamingTest {
     }
 
     @Test
-    fun `a colour background draws that colour`() = runComposeUiTest {
+    fun `a color background draws that color`() = runComposeUiTest {
         tile(color("#FF0000"))
         val map = pixels()
-        assertEquals(map.width * map.height, map.count { near(it, 1f, 0f, 0f) }, "the whole tile is the colour")
+        assertEquals(map.width * map.height, map.count { near(it, 1f, 0f, 0f) }, "the whole tile is the color")
     }
 
     @Test
     fun `a gradient draws both of its ends`() = runComposeUiTest {
         tile(SongBackground(type = SongBackgroundType.GRADIENT, color = "#FF0000", colorEnd = "#0000FF"))
         val map = pixels()
-        assertTrue(near(map[map.width / 2, 1], 1f, 0f, 0f), "the near colour is at the top")
+        assertTrue(near(map[map.width / 2, 1], 1f, 0f, 0f), "the near color is at the top")
         assertTrue(near(map[map.width / 2, map.height - 2], 0f, 0f, 1f), "and the far one at the bottom")
     }
 
@@ -259,7 +255,7 @@ class SongBackgroundNamingTest {
         tile(color("#FF0000").copy(opacity = 40))
         val middle = pixels()[60, 60]
         // Read on the alpha channel: the tile is captured over nothing, so a faded background
-        // arrives as its own colour at less than full opacity rather than blended toward a ground.
+        // arrives as its own color at less than full opacity rather than blended toward a ground.
         assertTrue(middle.alpha < 0.9f, "a faded background must not paint at full strength: $middle")
     }
 
@@ -271,7 +267,7 @@ class SongBackgroundNamingTest {
     }
 
     @Test
-    fun `a blurred background still draws its colour`() = runComposeUiTest {
+    fun `a blurred background still draws its color`() = runComposeUiTest {
         tile(color("#FF0000").copy(blur = 12))
         assertTrue(pixels().count { it.red > 0.5f } > 0, "a blur must not blank the tile")
     }

@@ -21,12 +21,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The two Song-pane controls that go somewhere else before they store anything: the number's corner
- * dropdown, and the text-backing button that opens a dialog of its own.
- *
- * Both are driven on each stored profile, for the reason the rest of the Song pane's suites give —
- * every field is an `if (lowerThird)` over a pair, and writing the wrong half looks like nothing
- * happening.
+ * The number's corner dropdown and the text-backing button — the two Song-pane controls that go
+ * somewhere else before they store anything. Both driven on each stored profile.
  */
 class ProjectionCustomizeSongExtrasTest {
 

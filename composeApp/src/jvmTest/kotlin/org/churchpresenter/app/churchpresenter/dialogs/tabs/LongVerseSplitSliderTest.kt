@@ -29,12 +29,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The one control that says both whether a long verse is broken across two slides and how long
- * "long" is.
- *
- * `SlimSlider` publishes no semantics of its own, so the track is driven by injecting a click at a
- * computed coordinate inside a host of known width — the approach [SlimSliderTest] documents. The
- * caption line is what the assertions read: it is the only place the current stop is written out.
+ * Whether a long verse is broken across two slides, and how long "long" is — one slider for both.
+ * `SlimSlider` publishes no semantics, so the track is tapped at a computed coordinate.
  */
 class LongVerseSplitSliderTest {
 

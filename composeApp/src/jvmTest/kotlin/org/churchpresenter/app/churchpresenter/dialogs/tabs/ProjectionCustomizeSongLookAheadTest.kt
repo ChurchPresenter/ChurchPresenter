@@ -18,13 +18,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The Song pane's look-ahead elements, driven on **both** stored profiles.
- *
- * `ProjectionCustomizeSongControlsTest` covers the sizes and colours; these are the halves it does
- * not reach — the face buttons on the look-ahead line, the next section's own quartet, the font
- * pickers, and the typography row — each on the full screen and on the band, because the same
- * control writes a different field depending on the output's shape and that pairing is exactly
- * where a wrong-half bug lives.
+ * The Song pane's look-ahead elements on both stored profiles: the face buttons, the next section's
+ * quartet, the font pickers and the typography row.
  */
 class ProjectionCustomizeSongLookAheadTest {
 

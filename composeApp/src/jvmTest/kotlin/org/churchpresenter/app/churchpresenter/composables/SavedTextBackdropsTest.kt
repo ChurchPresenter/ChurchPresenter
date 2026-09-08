@@ -12,9 +12,7 @@ import kotlin.test.assertTrue
 
 /**
  * The operator's own presets: what goes in the row, in what order, and what survives a restart.
- *
- * The store is a process-wide singleton over one file under the fake home, so each test clears both
- * before and after — the same shape [ColorPickerDialogTest] uses for [RecentColors].
+ * The store is a process-wide singleton over a file under the fake home, so each test clears it.
  */
 class SavedTextBackdropsTest {
 

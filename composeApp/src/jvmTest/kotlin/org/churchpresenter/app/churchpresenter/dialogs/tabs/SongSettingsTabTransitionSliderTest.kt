@@ -11,10 +11,7 @@ import kotlin.test.assertTrue
 
 /**
  * The Song tab's transition-duration slider — the one control in that section with no field to type
- * into, and the reason the section's coverage stopped where the checkboxes did.
- *
- * It snaps to 50ms steps over a 100..2000 track, so each test drops the handle at a fraction and
- * asserts the stored value rather than a pixel.
+ * into. It snaps to 50ms steps over a 100..2000 track.
  */
 class SongSettingsTabTransitionSliderTest {
 

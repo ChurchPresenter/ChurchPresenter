@@ -10,18 +10,12 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
 
 /**
- * Tapping a `SlimSlider` that has a caption above it and a readout beside it.
+ * Taps a `SlimSlider` that has a caption above it and a readout beside it.
  *
- * The slider draws its track on a bare `Canvas` and publishes no semantics at all, so there is no
- * node to address and no value to read back from it — the caption and the readout are the only two
- * things in the tree, and the track is the strip between them. `BackgroundSettingsTabTestSupport`
- * has the same helper for that tab; this one is for the forms whose caption and readout sit in
- * different containers (the Customize dialog's rows, and the Song tab's control columns), and it
- * takes both texts from the caller rather than pairing them by geometry.
- *
- * The click goes to the **root**, because the point it needs is inside neither node. Where a dialog
- * is open there are two roots at the same origin and the dialog is the second, so the last one is
- * the one addressed — its children's `boundsInRoot` are in the same coordinates either way.
+ * The slider draws its track on a bare `Canvas` and publishes no semantics, so the caption and the
+ * readout are the only nodes in the tree and the track is the strip between them. The click goes to
+ * the root, because the point it needs is inside neither node; with a dialog open there are two
+ * roots at the same origin and the dialog is the last one.
  */
 internal fun ComposeUiTest.tapSliderTrack(caption: String, readout: String, fraction: Float) {
     val captionBounds = onAllNodesWithText(caption).fetchSemanticsNodes(atLeastOneRootRequired = false)

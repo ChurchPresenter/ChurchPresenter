@@ -8,13 +8,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The two decisions the background camera picker takes once a machine reports hardware.
- *
- * Driven as functions rather than through the rendered picker, for the reason
- * `SourcePropertiesCameraSelectionTest` gives for the Canvas panel's twin: what a camera dropdown
- * contains is the operator's own hardware, and no fixture can plug a capture card in. These are
- * about a background configured *somewhere else* — a `.song` saved in the booth and opened on a
- * laptop, or a card moved between slots.
+ * The two decisions the background camera picker takes once a machine reports hardware — driven as
+ * functions, because no fixture can plug a capture card in.
  */
 class BackgroundCameraPickerModelTest {
 

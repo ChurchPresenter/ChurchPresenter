@@ -23,14 +23,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The text-backing control at the end of the style row: a chip that flips the last look on and off,
- * and a caret onto the dialog behind it.
- *
- * Both halves publish their tooltip as a content description — the chip draws a letter and the
- * caret an arrow, so neither has a name of its own — which is how each is addressed here.
- *
- * The dialog the caret opens shares [SavedTextBackdrops], a process-wide singleton over a file
- * under the fake home, so it is reset around every test exactly as [TextBackdropDialogTest] does.
+ * The text-backing split button: a chip that flips the last look on and off, and a caret onto the
+ * dialog. Both halves publish their tooltip as a content description, which is how each is found.
  */
 class TextStyleButtonsBackdropTest {
 

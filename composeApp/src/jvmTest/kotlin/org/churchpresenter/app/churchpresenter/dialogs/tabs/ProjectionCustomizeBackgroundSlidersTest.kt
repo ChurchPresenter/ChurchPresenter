@@ -15,16 +15,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The three sliders every drawn background carries — how opaque it is, how much black is washed
- * over it, and how far it is blurred.
- *
- * They are nudged until the picture reads well behind text rather than typed to a number, so they
- * are sliders and not fields, and the fixture gives each a distinct reading so the track can be
- * found by the number beside it.
- *
- * Driven across three surfaces rather than one: which of the six a pane edits is decided by the
- * chip *and* the output's shape before a control is ever drawn, and all six go through the one
- * `configFor`/`withConfigFor` pair.
+ * The three sliders every drawn background carries: opacity, dim and blur. The fixture gives each a
+ * distinct reading so its track can be found by the number beside it.
  */
 class ProjectionCustomizeBackgroundSlidersTest {
 

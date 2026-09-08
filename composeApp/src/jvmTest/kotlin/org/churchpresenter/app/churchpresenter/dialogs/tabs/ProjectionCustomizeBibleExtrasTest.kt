@@ -20,12 +20,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The Bible pane's face, alignment and text-backing controls, on both stored profiles.
- *
- * `ProjectionCustomizeBibleControlsTest` covers the sizes and colours; these are the rest of the
- * verse-text group. The vertical alignment is the odd one out and is asserted as such: it is one
- * value on `BibleSettings` rather than a pair on the translation, so a band and a full screen share
- * it.
+ * The Bible pane's face, alignment and text-backing controls, on both stored profiles. The vertical
+ * alignment is one value on `BibleSettings` rather than a pair, and is asserted as such.
  */
 class ProjectionCustomizeBibleExtrasTest {
 

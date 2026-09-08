@@ -15,14 +15,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 /**
- * The letter- and word-spacing sliders shared by the Song and Bible panes.
- *
- * They are the two controls in the typography group with no field to type into, which is why the
- * group's coverage stopped at the case picker. Both run a -20..100 track, so halfway along is 40
- * and the two ends are the range's own — see [tapSliderTrack] for why the far end is a pixel short.
- *
- * Each is driven on both stored profiles: the pane writes an `if (lowerThird)` pair, and one that
- * wrote the full-screen half on a band would look right and change nothing.
+ * The letter- and word-spacing sliders shared by the Song and Bible panes. Both run a -20..100
+ * track, so halfway along is 40; see [tapSliderTrack] for why the far end is a pixel short.
  */
 class ProjectionCustomizeSpacingTest {
 

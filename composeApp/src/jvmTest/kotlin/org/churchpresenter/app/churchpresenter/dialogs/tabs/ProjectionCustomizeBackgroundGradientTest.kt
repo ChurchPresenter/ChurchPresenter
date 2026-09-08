@@ -16,18 +16,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The Background pane's gradient, which only two of the six surfaces offer.
+ * The Background pane's gradient, which only the two lower-third surfaces offer.
  *
- * A gradient is a band's background — the full screen's surfaces do not list it — so every test
- * here drives a lower-third output and reads back the `bibleLowerThirdBackground` half of the
- * override, which is the one that shape writes.
- *
- * **Gradient is never *clicked* here, only started from.** It is the sixth and last segment of the
- * type row, and at the dialog's width that row overflows its pane: measured on a 1024×768 test
- * window, Transparent is clipped to 26px and Gradient to a zero-sized rect, so a click on it lands
- * on nothing and stores nothing. That is a real layout fault rather than a testing obstacle — a
- * band's Gradient option is unreachable at that width — and asserting around it here is
- * deliberate, not an oversight.
+ * **Gradient is never clicked here, only started from.** It is the last of six segments in the type
+ * row, and that row overflows its pane: on a 1024x768 test window Transparent is clipped to 26px
+ * and Gradient to a zero-sized rect, so a click on it lands on nothing. That is a layout fault, not
+ * a testing obstacle.
  */
 class ProjectionCustomizeBackgroundGradientTest {
 
@@ -95,7 +89,7 @@ class ProjectionCustomizeBackgroundGradientTest {
     fun `a gradient shows both of its ends and where it turns over`() {
         projectionTab(output()) { _ ->
             openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE, override = false)
-            // The two colour fields are named by the colours they hold: "Top" and "Bottom" are also
+            // The two color fields are named by the colors they hold: "Top" and "Bottom" are also
             // the captions of the Window Position card on the tab behind the dialog, and the
             // finder spans every root.
             onNodeWithText("#101010").assertExists()
@@ -137,7 +131,7 @@ class ProjectionCustomizeBackgroundGradientTest {
     // ── The other types ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `a surface drawing a colour shows no gradient rows`() {
+    fun `a surface drawing a color shows no gradient rows`() {
         val colored = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR, gradientPosition = 0.37f)
         projectionTab(output(config = colored)) { _ ->
             openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE, override = false)
@@ -179,7 +173,7 @@ class ProjectionCustomizeBackgroundGradientTest {
     }
 
     @Test
-    fun `leaving a gradient for a colour puts the colour row back`() {
+    fun `leaving a gradient for a color puts the color row back`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE)
             chooseSegment("Color")

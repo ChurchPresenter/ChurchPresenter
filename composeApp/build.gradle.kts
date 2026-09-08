@@ -1174,20 +1174,20 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
-        // All six counters are temporarily at 75%. They were 85/80/85/75/85/85 until 2026-08-18,
-        // when CLASS fell to 84.77% and the gate began blocking every merge; the floors were dropped
-        // in one step rather than tuned per counter. Re-measured 2026-08-18 on the report scope:
+        // Each floor is the measured value truncated to a whole percent and then dropped one point,
+        // capped at 85% -- close enough to bite on a real regression, loose enough that ordinary
+        // rounding does not. Measured on THIS task's scope, which excludes MainKt and so runs
+        // several points above the report's:
         //
         //   counter      measured   floor   margin
-        //   INSTRUCTION    88.16%    75%     +13.2
-        //   BRANCH         80.04%    75%      +5.0
-        //   LINE           88.69%    75%     +13.7
-        //   COMPLEXITY     76.85%    75%      +1.9
-        //   METHOD         85.44%    75%     +10.4
-        //   CLASS          84.77%    75%      +9.8
+        //   INSTRUCTION    86.92%    85%      +1.9
+        //   BRANCH         79.90%    78%      +1.9
+        //   LINE           90.09%    85%      +5.1
+        //   COMPLEXITY     76.15%    75%      +1.2
+        //   METHOD         85.03%    84%      +1.0
+        //   CLASS          88.54%    85%      +3.5
         //
-        // Raising them back is the open question, not whether the notes below still hold -- those
-        // describe why the numbers sit where they do and are unchanged.
+        // The notes below describe why the numbers sit where they do; they are unchanged.
         //
         // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
         // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
@@ -1218,17 +1218,17 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.78".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "COMPLEXITY"
@@ -1238,12 +1238,12 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "METHOD"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.84".toBigDecimal()
             }
             limit {
                 counter = "CLASS"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
         }
     }

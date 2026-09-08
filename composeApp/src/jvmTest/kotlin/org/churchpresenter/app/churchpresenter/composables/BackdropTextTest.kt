@@ -33,12 +33,8 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * [BackdropText] and the painter behind it — the wrapper the ordinary call sites use, and the
- * `modifier` + `onTextLayout` pair the presenters chain onto their own measuring.
- *
- * Asserted in pixels rather than by asking the painter what it holds: whether a backdrop is
- * actually drawn is the whole point of the class, and the painter's own state says nothing about
- * whether the `drawBehind` ever ran.
+ * [BackdropText] and the painter behind it. Asserted in pixels: whether the `drawBehind` ever ran
+ * is the whole point, and the painter's own state does not say.
  */
 class BackdropTextTest {
 

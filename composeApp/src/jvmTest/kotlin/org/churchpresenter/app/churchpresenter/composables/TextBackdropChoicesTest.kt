@@ -10,10 +10,6 @@ import kotlin.test.assertTrue
 
 /**
  * The four-way mode the dialog collapses two booleans into, and the presets row it builds.
- *
- * Taken as functions rather than through the dialog: what a preset does to the *other* half of a
- * look is the difference between picking an outline and losing the plate under it, and that is one
- * assertion here against a rendered row and a click there.
  */
 class TextBackdropChoicesTest {
 
