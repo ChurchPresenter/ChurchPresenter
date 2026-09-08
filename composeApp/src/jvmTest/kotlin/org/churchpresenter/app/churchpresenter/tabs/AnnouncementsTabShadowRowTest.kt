@@ -3,12 +3,16 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.input.ImeAction
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
 import org.churchpresenter.settings.AnnouncementsSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,6 +28,18 @@ class AnnouncementsTabShadowRowTest {
         size: Int = 140,
         opacity: Int = 63,
     ) = AnnouncementsSettings(shadow = true, shadowColor = color, shadowSize = size, shadowOpacity = opacity)
+
+    /**
+     * Opens the color field showing [fromHex] and confirms [toHex].
+     *
+     * A local copy of `recolor` without its `performScrollTo`: the toolbar's shadow row has no
+     * scrollable ancestor, and `performScrollTo` fails outright on a node that has none.
+     */
+    private fun ComposeUiTest.recolorHere(fromHex: String, toHex: String) {
+        onAllNodes(hasClickAction() and hasText(fromHex)).onFirst().performClick()
+        waitForIdle()
+        confirmColorDialogWith(toHex)
+    }
 
     /** No `performScrollTo`: the toolbar's shadow row has no scrollable ancestor to scroll within. */
     private fun ComposeUiTest.retype(showing: Int, to: Int) {
@@ -118,6 +134,46 @@ class AnnouncementsTabShadowRowTest {
             retype(63, 25)
             assertEquals(300, reports.settings?.shadowSize)
             assertEquals(25, reports.settings?.shadowOpacity)
+        }
+    }
+
+    // ── The shadow's own color ────────────────────────────────────────────────
+
+    @Test
+    fun `recoloring the shadow writes its color`() {
+        announcementsTab(shadowed()) { _, reports ->
+            recolorHere("#112233", "#445566")
+            assertEquals("#445566", reports.settings?.shadowColor)
+        }
+    }
+
+    @Test
+    fun `the shadow's color writes nothing else`() {
+        announcementsTab(shadowed()) { _, reports ->
+            recolorHere("#112233", "#445566")
+            val stored = reports.settings
+            assertEquals(140, stored?.shadowSize, "the fields beside it must not move")
+            assertEquals(63, stored?.shadowOpacity)
+        }
+    }
+
+    @Test
+    fun `the shadow's color is not the text's color`() {
+        announcementsTab(shadowed(color = "#112233")) { _, reports ->
+            recolorHere("#112233", "#445566")
+            assertEquals("#445566", reports.settings?.shadowColor)
+            assertEquals(
+                AnnouncementsSettings().textColor,
+                reports.settings?.textColor,
+                "the announcement's own ink must be untouched",
+            )
+        }
+    }
+
+    @Test
+    fun `the shadow color field is gone while the shadow is off`() {
+        announcementsTab(AnnouncementsSettings(shadow = false, shadowColor = "#112233")) { _, _ ->
+            onNodeWithText("#112233").assertDoesNotExist()
         }
     }
 }
