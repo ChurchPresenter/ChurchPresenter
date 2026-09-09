@@ -270,23 +270,37 @@ class CrashReporterTest {
 
     @Test
     fun `a clean previous run resets the crash count and leaves video backgrounds on`() {
-        val (count, disable) = CrashReporter.evaluateCrashEscalation(crashedLastRun = false, previousCount = 5)
+        val (count, disable) =
+            CrashReporter.evaluateCrashEscalation(crashedLastRun = false, previousCount = 5, lastCrashKind = null)
         assertEquals(0, count)
         assertFalse(disable)
     }
 
     @Test
     fun `a single crash increments the count but stays under the threshold`() {
-        val (count, disable) = CrashReporter.evaluateCrashEscalation(crashedLastRun = true, previousCount = 0)
+        val (count, disable) =
+            CrashReporter.evaluateCrashEscalation(crashedLastRun = true, previousCount = 0, lastCrashKind = null)
         assertEquals(1, count)
         assertFalse(disable, "one crash must not disable video backgrounds")
     }
 
     @Test
     fun `a second consecutive crash trips the video-background guard`() {
-        val (count, disable) = CrashReporter.evaluateCrashEscalation(crashedLastRun = true, previousCount = 1)
+        val (count, disable) =
+            CrashReporter.evaluateCrashEscalation(crashedLastRun = true, previousCount = 1, lastCrashKind = null)
         assertEquals(2, count)
         assertTrue(disable)
+    }
+
+    @Test
+    fun `a renderer crash counts toward the total but never trips the video-background guard`() {
+        val (count, disable) = CrashReporter.evaluateCrashEscalation(
+            crashedLastRun = true,
+            previousCount = 1,
+            lastCrashKind = CrashKind.RENDERER,
+        )
+        assertEquals(2, count, "it was a crash and the count is what the banner and the report show")
+        assertFalse(disable, "video backgrounds had nothing to do with a fault in the compositor")
     }
 
     @Test

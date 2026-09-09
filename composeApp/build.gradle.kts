@@ -514,7 +514,8 @@ compose.desktop {
             "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
-        // Explicitly set Skiko GPU backend to prevent software fallback
+        // Explicitly set Skiko GPU backend to prevent software fallback, EXCEPT on Windows —
+        // see the windows { } block below for why that one is left to skiko.
         val osName = System.getProperty("os.name").lowercase()
         when {
             osName.contains("mac") -> jvmArgs(
@@ -524,7 +525,7 @@ compose.desktop {
                 // unrecognized -Xdock option on other platforms aborts JVM startup entirely.
                 "-Xdock:name=Church Presenter"
             )
-            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=OPENGL")
+            osName.contains("win") -> Unit
             else -> jvmArgs("-Dskiko.renderApi=OPENGL")
         }
 
@@ -626,7 +627,15 @@ compose.desktop {
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
-                jvmArgs("-Dskiko.renderApi=OPENGL")
+
+                // ── No renderApi here, deliberately ───────────────────────────
+                // This used to pin OPENGL, overriding skiko's own Direct3D default, and that is
+                // the only reason a GPU driver access violation surfaced inside
+                // WindowsOpenGLRedrawer.swapBuffers rather than anywhere else. skiko's
+                // fallbackRenderApiQueue covers *context creation* only, so a fault during
+                // swapBuffers never triggers it — the default has to be right, not recoverable.
+                // An operator whose machine fares worse on Direct3D sets CHURCHPRESENTER_RENDER_API
+                // (see DevFlags.renderApiOverride); main() applies it before the first SkiaLayer.
             }
 
             linux {

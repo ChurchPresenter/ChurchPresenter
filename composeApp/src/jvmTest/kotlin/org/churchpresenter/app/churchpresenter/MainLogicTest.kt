@@ -40,15 +40,33 @@ class MainLogicTest {
     @Test
     fun `macOS is pinned to Metal`() {
         // Left to choose, skiko falls back to OpenGL there and crashes on some machines.
-        assertTrue(shouldForceMetalRenderer("Mac OS X"))
-        assertTrue(shouldForceMetalRenderer("macOS"))
+        assertEquals("METAL", preferredRenderApi("Mac OS X", override = null))
+        assertEquals("METAL", preferredRenderApi("macOS", override = null))
     }
 
     @Test
     fun `every other platform chooses for itself`() {
-        assertFalse(shouldForceMetalRenderer("Windows 11"))
-        assertFalse(shouldForceMetalRenderer("Linux"))
-        assertFalse(shouldForceMetalRenderer(""))
+        // Windows especially: it used to be pinned to OPENGL, which is the only reason a GPU driver
+        // fault landed in WindowsOpenGLRedrawer.swapBuffers rather than on skiko's Direct3D default.
+        assertNull(preferredRenderApi("Windows 11", override = null))
+        assertNull(preferredRenderApi("Linux", override = null))
+        assertNull(preferredRenderApi("", override = null))
+    }
+
+    @Test
+    fun `an operator override beats the platform default, on every platform`() {
+        assertEquals("DIRECT3D", preferredRenderApi("Windows 11", override = "DIRECT3D"))
+        assertEquals("OPENGL", preferredRenderApi("Mac OS X", override = "OpenGL"), "skiko wants it uppercase")
+        assertEquals("SOFTWARE", preferredRenderApi("Linux", override = "  software  "), "a stray space is not a value")
+    }
+
+    @Test
+    fun `an empty override is no override, not an empty render api`() {
+        // An env var set to nothing is the shape a shell script leaves behind; it must not be
+        // handed to skiko, which would reject it and take the whole window down with it.
+        assertNull(preferredRenderApi("Windows 11", override = ""))
+        assertNull(preferredRenderApi("Windows 11", override = "   "))
+        assertEquals("METAL", preferredRenderApi("macOS", override = ""))
     }
 
     // ── The single-instance lock ────────────────────────────────────────────────

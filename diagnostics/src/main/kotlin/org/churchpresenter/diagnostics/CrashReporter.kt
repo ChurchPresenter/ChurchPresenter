@@ -54,6 +54,23 @@ data class BuildIdentity(
     val buildChannel: String = UNKNOWN_BUILD,
 )
 
+/**
+ * What kind of fault the last crash was, as far as the handler could tell.
+ *
+ * Only the distinction the crash-loop guard acts on is drawn. The guard disables video backgrounds,
+ * so what it needs to know is whether the crash could plausibly have been video decoding — and a
+ * fault in the rendering stack could not. Everything that is not positively the renderer stays
+ * [OTHER], and a crash that recorded nothing at all is neither (see
+ * `CrashReporter.takeLastCrashKind`).
+ */
+internal enum class CrashKind {
+    /** skiko/skia: the compositor, typically a GPU driver fault surfaced as a Java exception. */
+    RENDERER,
+
+    /** Anything else that reached the uncaught handler with a throwable to look at. */
+    OTHER,
+}
+
 private const val UNKNOWN_VERSION = "unknown"
 
 /** What [BuildIdentity] reports for build provenance it was not told. */
@@ -94,6 +111,7 @@ object CrashReporter {
     private val crashDir: File get() = File(appDir, "crash-reports")
     private val runningFile: File get() = File(appDir, ".running")
     private val crashCountFile: File get() = File(appDir, ".crash_count")
+    private val crashKindFile: File get() = File(appDir, ".crash_kind")
     private val installIdFile: File get() = File(appDir, ".install_id")
     private val timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
 
@@ -167,6 +185,9 @@ object CrashReporter {
 
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         setUncaughtHandler { thread, throwable ->
+            // Record what failed before anything else can go wrong: the next run reads this to
+            // decide whether the crash-loop guard should blame video backgrounds for it.
+            writeCrashKind(classifyCrash(throwable))
             writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
             // Flush Sentry synchronously so the event is delivered before the JVM exits
             try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
@@ -177,7 +198,8 @@ object CrashReporter {
 
         // Check if previous run crashed (lock file still exists)
         didCrashLastRun = runningFile.exists()
-        val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount())
+        // Consumed and cleared here, so a kind is judged once and never carried into a later run.
+        val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount(), takeLastCrashKind())
         consecutiveCrashes = count
         writeCrashCount(count)
         if (disable) videoBackgroundsDisabled = true
@@ -234,17 +256,53 @@ object CrashReporter {
     }
 
     /**
-     * Given whether the previous run crashed and the persisted consecutive-crash count, returns the
-     * new count and whether video backgrounds should be disabled (a crash-loop guard that trips at
-     * [CRASH_THRESHOLD]). A clean run resets the count to zero.
+     * Given whether the previous run crashed, the persisted consecutive-crash count and what kind
+     * of crash it was, returns the new count and whether video backgrounds should be disabled
+     * (a crash-loop guard that trips at [CRASH_THRESHOLD]). A clean run resets the count to zero.
+     *
+     * [lastCrashKind] is null when the previous run left no record of *what* failed — a hard kill,
+     * a power loss, or a native crash that took the JVM down without unwinding. That is the case
+     * the guard was built for, since a VLC fault does exactly that and leaves no throwable behind,
+     * so an unknown kind still escalates.
+     *
+     * A [CrashKind.RENDERER] crash does not. It counts — it really was a crash, and the count is
+     * what the banner and the diagnostic report show — but disabling video backgrounds for a GPU
+     * driver fault turns off a working feature and hides the real cause. The guard's own subject is
+     * video decoding; a fault in the compositor is somebody else's.
      */
-    internal fun evaluateCrashEscalation(crashedLastRun: Boolean, previousCount: Int): Pair<Int, Boolean> =
+    internal fun evaluateCrashEscalation(
+        crashedLastRun: Boolean,
+        previousCount: Int,
+        lastCrashKind: CrashKind?,
+    ): Pair<Int, Boolean> =
         if (crashedLastRun) {
             val n = previousCount + 1
-            n to (n >= CRASH_THRESHOLD)
+            n to (n >= CRASH_THRESHOLD && lastCrashKind != CrashKind.RENDERER)
         } else {
             0 to false
         }
+
+    /**
+     * What failed, as far as the crash handler could tell — classified by exception **type**, never
+     * by message, so a wording change upstream cannot silently reclassify a crash.
+     *
+     * Only the distinction the escalation guard acts on is drawn: a fault in the rendering stack
+     * versus anything else. skiko surfaces a GPU driver access violation as its own
+     * `org.jetbrains.skiko.RenderException`, thrown from `RenderExceptionsHandler`, so the package
+     * is the whole test — the stack below it is AWT and coroutines, with no application frame in it.
+     */
+    internal fun classifyCrash(throwable: Throwable?): CrashKind {
+        val seen = mutableSetOf<Throwable>()
+        var current = throwable
+        while (current != null && seen.add(current)) {
+            val name = current.javaClass.name
+            if (name.startsWith("org.jetbrains.skiko.") || name.startsWith("org.jetbrains.skia.")) {
+                return CrashKind.RENDERER
+            }
+            current = current.cause
+        }
+        return CrashKind.OTHER
+    }
 
     internal fun readCrashCount(): Int = try {
         if (crashCountFile.exists()) crashCountFile.readText().trim().toIntOrNull() ?: 0 else 0
@@ -253,6 +311,22 @@ object CrashReporter {
     internal fun writeCrashCount(count: Int) = try {
         crashCountFile.parentFile?.mkdirs()
         crashCountFile.writeText(count.toString())
+    } catch (_: Exception) { }
+
+    /**
+     * Reads the kind the previous run recorded and clears it, so a kind is consumed exactly once
+     * and a later hard kill — which records nothing — is never judged by a stale one. An unreadable
+     * or unrecognised value reads as null, which is the same as no record: today's behaviour.
+     */
+    internal fun takeLastCrashKind(): CrashKind? = try {
+        val stored = if (crashKindFile.exists()) crashKindFile.readText().trim() else ""
+        crashKindFile.delete()
+        CrashKind.entries.find { it.name == stored }
+    } catch (_: Exception) { null }
+
+    internal fun writeCrashKind(kind: CrashKind) = try {
+        crashKindFile.parentFile?.mkdirs()
+        crashKindFile.writeText(kind.name)
     } catch (_: Exception) { }
 
     /**

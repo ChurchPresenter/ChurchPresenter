@@ -135,6 +135,23 @@ Equivalently, the JVM system property `-Dchurchpresenter.forceDevWindow=true` wo
 via `JAVA_TOOL_OPTIONS`). This only affects whether the fallback window appears — it does not
 change how the app reports itself for update checks, crash reporting, or usage analytics.
 
+#### Choosing the graphics backend
+
+The app pins Metal on macOS and otherwise lets skiko pick for the platform — Direct3D on Windows,
+OpenGL on Linux. If a machine's GPU driver fares badly on that choice — a window that freezes while
+presenting is the symptom to look for — name a different one:
+
+```shell
+CHURCHPRESENTER_RENDER_API=OPENGL ./ChurchPresenter        # macOS/Linux
+```
+```shell
+set CHURCHPRESENTER_RENDER_API=OPENGL && ChurchPresenter.exe   # Windows
+```
+
+The JVM system property `-Dchurchpresenter.renderApi=OPENGL` does the same. Accepted values are
+skiko's own: `DIRECT3D`, `OPENGL`, `METAL` and `SOFTWARE`. `SOFTWARE` is a last resort — it renders
+on the CPU, which a dual-output presenter app will feel.
+
 ---
 
 ## 📚 Documentation

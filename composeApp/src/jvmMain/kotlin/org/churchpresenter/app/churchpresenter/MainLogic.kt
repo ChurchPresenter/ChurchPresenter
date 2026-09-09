@@ -40,13 +40,25 @@ private const val MILLIS_PER_SECOND_L = 1000L
  */
 
 /**
- * Whether skiko should be pinned to Metal.
+ * The skiko render API to pin, or null to leave the choice to skiko.
  *
- * Only on macOS, where leaving skiko to choose falls back to OpenGL and crashes on some machines.
+ * macOS is pinned to Metal: left to choose, skiko falls back to OpenGL there and crashes on some
+ * machines. Windows is deliberately **not** pinned. It used to be forced to OpenGL, which is the
+ * only reason a GPU driver fault landed in `WindowsOpenGLRedrawer.swapBuffers`; skiko's own
+ * Direct3D default is the better first rung. Note skiko's `fallbackRenderApiQueue` covers *context
+ * creation* only, so a fault during `swapBuffers` never triggers it — the default has to be right
+ * rather than recoverable.
+ *
+ * [override] is the operator's escape hatch, taken verbatim when set, so a machine that does worse
+ * on the platform default has a way out without waiting for a build.
+ *
  * Matched on the name rather than a platform enum because that is what the property carries.
  */
-internal fun shouldForceMetalRenderer(osName: String): Boolean =
-    osName.lowercase().contains("mac")
+internal fun preferredRenderApi(osName: String, override: String?): String? {
+    val requested = override?.trim()?.uppercase()
+    if (!requested.isNullOrEmpty()) return requested
+    return if (osName.lowercase().contains("mac")) "METAL" else null
+}
 
 /** The port the single-instance lock binds, honouring the override a second dev instance sets. */
 internal fun singleInstanceLockPort(override: String?, default: Int): Int =

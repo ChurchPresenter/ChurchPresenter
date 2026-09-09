@@ -612,7 +612,15 @@
     <!-- Bible Tab -->
 
     <!-- Crash Recovery -->
+    <!--
+      crash_video_bg_disabled is superseded by the three strings below, which split the message from
+      its two actions so they can be real buttons. It is left in place because ~30 locale files still
+      carry a translation of it; removing only the English entry would leave those orphaned.
+    -->
     <string name="crash_video_bg_disabled">Video backgrounds disabled after %1$d consecutive crashes.  [Re-enable]  [Dismiss]</string>
+    <string name="crash_video_bg_banner">Video backgrounds were turned off after %1$d crashes in a row.</string>
+    <string name="crash_video_bg_reenable">Turn back on</string>
+    <string name="crash_video_bg_dismiss">Dismiss</string>
 
     <!-- Position Options -->
     <string name="position_above">Above</string>
