@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
@@ -668,5 +669,11 @@ class SourcePropertiesClockTest {
         sourcePanel(Fixture.clock("clk-target-noduration").copy(mode = "target_time")) { _ ->
             assertEquals(0, countOf("TEXT WHEN TIMER EXPIRES"))
         }
+    }
+
+    @Test
+    fun `the style row carries no text-backing control`() = sourcePanel(Fixture.clock()) { _ ->
+        onAllNodesWithText("B").assertCountEquals(1)
+        onAllNodesWithText("A").assertCountEquals(0)
     }
 }

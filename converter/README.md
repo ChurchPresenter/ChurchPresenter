@@ -50,7 +50,12 @@ Built with Kotlin Multiplatform and Compose Desktop.
   - A chorus stored once per singing becomes one section — the repeats are matched on their lyrics,
     because a book writes the same chorus as `C1` several times and then as `C2`
   - Verses past the ninth, which books stop numbering, keep counting up instead of stacking
-  - The `***` / `<><><>` end marker on the last verse is dropped
+  - The `***` / `<><><>` end marker on the last verse is dropped, including when the book wrote it
+    inside its own color markup
+  - A bilingual book's `<cAARRGGBB>` … `</c>` color markup is dropped rather than imported as lyrics
+  - A bilingual verse — two languages either side of a row of dashes — becomes the `.song` file's
+    `[Primary]` and `[Secondary]` halves, so the app can show either language or both; a verse the
+    book never translated holds its place, since the two halves are paired by position
 
 - **Documents** — lyrics pulled straight out of the files a church already has: `.pdf`, `.docx`,
   `.pptx`, `.ppt` and Keynote `.key`

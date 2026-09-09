@@ -81,6 +81,55 @@ class PictureDecoderTest {
         assertNull(PictureDecoder.decodeOrNull(broken))
     }
 
+    /**
+     * The smallest valid Photoshop document: a 1x1 8-bit RGB image, uncompressed.
+     *
+     * Hand-built because `imageio-psd` reads PSD and does not write it, so ImageIO cannot produce
+     * this fixture. The layout is the PSD file header (signature, version, channel count, height,
+     * width, depth, colour mode), three empty length-prefixed sections, then the raw image data
+     * preceded by its compression word.
+     */
+    private fun minimalPsdBytes(): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        java.io.DataOutputStream(out).use { data ->
+            data.writeBytes("8BPS")
+            data.writeShort(1)                  // version
+            repeat(6) { data.writeByte(0) }     // reserved
+            data.writeShort(3)                  // channels: R, G, B
+            data.writeInt(1)                    // height
+            data.writeInt(1)                    // width
+            data.writeShort(8)                  // bits per channel
+            data.writeShort(3)                  // colour mode: RGB
+            data.writeInt(0)                    // colour mode data
+            data.writeInt(0)                    // image resources
+            data.writeInt(0)                    // layer and mask info
+            data.writeShort(0)                  // compression: raw
+            data.write(byteArrayOf(0x7F, 0x00, 0x00))  // one pixel, one byte per channel
+        }
+        return out.toByteArray()
+    }
+
+    @Test
+    fun `decodes a Photoshop file carrying a jpg name`() {
+        // The field report: an undecodable thumbnail whose leading bytes were 8BPS and whose name
+        // ended .jpg. Skia refuses it and the extension is a lie, so only the ImageIO fallback --
+        // and only with imageio-psd on the classpath -- can read it.
+        val file = File(folder, "renamed-photoshop.jpg")
+        file.writeBytes(minimalPsdBytes())
+
+        assertNotNull(PictureDecoder.decodeOrNull(file), "imageio-psd must be on the classpath")
+    }
+
+    @Test
+    fun `a Photoshop file is claimed by an ImageIO reader`() {
+        // The same file's diagnosis line said "imageio=none" before the reader was added, which is
+        // what made the report look like an unsupported format rather than a missing plugin.
+        val file = File(folder, "photoshop.psd")
+        file.writeBytes(minimalPsdBytes())
+
+        assertContains(PictureDecoder.diagnose(file).lowercase(), "imageio=psd")
+    }
+
     @Test
     fun `transcode returns null for bytes ImageIO cannot read`() {
         assertNull(PictureDecoder.transcodeWithImageIO("not an image".toByteArray()))

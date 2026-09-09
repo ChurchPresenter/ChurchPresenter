@@ -2,8 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import java.time.LocalTime
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Canvas
@@ -13,8 +13,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.runComposeUiTest
-import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
@@ -38,6 +36,10 @@ import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.settings.withZoneWidth
+import org.churchpresenter.settings.withZoneHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.test.runDesktopComposeUiTest
 
 /**
  * The stage monitor — the screen the worship leader and the speaker read from.
@@ -56,11 +58,20 @@ import kotlin.test.Test
  */
 class StageMonitorScreenshotTest {
 
-    private val screen = Modifier.size(1920.dp, 1080.dp)
+    /** What the clock zone reads in every shot. Arbitrary, and the point is that it never moves. */
+    private val PINNED_CLOCK: LocalTime = LocalTime.of(10, 42, 8)
 
     private fun shoot(
         name: String,
         settings: StageMonitorSettings = stageSettings(),
+        /**
+         * The monitor's own pixel size, which is the size of the image.
+         *
+         * It has to be the **window's** size, not a `Modifier.size` on the content: the capture is
+         * the test window's root, so a content box larger than the window is simply cropped by it
+         * and every image comes out 1024x768 whatever the box asked for.
+         */
+        output: OutputSize = OutputSize(1024, 768),
         showChords: Boolean = true,
         presenting: Presenting = Presenting.LYRICS,
         announcementActive: Boolean = false,
@@ -77,10 +88,10 @@ class StageMonitorScreenshotTest {
         question: Question? = null,
         entry: StrongsEntry? = null,
         awaitPicture: Boolean = false,
-    ) = runComposeUiTest {
+    ) = runDesktopComposeUiTest(width = output.width, height = output.height) {
         setContent {
             MaterialTheme {
-                Box(screen) {
+                Box(Modifier.fillMaxSize()) {
                     StageMonitorScreen(
                         sm = settings,
                         showChords = showChords,
@@ -100,6 +111,12 @@ class StageMonitorScreenshotTest {
                         displayedDictionaryEntry = entry,
                         qaSettings = QASettings(),
                         dictionarySettings = DictionarySettings(),
+                        // Pinned, never read from the machine. The clock zone drew the real wall
+                        // clock, so 22 of these images changed on every run and the suite could not
+                        // be read as pass/fail. 24-hour is pinned too: the host's locale decides
+                        // that, so a US mac and a CI box disagreed even with the instant fixed.
+                        now = { PINNED_CLOCK },
+                        use24Hour = false,
                     )
                 }
             }
@@ -394,6 +411,43 @@ class StageMonitorScreenshotTest {
         ),
         sections = SONG_SECTIONS,
     )
+
+    // ── Zone sizes, on three shapes of monitor ──────────────────────────────────────────────────
+    // The grid is weighted by the stored percentages, so the same resized layout has to hold up on
+    // whatever the output happens to be — a 1080p confidence screen, an old 4:3, or one rotated.
+    // Every zone carries content here, so what moved is legible rather than a shift of empty boxes.
+
+    /** A top row taking four fifths of the screen, and a bottom row split 50 / 14 / 36. */
+    @Test
+    fun `zones resized on a 1080p monitor`() = resizedShot("zones_resized")
+
+    /** The same percentages on a 4:3, where every zone is squarer and the text has less width. */
+    @Test
+    fun `zones resized on a four-three monitor`() =
+        resizedShot("zones_resized_four_three", FOUR_THREE)
+
+    /** And rotated, where an 80% top row is most of a very tall screen. */
+    @Test
+    fun `zones resized on a portrait monitor`() =
+        resizedShot("zones_resized_portrait", PORTRAIT)
+
+    // A deck rather than scripture, because a slide is an image: text reflows into whatever zone it
+    // is given, an image is letterboxed into it, so resizing shows on a slide in a way it does not
+    // on a paragraph. The notes beside it are the zone that gets squeezed.
+
+    /** A slide in the big zone with its notes beside it, on a resized 1080p grid. */
+    @Test
+    fun `a presentation on resized zones`() = presentationShot("zones_resized_presentation")
+
+    /** The same deck where the slide's own 4:3 and the monitor's agree, and the zones do not. */
+    @Test
+    fun `a presentation on resized zones on a four-three monitor`() =
+        presentationShot("zones_resized_presentation_four_three", FOUR_THREE)
+
+    /** And rotated, where a 4:3 slide in an 80%-tall zone leaves the most letterboxing. */
+    @Test
+    fun `a presentation on resized zones on a portrait monitor`() =
+        presentationShot("zones_resized_presentation_portrait", PORTRAIT)
 
     // ── Metronome positions ─────────────────────────────────────────────────────────────────────
 
@@ -893,6 +947,9 @@ class StageMonitorScreenshotTest {
         sections = listOf(chordSection()),
     )
 
+    /** A monitor's pixel size — the window the screen is drawn in, and so the size of the image. */
+    private data class OutputSize(val width: Int, val height: Int)
+
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     /**
@@ -915,6 +972,55 @@ class StageMonitorScreenshotTest {
             metronomePosition = metronomePosition,
         ),
     )
+
+    /** The resized grid drawing a deck: the slide in Zone 1, its notes in the squeezed Zone 4. */
+    private fun presentationShot(name: String, output: OutputSize = LANDSCAPE) = shoot(
+        name,
+        settings = resized(
+            zones = mapOf(
+                StageMonitorContentType.PRESENTATION to StageMonitorZone.A,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.D,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+        ),
+        presenting = Presenting.PRESENTATION,
+        section = LyricSection(),
+        slide = slideBitmap(),
+        notes = NOTES,
+        announcementActive = true,
+        announcementText = "05:00",
+        output = output,
+    )
+
+    /** The resized grid on an output of [output]'s size, with four of its five zones carrying text. */
+    private fun resizedShot(name: String, output: OutputSize = LANDSCAPE) = shoot(
+        name,
+        settings = resized(),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse(text = SWEEP_VERSE)),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "05:00",
+        output = output,
+    )
+
+    /**
+     * A grid nobody would get from the catalog, with content in every zone.
+     *
+     * Lopsided in both directions at once: height belongs to the row and width to the cell, and the
+     * same numbers everywhere would not show the difference.
+     */
+    private fun resized(zones: Map<StageMonitorContentType, StageMonitorZone> = emptyMap()) = stageSettings(
+        zones = mapOf(
+            StageMonitorContentType.BIBLE to StageMonitorZone.A,
+            StageMonitorContentType.NEXT to StageMonitorZone.B,
+            StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+            StageMonitorContentType.CLOCK to StageMonitorZone.D,
+        ) + zones,
+    )
+        .withZoneHeight(StageMonitorStyleZone.A, 80f)
+        .withZoneWidth(StageMonitorStyleZone.A, 75f)
+        .withZoneWidth(StageMonitorStyleZone.C, 50f)
 
     /**
      * [settings] on [layout], with anything routed to a zone it does not draw sent to None — the
@@ -1025,6 +1131,13 @@ class StageMonitorScreenshotTest {
 
     private companion object {
         const val SECTION = "stageMonitor"
+
+        /** 16:9, and the shape every image outside the zone-size set is recorded at. */
+        val LANDSCAPE = OutputSize(1024, 576)
+
+        /** An old confidence monitor, and a rotated one — both of which churches run. */
+        val FOUR_THREE = OutputSize(1024, 768)
+        val PORTRAIT = OutputSize(576, 1024)
 
         val FIXTURES = java.io.File("build/screenshot-fixtures/stage-monitor")
 

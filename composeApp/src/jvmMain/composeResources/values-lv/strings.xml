@@ -812,8 +812,6 @@
     <string name="display_mode">Attēlošanas režīms</string>
     <string name="display_fullscreen">Pilnekrāns</string>
     <string name="display_lower_third">Apakšjosla</string>
-    <string name="display_lower_third_horizontal">Horizontāla apakšjosla</string>
-    <string name="display_lower_third_vertical">Vertikāla apakšjosla</string>
     <string name="lower_third_height">Apakšjoslas augstums % (Bībelei un dziesmām)</string>
     <string name="full_screen">Pilnekrāns</string>
     <string name="lower_third_size">Apakšjosla</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numurs pirms nosaukuma</string>
+    <string name="song_number_corner">Stūris</string>
+    <string name="song_number_corner_off">Izslēgts</string>
     <string name="fullscreen_display">Pilnekrāna rādīšana</string>
     <string name="display_mode_label">Rādīšanas veids:</string>
     <string name="display_mode_one_verse">1 pants</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Rāda</string>
     <string name="stage_monitor_zone_count">%1$d zonas</string>
     <string name="stage_monitor_layout_stranded">Šajā izkārtojumā netiek rādīts: %1$s</string>
+    <string name="stage_monitor_size_section">Zonu izmērs</string>
+    <string name="stage_monitor_zone_width">Platums (%)</string>
+    <string name="stage_monitor_zone_row_height">Rindas augstums (%)</string>
+    <string name="stage_monitor_size_selected">Atlasīts</string>
+    <string name="stage_monitor_size_reset">Atiestatīt</string>
+    <string name="stage_monitor_size_hint">Velciet dalītāju, lai pārdalītu vietu starp blakus zonām. Katra rinda kopā ir 100%.</string>
+    <string name="stage_monitor_size_even">Izlīdzināt</string>
+    <string name="stage_monitor_size_even_row">Šī rinda</string>
+    <string name="stage_monitor_size_even_all">Viss</string>
     <string name="stage_monitor_layout_classic">Klasiskais (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Augšā / apakšā</string>
     <string name="stage_monitor_layout_left_right">Pa kreisi / pa labi</string>

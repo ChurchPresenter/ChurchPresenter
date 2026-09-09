@@ -812,8 +812,6 @@
     <string name="display_mode">Mode Tampilan</string>
     <string name="display_fullscreen">Layar Penuh</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Lower Third Horizontal</string>
-    <string name="display_lower_third_vertical">Lower Third Vertikal</string>
     <string name="lower_third_height">Tinggi Lower Third % (untuk Alkitab dan Lagu)</string>
     <string name="full_screen">Layar Penuh</string>
     <string name="lower_third_size">Lower Third</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nomor sebelum judul</string>
+    <string name="song_number_corner">Sudut</string>
+    <string name="song_number_corner_off">Mati</string>
     <string name="fullscreen_display">Tampilan Layar Penuh</string>
     <string name="display_mode_label">Mode Tampilan:</string>
     <string name="display_mode_one_verse">1 Ayat</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Menampilkan</string>
     <string name="stage_monitor_zone_count">%1$d zona</string>
     <string name="stage_monitor_layout_stranded">Tidak tampil pada tata letak ini: %1$s</string>
+    <string name="stage_monitor_size_section">Ukuran Zona</string>
+    <string name="stage_monitor_zone_width">Lebar (%)</string>
+    <string name="stage_monitor_zone_row_height">Tinggi Baris (%)</string>
+    <string name="stage_monitor_size_selected">Terpilih</string>
+    <string name="stage_monitor_size_reset">Atur Ulang</string>
+    <string name="stage_monitor_size_hint">Seret pembatas untuk membagi ruang antar zona bersebelahan. Setiap baris berjumlah 100%.</string>
+    <string name="stage_monitor_size_even">Ratakan</string>
+    <string name="stage_monitor_size_even_row">Baris ini</string>
+    <string name="stage_monitor_size_even_all">Semua</string>
     <string name="stage_monitor_layout_classic">Klasik (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Atas / bawah</string>
     <string name="stage_monitor_layout_left_right">Kiri / kanan</string>

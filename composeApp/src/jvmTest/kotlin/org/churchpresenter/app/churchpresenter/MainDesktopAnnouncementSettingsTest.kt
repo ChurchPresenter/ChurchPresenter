@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.text.TextBackdrop
 import kotlin.reflect.full.memberProperties
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +40,7 @@ class MainDesktopAnnouncementSettingsTest {
         targetMinute = 45,
         targetSecond = 30,
         liveClockFormat = "hh:mm a",
+        backdrop = TextBackdrop(lineBackground = true, lineBackgroundColor = "#123456"),
     )
 
     @Test
@@ -63,6 +65,7 @@ class MainDesktopAnnouncementSettingsTest {
         assertEquals("We are starting", after.timerExpiredText)
         assertEquals("clock", after.timerMode)
         assertEquals("hh:mm a", after.liveClockFormat)
+        assertEquals(TextBackdrop(lineBackground = true, lineBackgroundColor = "#123456"), after.backdrop)
     }
 
     @Test
@@ -84,6 +87,7 @@ class MainDesktopAnnouncementSettingsTest {
             loopCount = 11, timerHours = 12, timerMinutes = 13, timerSeconds = 14,
             timerTextColor = "#000004", timerExpiredText = "stale", timerMode = "duration",
             targetHour = 15, targetMinute = 16, targetSecond = 17, liveClockFormat = "stale",
+            backdrop = TextBackdrop(border = true, borderColor = "#000005"),
         )
 
         val after = withAnnouncementFrom(

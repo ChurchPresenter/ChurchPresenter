@@ -812,8 +812,6 @@
     <string name="display_mode">Visningsläge</string>
     <string name="display_fullscreen">Helskärm</string>
     <string name="display_lower_third">Nedre tredjedel</string>
-    <string name="display_lower_third_horizontal">Vågrät nedre tredjedel</string>
-    <string name="display_lower_third_vertical">Lodrät nedre tredjedel</string>
     <string name="lower_third_height">Höjd på nedre tredjedel i % (för Bibel och Sånger)</string>
     <string name="full_screen">Helskärm</string>
     <string name="lower_third_size">Nedre tredjedel</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer före titel</string>
+    <string name="song_number_corner">Hörn</string>
+    <string name="song_number_corner_off">Av</string>
     <string name="fullscreen_display">Helskärmsvisning</string>
     <string name="display_mode_label">Visningsläge:</string>
     <string name="display_mode_one_verse">1 vers</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Visar</string>
     <string name="stage_monitor_zone_count">%1$d zoner</string>
     <string name="stage_monitor_layout_stranded">Visas inte i den här layouten: %1$s</string>
+    <string name="stage_monitor_size_section">Zonstorlek</string>
+    <string name="stage_monitor_zone_width">Bredd (%)</string>
+    <string name="stage_monitor_zone_row_height">Radhöjd (%)</string>
+    <string name="stage_monitor_size_selected">Vald</string>
+    <string name="stage_monitor_size_reset">Återställ</string>
+    <string name="stage_monitor_size_hint">Dra en avdelare för att fördela plats mellan grannar. Varje rad delar på 100%.</string>
+    <string name="stage_monitor_size_even">Jämna ut</string>
+    <string name="stage_monitor_size_even_row">Denna rad</string>
+    <string name="stage_monitor_size_even_all">Allt</string>
     <string name="stage_monitor_layout_classic">Klassisk (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Topp / botten</string>
     <string name="stage_monitor_layout_left_right">Vänster / höger</string>

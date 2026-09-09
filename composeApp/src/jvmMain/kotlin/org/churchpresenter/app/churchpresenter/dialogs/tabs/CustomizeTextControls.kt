@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
@@ -41,6 +42,10 @@ internal fun ColorControl(label: String, color: String, onColorChange: (String) 
 /**
  * The bold/italic/underline/shadow quartet — the shared [TextStyleButtons] the Song tab and the
  * canvas editors draw, so the buttons match wherever text is styled.
+ *
+ * Pass [backdrop] and [onBackdropChange] to add the border and line-background buttons, each of
+ * which opens its own dialog. Both are optional so a caller with nowhere to store them keeps the
+ * four buttons it always had.
  */
 @Suppress("LongParameterList")
 @Composable
@@ -53,6 +58,8 @@ internal fun StyleControl(
     onItalicChange: (Boolean) -> Unit,
     onUnderlineChange: (Boolean) -> Unit,
     onShadowChange: (Boolean) -> Unit,
+    backdrop: TextBackdrop? = null,
+    onBackdropChange: ((TextBackdrop) -> Unit)? = null,
 ) {
     TextStyleButtons(
         bold = bold,
@@ -63,6 +70,8 @@ internal fun StyleControl(
         onItalicChange = onItalicChange,
         onUnderlineChange = onUnderlineChange,
         onShadowChange = onShadowChange,
+        backdrop = backdrop,
+        onBackdropChange = onBackdropChange,
         buttonSize = CHOICE_HEIGHT,
     )
 }

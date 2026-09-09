@@ -1205,6 +1205,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo před názvem</string>
+    <string name="song_number_corner">Roh</string>
+    <string name="song_number_corner_off">Vypnuto</string>
     <string name="fullscreen_display">Zobrazení na celou obrazovku</string>
     <string name="display_mode_label">Režim zobrazení:</string>
     <string name="display_mode_one_verse">1 sloka</string>
@@ -1466,6 +1468,15 @@
     <string name="stage_monitor_zone_shows">Zobrazuje</string>
     <string name="stage_monitor_zone_count">Zón: %1$d</string>
     <string name="stage_monitor_layout_stranded">V tomto rozvržení se nezobrazuje: %1$s</string>
+    <string name="stage_monitor_size_section">Velikost zón</string>
+    <string name="stage_monitor_zone_width">Šířka (%)</string>
+    <string name="stage_monitor_zone_row_height">Výška řádku (%)</string>
+    <string name="stage_monitor_size_selected">Vybráno</string>
+    <string name="stage_monitor_size_reset">Obnovit</string>
+    <string name="stage_monitor_size_hint">Přetažením dělicí čáry přerozdělíte místo mezi sousedy. Každý řádek tvoří 100%.</string>
+    <string name="stage_monitor_size_even">Vyrovnat</string>
+    <string name="stage_monitor_size_even_row">Tento řádek</string>
+    <string name="stage_monitor_size_even_all">Vše</string>
     <string name="stage_monitor_layout_classic">Klasické (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Nahoře / dole</string>
     <string name="stage_monitor_layout_left_right">Vlevo / vpravo</string>
@@ -2165,8 +2176,6 @@
     <string name="presentation_focus_lost">Ztraceno zaměření klávesnice — klikněte sem pro obnovení šipek a klikátka</string>
     <string name="tab_focus_lost">Ztraceno zaměření klávesnice — klikněte sem pro obnovení šipek</string>
     <string name="dev_window_label">Vývojářské okno</string>
-    <string name="display_lower_third_horizontal">Vodorovná dolní třetina</string>
-    <string name="display_lower_third_vertical">Svislá dolní třetina</string>
     <string name="remote_api_remove_from_schedule">Odebrat z plánu</string>
     <string name="remote_activity_removed_from_schedule">Odebráno z programu</string>
     <string name="instance_link_follower_badge">Instance Link — aktuálně připojeno</string>

@@ -8,6 +8,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.text.TextBackdrop
 import java.io.File
 import java.nio.file.Files
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -257,14 +258,14 @@ class ScheduleTabMenuActionsTest {
     @Test
     fun `addAnnouncement carries its whole argument list through`() =
         scheduleTab { vm, reports ->
-            // 28 parameters wide, and the ones that matter are deep in the middle of it: a shifted
+            // 29 parameters wide, and the ones that matter are deep in the middle of it: a shifted
             // argument here is how a countdown ends up the wrong colour or counting to the wrong time.
             registeredActions(reports).addAnnouncement(
                 "Service starts in", "#FFEEAA", "#101020", 64, "Georgia",
                 true, true, true, true, "#001122", 120, 55,
                 "left", "top", "FADE", 750, 3,
                 true, 1, 2, 3, "#00FF00", "We're starting!", "clock",
-                18, 30, 15, "hh:mm a",
+                18, 30, 15, "hh:mm a", TextBackdrop(border = true, borderColor = "#ABCDEF"),
             )
             waitForIdle()
 
@@ -276,6 +277,7 @@ class ScheduleTabMenuActionsTest {
             assertEquals("Georgia", item.fontType)
             assertTrue(item.bold && item.italic && item.underline && item.shadow)
             assertEquals("#001122", item.shadowColor)
+            assertEquals(TextBackdrop(border = true, borderColor = "#ABCDEF"), item.backdrop)
             assertEquals(120, item.shadowSize)
             assertEquals(55, item.shadowOpacity)
             assertEquals("left", item.horizontalAlignment)

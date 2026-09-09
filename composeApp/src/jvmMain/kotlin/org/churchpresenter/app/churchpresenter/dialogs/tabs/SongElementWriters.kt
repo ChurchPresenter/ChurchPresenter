@@ -26,6 +26,7 @@ internal fun SongSettings.withNumber(s: SongElementStyle) = copy(
     songNumberWordSpacing = s.wordSpacing,
     songNumberTransform = s.transform,
     songNumberPosition = s.position,
+    songNumberBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withNumberLowerThird(s: SongElementStyle) = copy(
@@ -45,6 +46,7 @@ internal fun SongSettings.withNumberLowerThird(s: SongElementStyle) = copy(
     songNumberLowerThirdWordSpacing = s.wordSpacing,
     songNumberLowerThirdTransform = s.transform,
     songNumberLowerThirdPosition = s.position,
+    songNumberLowerThirdBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withTitle(s: SongElementStyle) = copy(
@@ -64,6 +66,7 @@ internal fun SongSettings.withTitle(s: SongElementStyle) = copy(
     titleWordSpacing = s.wordSpacing,
     titleTransform = s.transform,
     titlePosition = s.position,
+    titleBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withTitleLowerThird(s: SongElementStyle) = copy(
@@ -83,6 +86,7 @@ internal fun SongSettings.withTitleLowerThird(s: SongElementStyle) = copy(
     titleLowerThirdWordSpacing = s.wordSpacing,
     titleLowerThirdTransform = s.transform,
     titleLowerThirdPosition = s.position,
+    titleLowerThirdBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withLyrics(s: SongElementStyle) = copy(
@@ -103,6 +107,7 @@ internal fun SongSettings.withLyrics(s: SongElementStyle) = copy(
     lyricsTransform = s.transform,
     lyricsChordColor = s.chordColor,
     lyricsFontSizeAutoFit = s.autoFit,
+    lyricsBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withLyricsLowerThird(s: SongElementStyle) = copy(
@@ -123,6 +128,7 @@ internal fun SongSettings.withLyricsLowerThird(s: SongElementStyle) = copy(
     lyricsLowerThirdTransform = s.transform,
     lyricsLowerThirdChordColor = s.chordColor,
     lyricsLowerThirdFontSizeAutoFit = s.autoFit,
+    lyricsLowerThirdBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withLookAhead(s: SongElementStyle) = copy(
@@ -142,6 +148,7 @@ internal fun SongSettings.withLookAhead(s: SongElementStyle) = copy(
     lookAheadWordSpacing = s.wordSpacing,
     lookAheadTransform = s.transform,
     lookAheadFontSizeAutoFit = s.autoFit,
+    lookAheadBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withLookAheadLowerThird(s: SongElementStyle) = copy(
@@ -161,6 +168,7 @@ internal fun SongSettings.withLookAheadLowerThird(s: SongElementStyle) = copy(
     lowerThirdLookAheadWordSpacing = s.wordSpacing,
     lowerThirdLookAheadTransform = s.transform,
     lowerThirdLookAheadFontSizeAutoFit = s.autoFit,
+    lowerThirdLookAheadBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withNextSection(s: SongElementStyle) = copy(
@@ -180,6 +188,7 @@ internal fun SongSettings.withNextSection(s: SongElementStyle) = copy(
     lookAheadNextWordSpacing = s.wordSpacing,
     lookAheadNextTransform = s.transform,
     lookAheadNextFontSizeAutoFit = s.autoFit,
+    lookAheadNextBackdrop = s.backdrop,
 )
 
 internal fun SongSettings.withNextSectionLowerThird(s: SongElementStyle) = copy(
@@ -199,4 +208,5 @@ internal fun SongSettings.withNextSectionLowerThird(s: SongElementStyle) = copy(
     lowerThirdLookAheadNextWordSpacing = s.wordSpacing,
     lowerThirdLookAheadNextTransform = s.transform,
     lowerThirdLookAheadNextFontSizeAutoFit = s.autoFit,
+    lowerThirdLookAheadNextBackdrop = s.backdrop,
 )

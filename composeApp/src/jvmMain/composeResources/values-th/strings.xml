@@ -812,8 +812,6 @@
     <string name="display_mode">โหมดการแสดงผล</string>
     <string name="display_fullscreen">เต็มจอ</string>
     <string name="display_lower_third">แถบล่าง</string>
-    <string name="display_lower_third_horizontal">แถบล่างแนวนอน</string>
-    <string name="display_lower_third_vertical">แถบล่างแนวตั้ง</string>
     <string name="lower_third_height">ความสูงแถบล่าง % (สำหรับพระคัมภีร์และเพลง)</string>
     <string name="full_screen">เต็มจอ</string>
     <string name="lower_third_size">แถบล่าง</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">หมายเลขอยู่หน้าชื่อ</string>
+    <string name="song_number_corner">มุม</string>
+    <string name="song_number_corner_off">ปิด</string>
     <string name="fullscreen_display">แสดงเต็มจอ</string>
     <string name="display_mode_label">วิธีแสดง:</string>
     <string name="display_mode_one_verse">ครั้งละ 1 ท่อน</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">แสดง</string>
     <string name="stage_monitor_zone_count">%1$d โซน</string>
     <string name="stage_monitor_layout_stranded">ไม่แสดงในเลย์เอาต์นี้: %1$s</string>
+    <string name="stage_monitor_size_section">ขนาดโซน</string>
+    <string name="stage_monitor_zone_width">ความกว้าง (%)</string>
+    <string name="stage_monitor_zone_row_height">ความสูงแถว (%)</string>
+    <string name="stage_monitor_size_selected">ที่เลือก</string>
+    <string name="stage_monitor_size_reset">รีเซ็ต</string>
+    <string name="stage_monitor_size_hint">ลากเส้นแบ่งเพื่อแบ่งพื้นที่ระหว่างโซนข้างเคียง แต่ละแถวรวมกันเป็น 100%</string>
+    <string name="stage_monitor_size_even">ปรับให้เท่ากัน</string>
+    <string name="stage_monitor_size_even_row">แถวนี้</string>
+    <string name="stage_monitor_size_even_all">ทั้งหมด</string>
     <string name="stage_monitor_layout_classic">คลาสสิก (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">บน / ล่าง</string>
     <string name="stage_monitor_layout_left_right">ซ้าย / ขวา</string>

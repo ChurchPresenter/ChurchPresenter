@@ -74,8 +74,22 @@ fun rememberFocusLostRescue(
 @Composable
 fun FocusLostBanner(state: FocusLostRescueState, text: String, modifier: Modifier = Modifier) {
     if (!state.bannerVisible) return
+    FocusHintBanner(text = text, onClick = { state.rescue() }, modifier = modifier)
+}
+
+/**
+ * The banner itself: a wide, tinted, non-focusable button that says why the keyboard is not
+ * responding and takes it back when clicked.
+ *
+ * Separated from [FocusLostBanner] because the *other* way to lose keyboard control is to still
+ * have the caret in a search box, which is not a lost focus at all -- the tab still `hasFocus`,
+ * so [FocusLostRescueState.bannerVisible] is false and the rescue has nothing to heal. Same
+ * picture, same words, different reason; see SongsTab's search banner.
+ */
+@Composable
+fun FocusHintBanner(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
-        onClick = { state.rescue() },
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)

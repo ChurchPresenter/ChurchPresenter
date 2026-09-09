@@ -6,12 +6,13 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
  * VideoPsalm song books. The cases here are the ways the file's verse array differs from the song's
- * structure: choruses stored once per singing, ids that stop being written past the ninth verse, and
- * the end marker the last verse carries.
+ * structure: choruses stored once per singing, ids that stop being written past the ninth verse, the
+ * end marker the last verse carries, and the color markup a bilingual book styles it with.
  */
 class VideoPsalmConverterTest {
 
@@ -110,6 +111,79 @@ class VideoPsalmConverterTest {
 
         assertEquals(listOf("last line"), VideoPsalmConverter.parse(stars).songs[0].sections[0].lines)
         assertEquals(listOf("last line"), VideoPsalmConverter.parse(arrows).songs[0].sections[0].lines)
+    }
+
+    @Test
+    fun `the end marker is still dropped when the book wrote it inside its own colour`() {
+        val file = book("""{Verses:[${verse("last line\n<cFF00D800>***</c>")}],Text:"Song"}""")
+        assertEquals(listOf("last line"), VideoPsalmConverter.parse(file).songs[0].sections[0].lines)
+    }
+
+    @Test
+    fun `the colour a bilingual book gives its second language is not imported`() {
+        val text = "We praise Thee, O God!\n<cFF00D800>Nous Te louons, Dieu!\nPour Ton Fils bien-aimé,</c>"
+        val file = book("""{Verses:[${verse(text)}],Text:"Song"}""")
+
+        assertEquals(
+            listOf("We praise Thee, O God!", "Nous Te louons, Dieu!", "Pour Ton Fils bien-aimé,"),
+            VideoPsalmConverter.parse(file).songs[0].sections[0].lines,
+        )
+    }
+
+    @Test
+    fun `colour markup in a title or an author is not imported either`() {
+        val file = book("""{Author:"<cFF64FF64>W. Kethe</c>",Verses:[${verse("Line")}],
+            |Text:"<cFF64FF64>All People That on Earth Do Dwell</c>"}""".trimMargin())
+        val song = VideoPsalmConverter.parse(file).songs[0]
+
+        assertEquals("All People That on Earth Do Dwell", song.title)
+        assertEquals("W. Kethe", song.author)
+    }
+
+    @Test
+    fun `the rule between two languages splits the verse into the song's two halves`() {
+        val text = "We praise Thee, O God!\nFor the Son of Thy love\n----------------\n" +
+            "Nous Te louons, Dieu!\nPour Ton Fils bien-aimé,"
+        val file = book("""{Verses:[${verse(text)}],Text:"Song"}""")
+        val song = VideoPsalmConverter.parse(file).songs[0]
+
+        assertEquals(listOf("We praise Thee, O God!", "For the Son of Thy love"), song.sections[0].lines)
+        assertEquals(listOf("Nous Te louons, Dieu!", "Pour Ton Fils bien-aimé,"), song.secondarySections[0].lines)
+        assertEquals(song.sections[0].label, song.secondarySections[0].label, "both halves under one label")
+    }
+
+    @Test
+    fun `a book with one language has no second half at all`() {
+        val file = book("""{Verses:[${verse("Amazing grace")}],Text:"Song"}""")
+        assertTrue(VideoPsalmConverter.parse(file).songs[0].secondarySections.isEmpty())
+    }
+
+    @Test
+    fun `a verse the book never translated holds its place in the second half`() {
+        val translated = "Second verse\n----\nDeuxième couplet"
+        val file = book("""{Verses:[${verse("First verse")},${verse(translated)}],Text:"Song"}""")
+        val song = VideoPsalmConverter.parse(file).songs[0]
+
+        assertEquals(2, song.secondarySections.size, "the app pairs the halves by position")
+        assertEquals(emptyList(), song.secondarySections[0].lines)
+        assertEquals(listOf("Deuxième couplet"), song.secondarySections[1].lines)
+    }
+
+    @Test
+    fun `both languages are written into the one song file`() {
+        val text = "English line\n----------------\nLigne française"
+        val file = book("""{Verses:[${verse(text)}],Text:"Song"}""")
+        val out = File(temp, "out").apply { mkdirs() }
+        VideoPsalmConverter.convert(file, out)
+        val written = out.walkTopDown().first { it.extension == "song" }.readText()
+
+        assertTrue(written.contains("[Secondary]"), "the translation needs its own half")
+        assertTrue(
+            written.indexOf("English line") < written.indexOf("[Secondary]"),
+            "the verse belongs in the primary half",
+        )
+        assertTrue(written.indexOf("Ligne française") > written.indexOf("[Secondary]"))
+        assertFalse(written.contains("----"), "the rule between the two is not a lyric")
     }
 
     @Test

@@ -1194,6 +1194,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Номер перед названием</string>
+    <string name="song_number_corner">Угол</string>
+    <string name="song_number_corner_off">Выкл.</string>
     <string name="fullscreen_display">Полноэкранный режим</string>
     <string name="display_mode_label">Режим отображения:</string>
     <string name="display_mode_one_verse">1 куплет</string>
@@ -1465,6 +1467,15 @@
     <string name="stage_monitor_zone_shows">Показывает</string>
     <string name="stage_monitor_zone_count">Зон: %1$d</string>
     <string name="stage_monitor_layout_stranded">Не показывается в этой раскладке: %1$s</string>
+    <string name="stage_monitor_size_section">Размер зон</string>
+    <string name="stage_monitor_zone_width">Ширина (%)</string>
+    <string name="stage_monitor_zone_row_height">Высота ряда (%)</string>
+    <string name="stage_monitor_size_selected">Выбрано</string>
+    <string name="stage_monitor_size_reset">Сбросить</string>
+    <string name="stage_monitor_size_hint">Перетащите разделитель, чтобы поделить место между соседями. Каждый ряд в сумме — 100%.</string>
+    <string name="stage_monitor_size_even">Выровнять</string>
+    <string name="stage_monitor_size_even_row">Этот ряд</string>
+    <string name="stage_monitor_size_even_all">Всё</string>
     <string name="stage_monitor_layout_classic">Классическая (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Сверху / снизу</string>
     <string name="stage_monitor_layout_left_right">Слева / справа</string>
@@ -2158,8 +2169,6 @@
     <string name="presentation_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки и кликер</string>
     <string name="tab_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки</string>
     <string name="dev_window_label">Окно разработчика</string>
-    <string name="display_lower_third_horizontal">Горизонтальная нижняя треть</string>
-    <string name="display_lower_third_vertical">Вертикальная нижняя треть</string>
     <string name="remote_api_remove_from_schedule">Удалить из расписания</string>
     <string name="remote_activity_removed_from_schedule">Удалено из программы</string>
     <string name="instance_link_follower_badge">Instance Link — подключено</string>

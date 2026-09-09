@@ -557,7 +557,11 @@ internal fun QARemoteContent(
                                 onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
                                 onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
                                 onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
-                                onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }
+                                onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } },
+                                backdrop = qaSettings.backdrop,
+                                onBackdropChange = { updated ->
+                                    onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backdrop = updated)) }
+                                },
                         )
 
                         AnimatedVisibility(visible = qaSettings.shadow) {

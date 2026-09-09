@@ -812,8 +812,6 @@
     <string name="display_mode">Näyttötila</string>
     <string name="display_fullscreen">Koko näyttö</string>
     <string name="display_lower_third">Alapalkki</string>
-    <string name="display_lower_third_horizontal">Vaakasuuntainen alapalkki</string>
-    <string name="display_lower_third_vertical">Pystysuuntainen alapalkki</string>
     <string name="lower_third_height">Alapalkin korkeus % (Raamattu ja laulut)</string>
     <string name="full_screen">Koko näyttö</string>
     <string name="lower_third_size">Alapalkki</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero ennen otsikkoa</string>
+    <string name="song_number_corner">Kulma</string>
+    <string name="song_number_corner_off">Pois</string>
     <string name="fullscreen_display">Koko näytön esitys</string>
     <string name="display_mode_label">Näyttötila:</string>
     <string name="display_mode_one_verse">1 säkeistö</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Näyttää</string>
     <string name="stage_monitor_zone_count">%1$d aluetta</string>
     <string name="stage_monitor_layout_stranded">Ei näy tässä asettelussa: %1$s</string>
+    <string name="stage_monitor_size_section">Alueiden koko</string>
+    <string name="stage_monitor_zone_width">Leveys (%)</string>
+    <string name="stage_monitor_zone_row_height">Rivin korkeus (%)</string>
+    <string name="stage_monitor_size_selected">Valittu</string>
+    <string name="stage_monitor_size_reset">Palauta</string>
+    <string name="stage_monitor_size_hint">Vedä jakajaa jakaaksesi tilaa vierekkäisten alueiden kesken. Jokainen rivi on yhteensä 100%.</string>
+    <string name="stage_monitor_size_even">Tasaa</string>
+    <string name="stage_monitor_size_even_row">Tämä rivi</string>
+    <string name="stage_monitor_size_even_all">Kaikki</string>
     <string name="stage_monitor_layout_classic">Klassinen (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Ylä / ala</string>
     <string name="stage_monitor_layout_left_right">Vasen / oikea</string>

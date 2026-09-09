@@ -812,8 +812,6 @@
     <string name="display_mode">表示モード</string>
     <string name="display_fullscreen">全画面</string>
     <string name="display_lower_third">下部テロップ</string>
-    <string name="display_lower_third_horizontal">横型の下部テロップ</string>
-    <string name="display_lower_third_vertical">縦型の下部テロップ</string>
     <string name="lower_third_height">下部テロップの高さ %（聖書と賛美歌用）</string>
     <string name="full_screen">全画面</string>
     <string name="lower_third_size">下部テロップ</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">番号をタイトルの前に表示</string>
+    <string name="song_number_corner">角</string>
+    <string name="song_number_corner_off">オフ</string>
     <string name="fullscreen_display">全画面表示</string>
     <string name="display_mode_label">表示方法:</string>
     <string name="display_mode_one_verse">1 節ずつ</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">表示内容</string>
     <string name="stage_monitor_zone_count">%1$d ゾーン</string>
     <string name="stage_monitor_layout_stranded">このレイアウトでは表示されません: %1$s</string>
+    <string name="stage_monitor_size_section">ゾーンのサイズ</string>
+    <string name="stage_monitor_zone_width">幅 (%)</string>
+    <string name="stage_monitor_zone_row_height">行の高さ (%)</string>
+    <string name="stage_monitor_size_selected">選択中</string>
+    <string name="stage_monitor_size_reset">リセット</string>
+    <string name="stage_monitor_size_hint">仕切りをドラッグすると隣のゾーンと領域を分け合います。各行の合計は 100% です。</string>
+    <string name="stage_monitor_size_even">均等化</string>
+    <string name="stage_monitor_size_even_row">この行</string>
+    <string name="stage_monitor_size_even_all">すべて</string>
     <string name="stage_monitor_layout_classic">クラシック (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">上 / 下</string>
     <string name="stage_monitor_layout_left_right">左 / 右</string>

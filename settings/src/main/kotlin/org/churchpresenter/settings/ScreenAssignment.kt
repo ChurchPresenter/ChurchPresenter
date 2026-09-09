@@ -152,6 +152,18 @@ data class ScreenAssignment(
     val ndiHeight: Int = 1080, // only used by ProjectionSettings.ndiOutputs entries
     val ndiFps: Int = 30, // only used by ProjectionSettings.ndiOutputs entries
     /**
+     * The size a dev fallback window stands for, and reports as its bounds.
+     *
+     * A dev slot drives no display, so it has no `targetBounds*` to read -- which used to mean it
+     * reported the PRIMARY monitor's shape to every preview, a screen nothing is ever sent to.
+     * Per slot rather than per app so a single-monitor machine can simulate a 16:9 projector beside
+     * a 4:3 foyer TV, which is the whole point of running more than one of them.
+     *
+     * Ignored by any slot that does drive a display: real bounds win.
+     */
+    val devWindowWidth: Int = 1920,
+    val devWindowHeight: Int = 1080,
+    /**
      * One of `Constants.NDI_MODE_*`. Defaults to alpha, which is the mode worth defaulting to: it
      * is the one SDI cannot do, and it is what makes a lower third arrive in OBS already keyed.
      *

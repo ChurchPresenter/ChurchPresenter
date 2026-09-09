@@ -83,6 +83,30 @@ internal val SONG_BACKGROUND_COLORS = listOf(
 internal val SONG_BACKGROUND_NAMED_COLORS: Set<String> =
     SONG_BACKGROUND_COLORS.filter { !it.own && !it.gradient }.map { it.color.lowercase() }.toSet()
 
-/** The six one-click colours the design puts under the hex field. */
+/** How many one-click colours the design puts under the hex field. */
+internal const val SONG_BACKGROUND_SUGGESTION_COUNT = 6
+
+/** The six the row falls back on, for an install that has not picked a colour yet. */
 internal val SONG_BACKGROUND_SUGGESTIONS =
     listOf("#000000", "#0d1b2a", "#1b2436", "#2a1130", "#0f2018", "#3a2a12")
+
+/**
+ * The row under the hex field: colours this operator has actually picked, newest first.
+ *
+ * A church settles on one or two backgrounds and reaches for them every week, and six colours
+ * chosen by whoever wrote this file are no help with that -- so [recent] leads and
+ * [SONG_BACKGROUND_SUGGESTIONS] fills whatever is left, dropping off one at a time as the operator
+ * builds up their own. The recents come from `RecentColors`, which every colour picker in the app
+ * already writes to, so a background colour set anywhere turns up here.
+ *
+ * Compared case-insensitively: the picker stores `#RRGGBB` upper case and the fallbacks above are
+ * lower, and one colour must not appear twice for having been typed in a different case.
+ */
+internal fun backgroundSwatches(
+    recent: List<String>,
+    limit: Int = SONG_BACKGROUND_SUGGESTION_COUNT,
+): List<String> {
+    val mine = recent.distinctBy { it.uppercase() }
+    val taken = mine.mapTo(mutableSetOf()) { it.uppercase() }
+    return (mine + SONG_BACKGROUND_SUGGESTIONS.filterNot { it.uppercase() in taken }).take(limit)
+}

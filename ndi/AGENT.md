@@ -80,6 +80,13 @@ App-side wiring is **not** here, the way `AtemBridge` is not in `:atem`: `NdiVid
   the reused buffers safe; two threads through one sender tears a frame, and two through one
   receiver read a buffer while it is being overwritten. `JnaNdiLibrary` keeps one buffer **per
   handle** for the same reason, on both sides.
+- **An `NdiFinder` is driven by one owner too, and destroying one while a look is inside it is a
+  use-after-free.** `NDIlib_find_get_current_sources` blocks for up to a second and JNA cannot be
+  interrupted, so a panel that closes mid-look frees the handle under a live call — a **fatal native
+  crash on Windows, not an exception** (Sentry CHURCH-PRESENTER-DESKTOP-66). `NdiSourceDirectory` is
+  that owner: it serialises looks on one finder and defers `find_destroy` until the last look has
+  left, which is why the finder's own contract stays a plain single-owner one. `findSources` also
+  refuses an implausible source count rather than walking the array it describes.
 - **A received frame's pixels are borrowed, not given.** `NdiLibrary.recvCaptureVideo` and
   `NdiReceiver.receive` both hand back a buffer that the next call overwrites — copy what you need
   before asking for another frame. `NdiFrameCache` does that into a `BufferedImage` immediately.

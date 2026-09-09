@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import kotlin.test.Test
+import org.churchpresenter.core.models.text.TextBackdrop
 
 /**
  * `MainDesktop` holds a `ScheduleTabActions()` built from every default before the tab's own
@@ -38,7 +39,7 @@ class ScheduleTabActionsDefaultsTest {
             false, false, false, false, "#000000", 100, 78,
             "center", "center", "SLIDE_FROM_BOTTOM", 500, 0,
             false, 0, 0, 0, "#FFFFFF", "", "duration",
-            0, 0, 0, "HH:mm:ss",
+            0, 0, 0, "HH:mm:ss", TextBackdrop(),
         )
         actions.addWebsite("url", "title")
         actions.updateWebsiteTitle("url", "title")

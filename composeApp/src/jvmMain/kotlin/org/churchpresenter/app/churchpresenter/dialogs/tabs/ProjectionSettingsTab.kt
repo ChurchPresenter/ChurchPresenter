@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -97,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
+import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
@@ -121,6 +123,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 private const val HALF_WIDTH = 0.5f
+
+/** Cap on the Window Position mockup, so a portrait output cannot balloon the row of inset fields. */
+private val WINDOW_POSITION_MOCK_MAX_HEIGHT = 220.dp
 
 /**
  * One physical display, reduced to what this tab needs of it: its index in the device list (which is
@@ -241,6 +246,10 @@ fun ProjectionSettingsTab(
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
+
+    // The Window Position mockup stands for the projection output, so it takes that output's shape
+    // rather than whatever the layout's width happened to make it.
+    val windowMockAspect = previewOutputSize(settings).aspectRatio
 
     // Detect physical screens; exclude the primary monitor from presenter targets.
     val screenDevicesAll = remember { detectScreens() }
@@ -755,10 +764,13 @@ fun ProjectionSettingsTab(
                 )
 
                 TvScreenBox(
+                    // `weight` stays first so it lands on TvScreenBox's own outermost node; the cap
+                    // after it only stops a portrait output ballooning the row of inset fields.
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 8.dp)
-                        .height(180.dp)
+                        .widthIn(max = tvScreenBoxWidthFor(WINDOW_POSITION_MOCK_MAX_HEIGHT, windowMockAspect)),
+                    screenAspectRatio = windowMockAspect,
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(

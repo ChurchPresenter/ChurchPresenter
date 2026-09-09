@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
@@ -94,6 +95,7 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import org.churchpresenter.settings.layoutSizes
 
 private const val CLOCK_TICK_MS = 1000L
 private const val SHADOW_OFFSET_DIVISOR = 10f
@@ -192,6 +194,17 @@ fun StageMonitorScreen(
     qaSettings: QASettings = QASettings(),
     displayedDictionaryEntry: StrongsEntry? = null,
     dictionarySettings: DictionarySettings = DictionarySettings(),
+    /**
+     * What the clock zone reads, and whether it reads it as 24-hour.
+     *
+     * Parameters only so the screenshot of this screen can pin them -- the same reason
+     * [AboutDialogContent][org.churchpresenter.app.churchpresenter.dialogs.AboutDialogContent]
+     * takes its version line. A live wall clock and the host's locale are both values from outside
+     * the composition, and a committed image of a screen that draws them is stale the second it is
+     * recorded: 22 of them changed on every run. Nothing but the test passes anything here.
+     */
+    now: () -> LocalTime = { LocalTime.now() },
+    use24Hour: Boolean = isSystemUsing24HourFormat(),
     modifier: Modifier = Modifier
 ) {
     val currentText = stageCurrentText(presentingMode, currentLyricSection, displayedVerses)
@@ -204,10 +217,10 @@ fun StageMonitorScreen(
     }
 
     // Clock state — ticks every second
-    var clockText by remember { mutableStateOf(formatClock()) }
+    var clockText by remember { mutableStateOf(formatClock(now(), use24Hour)) }
     LaunchedEffect(Unit) {
         while (true) {
-            clockText = formatClock()
+            clockText = formatClock(now(), use24Hour)
             delay(CLOCK_TICK_MS)
         }
     }
@@ -277,16 +290,18 @@ fun StageMonitorScreen(
             }
         } else {
             // The grid the chosen layout describes: rows down the screen, cells across each row,
-            // both weighted. The classic arrangement is one entry in that catalog, not a special case.
+            // both weighted. The classic arrangement is one entry in that catalog, not a special
+            // case. The weights are percentages, the layout's own until someone resizes a zone.
+            val sizes = sm.layoutSizes()
             Column(modifier = Modifier.fillMaxSize()) {
                 sm.layout.rows.forEachIndexed { rowIndex, layoutRow ->
                     if (rowIndex > 0) HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    Row(modifier = Modifier.fillMaxWidth().weight(layoutRow.weight)) {
+                    Row(modifier = Modifier.fillMaxWidth().weight(sizes.rowHeights[rowIndex])) {
                         layoutRow.cells.forEachIndexed { cellIndex, cell ->
                             if (cellIndex > 0) VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                             StageZoneBox(
                                 sm, cell.slot.toZone(), renderData, mediaViewModel, ::contentFor,
-                                Modifier.weight(cell.weight)
+                                Modifier.weight(sizes.rowCellWidths[rowIndex][cellIndex])
                             )
                         }
                     }
@@ -551,6 +566,7 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
         verticalArrangement = resolveColumnVerticalArrangement(style.verticalAlignment),
         horizontalAlignment = resolveColumnHorizontalAlignment(style.horizontalAlignment)
     ) {
+        val painter = rememberTextBackdropPainter(style.backdrop)
         Text(
             text = text,
             style = buildTextStyle(
@@ -565,7 +581,8 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
                 shadowSize = style.shadowSize,
                 shadowOpacity = style.shadowOpacity
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            onTextLayout = painter::onTextLayout,
             textAlign = resolveTextAlign(style.horizontalAlignment)
         )
     }
@@ -609,6 +626,7 @@ private fun SlideContent(bitmap: ImageBitmap?) {
 
 @Composable
 private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
+    val painter = rememberTextBackdropPainter(style.backdrop)
     Text(
         text = text,
         style = buildTextStyle(
@@ -623,13 +641,15 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
             shadowSize = style.shadowSize,
             shadowOpacity = style.shadowOpacity
         ),
+        modifier = painter.modifier,
+        onTextLayout = painter::onTextLayout,
         textAlign = TextAlign.Center
     )
 }
 
-private fun formatClock(): String {
-    val pattern = if (isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
-    return LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
+private fun formatClock(now: LocalTime, use24Hour: Boolean): String {
+    val pattern = if (use24Hour) "HH:mm:ss" else "hh:mm:ss a"
+    return now.format(DateTimeFormatter.ofPattern(pattern))
 }
 
 private fun buildTextStyle(

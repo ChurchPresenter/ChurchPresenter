@@ -67,6 +67,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -119,8 +123,8 @@ import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.composer
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -289,7 +293,19 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                         value = searchQuery,
                         onValueChange = { onSearchQueryChange(it) },
                         modifier = Modifier.fillMaxWidth()
-                            .onFocusChanged { onSearchFocusChanged(it.isFocused) },
+                            .onFocusChanged { onSearchFocusChanged(it.isFocused) }
+                            // Enter is the operator saying "that is the song": take the caret back
+                            // now rather than waiting out the idle window, and — unlike that
+                            // automatic path — do it even while lyrics are live, because this is
+                            // deliberate. Consuming it keeps Enter from reaching anything else.
+                            .onPreviewKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
+                                    tabFocusRequester.requestFocus()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                         textStyle = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         ),
@@ -310,7 +326,12 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     )
                 }
                 if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchQueryChange("") }, modifier = Modifier.size(30.dp)) {
+                    // Focus goes back to the tab, not to this button — left on the IconButton, a
+                    // following Enter or Space would just re-fire the clear. Matches BibleTab.
+                    IconButton(
+                        onClick = { onSearchQueryChange(""); tabFocusRequester.requestFocus() },
+                        modifier = Modifier.size(30.dp),
+                    ) {
                         Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -648,13 +669,24 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                 if (isRowSelected) MaterialTheme.colorScheme.surfaceVariant
                                 else MaterialTheme.colorScheme.surface
                             )
-                            .finalPassClickable {
-                                onSelectSong(index)
-                                if (isPresenting && live.songId != null) {
-                                    onSelectSection(-1)
-                                }
-                                tabFocusRequester.requestFocus()
-                            }
+                            .finalPassCombinedClickable(
+                                onClick = {
+                                    onSelectSong(index)
+                                    if (isPresenting && live.songId != null) {
+                                        onSelectSection(-1)
+                                    }
+                                    tabFocusRequester.requestFocus()
+                                },
+                                // Double-click sends it, the same four steps the context menu's
+                                // Go Live runs -- and the same convention the schedule rows and the
+                                // Bible panels already use.
+                                onDoubleClick = {
+                                    onSelectSong(index)
+                                    sendToPresenter(true)
+                                    onPresenting(Presenting.LYRICS)
+                                    tabFocusRequester.requestFocus()
+                                },
+                            )
                             .padding(vertical = 8.dp)
                             .pointerInput(Unit) {
                                 awaitPointerEventScope {
@@ -723,13 +755,25 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                         textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
                                         modifier = Modifier
                                             .width(with(density) { colWidth(colId).toDp() })
-                                            .initialPassClickable {
-                                                onSelectSong(index)
-                                                if (isPresenting && live.songId != null) {
-                                                    onSelectSection(-1)
-                                                }
-                                                tabFocusRequester.requestFocus()
-                                            }
+                                            .initialPassCombinedClickable(
+                                                onClick = {
+                                                    onSelectSong(index)
+                                                    if (isPresenting && live.songId != null) {
+                                                        onSelectSection(-1)
+                                                    }
+                                                    tabFocusRequester.requestFocus()
+                                                },
+                                                // The cell consumes on the Initial pass, so a click
+                                                // on the title never reaches the row behind it --
+                                                // without this, double-clicking a song's name would
+                                                // do nothing.
+                                                onDoubleClick = {
+                                                    onSelectSong(index)
+                                                    sendToPresenter(true)
+                                                    onPresenting(Presenting.LYRICS)
+                                                    tabFocusRequester.requestFocus()
+                                                },
+                                            )
                                             .padding(horizontal = 8.dp),
                                         maxLines = if (colId == "number") Int.MAX_VALUE else 1,
                                         overflow = TextOverflow.Ellipsis,

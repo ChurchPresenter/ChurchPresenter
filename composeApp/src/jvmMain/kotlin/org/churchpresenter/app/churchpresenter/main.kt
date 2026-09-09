@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
@@ -166,6 +167,7 @@ import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrou
 import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
 import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
@@ -265,6 +267,8 @@ fun main() {
             versionDisplay = BuildConfig.VERSION_DISPLAY,
             appVersion = BuildConfig.APP_VERSION,
             isRelease = BuildConfig.IS_RELEASE,
+            buildType = BuildConfig.BUILD_TYPE,
+            buildChannel = BuildConfig.BUILD_CHANNEL,
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
@@ -291,13 +295,24 @@ fun main() {
         }
     )
 
+    // One camera enumeration at startup, so a capture that fails before any picker has been opened
+    // can still report what the machine had. A fifth of camera reports arrived carrying
+    // `camera.enumerator=not_run` — nothing had looked, because only a picker enumerates and the
+    // presenter restores a scene without one.
+    //
+    // Its own daemon thread, like the font warm-up above: this shells out to ffmpeg, and on Windows
+    // to PowerShell as well, so it must not be on the path that opens the window.
+    Thread {
+        runCatching { runBlocking { CameraDeviceCatalog.refresh() } }
+    }.apply { isDaemon = true }.start()
+
     val sessionStartedAt = System.currentTimeMillis()
-    Runtime.getRuntime().addShutdownHook(Thread {
+    addGuardedShutdownHook("session") {
         UsageEvents.recordSessionMinutes(((System.currentTimeMillis() - sessionStartedAt) / MILLIS_PER_MINUTE).toInt())
         // Shutdown is when the high-water marks are final. Reports only when they are higher than a
         // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
         ResourceCensus.reportIfLeaky()
-    })
+    }
 
     val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")

@@ -102,6 +102,16 @@ class InstanceLinkClient(
         const val MAX_RECONNECT_DELAY_MS = 30_000L
         /** How long a controller-mode command waits for its command_ack before soft-warning. */
         const val ACK_TIMEOUT_MS = 5_000L
+
+        /**
+         * The peer's address inside a connect failure's message, with the port kept.
+         *
+         * Group 1 is the scheme, group 2 the port and the rest of the URL, so the host between them
+         * is what [redactedConnectFailure] replaces. Deliberately narrow: it matches an address in a
+         * `ws://`/`wss://` URL and leaves every other word of ktor's message alone, because the rest
+         * of it is the diagnosis.
+         */
+        val PEER_URL = Regex("""(wss?://)[^/\s\]:]+(:\d+)?""")
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -207,12 +217,13 @@ class InstanceLinkClient(
                 val failureKind = classifyConnectFailure(e)
                 if (shouldReportConnectFailure(failureKind, consecutiveFailures)) {
                     CrashReporter.reportWarning(
-                        "InstanceLink: connection failed — ${e.message}",
+                        "InstanceLink: connection failed",
                         tags = mapOf(
                             "subsystem" to "instance_link",
                             "consecutive_failures" to consecutiveFailures.toString(),
                             "failure_kind" to failureKind
-                        )
+                        ),
+                        extras = mapOf("reason" to redactedConnectFailure(e.message))
                     )
                 }
                 InstanceLinkLogger.log(
@@ -262,6 +273,25 @@ class InstanceLinkClient(
      * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
      * that crashed mid-session, or a protocol/certificate bug).
      */
+    /**
+     * A connect failure's message with the peer's address taken out of it.
+     *
+     * The message used to be interpolated into the report's *title*, which did two things. It put
+     * the address of a church's own machine — `ws://192.168.1.100:8765/ws` — into an issue title,
+     * where nothing scrubs it: `CrashReporter` redacts home directories and the OS username, not
+     * private addresses. And because Sentry groups on the title, one failure arrived as **fourteen
+     * separate issues**, one per address and port, none of which looked related to the others.
+     *
+     * `PicturesViewModel.reportThumbnailFailures` fixed the same shape for file names and says why:
+     * a constant title so the class of failure is one issue, and what distinguishes an occurrence in
+     * the detail.
+     *
+     * The port is kept. It is not anyone's address, and a follower pointed at the wrong port is a
+     * real misconfiguration worth being able to see.
+     */
+    internal fun redactedConnectFailure(message: String?): String =
+        message?.replace(PEER_URL, "$1<peer>$2") ?: "none"
+
     internal fun classifyConnectFailure(e: Exception): String = when {
         // ktor's own pinger raises this when the primary misses the keepalive window, which is what
         // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the

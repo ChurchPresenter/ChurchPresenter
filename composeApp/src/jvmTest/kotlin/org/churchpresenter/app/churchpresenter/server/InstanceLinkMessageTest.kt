@@ -228,6 +228,45 @@ class InstanceLinkMessageTest {
     }
 
     @Test
+    fun `a connect failure report carries the port but not the peer's address`() {
+        val c = clientWith(Recorder())
+
+        // The message ktor actually produces, from a report in the field.
+        val redacted = c.redactedConnectFailure(
+            "Connect timeout has expired [url=ws://192.168.1.100:8765/ws, connect_timeout=5000 ms]"
+        )
+
+        assertEquals(
+            "Connect timeout has expired [url=ws://<peer>:8765/ws, connect_timeout=5000 ms]",
+            redacted,
+            "the address of a church's own machine is not ours to keep, and nothing scrubs a report " +
+                "for private addresses — but the port is a real misconfiguration worth seeing",
+        )
+    }
+
+    @Test
+    fun `redacting a connect failure leaves the diagnosis intact`() {
+        val c = clientWith(Recorder())
+
+        assertEquals("No route to host", c.redactedConnectFailure("No route to host"))
+        assertEquals(
+            "none", c.redactedConnectFailure(null),
+            "a null message used to arrive as the literal title \"connection failed — null\"",
+        )
+    }
+
+    @Test
+    fun `a secure peer is redacted the same way`() {
+        val c = clientWith(Recorder())
+
+        assertEquals(
+            "failed [url=wss://<peer>:443/ws]",
+            c.redactedConnectFailure("failed [url=wss://studio.example.org:443/ws]"),
+            "a hostname names the church as surely as its address does",
+        )
+    }
+
+    @Test
     fun `a ping timeout is classified and rate-limited like a refused connection`() {
         val c = clientWith(Recorder())
 

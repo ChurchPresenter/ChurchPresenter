@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_required
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
+import churchpresenter.composeapp.generated.resources.canvas_camera_unopenable_listing
 import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,6 +78,87 @@ class CameraToolHintsTest {
         val hints = cameraHintStringRes("Linux", emptyList(), ffmpegAvailable = true)
 
         assertEquals(listOf(Res.string.canvas_camera_none_found, Res.string.canvas_camera_v4l2_hint), hints)
+    }
+
+    // ── A listing nothing can open ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a fallback listing is explained even though ffmpeg is present`() {
+        val hints = cameraHintStringRes(
+            "Windows 11",
+            listOf(camera()),
+            ffmpegAvailable = true,
+            enumerator = CameraEnumerator.PNP_FALLBACK,
+        )
+
+        assertEquals(
+            listOf(Res.string.canvas_camera_unopenable_listing), hints,
+            "bundling ffmpeg made the old condition always false, which left a dropdown of cameras " +
+                "that cannot open with nothing on screen saying so",
+        )
+    }
+
+    @Test
+    fun `the mac fallback is explained the same way`() {
+        val hints = cameraHintStringRes(
+            "Mac OS X",
+            listOf(camera()),
+            ffmpegAvailable = true,
+            enumerator = CameraEnumerator.SYSTEM_PROFILER_FALLBACK,
+        )
+
+        assertEquals(listOf(Res.string.canvas_camera_unopenable_listing), hints)
+    }
+
+    @Test
+    fun `a listing ffmpeg itself produced is not explained away`() {
+        val hints = cameraHintStringRes(
+            "Windows 11",
+            listOf(camera()),
+            ffmpegAvailable = true,
+            enumerator = CameraEnumerator.DSHOW,
+        )
+
+        assertEquals(emptyList(), hints, "these open perfectly well and need no sentence")
+    }
+
+    @Test
+    fun `a missing ffmpeg still outranks the unopenable-listing sentence`() {
+        val hints = cameraHintStringRes(
+            "Windows 11",
+            listOf(camera()),
+            ffmpegAvailable = false,
+            enumerator = CameraEnumerator.PNP_FALLBACK,
+        )
+
+        assertEquals(
+            listOf(Res.string.canvas_camera_ffmpeg_required), hints,
+            "with no ffmpeg at all, finding one is the first thing to do and the more specific " +
+                "sentence would only be noise beside it",
+        )
+    }
+
+    @Test
+    fun `an unopenable listing with nothing in it says only that nothing was found`() {
+        val hints = cameraHintStringRes(
+            "Windows 11",
+            emptyList(),
+            ffmpegAvailable = true,
+            enumerator = CameraEnumerator.PNP_FALLBACK,
+        )
+
+        assertEquals(
+            listOf(Res.string.canvas_camera_none_found), hints,
+            "there is no listing to explain, and a machine with no camera is not a fault",
+        )
+    }
+
+    @Test
+    fun `an unknown enumerator adds no sentence`() {
+        assertEquals(
+            emptyList(),
+            cameraHintStringRes("Windows 11", listOf(camera()), ffmpegAvailable = true, enumerator = null),
+        )
     }
 
     @Test

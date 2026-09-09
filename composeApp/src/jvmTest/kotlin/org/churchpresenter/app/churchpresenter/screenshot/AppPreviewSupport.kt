@@ -5,6 +5,7 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -206,6 +207,11 @@ internal fun appPreview(
             presenterManager.setSongTransitionAlpha(1f)
             pinLottieFrame(presenterManager)
             waitForIdle()
+            // Checked here rather than after selectTab: what matters is the tab the frame is
+            // taken of, and `drive()` runs in between. A mis-click in a driver is exactly how the
+            // Q&A capture became a picture of the Pictures tab, and nothing failed — the file was
+            // simply wrong, and stayed wrong on the website until someone looked at it.
+            onNodeWithText(tabLabel(tab)).assertIsSelected()
             captureTo(File("$ROOT/${name}_$suffix.png"))
         }
     }
@@ -259,8 +265,19 @@ internal fun ComposeUiTest.goLive() {
     waitForIdle()
 }
 
-/** Left of this is the schedule panel, which carries a Go Live on every row. */
-private const val PANEL_LEFT = 380f
+/**
+ * Left of this is the schedule panel, which carries a Go Live on every row.
+ *
+ * `boundsInRoot` is in pixels, so this threshold has to be too: at `-PpreviewDensity=2` the panel
+ * is twice as wide in pixels while occupying the same dp, and a fixed 380f stops separating the
+ * panel from the tab beside it. That is not a near miss — `goLiveOnRow` then matched the schedule's
+ * own Go Live, so the Q&A capture was a shot of the Pictures tab with a photo live, recorded and
+ * shipped to the website while the test reported success.
+ */
+private val PANEL_LEFT = 380f * PREVIEW_DENSITY
+
+/** Right edge of the tab's own left panel, in pixels for the same reason as [PANEL_LEFT]. */
+private val PANEL_RIGHT = 820f * PREVIEW_DENSITY
 
 /**
  * A button by description inside the tab's own left panel — the timer panel carries its own Play
@@ -270,7 +287,7 @@ internal fun ComposeUiTest.clickInPanel(description: String) {
     val nodes = onAllNodesWithContentDescription(description)
     val inPanel = nodes.fetchSemanticsNodes(atLeastOneRootRequired = false)
         .withIndex()
-        .filter { it.value.boundsInRoot.left in PANEL_LEFT..820f }
+        .filter { it.value.boundsInRoot.left in PANEL_LEFT..PANEL_RIGHT }
     require(inPanel.isNotEmpty()) { "no \"$description\" button in the tab panel" }
     nodes[inPanel.first().index].performClick()
     waitForIdle()

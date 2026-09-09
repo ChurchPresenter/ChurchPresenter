@@ -812,8 +812,6 @@
     <string name="display_mode">حالت نمایش</string>
     <string name="display_fullscreen">تمام‌صفحه</string>
     <string name="display_lower_third">نوار پایین</string>
-    <string name="display_lower_third_horizontal">نوار پایین افقی</string>
-    <string name="display_lower_third_vertical">نوار پایین عمودی</string>
     <string name="lower_third_height">ارتفاع نوار پایین % (برای کتاب‌مقدس و سرودها)</string>
     <string name="full_screen">تمام‌صفحه</string>
     <string name="lower_third_size">نوار پایین</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">شماره پیش از عنوان</string>
+    <string name="song_number_corner">گوشه</string>
+    <string name="song_number_corner_off">خاموش</string>
     <string name="fullscreen_display">نمایش تمام‌صفحه</string>
     <string name="display_mode_label">شیوهٔ نمایش:</string>
     <string name="display_mode_one_verse">۱ بند</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">نمایش می‌دهد</string>
     <string name="stage_monitor_zone_count">%1$d ناحیه</string>
     <string name="stage_monitor_layout_stranded">در این چیدمان نمایش داده نمی‌شود: %1$s</string>
+    <string name="stage_monitor_size_section">اندازه ناحیه‌ها</string>
+    <string name="stage_monitor_zone_width">عرض (%)</string>
+    <string name="stage_monitor_zone_row_height">ارتفاع ردیف (%)</string>
+    <string name="stage_monitor_size_selected">انتخاب‌شده</string>
+    <string name="stage_monitor_size_reset">بازنشانی</string>
+    <string name="stage_monitor_size_hint">جداکننده را بکشید تا فضا میان ناحیه‌های مجاور تقسیم شود. هر ردیف در مجموع 100% است.</string>
+    <string name="stage_monitor_size_even">هم‌اندازه کردن</string>
+    <string name="stage_monitor_size_even_row">این ردیف</string>
+    <string name="stage_monitor_size_even_all">همه</string>
     <string name="stage_monitor_layout_classic">کلاسیک (۲ / ۳)</string>
     <string name="stage_monitor_layout_top_bottom">بالا / پایین</string>
     <string name="stage_monitor_layout_left_right">چپ / راست</string>

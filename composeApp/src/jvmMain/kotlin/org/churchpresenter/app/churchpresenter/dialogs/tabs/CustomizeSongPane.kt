@@ -16,6 +16,7 @@ import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.song_element_title
 import churchpresenter.composeapp.generated.resources.song_element_number
+import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
@@ -140,6 +141,13 @@ private fun SongLyricsGroup(
                 onShadowChange = { v ->
                     update { if (lowerThird) it.copy(lyricsLowerThirdShadow = v) else it.copy(lyricsShadow = v) }
                 },
+                backdrop = if (lowerThird) ss.lyricsLowerThirdBackdrop else ss.lyricsBackdrop,
+                onBackdropChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lyricsLowerThirdBackdrop = v)
+                        else it.copy(lyricsBackdrop = v)
+                    }
+                },
             )
         }
         CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
@@ -235,6 +243,13 @@ private fun SongNumberGroup(
                 },
             )
         }
+        CustomizeRow(stringResource(Res.string.song_number_corner)) {
+            DropdownControl(
+                value = ss.numberCorner(lowerThird),
+                options = songNumberCornerOptions(),
+                onValueChange = { v -> update { it.withNumberCorner(lowerThird, v) } },
+            )
+        }
     }
 }
 
@@ -294,38 +309,7 @@ private fun SongLookAheadGroup(
                 },
             )
         }
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold,
-                italic = if (lowerThird) ss.lowerThirdLookAheadItalic else ss.lookAheadItalic,
-                underline = if (lowerThird) ss.lowerThirdLookAheadUnderline else ss.lookAheadUnderline,
-                shadow = if (lowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow,
-                onBoldChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadBold = v)
-                        else it.copy(lookAheadBold = v)
-                    }
-                },
-                onItalicChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadItalic = v)
-                        else it.copy(lookAheadItalic = v)
-                    }
-                },
-                onUnderlineChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadUnderline = v)
-                        else it.copy(lookAheadUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadShadow = v)
-                        else it.copy(lookAheadShadow = v)
-                    }
-                },
-            )
-        }
+        SongLookAheadStyleRow(ss, lowerThird, update)
         CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
             HorizontalAlignControl(
                 selected = if (lowerThird) ss.lowerThirdLookAheadHorizontalAlignment
@@ -421,10 +405,62 @@ private fun SongLookAheadNextGroup(
                         else it.copy(lookAheadNextShadow = v)
                     }
                 },
+                backdrop = if (lowerThird) ss.lowerThirdLookAheadNextBackdrop else ss.lookAheadNextBackdrop,
+                onBackdropChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadNextBackdrop = v)
+                        else it.copy(lookAheadNextBackdrop = v)
+                    }
+                },
             )
         }
     }
 }
 
-
-
+/** The look-ahead line's own face buttons and backdrop, lifted out of [SongLookAheadGroup]. */
+@Composable
+private fun SongLookAheadStyleRow(
+    ss: SongSettings,
+    lowerThird: Boolean,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+) {
+        CustomizeRow(stringResource(Res.string.customize_style)) {
+            StyleControl(
+                bold = if (lowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold,
+                italic = if (lowerThird) ss.lowerThirdLookAheadItalic else ss.lookAheadItalic,
+                underline = if (lowerThird) ss.lowerThirdLookAheadUnderline else ss.lookAheadUnderline,
+                shadow = if (lowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow,
+                onBoldChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadBold = v)
+                        else it.copy(lookAheadBold = v)
+                    }
+                },
+                onItalicChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadItalic = v)
+                        else it.copy(lookAheadItalic = v)
+                    }
+                },
+                onUnderlineChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadUnderline = v)
+                        else it.copy(lookAheadUnderline = v)
+                    }
+                },
+                onShadowChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadShadow = v)
+                        else it.copy(lookAheadShadow = v)
+                    }
+                },
+                backdrop = if (lowerThird) ss.lowerThirdLookAheadBackdrop else ss.lookAheadBackdrop,
+                onBackdropChange = { v ->
+                    update {
+                        if (lowerThird) it.copy(lowerThirdLookAheadBackdrop = v)
+                        else it.copy(lookAheadBackdrop = v)
+                    }
+                },
+            )
+        }
+}

@@ -20,6 +20,8 @@ import javax.imageio.ImageIO
  *   TwelveMonkeys `imageio-jpeg` reader on the classpath reads them.
  * - **A HEIC/HEIF carrying a `.jpg`/`.jpeg` name.** Phone exports and chat apps rename freely, so
  *   the HEIC path is chosen by sniffing the `ftyp` box rather than by extension.
+ * - **A Photoshop file carrying a `.jpg` name.** Reported from the field as an undecodable
+ *   thumbnail whose leading bytes were `8BPS`; the `imageio-psd` reader on the classpath reads it.
  * - **A format only ImageIO knows**, TIFF being the one that turns up in picture folders.
  *
  * The fallbacks re-encode, so they cost a full extra decode — they run only after Skia has already

@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 
 @Serializable
 data class DictionarySettings(
@@ -23,6 +24,11 @@ data class DictionarySettings(
     val referenceShadowColor: String = "#000000",
     val referenceShadowSize: Int = 100,
     val referenceShadowOpacity: Int = 90,
+
+    // The band behind each line and the box around the block, per element.
+    val wordBackdrop: TextBackdrop = TextBackdrop(),
+    val referenceBackdrop: TextBackdrop = TextBackdrop(),
+    val definitionBackdrop: TextBackdrop = TextBackdrop(),
 
     // Definition
     val definitionColor: String = "#DDDDDD",

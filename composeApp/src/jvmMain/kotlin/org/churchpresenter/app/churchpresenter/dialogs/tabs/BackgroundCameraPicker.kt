@@ -28,20 +28,28 @@ import churchpresenter.composeapp.generated.resources.background_camera_device
 import churchpresenter.composeapp.generated.resources.background_camera_format
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
+import org.churchpresenter.app.churchpresenter.composables.cameraFailureStringRes
 import org.churchpresenter.app.churchpresenter.composables.cameraHintStringRes
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
+import org.churchpresenter.app.churchpresenter.composables.CameraFailure
 import org.churchpresenter.app.churchpresenter.composables.CameraFormat
+import org.churchpresenter.app.churchpresenter.composables.CameraPrivacyHint
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
 import org.churchpresenter.app.churchpresenter.composables.listCameraFormats
+import org.churchpresenter.app.churchpresenter.composables.SharedCameraFrameCache
 import org.churchpresenter.app.churchpresenter.composables.selectedConnectionName
 import org.churchpresenter.app.churchpresenter.composables.selectedFormatName
 import org.churchpresenter.app.churchpresenter.composables.selectedModeName
 import org.churchpresenter.core.models.camera.CameraDeviceRef
+import org.churchpresenter.core.models.camera.asCameraSource
+import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.settings.BackgroundConfig
 import org.jetbrains.compose.resources.stringResource
 
@@ -79,31 +87,88 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
         // Above the dropdown rather than instead of it: on Windows without ffmpeg the PnP fallback
         // fills the list with names that cannot be opened, so a hint shown only when the list is
         // empty is a hint the operator who needs it never sees.
-        cameraHintStringRes(System.getProperty("os.name", ""), devices, ffmpegAvailable).forEach { hint ->
+        cameraHintStringRes(
+            System.getProperty("os.name", ""),
+            devices,
+            ffmpegAvailable,
+            CameraDeviceCatalog.lastEnumeration?.enumerator,
+        ).forEach { hint ->
             Text(
                 text = stringResource(hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (found.isEmpty()) return@Column
-
-        DropdownSelector(
-            label = stringResource(Res.string.background_camera_device),
-            items = found.map { it.displayName },
-            selected = selectedBackgroundCameraName(found, config.camera),
-            onSelectedChange = { name ->
-                found.firstOrNull { it.displayName == name }?.let {
-                    onConfigChange(config.copy(camera = cameraRefOn(config.camera, it)))
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        if (config.camera.isDeckLink && config.camera.deckLinkIndex >= 0) {
-            DeckLinkFormatRows(config, onConfigChange, autoLabel)
-        } else if (config.camera.isSet) {
-            CameraFormatRow(config, onConfigChange, autoLabel)
+        // Wrapped rather than an early `return@Column`, so the failure line and the way out of a
+        // privacy refusal below still render when the list is empty. On macOS empty is *the*
+        // symptom: a TCC denial makes AVFoundation enumerate nothing, so returning here hid the
+        // remedy in precisely the case it exists for.
+        if (found.isNotEmpty()) {
+            DropdownSelector(
+                label = stringResource(Res.string.background_camera_device),
+                items = found.map { it.displayName },
+                selected = selectedBackgroundCameraName(found, config.camera),
+                onSelectedChange = { name ->
+                    found.firstOrNull { it.displayName == name }?.let {
+                        onConfigChange(config.copy(camera = cameraRefOn(config.camera, it)))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (config.camera.isDeckLink && config.camera.deckLinkIndex >= 0) {
+                DeckLinkFormatRows(config, onConfigChange, autoLabel)
+            } else if (config.camera.isSet) {
+                CameraFormatRow(config, onConfigChange, autoLabel)
+            }
         }
+        CameraFailureRow(config.camera)
+        CameraPrivacyHint()
+    }
+}
+
+/**
+ * Why [source] is not drawing, if something is drawing it — and null when nothing is.
+ *
+ * Deliberately **not** an acquire: a settings panel that wants to explain a black rectangle must
+ * not be the thing that starts a capture. Acquiring from a dialog would open the device because
+ * someone opened Settings, and the matching release could stop a capture the output is still using.
+ *
+ * Null therefore means "nothing is capturing this camera", which is not the same as "it is fine".
+ * The caller renders that as no diagnosis, never as an all-clear.
+ *
+ * Here rather than beside the cache because that file is already at its `TooManyFunctions`
+ * threshold, and this is its only caller.
+ */
+private fun cameraFailureFlow(source: SceneSource.CameraSource): StateFlow<CameraFailure?>? =
+    SharedCameraFrameCache.liveFailures[SharedCameraFrameCache.keyFor(source)]
+
+/**
+ * Why the chosen camera is not drawing, when something is trying to draw it.
+ *
+ * A camera background renders as black and says nothing — `CameraBackground` documents that as
+ * deliberate, and it is right, because that composable *is* the presenter output and must never
+ * carry troubleshooting text in front of a congregation. But that left the failure explained
+ * nowhere at all: the Canvas layer has its red sentence and this picker had none, so an operator
+ * whose background was refused by macOS saw a black rectangle and no route to the cause. That is
+ * the discoverability half of issue #488.
+ *
+ * Observes through [SharedCameraFrameCache.failureOf] rather than acquiring, so opening Settings
+ * cannot itself start a capture. Nothing capturing means no diagnosis rather than an all-clear —
+ * the camera may simply not be live yet.
+ */
+@Composable
+private fun CameraFailureRow(camera: CameraDeviceRef) {
+    if (!camera.isSet) return
+    val source = remember(camera) { camera.asCameraSource() }
+    val failures = remember(source) { cameraFailureFlow(source) }
+    val failure by (failures ?: remember { MutableStateFlow(null) }).collectAsState()
+
+    failure?.let {
+        Text(
+            text = stringResource(cameraFailureStringRes(it)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
     }
 }
 

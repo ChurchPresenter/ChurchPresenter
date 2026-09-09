@@ -179,10 +179,18 @@ class ProjectionSettingsTabBrowserSourceTest {
 
             rowDropdown("1920×1080").performScrollTo().performClick()
             waitForIdle()
+            // Menu rows read "1920×1080  16:9" — the shape is spelled out beside the numbers, so
+            // these are substring matches. The row button itself still reads the numbers alone,
+            // which is why 1920×1080 is found twice: once on the row, once in the open menu.
             for (preset in listOf("1280×720", "1920×1080", "2560×1440", "3840×2160")) {
-                onAllNodesWithText(preset).assertCountEquals(if (preset == "1920×1080") 2 else 1)
+                onAllNodesWithText(preset, substring = true)
+                    .assertCountEquals(if (preset == "1920×1080") 2 else 1)
             }
-            onNodeWithText("2560×1440").performClick()
+            // A 4:3 and an ultrawide are on offer too — the list used to be 16:9 only, so an
+            // operator could not stand a Browser Source in for the shape it was feeding.
+            onAllNodesWithText("1024×768", substring = true).assertCountEquals(1)
+            onAllNodesWithText("2560×1080", substring = true).assertCountEquals(1)
+            onNodeWithText("2560×1440", substring = true).performClick()
             waitForIdle()
 
             assertEquals(2560, output(get).browserSourceWidth, "the picked width must be stored")
@@ -215,7 +223,7 @@ class ProjectionSettingsTabBrowserSourceTest {
             // Both rows read 1920×1080; the first is the one above.
             onAllNodesWithText("1920×1080")[0].performScrollTo().performClick()
             waitForIdle()
-            onNodeWithText("1280×720").performClick()
+            onNodeWithText("1280×720", substring = true).performClick()
             waitForIdle()
 
             assertEquals(1280, output(get, 0).browserSourceWidth, "the first output must change")

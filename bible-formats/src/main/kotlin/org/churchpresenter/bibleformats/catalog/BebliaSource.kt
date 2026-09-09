@@ -125,19 +125,19 @@ object BebliaSource : BibleSource {
                 // Closing the dialog cancels the install. That is the user's doing, not a fault.
                 throw e
             } catch (e: BibleInstallSupport.DownloadStalledException) {
-                CrashReporter.reportWarning(
-                    "Holy Bible XML download stalled (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf(
+                return@withContext BibleInstallSupport.reportedStall(
+                    "Holy Bible XML download stalled",
+                    e,
+                    mapOf(
                         "subsystem" to "bible_install",
                         "module" to module.fileStem,
                         "reason" to "stalled",
                         "attempts" to e.attempts.toString(),
                         "bytes_written" to e.bytesWritten.toString(),
                         "expected_bytes" to module.sizeBytes.toString(),
-                    )
+                    ),
+                    BibleInstallOutcome.DownloadStalled,
                 )
-                return@withContext BibleInstallOutcome.DownloadStalled
             } catch (e: IOException) {
                 return@withContext BibleInstallSupport.reported(
                     "Holy Bible XML download failed (${module.fileStem})",

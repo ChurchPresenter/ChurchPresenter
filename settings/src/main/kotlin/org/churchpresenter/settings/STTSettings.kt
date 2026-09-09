@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 
 @Serializable
@@ -30,6 +31,8 @@ data class STTSettings(
     val shadowColor: String = "#000000",
     val shadowSize: Int = 100,
     val shadowOpacity: Int = 78,
+    /** The band behind each line and the box around the block. */
+    val backdrop: TextBackdrop = TextBackdrop(),
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.BOTTOM,
 )

@@ -812,8 +812,6 @@
     <string name="display_mode">Način prikaza</string>
     <string name="display_fullscreen">Cijeli zaslon</string>
     <string name="display_lower_third">Donja traka</string>
-    <string name="display_lower_third_horizontal">Vodoravna donja traka</string>
-    <string name="display_lower_third_vertical">Okomita donja traka</string>
     <string name="lower_third_height">Visina donje trake % (za Bibliju i pjesme)</string>
     <string name="full_screen">Cijeli zaslon</string>
     <string name="lower_third_size">Donja traka</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Broj prije naslova</string>
+    <string name="song_number_corner">Kut</string>
+    <string name="song_number_corner_off">Isključeno</string>
     <string name="fullscreen_display">Prikaz na cijelom zaslonu</string>
     <string name="display_mode_label">Način prikaza:</string>
     <string name="display_mode_one_verse">1 stih</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Prikazuje</string>
     <string name="stage_monitor_zone_count">Zona: %1$d</string>
     <string name="stage_monitor_layout_stranded">Nije prikazano u ovom rasporedu: %1$s</string>
+    <string name="stage_monitor_size_section">Veličina zona</string>
+    <string name="stage_monitor_zone_width">Širina (%)</string>
+    <string name="stage_monitor_zone_row_height">Visina retka (%)</string>
+    <string name="stage_monitor_size_selected">Odabrano</string>
+    <string name="stage_monitor_size_reset">Vrati zadano</string>
+    <string name="stage_monitor_size_hint">Povucite razdjelnik da podijelite prostor sa susjedima. Svaki redak ukupno čini 100%.</string>
+    <string name="stage_monitor_size_even">Izjednači</string>
+    <string name="stage_monitor_size_even_row">Ovaj redak</string>
+    <string name="stage_monitor_size_even_all">Sve</string>
     <string name="stage_monitor_layout_classic">Klasični (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Gore / dolje</string>
     <string name="stage_monitor_layout_left_right">Lijevo / desno</string>

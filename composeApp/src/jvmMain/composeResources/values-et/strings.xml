@@ -1493,6 +1493,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number enne pealkirja</string>
+    <string name="song_number_corner">Nurk</string>
+    <string name="song_number_corner_off">Väljas</string>
     <string name="fullscreen_display">Täisekraankuva</string>
     <string name="display_mode_label">Kuvarežiim:</string>
     <string name="display_mode_one_verse">1 salm</string>
@@ -1570,6 +1572,15 @@
     <string name="stage_monitor_zone_shows">Näitab</string>
     <string name="stage_monitor_zone_count">%1$d tsooni</string>
     <string name="stage_monitor_layout_stranded">Selles paigutuses ei kuvata: %1$s</string>
+    <string name="stage_monitor_size_section">Tsoonide suurus</string>
+    <string name="stage_monitor_zone_width">Laius (%)</string>
+    <string name="stage_monitor_zone_row_height">Rea kõrgus (%)</string>
+    <string name="stage_monitor_size_selected">Valitud</string>
+    <string name="stage_monitor_size_reset">Lähtesta</string>
+    <string name="stage_monitor_size_hint">Lohista eraldusjoont, et jagada ruumi naabrite vahel. Iga rida annab kokku 100%.</string>
+    <string name="stage_monitor_size_even">Ühtlusta</string>
+    <string name="stage_monitor_size_even_row">See rida</string>
+    <string name="stage_monitor_size_even_all">Kõik</string>
     <string name="stage_monitor_layout_classic">Klassikaline (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Üleval / all</string>
     <string name="stage_monitor_layout_left_right">Vasak / parem</string>
@@ -2188,8 +2199,6 @@
     <string name="presentation_focus_lost">Klaviatuurifookus kadus — klõpsa siia, et taasaktiveerida nooleklahvid ja slaidipult</string>
     <string name="tab_focus_lost">Klaviatuurifookus kadus — klõpsa siia, et taasaktiveerida nooleklahvid</string>
     <string name="dev_window_label">Arendusaken</string>
-    <string name="display_lower_third_horizontal">Horisontaalne alumine kolmandik</string>
-    <string name="display_lower_third_vertical">Vertikaalne alumine kolmandik</string>
     <string name="remote_api_remove_from_schedule">Eemalda kavast</string>
     <string name="remote_activity_removed_from_schedule">Eemaldatud kavast</string>
     <string name="instance_link_follower_badge">Instance Link — praegu ühendatud</string>

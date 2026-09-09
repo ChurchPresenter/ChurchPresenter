@@ -812,8 +812,6 @@
     <string name="display_mode">وضع العرض</string>
     <string name="display_fullscreen">شاشة كاملة</string>
     <string name="display_lower_third">الثلث السفلي</string>
-    <string name="display_lower_third_horizontal">ثلث سفلي أفقي</string>
-    <string name="display_lower_third_vertical">ثلث سفلي رأسي</string>
     <string name="lower_third_height">نسبة ارتفاع الثلث السفلي % (للكتاب المقدس والترانيم)</string>
     <string name="full_screen">شاشة كاملة</string>
     <string name="lower_third_size">الثلث السفلي</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">الرقم قبل العنوان</string>
+    <string name="song_number_corner">الزاوية</string>
+    <string name="song_number_corner_off">إيقاف</string>
     <string name="fullscreen_display">عرض ملء الشاشة</string>
     <string name="display_mode_label">طريقة العرض:</string>
     <string name="display_mode_one_verse">مقطع واحد</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">يعرض</string>
     <string name="stage_monitor_zone_count">%1$d مناطق</string>
     <string name="stage_monitor_layout_stranded">لا يظهر في هذا التخطيط: %1$s</string>
+    <string name="stage_monitor_size_section">حجم المناطق</string>
+    <string name="stage_monitor_zone_width">العرض (%)</string>
+    <string name="stage_monitor_zone_row_height">ارتفاع الصف (%)</string>
+    <string name="stage_monitor_size_selected">المحدد</string>
+    <string name="stage_monitor_size_reset">إعادة تعيين</string>
+    <string name="stage_monitor_size_hint">اسحب الفاصل لتبادل المساحة بين المناطق المتجاورة. مجموع كل صف 100%.</string>
+    <string name="stage_monitor_size_even">توزيع متساوٍ</string>
+    <string name="stage_monitor_size_even_row">هذا الصف</string>
+    <string name="stage_monitor_size_even_all">كل شيء</string>
     <string name="stage_monitor_layout_classic">كلاسيكي (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">أعلى / أسفل</string>
     <string name="stage_monitor_layout_left_right">يسار / يمين</string>

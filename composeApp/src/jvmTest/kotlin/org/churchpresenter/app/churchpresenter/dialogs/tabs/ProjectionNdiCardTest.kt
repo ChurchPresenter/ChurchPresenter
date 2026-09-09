@@ -300,7 +300,8 @@ class ProjectionNdiCardTest {
         card(oneOutput()) { read ->
             onNodeWithText("1920×1080").performClick()
             waitForIdle()
-            onNodeWithText("3840×2160").performClick()
+            // The menu spells the shape out beside the numbers ("3840×2160  16:9").
+            onNodeWithText("3840×2160", substring = true).performClick()
             waitForIdle()
             val output = read().projectionSettings.ndiOutputs.single()
             assertEquals(3840, output.ndiWidth)

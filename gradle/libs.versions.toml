@@ -29,6 +29,7 @@ pdfbox = "2.0.33"
 aircompressor = "2.0.2"
 junitJupiter = "5.10.2"
 filekit = "0.14.1"
+twelvemonkeys-imageio = "3.10.1"
 
 [libraries]
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
@@ -79,6 +80,9 @@ apache-poi = { module = "org.apache.poi:poi", version.ref = "apache-poi" }
 apache-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "apache-poi" }
 apache-poi-ooxmlFull = { module = "org.apache.poi:poi-ooxml-full", version.ref = "apache-poi" }
 apache-poi-scratchpad = { module = "org.apache.poi:poi-scratchpad", version.ref = "apache-poi" }
+twelvemonkeys-imageio-core = { module = "com.twelvemonkeys.imageio:imageio-core", version.ref = "twelvemonkeys-imageio" }
+twelvemonkeys-imageio-jpeg = { module = "com.twelvemonkeys.imageio:imageio-jpeg", version.ref = "twelvemonkeys-imageio" }
+twelvemonkeys-imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = "twelvemonkeys-imageio" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 aircompressor = { module = "io.airlift:aircompressor", version.ref = "aircompressor" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }

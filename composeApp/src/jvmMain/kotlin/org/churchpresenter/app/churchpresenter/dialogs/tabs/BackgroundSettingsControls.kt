@@ -69,7 +69,8 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.PresetButton
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_LOOKS
-import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_SUGGESTIONS
+import org.churchpresenter.app.churchpresenter.composables.RecentColors
+import org.churchpresenter.app.churchpresenter.dialogs.backgroundSwatches
 import org.churchpresenter.app.churchpresenter.dialogs.Segment
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_MAX_BLUR
@@ -240,7 +241,7 @@ private fun BackgroundColorSection(config: BackgroundConfig, onConfigChange: (Ba
             modifier = Modifier.width(COLOR_FIELD_WIDTH)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
-            SONG_BACKGROUND_SUGGESTIONS.forEach { hex ->
+            backgroundSwatches(RecentColors.colors).forEach { hex ->
                 val selected = config.backgroundColor.equals(hex, ignoreCase = true)
                 Box(
                     Modifier

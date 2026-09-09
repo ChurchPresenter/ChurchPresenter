@@ -812,8 +812,6 @@
     <string name="display_mode">डिस्प्ले मोड</string>
     <string name="display_fullscreen">पूरी स्क्रीन</string>
     <string name="display_lower_third">लोअर थर्ड</string>
-    <string name="display_lower_third_horizontal">क्षैतिज लोअर थर्ड</string>
-    <string name="display_lower_third_vertical">लंबवत लोअर थर्ड</string>
     <string name="lower_third_height">लोअर थर्ड की ऊँचाई % (बाइबल और गीत के लिए)</string>
     <string name="full_screen">पूरी स्क्रीन</string>
     <string name="lower_third_size">लोअर थर्ड</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">शीर्षक से पहले नंबर</string>
+    <string name="song_number_corner">कोना</string>
+    <string name="song_number_corner_off">बंद</string>
     <string name="fullscreen_display">पूरी स्क्रीन पर दिखाना</string>
     <string name="display_mode_label">डिस्प्ले मोड:</string>
     <string name="display_mode_one_verse">1 वचन</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">दिखाता है</string>
     <string name="stage_monitor_zone_count">%1$d ज़ोन</string>
     <string name="stage_monitor_layout_stranded">इस लेआउट में नहीं दिखता: %1$s</string>
+    <string name="stage_monitor_size_section">ज़ोन का आकार</string>
+    <string name="stage_monitor_zone_width">चौड़ाई (%)</string>
+    <string name="stage_monitor_zone_row_height">पंक्ति की ऊँचाई (%)</string>
+    <string name="stage_monitor_size_selected">चयनित</string>
+    <string name="stage_monitor_size_reset">रीसेट करें</string>
+    <string name="stage_monitor_size_hint">पड़ोसी ज़ोन के बीच जगह बाँटने के लिए विभाजक को खींचें। हर पंक्ति कुल 100% होती है।</string>
+    <string name="stage_monitor_size_even">बराबर करें</string>
+    <string name="stage_monitor_size_even_row">यह पंक्ति</string>
+    <string name="stage_monitor_size_even_all">सब कुछ</string>
     <string name="stage_monitor_layout_classic">क्लासिक (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">ऊपर / नीचे</string>
     <string name="stage_monitor_layout_left_right">बाएँ / दाएँ</string>

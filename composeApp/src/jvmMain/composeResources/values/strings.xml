@@ -79,6 +79,33 @@
     <string name="tooltip_shadow">Shadow</string>
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Strikethrough</string>
+    <string name="text_style_backdrop">A</string>
+    <string name="tooltip_backdrop_options">Text backing options</string>
+
+    <!-- Text backing: the fill drawn behind each line and the border drawn around the block -->
+    <string name="backdrop_title">Text backing</string>
+    <string name="backdrop_style">Style</string>
+    <string name="backdrop_mode_off">Off</string>
+    <string name="backdrop_mode_fill">Fill</string>
+    <string name="backdrop_mode_border">Border</string>
+    <string name="backdrop_mode_both">Both</string>
+    <string name="backdrop_mode_hint">Pick Fill, Border or Both to start. Off is the first choice here, and the toolbar button flips between Off and the last style you used.</string>
+    <string name="backdrop_presets">Presets</string>
+    <string name="backdrop_save_preset">Save as Preset</string>
+    <string name="backdrop_saved_look">Saved preset</string>
+    <string name="backdrop_preset_saved_already">This look is already saved</string>
+    <string name="backdrop_preset_black_bar">Black bar</string>
+    <string name="backdrop_preset_soft_shade">Soft shade</string>
+    <string name="backdrop_preset_thin_outline">Thin outline</string>
+    <string name="backdrop_preset_rounded_plate">Rounded plate</string>
+    <string name="backdrop_fill_color">Fill color</string>
+    <string name="backdrop_opacity">Opacity %</string>
+    <string name="backdrop_height_offset">Height offset</string>
+    <string name="backdrop_vertical_offset">Vertical offset</string>
+    <string name="backdrop_border_color">Border color</string>
+    <string name="backdrop_border_width">Thickness</string>
+    <string name="backdrop_border_padding">Padding</string>
+    <string name="backdrop_border_radius">Corner radius</string>
     <string name="shadow_settings">Shadow</string>
     <string name="shadow_size">Size (%)</string>
     <string name="shadow_opacity">Intensity (%)</string>
@@ -760,6 +787,7 @@
     <string name="presentation_animate_keynote">Animate Keynote presentations</string>
     <string name="presentation_focus_lost">Keyboard focus lost — click here to re-enable keyboard and clicker control</string>
     <string name="tab_focus_lost">Keyboard focus lost — click here to re-enable keyboard control</string>
+    <string name="songs_search_focus_hint">Keyboard is in the search box — click here to re-enable keyboard control</string>
     <string name="loading_slides">Loading slides...</string>
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
@@ -905,8 +933,6 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Horizontal Lower Third</string>
-    <string name="display_lower_third_vertical">Vertical Lower Third</string>
     <string name="lower_third_height">Band height %</string>
     <string name="lower_third_band">Lower Third Band</string>
     <string name="full_screen">Full Screen</string>
@@ -1040,6 +1066,12 @@
     <string name="ndi_outputs_help">Virtual outputs sent over the network as NDI® sources — pick one in OBS, vMix or a switcher. Alpha mode carries real transparency, so a lower third arrives already keyed.</string>
     <string name="add_ndi_output">Add Output</string>
     <string name="ndi_output_numbered">NDI Output %1$d</string>
+    <string name="preview_output">Preview output</string>
+    <string name="output_resolution">Resolution</string>
+    <string name="output_resolution_custom">Custom…</string>
+    <string name="output_resolution_custom_title">Custom resolution</string>
+    <string name="output_resolution_width">Width</string>
+    <string name="output_resolution_height">Height</string>
     <string name="ndi_name_tooltip">The name receivers see on the network — Lyrics, Lower Third, Stage…</string>
     <string name="ndi_confirm_remove_message">Are you sure you want to remove %1$s?</string>
     <string name="ndi_enabled">Enabled</string>
@@ -1170,7 +1202,7 @@
     <string name="audio_output_device">Output device</string>
     <string name="audio_output_default">System Default</string>
     <string name="media_vlc_required">VLC media player is required for media playback</string>
-    <string name="background_camera_required">A camera or capture device is required. Install ffmpeg, or connect a Blackmagic DeckLink card.</string>
+    <string name="background_camera_required">A camera or capture device is required. Connect a camera or a Blackmagic DeckLink card, or check Settings → Projection if ffmpeg could not be found.</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
     <string name="media_vlc_arch_mismatch">Wrong VLC architecture. Your Mac uses Apple Silicon (arm64) but the installed VLC is Intel-only (x86_64). Download the Apple Silicon build of VLC from videolan.org and restart.</string>
     <string name="media_vlc_load_failed">VLC was found but could not be loaded. Try reinstalling VLC from videolan.org (on Windows, also install the Microsoft Visual C++ Redistributable), then restart the application.</string>
@@ -1496,10 +1528,11 @@
          virtual cameras. Kept defined because fourteen locales translate it: removing it here would
          orphan every one of those, which LocaleStringsTest gates against. -->
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
+    <string name="canvas_camera_unopenable_listing">ffmpeg could not list any camera on this machine. The cameras below were found by the system instead, and none of them will show a picture.</string>
     <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg, and this build could not find its copy. Open Settings → Projection to point at an ffmpeg, then check again.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
-    <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ffmpeg is not installed. Install ffmpeg, then select the camera again.</string>
+    <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ChurchPresenter could not find its copy of ffmpeg. Open Settings → Projection to point at an ffmpeg, then select the camera again.</string>
     <string name="canvas_camera_error_permission_denied_windows">Windows is blocking camera access for ChurchPresenter. Open Settings → Privacy &amp; security → Camera, turn on camera access and "Let desktop apps access your camera", then select the camera again.</string>
     <string name="canvas_camera_error_device_not_found_windows">Windows could not open a camera with this name. It may have been unplugged, or its driver may name it differently than Windows does — press Refresh Cameras and pick it again.</string>
     <string name="canvas_camera_error_permission_denied">macOS is blocking camera access for ChurchPresenter. Open System Settings → Privacy &amp; Security → Camera, switch ChurchPresenter on, then select the camera again.</string>
@@ -1922,6 +1955,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>
+    <string name="song_number_corner">Corner</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Verse</string>
@@ -2000,6 +2035,15 @@
     <string name="stage_monitor_zone_shows">Shows</string>
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Not shown on this layout: %1$s</string>
+    <string name="stage_monitor_size_section">Zone Size</string>
+    <string name="stage_monitor_zone_width">Width (%)</string>
+    <string name="stage_monitor_zone_row_height">Row Height (%)</string>
+    <string name="stage_monitor_size_selected">Selected</string>
+    <string name="stage_monitor_size_reset">Reset</string>
+    <string name="stage_monitor_size_hint">Drag a divider to trade space between neighbors. Each row shares 100%.</string>
+    <string name="stage_monitor_size_even">Even out</string>
+    <string name="stage_monitor_size_even_row">This row</string>
+    <string name="stage_monitor_size_even_all">Everything</string>
     <string name="stage_monitor_layout_classic">Classic (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Top / Bottom</string>
     <string name="stage_monitor_layout_left_right">Left / Right</string>

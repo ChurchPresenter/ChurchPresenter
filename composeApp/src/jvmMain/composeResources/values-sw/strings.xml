@@ -812,8 +812,6 @@
     <string name="display_mode">Hali ya Onyesho</string>
     <string name="display_fullscreen">Skrini Kamili</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Lower Third Mlalo</string>
-    <string name="display_lower_third_vertical">Lower Third Wima</string>
     <string name="lower_third_height">Kimo cha Lower Third % (kwa Biblia na Nyimbo)</string>
     <string name="full_screen">Skrini Kamili</string>
     <string name="lower_third_size">Lower Third</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Namba kabla ya kichwa</string>
+    <string name="song_number_corner">Pembe</string>
+    <string name="song_number_corner_off">Zima</string>
     <string name="fullscreen_display">Onyesho la skrini nzima</string>
     <string name="display_mode_label">Namna ya kuonyesha:</string>
     <string name="display_mode_one_verse">Ubeti 1</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Inaonyesha</string>
     <string name="stage_monitor_zone_count">Maeneo %1$d</string>
     <string name="stage_monitor_layout_stranded">Haionyeshwi katika mpangilio huu: %1$s</string>
+    <string name="stage_monitor_size_section">Ukubwa wa maeneo</string>
+    <string name="stage_monitor_zone_width">Upana (%)</string>
+    <string name="stage_monitor_zone_row_height">Kimo cha safu (%)</string>
+    <string name="stage_monitor_size_selected">Iliyochaguliwa</string>
+    <string name="stage_monitor_size_reset">Weka upya</string>
+    <string name="stage_monitor_size_hint">Buruta kigawanyi ili kugawana nafasi kati ya maeneo jirani. Kila safu ni jumla ya 100%.</string>
+    <string name="stage_monitor_size_even">Sawazisha</string>
+    <string name="stage_monitor_size_even_row">Safu hii</string>
+    <string name="stage_monitor_size_even_all">Vyote</string>
     <string name="stage_monitor_layout_classic">Klasiki (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Juu / chini</string>
     <string name="stage_monitor_layout_left_right">Kushoto / kulia</string>

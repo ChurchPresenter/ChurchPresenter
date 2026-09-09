@@ -31,6 +31,26 @@ class SongsTabScreenshotTest {
         ),
     )
 
+    /**
+     * A translation that skips a verse — how an imported book reads when it prints a title slide,
+     * or a verse, in one language only.
+     */
+    private val partlyTranslated = listOf(
+        SongFixture(
+            number = "1",
+            title = "Amazing Grace",
+            author = "John Newton",
+            lyrics = listOf(
+                "[Verse 1]",
+                "Amazing grace how sweet the sound",
+                "[Verse 2]",
+                "'Twas grace that taught my heart to fear",
+            ),
+            secondaryTitle = "О благодать",
+            secondaryLyrics = listOf("[Verse 1]", "[Verse 2]", "И научила сердце страх"),
+        ),
+    )
+
     private val splitChorus = listOf(
         SongFixture(
             number = "1",
@@ -182,6 +202,15 @@ class SongsTabScreenshotTest {
     @Test
     fun `a song in two languages`() = stackedThemes(SECTION, "song_two_languages") { mode, file ->
         songsTab(songs = bilingual, themeMode = mode) { _, _ ->
+            clickSong("Amazing Grace")
+            captureTo(file)
+        }
+    }
+
+    /** The first verse untranslated: it shows in one language while verse 2 shows in both. */
+    @Test
+    fun `a song translated only in part`() = stackedThemes(SECTION, "song_two_languages_partial") { mode, file ->
+        songsTab(songs = partlyTranslated, themeMode = mode) { _, _ ->
             clickSong("Amazing Grace")
             captureTo(file)
         }

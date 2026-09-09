@@ -36,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun LazyGridScope.cameraTiles(
     devices: List<CameraDevice>,
     background: SongBackground,
+    swatchAspect: Float,
     onChange: (SongBackground) -> Unit,
 ) {
     items(devices) { device ->
@@ -43,6 +44,7 @@ internal fun LazyGridScope.cameraTiles(
             label = device.displayName,
             selected = device.selects(background.camera),
             badge = SwatchBadge.NONE,
+            swatchAspect = swatchAspect,
             onClick = { onChange(cameraBackground(background, device)) },
         ) {
             Box(Modifier.fillMaxSize().background(Color.Black))

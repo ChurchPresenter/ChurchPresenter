@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -93,6 +94,9 @@ import org.jetbrains.compose.resources.stringResource
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
 
+/** How long typing must stop before the caret leaves the search box. See the idle effect below. */
+internal const val SEARCH_IDLE_FOCUS_MS = 3_000L
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SongsTab(
@@ -122,6 +126,14 @@ fun SongsTab(
     theme: ThemeMode = ThemeMode.SYSTEM,
     statisticsManager: StatisticsManager? = null,
     dialogDismissSignal: Int = 0,
+    /**
+     * How long typing must stop before the caret leaves the search box.
+     *
+     * A parameter only so a test can use a window short enough to wait out for real; the app never
+     * passes it. Compose's test clock does not reliably drive this `delay`, so a test that advanced
+     * the clock instead passed or failed depending on how much wall time the run happened to take.
+     */
+    searchIdleFocusMs: Long = SEARCH_IDLE_FOCUS_MS,
 ) {
     LaunchedEffect(statisticsManager) { viewModel.setStatisticsManager(statisticsManager) }
 
@@ -250,6 +262,35 @@ fun SongsTab(
     val tabFocusRequester = remember { FocusRequester() }
     // True while the caret is in the song search field — the tab's key handler stands down for it.
     var searchFieldFocused by remember { mutableStateOf(false) }
+
+    // Typing narrows the list and previews the first hit with no click, but the caret stays in the
+    // search field — and the key handler below stands down while it is there, so the verse and line
+    // keys do nothing until something else takes focus. Once typing has stopped, hand focus back to
+    // the tab root. The query and the filtered list are left exactly as they are; only the caret
+    // moves. Enter and a click in either pane do the same on demand.
+    //
+    // Every key earns its place: `searchQuery` restarts the wait on each keystroke, so it waits for
+    // *quiet* rather than for time since the first character; `searchFieldFocused` both arms the
+    // effect and cancels it when focus leaves by any other route; an empty query must never arm it
+    // at all (first composition, the clear button, backspacing the query away).
+    //
+    // `isPresenting` suppresses it outright while lyrics are live: every navigation branch below
+    // calls sendToPresenter(goLive = isPresenting), so a pause mid-service would otherwise leave one
+    // stray keypress able to change what the congregation is reading — and after a search the
+    // previewed song is usually not the live one, so it could push a different song entirely.
+    // Enter stays available when live, because it is deliberate.
+    //
+    // `songDialogOpen` covers the delete dialog, which composes in this same scene: a focus grab
+    // from a background coroutine would pull focus off its buttons.
+    val songDialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
+    LaunchedEffect(searchQuery, searchFieldFocused, isPresenting, songDialogOpen) {
+        // Not allowed to: something else owns the keyboard, or owns the output.
+        if (isPresenting || songDialogOpen) return@LaunchedEffect
+        // Nothing to do: the caret is not here, or there is no query to have finished typing.
+        if (!searchFieldFocused || searchQuery.isEmpty()) return@LaunchedEffect
+        delay(searchIdleFocusMs)
+        tabFocusRequester.requestFocus()
+    }
     // Focus-lost rescue: arrow-key song/section/line navigation only works while the tab
     // holds keyboard focus AND the window is focused — full machinery in
     // composables/FocusLostRescue.kt (shared with Presentation/Bible).
@@ -521,6 +562,7 @@ fun SongsTab(
             selectedSectionIndex = selectedSectionIndex,
             selectedLineIndex = viewModel.selectedLineIndex.value,
             searchQuery = searchQuery,
+            searchFieldFocused = searchFieldFocused,
             isPresenting = isPresenting,
             live = live,
             dialogs = dialogs,

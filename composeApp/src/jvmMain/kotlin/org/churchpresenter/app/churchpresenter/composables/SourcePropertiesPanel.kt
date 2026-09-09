@@ -41,6 +41,8 @@ fun SourcePropertiesPanel(
     modifier: Modifier = Modifier,
     appSettings: AppSettings? = null,
     fileChooser: FileChooser = FileChooser.platformInstance,
+    /** The cameras to offer, or null to ask this machine — see [CameraProperties]. */
+    cameraDevices: List<CameraDevice>? = null,
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(
@@ -99,7 +101,7 @@ fun SourcePropertiesPanel(
             is SceneSource.ShapeSource -> ShapeProperties(source, onSourceUpdate)
             is SceneSource.ClockSource -> ClockProperties(source, onSourceUpdate)
             is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
-            is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
+            is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate, cameraDevices)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
             is SceneSource.NdiSource -> NdiProperties(source, onSourceUpdate)
             is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)

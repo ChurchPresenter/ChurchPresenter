@@ -66,6 +66,7 @@ import kotlin.io.path.Path
 internal fun SongBackgroundLibrary(
     background: SongBackground,
     onChange: (SongBackground) -> Unit,
+    swatchAspect: Float,
     modifier: Modifier = Modifier,
     /**
      * The cameras to offer, or null to ask this machine. A test passes a list: enumeration shells
@@ -127,15 +128,16 @@ internal fun SongBackgroundLibrary(
                             label = stringResource(entry.label),
                             selected = entry.selects(background, SONG_BACKGROUND_NAMED_COLORS),
                             badge = if (entry.own) SwatchBadge.PLUS else SwatchBadge.NONE,
+                            swatchAspect = swatchAspect,
                             onClick = { onChange(entry.applyTo(background)) },
                         ) {
                             ColorTileFill(entry, background)
                         }
                     }
                 } else if (category == SongBackgroundType.CAMERA) {
-                    cameraTiles(cameras, background, onChange)
+                    cameraTiles(cameras, background, swatchAspect, onChange)
                 } else {
-                    mediaTiles(category, entries, background, onChange)
+                    mediaTiles(category, entries, background, swatchAspect, onChange)
                 }
             }
             VerticalScrollbar(
@@ -154,6 +156,7 @@ private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
     category: String,
     entries: List<LibraryEntry>,
     background: SongBackground,
+    swatchAspect: Float,
     onChange: (SongBackground) -> Unit,
 ) {
     val isVideo = category == SongBackgroundType.VIDEO
@@ -168,6 +171,7 @@ private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
             label = if (browsedIsChosen) File(chosen).name else label,
             selected = browsedIsChosen,
             badge = SwatchBadge.PLUS,
+            swatchAspect = swatchAspect,
             onClick = {
                 scope.launch {
                     browseForMedia(isVideo, label)?.let { onChange(mediaBackground(background, isVideo, it)) }
@@ -188,6 +192,7 @@ private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
             label = entry.name,
             selected = path != null && path == chosen,
             badge = if (isVideo) SwatchBadge.PLAY else SwatchBadge.NONE,
+            swatchAspect = swatchAspect,
             onClick = {
                 scope.launch {
                     val file = when (entry) {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -44,6 +45,9 @@ class AnnouncementsViewModel {
 
     private val _shadow = mutableStateOf(false)
     val shadow: Boolean get() = _shadow.value
+
+    private val _backdrop = mutableStateOf(TextBackdrop())
+    val backdrop: TextBackdrop get() = _backdrop.value
 
     private val _shadowColor = mutableStateOf("#000000")
     private val _shadowSize = mutableStateOf(100)
@@ -133,6 +137,7 @@ class AnnouncementsViewModel {
         _italic.value = settings.italic
         _underline.value = settings.underline
         _shadow.value = settings.shadow
+        _backdrop.value = settings.backdrop
         _shadowColor.value = settings.shadowColor
         _shadowSize.value = settings.shadowSize
         _shadowOpacity.value = settings.shadowOpacity
@@ -167,6 +172,7 @@ class AnnouncementsViewModel {
     fun setItalic(value: Boolean) { _italic.value = value }
     fun setUnderline(value: Boolean) { _underline.value = value }
     fun setShadow(value: Boolean) { _shadow.value = value }
+    fun setBackdrop(value: TextBackdrop) { _backdrop.value = value }
     fun setHorizontalAlignment(value: String) { _horizontalAlignment.value = value }
     fun setPosition(value: String) { _position.value = value }
     fun setAnimationType(value: String) { _animationType.value = value }
@@ -463,6 +469,7 @@ class AnnouncementsViewModel {
         italic = _italic.value,
         underline = _underline.value,
         shadow = _shadow.value,
+        backdrop = _backdrop.value,
         shadowColor = _shadowColor.value,
         shadowSize = _shadowSize.value,
         shadowOpacity = _shadowOpacity.value,

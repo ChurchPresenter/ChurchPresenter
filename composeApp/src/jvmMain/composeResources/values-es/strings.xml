@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Número antes del título</string>
+    <string name="song_number_corner">Esquina</string>
+    <string name="song_number_corner_off">Apagado</string>
     <string name="fullscreen_display">Pantalla completa</string>
     <string name="display_mode_label">Modo de visualización:</string>
     <string name="display_mode_one_verse">1 versículo</string>
@@ -1475,6 +1477,15 @@
     <string name="stage_monitor_zone_shows">Muestra</string>
     <string name="stage_monitor_zone_count">%1$d zonas</string>
     <string name="stage_monitor_layout_stranded">No se muestra en este diseño: %1$s</string>
+    <string name="stage_monitor_size_section">Tamaño de zonas</string>
+    <string name="stage_monitor_zone_width">Ancho (%)</string>
+    <string name="stage_monitor_zone_row_height">Alto de fila (%)</string>
+    <string name="stage_monitor_size_selected">Seleccionado</string>
+    <string name="stage_monitor_size_reset">Restablecer</string>
+    <string name="stage_monitor_size_hint">Arrastra un divisor para repartir espacio entre zonas vecinas. Cada fila suma 100%.</string>
+    <string name="stage_monitor_size_even">Igualar</string>
+    <string name="stage_monitor_size_even_row">Esta fila</string>
+    <string name="stage_monitor_size_even_all">Todo</string>
     <string name="stage_monitor_layout_classic">Clásico (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Arriba / abajo</string>
     <string name="stage_monitor_layout_left_right">Izquierda / derecha</string>
@@ -2183,8 +2194,6 @@
     <string name="presentation_focus_lost">Foco de teclado perdido — haga clic aquí para reactivar las flechas y el control remoto</string>
     <string name="tab_focus_lost">Foco de teclado perdido — haga clic aquí para reactivar las flechas</string>
     <string name="dev_window_label">Ventana de desarrollo</string>
-    <string name="display_lower_third_horizontal">Tercio inferior horizontal</string>
-    <string name="display_lower_third_vertical">Tercio inferior vertical</string>
     <string name="remote_api_remove_from_schedule">Eliminar del programa</string>
     <string name="remote_activity_removed_from_schedule">Eliminado del programa</string>
     <string name="instance_link_follower_badge">Instance Link — conectado actualmente</string>

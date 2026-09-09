@@ -252,55 +252,64 @@ fun QATab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!isServerRunning) {
-                    Text(
-                        stringResource(Res.string.qa_server_not_running),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                } else if (sessionActive) {
-                    Button(
-                        onClick = {
-                            qaManager.toggleSession()
-                            presenterManager.setDisplayedQuestion(null)
-                            presenterManager.setShowQRCodeOnDisplay(false)
-                            presenting(Presenting.NONE)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(Res.string.qa_stop_session))
-                    }
-                } else {
-                    Button(
-                        onClick = { qaManager.toggleSession() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.inverseSurface,
-                            contentColor = MaterialTheme.colorScheme.inverseOnSurface
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(Res.string.qa_new_session))
-                    }
-                    if (qaManager.history.isNotEmpty()) {
-                        OutlinedButton(onClick = { qaManager.restoreFromHistory() },
+                // The session controls take the leftover width, so the trailing badges and
+                // buttons keep their intrinsic size instead of being squeezed to one glyph.
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!isServerRunning) {
+                        Text(
+                            stringResource(Res.string.qa_server_not_running),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                    } else if (sessionActive) {
+                        Button(
+                            onClick = {
+                                qaManager.toggleSession()
+                                presenterManager.setDisplayedQuestion(null)
+                                presenterManager.setShowQRCodeOnDisplay(false)
+                                presenting(Presenting.NONE)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text(stringResource(Res.string.qa_resume, qaManager.history.size))
+                            Text(stringResource(Res.string.qa_stop_session))
+                        }
+                    } else {
+                        Button(
+                            onClick = { qaManager.toggleSession() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                                contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text(stringResource(Res.string.qa_new_session))
+                        }
+                        if (qaManager.history.isNotEmpty()) {
+                            OutlinedButton(onClick = { qaManager.restoreFromHistory() },
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(Res.string.qa_resume, qaManager.history.size))
+                            }
                         }
                     }
                 }
-
-                Spacer(Modifier.weight(1f))
 
                 StatBadge(stringResource(Res.string.qa_incoming), pendingCount, MaterialTheme.colorScheme.tertiary)
                 Spacer(Modifier.width(8.dp))
@@ -354,7 +363,11 @@ fun QATab(
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text(stringResource(Res.string.qa_clear_all_questions))
+                        Text(
+                            stringResource(Res.string.qa_clear_all_questions),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }

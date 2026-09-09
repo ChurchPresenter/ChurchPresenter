@@ -41,6 +41,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -158,13 +160,15 @@ fun STTPresenter(
                                 text = first,
                                 style = firstStyle,
                                 maxLines = maxLines,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                backdrop = sttSettings.backdrop,
                             )
                             BottomAlignedText(
                                 text = second,
                                 style = secondStyle,
                                 maxLines = maxLines,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                backdrop = sttSettings.backdrop,
                             )
                         }
                     } else {
@@ -174,7 +178,8 @@ fun STTPresenter(
                                     text = first,
                                     style = firstStyle,
                                     maxLines = maxLines,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    backdrop = sttSettings.backdrop,
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
@@ -183,7 +188,8 @@ fun STTPresenter(
                                     text = second,
                                     style = secondStyle,
                                     maxLines = maxLines,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    backdrop = sttSettings.backdrop,
                                 )
                             }
                         }
@@ -204,7 +210,8 @@ fun STTPresenter(
                         text = displayText,
                         style = baseTextStyle.copy(color = displayColor),
                         maxLines = maxLines,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        backdrop = sttSettings.backdrop,
                     )
                 }
             }
@@ -222,10 +229,20 @@ private fun BottomAlignedText(
     text: AnnotatedString,
     style: TextStyle,
     maxLines: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backdrop: TextBackdrop = TextBackdrop(),
 ) {
+    // The painter goes on the content text in both branches, never on the invisible reference
+    // below: that one exists to measure a fixed number of lines, and banding it would paint a
+    // block of empty lines behind the captions.
+    val painter = rememberTextBackdropPainter(backdrop)
     if (maxLines <= 0) {
-        Text(text = text, style = style, modifier = modifier.fillMaxWidth())
+        Text(
+            text = text,
+            style = style,
+            modifier = modifier.fillMaxWidth().then(painter.modifier),
+            onTextLayout = painter::onTextLayout,
+        )
         return
     }
 
@@ -242,7 +259,12 @@ private fun BottomAlignedText(
                 maxLines = maxLines
             )
             // Actual content: measured unconstrained
-            Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
+            Text(
+                text = text,
+                style = style,
+                modifier = Modifier.fillMaxWidth().then(painter.modifier),
+                onTextLayout = painter::onTextLayout,
+            )
         },
         modifier = modifier.clipToBounds()
     ) { measurables, constraints ->

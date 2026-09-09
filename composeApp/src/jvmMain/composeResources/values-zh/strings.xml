@@ -812,8 +812,6 @@
     <string name="display_mode">显示模式</string>
     <string name="display_fullscreen">全屏</string>
     <string name="display_lower_third">字幕条</string>
-    <string name="display_lower_third_horizontal">横向字幕条</string>
-    <string name="display_lower_third_vertical">纵向字幕条</string>
     <string name="lower_third_height">字幕条高度 %（用于圣经和歌曲）</string>
     <string name="full_screen">全屏</string>
     <string name="lower_third_size">字幕条</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">编号在标题之前</string>
+    <string name="song_number_corner">角落</string>
+    <string name="song_number_corner_off">关闭</string>
     <string name="fullscreen_display">全屏显示</string>
     <string name="display_mode_label">显示方式：</string>
     <string name="display_mode_one_verse">每次 1 段</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">显示内容</string>
     <string name="stage_monitor_zone_count">%1$d 个区域</string>
     <string name="stage_monitor_layout_stranded">此布局中不显示：%1$s</string>
+    <string name="stage_monitor_size_section">区域大小</string>
+    <string name="stage_monitor_zone_width">宽度 (%)</string>
+    <string name="stage_monitor_zone_row_height">行高 (%)</string>
+    <string name="stage_monitor_size_selected">已选择</string>
+    <string name="stage_monitor_size_reset">重置</string>
+    <string name="stage_monitor_size_hint">拖动分隔线可在相邻区域之间分配空间。每行合计为 100%。</string>
+    <string name="stage_monitor_size_even">均分</string>
+    <string name="stage_monitor_size_even_row">本行</string>
+    <string name="stage_monitor_size_even_all">全部</string>
     <string name="stage_monitor_layout_classic">经典 (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">上 / 下</string>
     <string name="stage_monitor_layout_left_right">左 / 右</string>

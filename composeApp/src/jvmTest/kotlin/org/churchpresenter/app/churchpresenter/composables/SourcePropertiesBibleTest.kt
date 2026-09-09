@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -606,5 +607,11 @@ class SourcePropertiesBibleTest {
                 "an operator may always overwrite what Insert produced",
             )
         }
+    }
+
+    @Test
+    fun `neither style row carries a text-backing control`() = sourcePanel(Fixture.bible()) { _ ->
+        onAllNodesWithText("B").assertCountEquals(2)
+        onAllNodesWithText("A").assertCountEquals(0)
     }
 }

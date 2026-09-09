@@ -25,6 +25,13 @@ private const val BANDWIDTH_HIGHEST = 100
 private const val BANDWIDTH_LOWEST = 0
 
 /**
+ * More sources than any real network carries -- dozens is a large facility.
+ *
+ * Not a limit on discovery: it is a bound on how much memory a nonsense count can make this read.
+ */
+private const val MAX_DISCOVERED_SOURCES = 1_024
+
+/**
  * The NDI API as JNA sees it — the flat C symbols `libndi` exports, sixteen of which are the whole
  * of what this app needs: four for the runtime itself, four to put a source on the network, and
  * eight to find one and take it off again.
@@ -274,12 +281,36 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
         if (timeoutMs > 0) lib.NDIlib_find_wait_for_sources(handle, timeoutMs)
         val count = IntByReference()
         val first = lib.NDIlib_find_get_current_sources(handle, count) ?: return emptyList()
-        if (count.value <= 0) return emptyList()
+        // A count no real network could produce means the pointer and the count are not describing
+        // an array at all -- a stale or freed finder -- so nothing in it can be trusted, element
+        // zero included. Reading it is the crash; an empty list reads to the picker as "none found".
+        if (count.value !in 1..MAX_DISCOVERED_SOURCES) {
+            if (count.value > MAX_DISCOVERED_SOURCES) noteAbsurdSourceCount(count.value)
+            return emptyList()
+        }
         // The runtime owns this array and keeps it alive until the next call on the same finder,
         // so the names are copied out of it here rather than held.
         return NdiSourceStruct(first).toArray(count.value).map { struct ->
             val source = struct as NdiSourceStruct
             NdiSourceInfo(source.p_ndi_name.orEmpty(), source.p_url_address.orEmpty())
+        }
+    }
+
+    /**
+     * Leaves the fact on any crash that does happen, without reporting one itself.
+     *
+     * A breadcrumb rather than a report because a corrupt count would fire on every press of the
+     * picker's refresh button -- the same "one unusable install, eight reports from one church"
+     * the load path above already learned.
+     */
+    private fun noteAbsurdSourceCount(count: Int) {
+        runCatching {
+            CrashReporter.setTag("ndi.find_count_absurd", "true")
+            CrashReporter.breadcrumb(
+                "NDI discovery reported $count sources; ignoring the array",
+                category = "ndi",
+                level = SentryLevel.WARNING,
+            )
         }
     }
 

@@ -186,23 +186,43 @@ internal object Grid {
     const val IDENTIFY = 0
     const val CONTROLS_PER_ROW = 5
 
+    /**
+     * A dev fallback row carries one more: the resolution picker, between the display mode and the
+     * content-outputs button.
+     *
+     * A simulated window has no monitor to take its size from, so the operator sets it. A row
+     * driving a real display has nothing there to choose, which is why the two counts differ --
+     * pass [devFallback] wherever the screens are [noExternalScreens].
+     */
+    const val DEV_CONTROLS_PER_ROW = 6
+
+    fun controlsPerRow(devFallback: Boolean) = if (devFallback) DEV_CONTROLS_PER_ROW else CONTROLS_PER_ROW
+
+    /** How many labelled buttons the grid itself contributes for [rows] rows. */
+    fun gridButtonCount(rows: Int, devFallback: Boolean = false) = 1 + rows * controlsPerRow(devFallback)
+
     /** The target-display dropdown for assignment row [row]. */
-    fun targetDisplay(row: Int) = 1 + row * CONTROLS_PER_ROW
+    fun targetDisplay(row: Int, devFallback: Boolean = false) = 1 + row * controlsPerRow(devFallback)
 
     /** The key-output dropdown for assignment row [row]. */
-    fun keyOutput(row: Int) = 2 + row * CONTROLS_PER_ROW
+    fun keyOutput(row: Int, devFallback: Boolean = false) = 2 + row * controlsPerRow(devFallback)
 
     /** The display-mode dropdown for assignment row [row]. */
-    fun displayMode(row: Int) = 3 + row * CONTROLS_PER_ROW
+    fun displayMode(row: Int, devFallback: Boolean = false) = 3 + row * controlsPerRow(devFallback)
+
+    /** The resolution picker for dev fallback row [row]. Absent on a row driving a real display. */
+    fun resolution(row: Int) = 4 + row * DEV_CONTROLS_PER_ROW
 
     /** The "N of M enabled" content-outputs button for assignment row [row]. */
-    fun contentOutputs(row: Int) = 4 + row * CONTROLS_PER_ROW
+    fun contentOutputs(row: Int, devFallback: Boolean = false) =
+        (if (devFallback) 5 else 4) + row * controlsPerRow(devFallback)
 
     /** The Customize button for assignment row [row], which sits beside the content-outputs one. */
-    fun customize(row: Int) = 5 + row * CONTROLS_PER_ROW
+    fun customize(row: Int, devFallback: Boolean = false) =
+        (if (devFallback) 6 else 5) + row * controlsPerRow(devFallback)
 
     /** The first button after the grid, given [rows] assignment rows: "Add Output". */
-    fun addOutput(rows: Int) = 1 + rows * CONTROLS_PER_ROW
+    fun addOutput(rows: Int, devFallback: Boolean = false) = 1 + rows * controlsPerRow(devFallback)
 
     /**
      * How many labelled buttons follow the grid.

@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.song_background_look
 import churchpresenter.composeapp.generated.resources.song_background_sample_line
 import churchpresenter.composeapp.generated.resources.song_background_your_color
 import churchpresenter.composeapp.generated.resources.unit_px
+import org.churchpresenter.app.churchpresenter.composables.RecentColors
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_MAX_BLUR
 import org.churchpresenter.core.models.songs.SongBackground
@@ -56,6 +57,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SongBackgroundLookColumn(
     background: SongBackground,
     sampleLine: String,
+    stageAspect: Float,
     onChange: (SongBackground) -> Unit,
     onApplyToSongbook: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -66,7 +68,7 @@ internal fun SongBackgroundLookColumn(
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
-            SongBackgroundStage(background, sampleLine)
+            SongBackgroundStage(background, sampleLine, stageAspect)
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
                 Text(
                     text = songBackgroundName(background),
@@ -141,14 +143,15 @@ internal fun SongBackgroundLookColumn(
 
 /** The preview: the background blurred and overscanned exactly as the presenter draws it. */
 @Composable
-private fun SongBackgroundStage(background: SongBackground, sampleLine: String) {
+private fun SongBackgroundStage(background: SongBackground, sampleLine: String, stageAspect: Float) {
     Box(
-        // 16:9 capped in height, which is what the design's `aspect-ratio` plus `max-height` does:
+        // The output's own shape, capped in height -- which is what the design's `aspect-ratio`
+        // plus `max-height` does:
         // the tile keeps the column's width and stops growing. 92 rather than the design's 110
         // buys the column 18dp; the panel's height was raised for the third slider rather than
         // taken back from here, so the preview keeps the size the sliders were fitted around.
         modifier = Modifier.fillMaxWidth().heightIn(max = STAGE_MAX_HEIGHT)
-            .aspectRatio(STAGE_ASPECT, matchHeightConstraintsFirst = true)
+            .aspectRatio(stageAspect, matchHeightConstraintsFirst = true)
             .clip(RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
     ) {
@@ -212,7 +215,7 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            SONG_BACKGROUND_SUGGESTIONS.forEach { hex ->
+            backgroundSwatches(RecentColors.colors).forEach { hex ->
                 val selected = background.color.equals(hex, ignoreCase = true)
                 Box(
                     Modifier.weight(1f).height(16.dp).clip(RoundedCornerShape(4.dp))
@@ -249,7 +252,6 @@ private fun LookPresetGrid(background: SongBackground, onChange: (SongBackground
     }
 }
 
-private const val STAGE_ASPECT = 16f / 9f
 private val STAGE_MAX_HEIGHT = 92.dp
 private const val BADGE_INK_ALPHA = 0.5f
 private const val HEX_LENGTH = 7

@@ -190,6 +190,64 @@ class MarkdownToSongConverterTest {
         assertTrue(rebuilt.indexOf("title: Round Trip") < rebuilt.indexOf("[Verse 1]"), "title precedes the sections")
     }
 
+    // ── The second language ───────────────────────────────────────────────────
+
+    @Test
+    fun `a song with no translation is written without a Secondary half`() {
+        val content = MarkdownToSongConverter.buildSongContent(
+            ParsedSong(title = "T", sections = listOf(SongSection("Verse 1", listOf("Line"))))
+        )
+        assertTrue(!content.contains("[Secondary]"), "one language, one half")
+    }
+
+    @Test
+    fun `a translation is written as the Secondary half, under the primary one`() {
+        val content = MarkdownToSongConverter.buildSongContent(
+            ParsedSong(
+                title = "Amazing Grace",
+                sections = listOf(SongSection("Verse 1", listOf("Amazing grace"))),
+                secondarySections = listOf(SongSection("Verse 1", listOf("О благодать"))),
+            )
+        )
+        assertTrue(content.indexOf("[Primary]") < content.indexOf("[Secondary]"))
+        assertTrue(content.indexOf("Amazing grace") < content.indexOf("[Secondary]"))
+        assertTrue(content.indexOf("О благодать") > content.indexOf("[Secondary]"))
+    }
+
+    /** The app pairs the halves by position, so a section left untranslated still needs its header. */
+    @Test
+    fun `an untranslated section keeps its header in the Secondary half`() {
+        val content = MarkdownToSongConverter.buildSongContent(
+            ParsedSong(
+                title = "T",
+                sections = listOf(
+                    SongSection("Verse 1", listOf("one")),
+                    SongSection("Verse 2", listOf("two")),
+                ),
+                secondarySections = listOf(
+                    SongSection("Verse 1", emptyList()),
+                    SongSection("Verse 2", listOf("dos")),
+                ),
+            )
+        )
+        val secondHalf = content.substringAfter("[Secondary]")
+        assertTrue(secondHalf.indexOf("[Verse 1]") < secondHalf.indexOf("[Verse 2]"), "both headers, in order")
+        assertTrue(secondHalf.contains("dos"))
+    }
+
+    /** A second half of nothing but headers is no translation at all, and is not written. */
+    @Test
+    fun `sections that are all empty are not written as a Secondary half`() {
+        val content = MarkdownToSongConverter.buildSongContent(
+            ParsedSong(
+                title = "T",
+                sections = listOf(SongSection("Verse 1", listOf("one"))),
+                secondarySections = listOf(SongSection("Verse 1", emptyList())),
+            )
+        )
+        assertTrue(!content.contains("[Secondary]"))
+    }
+
     // ── Writing files ─────────────────────────────────────────────────────────
 
     @Test

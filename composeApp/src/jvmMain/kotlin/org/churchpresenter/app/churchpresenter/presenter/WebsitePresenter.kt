@@ -49,6 +49,186 @@ private const val AUDIO_INIT_DELAY_MS = 2000L
 private const val AUDIO_RETRY_DELAY_MS = 5000L
 
 /**
+ * Choosing where JCEF's native install goes, and getting it there.
+ *
+ * Its own object rather than more members on [CefManager]: picking a directory, probing it, and
+ * moving on to the next one when an install fails is one job with one reason to change — and it is
+ * the half of the engine's startup that can be exercised without a browser.
+ */
+internal object JcefInstall {
+
+    /**
+     * Root directories for JCEF's native install + web cache, best first.
+     *
+     * On Windows, prefer an ASCII-safe, username-free path under %ProgramData%
+     * (e.g. C:\ProgramData\ChurchPresenter) — a home directory containing non-ASCII characters is
+     * a suspected trigger for native-load failures, and a fresh extraction here also clears any
+     * partially-corrupted install. ~/.churchpresenter follows it, because ProgramData is shared
+     * between accounts: a directory this user can create is not necessarily one this user can
+     * extract into when another account got there first, and that is only knowable by trying.
+     *
+     * On macOS/Linux the home directory is the only candidate — no accent problem, no ProgramData.
+     *
+     * A list rather than one chosen path because the choice cannot be made up front. The old form
+     * probed `canWrite()` and committed to whatever passed; the failure reported from the field
+     * passed that probe and then hit `Access is denied` extracting `chrome_elf.dll`, which left the
+     * browser engine down for the session with a usable directory sitting unused beside it.
+     */
+    internal fun rootCandidates(
+        osName: String = System.getProperty("os.name", ""),
+        programData: String? = System.getenv("ProgramData"),
+        homeDir: String = System.getProperty("user.home")
+    ): List<File> {
+        val home = File(homeDir, ".churchpresenter")
+        if (!osName.lowercase().contains("win")) return listOf(home)
+        return listOf(File(programData ?: "C:\\ProgramData", "ChurchPresenter"), home)
+            .distinctBy { it.absolutePath }
+    }
+
+    /**
+     * Whether [dir] can actually be written to, established by creating it and putting a file in it.
+     *
+     * `File.canWrite()` does not answer this on Windows: it reports the read-only attribute and not
+     * the ACL, so a directory the account cannot write to can still come back true. The only
+     * reliable probe is the write itself, and it is trivially cheap beside the ~100 MB extraction
+     * it is deciding whether to start.
+     */
+    internal fun directoryIsWritable(dir: File): Boolean = runCatching {
+        dir.mkdirs()
+        if (!dir.isDirectory) return@runCatching false
+        val probe = File(dir, ".write-probe-" + System.nanoTime())
+        probe.createNewFile().also { probe.delete() }
+    }.getOrDefault(false)
+
+    /**
+     * Why a JCEF install cannot be attempted into a directory in this state, or null to go ahead.
+     *
+     * Both answers are the machine: a directory the user cannot write to (ProgramData ACLs vary,
+     * and a locked-down install is a normal corporate build), and a disk without room for a
+     * bundled Chromium. Neither is a defect and neither becomes an event; what they do is stop the
+     * app spending a download to discover it, and leave a tag saying which one it was.
+     *
+     * Zero is not "full": `File.usableSpace` answers 0 when it cannot determine the figure at all,
+     * so treating it as no space would block the install on every machine whose filesystem does not
+     * report one. An unknown figure goes ahead and lets the real attempt decide.
+     */
+    internal fun installBlocker(writable: Boolean, usableSpaceBytes: Long): String? = when {
+        !writable -> "permission_denied"
+        usableSpaceBytes in 1 until JCEF_REQUIRED_BYTES -> "disk_space"
+        else -> null
+    }
+
+    /**
+     * "policy" when [message] is a machine refusing to load the library, or null for a real failure.
+     *
+     * Matched on the message because it is only knowable after the load has been attempted — unlike
+     * [installBlocker], whose two causes can be asked about beforehand. Matching English wording is
+     * a real limitation and the reason this only ever *suppresses* an event: a localised Windows
+     * falls through and is reported as before, which is the safe direction to be wrong in.
+     */
+    internal fun policyBlock(message: String?): String? {
+        val text = message?.lowercase() ?: return null
+        val blocked = listOf("application control policy", "blocked by group policy", "blocked this file")
+        return if (blocked.any { it in text }) "policy" else null
+    }
+
+    /** How an attempt to install JCEF into the candidate roots ended. */
+    internal sealed interface Outcome {
+        /** It installed into [root]. */
+        data class Installed(val root: File) : Outcome
+        /** Nothing was attempted; [reason] is the last candidate's blocker. */
+        data class Blocked(val reason: String) : Outcome
+        /** An attempt ran and threw; [cause] came from [root]. */
+        data class Failed(val root: File, val cause: Throwable) : Outcome
+    }
+
+    /**
+     * Builds the CEF app against [root], throwing whatever the install or the native load throws.
+     *
+     * The throw is the point: it is what tells [installIntoFirstUsableRoot] this root did not work.
+     */
+    fun buildCefApp(root: File): CefApp {
+        val installDir = File(root, "jcef")
+        installDir.mkdirs()
+        val cacheDir = File(root, "webview-cache")
+        cacheDir.mkdirs()
+
+        val builder = CefAppBuilder()
+        builder.setInstallDir(installDir)
+        builder.setProgressHandler(ConsoleProgressHandler())
+        builder.setAppHandler(object : MavenCefAppHandlerAdapter() {})
+        builder.cefSettings.windowless_rendering_enabled = false
+        builder.cefSettings.cache_path = cacheDir.absolutePath
+        // Fallback to software rendering on VMs / systems without proper GPU drivers
+        val dmiTexts = listOf("product_name", "sys_vendor").mapNotNull { file ->
+            runCatching { File("/sys/class/dmi/id/$file").readText().trim() }.getOrNull()
+        }
+        if (isVirtualizedEnvironment(dmiTexts)) {
+            builder.addJcefArgs("--disable-gpu")
+            builder.addJcefArgs("--disable-gpu-compositing")
+            builder.addJcefArgs("--enable-unsafe-swiftshader")
+        }
+        return builder.build()
+    }
+
+    /** Installs into the first usable root, with the real candidates and the real probes. */
+    fun install(attempt: (File) -> Unit): Outcome = installIntoFirstUsableRoot(
+        roots = rootCandidates(),
+        // Two of the ways this fails are the machine rather than the app, and both are knowable
+        // before the download starts. Asking beforehand keeps them out of the crash reports and is
+        // locale-independent — the exceptions they raise say "Access is denied" and "There is not
+        // enough space on the disk" only on an English Windows, so classifying them after the fact
+        // would work in one language.
+        blockerFor = { root ->
+            val installDir = File(root, "jcef")
+            installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
+        },
+        stopRetrying = { policyBlock(it.message) != null },
+        attempt = attempt,
+    )
+
+    /**
+     * Tries [attempt] against each of [roots] in turn and reports how it ended.
+     *
+     * A root that [blockerFor] rules out is skipped without an attempt; one whose attempt throws is
+     * followed by the next root, unless [stopRetrying] says the failure is about the machine rather
+     * than the directory — a software-policy block applies everywhere, so trying a second path only
+     * spends another download to be refused identically.
+     *
+     * The attempt is a parameter because it is the one step that cannot run in a test: it downloads
+     * and extracts a Chromium build. Everything around it — the order, the skipping, the stop
+     * condition, and which outcome is reported — is the part that was wrong in production, and this
+     * way it is the part under test.
+     */
+    // Throwable is deliberate: a JCEF install fails with UnsatisfiedLinkError as readily as with an
+    // IOException, and both mean "this directory did not work, try the next one".
+    @Suppress("TooGenericExceptionCaught")
+    internal fun installIntoFirstUsableRoot(
+        roots: List<File>,
+        blockerFor: (File) -> String?,
+        stopRetrying: (Throwable) -> Boolean,
+        attempt: (File) -> Unit,
+    ): Outcome {
+        var lastOutcome: Outcome = Outcome.Blocked("no_install_dir")
+        for (root in roots) {
+            val blocker = blockerFor(root)
+            if (blocker != null) {
+                lastOutcome = Outcome.Blocked(blocker)
+                continue
+            }
+            try {
+                attempt(root)
+                return Outcome.Installed(root)
+            } catch (t: Throwable) {
+                lastOutcome = Outcome.Failed(root, t)
+                if (stopRetrying(t)) return lastOutcome
+            }
+        }
+        return lastOutcome
+    }
+}
+
+/**
  * Manages a single CefApp instance for the entire application.
  * Must call [init] once at startup before any WebView is used.
  */
@@ -157,33 +337,6 @@ object CefManager {
     }
 
     /**
-     * Root directory for JCEF's native install + web cache.
-     *
-     * On Windows, prefer an ASCII-safe, username-free path under %ProgramData%
-     * (e.g. C:\ProgramData\ChurchPresenter) — a home directory containing non-ASCII
-     * characters is a suspected trigger for native-load failures, and a fresh
-     * extraction here also clears any partially-corrupted install. Fall back to
-     * ~/.churchpresenter when ProgramData is missing or not writable.
-     *
-     * On macOS/Linux the home directory is used unchanged — no accent problem, no ProgramData.
-     */
-    internal fun jcefRootDir(
-        osName: String = System.getProperty("os.name", ""),
-        programData: String? = System.getenv("ProgramData"),
-        homeDir: String = System.getProperty("user.home")
-    ): File {
-        val isWindows = osName.lowercase().contains("win")
-        if (isWindows) {
-            val candidate = File(programData ?: "C:\\ProgramData", "ChurchPresenter")
-            // Only use it if we can actually create and write to it (ProgramData ACLs vary).
-            val usable = runCatching { candidate.mkdirs(); candidate.isDirectory && candidate.canWrite() }
-                .getOrDefault(false)
-            if (usable) return candidate
-        }
-        return File(homeDir, ".churchpresenter")
-    }
-
-    /**
      * One-time cleanup of the legacy JCEF footprint left under ~/.churchpresenter after a
      * Windows user is relocated to %ProgramData%. Only runs when [activeRoot] is NOT the home
      * directory — i.e. we actually moved. If ProgramData was unwritable and we fell back to the
@@ -204,38 +357,6 @@ object CefManager {
         }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
     }
 
-    /**
-     * Why a JCEF install cannot be attempted into a directory in this state, or null to go ahead.
-     *
-     * Both answers are the machine: a directory the user cannot write to (ProgramData ACLs vary,
-     * and a locked-down install is a normal corporate build), and a disk without room for a
-     * bundled Chromium. Neither is a defect and neither becomes an event; what they do is stop the
-     * app spending a download to discover it, and leave a tag saying which one it was.
-     *
-     * Zero is not "full": `File.usableSpace` answers 0 when it cannot determine the figure at all,
-     * so treating it as no space would block the install on every machine whose filesystem does not
-     * report one. An unknown figure goes ahead and lets the real attempt decide.
-     */
-    internal fun jcefInstallBlocker(writable: Boolean, usableSpaceBytes: Long): String? = when {
-        !writable -> "permission_denied"
-        usableSpaceBytes in 1 until JCEF_REQUIRED_BYTES -> "disk_space"
-        else -> null
-    }
-
-    /**
-     * "policy" when [message] is a machine refusing to load the library, or null for a real failure.
-     *
-     * Matched on the message because it is only knowable after the load has been attempted — unlike
-     * [jcefInstallBlocker], whose two causes can be asked about beforehand. Matching English
-     * wording is a real limitation and the reason this only ever *suppresses* an event: a localised
-     * Windows falls through and is reported as before, which is the safe direction to be wrong in.
-     */
-    internal fun jcefPolicyBlock(message: String?): String? {
-        val text = message?.lowercase() ?: return null
-        val blocked = listOf("application control policy", "blocked by group policy", "blocked this file")
-        return if (blocked.any { it in text }) "policy" else null
-    }
-
     fun init() {
         if (initialized) return
         if (isUnsupportedMacOS()) {
@@ -245,79 +366,70 @@ object CefManager {
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
-        val root = jcefRootDir()
-        val installDir = File(root, "jcef")
-        try {
-            installDir.mkdirs()
+        applyInstallOutcome(JcefInstall.install { root -> cefApp = JcefInstall.buildCefApp(root) })
+    }
 
-            // Two of the ways this fails are the machine rather than the app, and both are knowable
-            // before the download starts. Asking beforehand keeps them out of the crash reports and
-            // is locale-independent — the exceptions they raise say "Access is denied" and "There is
-            // not enough space on the disk" only on an English Windows, so classifying them after
-            // the fact would work in one language.
-            val blocker = jcefInstallBlocker(installDir.canWrite(), installDir.usableSpace)
-            if (blocker != null) {
-                System.err.println("[JCEF] Not installing to ${installDir.path}: $blocker")
-                cefApp = null
-                initialized = false
-                // No event: web features simply stay unavailable, which jcef.available already
-                // says. The tag rides along on anything else this session reports.
-                runCatching { CrashReporter.setTag("jcef.blocked", blocker) }
-                return
-            }
-
-            val cacheDir = File(root, "webview-cache")
-            cacheDir.mkdirs()
-
-            val builder = CefAppBuilder()
-            builder.setInstallDir(installDir)
-            builder.setProgressHandler(ConsoleProgressHandler())
-            builder.setAppHandler(object : MavenCefAppHandlerAdapter() {})
-            builder.cefSettings.windowless_rendering_enabled = false
-            builder.cefSettings.cache_path = cacheDir.absolutePath
-            // Fallback to software rendering on VMs / systems without proper GPU drivers
-            val dmiTexts = listOf("product_name", "sys_vendor").mapNotNull { file ->
-                runCatching { File("/sys/class/dmi/id/$file").readText().trim() }.getOrNull()
-            }
-            if (isVirtualizedEnvironment(dmiTexts)) {
-                builder.addJcefArgs("--disable-gpu")
-                builder.addJcefArgs("--disable-gpu-compositing")
-                builder.addJcefArgs("--enable-unsafe-swiftshader")
-            }
-
-            cefApp = builder.build()
+    /** Sets the engine's state from [outcome], reporting only a failure that is ours. */
+    private fun applyInstallOutcome(outcome: JcefInstall.Outcome) = when (outcome) {
+        is JcefInstall.Outcome.Installed -> {
             initialized = true
+            runCatching { CrashReporter.setTag("jcef.install_root", outcome.root.name) }
             // Now that the relocated install works, reclaim the orphaned old footprint.
-            cleanupLegacyJcef(root)
-        } catch (t: Throwable) {
-            // JCEF native load can fail with UnsatisfiedLinkError (an Error, not an
-            // Exception) — e.g. a broken/partial chrome_elf.dll install, a missing VC++
-            // runtime, or a non-ASCII install path. Catch Throwable so the whole app
-            // does not crash at startup; embedded web features simply stay unavailable.
-            cefApp = null
-            initialized = false
-            // Best-effort telemetry: distinguish the accented-path theory from the
-            // VC++-runtime theory at a glance in Sentry. Never let telemetry throw.
-            runCatching {
-                CrashReporter.setTag("jcef.path_ascii", installDir.path.all { it.code < ASCII_MAX }.toString())
-                CrashReporter.setContext("jcef", mapOf(
-                    "installDir" to installDir.path,
-                    "os" to (System.getProperty("os.name") ?: ""),
-                    "arch" to (System.getProperty("os.arch") ?: "")
-                ))
-            }
-            // A policy block is the machine, not a defect, and it recurs on every launch of every
-            // affected install — so it is tagged and told to the operator rather than reported,
-            // exactly as the two blockers checked before the download are.
-            val policy = jcefPolicyBlock(t.message)
-            if (policy != null) {
-                blockedByPolicy = true
-                System.err.println("[JCEF] Blocked by this machine's software policy: ${t.message}")
-                runCatching { CrashReporter.setTag("jcef.blocked", policy) }
-                return
-            }
-            CrashReporter.reportException(t, context = "CefManager.init")
+            cleanupLegacyJcef(outcome.root)
         }
+        is JcefInstall.Outcome.Blocked -> {
+            engineUnavailable()
+            System.err.println("[JCEF] Not installing: ${outcome.reason}")
+            // No event: web features simply stay unavailable, which jcef.available already
+            // says. The tag rides along on anything else this session reports.
+            runCatching { CrashReporter.setTag("jcef.blocked", outcome.reason) }
+            Unit
+        }
+        is JcefInstall.Outcome.Failed -> {
+            engineUnavailable()
+            reportInstallFailure(outcome)
+        }
+    }
+
+    /** Leaves the web engine off for this session. */
+    private fun engineUnavailable() {
+        cefApp = null
+        initialized = false
+    }
+
+    /**
+     * Reports an install that ran and threw, after every candidate root had its turn — so this is
+     * the engine being genuinely unavailable, not one directory being unusable.
+     *
+     * JCEF native load can fail with UnsatisfiedLinkError (an Error, not an Exception) — e.g. a
+     * broken/partial chrome_elf.dll install, a missing VC++ runtime, or a non-ASCII install path.
+     * All of it is caught so the app does not crash at startup; embedded web features simply stay
+     * unavailable.
+     */
+    private fun reportInstallFailure(outcome: JcefInstall.Outcome.Failed) {
+        val installDir = File(outcome.root, "jcef")
+        // Best-effort telemetry: distinguish the accented-path theory from the
+        // VC++-runtime theory at a glance in Sentry. Never let telemetry throw.
+        runCatching {
+            CrashReporter.setTag("jcef.path_ascii", installDir.path.all { it.code < ASCII_MAX }.toString())
+            CrashReporter.setTag("jcef.install_root", outcome.root.name)
+            CrashReporter.setContext("jcef", mapOf(
+                "installDir" to installDir.path,
+                "os" to (System.getProperty("os.name") ?: ""),
+                "arch" to (System.getProperty("os.arch") ?: "")
+            ))
+        }
+        // A policy block is the machine, not a defect, and it recurs on every launch of every
+        // affected install — so it is tagged and told to the operator rather than reported,
+        // exactly as the two blockers checked before the download are.
+        val policy = JcefInstall.policyBlock(outcome.cause.message)
+        if (policy != null) {
+            blockedByPolicy = true
+            System.err.println("[JCEF] Blocked by this machine's software policy: ${outcome.cause.message}")
+            runCatching { CrashReporter.setTag("jcef.blocked", policy) }
+            return
+        }
+        CrashReporter.reportException(outcome.cause, context = "CefManager.init")
     }
 
     /**

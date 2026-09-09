@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -47,6 +48,8 @@ internal data class BibleElementStyle(
     val letterSpacing: Int = 0,
     val wordSpacing: Int = 0,
     val transform: String = Constants.TEXT_TRANSFORM_NONE,
+    /** The line background and the border box drawn behind and around this element. */
+    val backdrop: TextBackdrop = TextBackdrop(),
 )
 
 /** What this translation currently draws [element] with on [target]. */
@@ -70,6 +73,7 @@ internal fun BibleTranslationSettings.elementStyle(
         letterSpacing = textLetterSpacing,
         wordSpacing = textWordSpacing,
         transform = textTransform,
+        backdrop = textBackdrop,
     )
     element == BibleStyleElement.TEXT -> BibleElementStyle(
         color = lowerThirdTextColor,
@@ -87,6 +91,7 @@ internal fun BibleTranslationSettings.elementStyle(
         letterSpacing = lowerThirdTextLetterSpacing,
         wordSpacing = lowerThirdTextWordSpacing,
         transform = lowerThirdTextTransform,
+        backdrop = lowerThirdTextBackdrop,
     )
     !target.isLowerThird -> BibleElementStyle(
         color = referenceColor,
@@ -105,6 +110,7 @@ internal fun BibleTranslationSettings.elementStyle(
         letterSpacing = referenceLetterSpacing,
         wordSpacing = referenceWordSpacing,
         transform = referenceTransform,
+        backdrop = referenceBackdrop,
     )
     else -> BibleElementStyle(
         color = lowerThirdReferenceColor,
@@ -123,6 +129,7 @@ internal fun BibleTranslationSettings.elementStyle(
         letterSpacing = lowerThirdReferenceLetterSpacing,
         wordSpacing = lowerThirdReferenceWordSpacing,
         transform = lowerThirdReferenceTransform,
+        backdrop = lowerThirdReferenceBackdrop,
     )
 }
 
@@ -160,6 +167,7 @@ private fun BibleTranslationSettings.withFullScreenText(s: BibleElementStyle) = 
     textLetterSpacing = s.letterSpacing,
     textWordSpacing = s.wordSpacing,
     textTransform = s.transform,
+    textBackdrop = s.backdrop,
 )
 
 private fun BibleTranslationSettings.withLowerThirdText(s: BibleElementStyle) = copy(
@@ -178,6 +186,7 @@ private fun BibleTranslationSettings.withLowerThirdText(s: BibleElementStyle) = 
     lowerThirdTextLetterSpacing = s.letterSpacing,
     lowerThirdTextWordSpacing = s.wordSpacing,
     lowerThirdTextTransform = s.transform,
+    lowerThirdTextBackdrop = s.backdrop,
 )
 
 private fun BibleTranslationSettings.withFullScreenReference(s: BibleElementStyle) = copy(
@@ -197,6 +206,7 @@ private fun BibleTranslationSettings.withFullScreenReference(s: BibleElementStyl
     referenceLetterSpacing = s.letterSpacing,
     referenceWordSpacing = s.wordSpacing,
     referenceTransform = s.transform,
+    referenceBackdrop = s.backdrop,
 )
 
 private fun BibleTranslationSettings.withLowerThirdReference(s: BibleElementStyle) = copy(
@@ -216,6 +226,7 @@ private fun BibleTranslationSettings.withLowerThirdReference(s: BibleElementStyl
     lowerThirdReferenceLetterSpacing = s.letterSpacing,
     lowerThirdReferenceWordSpacing = s.wordSpacing,
     lowerThirdReferenceTransform = s.transform,
+    lowerThirdReferenceBackdrop = s.backdrop,
 )
 
 /**

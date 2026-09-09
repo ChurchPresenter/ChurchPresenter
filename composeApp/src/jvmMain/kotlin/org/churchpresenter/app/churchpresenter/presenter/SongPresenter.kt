@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -45,7 +44,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
-import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.AppSettings
 
@@ -66,6 +64,8 @@ import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBackdrop
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
@@ -366,10 +366,7 @@ fun SongPresenter(
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
             .then(if (!isLowerThird && !blurred) bgModifier else Modifier)
     ) {
-        val density = LocalDensity.current
-        val widthScale = with(density) { maxWidth.toPx() / 1920f }
-        val heightScale = with(density) { maxHeight.toPx() / 1080f }
-        val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
         // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
         val blurRadius = backgroundBlurRadius(bgBlurReferencePx, maxWidth)
         PresenterBackgroundLayers(
@@ -448,10 +445,6 @@ fun SongPresenter(
                     1080 - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 }
-<<<<<<< Updated upstream
-                // In top/bottom bilingual mode, each language gets half the height
-                val refHeight = if (topBottom) fullHeight / 2 else fullHeight
-=======
                 // Stacked, each language gets a band of the height on the same reasoning.
                 val refHeight = if (topBottom) fullHeight / drawnLanguages else fullHeight
                 // The same tracking the lines are drawn with. Spacing is stored in pixels against
@@ -460,10 +453,10 @@ fun SongPresenter(
                 // as the rendered line does.
                 val fitLetterEm = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize)
                 val fitWordEm = spacingEm(lyricsStyleProfile.wordSpacing, lyricsStyleProfile.fontSize)
->>>>>>> Stashed changes
                 val baseStyle = TextStyle(
                     fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                    letterSpacing = fitLetterEm.em,
                     fontFamily = lyricsFontFamily
                 )
                 // Resolve display mode to know if we're in line mode
@@ -524,6 +517,7 @@ fun SongPresenter(
                 val fitTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val fitNumberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
                 val fitNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                val fitNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
                 val fitTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
                 val fitNumberFontSize = if (isLowerThird) ss.songNumberLowerThirdFontSize else ss.songNumberFontSize
 
@@ -537,7 +531,11 @@ fun SongPresenter(
                         reserved += autoFitTextMeasurer.measure(longestTitle, titleStyle, density = referenceDensity).size.height
                     }
                 }
-                if (fitNumberDisplay != Constants.NONE && fitNumberPosition == Constants.ABOVE_VERSE) {
+                // A cornered number is drawn over the slide rather than in the row above it, so it
+                // takes no height from the lyrics and reserves none here.
+                if (fitNumberDisplay != Constants.NONE && fitNumberCorner == Constants.NONE &&
+                    fitNumberPosition == Constants.ABOVE_VERSE
+                ) {
                     val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
                     val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
                     if (maxNum > 0) {
@@ -552,7 +550,11 @@ fun SongPresenter(
                     availableWidth = refWidth,
                     availableHeight = refHeight,
                     reservedHeight = reserved,
-                    includeEndIndicator = true
+                    includeEndIndicator = true,
+                    // Measure what `LyricLine` draws, not the stored line: an uppercase transform
+                    // and the word spacing below are both applied at render, and a fit that did not
+                    // include them chose a size whose lines then ran off the side of the output.
+                    styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
                 )
             }
         }
@@ -683,6 +685,9 @@ fun SongPresenter(
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
                 val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                // Which corner the number is pinned to, or NONE for the row it shares with the title.
+                val songNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
+                val numberInCorner = numberConfigured && songNumberCorner != Constants.NONE
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
@@ -773,10 +778,7 @@ fun SongPresenter(
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
                     val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
@@ -791,10 +793,6 @@ fun SongPresenter(
                     } else laFontSize
                     val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
-<<<<<<< Updated upstream
-                    @Composable
-                    fun LyricLine(lineIdx: Int, line: String, laStart: Int) {
-=======
                     // How each language draws its lyric lines and its look-ahead lines.
                     //
                     // Language 0, and every language that has not asked for a look of its own, get
@@ -865,7 +863,6 @@ fun SongPresenter(
                      */
                     @Composable
                     fun LyricLine(lineIdx: Int, line: String, laStart: Int, language: Int = 0) {
->>>>>>> Stashed changes
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
                         val styling =
                             if (isLookAheadLine) languageLaStyling[language] else languageLyricStyling[language]
@@ -877,12 +874,9 @@ fun SongPresenter(
                         } else {
                             lyricsHorizontalAlignment
                         }
-<<<<<<< Updated upstream
-=======
                         val lineBlock = if (isLookAheadLine) laBlocks[language] else lyricsBlocks[language]
->>>>>>> Stashed changes
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
                             textAlign = lineAlign,
                             fontFamily = styling.fontFamily,
                             fontSize = styling.fontSize,
@@ -893,14 +887,9 @@ fun SongPresenter(
                                 spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
                                 spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
                             ),
-<<<<<<< Updated upstream
-                            color = if (isLookAheadLine) laColor else lyricsColor,
-                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled
-=======
                             color = styling.color,
                             style = styling.textStyle,
                             onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
->>>>>>> Stashed changes
                         )
                     }
 
@@ -999,8 +988,10 @@ fun SongPresenter(
 
                     @Composable
                     fun NumberPart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val numberPainter = rememberTextBackdropPainter(numberStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(numberPainter.modifier),
+                            onTextLayout = numberPainter::onTextLayout,
                             textAlign = songNumberHorizontalAlignment,
                             fontFamily = songNumberFontFamily,
                             fontSize = scaledSongNumberFontSize,
@@ -1017,8 +1008,10 @@ fun SongPresenter(
 
                     @Composable
                     fun TitlePart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                        val titlePainter = rememberTextBackdropPainter(titleStyleProfile.backdrop)
                         Text(
-                            modifier = modifier.alpha(visibilityAlpha),
+                            modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
+                            onTextLayout = titlePainter::onTextLayout,
                             textAlign = titleHorizontalAlignment,
                             fontFamily = titleFontFamily,
                             fontSize = scaledTitleFontSize,
@@ -1037,7 +1030,8 @@ fun SongPresenter(
                     fun TitleAndNumberRow(position: String, invisible: Boolean = false) {
                         // "configured" = setting is not None (could appear on some slides)
                         val hasTitleHere = titleConfigured && effectiveTitlePosition == position
-                        val hasNumberHere = numberConfigured && effectiveSongNumberPosition == position
+                        val hasNumberHere = numberConfigured && !numberInCorner &&
+                                effectiveSongNumberPosition == position
                         if (!hasTitleHere && !hasNumberHere) return
 
                         // Alpha: fully invisible when used as a balancing spacer,
@@ -1073,12 +1067,9 @@ fun SongPresenter(
 
                     // Determine which positions have content for balancing
                     val hasBottomContent = (titleConfigured && effectiveTitlePosition == Constants.BELOW_VERSE) ||
-                            (numberConfigured && effectiveSongNumberPosition == Constants.BELOW_VERSE)
+                            (numberConfigured && !numberInCorner &&
+                                    effectiveSongNumberPosition == Constants.BELOW_VERSE)
 
-<<<<<<< Updated upstream
-                    // Outer column fills the content area; title/number at edges, lyrics centered
-                    Column(modifier = Modifier.fillMaxSize()) {
-=======
                     // Outer column fills the content area; title/number at edges, lyrics centered.
                     // Every language's two containers go on it -- each paints only the lines that
                     // reported to it, so the ones for languages this slide does not draw cost a
@@ -1086,7 +1077,6 @@ fun SongPresenter(
                     val blockContainers = (lyricsBlocks + laBlocks)
                         .fold(Modifier as Modifier) { acc, block -> acc.then(block.containerModifier) }
                     Column(modifier = Modifier.fillMaxSize().then(blockContainers)) {
->>>>>>> Stashed changes
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 
@@ -1108,17 +1098,6 @@ fun SongPresenter(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
-<<<<<<< Updated upstream
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                                PrimaryLines()
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
-                                            }
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                                combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart)
-=======
                                             languageBlocks.forEach { block ->
                                                 Column(
                                                     modifier = Modifier.weight(1f),
@@ -1127,7 +1106,6 @@ fun SongPresenter(
                                                     LanguageLines(block)
                                                     EndOfSongIndicator()
                                                     LookAheadPlaceholder(block)
->>>>>>> Stashed changes
                                                 }
                                             }
                                         }
@@ -1145,26 +1123,12 @@ fun SongPresenter(
                                             }
                                         }
                                     } else {
-<<<<<<< Updated upstream
-                                        // Top/bottom bilingual layout
-                                        if (isLowerThird) {
-                                            // Lower third: compact layout, no height splitting
-                                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                PrimaryLines()
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
-                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                                combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart)
-=======
                                         // Full screen: a band of the height each, equally weighted.
                                         val bandAlignment = contentAlignment
                                         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                                             languageBlocks.forEachIndexed { position, block ->
                                                 if (position > 0) {
                                                     Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
->>>>>>> Stashed changes
                                                 }
                                                 Box(
                                                     modifier = Modifier.fillMaxWidth().weight(1f),
@@ -1173,22 +1137,7 @@ fun SongPresenter(
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                         LanguageLines(block)
                                                         EndOfSongIndicator()
-<<<<<<< Updated upstream
-                                                        LookAheadPlaceholder()
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                                    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                        combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                            LookAheadSpacer(idx, secondaryLaStart)
-                                                            LyricLine(idx, line, secondaryLaStart)
-                                                        }
-                                                        EndOfSongIndicator()
-                                                        LookAheadPlaceholder()
-=======
                                                         LookAheadPlaceholder(block)
->>>>>>> Stashed changes
                                                     }
                                                 }
                                             }
@@ -1217,6 +1166,22 @@ fun SongPresenter(
                                 }
                             }
                         }
+                    }
+
+                    // The number pinned to a corner, drawn over the slide rather than in the row it
+                    // would otherwise share with the title: it costs the lyrics no height and does
+                    // not shift when the title's row grows or is left off a slide.
+                    if (numberInCorner && shouldShowSongNumber) {
+                        NumberPart(
+                            modifier = Modifier.align(
+                                when (songNumberCorner) {
+                                    Constants.TOP_LEFT -> Alignment.TopStart
+                                    Constants.TOP_RIGHT -> Alignment.TopEnd
+                                    Constants.BOTTOM_LEFT -> Alignment.BottomStart
+                                    else -> Alignment.BottomEnd
+                                },
+                            ),
+                        )
                     }
                 }
             }

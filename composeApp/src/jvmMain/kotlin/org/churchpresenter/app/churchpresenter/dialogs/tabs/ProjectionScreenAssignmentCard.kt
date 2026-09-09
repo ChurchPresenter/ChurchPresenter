@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.output_resolution
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
 import churchpresenter.composeapp.generated.resources.content_bible
@@ -71,6 +72,9 @@ import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene
@@ -164,6 +168,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     // monitor name — the left column is a name box for any row that drives a real display.
     val screenLabelWidth = 116.dp
     val displayDropdownWidth = 100.dp
+    val resolutionCellWidth = 108.dp
 
     // Header row: Screen label + Display + Key Output + Display Mode + Content Outputs.
     // Every label sits in a fixed-height, bottom-aligned Box so all labels' bottoms line up
@@ -196,6 +201,23 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+        // Dev fallback only: a simulated window has no monitor to take its size from, so the
+        // operator sets it -- per row, so several differently-shaped outputs can be simulated at
+        // once. A real display's size is its own and there is nothing here to choose.
+        if (devWindowedFallback) {
+            Box(
+                modifier = Modifier.width(resolutionCellWidth).height(contentLabelHeight),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                Text(
+                    text = stringResource(Res.string.output_resolution),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
         Spacer(modifier = Modifier.width(8.dp))
         Box(modifier = Modifier.weight(1f).height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
@@ -573,6 +595,29 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 }
             }
 
+            // Dev fallback only — see the header comment. Written to the slot's own
+            // devWindowWidth/Height, which is what outputSizeOf falls back to when a slot has no
+            // display bounds, so the window, its live preview and every settings preview all take
+            // the size from the one place.
+            if (devWindowedFallback) {
+                ResolutionPicker(
+                    label = "",
+                    width = assignment.devWindowWidth,
+                    height = assignment.devWindowHeight,
+                    cellWidth = resolutionCellWidth,
+                    labelHeight = 0.dp,
+                    onChange = { w, h ->
+                        onSettingsChange { s ->
+                            s.copy(
+                                projectionSettings = s.projectionSettings.withAssignment(
+                                    i, assignment.copy(devWindowWidth = w, devWindowHeight = h),
+                                )
+                            )
+                        }
+                    },
+                )
+            }
+
             Spacer(modifier = Modifier.width(8.dp))
 
             // Content Outputs — opens a modal listing every content type + background.
@@ -616,6 +661,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     title = stringResource(Res.string.content_outputs_for, screenLabel),
                     screenLabel = screenLabel,
                     assignment = assignment,
+                    outputSize = outputSizeOf(assignment, OutputKind.SCREEN),
                     contentGroup = contentGroup,
                     backgroundGroup = backgroundGroup,
                     bibleLabel = bibleLabel,

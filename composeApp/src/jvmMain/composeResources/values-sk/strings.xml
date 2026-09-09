@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo pred názvom</string>
+    <string name="song_number_corner">Roh</string>
+    <string name="song_number_corner_off">Vypnuté</string>
     <string name="fullscreen_display">Zobrazenie na celú obrazovku</string>
     <string name="display_mode_label">Režim zobrazenia:</string>
     <string name="display_mode_one_verse">1 verš</string>
@@ -1475,6 +1477,15 @@
     <string name="stage_monitor_zone_shows">Zobrazuje</string>
     <string name="stage_monitor_zone_count">Zón: %1$d</string>
     <string name="stage_monitor_layout_stranded">V tomto rozložení sa nezobrazuje: %1$s</string>
+    <string name="stage_monitor_size_section">Veľkosť zón</string>
+    <string name="stage_monitor_zone_width">Šírka (%)</string>
+    <string name="stage_monitor_zone_row_height">Výška riadka (%)</string>
+    <string name="stage_monitor_size_selected">Vybraté</string>
+    <string name="stage_monitor_size_reset">Obnoviť</string>
+    <string name="stage_monitor_size_hint">Potiahnutím deliacej čiary prerozdelíte miesto medzi susedmi. Každý riadok tvorí 100%.</string>
+    <string name="stage_monitor_size_even">Vyrovnať</string>
+    <string name="stage_monitor_size_even_row">Tento riadok</string>
+    <string name="stage_monitor_size_even_all">Všetko</string>
     <string name="stage_monitor_layout_classic">Klasické (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Hore / dole</string>
     <string name="stage_monitor_layout_left_right">Vľavo / vpravo</string>
@@ -2185,8 +2196,6 @@
     <string name="presentation_focus_lost">Fokus klávesnice bol stratený — kliknite sem pre opätovné povolenie šípok a klikača</string>
     <string name="tab_focus_lost">Fokus klávesnice bol stratený — kliknite sem pre opätovné povolenie šípok</string>
     <string name="dev_window_label">Vývojárske okno</string>
-    <string name="display_lower_third_horizontal">Horizontálny Lower Third</string>
-    <string name="display_lower_third_vertical">Vertikálny Lower Third</string>
     <string name="remote_api_remove_from_schedule">Odstrániť z programu</string>
     <string name="remote_activity_removed_from_schedule">Odstránené z programu</string>
     <string name="instance_link_follower_badge">Instance Link — momentálne pripojené</string>

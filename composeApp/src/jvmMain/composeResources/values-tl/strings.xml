@@ -812,8 +812,6 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="display_lower_third_horizontal">Horizontal na Lower Third</string>
-    <string name="display_lower_third_vertical">Bertikal na Lower Third</string>
     <string name="lower_third_height">Taas ng Lower Third % (para sa Biblia at mga Awit)</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero bago ang pamagat</string>
+    <string name="song_number_corner">Sulok</string>
+    <string name="song_number_corner_off">Off</string>
     <string name="fullscreen_display">Fullscreen na Display</string>
     <string name="display_mode_label">Display Mode:</string>
     <string name="display_mode_one_verse">1 Talata</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Ipinapakita</string>
     <string name="stage_monitor_zone_count">%1$d na zone</string>
     <string name="stage_monitor_layout_stranded">Hindi ipinapakita sa layout na ito: %1$s</string>
+    <string name="stage_monitor_size_section">Laki ng Zone</string>
+    <string name="stage_monitor_zone_width">Lapad (%)</string>
+    <string name="stage_monitor_zone_row_height">Taas ng Row (%)</string>
+    <string name="stage_monitor_size_selected">Napili</string>
+    <string name="stage_monitor_size_reset">I-reset</string>
+    <string name="stage_monitor_size_hint">I-drag ang divider para hatiin ang espasyo sa magkatabing zone. Bawat row ay may kabuuang 100%.</string>
+    <string name="stage_monitor_size_even">Pantayin</string>
+    <string name="stage_monitor_size_even_row">Ang row na ito</string>
+    <string name="stage_monitor_size_even_all">Lahat</string>
     <string name="stage_monitor_layout_classic">Klasiko (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Itaas / ibaba</string>
     <string name="stage_monitor_layout_left_right">Kaliwa / kanan</string>

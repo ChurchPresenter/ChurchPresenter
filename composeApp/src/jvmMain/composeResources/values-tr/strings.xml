@@ -812,8 +812,6 @@
     <string name="display_mode">Görüntüleme Modu</string>
     <string name="display_fullscreen">Tam Ekran</string>
     <string name="display_lower_third">Alt Bant</string>
-    <string name="display_lower_third_horizontal">Yatay Alt Bant</string>
-    <string name="display_lower_third_vertical">Dikey Alt Bant</string>
     <string name="lower_third_height">Alt Bant Yüksekliği % (Kutsal Kitap ve Şarkılar için)</string>
     <string name="full_screen">Tam Ekran</string>
     <string name="lower_third_size">Alt Bant</string>
@@ -1661,6 +1659,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numara başlıktan önce</string>
+    <string name="song_number_corner">Köşe</string>
+    <string name="song_number_corner_off">Kapalı</string>
     <string name="fullscreen_display">Tam ekran gösterim</string>
     <string name="display_mode_label">Gösterim biçimi:</string>
     <string name="display_mode_one_verse">1 kıta</string>
@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Gösterir</string>
     <string name="stage_monitor_zone_count">%1$d bölge</string>
     <string name="stage_monitor_layout_stranded">Bu düzende gösterilmiyor: %1$s</string>
+    <string name="stage_monitor_size_section">Bölge boyutu</string>
+    <string name="stage_monitor_zone_width">Genişlik (%)</string>
+    <string name="stage_monitor_zone_row_height">Satır yüksekliği (%)</string>
+    <string name="stage_monitor_size_selected">Seçili</string>
+    <string name="stage_monitor_size_reset">Sıfırla</string>
+    <string name="stage_monitor_size_hint">Komşu bölgeler arasında alanı paylaştırmak için ayırıcıyı sürükleyin. Her satır toplamda 100%.</string>
+    <string name="stage_monitor_size_even">Eşitle</string>
+    <string name="stage_monitor_size_even_row">Bu satır</string>
+    <string name="stage_monitor_size_even_all">Tümü</string>
     <string name="stage_monitor_layout_classic">Klasik (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Üst / alt</string>
     <string name="stage_monitor_layout_left_right">Sol / sağ</string>

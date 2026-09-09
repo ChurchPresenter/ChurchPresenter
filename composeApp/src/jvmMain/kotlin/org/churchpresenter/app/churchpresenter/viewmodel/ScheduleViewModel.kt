@@ -8,9 +8,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
@@ -103,7 +105,7 @@ class ScheduleViewModel(
         // exitProcess/System.exit shutdown (e.g. the self-updater relaunching an installer),
         // so this loop could otherwise wake up mid-shutdown and try to classload ScheduleFileV2
         // after the installer has started overwriting the app's own files.
-        Runtime.getRuntime().addShutdownHook(Thread { scope.cancel() })
+        addGuardedShutdownHook("schedule") { scope.cancel() }
         scope.launch {
             while (true) {
                 delay(AUTOSAVE_INTERVAL_MS)
@@ -482,7 +484,8 @@ class ScheduleViewModel(
         targetHour: Int = 0,
         targetMinute: Int = 0,
         targetSecond: Int = 0,
-        liveClockFormat: String = "HH:mm:ss"
+        liveClockFormat: String = "HH:mm:ss",
+        backdrop: TextBackdrop = TextBackdrop()
     ) {
         addOrPush(
             ScheduleItem.AnnouncementItem(
@@ -514,7 +517,8 @@ class ScheduleViewModel(
                 targetHour = targetHour,
                 targetMinute = targetMinute,
                 targetSecond = targetSecond,
-                liveClockFormat = liveClockFormat
+                liveClockFormat = liveClockFormat,
+                backdrop = backdrop
             )
         )
     }

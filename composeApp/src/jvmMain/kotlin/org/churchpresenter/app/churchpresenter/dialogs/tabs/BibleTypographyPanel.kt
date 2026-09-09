@@ -201,6 +201,8 @@ private fun ColorControl(
             strikethrough = style.strikethrough,
             onStrikethroughChange = { onStyleChange(style.copy(strikethrough = it)) },
             showShadow = false,
+            backdrop = style.backdrop,
+            onBackdropChange = { onStyleChange(style.copy(backdrop = it)) },
             buttonSize = FACE_BUTTON_SIZE,
         )
     }

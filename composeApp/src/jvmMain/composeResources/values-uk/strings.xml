@@ -1154,6 +1154,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Номер перед назвою</string>
+    <string name="song_number_corner">Кут</string>
+    <string name="song_number_corner_off">Вимк.</string>
     <string name="fullscreen_display">Повноекранний режим</string>
     <string name="display_mode_label">Режим відображення:</string>
     <string name="display_mode_one_verse">1 куплет</string>
@@ -1422,6 +1424,15 @@
     <string name="stage_monitor_zone_shows">Показує</string>
     <string name="stage_monitor_zone_count">Зон: %1$d</string>
     <string name="stage_monitor_layout_stranded">Не показується в цьому розкладі: %1$s</string>
+    <string name="stage_monitor_size_section">Розмір зон</string>
+    <string name="stage_monitor_zone_width">Ширина (%)</string>
+    <string name="stage_monitor_zone_row_height">Висота рядка (%)</string>
+    <string name="stage_monitor_size_selected">Вибрано</string>
+    <string name="stage_monitor_size_reset">Скинути</string>
+    <string name="stage_monitor_size_hint">Перетягніть роздільник, щоб поділити місце між сусідами. Кожен рядок разом — 100%.</string>
+    <string name="stage_monitor_size_even">Вирівняти</string>
+    <string name="stage_monitor_size_even_row">Цей рядок</string>
+    <string name="stage_monitor_size_even_all">Усе</string>
     <string name="stage_monitor_layout_classic">Класична (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Зверху / знизу</string>
     <string name="stage_monitor_layout_left_right">Ліворуч / праворуч</string>
@@ -2155,8 +2166,6 @@
     <string name="presentation_focus_lost">Фокус клавіатури втрачено — натисніть тут, щоб знову увімкнути стрілки та клікер</string>
     <string name="tab_focus_lost">Фокус клавіатури втрачено — натисніть тут, щоб знову увімкнути стрілки</string>
     <string name="dev_window_label">Вікно розробника</string>
-    <string name="display_lower_third_horizontal">Горизонтальний нижній титр</string>
-    <string name="display_lower_third_vertical">Вертикальний нижній титр</string>
     <string name="remote_api_remove_from_schedule">Видалити з програми</string>
     <string name="remote_activity_removed_from_schedule">Видалено з програми</string>
     <string name="instance_link_follower_badge">Instance Link — зараз підключено</string>

@@ -46,8 +46,14 @@ internal object CameraDeviceCatalog {
     /** Bounds the blind-ffmpeg report to one per process — re-opening a picker re-enumerates. */
     private val blindFfmpegReport = ReportOnce()
 
-    /** Re-enumerates, on IO. Safe to call from a composition's `LaunchedEffect`. */
-    suspend fun refresh(deckLinkDeviceFormat: String) {
+    /**
+     * Re-enumerates, on IO. Safe to call from a composition's `LaunchedEffect`.
+     *
+     * The default matches [listCameraDevicesWithDeckLink]'s, for the startup call that has no
+     * composition to read a string resource from — it only labels DeckLink devices, and a label is
+     * not what the startup enumeration is for.
+     */
+    suspend fun refresh(deckLinkDeviceFormat: String = "DeckLink: %1\$s") {
         val listing = withContext(Dispatchers.IO) { listCameraDevicesWithDeckLinkListing(deckLinkDeviceFormat) }
         _lastEnumeration = listing.facts
         _devices.value = listing.devices

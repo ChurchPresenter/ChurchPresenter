@@ -159,6 +159,15 @@ internal fun songsTab(
     themeMode: ThemeMode? = null,
     /** The bindings the tab resolves its key handler and nav hint through; the shipped set unless overridden. */
     shortcuts: ShortcutMap = ShortcutMap.DEFAULT,
+    /**
+     * How long typing must stop before the tab takes the caret back — the app's own three seconds
+     * unless a test shortens it.
+     *
+     * Shortened rather than clock-advanced because Compose's test clock does not reliably drive
+     * that `delay`: tests that advanced the clock passed or failed depending on how much wall time
+     * the run happened to take. A short window plus `waitUntil` ends on a positive signal instead.
+     */
+    searchIdleFocusMs: Long = SEARCH_IDLE_FOCUS_MS,
     block: ComposeUiTest.(vm: SongsViewModel, reports: TabReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-songs-tab").toFile()
@@ -219,6 +228,7 @@ internal fun songsTab(
                         onLineIndexChanged = { reports.lineIndex = it },
                         onPresenting = { reports.presenting += it },
                         isPresenting = isPresenting,
+                        searchIdleFocusMs = searchIdleFocusMs,
                         statisticsManager = statistics,
                         selectedSongItem = scheduleSelection.value,
                         selectedSongItemVersion = scheduleSelectionVersion.value,

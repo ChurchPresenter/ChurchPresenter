@@ -1154,6 +1154,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer vor dem Titel</string>
+    <string name="song_number_corner">Ecke</string>
+    <string name="song_number_corner_off">Aus</string>
     <string name="fullscreen_display">Vollbildanzeige</string>
     <string name="display_mode_label">Anzeigemodus:</string>
     <string name="display_mode_one_verse">1 Strophe</string>
@@ -1422,6 +1424,15 @@
     <string name="stage_monitor_zone_shows">Zeigt</string>
     <string name="stage_monitor_zone_count">%1$d Zonen</string>
     <string name="stage_monitor_layout_stranded">In diesem Layout nicht sichtbar: %1$s</string>
+    <string name="stage_monitor_size_section">Zonengröße</string>
+    <string name="stage_monitor_zone_width">Breite (%)</string>
+    <string name="stage_monitor_zone_row_height">Zeilenhöhe (%)</string>
+    <string name="stage_monitor_size_selected">Ausgewählt</string>
+    <string name="stage_monitor_size_reset">Zurücksetzen</string>
+    <string name="stage_monitor_size_hint">Ziehen Sie eine Trennlinie, um Platz zwischen Nachbarn aufzuteilen. Jede Zeile ergibt zusammen 100%.</string>
+    <string name="stage_monitor_size_even">Angleichen</string>
+    <string name="stage_monitor_size_even_row">Diese Zeile</string>
+    <string name="stage_monitor_size_even_all">Alles</string>
     <string name="stage_monitor_layout_classic">Klassisch (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Oben / unten</string>
     <string name="stage_monitor_layout_left_right">Links / rechts</string>
@@ -2156,8 +2167,6 @@
     <string name="presentation_focus_lost">Tastaturfokus verloren — klicken Sie hier, um Pfeiltasten und Fernbedienung wieder zu aktivieren</string>
     <string name="tab_focus_lost">Tastaturfokus verloren — klicken Sie hier, um die Pfeiltasten wieder zu aktivieren</string>
     <string name="dev_window_label">Dev-Fenster</string>
-    <string name="display_lower_third_horizontal">Horizontales unteres Drittel</string>
-    <string name="display_lower_third_vertical">Vertikales unteres Drittel</string>
     <string name="remote_api_remove_from_schedule">Aus Programm entfernen</string>
     <string name="remote_activity_removed_from_schedule">Aus Programm entfernt</string>
     <string name="instance_link_follower_badge">Instance Link — aktuell verbunden</string>

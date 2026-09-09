@@ -1402,6 +1402,8 @@
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer voor titel</string>
+    <string name="song_number_corner">Hoek</string>
+    <string name="song_number_corner_off">Uit</string>
     <string name="fullscreen_display">Volledig scherm weergave</string>
     <string name="display_mode_label">Weergavemodus:</string>
     <string name="display_mode_one_verse">1 vers</string>
@@ -1475,6 +1477,15 @@
     <string name="stage_monitor_zone_shows">Toont</string>
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Niet zichtbaar in deze indeling: %1$s</string>
+    <string name="stage_monitor_size_section">Zonegrootte</string>
+    <string name="stage_monitor_zone_width">Breedte (%)</string>
+    <string name="stage_monitor_zone_row_height">Rijhoogte (%)</string>
+    <string name="stage_monitor_size_selected">Geselecteerd</string>
+    <string name="stage_monitor_size_reset">Resetten</string>
+    <string name="stage_monitor_size_hint">Sleep een scheidingslijn om ruimte tussen buren te verdelen. Elke rij is samen 100%.</string>
+    <string name="stage_monitor_size_even">Gelijkmaken</string>
+    <string name="stage_monitor_size_even_row">Deze rij</string>
+    <string name="stage_monitor_size_even_all">Alles</string>
     <string name="stage_monitor_layout_classic">Klassiek (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Boven / onder</string>
     <string name="stage_monitor_layout_left_right">Links / rechts</string>
@@ -2183,8 +2194,6 @@
     <string name="presentation_focus_lost">Toetsenbordfocus verloren — klik hier om pijltjestoetsen en clicker weer in te schakelen</string>
     <string name="tab_focus_lost">Toetsenbordfocus verloren — klik hier om pijltjestoetsen weer in te schakelen</string>
     <string name="dev_window_label">Dev-venster</string>
-    <string name="display_lower_third_horizontal">Horizontale lower third</string>
-    <string name="display_lower_third_vertical">Verticale lower third</string>
     <string name="remote_api_remove_from_schedule">Verwijderen uit programma</string>
     <string name="remote_activity_removed_from_schedule">Verwijderd uit programma</string>
     <string name="instance_link_follower_badge">Instance Link — momenteel verbonden</string>

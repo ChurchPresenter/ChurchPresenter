@@ -354,8 +354,12 @@ kotlin {
             // Logging backend + Sentry log forwarding (WARN/ERROR → breadcrumbs/events)
             implementation(libs.logback.classic)
             implementation(libs.sentry.logback)
-            implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
-            implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
+            // ImageIO readers for what Skia refuses — see PictureDecoder. jpeg covers CMYK/YCCK
+            // JPEGs out of print workflows; psd covers Photoshop files, which reach picture
+            // folders under a .jpg name often enough to have been reported from the field.
+            implementation(libs.twelvemonkeys.imageio.core)
+            implementation(libs.twelvemonkeys.imageio.jpeg)
+            implementation(libs.twelvemonkeys.imageio.psd)
             // Apache PDFBox for PDF slide extraction
             implementation(libs.pdfbox)
             // Apache POI for PowerPoint slide extraction.
@@ -696,6 +700,18 @@ val generateBuildConfig by tasks.registering {
     // would read whatever directory the user happened to launch the app from.
     val repoSlug = gitRepoSlug()
     val buildType = gitBuildType(isRelease)
+    // Whether this build came off CI or somebody's machine. `IS_RELEASE` cannot answer that: it
+    // means "a packaging task ran", so `./gradlew packageDmg` on a laptop produces a build that
+    // calls itself a release and reports `environment=production` to Sentry. Over 30 days that
+    // left 224 of 234 camera reports labelled production, including a tester's, and no way to tell
+    // an operator's build from one built to try a fix out.
+    //
+    // `providers.environmentVariable` and NOT `System.getenv`, for the reason recorded on
+    // `printCoverageLink` below: `System.getenv` reads the Gradle DAEMON's environment, frozen when
+    // the daemon started, which need not be the environment of the build asking.
+    val buildChannel = providers.environmentVariable("GITHUB_ACTIONS")
+        .map { if (it == "true") "ci" else "local" }
+        .getOrElse("local")
     val planningCenterClientId = System.getenv("PLANNING_CENTER_CLIENT_ID") ?: ""
     val planningCenterClientSecret = System.getenv("PLANNING_CENTER_CLIENT_SECRET") ?: ""
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
@@ -719,6 +735,7 @@ val generateBuildConfig by tasks.registering {
             |    const val IS_RELEASE = $isRelease
             |    const val REPO_SLUG = "$repoSlug"
             |    const val BUILD_TYPE = "$buildType"
+            |    const val BUILD_CHANNEL = "$buildChannel"
             |    const val PLANNING_CENTER_CLIENT_ID = "$planningCenterClientId"
             |    const val PLANNING_CENTER_CLIENT_SECRET = "$planningCenterClientSecret"
             |}

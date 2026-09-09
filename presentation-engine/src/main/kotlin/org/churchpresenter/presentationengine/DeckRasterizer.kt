@@ -5,6 +5,7 @@ import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.Drawable
+import org.apache.poi.sl.usermodel.Slide
 import org.apache.poi.sl.usermodel.SlideShow
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
@@ -20,6 +21,7 @@ import org.churchpresenter.presentationengine.model.RectPt
 import org.churchpresenter.presentationengine.pptx.PowerPointDeckSupport
 import org.churchpresenter.presentationengine.pptx.PptxSlideRasterizer
 import java.awt.Color
+import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
@@ -36,7 +38,18 @@ import kotlin.math.sqrt
  */
 class DeckRasterizer(
     private val deck: Deck,
-    private val targetWidthPx: Int = DEFAULT_TARGET_WIDTH_PX
+    private val targetWidthPx: Int = DEFAULT_TARGET_WIDTH_PX,
+    /**
+     * Called for the **first** slide of this deck that could only be rendered with elements left
+     * out, and not again for the rest of the render.
+     *
+     * A callback rather than a report from in here: this module has no dependency on the crash
+     * reporter and should not gain one, and the caller is what knows whether this render is a
+     * thumbnail, the companion API or the live output. First-only because the cause is nearly
+     * always one asset the whole deck reuses — a hundred-slide deck would otherwise file a
+     * hundred identical events for a single bad picture.
+     */
+    private val onDegraded: (SlideRenderDegradation) -> Unit = {},
 ) : AutoCloseable {
 
     companion object {
@@ -87,6 +100,12 @@ class DeckRasterizer(
     private var slideShow: SlideShow<*, *>? = null
     private var keynoteTempPdf: File? = null
     private var keynoteSceneRasterizer: KeynoteSceneRasterizer? = null
+
+    /** The pixel size a slide renders at, and the scale that gets it there from page points. */
+    private data class SlideCanvas(val width: Int, val height: Int, val scale: Double)
+
+    /** Whether [onDegraded] has already fired for this deck; see its own doc for why once. */
+    private var degradationReported = false
 
     /** Embedded pptx video files extracted to temp files, keyed by relationship id — see
      *  [PptxSlideRasterizer.rasterizeLayer]; deleted in [close], not just `deleteOnExit()`. */
@@ -199,17 +218,43 @@ class DeckRasterizer(
 
     // ── PowerPoint ────────────────────────────────────────────────────────────
 
+    // Throwable is the point: one shape's failure must not cost the slide, and the drawing path
+    // raises Errors (OutOfMemoryError on an absurd declared length) as well as exceptions.
+    @Suppress("TooGenericExceptionCaught")
     private fun renderPowerPointSlide(file: File, slideIndex: Int): BufferedImage {
         val show = slideShow ?: PowerPointDeckSupport.open(file).also { slideShow = it }
         val slide = show.slides[slideIndex]
         val pageSize = show.pageSize
         val scale = boundedRenderScale(pageSize.width.toDouble(), pageSize.height.toDouble(), targetWidthPx)
-        val width = (pageSize.width * scale).toInt().coerceAtLeast(1)
-        val height = (pageSize.height * scale).toInt().coerceAtLeast(1)
-        // ARGB: a slide without an opaque background keeps its transparency instead of the old
-        // pipeline's forced white fill (the slide's own background — from slide, layout or
-        // master — is painted by POI's DrawSlide).
-        val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val canvas = SlideCanvas(
+            width = (pageSize.width * scale).toInt().coerceAtLeast(1),
+            height = (pageSize.height * scale).toInt().coerceAtLeast(1),
+            scale = scale,
+        )
+        return try {
+            slideImage(canvas) { graphics ->
+                DrawFactory.getInstance(graphics).getDrawable(slide).draw(graphics)
+            }
+        } catch (t: Throwable) {
+            // POI's DrawSlide walks every shape itself, so anything one of them throws — an
+            // oversized embedded picture is the one seen in the field — comes out here having
+            // abandoned the rest of the slide. A blank slide mid-service is far worse than a
+            // slide missing one picture, so draw it again the forgiving way. Nothing is retained
+            // from the failed attempt: it is a fresh image, because the first pass may have
+            // painted part of the slide before it threw.
+            renderPowerPointSlideDegraded(slide, slideIndex, canvas, t)
+        }
+    }
+
+    /**
+     * A slide-sized ARGB image with [draw] painted onto it at [scale].
+     *
+     * ARGB: a slide without an opaque background keeps its transparency instead of the old
+     * pipeline's forced white fill (the slide's own background — from slide, layout or master —
+     * is painted by POI's DrawSlide).
+     */
+    private fun slideImage(canvas: SlideCanvas, draw: (Graphics2D) -> Unit): BufferedImage {
+        val image = BufferedImage(canvas.width, canvas.height, BufferedImage.TYPE_INT_ARGB)
         val graphics = image.createGraphics()
         try {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -218,10 +263,48 @@ class DeckRasterizer(
             graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
             graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
             graphics.setRenderingHint(Drawable.FONT_HANDLER, SlideFontRegistry.drawFontManager)
-            graphics.scale(scale, scale)
-            DrawFactory.getInstance(graphics).getDrawable(slide).draw(graphics)
+            graphics.scale(canvas.scale, canvas.scale)
+            draw(graphics)
         } finally {
             graphics.dispose()
+        }
+        return image
+    }
+
+    /**
+     * Re-renders the slide one element at a time, keeping everything that draws.
+     *
+     * This reproduces what `DrawSlide.draw` does — background, then the master sheet when the
+     * slide follows it, then the shapes — with each step on its own, so a failing element costs
+     * only itself. It is not a substitute for the single call: it is slower and it re-implements
+     * an ordering POI owns, which is why it runs only after that call has already failed.
+     */
+    private fun renderPowerPointSlideDegraded(
+        slide: Slide<*, *>,
+        slideIndex: Int,
+        canvas: SlideCanvas,
+        cause: Throwable,
+    ): BufferedImage {
+        val shapes = slide.shapes.toList()
+        var skipped = 0
+        val image = slideImage(canvas) { graphics ->
+            val factory = DrawFactory.getInstance(graphics)
+            runCatching { slide.background?.let { factory.getDrawable(it).draw(graphics) } }
+            if (slide.followMasterGraphics) {
+                runCatching { slide.masterSheet?.let { factory.getDrawable(it).draw(graphics) } }
+            }
+            skipped = drawEachSkippingFailures(shapes) { factory.getDrawable(it).draw(graphics) }
+        }
+        if (!degradationReported) {
+            degradationReported = true
+            onDegraded(
+                SlideRenderDegradation(
+                    slideIndex = slideIndex,
+                    shapesTotal = shapes.size,
+                    shapesSkipped = skipped,
+                    cause = cause.javaClass.simpleName,
+                )
+            )
         }
         return image
     }

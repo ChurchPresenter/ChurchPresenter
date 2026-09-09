@@ -40,11 +40,24 @@ import kotlin.test.assertEquals
  */
 class SourcePropertiesCameraTest {
 
-    /** Renders the camera panel with the platform's device enumeration deliberately absent. */
+    /**
+     * Renders the camera panel with the platform's device enumeration deliberately absent.
+     *
+     * [CameraDeviceCatalog] is process-wide and holds whatever the last enumeration found, so a
+     * suite that ran before this one in the same fork can leave the host's real cameras in it and
+     * the panel draws a picker instead of the message. The panel re-enumerates on composition, and
+     * under a faked OS that lands an empty list — so the wait is for that landing, which is also
+     * the state every test here asserts against.
+     */
     private fun cameraPanel(
         source: SceneSource.CameraSource = Fixture.camera(),
         block: ComposeUiTest.(get: () -> SceneSource) -> Unit,
-    ) = withOsName(OS_WITHOUT_ENUMERATOR) { sourcePanel(source, block = block) }
+    ) = withOsName(OS_WITHOUT_ENUMERATOR) {
+        sourcePanel(source) { get ->
+            waitUntil { CameraDeviceCatalog.devices.value?.isEmpty() == true }
+            block(get)
+        }
+    }
 
     // ── What the panel displays ───────────────────────────────────────────────
 

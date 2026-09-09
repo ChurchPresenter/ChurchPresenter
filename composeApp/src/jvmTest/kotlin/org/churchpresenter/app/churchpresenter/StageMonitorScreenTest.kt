@@ -41,6 +41,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import androidx.compose.ui.test.onNodeWithText
+import org.churchpresenter.settings.withZoneWidth
+import org.churchpresenter.settings.withZoneHeight
 
 /**
  * What the platform sees on the stage monitor.
@@ -303,6 +306,75 @@ class StageMonitorScreenTest {
             assertTrue(rendersText("the live one"), renderedText().toString())
             assertFalse(rendersContaining("the idle one"))
         }
+    }
+
+    // ── Zone sizes ──────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * The percentages are the grid's weights, so a resized row really does move the line the zones
+     * are drawn either side of. Asserted as a change between two renders of the same content rather
+     * than as an absolute pixel, which would be a font metric as much as a layout.
+     */
+    @Test
+    fun `a taller top row pushes the row below it down`() {
+        val base = routing(
+            StageMonitorContentType.BIBLE to StageMonitorZone.A,
+            StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+        )
+        val below = "down here"
+
+        var atCatalogSize = 0f
+        screen(
+            sm = base,
+            presentingMode = Presenting.BIBLE,
+            announcementActive = true,
+            displayedVerses = listOf(verse(text = "up there")),
+            announcementText = below,
+        ) { atCatalogSize = topOf(below) }
+
+        var whenTaller = 0f
+        screen(
+            sm = base.withZoneHeight(StageMonitorStyleZone.A, 85f),
+            presentingMode = Presenting.BIBLE,
+            announcementActive = true,
+            displayedVerses = listOf(verse(text = "up there")),
+            announcementText = below,
+        ) { whenTaller = topOf(below) }
+
+        assertTrue(
+            whenTaller > atCatalogSize + 80f,
+            "a top row at 85% must push the bottom row well down, was $atCatalogSize then $whenTaller",
+        )
+    }
+
+    @Test
+    fun `a wider zone pushes the one beside it to the right`() {
+        val base = routing(
+            StageMonitorContentType.BIBLE to StageMonitorZone.A,
+            StageMonitorContentType.NEXT to StageMonitorZone.B,
+        )
+        val beside = "over there"
+
+        var atCatalogSize = 0f
+        screen(
+            sm = base,
+            presentingMode = Presenting.BIBLE,
+            displayedVerses = listOf(verse(text = "here")),
+            nextVerses = listOf(verse(number = 17, text = beside)),
+        ) { atCatalogSize = leftOf(beside) }
+
+        var whenWider = 0f
+        screen(
+            sm = base.withZoneWidth(StageMonitorStyleZone.A, 75f),
+            presentingMode = Presenting.BIBLE,
+            displayedVerses = listOf(verse(text = "here")),
+            nextVerses = listOf(verse(number = 17, text = beside)),
+        ) { whenWider = leftOf(beside) }
+
+        assertTrue(
+            whenWider > atCatalogSize + 80f,
+            "a first zone at 75% must push its neighbour right, was $atCatalogSize then $whenWider",
+        )
     }
 
     // ── Clock ───────────────────────────────────────────────────────────────────────────────────
@@ -732,3 +804,10 @@ private fun ComposeUiTest.taggedCount(tag: String): Int =
 private fun ComposeUiTest.imageCount(): Int = taggedCount("stage_slide")
 
 private fun ComposeUiTest.metronomeCount(): Int = taggedCount("stage_metronome")
+
+/** Where a drawn line of text starts, for asserting which zone drew it. */
+private fun ComposeUiTest.topOf(text: String): Float =
+    onNodeWithText(text, substring = true).fetchSemanticsNode().boundsInRoot.top
+
+private fun ComposeUiTest.leftOf(text: String): Float =
+    onNodeWithText(text, substring = true).fetchSemanticsNode().boundsInRoot.left

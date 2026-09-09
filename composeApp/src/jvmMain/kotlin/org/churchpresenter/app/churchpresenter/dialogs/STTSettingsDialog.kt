@@ -349,7 +349,11 @@ internal fun STTSettingsDialogContent(
                             onBoldChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(bold = it)) } },
                             onItalicChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(italic = it)) } },
                             onUnderlineChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(underline = it)) } },
-                            onShadowChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadow = it)) } }
+                            onShadowChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadow = it)) } },
+                            backdrop = sttSettings.backdrop,
+                            onBackdropChange = { updated ->
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backdrop = updated)) }
+                            },
                         )
                         AnimatedVisibility(visible = sttSettings.shadow) {
                             ShadowDetailRow(

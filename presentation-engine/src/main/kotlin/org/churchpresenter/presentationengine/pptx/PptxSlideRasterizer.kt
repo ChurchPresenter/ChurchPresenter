@@ -126,9 +126,9 @@ internal object PptxSlideRasterizer {
             graphics.scale(scale, scale)
             if (spec.zIndex == 0) {
                 val factory = DrawFactory.getInstance(graphics)
-                slide.background?.let { factory.getDrawable(it).draw(graphics) }
+                runCatching { slide.background?.let { factory.getDrawable(it).draw(graphics) } }
                 if (slide.followMasterGraphics) {
-                    slide.masterSheet?.let { factory.getDrawable(it).draw(graphics) }
+                    runCatching { slide.masterSheet?.let { factory.getDrawable(it).draw(graphics) } }
                 }
             }
             for (shapeIndex in spec.shapeIndexes) {
@@ -164,9 +164,21 @@ internal object PptxSlideRasterizer {
         return RasterLayer(spec, image, offsetX, offsetY)
     }
 
+    /**
+     * Draws one shape, skipping it if it throws.
+     *
+     * This is the layered playback path, where an unguarded throw costs the caller its whole band
+     * (and through `DeckRasterizer.rasterizeSlideLayers`, the slide's entire layer list) for one
+     * bad element. The same swallow-and-degrade choice the file already makes in
+     * `extractVideoFile`.
+     */
     private fun drawShape(graphics: Graphics2D, shape: XSLFShape) {
-        graphics.setRenderingHint(Drawable.GROUP_TRANSFORM, AffineTransform())
-        DrawFactory.getInstance(graphics).getDrawable(shape).draw(graphics)
+        try {
+            graphics.setRenderingHint(Drawable.GROUP_TRANSFORM, AffineTransform())
+            DrawFactory.getInstance(graphics).getDrawable(shape).draw(graphics)
+        } catch (_: Throwable) {
+            // Left out of this layer; the rest of the band still draws.
+        }
     }
 
     private fun applyHints(graphics: Graphics2D, slide: XSLFSlide) {

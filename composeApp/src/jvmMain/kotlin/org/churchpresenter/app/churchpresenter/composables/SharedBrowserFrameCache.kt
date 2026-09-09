@@ -37,6 +37,7 @@ import java.util.concurrent.CompletionStage
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
+import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 
 private const val HTTP_OK = 200
 private const val MILLIS_PER_SECOND = 1000L
@@ -70,12 +71,12 @@ object SharedBrowserFrameCache {
 
     init {
         // Kill all browser processes on JVM shutdown to prevent orphaned Chrome/Edge windows
-        Runtime.getRuntime().addShutdownHook(Thread {
+        addGuardedShutdownHook("browser-source") {
             synchronized(this@SharedBrowserFrameCache) {
                 entries.values.forEach { stopBrowser(it) }
                 entries.clear()
             }
-        })
+        }
     }
 
     private class CacheEntry(
