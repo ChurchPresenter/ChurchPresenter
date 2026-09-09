@@ -22,6 +22,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
+import org.churchpresenter.app.churchpresenter.composables.selectableCameras
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -52,15 +53,24 @@ internal fun LazyGridScope.cameraTiles(
     }
 }
 
-/** The cameras to offer: what the caller supplied, or this machine's, enumerated off-thread. */
+/**
+ * The cameras to offer: what the caller supplied, or this machine's, enumerated off-thread.
+ *
+ * Displays are dropped from the grid — see `selectableCameras` — except [keeping], the one a
+ * background already points at, which stays so it has a tile to be seen and changed from.
+ */
 @Composable
-internal fun rememberCameras(category: String, supplied: List<CameraDevice>?): List<CameraDevice> {
+internal fun rememberCameras(
+    category: String,
+    supplied: List<CameraDevice>?,
+    keeping: String? = null,
+): List<CameraDevice> {
     if (category != SongBackgroundType.CAMERA) return emptyList()
-    if (supplied != null) return supplied
+    if (supplied != null) return supplied.selectableCameras(keeping)
     val deckLinkLabel = stringResource(Res.string.canvas_decklink_device)
     val found by CameraDeviceCatalog.devices.collectAsState()
     LaunchedEffect(category) { CameraDeviceCatalog.refresh(deckLinkLabel) }
-    return found.orEmpty()
+    return found.orEmpty().selectableCameras(keeping)
 }
 
 /** Whether this device is the one [camera] names — by card index, or by the path it was listed at. */
