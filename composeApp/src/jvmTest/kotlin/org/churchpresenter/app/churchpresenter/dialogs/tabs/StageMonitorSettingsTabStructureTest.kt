@@ -36,9 +36,15 @@ class StageMonitorSettingsTabStructureTest {
         // cell. Titles are matched as *non-clickable* text: a routing dropdown merges its caption
         // and its current value into one node, so "Zone 1" would also match every dropdown set to it.
         for (zone in StageMonitorStyleZone.entries) {
-            // The five slots are named twice — the preview cell and the editor title. Full Screen
-            // has no cell in the grid; it is named by its chip beneath and by its editor.
-            onAllNodes(hasText(ZoneLabel.of(zone)) and !hasClickAction()).assertCountEquals(2)
+            // Once for every zone — the editor title. The preview cell names it too, but a cell is
+            // clickable (that is how a zone is selected for resizing), so it is excluded here along
+            // with the routing dropdowns. Zone 1 is named twice: it is also the zone the Selected
+            // field opens on. Full Screen has no cell and is named by its chip and its editor.
+            val named = when (zone) {
+                StageMonitorStyleZone.A, StageMonitorStyleZone.FULL_SCREEN -> 2
+                else -> 1
+            }
+            onAllNodes(hasText(ZoneLabel.of(zone)) and !hasClickAction()).assertCountEquals(named)
         }
     }
 
@@ -82,7 +88,7 @@ class StageMonitorSettingsTabStructureTest {
     /** Three per zone too: the font size and the shadow's size and intensity. */
     @Test
     fun `each zone editor offers three number fields`() = stageMonitorTab { _ ->
-        numberFields().assertCountEquals(ZoneOrdinal.COUNT * 3)
+        numberFields().assertCountEquals(ZoneOrdinal.COUNT * 3 + SIZE_FIELD_COUNT)
         onAllNodesWithText("SIZE (%)").assertCountEquals(ZoneOrdinal.COUNT)
         onAllNodesWithText("INTENSITY (%)").assertCountEquals(ZoneOrdinal.COUNT)
     }
@@ -144,7 +150,7 @@ class StageMonitorSettingsTabStructureTest {
             stageMonitorTab(initial = zoneStyled(zone) { copy(fontSize = marker) }) { _ ->
                 assertEquals(
                     marker.toString(),
-                    numberFields()[index * 3].fetchSemanticsNode().config
+                    numberFields()[SIZE_FIELD_COUNT + index * 3].fetchSemanticsNode().config
                         .let { c -> c[SemanticsProperties.EditableText].text },
                     "the font size at ordinal $index must belong to $zone",
                 )
@@ -164,6 +170,6 @@ class StageMonitorSettingsTabStructureTest {
      */
     @Test
     fun `the stepper arrows are laid out where they can be clicked`() = stageMonitorTab { _ ->
-        assertStepperArrowsUsable(expected = ZoneOrdinal.COUNT * 3)
+        assertStepperArrowsUsable(expected = ZoneOrdinal.COUNT * 3 + SIZE_FIELD_COUNT)
     }
 }

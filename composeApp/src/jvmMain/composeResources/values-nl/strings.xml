@@ -1477,6 +1477,15 @@
     <string name="stage_monitor_zone_shows">Toont</string>
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Niet zichtbaar in deze indeling: %1$s</string>
+    <string name="stage_monitor_size_section">Zonegrootte</string>
+    <string name="stage_monitor_zone_width">Breedte (%)</string>
+    <string name="stage_monitor_zone_row_height">Rijhoogte (%)</string>
+    <string name="stage_monitor_size_selected">Geselecteerd</string>
+    <string name="stage_monitor_size_reset">Resetten</string>
+    <string name="stage_monitor_size_hint">Sleep een scheidingslijn om ruimte tussen buren te verdelen. Elke rij is samen 100%.</string>
+    <string name="stage_monitor_size_even">Gelijkmaken</string>
+    <string name="stage_monitor_size_even_row">Deze rij</string>
+    <string name="stage_monitor_size_even_all">Alles</string>
     <string name="stage_monitor_layout_classic">Klassiek (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Boven / onder</string>
     <string name="stage_monitor_layout_left_right">Links / rechts</string>

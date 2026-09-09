@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Koʻrsatadi</string>
     <string name="stage_monitor_zone_count">%1$d hudud</string>
     <string name="stage_monitor_layout_stranded">Bu joylashuvda koʻrsatilmaydi: %1$s</string>
+    <string name="stage_monitor_size_section">Hudud oʻlchami</string>
+    <string name="stage_monitor_zone_width">Kengligi (%)</string>
+    <string name="stage_monitor_zone_row_height">Qator balandligi (%)</string>
+    <string name="stage_monitor_size_selected">Tanlangan</string>
+    <string name="stage_monitor_size_reset">Tiklash</string>
+    <string name="stage_monitor_size_hint">Qoʻshni hududlar orasida joyni taqsimlash uchun ajratgichni torting. Har bir qator jami 100%.</string>
+    <string name="stage_monitor_size_even">Tenglashtirish</string>
+    <string name="stage_monitor_size_even_row">Shu qator</string>
+    <string name="stage_monitor_size_even_all">Hammasi</string>
     <string name="stage_monitor_layout_classic">Klassik (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Yuqori / past</string>
     <string name="stage_monitor_layout_left_right">Chap / oʻng</string>

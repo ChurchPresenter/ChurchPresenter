@@ -1467,6 +1467,15 @@
     <string name="stage_monitor_zone_shows">Показывает</string>
     <string name="stage_monitor_zone_count">Зон: %1$d</string>
     <string name="stage_monitor_layout_stranded">Не показывается в этой раскладке: %1$s</string>
+    <string name="stage_monitor_size_section">Размер зон</string>
+    <string name="stage_monitor_zone_width">Ширина (%)</string>
+    <string name="stage_monitor_zone_row_height">Высота ряда (%)</string>
+    <string name="stage_monitor_size_selected">Выбрано</string>
+    <string name="stage_monitor_size_reset">Сбросить</string>
+    <string name="stage_monitor_size_hint">Перетащите разделитель, чтобы поделить место между соседями. Каждый ряд в сумме — 100%.</string>
+    <string name="stage_monitor_size_even">Выровнять</string>
+    <string name="stage_monitor_size_even_row">Этот ряд</string>
+    <string name="stage_monitor_size_even_all">Всё</string>
     <string name="stage_monitor_layout_classic">Классическая (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Сверху / снизу</string>
     <string name="stage_monitor_layout_left_right">Слева / справа</string>

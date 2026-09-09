@@ -66,7 +66,7 @@ class StageMonitorSettingsTabRecompositionTest {
 
         onAllNodesWithText("Screen Content").assertCountEquals(1)
         colorFields().assertCountEquals(ZoneOrdinal.COUNT * 3 + CHORD_COLOUR_ZONES)
-        numberFields().assertCountEquals(ZoneOrdinal.COUNT * 3)
+        numberFields().assertCountEquals(ZoneOrdinal.COUNT * 3 + SIZE_FIELD_COUNT)
     }
 
     /**

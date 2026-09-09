@@ -1,16 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -23,12 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.color
@@ -53,7 +45,6 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
@@ -62,10 +53,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.toAlignment
-import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.MetronomePosition
@@ -75,11 +63,27 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.settings.toZone
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
+import churchpresenter.composeapp.generated.resources.stage_monitor_size_reset
+import churchpresenter.composeapp.generated.resources.stage_monitor_size_hint
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.aspectRatio
+import org.churchpresenter.settings.hasCustomZoneSizes
+import org.churchpresenter.settings.withDefaultZoneSizes
+import org.churchpresenter.settings.withEvenZoneSizes
+import org.churchpresenter.settings.withEvenRowWidths
+import org.churchpresenter.settings.withZoneHeight
+import org.churchpresenter.settings.withZoneWidth
+import org.churchpresenter.settings.zoneHeightPercent
+import org.churchpresenter.settings.zoneWidthPercent
+import org.churchpresenter.settings.layoutSizes
 
-private const val PREVIEW_WIDTH_FRACTION = 0.9f
 
 /**
  * How tall the monitor mockup may get, stand included.
@@ -90,16 +94,12 @@ private const val PREVIEW_WIDTH_FRACTION = 0.9f
  * near 250dp, so sharing that 260dp number would leave the common case one dialog-resize away from
  * silently clamping.
  */
-private val STAGE_PREVIEW_MAX_HEIGHT = 360.dp
 private const val SHOWS_COLUMNS = 4
 private const val TRANSITION_LABEL_WIDTH = 120
 private const val TRANSITION_STEP_MS = 50f
 private const val TRANSITION_MIN_MS = 100f
 private const val TRANSITION_MAX_MS = 2000f
-private const val ZONE_ALPHA = 0.10f
-private const val ZONE_BORDER_ALPHA = 0.45f
-private const val ZONE_CAPTION_ALPHA = 0.6f
-private const val ZONE_LINE_HEIGHT = 1.2f
+internal const val ZONE_LINE_HEIGHT = 1.2f
 
 @Composable
 fun StageMonitorSettingsTab(
@@ -151,7 +151,7 @@ fun StageMonitorSettingsTab(
                     modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    StageMonitorPreviewSection(sm = sm, screenAspect = previewAspect)
+                    StageMonitorPreviewSection(sm = sm, screenAspect = previewAspect, update = ::update)
 
                     // Every zone the layout draws gets its own editor, plus the full-screen
                     // override, so nothing has to be selected to be styled.
@@ -195,46 +195,63 @@ private fun MetronomeRow(
 }
 
 /**
- * The monitor as it will be divided, every zone clickable.
+ * The monitor as it will be divided: what each zone shows, how big it is, and the controls for both.
+ *
+ * One picture of the screen rather than two. The zones are the same zones whichever question is
+ * being asked — what is routed here, and how much room does it get — so a second diagram of the
+ * same grid beside the first was a picture the reader had to reconcile rather than read.
+ *
+ * Sizing is done on the shared edges: height belongs to the row (a cell taller than the cell beside
+ * it is not a grid), and a lone slider that silently changes its neighbor reads as a fault, whereas
+ * a divider obviously moves both sides. The numbers underneath are for what a drag cannot do —
+ * an exact 30/70.
  *
  * Full Screen and None sit under the grid rather than in it: neither is a position, and both have
- * to be selectable to be edited or emptied.
+ * to be shown to be understood.
  */
 @Composable
-private fun StageMonitorPreviewSection(sm: StageMonitorSettings, screenAspect: Float) {
-    SettingsSection(title = stringResource(Res.string.stage_monitor_content_section)) {
-        TvScreenBox(
-            modifier = Modifier
-                .fillMaxWidth(PREVIEW_WIDTH_FRACTION)
-                .widthIn(max = tvScreenBoxWidthFor(STAGE_PREVIEW_MAX_HEIGHT, screenAspect)),
-            screenAspectRatio = screenAspect,
-            bezelColor = stageMonitorBezelColor(),
-            screenColor = Color.Black,
-        ) {
-            // Inset, so the screen itself shows around the zones instead of being papered over.
-            Column(modifier = Modifier.fillMaxSize().padding(4.dp)) {
-                sm.layout.rows.forEach { row ->
-                    Row(modifier = Modifier.fillMaxWidth().weight(row.weight)) {
-                        row.cells.forEach { cell ->
-                            val zone = cell.slot.toZone()
-                            ZoneLabelCell(
-                                caption = zoneLabel(zone),
-                                text = sm.typesIn(zone).map { contentTypeLabel(it) }.joinToString(", "),
-                                modifier = Modifier.weight(cell.weight)
-                            )
-                        }
-                    }
-                }
-            }
-            sm.metronomePosition.toAlignment()?.let { alignment ->
-                MetronomeDot(
-                    bpm = 100,
-                    active = true,
-                    size = 24.dp,
-                    modifier = Modifier.align(alignment).padding(6.dp)
-                )
+private fun StageMonitorPreviewSection(
+    sm: StageMonitorSettings,
+    screenAspect: Float,
+    update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
+) {
+    // Keyed on the layout: its slots are what can be selected, and a smaller layout would otherwise
+    // leave the selection pointing at a zone that is no longer drawn.
+    var selected by remember(sm.layout) { mutableStateOf(sm.layout.slots.first()) }
+    val sizes = sm.layoutSizes()
+
+    SettingsSection(
+        title = stringResource(Res.string.stage_monitor_content_section),
+        headerTrailing = {
+            TextButton(
+                onClick = { update { withDefaultZoneSizes() } },
+                enabled = sm.hasCustomZoneSizes(),
+                shape = RoundedCornerShape(6.dp),
+                modifier = Modifier.height(24.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp),
+            ) {
+                Text(stringResource(Res.string.stage_monitor_size_reset), style = MaterialTheme.typography.labelSmall)
             }
         }
+    ) {
+        Text(
+            text = stringResource(Res.string.stage_monitor_size_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = MaterialTheme.typography.labelSmall.fontSize * ZONE_LINE_HEIGHT,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        ZoneGrid(
+            layout = sm.layout,
+            sizes = sizes,
+            screenAspect = screenAspect,
+            selected = selected,
+            metronomePosition = sm.metronomePosition,
+            contentsOf = { zone -> sm.typesIn(zone).map { contentTypeLabel(it) }.joinToString(", ") },
+            onSelect = { zone -> selected = zone },
+            onWidthChange = { zone, percent -> update { withZoneWidth(zone, percent) } },
+            onHeightChange = { zone, percent -> update { withZoneHeight(zone, percent) } },
+        )
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -259,10 +276,18 @@ private fun StageMonitorPreviewSection(sm: StageMonitorSettings, screenAspect: F
                 modifier = Modifier.padding(top = 6.dp)
             )
         }
+        ZoneSizeControls(
+            selectedLabel = zoneLabel(selected.toZone()),
+            widthPercent = sm.zoneWidthPercent(selected),
+            heightPercent = sm.zoneHeightPercent(selected),
+            onWidthChange = { percent -> update { withZoneWidth(selected, percent) } },
+            onHeightChange = { percent -> update { withZoneHeight(selected, percent) } },
+            onEvenRow = { update { withEvenRowWidths(selected) } },
+            onEvenAll = { update { withEvenZoneSizes() } },
+        )
     }
 }
 
-/** How text changing in a zone is animated — one setting for every zone and the full screen. */
 @Composable
 private fun StageMonitorTransitionSection(
     sm: StageMonitorSettings,
@@ -371,61 +396,6 @@ private fun StageMonitorContentSection(
     }
 }
 
-@Composable
-private fun ZoneLabelCell(
-    caption: String,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    // Content on a lit screen — a translucent panel over the black, not an opaque tile.
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(2.dp)
-            .background(Color.White.copy(alpha = ZONE_ALPHA), RoundedCornerShape(3.dp))
-            .border(1.dp, Color.White.copy(alpha = ZONE_BORDER_ALPHA), RoundedCornerShape(3.dp))
-            .padding(4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        val body = text.ifBlank { "—" }
-        BoxWithConstraints(contentAlignment = Alignment.Center) {
-            // A narrow zone in a five-zone layout has room for a word, not a list, so the label
-            // steps down until it fits rather than being clipped mid-name.
-            val measurer = rememberTextMeasurer()
-            val base = MaterialTheme.typography.labelSmall
-            val ceiling = base.fontSize.value.toInt()
-            val fitted = remember(caption, body, base, maxWidth, maxHeight) {
-                calculateAutoFitFontSize(
-                    textMeasurer = measurer,
-                    text = "$caption\n$body",
-                    baseStyle = base,
-                    availableWidth = maxWidth.value.toInt(),
-                    availableHeight = maxHeight.value.toInt(),
-                ).coerceAtMost(ceiling)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = caption,
-                    style = base,
-                    fontSize = fitted.sp,
-                    lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = ZONE_CAPTION_ALPHA),
-                )
-                Text(
-                    text = body,
-                    style = base,
-                    fontSize = fitted.sp,
-                    lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
-                    color = Color.White.copy(alpha = if (text.isBlank()) ZONE_BORDER_ALPHA else 1f),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-/** Full font/color/style/alignment editor for one drawable zone. */
 @Composable
 private fun ZoneStyleSection(
     title: String,

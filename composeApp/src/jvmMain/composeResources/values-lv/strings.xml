@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Rāda</string>
     <string name="stage_monitor_zone_count">%1$d zonas</string>
     <string name="stage_monitor_layout_stranded">Šajā izkārtojumā netiek rādīts: %1$s</string>
+    <string name="stage_monitor_size_section">Zonu izmērs</string>
+    <string name="stage_monitor_zone_width">Platums (%)</string>
+    <string name="stage_monitor_zone_row_height">Rindas augstums (%)</string>
+    <string name="stage_monitor_size_selected">Atlasīts</string>
+    <string name="stage_monitor_size_reset">Atiestatīt</string>
+    <string name="stage_monitor_size_hint">Velciet dalītāju, lai pārdalītu vietu starp blakus zonām. Katra rinda kopā ir 100%.</string>
+    <string name="stage_monitor_size_even">Izlīdzināt</string>
+    <string name="stage_monitor_size_even_row">Šī rinda</string>
+    <string name="stage_monitor_size_even_all">Viss</string>
     <string name="stage_monitor_layout_classic">Klasiskais (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Augšā / apakšā</string>
     <string name="stage_monitor_layout_left_right">Pa kreisi / pa labi</string>

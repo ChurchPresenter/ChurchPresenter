@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">देखाउँछ</string>
     <string name="stage_monitor_zone_count">%1$d क्षेत्र</string>
     <string name="stage_monitor_layout_stranded">यो लेआउटमा देखिँदैन: %1$s</string>
+    <string name="stage_monitor_size_section">क्षेत्रको आकार</string>
+    <string name="stage_monitor_zone_width">चौडाइ (%)</string>
+    <string name="stage_monitor_zone_row_height">पङ्क्तिको उचाइ (%)</string>
+    <string name="stage_monitor_size_selected">चयन गरिएको</string>
+    <string name="stage_monitor_size_reset">रिसेट गर्नुहोस्</string>
+    <string name="stage_monitor_size_hint">छिमेकी क्षेत्रबीच ठाउँ बाँड्न विभाजक तान्नुहोस्। हरेक पङ्क्ति जम्मा 100% हुन्छ।</string>
+    <string name="stage_monitor_size_even">बराबर बनाउनुहोस्</string>
+    <string name="stage_monitor_size_even_row">यो पङ्क्ति</string>
+    <string name="stage_monitor_size_even_all">सबै</string>
     <string name="stage_monitor_layout_classic">क्लासिक (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">माथि / तल</string>
     <string name="stage_monitor_layout_left_right">बायाँ / दायाँ</string>
