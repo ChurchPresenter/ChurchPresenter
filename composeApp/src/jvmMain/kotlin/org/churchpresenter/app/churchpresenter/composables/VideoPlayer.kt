@@ -289,7 +289,18 @@ fun detectVlcInstallPath(): String = detectVlcInstallPathFor(System.getProperty(
  * its `MacOS/lib` holds no libvlc, the bundle root is returned anyway, because that is still where the
  * user installed VLC and JNA may yet find the library through it.
  */
-internal fun detectVlcInstallPathFor(osName: String): String {
+internal fun detectVlcInstallPathFor(
+    osName: String,
+    /**
+     * Whether a directory holds libvlc. A parameter for the same reason [osName] is one: left
+     * reading the real filesystem, every assertion below becomes a statement about whether the
+     * developer happens to have VLC installed. `detectVlcInstallPath finds nothing on a forced
+     * Windows OS name` asserted exactly that and failed on any machine with VLC in Program Files.
+     */
+    hasVlcLib: (Path) -> Boolean = ::dirContainsVlcLib,
+    /** Whether a path exists at all — only the macOS bundle fallback needs it. */
+    pathExists: (Path) -> Boolean = Files::exists,
+): String {
     return when {
         "win" in osName -> {
             val paths = listOfNotNull(
@@ -297,12 +308,12 @@ internal fun detectVlcInstallPathFor(osName: String): String {
                 Paths.get(System.getenv("ProgramFiles") ?: "C:\\Program Files", "VideoLAN", "VLC"),
                 Paths.get(System.getenv("ProgramFiles(x86)") ?: "C:\\Program Files (x86)", "VideoLAN", "VLC")
             )
-            paths.firstOrNull { dirContainsVlcLib(it) }?.toString() ?: ""
+            paths.firstOrNull { hasVlcLib(it) }?.toString() ?: ""
         }
         "mac" in osName || "darwin" in osName -> {
             val libPath = Paths.get("/Applications/VLC.app/Contents/MacOS/lib")
-            if (dirContainsVlcLib(libPath)) libPath.toString()
-            else if (Files.exists(Paths.get("/Applications/VLC.app"))) "/Applications/VLC.app"
+            if (hasVlcLib(libPath)) libPath.toString()
+            else if (pathExists(Paths.get("/Applications/VLC.app"))) "/Applications/VLC.app"
             else ""
         }
         else -> {
@@ -313,7 +324,7 @@ internal fun detectVlcInstallPathFor(osName: String): String {
                 Paths.get("/usr/lib/aarch64-linux-gnu"),
                 Paths.get("/snap/vlc/current/usr/lib")
             )
-            libDirs.firstOrNull { dirContainsVlcLib(it) }?.toString() ?: ""
+            libDirs.firstOrNull { hasVlcLib(it) }?.toString() ?: ""
         }
     }
 }
@@ -342,6 +353,20 @@ internal fun vlcInstalledOn(osName: String, customPath: String, run: CommandRunn
 
 data class VlcAudioDevice(val id: String, val description: String)
 
+/**
+ * Drops VLC's own "use whatever the system is using" entry, which it reports with an **empty**
+ * device id and a description in VLC's language rather than the app's ("Default" in English).
+ *
+ * The app already offers that choice itself — the first item in the dropdown, labelled with the
+ * localized `audio_output_default` string — and stores it as an empty `audioOutputDeviceId`.
+ * Keeping VLC's copy as well put two rows meaning the same thing in the menu, and because the
+ * stored id is `""` it also *matched* VLC's entry, so the closed button showed VLC's untranslated
+ * description instead of the app's string on every machine whose VLC reports a default device
+ * (which is every machine with a working audio output).
+ */
+internal fun withoutVlcDefaultDevice(devices: List<VlcAudioDevice>): List<VlcAudioDevice> =
+    devices.filter { it.id.isNotBlank() }
+
 /** Lists available audio output devices via VLCJ. */
 fun listVlcAudioDevices(): List<VlcAudioDevice> {
     if (!isVlcAvailable) return emptyList()
@@ -352,7 +377,7 @@ fun listVlcAudioDevices(): List<VlcAudioDevice> {
             .map { VlcAudioDevice(it.deviceId, it.longName) }
         mp.release()
         factory.release()
-        devices
+        withoutVlcDefaultDevice(devices)
     } catch (_: Throwable) { emptyList() }
 }
 

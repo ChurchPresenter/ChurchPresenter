@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import java.nio.file.Files
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.test.Test
@@ -74,19 +75,31 @@ class FileImagePickerTest {
     }
 
     @Test
-    fun `choosing a file reports its path back`() = runComposeUiTest {
-        val chooser = FakeFileChooser(answer = Path.of("/chosen/new-logo.png"))
-        var reported: String? = null
-        setContent {
-            MaterialTheme {
-                FileImagePicker(imagePath = "", onImagePathChange = { reported = it }, fileChooser = chooser)
-            }
-        }
-        onNode(hasClickAction()).performClick()
-        waitForIdle()
+    fun `choosing a file reports its path back`() {
+        // The chosen path is built from a real temp directory rather than written as "/chosen/...".
+        // A POSIX literal is not an absolute path on Windows, so the round-trip gained a drive
+        // letter or lost its root and the assertion failed there for reasons unrelated to the
+        // picker (see the root AGENT.md). Derived this way, both sides agree on every platform.
+        val dir = Files.createTempDirectory("cp-picker-test")
+        try {
+            val chosen = dir.resolve("new-logo.png")
+            runComposeUiTest {
+                val chooser = FakeFileChooser(answer = chosen)
+                var reported: String? = null
+                setContent {
+                    MaterialTheme {
+                        FileImagePicker(imagePath = "", onImagePathChange = { reported = it }, fileChooser = chooser)
+                    }
+                }
+                onNode(hasClickAction()).performClick()
+                waitForIdle()
 
-        assertEquals("/chosen/new-logo.png", reported)
-        assertEquals(1, chooser.callCount)
+                assertEquals(chosen.toString(), reported)
+                assertEquals(1, chooser.callCount)
+            }
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
     }
 
     @Test

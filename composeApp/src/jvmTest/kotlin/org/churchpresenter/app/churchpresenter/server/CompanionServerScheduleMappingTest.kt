@@ -570,8 +570,12 @@ class CompanionServerScheduleMappingTest {
             server.updatePictures("folder-77", "Catalogued", folder.absolutePath, images)
             val elsewhere = java.nio.file.Files.createTempDirectory("cp-remote-pictures-sent").toFile()
 
+            // JSON-escaped: a Windows absolute path is full of backslashes and a lone backslash is
+            // an invalid JSON escape, so interpolating it raw made the body unparseable and the
+            // route answered 400 — a malformed request, not the mapping this test is about.
+            val sentPath = elsewhere.absolutePath.replace("\\", "\\\\")
             val (status, item) = addAndApprove(
-                """{"item":{"type":"picture","folder-id":"folder-77","folderPath":"${elsewhere.absolutePath}","folderName":"Sent","imageCount":4}}"""
+                """{"item":{"type":"picture","folder-id":"folder-77","folderPath":"$sentPath","folderName":"Sent","imageCount":4}}"""
             )
 
             assertEquals(HttpStatusCode.OK, status)

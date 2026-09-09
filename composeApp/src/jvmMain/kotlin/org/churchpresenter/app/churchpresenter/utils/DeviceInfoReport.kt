@@ -40,6 +40,8 @@ object DeviceInfoReport {
         val totalSongs: Int,
         val bibleCount: Int,
         val analyticsEnabled: Boolean,
+        /** The skiko render API in force, or "default" when the platform's own choice stands. */
+        val renderApi: String,
     )
 
     internal fun screenLine(index: Int, width: Int, height: Int, refreshRate: Int, primary: Boolean): String =
@@ -90,6 +92,7 @@ object DeviceInfoReport {
             totalSongs = songFolders.sumOf { it.second },
             bibleCount = bibleFiles.size,
             analyticsEnabled = CrashReporter.isEnabled(),
+            renderApi = System.getProperty("skiko.renderApi") ?: "default",
         )
     }
 
@@ -108,6 +111,7 @@ object DeviceInfoReport {
         appendLine("-- System --")
         appendLine("OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} (${System.getProperty("os.arch", "unknown")})")
         appendLine("Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})")
+        appendLine("Renderer: ${facts.renderApi}")
         val runtime = Runtime.getRuntime()
         appendLine("CPU cores: ${runtime.availableProcessors()}")
         val usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)

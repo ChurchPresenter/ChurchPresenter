@@ -544,7 +544,10 @@ class XdgPortalRequestTest {
 
         assertEquals(true, options["multiple"]?.value)
         assertEquals(true, options["directory"]?.value)
-        assertEquals("/home/leader/Songs", options["current_folder"]?.value)
+        // Derived through Path so the expectation matches on Windows too: the portal request is
+        // built from Path.toString(), which separates with backslashes there. The XDG portal itself
+        // is Linux-only, but this suite runs on every platform.
+        assertEquals(Path("/home/leader/Songs").toString(), options["current_folder"]?.value)
         assertEquals("deadbeef", options["handle_token"]?.value)
     }
 
@@ -698,7 +701,7 @@ class XdgPortalRequestTest {
             null
         }
 
-        assertEquals("/home/leader/Songs", seenOptions?.get("current_folder")?.value)
+        assertEquals(Path("/home/leader/Songs").toString(), seenOptions?.get("current_folder")?.value)
         assertEquals(true, seenOptions?.get("multiple")?.value)
         assertEquals("deadbeef", seenOptions?.get("handle_token")?.value)
         assertEquals(
