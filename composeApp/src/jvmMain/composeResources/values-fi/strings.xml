@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Näyttää</string>
     <string name="stage_monitor_zone_count">%1$d aluetta</string>
     <string name="stage_monitor_layout_stranded">Ei näy tässä asettelussa: %1$s</string>
+    <string name="stage_monitor_size_section">Alueiden koko</string>
+    <string name="stage_monitor_zone_width">Leveys (%)</string>
+    <string name="stage_monitor_zone_row_height">Rivin korkeus (%)</string>
+    <string name="stage_monitor_size_selected">Valittu</string>
+    <string name="stage_monitor_size_reset">Palauta</string>
+    <string name="stage_monitor_size_hint">Vedä jakajaa jakaaksesi tilaa vierekkäisten alueiden kesken. Jokainen rivi on yhteensä 100%.</string>
+    <string name="stage_monitor_size_even">Tasaa</string>
+    <string name="stage_monitor_size_even_row">Tämä rivi</string>
+    <string name="stage_monitor_size_even_all">Kaikki</string>
     <string name="stage_monitor_layout_classic">Klassinen (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Ylä / ala</string>
     <string name="stage_monitor_layout_left_right">Vasen / oikea</string>

@@ -1743,6 +1743,15 @@
     <string name="stage_monitor_zone_shows">காட்டுவது</string>
     <string name="stage_monitor_zone_count">%1$d மண்டலங்கள்</string>
     <string name="stage_monitor_layout_stranded">இந்த அமைப்பில் காட்டப்படாதவை: %1$s</string>
+    <string name="stage_monitor_size_section">மண்டல அளவு</string>
+    <string name="stage_monitor_zone_width">அகலம் (%)</string>
+    <string name="stage_monitor_zone_row_height">வரிசை உயரம் (%)</string>
+    <string name="stage_monitor_size_selected">தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="stage_monitor_size_reset">மீட்டமை</string>
+    <string name="stage_monitor_size_hint">அருகிலுள்ள மண்டலங்களுக்கு இடையே இடத்தைப் பகிர பிரிப்பானை இழுக்கவும். ஒவ்வொரு வரிசையும் மொத்தம் 100%.</string>
+    <string name="stage_monitor_size_even">சமன் செய்</string>
+    <string name="stage_monitor_size_even_row">இந்த வரிசை</string>
+    <string name="stage_monitor_size_even_all">அனைத்தும்</string>
     <string name="stage_monitor_layout_classic">பாரம்பரியம் (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">மேல் / கீழ்</string>
     <string name="stage_monitor_layout_left_right">இடது / வலது</string>

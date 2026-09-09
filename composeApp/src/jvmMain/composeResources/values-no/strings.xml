@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Viser</string>
     <string name="stage_monitor_zone_count">%1$d soner</string>
     <string name="stage_monitor_layout_stranded">Vises ikke i dette oppsettet: %1$s</string>
+    <string name="stage_monitor_size_section">Sonestørrelse</string>
+    <string name="stage_monitor_zone_width">Bredde (%)</string>
+    <string name="stage_monitor_zone_row_height">Radhøyde (%)</string>
+    <string name="stage_monitor_size_selected">Valgt</string>
+    <string name="stage_monitor_size_reset">Tilbakestill</string>
+    <string name="stage_monitor_size_hint">Dra en skillelinje for å fordele plass mellom naboer. Hver rad utgjør til sammen 100%.</string>
+    <string name="stage_monitor_size_even">Jevn ut</string>
+    <string name="stage_monitor_size_even_row">Denne raden</string>
+    <string name="stage_monitor_size_even_all">Alt</string>
     <string name="stage_monitor_layout_classic">Klassisk (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Topp / bunn</string>
     <string name="stage_monitor_layout_left_right">Venstre / høyre</string>

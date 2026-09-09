@@ -1572,6 +1572,15 @@
     <string name="stage_monitor_zone_shows">Näitab</string>
     <string name="stage_monitor_zone_count">%1$d tsooni</string>
     <string name="stage_monitor_layout_stranded">Selles paigutuses ei kuvata: %1$s</string>
+    <string name="stage_monitor_size_section">Tsoonide suurus</string>
+    <string name="stage_monitor_zone_width">Laius (%)</string>
+    <string name="stage_monitor_zone_row_height">Rea kõrgus (%)</string>
+    <string name="stage_monitor_size_selected">Valitud</string>
+    <string name="stage_monitor_size_reset">Lähtesta</string>
+    <string name="stage_monitor_size_hint">Lohista eraldusjoont, et jagada ruumi naabrite vahel. Iga rida annab kokku 100%.</string>
+    <string name="stage_monitor_size_even">Ühtlusta</string>
+    <string name="stage_monitor_size_even_row">See rida</string>
+    <string name="stage_monitor_size_even_all">Kõik</string>
     <string name="stage_monitor_layout_classic">Klassikaline (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Üleval / all</string>
     <string name="stage_monitor_layout_left_right">Vasak / parem</string>

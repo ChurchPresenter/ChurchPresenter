@@ -1424,6 +1424,15 @@
     <string name="stage_monitor_zone_shows">Показує</string>
     <string name="stage_monitor_zone_count">Зон: %1$d</string>
     <string name="stage_monitor_layout_stranded">Не показується в цьому розкладі: %1$s</string>
+    <string name="stage_monitor_size_section">Розмір зон</string>
+    <string name="stage_monitor_zone_width">Ширина (%)</string>
+    <string name="stage_monitor_zone_row_height">Висота рядка (%)</string>
+    <string name="stage_monitor_size_selected">Вибрано</string>
+    <string name="stage_monitor_size_reset">Скинути</string>
+    <string name="stage_monitor_size_hint">Перетягніть роздільник, щоб поділити місце між сусідами. Кожен рядок разом — 100%.</string>
+    <string name="stage_monitor_size_even">Вирівняти</string>
+    <string name="stage_monitor_size_even_row">Цей рядок</string>
+    <string name="stage_monitor_size_even_all">Усе</string>
     <string name="stage_monitor_layout_classic">Класична (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Зверху / знизу</string>
     <string name="stage_monitor_layout_left_right">Ліворуч / праворуч</string>

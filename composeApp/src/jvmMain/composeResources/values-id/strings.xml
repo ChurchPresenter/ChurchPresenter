@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Menampilkan</string>
     <string name="stage_monitor_zone_count">%1$d zona</string>
     <string name="stage_monitor_layout_stranded">Tidak tampil pada tata letak ini: %1$s</string>
+    <string name="stage_monitor_size_section">Ukuran Zona</string>
+    <string name="stage_monitor_zone_width">Lebar (%)</string>
+    <string name="stage_monitor_zone_row_height">Tinggi Baris (%)</string>
+    <string name="stage_monitor_size_selected">Terpilih</string>
+    <string name="stage_monitor_size_reset">Atur Ulang</string>
+    <string name="stage_monitor_size_hint">Seret pembatas untuk membagi ruang antar zona bersebelahan. Setiap baris berjumlah 100%.</string>
+    <string name="stage_monitor_size_even">Ratakan</string>
+    <string name="stage_monitor_size_even_row">Baris ini</string>
+    <string name="stage_monitor_size_even_all">Semua</string>
     <string name="stage_monitor_layout_classic">Klasik (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Atas / bawah</string>
     <string name="stage_monitor_layout_left_right">Kiri / kanan</string>

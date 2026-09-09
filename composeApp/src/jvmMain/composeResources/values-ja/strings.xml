@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">表示内容</string>
     <string name="stage_monitor_zone_count">%1$d ゾーン</string>
     <string name="stage_monitor_layout_stranded">このレイアウトでは表示されません: %1$s</string>
+    <string name="stage_monitor_size_section">ゾーンのサイズ</string>
+    <string name="stage_monitor_zone_width">幅 (%)</string>
+    <string name="stage_monitor_zone_row_height">行の高さ (%)</string>
+    <string name="stage_monitor_size_selected">選択中</string>
+    <string name="stage_monitor_size_reset">リセット</string>
+    <string name="stage_monitor_size_hint">仕切りをドラッグすると隣のゾーンと領域を分け合います。各行の合計は 100% です。</string>
+    <string name="stage_monitor_size_even">均等化</string>
+    <string name="stage_monitor_size_even_row">この行</string>
+    <string name="stage_monitor_size_even_all">すべて</string>
     <string name="stage_monitor_layout_classic">クラシック (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">上 / 下</string>
     <string name="stage_monitor_layout_left_right">左 / 右</string>

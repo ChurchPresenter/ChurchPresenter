@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">ສະແດງ</string>
     <string name="stage_monitor_zone_count">%1$d ເຂດ</string>
     <string name="stage_monitor_layout_stranded">ບໍ່ສະແດງໃນຮູບແບບນີ້: %1$s</string>
+    <string name="stage_monitor_size_section">ຂະໜາດເຂດ</string>
+    <string name="stage_monitor_zone_width">ຄວາມກວ້າງ (%)</string>
+    <string name="stage_monitor_zone_row_height">ຄວາມສູງແຖວ (%)</string>
+    <string name="stage_monitor_size_selected">ທີ່ເລືອກ</string>
+    <string name="stage_monitor_size_reset">ຣີເຊັດ</string>
+    <string name="stage_monitor_size_hint">ລາກເສັ້ນແບ່ງເພື່ອແບ່ງພື້ນທີ່ລະຫວ່າງເຂດຂ້າງຄຽງ. ແຕ່ລະແຖວລວມເປັນ 100%.</string>
+    <string name="stage_monitor_size_even">ປັບໃຫ້ເທົ່າກັນ</string>
+    <string name="stage_monitor_size_even_row">ແຖວນີ້</string>
+    <string name="stage_monitor_size_even_all">ທັງໝົດ</string>
     <string name="stage_monitor_layout_classic">ຄລາສສິກ (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">ເທິງ / ລຸ່ມ</string>
     <string name="stage_monitor_layout_left_right">ຊ້າຍ / ຂວາ</string>

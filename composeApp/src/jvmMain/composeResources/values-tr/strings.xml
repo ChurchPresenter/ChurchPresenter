@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Gösterir</string>
     <string name="stage_monitor_zone_count">%1$d bölge</string>
     <string name="stage_monitor_layout_stranded">Bu düzende gösterilmiyor: %1$s</string>
+    <string name="stage_monitor_size_section">Bölge boyutu</string>
+    <string name="stage_monitor_zone_width">Genişlik (%)</string>
+    <string name="stage_monitor_zone_row_height">Satır yüksekliği (%)</string>
+    <string name="stage_monitor_size_selected">Seçili</string>
+    <string name="stage_monitor_size_reset">Sıfırla</string>
+    <string name="stage_monitor_size_hint">Komşu bölgeler arasında alanı paylaştırmak için ayırıcıyı sürükleyin. Her satır toplamda 100%.</string>
+    <string name="stage_monitor_size_even">Eşitle</string>
+    <string name="stage_monitor_size_even_row">Bu satır</string>
+    <string name="stage_monitor_size_even_all">Tümü</string>
     <string name="stage_monitor_layout_classic">Klasik (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Üst / alt</string>
     <string name="stage_monitor_layout_left_right">Sol / sağ</string>

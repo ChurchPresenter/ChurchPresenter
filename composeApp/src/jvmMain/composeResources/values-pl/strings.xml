@@ -1423,6 +1423,15 @@
     <string name="stage_monitor_zone_shows">Pokazuje</string>
     <string name="stage_monitor_zone_count">Stref: %1$d</string>
     <string name="stage_monitor_layout_stranded">Nie jest wyświetlane w tym układzie: %1$s</string>
+    <string name="stage_monitor_size_section">Rozmiar stref</string>
+    <string name="stage_monitor_zone_width">Szerokość (%)</string>
+    <string name="stage_monitor_zone_row_height">Wysokość wiersza (%)</string>
+    <string name="stage_monitor_size_selected">Wybrano</string>
+    <string name="stage_monitor_size_reset">Resetuj</string>
+    <string name="stage_monitor_size_hint">Przeciągnij separator, aby podzielić miejsce między sąsiadami. Każdy wiersz to łącznie 100%.</string>
+    <string name="stage_monitor_size_even">Wyrównaj</string>
+    <string name="stage_monitor_size_even_row">Ten wiersz</string>
+    <string name="stage_monitor_size_even_all">Wszystko</string>
     <string name="stage_monitor_layout_classic">Klasyczny (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Góra / dół</string>
     <string name="stage_monitor_layout_left_right">Lewo / prawo</string>

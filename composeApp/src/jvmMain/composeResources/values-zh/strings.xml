@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">显示内容</string>
     <string name="stage_monitor_zone_count">%1$d 个区域</string>
     <string name="stage_monitor_layout_stranded">此布局中不显示：%1$s</string>
+    <string name="stage_monitor_size_section">区域大小</string>
+    <string name="stage_monitor_zone_width">宽度 (%)</string>
+    <string name="stage_monitor_zone_row_height">行高 (%)</string>
+    <string name="stage_monitor_size_selected">已选择</string>
+    <string name="stage_monitor_size_reset">重置</string>
+    <string name="stage_monitor_size_hint">拖动分隔线可在相邻区域之间分配空间。每行合计为 100%。</string>
+    <string name="stage_monitor_size_even">均分</string>
+    <string name="stage_monitor_size_even_row">本行</string>
+    <string name="stage_monitor_size_even_all">全部</string>
     <string name="stage_monitor_layout_classic">经典 (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">上 / 下</string>
     <string name="stage_monitor_layout_left_right">左 / 右</string>
