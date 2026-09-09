@@ -101,20 +101,28 @@ internal fun projectionTab(
  */
 internal val PINNED_FFMPEG = FfmpegStatus(available = true, path = "/app/ffmpeg", bundled = true)
 
-/** The audio device entry every machine has, and so the signal that VLC's probe has come back. */
-internal const val SYSTEM_DEFAULT_DEVICE = "System Default"
+/** The label beside the dropdown. Composed only once the probe has answered — see below. */
+private const val AUDIO_DEVICE_LABEL = "Output device"
 
 /**
  * Waits for the audio device dropdown to appear.
  *
  * The card asks VLC for its device list on `Dispatchers.IO` — which is why the tab no longer stalls
- * composition on it, and also why `waitForIdle` does not cover it. This waits on the dropdown
- * itself: a positive signal that lands as soon as the probe returns, never on a timeout. Where VLC
- * is absent the card composes a message instead and there is nothing to wait for.
+ * composition on it, and also why `waitForIdle` does not cover it. This waits on the row's own
+ * label: while the list is null the card draws a "Loading" row instead, so the label appearing is a
+ * positive signal that lands as soon as the probe returns, never on a timeout. Where VLC is absent
+ * the card composes a message instead and there is nothing to wait for.
+ *
+ * It waits on the **label** rather than on the "System Default" button beside it, because that
+ * button shows the *selected* device, which is not a fixed string: any test starting from a stored
+ * device would never satisfy it. That is also how this used to hang for 198 tests on a real machine —
+ * VLC reports its own default device with an empty id, the stored id is empty too, so the button
+ * read VLC's untranslated "Default" and the app's string was only ever inside the closed menu. The
+ * duplicate entry is dropped in `withoutVlcDefaultDevice` now, but the label is the honest signal.
  */
 internal fun ComposeUiTest.awaitAudioDevices() {
     if (!isVlcAvailable) return
-    waitUntil { onAllNodesWithText(SYSTEM_DEFAULT_DEVICE).fetchSemanticsNodes(false).isNotEmpty() }
+    waitUntil { onAllNodesWithText(AUDIO_DEVICE_LABEL).fetchSemanticsNodes(false).isNotEmpty() }
 }
 
 // ── Screen fixtures ─────────────────────────────────────────────────────────────────────────────
