@@ -157,8 +157,11 @@ class MediaViewModel {
                 url.substringAfterLast("/").ifBlank { url }
             else -> {
                 val file = java.io.File(url)
+                // `File.name` splits on the platform's own separator, so a Windows path that no
+                // longer exists still yields "clip.mp4". `substringAfterLast("/")` found no slash
+                // in C:\Media\clip.mp4 and handed the whole path back as the title.
                 if (file.exists()) file.nameWithoutExtension
-                else url.substringAfterLast("/").ifBlank { url }
+                else file.name.ifBlank { url }
             }
         }
     }

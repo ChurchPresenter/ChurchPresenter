@@ -1424,6 +1424,15 @@
     <string name="stage_monitor_zone_shows">Zeigt</string>
     <string name="stage_monitor_zone_count">%1$d Zonen</string>
     <string name="stage_monitor_layout_stranded">In diesem Layout nicht sichtbar: %1$s</string>
+    <string name="stage_monitor_size_section">Zonengröße</string>
+    <string name="stage_monitor_zone_width">Breite (%)</string>
+    <string name="stage_monitor_zone_row_height">Zeilenhöhe (%)</string>
+    <string name="stage_monitor_size_selected">Ausgewählt</string>
+    <string name="stage_monitor_size_reset">Zurücksetzen</string>
+    <string name="stage_monitor_size_hint">Ziehen Sie eine Trennlinie, um Platz zwischen Nachbarn aufzuteilen. Jede Zeile ergibt zusammen 100%.</string>
+    <string name="stage_monitor_size_even">Angleichen</string>
+    <string name="stage_monitor_size_even_row">Diese Zeile</string>
+    <string name="stage_monitor_size_even_all">Alles</string>
     <string name="stage_monitor_layout_classic">Klassisch (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Oben / unten</string>
     <string name="stage_monitor_layout_left_right">Links / rechts</string>

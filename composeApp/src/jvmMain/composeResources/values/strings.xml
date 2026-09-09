@@ -612,7 +612,15 @@
     <!-- Bible Tab -->
 
     <!-- Crash Recovery -->
+    <!--
+      crash_video_bg_disabled is superseded by the three strings below, which split the message from
+      its two actions so they can be real buttons. It is left in place because ~30 locale files still
+      carry a translation of it; removing only the English entry would leave those orphaned.
+    -->
     <string name="crash_video_bg_disabled">Video backgrounds disabled after %1$d consecutive crashes.  [Re-enable]  [Dismiss]</string>
+    <string name="crash_video_bg_banner">Video backgrounds were turned off after %1$d crashes in a row.</string>
+    <string name="crash_video_bg_reenable">Turn back on</string>
+    <string name="crash_video_bg_dismiss">Dismiss</string>
 
     <!-- Position Options -->
     <string name="position_above">Above</string>
@@ -2022,6 +2030,15 @@
     <string name="stage_monitor_zone_shows">Shows</string>
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Not shown on this layout: %1$s</string>
+    <string name="stage_monitor_size_section">Zone Size</string>
+    <string name="stage_monitor_zone_width">Width (%)</string>
+    <string name="stage_monitor_zone_row_height">Row Height (%)</string>
+    <string name="stage_monitor_size_selected">Selected</string>
+    <string name="stage_monitor_size_reset">Reset</string>
+    <string name="stage_monitor_size_hint">Drag a divider to trade space between neighbors. Each row shares 100%.</string>
+    <string name="stage_monitor_size_even">Even out</string>
+    <string name="stage_monitor_size_even_row">This row</string>
+    <string name="stage_monitor_size_even_all">Everything</string>
     <string name="stage_monitor_layout_classic">Classic (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Top / Bottom</string>
     <string name="stage_monitor_layout_left_right">Left / Right</string>

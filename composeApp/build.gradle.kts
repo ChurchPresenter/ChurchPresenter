@@ -514,18 +514,24 @@ compose.desktop {
             "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
-        // Explicitly set Skiko GPU backend to prevent software fallback
+        // ── No -Dskiko.renderApi here, on any platform ────────────────────────────────────
+        // The GPU backend is chosen by MainLogic.preferredRenderApi, which main() applies before
+        // the first SkiaLayer. Two reasons it cannot be done from this file:
+        //   • This runs on the machine doing the BUILD, and the value is baked into the artifact.
+        //   • `jvmArgs` is declared only on JvmApplication, so a call inside macOS { }/windows { }/
+        //     linux { } resolves against the enclosing application { } and applies EVERYWHERE. A
+        //     METAL pin written in the macOS block was reaching Windows and Linux this way, and
+        //     only stayed invisible because the branch below pinned OPENGL first and Gradle keeps
+        //     the first value for a repeated -D key.
+        // Deciding it at runtime instead is right whoever built the app and wherever it runs, and
+        // gives CHURCHPRESENTER_RENDER_API the last word on the operator's own machine.
         val osName = System.getProperty("os.name").lowercase()
-        when {
-            osName.contains("mac") -> jvmArgs(
-                "-Dskiko.renderApi=METAL",
-                // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to
-                // the main class name ("MainKt") in the menu bar without this. macOS-only: an
-                // unrecognized -Xdock option on other platforms aborts JVM startup entirely.
-                "-Xdock:name=Church Presenter"
-            )
-            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=OPENGL")
-            else -> jvmArgs("-Dskiko.renderApi=OPENGL")
+        if (osName.contains("mac")) {
+            // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to the
+            // main class name ("MainKt") in the menu bar without this. macOS-only: an unrecognized
+            // -Xdock option on other platforms aborts JVM startup entirely — so this one genuinely
+            // does belong to the build, and is guarded on the build machine being a Mac.
+            jvmArgs("-Xdock:name=Church Presenter")
         }
 
         buildTypes.release.proguard {
@@ -579,7 +585,17 @@ compose.desktop {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
-                jvmArgs("-Dskiko.renderApi=METAL")
+
+                // ── No renderApi here ─────────────────────────────────────────
+                // A platform block has NO jvmArgs of its own: `jvmArgs` is declared only on
+                // JvmApplication, so a call written in here silently resolves against the
+                // enclosing application { } receiver and applies to EVERY platform, including
+                // the `run` task on Windows and Linux. This block used to pin METAL, and it was
+                // pinning it everywhere; Windows only escaped because the block above pinned
+                // OPENGL first and Gradle keeps the first value for a repeated -D key. Take that
+                // pin away and METAL is the only value left, so skiko throws
+                // "Windows does not support Metal rendering API" before the first window opens.
+                // macOS is pinned by MainLogic.preferredRenderApi, on the machine that runs it.
 
                 // ── macOS Privacy ─────────────────────────────────────────────
                 // macOS attributes a spawned child process's privacy requests to the app bundle
@@ -626,7 +642,19 @@ compose.desktop {
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
-                jvmArgs("-Dskiko.renderApi=OPENGL")
+
+                // ── No renderApi here, deliberately ───────────────────────────
+                // This used to pin OPENGL, overriding skiko's own Direct3D default, and that is
+                // the only reason a GPU driver access violation surfaced inside
+                // WindowsOpenGLRedrawer.swapBuffers rather than anywhere else. skiko's
+                // fallbackRenderApiQueue covers *context creation* only, so a fault during
+                // swapBuffers never triggers it — the default has to be right, not recoverable.
+                // An operator whose machine fares worse on Direct3D sets CHURCHPRESENTER_RENDER_API
+                // (see DevFlags.renderApiOverride); main() applies it before the first SkiaLayer.
+                //
+                // Nor could it go here even if it were wanted: a platform block has no jvmArgs of
+                // its own, so the call above adds to the application-wide list and reaches macOS
+                // and Linux too. MainLogic.preferredRenderApi is where the choice is made.
             }
 
             linux {
@@ -1187,61 +1215,21 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
-        // All six counters are temporarily at 75%. They were 85/80/85/75/85/85 until 2026-08-18,
-        // when CLASS fell to 84.77% and the gate began blocking every merge; the floors were dropped
-        // in one step rather than tuned per counter. Re-measured 2026-08-18 on the report scope:
-        //
-        //   counter      measured   floor   margin
-        //   INSTRUCTION    88.16%    75%     +13.2
-        //   BRANCH         80.04%    75%      +5.0
-        //   LINE           88.69%    75%     +13.7
-        //   COMPLEXITY     76.85%    75%      +1.9
-        //   METHOD         85.44%    75%     +10.4
-        //   CLASS          84.77%    75%      +9.8
-        //
-        // Raising them back is the open question, not whether the notes below still hold -- those
-        // describe why the numbers sit where they do and are unchanged.
-        //
-        // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
-        // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
-        // under java.awt.headless and so cannot be covered at all. Inside main.kt those lines were
-        // invisible to this gate, because MainKt* is excluded above; in their own file they are
-        // counted, and they cost 0.84 points on their own. The testable parts of that file were
-        // extracted rather than left behind -- PresenterOutputContent, PresenterModeContent and
-        // PresenterTransitionEffects all came out of it and are covered -- so what remains really
-        // is display-only.
-        //
-        // The floor was lowered to 85% rather than excluding PresenterWindowsKt*, which would have
-        // kept the number at ~90% by hiding the same lines the old arrangement hid. 85% is what
-        // every other counter that can be honestly measured already sits at.
-        //
-        // BRANCH is now the tight one -- 0.8 points, a few dozen branches -- and WILL fail on a
-        // small regression. That is the point, but it also means a PR that adds a chunk of
-        // legitimately hard-to-cover code trips it. When that happens the fix is to cover it or to
-        // argue the floor down, not to widen an exclusion above: exclusions decide what the number
-        // means, floors decide how much of it we insist on. (COMPLEXITY used to be the tight one at
-        // +0.4; it is at +3.5 now.)
-        //
-        // BRANCH and COMPLEXITY sit lowest and cannot be pushed to where LINE is, for a structural
-        // reason rather than a testing gap: 396 classes are at 100% LINE and 88.6% BRANCH -- 757
-        // branches missed on code where every line ran. Those are the Compose compiler's `$changed`
-        // bitmask skip checks, emitted INSIDE each composable's own method, so no class-file
-        // exclusion can remove them. They are ~3.5% of the branch denominator.
         rule {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.79".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "COMPLEXITY"
@@ -1251,12 +1239,12 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "METHOD"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "CLASS"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
         }
     }

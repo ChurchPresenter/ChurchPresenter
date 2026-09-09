@@ -1477,6 +1477,15 @@
     <string name="stage_monitor_zone_shows">Muestra</string>
     <string name="stage_monitor_zone_count">%1$d zonas</string>
     <string name="stage_monitor_layout_stranded">No se muestra en este diseño: %1$s</string>
+    <string name="stage_monitor_size_section">Tamaño de zonas</string>
+    <string name="stage_monitor_zone_width">Ancho (%)</string>
+    <string name="stage_monitor_zone_row_height">Alto de fila (%)</string>
+    <string name="stage_monitor_size_selected">Seleccionado</string>
+    <string name="stage_monitor_size_reset">Restablecer</string>
+    <string name="stage_monitor_size_hint">Arrastra un divisor para repartir espacio entre zonas vecinas. Cada fila suma 100%.</string>
+    <string name="stage_monitor_size_even">Igualar</string>
+    <string name="stage_monitor_size_even_row">Esta fila</string>
+    <string name="stage_monitor_size_even_all">Todo</string>
     <string name="stage_monitor_layout_classic">Clásico (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Arriba / abajo</string>
     <string name="stage_monitor_layout_left_right">Izquierda / derecha</string>

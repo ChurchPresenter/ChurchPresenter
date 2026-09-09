@@ -1468,6 +1468,15 @@
     <string name="stage_monitor_zone_shows">Zobrazuje</string>
     <string name="stage_monitor_zone_count">Zón: %1$d</string>
     <string name="stage_monitor_layout_stranded">V tomto rozvržení se nezobrazuje: %1$s</string>
+    <string name="stage_monitor_size_section">Velikost zón</string>
+    <string name="stage_monitor_zone_width">Šířka (%)</string>
+    <string name="stage_monitor_zone_row_height">Výška řádku (%)</string>
+    <string name="stage_monitor_size_selected">Vybráno</string>
+    <string name="stage_monitor_size_reset">Obnovit</string>
+    <string name="stage_monitor_size_hint">Přetažením dělicí čáry přerozdělíte místo mezi sousedy. Každý řádek tvoří 100%.</string>
+    <string name="stage_monitor_size_even">Vyrovnat</string>
+    <string name="stage_monitor_size_even_row">Tento řádek</string>
+    <string name="stage_monitor_size_even_all">Vše</string>
     <string name="stage_monitor_layout_classic">Klasické (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Nahoře / dole</string>
     <string name="stage_monitor_layout_left_right">Vlevo / vpravo</string>

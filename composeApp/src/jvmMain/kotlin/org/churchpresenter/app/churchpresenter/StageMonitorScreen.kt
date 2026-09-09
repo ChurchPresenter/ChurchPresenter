@@ -95,6 +95,7 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import org.churchpresenter.settings.layoutSizes
 
 private const val CLOCK_TICK_MS = 1000L
 private const val SHADOW_OFFSET_DIVISOR = 10f
@@ -289,16 +290,18 @@ fun StageMonitorScreen(
             }
         } else {
             // The grid the chosen layout describes: rows down the screen, cells across each row,
-            // both weighted. The classic arrangement is one entry in that catalog, not a special case.
+            // both weighted. The classic arrangement is one entry in that catalog, not a special
+            // case. The weights are percentages, the layout's own until someone resizes a zone.
+            val sizes = sm.layoutSizes()
             Column(modifier = Modifier.fillMaxSize()) {
                 sm.layout.rows.forEachIndexed { rowIndex, layoutRow ->
                     if (rowIndex > 0) HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    Row(modifier = Modifier.fillMaxWidth().weight(layoutRow.weight)) {
+                    Row(modifier = Modifier.fillMaxWidth().weight(sizes.rowHeights[rowIndex])) {
                         layoutRow.cells.forEachIndexed { cellIndex, cell ->
                             if (cellIndex > 0) VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                             StageZoneBox(
                                 sm, cell.slot.toZone(), renderData, mediaViewModel, ::contentFor,
-                                Modifier.weight(cell.weight)
+                                Modifier.weight(sizes.rowCellWidths[rowIndex][cellIndex])
                             )
                         }
                     }

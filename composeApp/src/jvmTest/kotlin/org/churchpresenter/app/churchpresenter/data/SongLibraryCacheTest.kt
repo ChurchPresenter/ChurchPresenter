@@ -287,8 +287,12 @@ class SongLibraryCacheTest {
     fun `a cache written by an older build is still readable`() {
         // Older caches held only the song list, with no modification times to check against.
         cacheFile.parentFile?.mkdirs()
+        // The path goes in JSON-escaped. A Windows absolute path is full of backslashes, and a lone
+        // backslash is an invalid JSON escape — so interpolating it raw made the document unparseable
+        // and the loader correctly returned null, failing this test for a reason it is not about.
+        val storageDirectory = library.absolutePath.replace("\\", "\\\\")
         cacheFile.writeText(
-            """{"storageDirectory":"${library.absolutePath}","songs":[""" +
+            """{"storageDirectory":"$storageDirectory","songs":[""" +
                 """{"number":"1","title":"From an old cache","songbook":"Hymnal"}],"cachedSongs":[]}"""
         )
 

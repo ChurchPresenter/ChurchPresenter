@@ -86,7 +86,10 @@ class PresentationViewModelRemoteTest {
         awaitUntil("the download") { !vm.isLoading && vm.slideFiles.size == 3 }
 
         assertEquals(3, vm.totalSlides)
-        assertEquals(remotePath, vm.selectedPresentation?.absolutePath)
+        // selectedPresentation is a File, so the primary's path is re-rooted with the local
+        // separator (and a drive letter on Windows). Compare through the same conversion: what the
+        // assertion is for is that the deck is identified by the PRIMARY's path, not the cache file.
+        assertEquals(File(remotePath).absolutePath, vm.selectedPresentation?.absolutePath)
         assertEquals(1, vm.presentations.size)
         assertNull(vm.loadError)
         assertTrue(vm.slideFiles.all { it.exists() }, "slides are cached to real files")

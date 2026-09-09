@@ -100,8 +100,12 @@ class PicturesViewModelRemoteTest {
         awaitUntil("three mirrored images") { vm.images.size == 3 }
         assertEquals(listOf("image_0000.jpg", "image_0001.jpg", "image_0002.jpg"), vm.names)
         assertEquals(listOf(0, 1, 2), asked)
+        // Through File(...) because selectedFolder is a File: it re-separates a foreign path with
+        // the local separator, so a Windows follower of a macOS primary renders the mac path with
+        // backslashes. The point of the assertion is that it is the PRIMARY's folder rather than the
+        // local cache directory, and that still holds either way.
         assertEquals(
-            "/Volumes/primary-only/Sunday",
+            File("/Volumes/primary-only/Sunday").path,
             vm.selectedFolder?.path,
             "the folder shown is the primary's path, even though the bytes live in the local cache"
         )
@@ -283,7 +287,7 @@ class PicturesViewModelRemoteTest {
         awaitUntil("the cache directory to be created") { cacheDir("folder-empty").isDirectory }
         assertEquals(0, fetches)
         assertTrue(vm.images.isEmpty())
-        assertEquals("/Volumes/primary-only/Empty", vm.selectedFolder?.path)
+        assertEquals(File("/Volumes/primary-only/Empty").path, vm.selectedFolder?.path)
     }
 
     // ── Thumbnails ──────────────────────────────────────────────────────────────

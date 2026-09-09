@@ -28,6 +28,10 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.withZoneWidth
+import org.churchpresenter.settings.withZoneHeight
 
 /**
  * The Stage Monitor tab of the settings dialog, in both themes.
@@ -78,6 +82,48 @@ class StageMonitorSettingsTabScreenshotTest {
      */
     @Test
     fun `content routed across the zones`() = shoot("zones_routed", settings = routed())
+
+    /**
+     * The grid dragged away from the proportions the layout catalog gives it.
+     *
+     * The cells say their own size, so this is also the image that shows a row's widths still adding
+     * to 100 after two of them have been traded, and it is the only one where Reset is offered —
+     * the header button is disabled until something has been resized.
+     */
+    @Test
+    fun `zones resized away from the layout`() = shoot("zones_resized", settings = resized())
+
+    /**
+     * A zone other than the first selected, which is what the width and row-height fields follow.
+     *
+     * Clicked rather than seeded: selection is composition state, not a setting, so there is no
+     * fixture for it — and the click is also what an operator does to point the fields somewhere.
+     */
+    @Test
+    fun `another zone selected in the grid`() = shoot("zone_selected", settings = resized()) {
+        onAllNodesWithText(BOTTOM_CENTRE_CELL)[0].performScrollTo().performClick()
+        waitForIdle()
+    }
+
+    // ── The shape of the output the zones are drawn on ──────────────────────────────────────────
+    // The mock is the shape of the real stage monitor, not a fixed 16:9, so the same layout gives
+    // very different cells on a 4:3, a portrait confidence display and an ultrawide — and the cell
+    // labels have to fit all three. Churches run all three.
+
+    /** An old 4:3 confidence monitor: the cells get taller and the bottom row squarer. */
+    @Test
+    fun `the zones on a four-three output`() = shoot("zones_output_four_three", settings = output(1024, 768))
+
+    /**
+     * A rotated display, where the mock is capped by [STAGE_PREVIEW_MAX_HEIGHT] rather than sized
+     * by it — the one shape where the cap is what decides how big the picture is.
+     */
+    @Test
+    fun `the zones on a portrait output`() = shoot("zones_output_portrait", settings = output(1080, 1920))
+
+    /** An ultrawide, where the cells go long and the three-line label has the least height. */
+    @Test
+    fun `the zones on an ultrawide output`() = shoot("zones_output_ultrawide", settings = output(2560, 1080))
 
     // ── The dropdowns ───────────────────────────────────────────────────────────────────────────
 
@@ -234,6 +280,32 @@ class StageMonitorSettingsTabScreenshotTest {
     private fun stageMonitor(edit: StageMonitorSettings.() -> StageMonitorSettings) =
         AppSettings(stageMonitorSettings = StageMonitorSettings().edit())
 
+    /** The tab as it opens, with the stage monitor going out on a [width] by [height] screen. */
+    private fun output(width: Int, height: Int) = AppSettings(
+        projectionSettings = ProjectionSettings(
+            screenAssignments = listOf(
+                ScreenAssignment(
+                    displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,
+                    targetBoundsW = width,
+                    targetBoundsH = height,
+                ),
+            ),
+        ),
+    )
+
+    /**
+     * A grid nobody would get from the catalog: a top row taking four fifths of the screen, split
+     * three ways to one, and a bottom row whose first cell has taken half of it.
+     *
+     * Deliberately lopsided in both directions at once — the same numbers on every row would not
+     * show that height belongs to the row while width belongs to the cell.
+     */
+    private fun resized() = stageMonitor {
+        withZoneHeight(StageMonitorStyleZone.A, 80f)
+            .withZoneWidth(StageMonitorStyleZone.A, 75f)
+            .withZoneWidth(StageMonitorStyleZone.C, 50f)
+    }
+
     /**
      * Every zone but Full Screen in use, and nothing left on Full Screen at all.
      *
@@ -319,6 +391,15 @@ class StageMonitorSettingsTabScreenshotTest {
 
         /** One per style block — the handle the scroll positions use. */
         const val SHADOW = "Shadow"
+
+        /**
+         * The Bottom-Center cell of the grid, addressed by what is routed there.
+         *
+         * Its zone name would also match the Clock row's dropdown, which is set to that zone; the
+         * title-cased content name is drawn in the cell and nowhere else (the dropdown captions the
+         * row "CLOCK").
+         */
+        const val BOTTOM_CENTRE_CELL = "Clock"
 
         // Style blocks in composition order: the left column's three, then the right column's.
         const val FULL_SCREEN_BLOCK = 0
