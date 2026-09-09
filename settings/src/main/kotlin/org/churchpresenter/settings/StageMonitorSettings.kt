@@ -131,38 +131,6 @@ enum class StageMonitorLayout(val rows: List<StageMonitorRow>) {
 private fun row(weight: Float, vararg slots: StageMonitorStyleZone) =
     StageMonitorRow(weight, slots.map { StageMonitorCell(it) })
 
-/**
- * Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid,
- * independent of the content zones above (no full-screen option since it's a small overlay).
- */
-@Serializable
-enum class MetronomePosition {
-    NONE,
-    TOP_LEFT, TOP_CENTER, TOP_RIGHT,
-    MIDDLE_LEFT, CENTER, MIDDLE_RIGHT,
-    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
-}
-
-fun StageMonitorZone.toStyleZone(): StageMonitorStyleZone? = when (this) {
-    StageMonitorZone.A -> StageMonitorStyleZone.A
-    StageMonitorZone.B -> StageMonitorStyleZone.B
-    StageMonitorZone.C -> StageMonitorStyleZone.C
-    StageMonitorZone.D -> StageMonitorStyleZone.D
-    StageMonitorZone.E -> StageMonitorStyleZone.E
-    StageMonitorZone.FULL_SCREEN -> StageMonitorStyleZone.FULL_SCREEN
-    StageMonitorZone.NONE -> null
-}
-
-/** The routing target that draws this style zone. */
-fun StageMonitorStyleZone.toZone(): StageMonitorZone = when (this) {
-    StageMonitorStyleZone.A -> StageMonitorZone.A
-    StageMonitorStyleZone.B -> StageMonitorZone.B
-    StageMonitorStyleZone.C -> StageMonitorZone.C
-    StageMonitorStyleZone.D -> StageMonitorZone.D
-    StageMonitorStyleZone.E -> StageMonitorZone.E
-    StageMonitorStyleZone.FULL_SCREEN -> StageMonitorZone.FULL_SCREEN
-}
-
 @Serializable
 data class StageMonitorZoneStyle(
     val fontType: String = "Arial",
@@ -200,6 +168,10 @@ data class StageMonitorSettings(
 
     // Font/color/style/alignment for each of the drawable zones.
     val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles(),
+
+    // How big each zone is, per layout. A layout with no entry here is drawn at its catalog
+    // proportions, which is what every install starts with.
+    val zoneSizes: Map<StageMonitorLayout, StageMonitorZoneSizes> = emptyMap(),
 
     // Where the metronome flash dot is anchored; NONE = disabled (default).
     val metronomePosition: MetronomePosition = MetronomePosition.NONE,
