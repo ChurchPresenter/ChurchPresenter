@@ -119,11 +119,16 @@ class STTTabTest {
         }
     }
 
+    /**
+     * Seeded through `applyConnecting` rather than by clicking Connect and hoping to look before the
+     * attempt lands. Clicking raced the connection: on an idle machine the attempt failed first and
+     * the tab already read "Can't reach STT server", so this failed intermittently and in isolation.
+     * The click → CONNECTING transition is `STTManager.connect`'s own first act; what this test is
+     * for is what the *tab* renders while that state is up.
+     */
     @Test
     fun `while connecting the tab says so and the field is locked`() {
-        sttTab { _, _, _ ->
-            sttButton(STTLabel.CONNECT).performClick()
-
+        sttTab(seed = { applyConnecting() }) { _, _, _ ->
             assertTrue(showsExactly(STTLabel.CONNECTING), renderedText().toString())
             assertFalse(urlFieldIsEditable(), "the url can't be edited mid-attempt")
             assertFalse(hasSttButton(STTLabel.CLEAR))
