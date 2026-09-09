@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.SongTextStyle
 
