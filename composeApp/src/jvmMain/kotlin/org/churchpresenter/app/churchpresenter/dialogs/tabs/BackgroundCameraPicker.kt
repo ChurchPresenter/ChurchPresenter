@@ -26,6 +26,7 @@ import churchpresenter.composeapp.generated.resources.background_camera_auto
 import churchpresenter.composeapp.generated.resources.background_camera_connection
 import churchpresenter.composeapp.generated.resources.background_camera_device
 import churchpresenter.composeapp.generated.resources.background_camera_format
+import churchpresenter.composeapp.generated.resources.canvas_camera_is_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,8 +43,10 @@ import org.churchpresenter.app.churchpresenter.composables.CameraPrivacyHint
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
+import org.churchpresenter.app.churchpresenter.composables.isScreenCaptureDevice
 import org.churchpresenter.app.churchpresenter.composables.listCameraFormats
 import org.churchpresenter.app.churchpresenter.composables.SharedCameraFrameCache
+import org.churchpresenter.app.churchpresenter.composables.selectableCameras
 import org.churchpresenter.app.churchpresenter.composables.selectedConnectionName
 import org.churchpresenter.app.churchpresenter.composables.selectedFormatName
 import org.churchpresenter.app.churchpresenter.composables.selectedModeName
@@ -82,7 +85,9 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         PanelCaption(stringResource(Res.string.background_camera_device))
-        val found = devices.orEmpty()
+        // Displays are dropped from what is offered, not from the catalog — see `selectableCameras`.
+        // The hints below still read the unfiltered list: they are about what enumeration found.
+        val found = devices.orEmpty().selectableCameras(keeping = config.camera.deviceName)
 
         // Above the dropdown rather than instead of it: on Windows without ffmpeg the PnP fallback
         // fills the list with names that cannot be opened, so a hint shown only when the list is
@@ -115,6 +120,15 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
                 },
                 modifier = Modifier.fillMaxWidth(),
             )
+            // A background opens as the presenter window does, so a display saved here is what
+            // re-raises the Screen Recording prompt on every launch. It keeps working; it is named.
+            if (!config.camera.isDeckLink && isScreenCaptureDevice(config.camera.deviceName)) {
+                Text(
+                    text = stringResource(Res.string.canvas_camera_is_screen_capture),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             if (config.camera.isDeckLink && config.camera.deckLinkIndex >= 0) {
                 DeckLinkFormatRows(config, onConfigChange, autoLabel)
             } else if (config.camera.isSet) {

@@ -1529,6 +1529,7 @@
     <string name="canvas_camera_ffmpeg_required">ChurchPresenter opens cameras with ffmpeg, and this build could not find its copy. Open Settings → Projection to point at an ffmpeg, then check again.</string>
     <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
+    <string name="canvas_camera_is_screen_capture">This is a display, not a camera — it records your screen, which is why macOS asks for Screen Recording permission. To put a screen on the canvas, use a Screen Capture source instead.</string>
     <string name="canvas_camera_error_ffmpeg_missing">This camera cannot be opened because ChurchPresenter could not find its copy of ffmpeg. Open Settings → Projection to point at an ffmpeg, then select the camera again.</string>
     <string name="canvas_camera_error_permission_denied_windows">Windows is blocking camera access for ChurchPresenter. Open Settings → Privacy &amp; security → Camera, turn on camera access and "Let desktop apps access your camera", then select the camera again.</string>
     <string name="canvas_camera_error_device_not_found_windows">Windows could not open a camera with this name. It may have been unplugged, or its driver may name it differently than Windows does — press Refresh Cameras and pick it again.</string>

@@ -23,6 +23,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
 import churchpresenter.composeapp.generated.resources.canvas_camera_open_privacy_settings
+import churchpresenter.composeapp.generated.resources.canvas_camera_is_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_camera_format
 import churchpresenter.composeapp.generated.resources.canvas_camera_format_auto
@@ -221,7 +222,9 @@ internal fun CameraProperties(
     // "Canvas tab is very hanging"; the catalog does the same work on IO and caches it.
     val known by CameraDeviceCatalog.devices.collectAsState()
     val supplied = devices
-    val offered = supplied ?: known.orEmpty()
+    // Displays are dropped here rather than in the catalog: the catalog is what decides where a
+    // *saved* device is now, and it has to keep seeing them. See `selectableCameras`.
+    val offered = (supplied ?: known.orEmpty()).selectableCameras(keeping = source.deviceName)
     val scope = rememberCoroutineScope()
 
     // Never enumerated when the caller supplied the list, or the real hardware would land a moment
@@ -252,6 +255,18 @@ internal fun CameraProperties(
             },
             modifier = Modifier.fillMaxWidth()
         )
+
+        // Only reachable for a source saved before displays were dropped from the list, or one
+        // hand-edited into a scene file. It keeps drawing — blacking out a working configuration
+        // mid-service would be worse — but it says what it actually is.
+        if (!source.isDeckLink && isScreenCaptureDevice(source.deviceName)) {
+            Text(
+                text = stringResource(Res.string.canvas_camera_is_screen_capture),
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
 
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
 
