@@ -1187,61 +1187,21 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
-        // All six counters are temporarily at 75%. They were 85/80/85/75/85/85 until 2026-08-18,
-        // when CLASS fell to 84.77% and the gate began blocking every merge; the floors were dropped
-        // in one step rather than tuned per counter. Re-measured 2026-08-18 on the report scope:
-        //
-        //   counter      measured   floor   margin
-        //   INSTRUCTION    88.16%    75%     +13.2
-        //   BRANCH         80.04%    75%      +5.0
-        //   LINE           88.69%    75%     +13.7
-        //   COMPLEXITY     76.85%    75%      +1.9
-        //   METHOD         85.44%    75%     +10.4
-        //   CLASS          84.77%    75%      +9.8
-        //
-        // Raising them back is the open question, not whether the notes below still hold -- those
-        // describe why the numbers sit where they do and are unchanged.
-        //
-        // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
-        // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
-        // under java.awt.headless and so cannot be covered at all. Inside main.kt those lines were
-        // invisible to this gate, because MainKt* is excluded above; in their own file they are
-        // counted, and they cost 0.84 points on their own. The testable parts of that file were
-        // extracted rather than left behind -- PresenterOutputContent, PresenterModeContent and
-        // PresenterTransitionEffects all came out of it and are covered -- so what remains really
-        // is display-only.
-        //
-        // The floor was lowered to 85% rather than excluding PresenterWindowsKt*, which would have
-        // kept the number at ~90% by hiding the same lines the old arrangement hid. 85% is what
-        // every other counter that can be honestly measured already sits at.
-        //
-        // BRANCH is now the tight one -- 0.8 points, a few dozen branches -- and WILL fail on a
-        // small regression. That is the point, but it also means a PR that adds a chunk of
-        // legitimately hard-to-cover code trips it. When that happens the fix is to cover it or to
-        // argue the floor down, not to widen an exclusion above: exclusions decide what the number
-        // means, floors decide how much of it we insist on. (COMPLEXITY used to be the tight one at
-        // +0.4; it is at +3.5 now.)
-        //
-        // BRANCH and COMPLEXITY sit lowest and cannot be pushed to where LINE is, for a structural
-        // reason rather than a testing gap: 396 classes are at 100% LINE and 88.6% BRANCH -- 757
-        // branches missed on code where every line ran. Those are the Compose compiler's `$changed`
-        // bitmask skip checks, emitted INSIDE each composable's own method, so no class-file
-        // exclusion can remove them. They are ~3.5% of the branch denominator.
         rule {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.79".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "COMPLEXITY"
@@ -1251,12 +1211,12 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "METHOD"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "CLASS"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
         }
     }
