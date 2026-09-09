@@ -42,12 +42,21 @@ private const val MILLIS_PER_SECOND_L = 1000L
 /**
  * The skiko render API to pin, or null to leave the choice to skiko.
  *
- * macOS is pinned to Metal: left to choose, skiko falls back to OpenGL there and crashes on some
- * machines. Windows is deliberately **not** pinned. It used to be forced to OpenGL, which is the
- * only reason a GPU driver fault landed in `WindowsOpenGLRedrawer.swapBuffers`; skiko's own
- * Direct3D default is the better first rung. Note skiko's `fallbackRenderApiQueue` covers *context
- * creation* only, so a fault during `swapBuffers` never triggers it — the default has to be right
- * rather than recoverable.
+ * **This is the only place the render API is chosen, for every platform.** It deliberately does not
+ * live in `build.gradle.kts`: a `jvmArgs` there is evaluated against the machine running the *build*
+ * and is baked into the artifact, and — because `jvmArgs` is declared only on `JvmApplication` — a
+ * call written inside a `macOS { }` / `windows { }` / `linux { }` block silently applies to every
+ * platform instead of that one. A pin written here is read on the machine that actually runs the
+ * app, so it is right whoever built it and wherever it ran.
+ *
+ * - **macOS** is pinned to Metal: left to choose, skiko falls back to OpenGL there and crashes on
+ *   some machines.
+ * - **Linux** is pinned to OpenGL, which is what guards it against a software fallback.
+ * - **Windows** is deliberately **not** pinned. It used to be forced to OpenGL, which is the only
+ *   reason a GPU driver fault landed in `WindowsOpenGLRedrawer.swapBuffers`; skiko's own Direct3D
+ *   default is the better first rung. Note skiko's `fallbackRenderApiQueue` covers *context
+ *   creation* only, so a fault during `swapBuffers` never triggers it — the default has to be right
+ *   rather than recoverable.
  *
  * [override] is the operator's escape hatch, taken verbatim when set, so a machine that does worse
  * on the platform default has a way out without waiting for a build.
@@ -57,7 +66,12 @@ private const val MILLIS_PER_SECOND_L = 1000L
 internal fun preferredRenderApi(osName: String, override: String?): String? {
     val requested = override?.trim()?.uppercase()
     if (!requested.isNullOrEmpty()) return requested
-    return if (osName.lowercase().contains("mac")) "METAL" else null
+    val name = osName.lowercase()
+    return when {
+        name.contains("mac") -> "METAL"
+        name.contains("win") -> null
+        else -> "OPENGL"
+    }
 }
 
 /** The port the single-instance lock binds, honouring the override a second dev instance sets. */

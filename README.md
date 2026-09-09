@@ -137,9 +137,10 @@ change how the app reports itself for update checks, crash reporting, or usage a
 
 #### Choosing the graphics backend
 
-The app pins Metal on macOS and otherwise lets skiko pick for the platform — Direct3D on Windows,
-OpenGL on Linux. If a machine's GPU driver fares badly on that choice — a window that freezes while
-presenting is the symptom to look for — name a different one:
+The app pins Metal on macOS and OpenGL on Linux, and leaves Windows to skiko, which picks Direct3D.
+The choice is made on the machine running the app, not the one that built it. If a machine's GPU
+driver fares badly on it — a window that freezes while presenting is the symptom to look for — name
+a different one:
 
 ```shell
 CHURCHPRESENTER_RENDER_API=OPENGL ./ChurchPresenter        # macOS/Linux

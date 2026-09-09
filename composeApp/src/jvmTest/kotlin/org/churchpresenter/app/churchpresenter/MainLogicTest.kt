@@ -45,12 +45,21 @@ class MainLogicTest {
     }
 
     @Test
-    fun `every other platform chooses for itself`() {
-        // Windows especially: it used to be pinned to OPENGL, which is the only reason a GPU driver
-        // fault landed in WindowsOpenGLRedrawer.swapBuffers rather than on skiko's Direct3D default.
+    fun `only Windows chooses for itself`() {
+        // It used to be pinned to OPENGL, which is the only reason a GPU driver fault landed in
+        // WindowsOpenGLRedrawer.swapBuffers rather than on skiko's Direct3D default.
         assertNull(preferredRenderApi("Windows 11", override = null))
-        assertNull(preferredRenderApi("Linux", override = null))
-        assertNull(preferredRenderApi("", override = null))
+        assertNull(preferredRenderApi("windows server 2022", override = null))
+    }
+
+    @Test
+    fun `Linux and anything unrecognised are pinned to OpenGL`() {
+        // The pin is what guards Linux against a software fallback. It used to be a jvmArgs line in
+        // build.gradle.kts, which pinned whatever the BUILD machine was; deciding it here means the
+        // artifact is right wherever it ends up running.
+        assertEquals("OPENGL", preferredRenderApi("Linux", override = null))
+        assertEquals("OPENGL", preferredRenderApi("FreeBSD", override = null))
+        assertEquals("OPENGL", preferredRenderApi("", override = null), "an unknown OS takes the safe backend")
     }
 
     @Test
