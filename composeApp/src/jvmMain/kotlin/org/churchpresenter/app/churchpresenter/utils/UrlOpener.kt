@@ -16,8 +16,28 @@ import java.net.URI
  * Every platform this ships to has a shell command that does work, so the fallback is to ask the
  * OS directly rather than to give up. [browse] and [exec] are parameters so the decision can be
  * tested without a desktop session; the one call that genuinely needs a display stays behind them.
+ *
+ * It also opens the OS's own settings URIs, which are not browser links at all — see [isWebUrl] for
+ * why those must not be handed to AWT.
  */
 object UrlOpener {
+
+    /**
+     * Whether AWT should be offered [url] at all.
+     *
+     * **Only a web link.** `Desktop.browse` means "open this in the browser", and it takes that
+     * literally: handed `x-apple.systempreferences:…`, macOS AWT passes the whole string to Safari,
+     * which opens a blank tab and asks *"Do you want to allow this website to open System
+     * Settings?"*. It then returns normally, so nothing looks like a failure and the shell fallback
+     * — which opens the pane directly — is never reached. That is the Camera privacy button doing
+     * nothing but opening a webpage; `ms-settings:` on Windows goes the same way through Edge.
+     *
+     * A scheme the OS routes itself belongs to the OS, so those skip AWT entirely.
+     */
+    internal fun isWebUrl(url: String): Boolean {
+        val scheme = url.substringBefore(':', missingDelimiterValue = "").lowercase()
+        return scheme == "http" || scheme == "https"
+    }
 
     /** Per-platform "open this URL" commands, tried in order after AWT declines. */
     internal fun fallbackCommands(osName: String, url: String): List<List<String>> {
@@ -53,7 +73,7 @@ object UrlOpener {
     ): Boolean {
         if (url.isBlank()) return false
         val opened = runCatching {
-            if (browseSupported()) {
+            if (isWebUrl(url) && browseSupported()) {
                 browse(URI(url))
                 true
             } else {

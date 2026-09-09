@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.app.churchpresenter.composables.MAC_CAMERA_PRIVACY_URI
+import org.churchpresenter.app.churchpresenter.composables.WINDOWS_CAMERA_PRIVACY_URI
 import java.net.URI
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -92,6 +94,54 @@ class UrlOpenerTest {
             UrlOpener.fallbackCommands("Windows 11", url),
         )
         assertEquals(listOf("xdg-open", url), UrlOpener.fallbackCommands("Linux", url).first())
+    }
+
+    @Test
+    fun `an OS settings uri never reaches AWT`() {
+        // Measured on macOS 26: `Desktop.browse` hands this to Safari, which opens a blank tab and
+        // asks "Do you want to allow this website to open System Settings?", then returns normally
+        // — so the button that exists for a blocked camera opened a webpage and nothing else.
+        val execed = mutableListOf<List<String>>()
+
+        val opened = UrlOpener.open(
+            MAC_CAMERA_PRIVACY_URI,
+            osName = "Mac OS X",
+            browseSupported = { true },
+            browse = { error("a settings uri is not a browser link") },
+            exec = { execed += it; true },
+        )
+
+        assertTrue(opened)
+        assertEquals(listOf(listOf("open", MAC_CAMERA_PRIVACY_URI)), execed)
+    }
+
+    @Test
+    fun `the windows settings uri takes the same route`() {
+        val execed = mutableListOf<List<String>>()
+
+        val opened = UrlOpener.open(
+            WINDOWS_CAMERA_PRIVACY_URI,
+            osName = "Windows 11",
+            browseSupported = { true },
+            browse = { error("a settings uri is not a browser link") },
+            exec = { execed += it; true },
+        )
+
+        assertTrue(opened)
+        assertEquals(
+            listOf(listOf("rundll32", "url.dll,FileProtocolHandler", WINDOWS_CAMERA_PRIVACY_URI)),
+            execed,
+        )
+    }
+
+    @Test
+    fun `only http and https are the browser's`() {
+        assertTrue(UrlOpener.isWebUrl("https://churchpresenter.org/wiki"))
+        assertTrue(UrlOpener.isWebUrl("http://192.168.1.4:8080"))
+        assertTrue(UrlOpener.isWebUrl("HTTPS://churchpresenter.org"), "the scheme is case-insensitive")
+        assertFalse(UrlOpener.isWebUrl(MAC_CAMERA_PRIVACY_URI))
+        assertFalse(UrlOpener.isWebUrl(WINDOWS_CAMERA_PRIVACY_URI))
+        assertFalse(UrlOpener.isWebUrl("churchpresenter.org"), "no scheme is not a web url")
     }
 
     @Test
