@@ -78,6 +78,31 @@ class PicturesViewModel(
     private val _selectedFolder = mutableStateOf<File?>(null)
     val selectedFolder: File? get() = _selectedFolder.value
 
+    /**
+     * The primary's own folder path when this folder came from [loadPictureFromRemote], against the
+     * [File] it was stored under.
+     *
+     * Kept as the string the primary sent, because a foreign path must not be re-separated by the
+     * local platform: `File("/Volumes/primary-only/Sunday")` renders as `\Volumes\primary-only\Sunday`
+     * on a Windows follower. Keyed by the [File] rather than held loose so it cannot outlive the
+     * selection it describes — a display path is only ever returned for the exact folder it was
+     * recorded against.
+     */
+    private val _remoteFolderPath = mutableStateOf<Pair<File, String>?>(null)
+
+    /**
+     * What the tab shows for the current folder: the primary's path verbatim when this folder is
+     * mirrored over Instance Link, the local absolute path otherwise. Null when nothing is selected.
+     *
+     * Read this rather than [selectedFolder] for anything the operator looks at. [selectedFolder]
+     * stays a [File] because it is also an identity — `stableFileId` derives the folder id this
+     * instance publishes to its own remote clients from it.
+     */
+    val selectedFolderDisplayPath: String?
+        get() = _selectedFolder.value?.let { folder ->
+            _remoteFolderPath.value?.takeIf { it.first == folder }?.second ?: folder.absolutePath
+        }
+
     private val _images: SnapshotStateList<File> = mutableStateListOf()
     val images: List<File> get() = _images
 
@@ -311,7 +336,9 @@ class PicturesViewModel(
      * differently, or not mounted at all, here). Downloads each image's bytes via [fetchBytes] into
      * a cache dir keyed by [folderId] and populates [_images] with the cached files — same public
      * state contract as [selectFolder], so thumbnails, [syncWithPresenter], and navigation all work
-     * unchanged afterward. [folderPath] is only used to build [_selectedFolder]'s display value.
+     * unchanged afterward. [folderPath] is the primary's own path: it is kept verbatim in
+     * [_remoteFolderPath] for [selectedFolderDisplayPath] to show, and the [File] built from it is
+     * an identity for [_selectedFolder], never a path to read from.
      * [presenterManager] — when non-null, explicitly re-synced after every downloaded image (not
      * just once): images arrive one at a time here (unlike the synchronous local-folder path), and
      * PicturesTab's own reactive sync effect only restarts on selectedImageIndex/presentingMode
@@ -327,7 +354,9 @@ class PicturesViewModel(
         fetchBytes: suspend (index: Int) -> ByteArray?
     ) {
         clearImages()
-        _selectedFolder.value = File(folderPath)
+        val displayFolder = File(folderPath)
+        _selectedFolder.value = displayFolder
+        _remoteFolderPath.value = displayFolder to folderPath
         val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
         cacheDir.mkdirs()
         remoteLoadJob = scope.launch {
@@ -368,6 +397,9 @@ class PicturesViewModel(
         watchJob = null
         remoteLoadJob?.cancel()
         remoteLoadJob = null
+        // The one choke point for a mirrored folder's display path: selectFolder and
+        // loadPictureFromRemote both come through here, so neither can inherit the other's.
+        _remoteFolderPath.value = null
         synchronized(imagesLock) { _images.clear() }
         _thumbnails.clear()
         _thumbnailFailures.clear()

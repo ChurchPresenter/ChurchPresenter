@@ -493,7 +493,8 @@ fun PresentationTab(
                 )
             }
             Text(
-                text = viewModel.selectedPresentation?.name ?: stringResource(Res.string.no_file_selected_presentation),
+                text = viewModel.selectedPresentationDisplayName
+                    ?: stringResource(Res.string.no_file_selected_presentation),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                 modifier = Modifier.weight(1f),
@@ -626,7 +627,7 @@ fun PresentationTab(
                 ) {
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPresentationFiles.pinned
-                        val isActive = viewModel.selectedPresentation?.absolutePath == path
+                        val isActive = viewModel.selectedPresentationDisplayPath == path
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                             Box(
                                 modifier = Modifier
