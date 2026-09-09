@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">Inaonyesha</string>
     <string name="stage_monitor_zone_count">Maeneo %1$d</string>
     <string name="stage_monitor_layout_stranded">Haionyeshwi katika mpangilio huu: %1$s</string>
+    <string name="stage_monitor_size_section">Ukubwa wa maeneo</string>
+    <string name="stage_monitor_zone_width">Upana (%)</string>
+    <string name="stage_monitor_zone_row_height">Kimo cha safu (%)</string>
+    <string name="stage_monitor_size_selected">Iliyochaguliwa</string>
+    <string name="stage_monitor_size_reset">Weka upya</string>
+    <string name="stage_monitor_size_hint">Buruta kigawanyi ili kugawana nafasi kati ya maeneo jirani. Kila safu ni jumla ya 100%.</string>
+    <string name="stage_monitor_size_even">Sawazisha</string>
+    <string name="stage_monitor_size_even_row">Safu hii</string>
+    <string name="stage_monitor_size_even_all">Vyote</string>
     <string name="stage_monitor_layout_classic">Klasiki (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Juu / chini</string>
     <string name="stage_monitor_layout_left_right">Kushoto / kulia</string>

@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">แสดง</string>
     <string name="stage_monitor_zone_count">%1$d โซน</string>
     <string name="stage_monitor_layout_stranded">ไม่แสดงในเลย์เอาต์นี้: %1$s</string>
+    <string name="stage_monitor_size_section">ขนาดโซน</string>
+    <string name="stage_monitor_zone_width">ความกว้าง (%)</string>
+    <string name="stage_monitor_zone_row_height">ความสูงแถว (%)</string>
+    <string name="stage_monitor_size_selected">ที่เลือก</string>
+    <string name="stage_monitor_size_reset">รีเซ็ต</string>
+    <string name="stage_monitor_size_hint">ลากเส้นแบ่งเพื่อแบ่งพื้นที่ระหว่างโซนข้างเคียง แต่ละแถวรวมกันเป็น 100%</string>
+    <string name="stage_monitor_size_even">ปรับให้เท่ากัน</string>
+    <string name="stage_monitor_size_even_row">แถวนี้</string>
+    <string name="stage_monitor_size_even_all">ทั้งหมด</string>
     <string name="stage_monitor_layout_classic">คลาสสิก (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">บน / ล่าง</string>
     <string name="stage_monitor_layout_left_right">ซ้าย / ขวา</string>

@@ -1738,6 +1738,15 @@
     <string name="stage_monitor_zone_shows">दिखाता है</string>
     <string name="stage_monitor_zone_count">%1$d ज़ोन</string>
     <string name="stage_monitor_layout_stranded">इस लेआउट में नहीं दिखता: %1$s</string>
+    <string name="stage_monitor_size_section">ज़ोन का आकार</string>
+    <string name="stage_monitor_zone_width">चौड़ाई (%)</string>
+    <string name="stage_monitor_zone_row_height">पंक्ति की ऊँचाई (%)</string>
+    <string name="stage_monitor_size_selected">चयनित</string>
+    <string name="stage_monitor_size_reset">रीसेट करें</string>
+    <string name="stage_monitor_size_hint">पड़ोसी ज़ोन के बीच जगह बाँटने के लिए विभाजक को खींचें। हर पंक्ति कुल 100% होती है।</string>
+    <string name="stage_monitor_size_even">बराबर करें</string>
+    <string name="stage_monitor_size_even_row">यह पंक्ति</string>
+    <string name="stage_monitor_size_even_all">सब कुछ</string>
     <string name="stage_monitor_layout_classic">क्लासिक (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">ऊपर / नीचे</string>
     <string name="stage_monitor_layout_left_right">बाएँ / दाएँ</string>

@@ -1518,6 +1518,15 @@
     <string name="stage_monitor_zone_shows">Afișează</string>
     <string name="stage_monitor_zone_count">%1$d zone</string>
     <string name="stage_monitor_layout_stranded">Nu se afișează în acest aranjament: %1$s</string>
+    <string name="stage_monitor_size_section">Dimensiune Zone</string>
+    <string name="stage_monitor_zone_width">Lățime (%)</string>
+    <string name="stage_monitor_zone_row_height">Înălțime Rând (%)</string>
+    <string name="stage_monitor_size_selected">Selectat</string>
+    <string name="stage_monitor_size_reset">Resetează</string>
+    <string name="stage_monitor_size_hint">Trage un separator pentru a împărți spațiul între zonele vecine. Fiecare rând însumează 100%.</string>
+    <string name="stage_monitor_size_even">Egalizează</string>
+    <string name="stage_monitor_size_even_row">Acest rând</string>
+    <string name="stage_monitor_size_even_all">Tot</string>
     <string name="stage_monitor_layout_classic">Clasic (2 / 3)</string>
     <string name="stage_monitor_layout_top_bottom">Sus / jos</string>
     <string name="stage_monitor_layout_left_right">Stânga / dreapta</string>

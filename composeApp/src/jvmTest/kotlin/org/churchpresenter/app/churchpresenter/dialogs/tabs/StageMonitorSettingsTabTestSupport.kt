@@ -228,6 +228,15 @@ internal const val CHORD_COLOUR_ZONES = 5
  * order it draws them. The left column carries no style editor at all — it is the layout picker,
  * the preview, the routing dropdowns and the transition card.
  */
+/**
+ * The two number fields of the Zone Size card — the selected zone's width and its row's height.
+ *
+ * They are composed before the zone editors, so every ordinal into [numberFields] on this tab is
+ * offset by them. Nothing else on the card is ordinal-addressed: the diagram is addressed by the
+ * zone name it draws.
+ */
+internal const val SIZE_FIELD_COUNT = 2
+
 internal object ZoneOrdinal {
     const val COUNT = 6
 

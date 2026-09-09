@@ -6,7 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import org.churchpresenter.settings.MetronomePosition
@@ -30,9 +30,16 @@ import kotlin.test.assertTrue
  */
 class StageMonitorSettingsTabPreviewTest {
 
-    /** The text of every non-clickable node, which is what the preview is built from. */
+    /**
+     * The text of every leaf the tab draws, read from the unmerged tree.
+     *
+     * Unmerged because a preview cell is clickable — that is how a zone is selected for resizing —
+     * so its three lines arrive as one merged node, and "Bible, Songs" would no longer be a value
+     * anything holds. Each `Text` is its own node here, which is what the preview is built from.
+     */
     private fun ComposeUiTest.previewTexts(): List<String> =
-        onAllNodes(!hasClickAction()).fetchSemanticsNodes(atLeastOneRootRequired = false)
+        onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Text), useUnmergedTree = true)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
             .mapNotNull { it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } }
 
     // ── Out of the box ──────────────────────────────────────────────────────────────────────────
