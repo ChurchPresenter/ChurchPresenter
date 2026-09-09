@@ -59,34 +59,7 @@ internal val SongStyleElement.onLookAheadSlide: Boolean
  * see [SongStyleElement.hasPosition] and [SongStyleElement.hasChordColor]. The others read the
  * default and drop it on write, so a control for them is hidden rather than silently ineffective.
  */
-<<<<<<< Updated upstream
-internal data class SongElementStyle(
-    val color: String = "#FFFFFF",
-    /** Blank means "whatever the app falls back to", which is what an unset face has always meant. */
-    val fontType: String = "",
-    val fontSize: Int = 70,
-    val bold: Boolean = false,
-    val italic: Boolean = false,
-    val underline: Boolean = false,
-    val strikethrough: Boolean = false,
-    val shadow: Boolean = false,
-    val shadowColor: String = "#000000",
-    val shadowSize: Int = 100,
-    val shadowOpacity: Int = 90,
-    val horizontalAlignment: String = Constants.CENTER,
-    val position: String = Constants.BELOW_VERSE,
-    val letterSpacing: Int = 0,
-    val wordSpacing: Int = 0,
-    val transform: String = Constants.TEXT_TRANSFORM_NONE,
-    val chordColor: String = "#4FD3E8",
-    /** Only meaningful where [SongStyleElement.hasAutoFit]; the rest read and write nothing. */
-    val autoFit: Boolean = true,
-    /** The line background and the border box, both drawn behind and around this element. */
-    val backdrop: TextBackdrop = TextBackdrop(),
-)
-=======
 internal typealias SongElementStyle = SongTextStyle
->>>>>>> Stashed changes
 
 /** What this song draws [element] with on [target]. */
 internal fun SongSettings.elementStyle(
