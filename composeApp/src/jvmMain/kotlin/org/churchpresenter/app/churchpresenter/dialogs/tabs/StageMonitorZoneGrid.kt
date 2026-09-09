@@ -137,10 +137,11 @@ internal fun ZoneGrid(
                             ZoneLabelCell(
                                 caption = zoneLabel(zone),
                                 text = contentsOf(zone),
-                                // "50%×67%" — the zone's own width, and the height of its row.
-                                // Unspaced: a cell can be a tenth of a row wide, and the two
-                                // spaces are what tip that line into wrapping and being clipped.
-                                size = "${width.roundToInt()}$percentSuffix\u00D7" +
+                                // "50% × 67%" — the zone's own width, and the height of its
+                                // row. Spaced, as the design has it; the cell auto-fits all three
+                                // of its lines together, so a narrow zone pays a smaller font
+                                // rather than a clipped line.
+                                size = "${width.roundToInt()}$percentSuffix \u00D7 " +
                                     "${sizes.rowHeights[rowIndex].roundToInt()}$percentSuffix",
                                 selected = cell.slot == selected,
                                 onClick = { onSelect(cell.slot) },

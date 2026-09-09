@@ -14,7 +14,6 @@ import churchpresenter.composeapp.generated.resources.bible_editing
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.presenter.languageOverridesStyle
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
@@ -33,19 +32,10 @@ internal fun SongEditingCard(
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
     target: SongStyleTarget,
-    /** Which language is being styled -- `0` is the primary, and what the rest inherit from. */
-    translation: Int,
-    onTranslationChange: (Int) -> Unit,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    val style = settings.songSettings.elementStyle(element, target, translation)
-    // A language that has not been given a look of its own has nothing here to edit: the controls
-    // would read the primary's values and write to a profile nothing reads. The row below offers the
-    // switch that changes that.
-    val editable = translation == 0 ||
-        element.translationElement == null ||
-        settings.songSettings.languageOverridesStyle(translation)
+    val style = settings.songSettings.elementStyle(element, target)
     val editingScroll = rememberScrollState()
     Box(modifier = modifier) {
         Column(
@@ -55,11 +45,6 @@ internal fun SongEditingCard(
                 .padding(end = SettingsScrollbarGutter),
         ) {
             SettingsSection(title = stringResource(Res.string.bible_editing)) {
-                SongLanguageRow(
-                    settings = settings,
-                    translation = translation,
-                    onTranslationChange = onTranslationChange,
-                )
                 SongElementRow(
                     settings = settings,
                     onSettingsChange = onSettingsChange,
@@ -67,45 +52,31 @@ internal fun SongEditingCard(
                     onElementChange = onElementChange,
                     target = target,
                 )
-                // Directly above the panel it governs, and below everything it does not: the rows
-                // between it and the language buttons all write the output's own settings whichever
-                // language is selected.
-                SongLanguageStyleSwitch(
-                    settings = settings,
-                    onSettingsChange = onSettingsChange,
-                    translation = translation,
-                )
                 // Keyed on what the panel is pointed at: the controls below are one set standing for
                 // ten stored profiles, and without this Compose keeps the subtree across a switch and
                 // hands each control the state of whichever control held its slot before.
-                key(element, target, translation) {
-                    if (editable) {
-                        SongTypographyPanel(
-                            element = element,
-                            style = style,
-                            onStyleChange = { edited ->
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        songSettings =
-                                            s.songSettings.withElementStyle(element, target, translation, edited),
-                                    )
-                                }
-                            },
-                            onReset = {
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        songSettings = s.songSettings.withElementStyle(
-                                            element,
-                                            target,
-                                            translation,
-                                            defaultSongElementStyle(element, target),
-                                        ),
-                                    )
-                                }
-                            },
-                            availableFonts = availableFonts,
-                        )
-                    }
+                key(element, target) {
+                    SongTypographyPanel(
+                        element = element,
+                        style = style,
+                        onStyleChange = { edited ->
+                            onSettingsChange { s ->
+                                s.copy(songSettings = s.songSettings.withElementStyle(element, target, edited))
+                            }
+                        },
+                        onReset = {
+                            onSettingsChange { s ->
+                                s.copy(
+                                    songSettings = s.songSettings.withElementStyle(
+                                        element,
+                                        target,
+                                        defaultSongElementStyle(element, target),
+                                    ),
+                                )
+                            }
+                        },
+                        availableFonts = availableFonts,
+                    )
                 }
             }
         }

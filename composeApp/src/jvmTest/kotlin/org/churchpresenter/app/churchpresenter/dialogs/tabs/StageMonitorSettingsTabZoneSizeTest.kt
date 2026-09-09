@@ -50,7 +50,7 @@ class StageMonitorSettingsTabZoneSizeTest {
 
     @Test
     fun `clicking a zone in the diagram points the fields at it`() = stageMonitorTab { _ ->
-        diagramCell(ZoneLabel.ZONE_4, "Clock", "28%×33%").performClick()
+        diagramCell(ZoneLabel.ZONE_4, "Clock", "28% × 33%").performClick()
 
         onNode(hasTextExactly("SELECTED", ZoneLabel.ZONE_4)).assertExists()
         assertNumberFieldShows(28, "Zone 4's width")
@@ -83,7 +83,7 @@ class StageMonitorSettingsTabZoneSizeTest {
 
     @Test
     fun `the width typed for a zone is the width of the zone that is selected`() = stageMonitorTab { get ->
-        diagramCell(ZoneLabel.ZONE_3, "Announcements", "36%×33%").performClick()
+        diagramCell(ZoneLabel.ZONE_3, "Announcements", "36% × 33%").performClick()
         retypeNumberField(showing = 36, to = 50)
 
         assertEquals(50f, get().widthOf(StageMonitorStyleZone.C))
@@ -96,8 +96,8 @@ class StageMonitorSettingsTabZoneSizeTest {
     fun `the diagram redraws with the size that was typed`() = stageMonitorTab { _ ->
         retypeNumberField(showing = 50, to = 70)
 
-        diagramCell(ZoneLabel.ZONE_1, "Bible, Songs", "70%×67%").assertExists()
-        diagramCell(ZoneLabel.ZONE_2, "Next", "30%×67%").assertExists()
+        diagramCell(ZoneLabel.ZONE_1, "Bible, Songs", "70% × 67%").assertExists()
+        diagramCell(ZoneLabel.ZONE_2, "Next", "30% × 67%").assertExists()
     }
 
     // ── Dragging a divider ──────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ class StageMonitorSettingsTabZoneSizeTest {
     @Test
     fun `even out this row splits the selected zone's row and leaves the other alone`() =
         stageMonitorTab { get ->
-            diagramCell(ZoneLabel.ZONE_3, "Announcements", "36%×33%").performClick()
+            diagramCell(ZoneLabel.ZONE_3, "Announcements", "36% × 33%").performClick()
             onNodeWithText("This row").performClick()
 
             assertEquals(listOf(33f, 33f, 34f), get().sizes().layoutSizes().rowCellWidths[1])
@@ -184,7 +184,7 @@ class StageMonitorSettingsTabZoneSizeTest {
     @Test
     fun `the size fields follow a layout that no longer draws the selected zone`() {
         stageMonitorTab(initial = AppSettings()) { get ->
-            diagramCell(ZoneLabel.ZONE_5, "—", "36%×33%").performClick()
+            diagramCell(ZoneLabel.ZONE_5, "—", "36% × 33%").performClick()
             chooseLayout(zoneCount = "2 zones", name = "Left / Right")
 
             onNode(hasTextExactly("SELECTED", ZoneLabel.ZONE_1)).assertExists()

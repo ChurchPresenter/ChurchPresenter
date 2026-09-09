@@ -2037,8 +2037,8 @@
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Not shown on this layout: %1$s</string>
     <string name="stage_monitor_size_section">Zone Size</string>
-    <string name="stage_monitor_zone_width">Width (%)</string>
-    <string name="stage_monitor_zone_row_height">Row Height (%)</string>
+    <string name="stage_monitor_zone_width">Width %</string>
+    <string name="stage_monitor_zone_row_height">Row H %</string>
     <string name="stage_monitor_size_selected">Selected</string>
     <string name="stage_monitor_size_reset">Reset</string>
     <string name="stage_monitor_size_hint">Drag a divider to trade space between neighbors. Each row shares 100%.</string>
