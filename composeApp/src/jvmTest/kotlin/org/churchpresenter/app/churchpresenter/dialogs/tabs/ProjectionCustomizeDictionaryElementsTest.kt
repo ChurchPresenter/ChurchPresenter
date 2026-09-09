@@ -303,7 +303,10 @@ class ProjectionCustomizeDictionaryElementsTest {
             retypeNumberField(51, 24)
 
             val stored = get().stored()
-            assertEquals(listOf(72, 30, 24), listOf(stored.wordFontSize, stored.definitionFontSize, stored.kjvUsageFontSize))
+            assertEquals(
+                listOf(72, 30, 24),
+                listOf(stored.wordFontSize, stored.definitionFontSize, stored.kjvUsageFontSize),
+            )
             assertEquals(37, stored.referenceFontSize, "the reference was never opened and must be untouched")
         }
     }
