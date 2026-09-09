@@ -53,7 +53,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
-import churchpresenter.composeapp.generated.resources.content_bible_translations_all_selected
 import churchpresenter.composeapp.generated.resources.content_bible_translations_count_enabled
 import churchpresenter.composeapp.generated.resources.content_bible_translations_more
 import churchpresenter.composeapp.generated.resources.song_language_primary
@@ -179,6 +178,18 @@ internal fun ContentTranslationCell(
     enabledFormat: String,
     /** The grey note under the list, explaining what picking more than one does. */
     footerText: String,
+    /** What the trigger reads when every choice is ticked -- "All Bibles", "All Songs". */
+    allSelectedText: String,
+    /**
+     * Whether a multiple selection names its choices outright ("1, 2, 4") rather than naming the
+     * first and counting the rest ("1", then "+2 more" underneath).
+     *
+     * Song languages are single digits and there are at most four, so the whole selection fits in
+     * the space the count occupied and says more than the count did -- "1, 2, 4" is the answer the
+     * operator came for, where "+2 more" makes them open the menu to find out which two. A Bible
+     * stack is file stems like `kjv1769`, which do not fit and are what the count is there for.
+     */
+    listSelectedCodes: Boolean = false,
     /** The configured stack, in order; selection indices below refer to this order. */
     translations: List<TranslationChoiceDisplay>,
     showing: Boolean,
@@ -227,12 +238,15 @@ internal fun ContentTranslationCell(
     val allTranslationsSelected = selectionCount > 1 && selectionCount == translations.size
     val primaryLabel = when {
         primaryInfo == null -> ""
-        allTranslationsSelected -> stringResource(Res.string.content_bible_translations_all_selected)
+        allTranslationsSelected -> allSelectedText
+        listSelectedCodes -> tickedPositions.mapNotNull { translations.getOrNull(it)?.code }.joinToString(", ")
         else -> primaryInfo.code
     }
     val secondaryLabel = when {
         primaryInfo == null -> ""
         allTranslationsSelected -> stringResource(Res.string.content_bible_translations_count_enabled, selectionCount)
+        // The codes above already name every one of them; a count under them would restate it.
+        listSelectedCodes -> ""
         selectionCount > 1 -> stringResource(Res.string.content_bible_translations_more, selectionCount - 1)
         else -> primaryInfo.portion
     }

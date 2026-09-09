@@ -834,16 +834,16 @@ class SongsViewModel(
         val query = _searchQuery.value.trim()
         if (query.isNotEmpty()) {
             filtered = when (_filterType.value) {
-                Constants.CONTAINS -> filtered.filter {
-                    "${it.number}. ${it.title}".contains(query, ignoreCase = true)
+                Constants.CONTAINS -> filtered.filter { song ->
+                    song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) }
                 }
-                Constants.STARTS_WITH -> filtered.filter {
-                    it.title.startsWith(query, ignoreCase = true) ||
-                    it.number.startsWith(query, ignoreCase = true)
+                Constants.STARTS_WITH -> filtered.filter { song ->
+                    song.number.startsWith(query, ignoreCase = true) ||
+                        song.searchTitles().any { it.startsWith(query, ignoreCase = true) }
                 }
-                Constants.EXACT_MATCH -> filtered.filter {
-                    it.title.trim().equals(query, ignoreCase = true) ||
-                    it.number.trim().equals(query, ignoreCase = true)
+                Constants.EXACT_MATCH -> filtered.filter { song ->
+                    song.number.trim().equals(query, ignoreCase = true) ||
+                        song.searchTitles().any { it.trim().equals(query, ignoreCase = true) }
                 }
                 else -> filtered
             }
@@ -872,6 +872,20 @@ class SongsViewModel(
             }
         }
     }
+
+    /**
+     * Every name this song can be found by: the primary title and each translation's.
+     *
+     * A bilingual song is one song with several names, and the list only ever shows the primary --
+     * so an operator who knows a song by the name half the room sings could not find it by typing
+     * that name. All three filter types match against every one of them; the number is still the
+     * number, which no translation has its own of.
+     *
+     * Blanks are dropped rather than matched: a language that carries lyrics but no title of its
+     * own would otherwise make an empty query-shaped match on the [Constants.EXACT_MATCH] path.
+     */
+    private fun SongItem.searchTitles(): List<String> =
+        (listOf(title) + extraTranslations().map { it.title }).filter { it.isNotBlank() }
 
     /** [items] in the order [column] asks for; the sort itself, without the selection bookkeeping. */
     private fun sortedBy(column: String, items: List<SongItem>): List<SongItem> = when (column) {

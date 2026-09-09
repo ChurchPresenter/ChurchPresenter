@@ -57,7 +57,6 @@ internal fun SongEditingCard(
             SettingsSection(title = stringResource(Res.string.bible_editing)) {
                 SongLanguageRow(
                     settings = settings,
-                    onSettingsChange = onSettingsChange,
                     translation = translation,
                     onTranslationChange = onTranslationChange,
                 )
@@ -67,6 +66,14 @@ internal fun SongEditingCard(
                     element = element,
                     onElementChange = onElementChange,
                     target = target,
+                )
+                // Directly above the panel it governs, and below everything it does not: the rows
+                // between it and the language buttons all write the output's own settings whichever
+                // language is selected.
+                SongLanguageStyleSwitch(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    translation = translation,
                 )
                 // Keyed on what the panel is pointed at: the controls below are one set standing for
                 // ten stored profiles, and without this Compose keeps the subtree across a switch and

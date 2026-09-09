@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.content_bible_translations_all_selected
 import churchpresenter.composeapp.generated.resources.content_bible_translations_enabled
 import churchpresenter.composeapp.generated.resources.content_bible_translations_footer
 import churchpresenter.composeapp.generated.resources.content_bible_translations_header
@@ -57,6 +58,7 @@ import churchpresenter.composeapp.generated.resources.content_outputs_quick_sele
 import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
 import churchpresenter.composeapp.generated.resources.content_outputs_section_content
 import churchpresenter.composeapp.generated.resources.content_outputs_select_all
+import churchpresenter.composeapp.generated.resources.content_song_languages_all_selected
 import churchpresenter.composeapp.generated.resources.content_song_languages_enabled
 import churchpresenter.composeapp.generated.resources.content_song_languages_footer
 import churchpresenter.composeapp.generated.resources.content_song_languages_header
@@ -409,6 +411,7 @@ internal fun ContentOutputsDialog(
                         headerText = stringResource(Res.string.content_bible_translations_header),
                         enabledFormat = stringResource(Res.string.content_bible_translations_enabled),
                         footerText = stringResource(Res.string.content_bible_translations_footer),
+                        allSelectedText = stringResource(Res.string.content_bible_translations_all_selected),
                         translations = translationDisplays,
                         showing = assignment.showBible,
                         selected = assignment.bibleTranslations,
@@ -439,6 +442,11 @@ internal fun ContentOutputsDialog(
                         headerText = stringResource(Res.string.content_song_languages_header),
                         enabledFormat = stringResource(Res.string.content_song_languages_enabled),
                         footerText = stringResource(Res.string.content_song_languages_footer),
+                        allSelectedText = stringResource(Res.string.content_song_languages_all_selected),
+                        // Four single digits fit where the Bible's "+N more" count goes, so the
+                        // trigger names the languages themselves rather than making the operator
+                        // open the menu to find out which ones are on.
+                        listSelectedCodes = true,
                         translations = songLanguageChoices,
                         showing = assignment.showSongs,
                         selected = assignment.songTranslations,

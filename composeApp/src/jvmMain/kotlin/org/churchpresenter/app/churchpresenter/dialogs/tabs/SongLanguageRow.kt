@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +20,6 @@ import churchpresenter.composeapp.generated.resources.screen_lang_language_2
 import churchpresenter.composeapp.generated.resources.screen_lang_language_n
 import churchpresenter.composeapp.generated.resources.song_language_scope_label
 import churchpresenter.composeapp.generated.resources.song_translation_follows_primary
-import churchpresenter.composeapp.generated.resources.song_translation_label
 import churchpresenter.composeapp.generated.resources.song_translation_own_style
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
@@ -36,7 +34,6 @@ import org.churchpresenter.settings.withTranslationSettings
 import org.jetbrains.compose.resources.stringResource
 
 private val LANGUAGE_BUTTON_WIDTH = 74.dp
-private val NAME_FIELD_WIDTH = 190.dp
 
 /** What language [position] is called on this tab when nobody has named it. */
 @Composable
@@ -48,31 +45,33 @@ internal fun songLanguageName(position: Int, label: String): String = when {
 }
 
 /**
- * Which language the styling controls below are pointed at, what it is called, and whether it has a
- * look of its own.
+ * Which language the styling controls below are pointed at, and what it is called.
  *
  * The third axis of this tab, beside the output and the element. It only exists because a song may
  * now be sung in up to [MAX_SONG_TRANSLATIONS] languages at once, and a church that puts Ukrainian
  * beside English may well want the Cyrillic a size smaller.
  *
- * Language 1 has no switch: it *is* the look the others inherit, so there is nothing for it to
- * override.
+ * The switch that gives a language a look of its own is [SongLanguageStyleSwitch], and it is drawn
+ * at the far end of the card rather than here -- see its own note.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SongLanguageRow(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     translation: Int,
     onTranslationChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val songSettings = settings.songSettings
-    val stored = if (translation > 0) songSettings.translationSettings(translation - 1) else null
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    // The bottom padding is the gap to the element tabs underneath. `SettingsSection` stacks its
+    // children flush, so without it this row's buttons and that row's buttons share an edge and
+    // read as one two-line control rather than two separate ones.
+    Column(
+        modifier = modifier.fillMaxWidth().padding(bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         // Flowing rather than a hard row, for the same reason the chunk/language row above it
-        // flows: four language buttons plus a name field is wider than a narrow pane, and a `Row`
-        // clips rather than wraps.
+        // flows: four language buttons are wider than a narrow pane, and a `Row` clips rather than
+        // wraps.
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             itemVerticalAlignment = Alignment.CenterVertically,
@@ -91,58 +90,68 @@ internal fun SongLanguageRow(
                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
                 )
             }
-            if (stored != null) {
-                OutlinedTextField(
-                    value = stored.label,
-                    onValueChange = { value ->
-                        onSettingsChange { s ->
-                            s.copy(
-                                songSettings = s.songSettings.withTranslationSettings(translation - 1) {
-                                    it.copy(label = value)
-                                },
-                            )
-                        }
-                    },
-                    label = { Text(stringResource(Res.string.song_translation_label)) },
-                    singleLine = true,
-                    modifier = Modifier.width(NAME_FIELD_WIDTH),
-                )
-            }
         }
-        if (stored != null) {
-            LabeledCheckbox(
-                checked = stored.overrideStyle,
-                label = stringResource(Res.string.song_translation_own_style),
-                controlModifier = Modifier.size(24.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                onCheckedChange = { on ->
-                    onSettingsChange { s ->
-                        s.copy(
-                            songSettings = s.songSettings.withTranslationSettings(translation - 1) { current ->
-                                if (!on) current.copy(overrideStyle = false)
-                                // Seeded from what is already on screen, so switching this on is not
-                                // a jump to the defaults -- the operator starts from the look they
-                                // have, and changes the one thing they came here to change.
-                                else current.seededFrom { perElement, lowerThird ->
-                                    s.songSettings.elementStyle(
-                                        perElement.styleElement,
-                                        if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
-                                    )
-                                }
-                            },
-                        )
-                    }
-                },
+    }
+}
+
+/**
+ * The switch that gives the selected language a look of its own, and the typography panel it opens.
+ *
+ * Drawn at the far end of the card, immediately above that panel, rather than up beside the language
+ * buttons where it started. Between the two sit the element tabs, the chunk control and the Show
+ * row, and every one of those writes the output's own settings whichever language is selected -- so
+ * a switch above them read as governing them, and ticking it appeared to do nothing. It governs
+ * exactly one thing, and now it sits on top of it.
+ *
+ * Nothing at all for language 1: it *is* the look the others inherit, so there is nothing for it to
+ * override.
+ */
+@Composable
+internal fun SongLanguageStyleSwitch(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    translation: Int,
+    modifier: Modifier = Modifier,
+) {
+    if (translation <= 0) return
+    val stored = settings.songSettings.translationSettings(translation - 1)
+    Column(modifier = modifier.fillMaxWidth()) {
+        HorizontalDivider(
+            modifier = Modifier.padding(bottom = 6.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        )
+        LabeledCheckbox(
+            checked = stored.overrideStyle,
+            label = stringResource(Res.string.song_translation_own_style),
+            controlModifier = Modifier.size(24.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            onCheckedChange = { on ->
+                onSettingsChange { s ->
+                    s.copy(
+                        songSettings = s.songSettings.withTranslationSettings(translation - 1) { current ->
+                            if (!on) current.copy(overrideStyle = false)
+                            // Seeded from what is already on screen, so switching this on is not
+                            // a jump to the defaults -- the operator starts from the look they
+                            // have, and changes the one thing they came here to change.
+                            else current.seededFrom { perElement, lowerThird ->
+                                s.songSettings.elementStyle(
+                                    perElement.styleElement,
+                                    if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
+                                )
+                            }
+                        },
+                    )
+                }
+            },
+        )
+        if (!stored.overrideStyle) {
+            Text(
+                text = stringResource(Res.string.song_translation_follows_primary),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 4.dp),
             )
-            if (!stored.overrideStyle) {
-                Text(
-                    text = stringResource(Res.string.song_translation_follows_primary),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 4.dp),
-                )
-            }
         }
     }
 }

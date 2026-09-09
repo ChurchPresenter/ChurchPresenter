@@ -417,21 +417,25 @@ internal fun EditSongContent(
                             weight = 2.4f,
                             emphasis = true,
                         )
-                        // Follows the open pane, so editing language three's lyrics puts language
-                        // three's title beside them. Parked on the first language while the primary
-                        // pane is open, which is where it always was.
-                        val titleSlot = (pane - 1).coerceAtLeast(0)
-                        FieldCard(
-                            label = if (titleSlot == 0) stringResource(Res.string.secondary_title)
-                            else stringResource(Res.string.song_translation_title, titleSlot + 2),
-                            value = editedTranslations[titleSlot].title,
-                            onValueChange = { value ->
-                                editedTranslations = editedTranslations.mapIndexed { index, draft ->
-                                    if (index == titleSlot) draft.copy(title = value) else draft
-                                }
-                            },
-                            weight = 1f,
-                        )
+                        // Every language that has a pane gets its own card, rather than one card
+                        // following the open pane: a song's titles are read together -- checking
+                        // that the four languages are the same song is the point of having them --
+                        // and a card that swaps its contents as the lyrics pane changes shows one
+                        // and hides the rest. A monolingual song still draws the single Secondary
+                        // card it always did, since it has exactly one pane.
+                        repeat(visibleTranslations) { slot ->
+                            FieldCard(
+                                label = if (slot == 0) stringResource(Res.string.secondary_title)
+                                else stringResource(Res.string.song_translation_title, slot + 2),
+                                value = editedTranslations[slot].title,
+                                onValueChange = { value ->
+                                    editedTranslations = editedTranslations.mapIndexed { index, draft ->
+                                        if (index == slot) draft.copy(title = value) else draft
+                                    }
+                                },
+                                weight = 1f,
+                            )
+                        }
                         SongbookCard(
                             songbook = editedSongbook,
                             songbooks = songbooks,
@@ -716,7 +720,10 @@ private val CardShape = RoundedCornerShape(9.dp)
 @Composable
 private fun FieldValueStyle(emphasis: Boolean = false) = MaterialTheme.typography.bodyMedium.copy(
     color = MaterialTheme.colorScheme.onSurface,
-    fontSize = if (emphasis) 15.sp else 13.5.sp,
+    // One size for every card, emphasis carried by the weight alone. The song title used to be set
+    // two points larger, and it shares its row with up to three translation titles and the song
+    // book -- five cards where there used to be three, and the largest text in the narrowest space.
+    fontSize = 13.5.sp,
     fontWeight = if (emphasis) FontWeight.SemiBold else FontWeight.Normal,
     lineHeight = 19.sp,
 )

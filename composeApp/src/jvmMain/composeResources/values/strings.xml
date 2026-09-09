@@ -1041,6 +1041,7 @@
     <string name="content_song_languages_header">Song Languages</string>
     <string name="content_song_languages_enabled">%1$d of %2$d languages enabled</string>
     <string name="content_song_languages_footer">Multiple languages show side by side or stacked, as set in Song settings.</string>
+    <string name="content_song_languages_all_selected">All Songs</string>
     <string name="content_bible_translation_portion_ot_nt">OT+NT</string>
     <string name="content_bible_translation_portion_nt">NT</string>
     <string name="content_bible_translation_portion_ot">OT</string>
