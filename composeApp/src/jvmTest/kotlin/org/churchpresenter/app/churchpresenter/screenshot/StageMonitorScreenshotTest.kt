@@ -4,7 +4,6 @@ package org.churchpresenter.app.churchpresenter.screenshot
 
 import java.time.LocalTime
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Canvas
@@ -14,8 +13,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.runComposeUiTest
-import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
