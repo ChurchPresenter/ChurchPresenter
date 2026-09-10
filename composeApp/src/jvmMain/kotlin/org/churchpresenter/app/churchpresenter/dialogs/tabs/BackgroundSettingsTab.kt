@@ -112,6 +112,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
+import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
@@ -215,6 +216,10 @@ fun BackgroundSettingsTab(
                 ) {
                     BackgroundStagePreview(
                         config = backgrounds.resolvedConfigFor(scope),
+                        // Resolved separately: `resolvedConfigFor` walks the *band's* chain, and
+                        // the wash has one of its own — a surface with a picture of its own is not
+                        // inheriting a band, but its wash may still be coming from the Default.
+                        aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
                         coverage = scope.coverage,
                         bandFraction = bandFraction,
                         stageAspect = outputAspect,
@@ -313,6 +318,7 @@ private fun BackgroundScopeRow(
         ) {
             BackgroundCoverageFill(
                 config = backgrounds.resolvedConfigFor(scope),
+                aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
                 coverage = scope.coverage,
                 bandFraction = bandFraction,
                 modifier = Modifier.fillMaxSize()
@@ -458,6 +464,8 @@ private fun InheritToggleButton(inheriting: Boolean, onClick: () -> Unit) {
 @Composable
 private fun BackgroundStagePreview(
     config: BackgroundConfig,
+    /** The wash over the area above the band, already resolved; null where nothing is drawn. */
+    aboveBand: Color?,
     coverage: BackgroundCoverage,
     bandFraction: Float,
     stageAspect: Float,
@@ -482,6 +490,7 @@ private fun BackgroundStagePreview(
         ) {
             BackgroundCoverageFill(
                 config = config,
+                aboveBand = aboveBand,
                 coverage = coverage,
                 bandFraction = bandFraction,
                 // Clipped to TvScreenBox's own screen corner radius. Without it a picture's square
@@ -545,6 +554,7 @@ private fun BackgroundStagePreview(
 @Composable
 private fun BackgroundCoverageFill(
     config: BackgroundConfig,
+    aboveBand: Color?,
     coverage: BackgroundCoverage,
     bandFraction: Float,
     modifier: Modifier = Modifier,
@@ -552,7 +562,15 @@ private fun BackgroundCoverageFill(
 ) {
     Column(modifier) {
         if (coverage == BackgroundCoverage.BAND) {
-            Box(Modifier.fillMaxWidth().weight(1f - bandFraction))
+            // Not empty any more when the surface washes the area above its band: the operator has
+            // to be able to see that choice here, since it is the one part of a lower third the
+            // band below it cannot show.
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f - bandFraction)
+                    .then(if (aboveBand != null) Modifier.background(aboveBand) else Modifier)
+            )
         }
         Box(
             modifier = Modifier

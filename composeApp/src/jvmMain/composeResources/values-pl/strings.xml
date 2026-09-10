@@ -2506,6 +2506,9 @@
     <string name="background_image_file">Plik obrazu</string>
     <string name="background_video_file">Plik wideo</string>
     <string name="background_opacity_caption">Przezroczystość</string>
+    <string name="background_above_band_caption">Nad paskiem</string>
+    <string name="background_above_band_fill">Kolor wypełnienia</string>
+    <string name="background_above_band_opacity">Przezroczystość wypełnienia</string>
     <string name="quick_background_title">Szybkie tła</string>
     <string name="quick_background_reset">Powrót do normalnego</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

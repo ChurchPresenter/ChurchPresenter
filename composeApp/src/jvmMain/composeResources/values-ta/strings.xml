@@ -2519,6 +2519,9 @@
     <string name="background_image_file">படக் கோப்பு</string>
     <string name="background_video_file">காணொளிக் கோப்பு</string>
     <string name="background_opacity_caption">ஒளிபுகாநிலை</string>
+    <string name="background_above_band_caption">பட்டைக்கு மேலே</string>
+    <string name="background_above_band_fill">நிரப்பு நிறம்</string>
+    <string name="background_above_band_opacity">நிரப்பு ஒளிபுகாநிலை</string>
     <string name="quick_background_title">விரைவுப் பின்னணிகள்</string>
     <string name="quick_background_reset">வழக்கத்திற்குத் திரும்பு</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

@@ -2514,6 +2514,9 @@
     <string name="background_image_file">فایل تصویر</string>
     <string name="background_video_file">فایل ویدیو</string>
     <string name="background_opacity_caption">کدری</string>
+    <string name="background_above_band_caption">بالای نوار</string>
+    <string name="background_above_band_fill">رنگ پرکننده</string>
+    <string name="background_above_band_opacity">کدری پرکننده</string>
     <string name="quick_background_title">پس‌زمینه‌های سریع</string>
     <string name="quick_background_reset">بازگشت به حالت عادی</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

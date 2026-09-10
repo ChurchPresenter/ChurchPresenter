@@ -362,6 +362,25 @@ class PresenterLowerThirdScreenshotTest {
         bibleBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT)),
     )
 
+    /**
+     * A wash over the two thirds the band does not cover — the one state in this suite where the
+     * output draws anything above the band at all. Every other image here leaves it black, which is
+     * what a lower third has always done and still does until a wash is set.
+     */
+    @Test
+    fun `a wash above the scripture band`() = shootBible(
+        "bible_above_band_colour",
+        listOf(verse()),
+        bibleSettings().copy(
+            backgroundSettings = BackgroundSettings(
+                bibleLowerThirdBackground = BackgroundConfig(backgroundColor = "#1B2A5B"),
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#2E6B4F",
+                defaultLowerThirdAboveBandOpacity = 0.75f,
+            ),
+        ),
+    )
+
     @Test
     fun `the scripture band over a photograph`() = shootBible(
         "bible_background_image",

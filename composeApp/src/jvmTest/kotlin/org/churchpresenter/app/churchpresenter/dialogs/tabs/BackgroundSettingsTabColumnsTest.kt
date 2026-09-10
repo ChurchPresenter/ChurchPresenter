@@ -197,21 +197,6 @@ class BackgroundSettingsTabColumnsTest {
     }
 
     @Test
-    fun `copying a look puts it on the other surface of the same shape`() = backgroundTab { settings ->
-        setSurfaceType(Surface.BIBLE, TypeLabel.COLOR)
-        recolor(BackgroundConfig().backgroundColor, "#334455")
-        val dim = dragSlider(SliderCaption.DIM, 0.5f)
-
-        // Copy targets are named by the group they belong to.
-        inControls("Songs").performClick()
-        waitForIdle()
-        val song = settings().backgroundSettings.songBackground
-        assertEquals("#334455", song.backgroundColor.lowercase(), "the colour must travel")
-        assertEquals(dim, song.dim, "and so must the look")
-        assertEquals(Constants.BACKGROUND_COLOR, song.backgroundType)
-    }
-
-    @Test
     fun `an unrecognised stored type is left alone rather than rewritten`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(

@@ -74,11 +74,16 @@ class ProjectionCustomizeBackgroundGradientTest {
     fun `a content surface can fall back to the default above it`() {
         projectionTab(output()) { _ ->
             openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE, override = false)
-            // Two nodes carry it: the Default *chip* in the strip, and the Default *segment* in the
-            // type row this test is about. Counted rather than singled out, because both are real.
             assertTrue(
-                onAllNodesWithText("Default").fetchSemanticsNodes().size >= 2,
-                "the type row must offer the surface above as well as the chip naming it",
+                onAllNodesWithText("Default").fetchSemanticsNodes().isNotEmpty(),
+                "the type row must offer the surface above",
+            )
+            // And the chip beside it names *which* Default that is. This output is a band, so the
+            // surface above it is the lower-third Default — the chip used to read a bare "Default"
+            // because it asked for the full-screen scope no matter what the output was.
+            assertTrue(
+                onAllNodesWithText("Default Lower Third").fetchSemanticsNodes().isNotEmpty(),
+                "the chip must name the lower-third surface it writes",
             )
         }
     }

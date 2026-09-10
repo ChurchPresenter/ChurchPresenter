@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Datoteka slike</string>
     <string name="background_video_file">Datoteka videa</string>
     <string name="background_opacity_caption">Prozirnost</string>
+    <string name="background_above_band_caption">Iznad trake</string>
+    <string name="background_above_band_fill">Boja ispune</string>
+    <string name="background_above_band_opacity">Prozirnost ispune</string>
     <string name="quick_background_title">Brze pozadine</string>
     <string name="quick_background_reset">Natrag na normalno</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

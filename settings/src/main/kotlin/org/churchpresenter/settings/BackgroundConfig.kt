@@ -30,5 +30,23 @@ data class BackgroundConfig(
      * dim and blur were: these are same-typed parameters, and re-ordering them would silently
      * change the meaning of any positional construction.
      */
-    val camera: CameraDeviceRef = CameraDeviceRef()
+    val camera: CameraDeviceRef = CameraDeviceRef(),
+    /**
+     * What covers the part of the output a lower-third band does *not* — the two thirds above it.
+     *
+     * Shaped like [backgroundType] and read the same way, because it is the same decision one
+     * rectangle up: `Default` defers to the surface above, `Color` paints [aboveBandColor] at
+     * [aboveBandOpacity], `Transparent` paints nothing. Only those three — the band is where a
+     * picture, a clip or a camera belongs, and the area above it is a flat wash or nothing.
+     *
+     * `Default` is the out-of-the-box value, so Bible and Songs follow the Default Lower Third
+     * until they are given a wash of their own. **The chain ends transparent**, which is what
+     * every lower third did before this existed and what a Browser Source or NDI alpha output
+     * needs in order to key.
+     *
+     * All three are meaningless on a full-screen surface, which paints the whole output already.
+     */
+    val aboveBandType: String = Constants.BACKGROUND_DEFAULT,
+    val aboveBandColor: String = "#000000",
+    val aboveBandOpacity: Float = 1.0f,
 )

@@ -2514,6 +2514,9 @@
     <string name="background_image_file">ملف الصورة</string>
     <string name="background_video_file">ملف الفيديو</string>
     <string name="background_opacity_caption">العتامة</string>
+    <string name="background_above_band_caption">فوق الشريط</string>
+    <string name="background_above_band_fill">لون التعبئة</string>
+    <string name="background_above_band_opacity">عتامة التعبئة</string>
     <string name="quick_background_title">خلفيات سريعة</string>
     <string name="quick_background_reset">العودة إلى الوضع الطبيعي</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
