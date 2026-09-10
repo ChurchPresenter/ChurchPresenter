@@ -771,6 +771,8 @@
     <string name="media_now_presenting">Se prezintă acum pe ecran</string>
     <string name="media_seek_backward">Derulare Înapoi 10s</string>
     <string name="media_seek_forward">Derulare Înainte 10s</string>
+    <string name="media_loop_count">Bucle</string>
+    <string name="media_loop_count_tooltip">De câte ori se repetă (0 = la infinit)</string>
     <string name="media_preview">Previzualizare</string>
     <string name="media_volume">Volum</string>
     <string name="media_mute">Silențios</string>

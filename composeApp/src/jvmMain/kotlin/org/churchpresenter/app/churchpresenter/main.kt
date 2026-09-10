@@ -14,19 +14,15 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import org.jetbrains.skia.Image
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +34,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
@@ -172,7 +169,6 @@ import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val MILLIS_PER_MINUTE = 60_000L
-private const val CRASH_REPORT_RETRY_MS = 15_000L
 private const val OPTIONS_TAB_BACKGROUND = 3
 private const val UPDATE_CHECK_DELAY_MS = 5_000L
 private const val STORY_PROMPT_DELAY_MS = 8_000L
@@ -235,8 +231,9 @@ private fun bundleDefaultBible(settings: AppSettings) {
 }
 
 fun main() {
-    if (shouldForceMetalRenderer(System.getProperty("os.name", ""))) {
-        System.setProperty("skiko.renderApi", "METAL")
+    // Before anything else: skiko latches this on its first SkiaLayer, so a later set is ignored.
+    preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
+        System.setProperty("skiko.renderApi", it)
     }
     if (!acquireSingleInstanceLock()) {
         System.err.println("ChurchPresenter is already running.")
@@ -272,6 +269,12 @@ fun main() {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    // Which renderer was live is the first thing a GPU driver crash needs and the one thing the
+    // report never carried. "default" means the platform's own choice, which is not the same fact
+    // as any named API — a report from a machine on Direct3D-by-default and one pinned to it are
+    // different evidence. Set here rather than with the availability tags below: a render fault
+    // can arrive before those run.
+    CrashReporter.setTag("render.api", System.getProperty("skiko.renderApi") ?: "default")
 
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 
@@ -1339,33 +1342,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
                                 onOpenStoryPrompt = { showStoryPrompt = true },
                             )
-                            if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
-                                var showBanner by remember { mutableStateOf(true) }
-                                if (showBanner) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(
-                                            MaterialTheme.colorScheme.errorContainer
-                                        ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text =
-                                                "Video backgrounds disabled after ${CrashReporter.consecutiveCrashes}" +
-                                                    " consecutive crashes.  [Re-enable]  [Dismiss]",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onErrorContainer,
-                                            modifier = Modifier.onPreviewKeyEvent {
-                                                showBanner = false; true
-                                            }
-                                        )
-                                    }
-                                    LaunchedEffect(Unit) {
-                                        delay(CRASH_REPORT_RETRY_MS)
-                                        showBanner = false
-                                    }
-                                }
-                            }
-
                             val instanceLinkStatus = instanceLinkViewModel.connectionStatus.collectAsState().value
                             val instanceLinkIsControllerConnected =
                                 isControllerConnected(instanceLinkStatus, appSettings.instanceLink.role)
@@ -1611,6 +1587,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 companionSatelliteViewModel = companionSatelliteViewModel,
                                 onRequestDeveloperMenuUnlock = { developerMenuUnlocked = true }
                             )
+                            // After MainDesktop, not before it: siblings in a Box draw in order and
+                            // MainDesktop's root is an opaque fillMaxSize surface, so a banner
+                            // emitted above this line is painted over and never seen.
+                            CrashGuardBanner(Modifier.align(Alignment.TopCenter))
                             OptionsDialog(
                                 isVisible = showOptionsDialog,
                                 initialTab = optionsDialogInitialTab,

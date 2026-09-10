@@ -514,18 +514,24 @@ compose.desktop {
             "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
-        // Explicitly set Skiko GPU backend to prevent software fallback
+        // ── No -Dskiko.renderApi here, on any platform ────────────────────────────────────
+        // The GPU backend is chosen by MainLogic.preferredRenderApi, which main() applies before
+        // the first SkiaLayer. Two reasons it cannot be done from this file:
+        //   • This runs on the machine doing the BUILD, and the value is baked into the artifact.
+        //   • `jvmArgs` is declared only on JvmApplication, so a call inside macOS { }/windows { }/
+        //     linux { } resolves against the enclosing application { } and applies EVERYWHERE. A
+        //     METAL pin written in the macOS block was reaching Windows and Linux this way, and
+        //     only stayed invisible because the branch below pinned OPENGL first and Gradle keeps
+        //     the first value for a repeated -D key.
+        // Deciding it at runtime instead is right whoever built the app and wherever it runs, and
+        // gives CHURCHPRESENTER_RENDER_API the last word on the operator's own machine.
         val osName = System.getProperty("os.name").lowercase()
-        when {
-            osName.contains("mac") -> jvmArgs(
-                "-Dskiko.renderApi=METAL",
-                // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to
-                // the main class name ("MainKt") in the menu bar without this. macOS-only: an
-                // unrecognized -Xdock option on other platforms aborts JVM startup entirely.
-                "-Xdock:name=Church Presenter"
-            )
-            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=OPENGL")
-            else -> jvmArgs("-Dskiko.renderApi=OPENGL")
+        if (osName.contains("mac")) {
+            // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to the
+            // main class name ("MainKt") in the menu bar without this. macOS-only: an unrecognized
+            // -Xdock option on other platforms aborts JVM startup entirely — so this one genuinely
+            // does belong to the build, and is guarded on the build machine being a Mac.
+            jvmArgs("-Xdock:name=Church Presenter")
         }
 
         buildTypes.release.proguard {
@@ -579,7 +585,17 @@ compose.desktop {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
-                jvmArgs("-Dskiko.renderApi=METAL")
+
+                // ── No renderApi here ─────────────────────────────────────────
+                // A platform block has NO jvmArgs of its own: `jvmArgs` is declared only on
+                // JvmApplication, so a call written in here silently resolves against the
+                // enclosing application { } receiver and applies to EVERY platform, including
+                // the `run` task on Windows and Linux. This block used to pin METAL, and it was
+                // pinning it everywhere; Windows only escaped because the block above pinned
+                // OPENGL first and Gradle keeps the first value for a repeated -D key. Take that
+                // pin away and METAL is the only value left, so skiko throws
+                // "Windows does not support Metal rendering API" before the first window opens.
+                // macOS is pinned by MainLogic.preferredRenderApi, on the machine that runs it.
 
                 // ── macOS Privacy ─────────────────────────────────────────────
                 // macOS attributes a spawned child process's privacy requests to the app bundle
@@ -626,7 +642,19 @@ compose.desktop {
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
-                jvmArgs("-Dskiko.renderApi=OPENGL")
+
+                // ── No renderApi here, deliberately ───────────────────────────
+                // This used to pin OPENGL, overriding skiko's own Direct3D default, and that is
+                // the only reason a GPU driver access violation surfaced inside
+                // WindowsOpenGLRedrawer.swapBuffers rather than anywhere else. skiko's
+                // fallbackRenderApiQueue covers *context creation* only, so a fault during
+                // swapBuffers never triggers it — the default has to be right, not recoverable.
+                // An operator whose machine fares worse on Direct3D sets CHURCHPRESENTER_RENDER_API
+                // (see DevFlags.renderApiOverride); main() applies it before the first SkiaLayer.
+                //
+                // Nor could it go here even if it were wanted: a platform block has no jvmArgs of
+                // its own, so the call above adds to the application-wide list and reaches macOS
+                // and Linux too. MainLogic.preferredRenderApi is where the choice is made.
             }
 
             linux {

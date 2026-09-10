@@ -28,10 +28,19 @@ internal class FakeCommandRunner(private val answer: (List<String>) -> CommandRe
      * bundled with the app, an operator's override, or one found on the machine — so the token is
      * whatever this particular machine happens to have. Which tool was consulted is the question
      * these tests are asking; where it lives is not.
+     *
+     * The executable **suffix** comes off for the same reason the directory does: the same tool is
+     * `ffmpeg` on macOS and Linux and `ffmpeg.exe` on Windows, so leaving it on made every
+     * assertion here platform-specific and failed seven of them on Windows. `DeviceEnumerationTest`
+     * already normalised it this way in its own `isFfmpeg` helper; this is that rule, applied once.
      */
     val programs: List<String>
         get() = calls.map { call ->
-            call.firstOrNull()?.substringAfterLast('/')?.substringAfterLast('\\') ?: ""
+            call.firstOrNull()
+                ?.substringAfterLast('/')
+                ?.substringAfterLast('\\')
+                ?.removeSuffix(".exe")
+                ?: ""
         }
 
     fun run(command: List<String>, timeoutSeconds: Long): CommandResult {

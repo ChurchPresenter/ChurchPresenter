@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import org.churchpresenter.core.models.io.writeTextAtomically
 
 /**
  * Recently-opened presentation files, and the pinned subset that survives "clear recents".
@@ -74,7 +75,7 @@ object RecentPresentationFiles {
         try {
             file.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            file.writeText(json.encodeToString(files.toList()))
+            file.writeTextAtomically(json.encodeToString(files.toList()))
         } catch (_: Exception) {}
     }
 
@@ -82,7 +83,7 @@ object RecentPresentationFiles {
         try {
             pinnedFile.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            pinnedFile.writeText(json.encodeToString(pinned.toList()))
+            pinnedFile.writeTextAtomically(json.encodeToString(pinned.toList()))
         } catch (_: Exception) {}
     }
 }

@@ -12,4 +12,24 @@ object DevFlags {
             ?: System.getProperty("churchpresenter.forceDevWindow")?.toBoolean()
             ?: false
     }
+
+    /**
+     * An explicit skiko render API, overriding whatever this platform would otherwise pick.
+     * Set via env var CHURCHPRESENTER_RENDER_API (no JVM flag knowledge needed) or the
+     * -Dchurchpresenter.renderApi system property; the value is skiko's own — METAL, DIRECT3D,
+     * OPENGL or SOFTWARE.
+     *
+     * It exists so a machine whose GPU driver fares worse on the platform default has a way out
+     * without waiting for a build. Read once, before the first SkiaLayer is created; skiko latches
+     * the property on first use, so setting it later does nothing.
+     *
+     * A blank env var is treated as absent rather than as a value: `CHURCHPRESENTER_RENDER_API= app`
+     * is the shape a shell leaves behind, and taking it literally would mask a `-D` flag the same
+     * command deliberately passed. (On Windows `set VAR=` removes the variable outright; on macOS
+     * and Linux it does not, which is why this has to be checked rather than assumed.)
+     */
+    val renderApiOverride: String? by lazy {
+        System.getenv("CHURCHPRESENTER_RENDER_API")?.takeIf { it.isNotBlank() }
+            ?: System.getProperty("churchpresenter.renderApi")
+    }
 }

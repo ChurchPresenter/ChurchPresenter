@@ -29,6 +29,12 @@ object TrainingDataLogger {
     private const val OUTCOME_PREFIX = "suggestion-outcomes-"
     private const val FLAG_PREFIX = "operator-flags-"
 
+    /**
+     * BibleEngineClient's error log, appended to for ever and named after no session, so it matched
+     * none of the prefixes above and outlived every sweep. It shares this folder and this policy.
+     */
+    private const val ENGINE_ERRORS_FILE = "engine-errors.jsonl"
+
     // Stable per-service session id from STT (db base name or UUID), set by BibleViewModel on the first
     // engine detection. Null until then; the filename falls back to [runStamp] (zero behaviour change).
     @Volatile var sessionId: String? = null
@@ -95,8 +101,10 @@ object TrainingDataLogger {
             logDir.listFiles()?.forEach { file ->
                 val n = file.name
                 val dated = file.isFile && (
-                    (n.endsWith(".jsonl") && (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))) ||
-                        n.endsWith(".db") || n.endsWith(".db.tmp")
+                    (
+                        n.endsWith(".jsonl") &&
+                            (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))
+                        ) || n == ENGINE_ERRORS_FILE || n.endsWith(".db") || n.endsWith(".db.tmp")
                 )
                 if (dated && file.lastModified() < cutoff) file.delete()
             }

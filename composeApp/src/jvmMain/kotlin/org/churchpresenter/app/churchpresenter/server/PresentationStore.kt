@@ -68,6 +68,14 @@ internal class PresentationStore(
      * upload replaces it, so the mobile's presentation list never accumulates stale entries.
      */
     @Volatile internal var _lastDeviceUploadedPresentationId: String? = null
+
+    /** Forgets the previous device upload, so the mobile list never accumulates stale entries. */
+    internal fun evictPreviousDeviceUpload() {
+        val oldId = _lastDeviceUploadedPresentationId ?: return
+        _presentationCatalogs.remove(oldId)
+        _slideBytes.remove(oldId)
+        _presentationFilePaths.remove(oldId)
+    }
     private fun cacheSlideBytes(id: String, slides: List<ByteArray>) {
         _slideBytes[id] = slides
         _slideBytesOrder.remove(id)
@@ -221,5 +229,34 @@ internal class PresentationStore(
         } catch (e: Exception) {
             CrashReporter.reportException(e, "Storing presentation slide")
         }
+    }
+}
+
+/** Where decks pushed from a phone are written. */
+internal val deviceUploadDir: File
+    get() = File(System.getProperty("user.home"), ".churchpresenter/device_presentations")
+
+/** How many device-uploaded decks are kept on disk. */
+internal const val DEVICE_UPLOADS_KEPT = 10
+
+/**
+ * Keeps the newest [DEVICE_UPLOADS_KEPT] uploaded decks and deletes the rest, newest by write time.
+ *
+ * Nothing used to delete these at all. Evicting the previous upload from the catalogue kept the
+ * mobile list tidy while its file stayed in `device_presentations/` for ever, invisible to the UI —
+ * and an upload whose name is already taken is renamed rather than replaced, so re-sending one deck
+ * grew the folder every time. At 200 MB a deck that is the fastest-growing directory in the data
+ * folder.
+ *
+ * A count rather than deleting the previous upload outright: that one may still be open in the
+ * Presentation tab, which renders from the file on disk. Ten deep, the live deck is never the one
+ * that goes.
+ */
+internal fun pruneDeviceUploads() {
+    try {
+        val decks = deviceUploadDir.listFiles { f -> f.isFile } ?: return
+        decks.sortedByDescending { it.lastModified() }.drop(DEVICE_UPLOADS_KEPT).forEach { it.delete() }
+    } catch (_: Exception) {
+        // Housekeeping must never fail an upload that has already been written.
     }
 }

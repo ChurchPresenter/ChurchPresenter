@@ -56,6 +56,41 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     val selectedPresentation: File?
         get() = _selectedPresentation.value
 
+    /**
+     * The primary's own file path when this deck came from [loadPresentationFromRemote], against the
+     * [File] it was stored under.
+     *
+     * Kept as the string the primary sent: a foreign path must not be re-separated by the local
+     * platform, and `absolutePath` additionally prepends a drive letter (Windows) or the working
+     * directory (POSIX, for a path with no leading `/`). Keyed by the [File] so it cannot outlive
+     * the selection it describes.
+     */
+    private val _remotePresentationPath = mutableStateOf<Pair<File, String>?>(null)
+
+    /** The primary's path, but only while it still describes the current selection. */
+    private val remotePathForSelection: String?
+        get() = _selectedPresentation.value?.let { file ->
+            _remotePresentationPath.value?.takeIf { it.first == file }?.second
+        }
+
+    /**
+     * The full path shown for the current deck: the primary's verbatim when mirrored, the local
+     * absolute path otherwise. Null when nothing is selected.
+     */
+    val selectedPresentationDisplayPath: String?
+        get() = remotePathForSelection ?: _selectedPresentation.value?.absolutePath
+
+    /**
+     * The file name shown for the current deck.
+     *
+     * A mirrored path is split on both separators rather than through [File.getName], which knows
+     * only the local one — `File("C:\\Presentations\\Sunday.pptx").name` on a Mac or a Linux box is
+     * the whole string, not `Sunday.pptx`. Same idiom as `data/Songs.kt` and the file pickers.
+     */
+    val selectedPresentationDisplayName: String?
+        get() = remotePathForSelection?.substringAfterLast('/')?.substringAfterLast('\\')
+            ?: _selectedPresentation.value?.name
+
     private val _slideFiles = mutableStateListOf<File>()
     val slideFiles: SnapshotStateList<File> = _slideFiles
 
@@ -190,9 +225,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
      * differently, or not mounted at all, here). Downloads each slide's JPEG bytes via [fetchBytes]
      * into a disk cache keyed by [scheduleItemId] (reusing the same cache-dir idiom local rendering
      * uses) and populates [_slideFiles] from the cached files — no new rendering pipeline, just a
-     * remote source of already-cached slides. [filePath] is only used to build a synthetic [File]
-     * so [selectedPresentation] and downstream consumers (recents list, onSlidesLoaded broadcast)
-     * keep working the same as the local-file path — the file itself is never opened.
+     * remote source of already-cached slides. [filePath] is the primary's own path: the synthetic
+     * [File] built from it is an identity, so [selectedPresentation] and downstream consumers
+     * (recents list, onSlidesLoaded broadcast) keep working the same as the local-file path, while
+     * the string itself is kept verbatim for [selectedPresentationDisplayPath] to show. The file is
+     * never opened either way.
      */
     fun loadPresentationFromRemote(
         scheduleItemId: String,
@@ -204,6 +241,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         val existingFile = _presentations.find { it.absolutePath == syntheticFile.absolutePath }
         if (existingFile == null) _presentations.add(syntheticFile)
         _selectedPresentation.value = existingFile ?: syntheticFile
+        _remotePresentationPath.value = (existingFile ?: syntheticFile) to filePath
         _selectedSlideIndex.value = 0
         _loadError.value = null
         activeLoadJob?.cancel()
@@ -273,6 +311,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         if (_selectedPresentation.value?.absolutePath == file.absolutePath) {
             _selectedPresentation.value = _presentations.firstOrNull()
             _selectedPresentation.value?.let { selectPresentation(it) } ?: run {
+                _remotePresentationPath.value = null
                 clearCurrentSlideState()
                 _selectedSlideIndex.value = 0
             }
@@ -283,6 +322,9 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         val existingFile = _presentations.find { it.absolutePath == file.absolutePath }
         if (existingFile != null) {
             _selectedPresentation.value = existingFile
+            // Only when the selection actually moves elsewhere: re-selecting the mirrored deck
+            // itself must keep showing the primary's path, not fall back to the mangled one.
+            if (_remotePresentationPath.value?.first != existingFile) _remotePresentationPath.value = null
             _selectedSlideIndex.value = 0
             _loadError.value = null
             activeLoadJob?.cancel()
@@ -332,6 +374,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         activeLoadJob?.cancel()
         _presentations.clear()
         _selectedPresentation.value = null
+        _remotePresentationPath.value = null
         clearCurrentSlideState()
         _totalSlides.value = 0
         _selectedSlideIndex.value = 0

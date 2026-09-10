@@ -4,6 +4,7 @@ import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -98,6 +99,28 @@ class SongCacheTest {
 
         assertEquals(listOf("Legacy"), SongFileParser.loadSongCache("/library")?.map { it.title })
         assertEquals(emptyMap(), SongFileParser.loadCachedSongMap("/library"))
+    }
+
+    @Test
+    fun `a saved cache stores each song once`() {
+        SongFileParser.saveSongCache("/library", listOf(cachedSong("Amazing Grace", "/library/a.song")))
+
+        val written = cacheFile.readText()
+
+        // The legacy `songs` list repeated every song that `cachedSongs` already carries in full —
+        // half of a 27 MB file on a real library, rewritten whenever the folder watcher fired.
+        assertFalse(written.contains("\"songs\":[{"), "the legacy list must no longer be written")
+        assertEquals(1, Regex("Amazing Grace").findAll(written).count())
+    }
+
+    @Test
+    fun `a half-written cache never replaces a good one`() {
+        SongFileParser.saveSongCache("/library", listOf(cachedSong("Amazing Grace", "/library/a.song")))
+
+        // Whatever the write leaves behind, the folder holds the cache and nothing else: a sync
+        // client watching this directory must never find a scratch file to replicate.
+        val strays = cacheFile.parentFile.listFiles { f -> f.name.startsWith("song_cache.json.") }
+        assertEquals(emptyList(), strays.orEmpty().map { it.name })
     }
 
     @Test

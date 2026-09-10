@@ -558,6 +558,8 @@
     <string name="media_now_presenting">Nyní prezentováno na obrazovce</string>
     <string name="media_seek_backward">Zpět o 10 sek</string>
     <string name="media_seek_forward">Vpřed o 10 sek</string>
+    <string name="media_loop_count">Smyčky</string>
+    <string name="media_loop_count_tooltip">Kolikrát opakovat (0 = donekonečna)</string>
     <string name="media_preview">Náhled</string>
     <string name="media_volume">Hlasitost</string>
     <string name="media_mute">Ztlumit</string>

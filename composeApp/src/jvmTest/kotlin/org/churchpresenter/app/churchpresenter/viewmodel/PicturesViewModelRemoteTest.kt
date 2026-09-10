@@ -102,7 +102,7 @@ class PicturesViewModelRemoteTest {
         assertEquals(listOf(0, 1, 2), asked)
         assertEquals(
             "/Volumes/primary-only/Sunday",
-            vm.selectedFolder?.path,
+            vm.selectedFolderDisplayPath,
             "the folder shown is the primary's path, even though the bytes live in the local cache"
         )
         assertTrue(
@@ -228,6 +228,61 @@ class PicturesViewModelRemoteTest {
         }
     }
 
+    // ── The path shown for a mirrored folder ────────────────────────────────────
+
+    @Test
+    fun `a mirrored folder shows the primary's path exactly as the primary wrote it`() {
+        // Both shapes in one test on purpose. Each is foreign to one platform family, so this fails
+        // on the old `File(folderPath)` code wherever it runs rather than only on a Windows
+        // follower: a POSIX path comes back re-separated with backslashes and a drive letter on
+        // Windows, and a `C:\...` path has no leading slash, so `absolutePath` prepends the working
+        // directory on macOS and Linux.
+        val vm = vm()
+
+        vm.loadPictureFromRemote(folderId = "posix", folderPath = "/Volumes/primary-only/Sunday", imageCount = 0) {
+            pngBytes()
+        }
+        awaitUntil("the posix folder") { vm.selectedFolderDisplayPath != null }
+        assertEquals("/Volumes/primary-only/Sunday", vm.selectedFolderDisplayPath)
+
+        vm.loadPictureFromRemote(
+            folderId = "windows",
+            folderPath = """C:\Presentations\Sunday Pictures""",
+            imageCount = 0,
+        ) { pngBytes() }
+        awaitUntil("the windows folder") {
+            vm.selectedFolderDisplayPath == """C:\Presentations\Sunday Pictures"""
+        }
+        assertEquals("""C:\Presentations\Sunday Pictures""", vm.selectedFolderDisplayPath)
+    }
+
+    @Test
+    fun `a local folder chosen after a mirrored one shows its own path`() {
+        val local = Files.createTempDirectory("cp-pictures-remote-after").toFile()
+        try {
+            ImageIO.write(BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB), "jpg", File(local, "local.jpg"))
+            val vm = vm()
+            vm.loadPictureFromRemote(
+                folderId = "before-local",
+                folderPath = "/Volumes/primary-only/Sunday",
+                imageCount = 0,
+            ) { pngBytes() }
+            awaitUntil("the mirrored folder") { vm.selectedFolderDisplayPath != null }
+
+            vm.selectFolder(local)
+
+            assertEquals(
+                local.absolutePath,
+                vm.selectedFolderDisplayPath,
+                "the primary's path must not survive into a folder chosen here",
+            )
+
+            assertNull(vm().selectedFolderDisplayPath, "nothing selected yet, so there is nothing to show")
+        } finally {
+            local.deleteRecursively()
+        }
+    }
+
     @Test
     fun `each downloaded image is pushed to a screen already showing pictures`() {
         // Images arrive one at a time here, and PicturesTab's own reactive sync only reruns on an
@@ -283,7 +338,7 @@ class PicturesViewModelRemoteTest {
         awaitUntil("the cache directory to be created") { cacheDir("folder-empty").isDirectory }
         assertEquals(0, fetches)
         assertTrue(vm.images.isEmpty())
-        assertEquals("/Volumes/primary-only/Empty", vm.selectedFolder?.path)
+        assertEquals("/Volumes/primary-only/Empty", vm.selectedFolderDisplayPath)
     }
 
     // ── Thumbnails ──────────────────────────────────────────────────────────────

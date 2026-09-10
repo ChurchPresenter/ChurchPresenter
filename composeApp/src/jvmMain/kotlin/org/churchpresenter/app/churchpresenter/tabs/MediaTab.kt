@@ -89,14 +89,19 @@ import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.ic_volume_off
 import churchpresenter.composeapp.generated.resources.ic_volume_up
+import churchpresenter.composeapp.generated.resources.loop_off
+import churchpresenter.composeapp.generated.resources.loop_on
 import churchpresenter.composeapp.generated.resources.media_audio_continues
 import churchpresenter.composeapp.generated.resources.media_files_filter
 import churchpresenter.composeapp.generated.resources.media_load
+import churchpresenter.composeapp.generated.resources.media_loop_count
+import churchpresenter.composeapp.generated.resources.media_loop_count_tooltip
 import churchpresenter.composeapp.generated.resources.media_local_file
 import churchpresenter.composeapp.generated.resources.media_mute
 import churchpresenter.composeapp.generated.resources.media_network_url
@@ -128,6 +133,7 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
@@ -158,6 +164,9 @@ import kotlinx.coroutines.launch
 private const val MENU_OFFSET_X = 100
 private const val MENU_OFFSET_Y = 60
 private const val HANDLE_VISIBLE_ALPHA = 0.01f
+
+/** Upper bound of the loop-count field; 0 means repeat forever. */
+private const val MAX_LOOP_COUNT = 99
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -586,6 +595,73 @@ fun MediaTab(
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
+            // Loop: the button arms it, and the count beside it says how many repeats to play.
+            // The count only appears while looping is on, so the bar stays as it was otherwise.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                val loopLabel = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)
+                TooltipArea(
+                    tooltip = { TransportTooltip(loopLabel) },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
+                ) {
+                    IconButton(
+                        onClick = { viewModel.toggleLooping() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(30.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (viewModel.isLooping) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                Color.Transparent
+                            },
+                            contentColor = if (viewModel.isLooping) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                transportTint
+                            },
+                            // transportTint already carries the disabled alpha ramp.
+                            disabledContentColor = transportTint,
+                        )
+                    ) {
+                        // TooltipArea is a hover popup and contributes no semantics, so without
+                        // this the button would have no name at all.
+                        Icon(
+                            painterResource(Res.drawable.ic_refresh),
+                            contentDescription = loopLabel,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+                if (viewModel.isLooping) {
+                    val loopCountHint = stringResource(Res.string.media_loop_count_tooltip)
+                    TooltipArea(
+                        tooltip = { TransportTooltip(loopCountHint) },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(
+                            anchor = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 4.dp)
+                        )
+                    ) {
+                        NumberSettingsTextField(
+                            // Wide enough for the longest of the translated labels
+                            // ("SCHLEIFEN", "TAKRORLAR") before it starts ellipsizing.
+                            modifier = Modifier.width(96.dp),
+                            label = stringResource(Res.string.media_loop_count),
+                            initialText = viewModel.loopCount,
+                            range = 0..MAX_LOOP_COUNT,
+                            onValueChange = { viewModel.setLoopCount(it) }
+                        )
+                    }
+                }
+            }
+
+            // Divider
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
             // Volume
             Box {
                 TooltipArea(
@@ -694,6 +770,23 @@ fun MediaTab(
                 }
             }
         }
+    }
+}
+
+/** The dark tooltip bubble the media transport controls hover. */
+@Composable
+private fun TransportTooltip(text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.inverseSurface,
+        shape = MaterialTheme.shapes.extraSmall,
+        tonalElevation = 4.dp
+    ) {
+        Text(
+            text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 

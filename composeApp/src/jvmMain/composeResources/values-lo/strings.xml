@@ -949,6 +949,8 @@
     <string name="media_now_presenting">ກຳລັງສະແດງເທິງຈໍ</string>
     <string name="media_seek_backward">ຖອຍຫຼັງ 10 ວິ</string>
     <string name="media_seek_forward">ໄປໜ້າ 10 ວິ</string>
+    <string name="media_loop_count">ຮອບ</string>
+    <string name="media_loop_count_tooltip">ຊ້ຳຈັກຮອບ (0 = ບໍ່ຮູ້ຈົບ)</string>
     <string name="media_preview">ເບິ່ງກ່ອນ</string>
     <string name="media_volume">ລະດັບສຽງ</string>
     <string name="stop">ຢຸດ</string>

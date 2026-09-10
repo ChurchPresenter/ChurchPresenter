@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Šobrīd redzams ekrānā</string>
     <string name="media_seek_backward">Atpakaļ par 10 s</string>
     <string name="media_seek_forward">Uz priekšu par 10 s</string>
+    <string name="media_loop_count">Cilpas</string>
+    <string name="media_loop_count_tooltip">Cik reižu atkārtot (0 = bezgalīgi)</string>
     <string name="media_preview">Priekšskatījums</string>
     <string name="media_volume">Skaļums</string>
     <string name="stop">Apturēt</string>

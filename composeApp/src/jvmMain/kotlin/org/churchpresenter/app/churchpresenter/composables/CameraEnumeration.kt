@@ -624,6 +624,25 @@ private const val SCREEN_CAPTURE_PREFIX = "capture screen"
 internal fun isScreenCaptureDevice(name: String): Boolean =
     name.trim().lowercase().startsWith(SCREEN_CAPTURE_PREFIX)
 
+/**
+ * The devices worth **offering** as a camera: this machine's list without the displays.
+ *
+ * Picking a display from the camera list records the operator's screen, and a camera background
+ * opens as the presenter window does, so macOS raises its Screen Recording prompt on every launch.
+ * Nothing is taken away by hiding them: `SceneSource.ScreenCaptureSource` is the supported route to
+ * put a screen on the Canvas, with its own region and window modes.
+ *
+ * [keeping] is the name a source already points at, and it survives the filter. A configuration
+ * someone set deliberately keeps working and stays visible — dropping it from the list would only
+ * strand it, since the dropdown would then fall back to showing the raw `avfoundation://4` path.
+ *
+ * **Offering only.** The catalog itself stays unfiltered: [cameraResolves],
+ * [resolveAvfoundationDevice] and [avfDeviceNameAt] all read it to decide what a *saved* device is
+ * now, and the last of those treats list position as ffmpeg's index.
+ */
+internal fun List<CameraDevice>.selectableCameras(keeping: String? = null): List<CameraDevice> =
+    filter { !isScreenCaptureDevice(it.name) || it.name == keeping }
+
 /** Where a saved AVFoundation device is *now*, or why it must not be opened. */
 internal sealed interface AvfResolution {
 

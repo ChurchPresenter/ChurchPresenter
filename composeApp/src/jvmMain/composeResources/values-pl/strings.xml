@@ -516,6 +516,8 @@
     <string name="media_now_presenting">Teraz wyświetlane na ekranie</string>
     <string name="media_seek_backward">Cofnij 10 sek</string>
     <string name="media_seek_forward">Przewiń 10 sek</string>
+    <string name="media_loop_count">Pętle</string>
+    <string name="media_loop_count_tooltip">Ile razy powtórzyć (0 = w nieskończoność)</string>
     <string name="media_preview">Podgląd</string>
     <string name="media_volume">Głośność</string>
     <string name="media_mute">Wycisz</string>

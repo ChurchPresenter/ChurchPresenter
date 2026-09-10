@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Nyt näytöllä</string>
     <string name="media_seek_backward">Siirry 10 s taaksepäin</string>
     <string name="media_seek_forward">Siirry 10 s eteenpäin</string>
+    <string name="media_loop_count">Toistot</string>
+    <string name="media_loop_count_tooltip">Kuinka monta kertaa toistetaan (0 = loputon)</string>
     <string name="media_preview">Esikatselu</string>
     <string name="media_volume">Äänenvoimakkuus</string>
     <string name="stop">Pysäytä</string>

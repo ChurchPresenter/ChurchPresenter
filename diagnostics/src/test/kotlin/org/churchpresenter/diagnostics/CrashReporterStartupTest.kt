@@ -23,6 +23,7 @@ class CrashReporterStartupTest {
     private val crashDir = File(appDir, "crash-reports")
     private val runningFile = File(appDir, ".running")
     private val crashCountFile = File(appDir, ".crash_count")
+    private val crashKindFile = File(appDir, ".crash_kind")
     private val installIdFile = File(appDir, ".install_id")
 
     /** Collects what `startUp` would have installed on the JVM, so the test can run it instead. */
@@ -43,6 +44,7 @@ class CrashReporterStartupTest {
         crashDir.deleteRecursively()
         runningFile.delete()
         crashCountFile.delete()
+        crashKindFile.delete()
         installIdFile.delete()
     }
 
@@ -51,7 +53,16 @@ class CrashReporterStartupTest {
         crashDir.deleteRecursively()
         runningFile.delete()
         crashCountFile.delete()
+        crashKindFile.delete()
         CrashReporter.videoBackgroundsDisabled = false
+    }
+
+    /** Puts the machine in the state a second consecutive crash of [kind] would leave behind. */
+    private fun secondCrashPending(kind: CrashKind?) {
+        appDir.mkdirs()
+        runningFile.createNewFile()
+        crashCountFile.writeText("1")
+        if (kind != null) crashKindFile.writeText(kind.name)
     }
 
     // ── startUp ─────────────────────────────────────────────────────────────────
@@ -82,9 +93,9 @@ class CrashReporterStartupTest {
 
     @Test
     fun `a second consecutive crash disables video backgrounds`() {
-        appDir.mkdirs()
-        runningFile.createNewFile()
-        crashCountFile.writeText("1")
+        // No recorded kind: the JVM went down without unwinding, which is exactly what a native VLC
+        // fault does. This is the case the guard was built for, so it must still fire.
+        secondCrashPending(kind = null)
 
         startUp(analyticsReportingEnabled = false)
 
@@ -92,6 +103,110 @@ class CrashReporterStartupTest {
         assertTrue(
             CrashReporter.videoBackgroundsDisabled,
             "repeated crashes must turn off the most likely cause without the user doing anything",
+        )
+    }
+
+    @Test
+    fun `a second crash of an unrelated kind still disables video backgrounds`() {
+        secondCrashPending(CrashKind.OTHER)
+
+        startUp(analyticsReportingEnabled = false)
+
+        assertEquals(2, CrashReporter.consecutiveCrashes)
+        assertTrue(CrashReporter.videoBackgroundsDisabled, "only a renderer fault is exempted")
+    }
+
+    @Test
+    fun `a renderer crash is counted but does not disable video backgrounds`() {
+        secondCrashPending(CrashKind.RENDERER)
+
+        startUp(analyticsReportingEnabled = false)
+
+        assertEquals(2, CrashReporter.consecutiveCrashes, "it was still a crash, and the count says so")
+        assertFalse(
+            CrashReporter.videoBackgroundsDisabled,
+            "a GPU driver fault is not video decoding; turning off VLC hides the cause and costs a feature",
+        )
+    }
+
+    @Test
+    fun `the recorded kind is consumed, so a later crash that records nothing is not judged by it`() {
+        secondCrashPending(CrashKind.RENDERER)
+        startUp(analyticsReportingEnabled = false)
+        assertFalse(CrashReporter.videoBackgroundsDisabled)
+        assertFalse(crashKindFile.exists(), "a kind survives exactly one startup")
+
+        // A hard kill now: the lock is left behind, but nothing recorded what failed.
+        runningFile.createNewFile()
+        startUp(analyticsReportingEnabled = false)
+
+        assertTrue(
+            CrashReporter.videoBackgroundsDisabled,
+            "a stale RENDERER must not go on exempting crashes it had nothing to do with",
+        )
+    }
+
+    @Test
+    fun `an unreadable kind reads as no kind rather than as an exemption`() {
+        secondCrashPending(kind = null)
+        crashKindFile.writeText("GRAPHICS_ISH")
+
+        startUp(analyticsReportingEnabled = false)
+
+        assertTrue(CrashReporter.videoBackgroundsDisabled, "an unrecognised value degrades to the old behaviour")
+    }
+
+    // ── Classifying what failed ─────────────────────────────────────────────────
+
+    @Test
+    fun `a skiko throwable is a renderer fault`() {
+        assertEquals(
+            CrashKind.RENDERER,
+            CrashReporter.classifyCrash(org.jetbrains.skiko.RenderException("swapBuffers")),
+        )
+    }
+
+    @Test
+    fun `a skia throwable is a renderer fault`() {
+        assertEquals(
+            CrashKind.RENDERER,
+            CrashReporter.classifyCrash(org.jetbrains.skia.SkiaException("surface")),
+        )
+    }
+
+    @Test
+    fun `a renderer fault wrapped in something else is still a renderer fault`() {
+        val wrapped = RuntimeException("while presenting", org.jetbrains.skiko.RenderException("swapBuffers"))
+
+        assertEquals(CrashKind.RENDERER, CrashReporter.classifyCrash(wrapped))
+    }
+
+    @Test
+    fun `an ordinary throwable is not a renderer fault`() {
+        assertEquals(CrashKind.OTHER, CrashReporter.classifyCrash(IllegalStateException("kaboom")))
+        assertEquals(CrashKind.OTHER, CrashReporter.classifyCrash(null))
+    }
+
+    @Test
+    fun `a cause cycle terminates instead of hanging the crash handler`() {
+        val first = RuntimeException("first")
+        val second = RuntimeException("second", first)
+        first.initCause(second)
+
+        assertEquals(CrashKind.OTHER, CrashReporter.classifyCrash(first))
+    }
+
+    @Test
+    fun `the installed handler records what kind of crash it was`() {
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), org.jetbrains.skiko.RenderException("swapBuffers"))
+
+        assertEquals(
+            CrashKind.RENDERER.name,
+            crashKindFile.readText().trim(),
+            "the next run can only exempt the crash if this run wrote down what it was",
         )
     }
 

@@ -326,7 +326,7 @@ fun PicturesTab(
                 )
             }
             Text(
-                text = viewModel.selectedFolder?.absolutePath ?: stringResource(Res.string.no_folder_selected),
+                text = viewModel.selectedFolderDisplayPath ?: stringResource(Res.string.no_folder_selected),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                 modifier = Modifier.weight(1f),
@@ -387,7 +387,7 @@ fun PicturesTab(
                 ) {
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPictureFolders.pinned
-                        val isActive = viewModel.selectedFolder?.absolutePath == path
+                        val isActive = viewModel.selectedFolderDisplayPath == path
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(2.dp)

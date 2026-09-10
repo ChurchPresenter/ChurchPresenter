@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Hozir ekranda koʻrsatilmoqda</string>
     <string name="media_seek_backward">10 s orqaga</string>
     <string name="media_seek_forward">10 s oldinga</string>
+    <string name="media_loop_count">Takrorlar</string>
+    <string name="media_loop_count_tooltip">Necha marta takrorlansin (0 = cheksiz)</string>
     <string name="media_preview">Oldindan koʻrish</string>
     <string name="media_volume">Ovoz balandligi</string>
     <string name="stop">Toʻxtatish</string>

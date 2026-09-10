@@ -502,31 +502,25 @@ class StatisticsManagerTest {
     }
 
     /**
-     * Documents a KNOWN GAP: [StatisticsManager.save] writes straight to
-     * `~/.churchpresenter/statistics.json` without creating the folder first, and swallows the
-     * resulting failure — so on a profile where that folder does not exist yet, every service's
-     * worth of reporting data is discarded without a word. Its siblings do not have this problem:
-     * `QAManager` calls `parentFile?.mkdirs()` and `RemoteClientManager` calls `appDataDir.mkdirs()`
-     * before writing.
-     *
-     * Not normally reachable, because settings are written at startup and create the folder — but
-     * it makes the statistics store the only one that cannot stand on its own, and the failure is
-     * completely silent. One `mkdirs()` in `save`/`saveLog` closes it, and this test then flips to
-     * asserting the count survives.
+     * Was a KNOWN GAP, now closed: [StatisticsManager.save] wrote straight to
+     * `~/.churchpresenter/statistics.json` without creating the folder first and swallowed the
+     * resulting failure, so on a profile where that folder did not exist yet a whole service's
+     * worth of reporting data was discarded without a word. The atomic write both stores now go
+     * through creates the folder, which is the `mkdirs()` this test's earlier form asked for.
      */
     @Test
-    fun `nothing is recorded at all when the app data folder is missing -- known gap`() {
+    fun `a missing app data folder is created rather than losing the service`() {
         File(tempHome, ".churchpresenter").deleteRecursively()
         val stats = StatisticsManager()
 
         stats.sing("Amazing Grace")
 
         assertEquals(1, stats.getSongPlayCount("Hymnal::1"), "the in-memory tally is fine")
-        assertFalse(statsFile.exists(), "current behaviour: nothing reached the disk")
+        assertTrue(statsFile.exists(), "the folder must be created rather than the write dropped")
         assertEquals(
-            0,
+            1,
             restarted().getSongPlayCount("Hymnal::1"),
-            "current behaviour: the whole service's reporting data is gone on restart",
+            "a licence report is filed against these numbers — they cannot vanish on restart",
         )
     }
 

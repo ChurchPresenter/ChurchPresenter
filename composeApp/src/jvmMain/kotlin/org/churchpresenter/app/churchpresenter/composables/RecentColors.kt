@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 
 /** Stores recently used colors across all color picker instances, persisted to disk. */
 internal object RecentColors {
@@ -34,7 +35,7 @@ internal object RecentColors {
         try {
             file.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            file.writeText(json.encodeToString(colors.toList()))
+            file.writeTextAtomically(json.encodeToString(colors.toList()))
         } catch (_: Exception) {}
     }
 }

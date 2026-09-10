@@ -76,7 +76,7 @@ internal fun SongBackgroundLibrary(
 ) {
     var category by remember(background.type) { mutableStateOf(categoryOf(background.type)) }
     val entries = rememberMediaEntries(category)
-    val cameras = rememberCameras(category, devices)
+    val cameras = rememberCameras(category, devices, keeping = background.camera.deviceName)
     val count = when (category) {
         SongBackgroundType.COLOR -> SONG_BACKGROUND_COLORS.size
         SongBackgroundType.CAMERA -> cameras.size
