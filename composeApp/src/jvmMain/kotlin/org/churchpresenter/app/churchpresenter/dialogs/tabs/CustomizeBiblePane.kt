@@ -215,6 +215,18 @@ private fun BibleReferenceGroup(
                 },
             )
         }
+        CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
+            HorizontalAlignControl(
+                selected = if (lowerThird) t.lowerThirdReferenceHorizontalAlignment
+                else t.referenceHorizontalAlignment,
+                onSelect = { v ->
+                    updateEntry {
+                        if (lowerThird) it.copy(lowerThirdReferenceHorizontalAlignment = v)
+                        else it.copy(referenceHorizontalAlignment = v)
+                    }
+                },
+            )
+        }
         CustomizeRow(stringResource(Res.string.position)) {
             PositionControl(
                 selected = if (lowerThird) t.lowerThirdReferencePosition else t.referencePosition,

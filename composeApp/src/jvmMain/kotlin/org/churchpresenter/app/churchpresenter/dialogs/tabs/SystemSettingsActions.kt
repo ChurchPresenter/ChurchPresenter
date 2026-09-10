@@ -91,13 +91,20 @@ internal fun resetAllSettings(
     }
 }
 
+/** The folders a device can write into, all cleared together by [clearRemoteUploads]. */
+private val REMOTE_UPLOAD_DIRS = listOf("device_uploads", "device_presentations", "device_media")
+
 internal fun clearRemoteUploads(title: String, confirmMsg: String, clearedMsg: String) {
     SwingUtilities.invokeLater {
         val confirmed = JOptionPane.showConfirmDialog(
             activeWindow(), confirmMsg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
         ) == JOptionPane.YES_OPTION
         if (!confirmed) return@invokeLater
-        java.io.File(System.getProperty("user.home"), ".churchpresenter/device_uploads").deleteRecursively()
+        // All three trees, not just the pictures one: the button offers to delete "all remotely
+        // uploaded files", and decks and media pushed from a phone are written beside them and
+        // were never cleaned by anything.
+        val home = java.io.File(System.getProperty("user.home"))
+        REMOTE_UPLOAD_DIRS.forEach { java.io.File(home, ".churchpresenter/$it").deleteRecursively() }
         JOptionPane.showMessageDialog(activeWindow(), clearedMsg, title, JOptionPane.INFORMATION_MESSAGE)
     }
 }

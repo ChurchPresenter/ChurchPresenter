@@ -58,6 +58,7 @@ class ProjectionCustomizeBibleReferenceTest {
             open(this, override = false)
             onNodeWithText("Position").assertExists()
             onNodeWithText("Abbreviation").assertExists()
+            onNodeWithText("Horizontal alignment:").assertExists()
         }
     }
 
@@ -171,6 +172,52 @@ class ProjectionCustomizeBibleReferenceTest {
             assertTrue(get().stored().showAbbreviation)
             toggleCheckbox("Abbreviation")
             assertFalse(get().stored().showAbbreviation)
+        }
+    }
+
+    // ── Horizontal alignment ──────────────────────────────────────────────────
+
+    @Test
+    fun `the alignment writes the full screen's reference`() {
+        projectionTab(output()) { get ->
+            open(this)
+            horizontalAlignButton(group = 0, which = HAlign.CENTER).performScrollTo().performClick()
+            waitForIdle()
+
+            val stored = get().stored()
+            assertEquals(Constants.CENTER, stored.referenceHorizontalAlignment)
+            assertEquals(
+                Constants.RIGHT,
+                stored.lowerThirdReferenceHorizontalAlignment,
+                "the band's own alignment must be untouched, and a reference starts right",
+            )
+        }
+    }
+
+    @Test
+    fun `the alignment writes the band's reference instead`() {
+        projectionTab(output(band)) { get ->
+            open(this)
+            horizontalAlignButton(group = 0, which = HAlign.LEFT).performScrollTo().performClick()
+            waitForIdle()
+
+            val stored = get().stored()
+            assertEquals(Constants.LEFT, stored.lowerThirdReferenceHorizontalAlignment)
+            assertEquals(Constants.RIGHT, stored.referenceHorizontalAlignment)
+        }
+    }
+
+    @Test
+    fun `the alignment leaves the verse text's own alone`() {
+        projectionTab(output()) { get ->
+            open(this)
+            horizontalAlignButton(group = 0, which = HAlign.CENTER).performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(
+                BibleTranslationSettings().textHorizontalAlignment,
+                get().stored().textHorizontalAlignment,
+            )
         }
     }
 

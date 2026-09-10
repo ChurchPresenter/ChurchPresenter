@@ -11,6 +11,7 @@ import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.schedule.websiteDisplayText
@@ -101,6 +102,10 @@ class ScheduleViewModel(
     @Volatile private var isDirty = false
 
     init {
+        // An autosave the restore prompt can no longer offer — see autoSaveAvailable()'s same-day
+        // and four-hour gate — is unreachable for ever, so it is deleted rather than left to sit
+        // in the data folder. This runs before anything can ask for the prompt.
+        discardUnreachableAutoSave()
         // Compose's DisposableEffect-driven dispose() isn't guaranteed to run on a raw
         // exitProcess/System.exit shutdown (e.g. the self-updater relaunching an installer),
         // so this loop could otherwise wake up mid-shutdown and try to classload ScheduleFileV2
@@ -114,7 +119,7 @@ class ScheduleViewModel(
                         autoSaveFile.parentFile?.mkdirs()
                         val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
                         val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
-                        autoSaveFile.writeText(encrypt(serialized))
+                        autoSaveFile.writeTextAtomically(encrypt(serialized))
                         isDirty = false
                     } catch (_: Exception) {
                     } catch (_: LinkageError) {
@@ -136,6 +141,15 @@ class ScheduleViewModel(
         if (autoRestorePrompted) return false
         autoRestorePrompted = true
         return autoSaveAvailable()
+    }
+
+    /** Removes an autosave [autoSaveAvailable] would refuse, so a stale one does not linger. */
+    internal fun discardUnreachableAutoSave() {
+        try {
+            if (autoSaveFile.exists() && !autoSaveAvailable()) autoSaveFile.delete()
+        } catch (_: Exception) {
+            // Best effort — a schedule must still open on a folder we cannot write to.
+        }
     }
 
     /** Returns true if there is an autosave from today that is less than 4 hours old. */

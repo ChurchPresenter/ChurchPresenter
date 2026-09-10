@@ -978,7 +978,7 @@ class CompanionServer {
                 )
                 presentationRoutes(
                     this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
-                    presentations._presentationCatalogs, presentations._presentationFilePaths, presentations._scheduleItemToPresentationId,
+                    presentations._presentationCatalogs, presentations._scheduleItemToPresentationId,
                     presentations._slideBytes, json, scope
                 )
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
@@ -1166,7 +1166,7 @@ class CompanionServer {
         try {
             val (safeName, fileBytes) = receiveUploadedFile(call) ?: return
             val ext = safeName.substringAfterLast('.', "").lowercase()
-            val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+            val uploadDir = deviceUploadDir.also { it.mkdirs() }
             val uniqueName = if (File(uploadDir, safeName).exists()) {
                 val ts   = System.currentTimeMillis()
                 val base = safeName.substringBeforeLast('.', safeName)
@@ -1174,12 +1174,10 @@ class CompanionServer {
             } else safeName
             val file = File(uploadDir, uniqueName)
             file.writeBytes(fileBytes)
+            pruneDeviceUploads()
             val id = file.absolutePath.hashCode().toUInt().toString(16)
-            presentations._lastDeviceUploadedPresentationId?.let { oldId ->
-                presentations._presentationCatalogs.remove(oldId)
-                presentations._slideBytes.remove(oldId)
-                presentations._presentationFilePaths.remove(oldId)
-            }
+            presentations.evictPreviousDeviceUpload()
+            presentations._presentationFilePaths[id] = file.absolutePath
             presentations._lastDeviceUploadedPresentationId = id
             val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
             scope.launch { onPresentationUploaded.emit(file) }

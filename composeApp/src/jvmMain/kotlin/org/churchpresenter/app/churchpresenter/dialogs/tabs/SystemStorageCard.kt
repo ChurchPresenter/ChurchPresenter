@@ -86,14 +86,59 @@ private val DirStatus.isLinked: Boolean get() = this == DirStatus.WRITABLE || th
 
 private val DirStatus.needsAttention: Boolean get() = this == DirStatus.NOT_FOUND || this == DirStatus.INVALID
 
-private fun isWritableDir(dir: java.io.File): Boolean = try {
-    // File.createTempFile generates a unique name per call — concurrent checks
+private const val WRITE_PROBE_PREFIX = ".cp_write_test"
+private const val WRITE_PROBE_SUFFIX = ".tmp"
+
+/** How old a leftover probe must be before a sweep will remove it. */
+private const val STALE_PROBE_AGE_MS = 60_000L
+
+internal fun isWritableDir(dir: java.io.File): Boolean {
+    // Files.createTempFile generates a unique name per call — concurrent checks
     // from multiple pickers on the same directory cannot collide
-    val tmp = java.io.File.createTempFile(".cp_write_test", ".tmp", dir)
-    if (!tmp.delete()) tmp.deleteOnExit()
-    true
-} catch (_: Exception) {
-    false
+    val probe = try {
+        java.nio.file.Files.createTempFile(dir.toPath(), WRITE_PROBE_PREFIX, WRITE_PROBE_SUFFIX)
+    } catch (_: Exception) {
+        return false
+    }
+    // A cloud-sync client or a virus scanner can still hold the file open the instant after it is
+    // created, so the delete gets a second chance. deleteOnExit is the last resort and not the
+    // plan: it only runs on a graceful shutdown, so a crash or a force-quit strands the file —
+    // which is what sweepStaleWriteProbes below cleans up on the next check.
+    try {
+        java.nio.file.Files.deleteIfExists(probe)
+    } catch (_: Exception) {
+        try {
+            java.nio.file.Files.deleteIfExists(probe)
+        } catch (_: Exception) {
+            probe.toFile().deleteOnExit()
+        }
+    }
+    return true
+}
+
+/**
+ * Removes probe files an earlier run left behind in [dir].
+ *
+ * Only files older than [STALE_PROBE_AGE_MS] go: a probe another instance is running right now on
+ * the same shared folder must not be deleted out from under it.
+ */
+internal fun sweepStaleWriteProbes(dir: java.io.File) {
+    val cutoff = System.currentTimeMillis() - STALE_PROBE_AGE_MS
+    val strays = try {
+        dir.listFiles { f ->
+            f.isFile && f.name.startsWith(WRITE_PROBE_PREFIX) && f.name.endsWith(WRITE_PROBE_SUFFIX)
+        }
+    } catch (_: Exception) {
+        null
+    } ?: return
+    for (stray in strays) {
+        if (stray.lastModified() >= cutoff) continue
+        try {
+            stray.delete()
+        } catch (_: Exception) {
+            // a read-only or vanished file is nothing to report — the next check tries again
+        }
+    }
 }
 
 private fun isReadableDir(dir: java.io.File): Boolean = try {
@@ -124,6 +169,7 @@ internal fun rememberDirStatus(path: String): DirStatus {
         status = withContext(Dispatchers.IO) {
             val dir = java.io.File(path)
             try {
+                if (dir.isDirectory) sweepStaleWriteProbes(dir)
                 when {
                     !dir.isDirectory -> DirStatus.NOT_FOUND
                     isWritableDir(dir) -> DirStatus.WRITABLE

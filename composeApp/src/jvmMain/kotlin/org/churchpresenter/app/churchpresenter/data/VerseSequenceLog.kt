@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
+import org.churchpresenter.core.models.io.writeTextAtomically
 
 private const val PACKED_REF_LENGTH = 9
 private const val BOOK_DIGITS = 3
@@ -69,7 +70,7 @@ class VerseSequenceLog(
     private fun save() {
         try {
             file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(VerseSequenceFile.serializer(), state))
+            file.writeTextAtomically(json.encodeToString(VerseSequenceFile.serializer(), state))
         } catch (_: Exception) {
             // Learning is a convenience; a read-only home directory must not break a go-live.
         }
