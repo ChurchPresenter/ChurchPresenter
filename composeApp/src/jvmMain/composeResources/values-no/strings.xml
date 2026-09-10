@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Vises nå på skjermen</string>
     <string name="media_seek_backward">Spol 10 s tilbake</string>
     <string name="media_seek_forward">Spol 10 s fram</string>
+    <string name="media_loop_count">Løkker</string>
+    <string name="media_loop_count_tooltip">Hvor mange ganger gjenta (0 = uendelig)</string>
     <string name="media_preview">Forhåndsvisning</string>
     <string name="media_volume">Volum</string>
     <string name="stop">Stopp</string>

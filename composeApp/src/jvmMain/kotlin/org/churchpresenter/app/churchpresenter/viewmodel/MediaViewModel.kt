@@ -36,6 +36,34 @@ class MediaViewModel {
     private val _seekVersion = mutableIntStateOf(0)
     val seekVersion: Int get() = _seekVersion.intValue
 
+    // Looping
+    private val _isLooping = mutableStateOf(false)
+    val isLooping: Boolean get() = _isLooping.value
+
+    /** How many times to repeat after the first play. 0 means repeat forever. */
+    private val _loopCount = mutableIntStateOf(0)
+    val loopCount: Int get() = _loopCount.intValue
+
+    /** Repeats already played back for the current media. */
+    private val _loopsPlayed = mutableIntStateOf(0)
+    val loopsPlayed: Int get() = _loopsPlayed.intValue
+
+    /**
+     * Incremented every time a loop restarts the media. VideoPlayer observes this to re-issue
+     * the play command: once VLC has reached the end, seeking alone will not start it again.
+     */
+    private val _loopRestartVersion = mutableIntStateOf(0)
+    val loopRestartVersion: Int get() = _loopRestartVersion.intValue
+
+    /**
+     * Bumped whenever playback (re)starts, so that a repeated end-of-file event for one play is
+     * told apart from the end of the next one. With looping armed an end spends a repeat, so a
+     * doubled event would spend two; SoftwareVideoPlayer's `reportsPlaybackEnd` keeps a mirrored
+     * decoder from raising one at all, and this guards the rest.
+     */
+    private val _playbackGeneration = mutableIntStateOf(0)
+    private var finishHandledGeneration = -1
+
 
     // Volume: 0.0 – 1.0
     private val _volume = mutableStateOf(1.0f)
@@ -55,8 +83,40 @@ class MediaViewModel {
     private val _mediaFinished = mutableStateOf(false)
     val mediaFinished: Boolean get() = _mediaFinished.value
 
-    fun markFinished() { _mediaFinished.value = true; _isPlaying.value = false; _currentPosition.value = 0L; _seekVersion.intValue++ }
+    /**
+     * Called by VideoPlayer when the file reaches its end. Restarts it when a loop is still owed,
+     * and only otherwise reports the media as finished (which clears the output).
+     */
+    fun markFinished() {
+        // A repeat of the event for a play already dealt with, not the end of the next one.
+        if (finishHandledGeneration == _playbackGeneration.intValue) return
+        finishHandledGeneration = _playbackGeneration.intValue
+
+        if (_isLooping.value && (_loopCount.intValue == 0 || _loopsPlayed.intValue < _loopCount.intValue)) {
+            _loopsPlayed.intValue++
+            _currentPosition.value = 0L
+            _isPlaying.value = true
+            _playbackGeneration.intValue++
+            _loopRestartVersion.intValue++
+            return
+        }
+        _mediaFinished.value = true
+        _isPlaying.value = false
+        _currentPosition.value = 0L
+        _loopsPlayed.intValue = 0
+        _seekVersion.intValue++
+    }
     fun clearFinished() { _mediaFinished.value = false }
+
+    fun toggleLooping() {
+        _isLooping.value = !_isLooping.value
+        _loopsPlayed.intValue = 0
+    }
+
+    fun setLoopCount(count: Int) {
+        _loopCount.intValue = count.coerceAtLeast(0)
+        _loopsPlayed.intValue = 0
+    }
 
 
     fun loadMedia(url: String, type: String) {
@@ -69,6 +129,8 @@ class MediaViewModel {
         _duration.value = 0L
         _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
             url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
+        _loopsPlayed.intValue = 0
+        _playbackGeneration.intValue++
     }
 
     fun loadMediaFromSchedule(url: String, title: String, type: String) {
@@ -81,15 +143,21 @@ class MediaViewModel {
         _duration.value = 0L
         _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
             url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
+        _loopsPlayed.intValue = 0
+        _playbackGeneration.intValue++
     }
 
     fun togglePlayPause() {
         if (!_isLoaded.value) return
         _isPlaying.value = !_isPlaying.value
+        if (_isPlaying.value) _playbackGeneration.intValue++
     }
 
     fun play() {
-        if (_isLoaded.value) _isPlaying.value = true
+        if (_isLoaded.value) {
+            _isPlaying.value = true
+            _playbackGeneration.intValue++
+        }
     }
 
     fun pause() {
@@ -99,6 +167,8 @@ class MediaViewModel {
     fun stop() {
         _isPlaying.value = false
         _currentPosition.value = 0L
+        _loopsPlayed.intValue = 0
+        _playbackGeneration.intValue++
         _seekVersion.intValue++
     }
 
@@ -111,23 +181,28 @@ class MediaViewModel {
         _currentPosition.value = 0L
         _duration.value = 0L
         _isAudioFile.value = false
+        _loopsPlayed.intValue = 0
+        _playbackGeneration.intValue++
         _seekVersion.intValue++
     }
 
     fun seekForward(ms: Long = 10_000L) {
         if (_duration.value > 0) {
             _currentPosition.value = (_currentPosition.value + ms).coerceAtMost(_duration.value)
+            _playbackGeneration.intValue++
             _seekVersion.intValue++
         }
     }
 
     fun seekBackward(ms: Long = 10_000L) {
         _currentPosition.value = (_currentPosition.value - ms).coerceAtLeast(0L)
+        _playbackGeneration.intValue++
         _seekVersion.intValue++
     }
 
     fun seekTo(ms: Long) {
         _currentPosition.value = ms.coerceIn(0L, _duration.value.takeIf { it > 0 } ?: Long.MAX_VALUE)
+        _playbackGeneration.intValue++
         _seekVersion.intValue++
     }
 

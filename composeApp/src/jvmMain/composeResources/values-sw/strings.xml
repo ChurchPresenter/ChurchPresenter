@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Inaonyeshwa kwenye skrini sasa</string>
     <string name="media_seek_backward">Rudi Sekunde 10</string>
     <string name="media_seek_forward">Sogea Mbele Sekunde 10</string>
+    <string name="media_loop_count">Marudio</string>
+    <string name="media_loop_count_tooltip">Mara ngapi kujirudia (0 = bila mwisho)</string>
     <string name="media_preview">Onyesho la Awali</string>
     <string name="media_volume">Sauti</string>
     <string name="stop">Komesha</string>

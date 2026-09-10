@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Visas nu på skärmen</string>
     <string name="media_seek_backward">Spola bakåt 10 s</string>
     <string name="media_seek_forward">Spola framåt 10 s</string>
+    <string name="media_loop_count">Loopar</string>
+    <string name="media_loop_count_tooltip">Hur många gånger upprepa (0 = oändligt)</string>
     <string name="media_preview">Förhandsvisning</string>
     <string name="media_volume">Volym</string>
     <string name="stop">Stoppa</string>

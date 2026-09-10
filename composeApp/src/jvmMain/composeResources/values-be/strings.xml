@@ -515,6 +515,8 @@
     <string name="media_now_presenting">Зараз паказваецца на экране</string>
     <string name="media_seek_backward">Назад на 10 сек</string>
     <string name="media_seek_forward">Наперад на 10 сек</string>
+    <string name="media_loop_count">Паўторы</string>
+    <string name="media_loop_count_tooltip">Колькі разоў паўтарыць (0 = бясконца)</string>
     <string name="media_preview">Папярэдні прагляд</string>
     <string name="media_volume">Гучнасць</string>
     <string name="media_mute">Выключыць гук</string>

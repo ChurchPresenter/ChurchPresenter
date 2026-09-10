@@ -740,6 +740,8 @@
     <string name="media_now_presenting">Nu presenteren op scherm</string>
     <string name="media_seek_backward">10s terugspoelen</string>
     <string name="media_seek_forward">10s vooruitspoelen</string>
+    <string name="media_loop_count">Herhalen</string>
+    <string name="media_loop_count_tooltip">Hoe vaak herhalen (0 = oneindig)</string>
     <string name="media_preview">Voorbeeld</string>
     <string name="media_volume">Volume</string>
     <string name="media_mute">Dempen</string>

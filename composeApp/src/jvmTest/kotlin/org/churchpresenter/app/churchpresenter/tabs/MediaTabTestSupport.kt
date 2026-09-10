@@ -114,6 +114,11 @@ internal object MediaLabel {
     const val VOLUME = "Volume"
     const val MUTE = "Mute"
     const val UNMUTE = "Unmute"
+    const val LOOP_ON = "Loop On"
+    const val LOOP_OFF = "Loop Off"
+
+    /** The loop-count field's label, which NumberSettingsTextField renders uppercased. */
+    const val LOOP_COUNT = "LOOPS"
     const val NOW_PRESENTING = "Now presenting on screen"
     const val NO_SOURCE = "No media loaded"
 }
