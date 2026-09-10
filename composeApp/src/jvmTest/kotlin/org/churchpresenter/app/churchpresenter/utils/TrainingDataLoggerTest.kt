@@ -357,6 +357,21 @@ newline""",
     }
 
     @Test
+    fun `cleanup sweeps the engine error log that matches no session prefix`() {
+        // BibleEngineClient appends to this file for ever and names it after no session, so it
+        // matched none of the prefixes above and outlived every sweep while sharing this folder.
+        logDir.mkdirs()
+        val old = writeAged("engine-errors.jsonl", daysOld = 40)
+        val recent = writeAged("engine-errors-keep.jsonl", daysOld = 1)
+
+        resetCleanupLatch()
+        TrainingDataLogger.cleanupOldLogsOnce()
+
+        assertTrue(!old.exists(), "the engine error log must age out like every other log here")
+        assertTrue(recent.exists(), "only the error log itself is swept, and only when old")
+    }
+
+    @Test
     fun `cleanup leaves unrelated files untouched even when old`() {
         // Only the three known prefixes and the .db snapshots are subject to retention; anything
         // else the operator or another tool left in the folder must never be deleted.
