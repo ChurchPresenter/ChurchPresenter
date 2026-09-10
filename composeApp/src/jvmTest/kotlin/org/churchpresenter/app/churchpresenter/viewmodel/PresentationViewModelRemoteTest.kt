@@ -86,10 +86,12 @@ class PresentationViewModelRemoteTest {
         awaitUntil("the download") { !vm.isLoading && vm.slideFiles.size == 3 }
 
         assertEquals(3, vm.totalSlides)
-        // selectedPresentation is a File, so the primary's path is re-rooted with the local
-        // separator (and a drive letter on Windows). Compare through the same conversion: what the
-        // assertion is for is that the deck is identified by the PRIMARY's path, not the cache file.
-        assertEquals(File(remotePath).absolutePath, vm.selectedPresentation?.absolutePath)
+        assertEquals(
+            remotePath,
+            vm.selectedPresentationDisplayPath,
+            "the deck is shown by the PRIMARY's path, not by the cache file it was downloaded into"
+        )
+        assertEquals("Sunday.pptx", vm.selectedPresentationDisplayName)
         assertEquals(1, vm.presentations.size)
         assertNull(vm.loadError)
         assertTrue(vm.slideFiles.all { it.exists() }, "slides are cached to real files")
@@ -233,6 +235,43 @@ class PresentationViewModelRemoteTest {
         assertTrue(vm.presentations.isEmpty())
         assertTrue(vm.slideFiles.isEmpty())
         assertNull(vm.selectedPresentation)
+        assertNull(vm.selectedPresentationDisplayPath, "the primary's path goes with the deck")
+        assertNull(vm.selectedPresentationDisplayName)
+    }
+
+    // ── The path shown for a mirrored deck ──────────────────────────────────────
+
+    @Test
+    fun `a mirrored deck is named by the primary's path, whichever platform wrote it`() {
+        // A Windows primary mirrored onto this machine. `File.name` knows only the local separator,
+        // so on macOS and Linux it returns the whole string rather than the file name — which makes
+        // this red on CI before the fix, not only on a Windows follower.
+        val vm = viewModel()
+        val windowsPath = """C:\Presentations\Sunday.pptx"""
+
+        vm.loadPresentationFromRemote("sched-windows", windowsPath, slideCount = 2) { slideBytes(it) }
+        awaitUntil("download") { !vm.isLoading && vm.slideFiles.size == 2 }
+
+        assertEquals(windowsPath, vm.selectedPresentationDisplayPath)
+        assertEquals("Sunday.pptx", vm.selectedPresentationDisplayName)
+    }
+
+    @Test
+    fun `a local deck opened after a mirrored one is named by its own path`() {
+        val vm = viewModel()
+        vm.loadPresentationFromRemote("sched-before-local", remotePath, slideCount = 2) { slideBytes(it) }
+        awaitUntil("download") { !vm.isLoading && vm.slideFiles.size == 2 }
+
+        val local = pdfFile(pages = 1)
+        vm.addPresentation(local)
+        awaitUntil("the local deck to be selected") { vm.selectedPresentation == local }
+
+        assertEquals(
+            local.absolutePath,
+            vm.selectedPresentationDisplayPath,
+            "the primary's path must not survive into a deck opened here",
+        )
+        assertEquals(local.name, vm.selectedPresentationDisplayName)
     }
 
     // ── Render width from the output configuration ──────────────────────────────
