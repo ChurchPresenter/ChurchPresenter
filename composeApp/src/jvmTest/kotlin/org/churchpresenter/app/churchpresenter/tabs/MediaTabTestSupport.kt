@@ -45,6 +45,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 internal class MediaReports {
     /** mediaUrl, mediaTitle, mediaType — exactly what the schedule would be given. */
     val scheduled = mutableListOf<Triple<String, String, String>>()
+
+    /** The settings as the tab last rewrote them, so a persisted toggle is checked, not assumed. */
+    var settingsAfterChange: AppSettings? = null
 }
 
 @OptIn(ExperimentalTestApi::class)
@@ -70,7 +73,9 @@ internal fun mediaTab(
     val reports = MediaReports()
     // The tab's very first line is `LocalMediaViewModel.current ?: return`, so without this the whole
     // composable is a no-op and every assertion below would be about an empty screen.
-    val vm = MediaViewModel()
+    // Seeded from the settings under test, as main.kt does: a toggle that reads its initial value
+    // from settings is otherwise untestable through the tab.
+    val vm = MediaViewModel(appSettings)
     runComposeUiTest {
         setContent {
             ThemedForTest(themeMode) {
@@ -81,6 +86,9 @@ internal fun mediaTab(
                     selectedMediaItem = selectedMediaItem,
                     presenterManager = presenterManager,
                     onAddToSchedule = { url, title, type -> reports.scheduled += Triple(url, title, type) },
+                    onSettingsChange = { transform ->
+                        reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
+                    },
                     vlcAvailable = vlcAvailable,
                     vlcArchMismatch = vlcArchMismatch,
                     vlcLoadFailed = vlcLoadFailed,
@@ -114,6 +122,8 @@ internal object MediaLabel {
     const val VOLUME = "Volume"
     const val MUTE = "Mute"
     const val UNMUTE = "Unmute"
+    const val LOOP_ON = "Loop On"
+    const val LOOP_OFF = "Loop Off"
     const val NOW_PRESENTING = "Now presenting on screen"
     const val NO_SOURCE = "No media loaded"
 }

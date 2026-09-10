@@ -110,6 +110,51 @@ class MediaTabPlaybackTest {
         assertTrue(hasMediaButton(MediaLabel.UNMUTE))
     }
 
+    // ── Loop ────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the loop button starts off and toggles on`() = mediaTab { vm, _ ->
+        assertFalse(vm.isLooping, "media looping is off by default, unlike pictures and slides")
+        assertTrue(hasMediaButton(MediaLabel.LOOP_OFF))
+
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        assertTrue(vm.isLooping)
+        assertTrue(hasMediaButton(MediaLabel.LOOP_ON), "the button says which state it is in now")
+    }
+
+    @Test
+    fun `toggling loop persists the choice`() = mediaTab { vm, reports ->
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        assertEquals(true, reports.settingsAfterChange?.mediaIsLooping)
+
+        mediaButton(MediaLabel.LOOP_ON).performClick()
+        waitForIdle()
+
+        assertFalse(vm.isLooping, "clicking again turns it back off")
+        assertEquals(false, reports.settingsAfterChange?.mediaIsLooping)
+    }
+
+    @Test
+    fun `the saved setting is what the button starts as`() =
+        mediaTab(settings = { it.copy(mediaIsLooping = true) }) { vm, _ ->
+            assertTrue(vm.isLooping)
+            assertTrue(hasMediaButton(MediaLabel.LOOP_ON))
+        }
+
+    @Test
+    fun `loop can be set before anything is loaded`() = mediaTab { vm, _ ->
+        // Unlike the transport buttons it is not gated on isLoaded: choosing to loop and then
+        // picking the file is the order an operator setting up before a service works in.
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        assertTrue(vm.isLooping)
+    }
+
     // ── Go Live / Instance Link ─────────────────────────────────────────────────
 
     @Test

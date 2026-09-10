@@ -423,7 +423,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
     val currentScheduleActions by rememberUpdatedState(scheduleActions)
 
-    val mediaViewModel = remember { MediaViewModel() }
+    val mediaViewModel = remember { MediaViewModel(appSettings) }
 
     var identifyingScreen by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }

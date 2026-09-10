@@ -493,8 +493,10 @@ fun VideoPlayer(
         }
     }
 
-    // Load media when URL changes
-    LaunchedEffect(viewModel.mediaUrl) {
+    // Load media when the URL changes — and again on each repeat, which is what replayVersion is.
+    // Reloading rather than seeking: at the end of its media the player has stopped, and seeking a
+    // stopped player leaves it stopped.
+    LaunchedEffect(viewModel.mediaUrl, viewModel.replayVersion) {
         val url = viewModel.mediaUrl
         firstFrameCaptured.value = false  // reset grace window for each new file
         mp.controls().stop()
@@ -712,8 +714,10 @@ fun SoftwareVideoPlayer(
         }
     }
 
-    // Load media when URL changes
-    LaunchedEffect(viewModel.mediaUrl) {
+    // Load media when the URL changes — and again on each repeat, which is what replayVersion is.
+    // Reloading rather than seeking: at the end of its media the player has stopped, and seeking a
+    // stopped player leaves it stopped.
+    LaunchedEffect(viewModel.mediaUrl, viewModel.replayVersion) {
         val url = viewModel.mediaUrl
         firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
         SharedVideoOutput.frame.value = null  // clear stale frame while new media loads

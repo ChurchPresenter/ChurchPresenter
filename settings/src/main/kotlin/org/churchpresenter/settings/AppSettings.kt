@@ -34,6 +34,19 @@ data class AppSettings(
     val keyboardShortcutSettings: KeyboardShortcutSettings = KeyboardShortcutSettings(),
     val presentationStorageDirectory: String = "",
     val mediaStorageDirectory: String = "",
+    /**
+     * Whether the Media tab repeats the file it is playing.
+     *
+     * Here rather than in a `MediaSettings` of its own because that class does not exist: what the
+     * Media tab persists today is [mediaStorageDirectory], right above, and one boolean does not
+     * earn a new group. (The settings dialog's "Media" tab edits picture and presentation settings,
+     * despite the name.)
+     *
+     * Defaults **off**, unlike `PictureSettings.isLooping` and `PresentationSettings.isLooping`,
+     * which default on. A slideshow that reaches its end and starts again is the ordinary
+     * expectation; a sermon clip or a testimony video that quietly restarts is not.
+     */
+    val mediaIsLooping: Boolean = false,
     val schedulePanelWidthDp: Int = 280,
     val schedulePanelCollapsed: Boolean = false,
     val scheduleItemZoomPercent: Int = 100,

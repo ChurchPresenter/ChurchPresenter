@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -136,6 +137,71 @@ class MediaViewModelTest {
 
         vm.clearFinished()
         assertFalse(vm.mediaFinished)
+    }
+
+    // ── Looping ─────────────────────────────────────────────────────────────────
+
+    private fun looping(on: Boolean) =
+        MediaViewModel(AppSettings(mediaIsLooping = on))
+            .also { it.loadMedia("/media/clip.mp4", Constants.MEDIA_TYPE_LOCAL); it.play() }
+
+    @Test
+    fun `looping is off unless the saved setting says otherwise`() {
+        // Deliberately unlike the Pictures and Presentation loops, which default on: a slideshow
+        // starting again is expected, a sermon clip quietly restarting is not.
+        assertFalse(MediaViewModel().isLooping)
+        assertFalse(MediaViewModel(AppSettings()).isLooping)
+        assertTrue(MediaViewModel(AppSettings(mediaIsLooping = true)).isLooping)
+    }
+
+    @Test
+    fun `a looping file does not raise the flag that blanks the output`() {
+        // `mediaFinished` is what main.kt turns into requestClearDisplay(), so raising it between
+        // repeats would black the audience screen every time round.
+        val vm = looping(on = true)
+
+        vm.markFinished()
+
+        assertFalse(vm.mediaFinished, "this flag blanks the audience output")
+        assertTrue(vm.isPlaying, "the transport must not flip to paused between repeats")
+        assertEquals(0L, vm.currentPosition)
+    }
+
+    @Test
+    fun `each repeat asks the player to start the file again`() {
+        // Rewinding is not enough: at the end of its media the player has stopped, and seeking a
+        // stopped player leaves it stopped. replayVersion is what makes it reload.
+        val vm = looping(on = true)
+
+        vm.markFinished()
+        assertEquals(1, vm.replayVersion)
+
+        vm.markFinished()
+        assertEquals(2, vm.replayVersion, "a second time round asks again")
+    }
+
+    @Test
+    fun `the toggle is read when the file ends, not when it started`() {
+        // An operator who turns looping on part-way through a video means this video.
+        val vm = looping(on = false)
+        vm.isLooping = true
+
+        vm.markFinished()
+
+        assertFalse(vm.mediaFinished)
+        assertEquals(1, vm.replayVersion)
+    }
+
+    @Test
+    fun `turning looping off part-way through lets the file end`() {
+        val vm = looping(on = true)
+        vm.isLooping = false
+
+        vm.markFinished()
+
+        assertTrue(vm.mediaFinished, "the output is cleared as it would be without looping")
+        assertFalse(vm.isPlaying)
+        assertEquals(0, vm.replayVersion, "nothing was asked to replay")
     }
 
     // ── Seeking ─────────────────────────────────────────────────────────────────

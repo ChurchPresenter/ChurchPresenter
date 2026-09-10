@@ -2,9 +2,10 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 
-class MediaViewModel {
+class MediaViewModel(appSettings: AppSettings? = null) {
 
     // Media source
     private val _mediaUrl = mutableStateOf("")
@@ -55,7 +56,46 @@ class MediaViewModel {
     private val _mediaFinished = mutableStateOf(false)
     val mediaFinished: Boolean get() = _mediaFinished.value
 
-    fun markFinished() { _mediaFinished.value = true; _isPlaying.value = false; _currentPosition.value = 0L; _seekVersion.intValue++ }
+    /**
+     * Whether the file plays again when it reaches its end. Seeded from the saved setting; the tab
+     * writes the change back, as the Pictures and Presentation loop toggles do.
+     */
+    private val _isLooping = mutableStateOf(appSettings?.mediaIsLooping ?: false)
+    var isLooping: Boolean
+        get() = _isLooping.value
+        set(value) { _isLooping.value = value }
+
+    /**
+     * Incremented when a looping file reaches its end, to ask the player to start it again.
+     *
+     * Separate from [seekVersion] because rewinding is not enough: at the end of its media the
+     * player has stopped, and seeking a stopped player leaves it stopped. The player reloads on a
+     * change here, which is the one operation that works whatever state it is in.
+     */
+    private val _replayVersion = mutableIntStateOf(0)
+    val replayVersion: Int get() = _replayVersion.intValue
+
+    /**
+     * The end of the media, from the player's own event.
+     *
+     * When looping, [mediaFinished] is deliberately **not** set: that flag is what makes the app
+     * blank the audience output (`main.kt` reacts to it with `requestClearDisplay`), so setting it
+     * would black the screen between repeats. Playback is left marked as playing for the same
+     * reason — the transport must not flip to a paused-looking state each time round.
+     *
+     * The decision is read here, at the end of the file, rather than captured when playback began,
+     * so turning the toggle on or off part-way through a long video takes effect on that video.
+     */
+    fun markFinished() {
+        _currentPosition.value = 0L
+        _seekVersion.intValue++
+        if (_isLooping.value) {
+            _replayVersion.intValue++
+        } else {
+            _mediaFinished.value = true
+            _isPlaying.value = false
+        }
+    }
     fun clearFinished() { _mediaFinished.value = false }
 
 

@@ -98,6 +98,9 @@ import churchpresenter.composeapp.generated.resources.media_audio_continues
 import churchpresenter.composeapp.generated.resources.media_files_filter
 import churchpresenter.composeapp.generated.resources.media_load
 import churchpresenter.composeapp.generated.resources.media_local_file
+import churchpresenter.composeapp.generated.resources.ic_refresh
+import churchpresenter.composeapp.generated.resources.loop_off
+import churchpresenter.composeapp.generated.resources.loop_on
 import churchpresenter.composeapp.generated.resources.media_mute
 import churchpresenter.composeapp.generated.resources.media_network_url
 import churchpresenter.composeapp.generated.resources.media_no_source
@@ -582,6 +585,57 @@ fun MediaTab(
 
             // (Elapsed / total time now flank the seek bar below, so the combined time is
             // no longer shown here.)
+
+            // Divider
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+            // Loop — same control as the Pictures and Presentation tabs, down to the icon and the
+            // two strings, because it is the same idea and operators look for it in the same place.
+            TooltipArea(
+                tooltip = {
+                    Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp,
+                    ) {
+                        Text(
+                            stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(
+                    anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp),
+                ),
+            ) {
+                IconButton(
+                    onClick = {
+                        viewModel.isLooping = !viewModel.isLooping
+                        onSettingsChange { s -> s.copy(mediaIsLooping = viewModel.isLooping) }
+                    },
+                    modifier = Modifier.size(28.dp),
+                    colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ) else IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                    ),
+                ) {
+                    // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
+                    // semantics, so without this the button has no name at all.
+                    Icon(
+                        painterResource(Res.drawable.ic_refresh),
+                        contentDescription = stringResource(
+                            if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off
+                        ),
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
 
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
