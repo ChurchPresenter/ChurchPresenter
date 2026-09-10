@@ -91,6 +91,16 @@ class MediaTabScreenshotTest {
     }
 
     @Test
+    fun `looping armed, with the repeat count beside the button`() = shoot("looping") { vm ->
+        loadVideo(vm)
+        vm.setDuration(SEEK_DURATION_MS)
+        vm.setCurrentPosition(SEEK_POSITION_MS)
+        vm.toggleLooping()
+        vm.setLoopCount(LOOP_COUNT)
+        waitForIdle()
+    }
+
+    @Test
     fun `the recents bar, one entry pinned`() = shoot("recent_files") { vm ->
         RecentMediaFiles.add("$FIXTURES/Baptism Testimony.mp4")
         RecentMediaFiles.add("$FIXTURES/Welcome Loop.mp4")
@@ -128,5 +138,8 @@ class MediaTabScreenshotTest {
 
         const val SEEK_DURATION_MS = 214_000L
         const val SEEK_POSITION_MS = 72_000L
+
+        /** A finite repeat count, so the field is not shot on its "forever" default. */
+        const val LOOP_COUNT = 3
     }
 }

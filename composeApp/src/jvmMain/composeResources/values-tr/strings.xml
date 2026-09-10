@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Şu anda ekranda gösteriliyor</string>
     <string name="media_seek_backward">10 sn geri sar</string>
     <string name="media_seek_forward">10 sn ileri sar</string>
+    <string name="media_loop_count">Döngüler</string>
+    <string name="media_loop_count_tooltip">Kaç kez tekrarlanacak (0 = sonsuz)</string>
     <string name="media_preview">Ön izleme</string>
     <string name="media_volume">Ses düzeyi</string>
     <string name="stop">Durdur</string>

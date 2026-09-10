@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Sedang ditayangkan di layar</string>
     <string name="media_seek_backward">Mundur 10 dtk</string>
     <string name="media_seek_forward">Maju 10 dtk</string>
+    <string name="media_loop_count">Ulangan</string>
+    <string name="media_loop_count_tooltip">Berapa kali diulang (0 = tanpa henti)</string>
     <string name="media_preview">Pratinjau</string>
     <string name="media_volume">Volume</string>
     <string name="stop">Hentikan</string>

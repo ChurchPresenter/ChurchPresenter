@@ -516,6 +516,8 @@
     <string name="media_now_presenting">Wird jetzt auf dem Bildschirm präsentiert</string>
     <string name="media_seek_backward">10 Sek. zurück</string>
     <string name="media_seek_forward">10 Sek. vor</string>
+    <string name="media_loop_count">Schleifen</string>
+    <string name="media_loop_count_tooltip">Wie oft wiederholen (0 = endlos)</string>
     <string name="media_preview">Vorschau</string>
     <string name="media_volume">Lautstärke</string>
     <string name="media_mute">Stumm</string>

@@ -516,6 +516,8 @@
     <string name="media_now_presenting">Қазір экранда көрсетілуде</string>
     <string name="media_seek_backward">10 сек артқа</string>
     <string name="media_seek_forward">10 сек алға</string>
+    <string name="media_loop_count">Қайталау</string>
+    <string name="media_loop_count_tooltip">Неше рет қайталау (0 = шексіз)</string>
     <string name="media_preview">Алдын ала қарау</string>
     <string name="media_volume">Дыбыс деңгейі</string>
     <string name="media_mute">Үнсіз режим</string>

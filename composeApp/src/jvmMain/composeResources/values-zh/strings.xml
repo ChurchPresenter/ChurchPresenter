@@ -949,6 +949,8 @@
     <string name="media_now_presenting">正在屏幕上投放</string>
     <string name="media_seek_backward">后退 10 秒</string>
     <string name="media_seek_forward">前进 10 秒</string>
+    <string name="media_loop_count">循环</string>
+    <string name="media_loop_count_tooltip">重复次数 (0 = 无限)</string>
     <string name="media_preview">预览</string>
     <string name="media_volume">音量</string>
     <string name="stop">停止</string>
