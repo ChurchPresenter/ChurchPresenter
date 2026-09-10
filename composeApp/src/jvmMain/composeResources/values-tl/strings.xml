@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Kasalukuyang nasa screen</string>
     <string name="media_seek_backward">Bumalik ng 10s</string>
     <string name="media_seek_forward">Sumulong ng 10s</string>
+    <string name="media_loop_count">Loop</string>
+    <string name="media_loop_count_tooltip">Ilang beses uulitin (0 = walang hanggan)</string>
     <string name="media_preview">Preview</string>
     <string name="media_volume">Volume</string>
     <string name="stop">Itigil</string>

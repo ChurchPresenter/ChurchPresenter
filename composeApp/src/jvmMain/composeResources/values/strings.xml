@@ -1225,6 +1225,8 @@
     <string name="stop">Stop</string>
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
+    <string name="media_loop_count">Loops</string>
+    <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
     <string name="media_open_in_browser">Open in Browser</string>
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
     <string name="media_local_preview_note">Local video — use controls above to manage playback.</string>

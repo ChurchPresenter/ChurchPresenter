@@ -740,6 +740,8 @@
     <string name="media_now_presenting">En présentation à l'écran</string>
     <string name="media_seek_backward">Reculer de 10s</string>
     <string name="media_seek_forward">Avancer de 10s</string>
+    <string name="media_loop_count">Boucles</string>
+    <string name="media_loop_count_tooltip">Nombre de répétitions (0 = infini)</string>
     <string name="media_preview">Aperçu</string>
     <string name="media_volume">Volume</string>
     <string name="media_mute">Muet</string>

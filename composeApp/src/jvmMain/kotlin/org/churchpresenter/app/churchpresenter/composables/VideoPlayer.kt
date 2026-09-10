@@ -22,6 +22,14 @@ import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat
+import androidx.compose.runtime.MutableState
+import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
+import java.nio.ByteBuffer
 import java.awt.Component
 import java.io.File
 import java.nio.file.Files
@@ -35,6 +43,9 @@ private const val POSITION_POLL_MS = 200
 private const val VOLUME_PERCENT_SCALE = 100
 private const val STATE_SETTLE_MS = 250L
 private const val FRAME_INTERVAL_MS = 16L
+
+/** RV32 is four bytes to the pixel, which is how many pixels a native buffer holds. */
+private const val RV32_BYTES_PER_PIXEL = 4
 
 // libvlc media options, passed to play() one argument at a time rather than as an array: play() is
 // a Java vararg, so handing it an array makes the compiler copy that array at every call -- which
@@ -493,8 +504,9 @@ fun VideoPlayer(
         }
     }
 
-    // Load media when URL changes
-    LaunchedEffect(viewModel.mediaUrl) {
+    // Load media when the URL changes, and again on every loop restart: once VLC has reached the
+    // end of a file it is in the Ended state, where setTime()/play() alone will not start it over.
+    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion) {
         val url = viewModel.mediaUrl
         firstFrameCaptured.value = false  // reset grace window for each new file
         mp.controls().stop()
@@ -574,6 +586,124 @@ fun VideoPlayer(
 }
 
 /**
+ * A factory used only to create the CallbackVideoSurface; the media player component manages its
+ * own internal factory for the playback itself. Null when VLC cannot be initialised at all.
+ */
+@Composable
+private fun rememberSurfaceFactory(): MediaPlayerFactory? = remember {
+    try { MediaPlayerFactory() } catch (t: Throwable) {
+        CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed"); null
+    }
+}
+
+/**
+ * Turns each captured frame into an [ImageBitmap] on the composition's own coroutine rather than on
+ * VLC's render thread, which must not be blocked or the audio pipeline stutters. Capped at ~60fps.
+ */
+@Composable
+private fun ConvertFramesOffRenderThread(
+    frameVersion: MutableState<Long>,
+    holder: MutableState<BufferedImage?>,
+    out: MutableState<ImageBitmap?>,
+) {
+    LaunchedEffect(Unit) {
+        var lastVersion = 0L
+        while (isActive) {
+            val v = frameVersion.value
+            if (v != lastVersion) {
+                lastVersion = v
+                val img = holder.value
+                if (img != null) {
+                    val bitmap = img.toComposeImageBitmap()
+                    out.value = bitmap
+                    SharedVideoOutput.frame.value = bitmap
+                }
+            }
+            delay(FRAME_INTERVAL_MS)
+        }
+    }
+}
+
+/**
+ * The RV32 buffer format VLC renders into, re-allocating the backing [BufferedImage] whenever the
+ * source size changes.
+ */
+private fun rv32BufferFormatCallback(holder: MutableState<BufferedImage?>) =
+    object : BufferFormatCallback {
+        override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
+            val w = sourceWidth.coerceAtLeast(1)
+            val h = sourceHeight.coerceAtLeast(1)
+            holder.value = BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
+            return RV32BufferFormat(w, h)
+        }
+
+        override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
+    }
+
+/**
+ * Copies each decoded frame into the [BufferedImage] and bumps [frameVersion]. Runs on VLC's own
+ * render thread, so it does no conversion work: that happens in the composable's frame loop.
+ */
+private fun frameRenderCallback(
+    holder: MutableState<BufferedImage?>,
+    firstFrameCaptured: MutableState<Boolean>,
+    frameVersion: MutableState<Long>,
+) = RenderCallback { _, nativeBuffers, _ ->
+    val img = holder.value ?: return@RenderCallback
+    if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
+    val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
+    try {
+        val buf = nativeBuffers[0] ?: return@RenderCallback
+        buf.rewind()
+        buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / RV32_BYTES_PER_PIXEL))
+        firstFrameCaptured.value = true
+        frameVersion.value++  // signal new frame available, conversion happens off-thread
+    } catch (_: Throwable) { }
+}
+
+/**
+ * The software player's VLC event listener. [reportsPlaybackEnd] is what decides whether this
+ * decoder is the one that tells the view model the file ended — see the parameter on
+ * [SoftwareVideoPlayer].
+ */
+private fun softwarePlayerEvents(
+    viewModel: MediaViewModel,
+    firstFrameCaptured: MutableState<Boolean>,
+    gate: PlayerReleaseGate,
+    pauseTimer: MutableState<javax.swing.Timer?>,
+    reportsPlaybackEnd: Boolean,
+) = object : MediaPlayerEventAdapter() {
+    override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
+        if (newLength > 0) viewModel.setDuration(newLength)
+    }
+
+    override fun playing(mediaPlayer: MediaPlayer) {
+        if (viewModel.isPlaying) return
+        if (!firstFrameCaptured.value) {
+            // Give VLC up to 200 ms to decode and deliver the first frame to the render callback
+            // before pausing. This is critical for portrait/rotated videos (e.g. iPhone MOV) where
+            // the decoder may take longer to start. Held so onDispose can stop it — see the
+            // embedded player above.
+            pauseTimer.value?.stop()
+            pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
+                gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
+            }.also { it.isRepeats = false; it.start() }
+        } else {
+            SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
+        }
+    }
+
+    override fun finished(mediaPlayer: MediaPlayer) {
+        if (reportsPlaybackEnd) viewModel.markFinished()
+    }
+
+    override fun error(mediaPlayer: MediaPlayer) {
+        System.err.println("VLCJ (software): Playback error for: ${viewModel.mediaUrl}")
+        SwingUtilities.invokeLater { viewModel.pause() }
+    }
+}
+
+/**
  * Software-rendering video player that works in any context (including offscreen DeckLink).
  * Uses VLCJ's CallbackVideoSurface to capture frames as BufferedImage → Compose Image.
  * Integrates with MediaViewModel for full playback control.
@@ -583,13 +713,18 @@ fun SoftwareVideoPlayer(
     viewModel: MediaViewModel,
     modifier: Modifier = Modifier,
     audioEnabled: Boolean = true,
-    audioDeviceId: String = ""
+    audioDeviceId: String = "",
+    // Exactly one decoder may report the end of the file: with looping armed, the end is what
+    // spends a repeat, so a mirror mounted on the same view model reporting it too would spend
+    // two. The Media tab's decoder and MainDesktop's are already mutually exclusive; a mirror
+    // (the stage monitor) passes false.
+    reportsPlaybackEnd: Boolean = true
 ) {
     if (!isVlcAvailable) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
     val frameVersion = remember { mutableStateOf(0L) }
-    val bufferedImageHolder = remember { mutableStateOf<java.awt.image.BufferedImage?>(null) }
+    val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
 
     // On macOS, factory.mediaPlayers().newEmbeddedMediaPlayer() does NOT deliver video
     // frames to a callback surface — that requires CallbackMediaPlayerComponent.
@@ -598,36 +733,14 @@ fun SoftwareVideoPlayer(
     val component = remember { createMediaPlayerComponent() } ?: return
     val mp: EmbeddedMediaPlayer = component.mediaPlayer()
 
-    // A small factory used only to create the CallbackVideoSurface; the component
-    // above manages its own internal factory for actual media playback.
-    val surfaceFactory = remember {
-        try { MediaPlayerFactory() } catch (t: Throwable) {
-            CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed"); null
-        }
-    } ?: return
+    val surfaceFactory = rememberSurfaceFactory() ?: return
 
     // True once the render callback has delivered at least one frame for the current URL.
     // Used to give VLC a brief window (200 ms) before auto-pausing on first load so that
     // even slow-starting or portrait/rotated videos have time to deliver their first frame.
     val firstFrameCaptured = remember { mutableStateOf(false) }
 
-    // Convert frames off VLC's render thread to avoid blocking audio pipeline
-    LaunchedEffect(Unit) {
-        var lastVersion = 0L
-        while (isActive) {
-            val v = frameVersion.value
-            if (v != lastVersion) {
-                lastVersion = v
-                val img = bufferedImageHolder.value
-                if (img != null) {
-                    val bitmap = img.toComposeImageBitmap()
-                    currentFrame.value = bitmap
-                    SharedVideoOutput.frame.value = bitmap
-                }
-            }
-            delay(FRAME_INTERVAL_MS) // ~60fps cap
-        }
-    }
+    ConvertFramesOffRenderThread(frameVersion, bufferedImageHolder, currentFrame)
 
     // Native-handle lifetime guard and the deferred pause it protects — see PlayerReleaseGate.
     val gate = remember { PlayerReleaseGate() }
@@ -635,28 +748,8 @@ fun SoftwareVideoPlayer(
 
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
-        val bufferFormatCallback = object : uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback {
-            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat {
-                val w = sourceWidth.coerceAtLeast(1)
-                val h = sourceHeight.coerceAtLeast(1)
-                bufferedImageHolder.value = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB)
-                return uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat(w, h)
-            }
-            override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) = Unit
-        }
-
-        val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _, nativeBuffers, _ ->
-            val img = bufferedImageHolder.value ?: return@RenderCallback
-            if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
-            val pixelData = (img.raster.dataBuffer as? java.awt.image.DataBufferInt)?.data ?: return@RenderCallback
-            try {
-                val buf = nativeBuffers[0] ?: return@RenderCallback
-                buf.rewind()
-                buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
-                firstFrameCaptured.value = true
-                frameVersion.value++  // signal new frame available, conversion happens off-thread
-            } catch (_: Throwable) { }
-        }
+        val bufferFormatCallback = rv32BufferFormatCallback(bufferedImageHolder)
+        val renderCallback = frameRenderCallback(bufferedImageHolder, firstFrameCaptured, frameVersion)
 
         // Setting a new video surface here replaces the component's internal surface,
         // directing all decoded frames to our renderCallback instead.
@@ -664,34 +757,9 @@ fun SoftwareVideoPlayer(
             surfaceFactory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true)
         )
 
-        mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
-            override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
-                if (newLength > 0) viewModel.setDuration(newLength)
-            }
-            override fun playing(mediaPlayer: MediaPlayer) {
-                if (!viewModel.isPlaying) {
-                    if (!firstFrameCaptured.value) {
-                        // Give VLC up to 200 ms to decode and deliver the first frame to the
-                        // render callback before pausing. This is critical for portrait/rotated
-                        // videos (e.g. iPhone MOV) where the decoder may take longer to start.
-                        // Held so onDispose can stop it — see the embedded player above.
-                        pauseTimer.value?.stop()
-                        pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
-                            gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
-                        }.also { it.isRepeats = false; it.start() }
-                    } else {
-                        SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
-                    }
-                }
-            }
-            override fun finished(mediaPlayer: MediaPlayer) {
-                viewModel.markFinished()
-            }
-            override fun error(mediaPlayer: MediaPlayer) {
-                System.err.println("VLCJ (software): Playback error for: ${viewModel.mediaUrl}")
-                SwingUtilities.invokeLater { viewModel.pause() }
-            }
-        })
+        mp.events().addMediaPlayerEventListener(
+            softwarePlayerEvents(viewModel, firstFrameCaptured, gate, pauseTimer, reportsPlaybackEnd)
+        )
 
         onDispose {
             // Before releasePlayer(), so anything already queued sees the player as gone.
@@ -712,8 +780,9 @@ fun SoftwareVideoPlayer(
         }
     }
 
-    // Load media when URL changes
-    LaunchedEffect(viewModel.mediaUrl) {
+    // Load media when the URL changes, and again on every loop restart: once VLC has reached the
+    // end of a file it is in the Ended state, where setTime()/play() alone will not start it over.
+    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion) {
         val url = viewModel.mediaUrl
         firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
         SharedVideoOutput.frame.value = null  // clear stale frame while new media loads

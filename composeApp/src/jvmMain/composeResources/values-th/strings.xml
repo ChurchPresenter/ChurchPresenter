@@ -949,6 +949,8 @@
     <string name="media_now_presenting">กำลังแสดงบนจอ</string>
     <string name="media_seek_backward">ถอยหลัง 10 วิ</string>
     <string name="media_seek_forward">เดินหน้า 10 วิ</string>
+    <string name="media_loop_count">รอบ</string>
+    <string name="media_loop_count_tooltip">ทำซ้ำกี่รอบ (0 = ไม่สิ้นสุด)</string>
     <string name="media_preview">ดูตัวอย่าง</string>
     <string name="media_volume">ระดับเสียง</string>
     <string name="stop">หยุด</string>
