@@ -740,6 +740,8 @@
     <string name="media_now_presenting">Apresentando na tela agora</string>
     <string name="media_seek_backward">Retroceder 10s</string>
     <string name="media_seek_forward">Avançar 10s</string>
+    <string name="media_loop_count">Loops</string>
+    <string name="media_loop_count_tooltip">Quantas vezes repetir (0 = infinito)</string>
     <string name="media_preview">Pré-visualização</string>
     <string name="media_volume">Volume</string>
     <string name="media_mute">Silenciar</string>

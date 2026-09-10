@@ -949,6 +949,8 @@
     <string name="media_now_presenting">در حال نمایش روی صفحه</string>
     <string name="media_seek_backward">10 ثانیه به عقب</string>
     <string name="media_seek_forward">10 ثانیه به جلو</string>
+    <string name="media_loop_count">تکرارها</string>
+    <string name="media_loop_count_tooltip">چند بار تکرار شود (0 = بی‌پایان)</string>
     <string name="media_preview">پیش‌نمایش</string>
     <string name="media_volume">بلندی صدا</string>
     <string name="stop">توقف</string>

@@ -43,6 +43,7 @@ class MediaTabPlaybackTest {
         mediaButton(MediaLabel.SEEK_BACKWARD).assertIsNotEnabled()
         mediaButton(MediaLabel.SEEK_FORWARD).assertIsNotEnabled()
         mediaButton(MediaLabel.VOLUME).assertIsNotEnabled()
+        mediaButton(MediaLabel.LOOP_OFF).assertIsNotEnabled()
     }
 
     @Test
@@ -108,6 +109,49 @@ class MediaTabPlaybackTest {
 
         assertTrue(vm.isMuted)
         assertTrue(hasMediaButton(MediaLabel.UNMUTE))
+    }
+
+    // ── Loop ────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the loop button arms looping and shows the count beside it`() = mediaTab { vm, _ ->
+        loadUrl()
+        assertFalse(vm.isLooping)
+        assertFalse(showsExactly(MediaLabel.LOOP_COUNT), "the count is hidden until looping is armed")
+
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        assertTrue(vm.isLooping)
+        assertTrue(hasMediaButton(MediaLabel.LOOP_ON), "the button reads back its new state")
+        assertTrue(showsExactly(MediaLabel.LOOP_COUNT))
+    }
+
+    @Test
+    fun `disarming looping takes the count away again`() = mediaTab { vm, _ ->
+        loadUrl()
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        mediaButton(MediaLabel.LOOP_ON).performClick()
+        waitForIdle()
+
+        assertFalse(vm.isLooping)
+        assertFalse(showsExactly(MediaLabel.LOOP_COUNT))
+    }
+
+    @Test
+    fun `the loop count typed into the field reaches the view model`() = mediaTab { vm, _ ->
+        loadUrl()
+        mediaButton(MediaLabel.LOOP_OFF).performClick()
+        waitForIdle()
+
+        // Index 0 is the network-URL entry that loadUrl() used; the loop count is the last field.
+        val fields = onAllNodes(hasSetTextAction())
+        fields[fields.fetchSemanticsNodes().lastIndex].performTextReplacement("4")
+        waitForIdle()
+
+        assertEquals(4, vm.loopCount)
     }
 
     // ── Go Live / Instance Link ─────────────────────────────────────────────────

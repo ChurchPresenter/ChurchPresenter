@@ -505,7 +505,10 @@ private fun ZoneContent(
                 SoftwareVideoPlayer(
                     viewModel = mediaViewModel,
                     modifier = Modifier.fillMaxSize(),
-                    audioEnabled = false // audio is handled by the main output
+                    audioEnabled = false, // audio is handled by the main output
+                    // A mirror of the main output, so it must not report the end of the file
+                    // as well -- with looping armed that would spend two repeats per play.
+                    reportsPlaybackEnd = false
                 )
             }
         }

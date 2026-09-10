@@ -954,6 +954,8 @@
     <string name="media_now_presenting">இப்போது திரையில் காட்டப்படுகிறது</string>
     <string name="media_seek_backward">10 வினாடி பின்னோக்கி</string>
     <string name="media_seek_forward">10 வினாடி முன்னோக்கி</string>
+    <string name="media_loop_count">சுழற்சி</string>
+    <string name="media_loop_count_tooltip">எத்தனை முறை மீண்டும் இயக்க (0 = முடிவின்றி)</string>
     <string name="media_preview">முன்னோட்டம்</string>
     <string name="media_volume">ஒலியளவு</string>
     <string name="stop">நிறுத்து</string>

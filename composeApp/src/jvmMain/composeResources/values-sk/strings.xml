@@ -740,6 +740,8 @@
     <string name="media_now_presenting">Teraz sa prezentuje na obrazovke</string>
     <string name="media_seek_backward">Pretočiť dozadu o 10s</string>
     <string name="media_seek_forward">Pretočiť dopredu o 10s</string>
+    <string name="media_loop_count">Slučky</string>
+    <string name="media_loop_count_tooltip">Koľkokrát opakovať (0 = donekonečna)</string>
     <string name="media_preview">Náhľad</string>
     <string name="media_volume">Hlasitosť</string>
     <string name="media_mute">Stlmiť</string>

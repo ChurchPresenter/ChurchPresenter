@@ -820,6 +820,8 @@
     <string name="media_now_presenting">Praegu ekraanil esitamisel</string>
     <string name="media_seek_backward">Keri 10 s tagasi</string>
     <string name="media_seek_forward">Keri 10 s edasi</string>
+    <string name="media_loop_count">Kordused</string>
+    <string name="media_loop_count_tooltip">Mitu korda korrata (0 = lõputult)</string>
     <string name="media_preview">Eelvaade</string>
     <string name="media_volume">Helitugevus</string>
     <string name="stop">Peata</string>

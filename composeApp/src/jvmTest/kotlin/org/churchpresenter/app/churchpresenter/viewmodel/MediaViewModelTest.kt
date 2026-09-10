@@ -236,6 +236,176 @@ class MediaViewModelTest {
         assertEquals(0.8f, vm.effectiveVolume, "unmuting restores the previous level")
     }
 
+    // ── Looping ─────────────────────────────────────────────────────────────────
+
+    private fun playing(): MediaViewModel = loaded().also {
+        it.setDuration(60_000)
+        it.play()
+    }
+
+    @Test
+    fun `looping is off until it is armed`() {
+        val vm = playing()
+        assertFalse(vm.isLooping)
+        vm.markFinished()
+        assertTrue(vm.mediaFinished, "without looping the end of the file clears the output")
+    }
+
+    @Test
+    fun `a loop restarts the clip instead of finishing it`() {
+        val vm = playing()
+        vm.toggleLooping()
+        val restarts = vm.loopRestartVersion
+        vm.seekTo(59_000)
+
+        vm.markFinished()
+        assertFalse(vm.mediaFinished, "a loop must not clear the output")
+        assertTrue(vm.isPlaying, "the clip keeps playing across a loop")
+        assertEquals(0L, vm.currentPosition)
+        assertTrue(vm.loopRestartVersion > restarts, "the player must be told to start over")
+        assertEquals(1, vm.loopsPlayed)
+    }
+
+    @Test
+    fun `a loop count of zero repeats forever`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(0)
+        repeat(20) { vm.markFinished() }
+        assertFalse(vm.mediaFinished, "zero means forever, not zero repeats")
+        assertTrue(vm.isPlaying)
+    }
+
+    @Test
+    fun `a finite loop count plays that many repeats and then finishes`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(2)
+
+        vm.markFinished()
+        assertEquals(1, vm.loopsPlayed)
+        assertFalse(vm.mediaFinished)
+
+        vm.markFinished()
+        assertEquals(2, vm.loopsPlayed)
+        assertFalse(vm.mediaFinished, "the second repeat is still owed")
+
+        vm.markFinished()
+        assertTrue(vm.mediaFinished, "three plays in total, then the output clears")
+        assertFalse(vm.isPlaying)
+        assertEquals(0, vm.loopsPlayed, "the tally resets for the next play")
+    }
+
+    // One decoder reports the end of a file and the rest mirror it -- SoftwareVideoPlayer's
+    // `reportsPlaybackEnd` is what enforces that -- so a repeat cannot be spent twice over by
+    // two players seeing the same end. Within one play the tally below is the guard.
+    @Test
+    fun `the same end of file reported twice only clears the output once`() {
+        val vm = playing()
+        vm.seekTo(59_000)
+        val version = vm.seekVersion
+
+        vm.markFinished()
+        val afterFirst = vm.seekVersion
+        assertTrue(afterFirst > version, "the first end rewinds the player")
+
+        vm.markFinished()
+        assertEquals(afterFirst, vm.seekVersion, "a repeat of the same end is not another end")
+    }
+
+    @Test
+    fun `playing again after the file finished is not taken for a repeated event`() {
+        val vm = playing()
+        vm.markFinished()
+        assertTrue(vm.mediaFinished)
+        vm.clearFinished()
+
+        vm.play()
+        vm.markFinished()
+        assertTrue(vm.mediaFinished, "the second play ends on its own account")
+    }
+
+    @Test
+    fun `disarming looping lets the next end finish the media`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.markFinished()
+        assertFalse(vm.mediaFinished)
+
+        vm.toggleLooping()
+        assertFalse(vm.isLooping)
+        vm.markFinished()
+        assertTrue(vm.mediaFinished)
+    }
+
+    @Test
+    fun `arming looping again starts the tally over`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(5)
+        vm.markFinished()
+        assertEquals(1, vm.loopsPlayed)
+
+        vm.toggleLooping()
+        vm.toggleLooping()
+        assertEquals(0, vm.loopsPlayed, "re-arming must not carry the old tally over")
+    }
+
+    @Test
+    fun `changing the loop count starts the tally over`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(5)
+        vm.markFinished()
+        assertEquals(1, vm.loopsPlayed)
+
+        vm.setLoopCount(2)
+        assertEquals(0, vm.loopsPlayed, "a new count counts from this play, not the last one")
+    }
+
+    @Test
+    fun `a negative loop count is treated as forever`() {
+        val vm = MediaViewModel()
+        vm.setLoopCount(-3)
+        assertEquals(0, vm.loopCount)
+    }
+
+    @Test
+    fun `stopping clears the repeats already played`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(3)
+        vm.markFinished()
+        assertEquals(1, vm.loopsPlayed)
+
+        vm.stop()
+        assertEquals(0, vm.loopsPlayed)
+        assertTrue(vm.isLooping, "stopping is not disarming")
+    }
+
+    @Test
+    fun `loading other media clears the repeats but keeps the loop armed`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.setLoopCount(3)
+        vm.markFinished()
+
+        vm.loadMedia("/media/next.mp4", Constants.MEDIA_TYPE_LOCAL)
+        assertEquals(0, vm.loopsPlayed)
+        assertTrue(vm.isLooping, "the operator armed the loop, not the file")
+        assertEquals(3, vm.loopCount)
+    }
+
+    @Test
+    fun `unloading clears the repeats already played`() {
+        val vm = playing()
+        vm.toggleLooping()
+        vm.markFinished()
+
+        vm.unload()
+        assertEquals(0, vm.loopsPlayed)
+    }
+
     // ── Time formatting ─────────────────────────────────────────────────────────
 
     @Test

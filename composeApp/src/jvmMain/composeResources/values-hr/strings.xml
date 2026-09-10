@@ -949,6 +949,8 @@
     <string name="media_now_presenting">Trenutno prikazano na zaslonu</string>
     <string name="media_seek_backward">Nazad 10 s</string>
     <string name="media_seek_forward">Naprijed 10 s</string>
+    <string name="media_loop_count">Petlje</string>
+    <string name="media_loop_count_tooltip">Koliko puta ponoviti (0 = bez kraja)</string>
     <string name="media_preview">Pretpregled</string>
     <string name="media_volume">Glasnoća</string>
     <string name="stop">Zaustavi</string>

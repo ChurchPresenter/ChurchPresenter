@@ -949,6 +949,8 @@
     <string name="media_now_presenting">画面に表示中</string>
     <string name="media_seek_backward">10 秒戻す</string>
     <string name="media_seek_forward">10 秒進める</string>
+    <string name="media_loop_count">ループ</string>
+    <string name="media_loop_count_tooltip">繰り返す回数 (0 は無限)</string>
     <string name="media_preview">プレビュー</string>
     <string name="media_volume">音量</string>
     <string name="stop">停止</string>

@@ -949,6 +949,8 @@
     <string name="media_now_presenting">अहिले पर्दामा देखाइँदै</string>
     <string name="media_seek_backward">१० से पछाडि</string>
     <string name="media_seek_forward">१० से अगाडि</string>
+    <string name="media_loop_count">लूप</string>
+    <string name="media_loop_count_tooltip">कति पटक दोहोर्‍याउने (0 = अनन्त)</string>
     <string name="media_preview">पूर्वदृश्य</string>
     <string name="media_volume">आवाज</string>
     <string name="stop">रोक्नुहोस्</string>

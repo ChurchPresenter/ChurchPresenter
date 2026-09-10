@@ -949,6 +949,8 @@
     <string name="media_now_presenting">معروض الآن على الشاشة</string>
     <string name="media_seek_backward">إرجاع 10 ثوانٍ</string>
     <string name="media_seek_forward">تقديم 10 ثوانٍ</string>
+    <string name="media_loop_count">تكرارات</string>
+    <string name="media_loop_count_tooltip">كم مرة يتكرر (0 = بلا نهاية)</string>
     <string name="media_preview">معاينة</string>
     <string name="media_volume">مستوى الصوت</string>
     <string name="stop">إيقاف</string>
