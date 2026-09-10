@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">En vivo</string>
     <string name="live_preview_nothing">Nada en vivo</string>
+    <string name="collapse_preview">Ocultar esta vista previa</string>
+    <string name="expand_preview">Mostrar esta vista previa</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Canto</string>
     <string name="live_preview_picture">Imagen</string>

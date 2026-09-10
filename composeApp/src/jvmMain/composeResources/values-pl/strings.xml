@@ -818,6 +818,8 @@
     <string name="live_preview_lower_third">Dolna trzecia</string>
     <string name="live_preview_media">Media</string>
     <string name="live_preview_nothing">Nic nie jest na żywo</string>
+    <string name="collapse_preview">Ukryj ten podgląd</string>
+    <string name="expand_preview">Pokaż ten podgląd</string>
     <string name="live_preview_picture">Obraz</string>
     <string name="live_preview_presentation">Prezentacja</string>
     <string name="live_preview_song">Pieśń</string>

@@ -12,6 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
@@ -39,17 +41,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +66,9 @@ import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.collapse_preview
+import churchpresenter.composeapp.generated.resources.expand_preview
+import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
@@ -317,25 +326,27 @@ private fun SingleDisplayPreview(
         // does not have.
         Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
         Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third)
-        else -> null
+        // Full screen is the remaining mode, and it used to be the one with no chip at all -- so a
+        // stack of previews named the two special outputs and left the ordinary ones to be guessed
+        // at. It is also the row that has to be there for the header below to be clickable.
+        else -> stringResource(Res.string.display_fullscreen)
     }
 
-    Column(modifier = modifier) {
-        // Display mode chip (e.g. "Stage Monitor", "Lower Third") — sits above the preview so it
-        // never covers the content.
-        if (displayModeChipLabel != null) {
-            Text(
-                text = displayModeChipLabel,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 9.sp,
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(3.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            )
-        }
+    // Session-only, and deliberately not persisted: collapsing is something an operator does to get
+    // a long sidebar out of the way for a moment, not a property of the output. Nothing here is
+    // needed by the real presenter window, which main.kt drives on its own -- a collapsed preview
+    // stops drawing and nothing else changes.
+    var expanded by remember { mutableStateOf(true) }
 
+    Column(modifier = modifier) {
+        PreviewHeader(
+            modeLabel = displayModeChipLabel,
+            outputLabel = label,
+            expanded = expanded,
+            onToggle = { expanded = !expanded },
+        )
+
+        if (expanded) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -613,8 +624,66 @@ private fun SingleDisplayPreview(
             }
         }
         }
+        }
     }
 }
+
+/**
+ * The row above one preview: the output's display mode, and a caret that folds the picture away.
+ *
+ * The mode chip used to be drawn for Stage Monitor and Lower Third only, so the ordinary full-screen
+ * outputs -- the majority of them -- were the ones with nothing written above them. Every mode names
+ * itself now, which is also what gives every preview a row to click.
+ *
+ * [outputLabel] is drawn **only while collapsed**, and against the far edge. Open, the output
+ * already names itself in the corner of its own picture and repeating it here would say the same
+ * thing twice in one glance; collapsed, that corner is gone and a stack of rows reading "Full
+ * Screen" three times over could not be told apart. Pushing it to the trailing edge keeps it in the
+ * column the in-picture label sits in, so the name does not jump across the row as a preview folds.
+ */
+@Composable
+private fun PreviewHeader(
+    modeLabel: String,
+    outputLabel: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(3.dp))
+            .clickable(onClick = onToggle)
+            .padding(bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowDown,
+            contentDescription = if (expanded) stringResource(Res.string.collapse_preview)
+                                 else stringResource(Res.string.expand_preview),
+            modifier = Modifier.size(14.dp).rotate(if (expanded) 0f else CARET_CLOSED_DEGREES),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = modeLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 9.sp,
+        )
+        if (!expanded) {
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = outputLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                fontSize = 9.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+/** How far the caret turns when the preview is folded away; the same quarter turn the tray uses. */
+private const val CARET_CLOSED_DEGREES = -90f
 
 /**
  * The pulsing LIVE badge.

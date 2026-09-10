@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">ສົດ</string>
     <string name="live_preview_nothing">ບໍ່ມີຫຍັງອອກສົດ</string>
+    <string name="collapse_preview">ເຊື່ອງການເບິ່ງກ່ອນນີ້</string>
+    <string name="expand_preview">ສະແດງການເບິ່ງກ່ອນນີ້</string>
     <string name="live_preview_bible">ພຣະຄຳພີ</string>
     <string name="live_preview_song">ເພງ</string>
     <string name="live_preview_picture">ຮູບ</string>

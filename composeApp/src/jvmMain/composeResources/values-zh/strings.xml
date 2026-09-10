@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">上屏</string>
     <string name="live_preview_nothing">当前没有内容上屏</string>
+    <string name="collapse_preview">隐藏此预览</string>
+    <string name="expand_preview">显示此预览</string>
     <string name="live_preview_bible">圣经</string>
     <string name="live_preview_song">歌曲</string>
     <string name="live_preview_picture">图片</string>

@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Нижня третина</string>
     <string name="live_preview_media">Медіа</string>
     <string name="live_preview_nothing">Нічого не в ефірі</string>
+    <string name="collapse_preview">Сховати цей попередній перегляд</string>
+    <string name="expand_preview">Показати цей попередній перегляд</string>
     <string name="live_preview_picture">Зображення</string>
     <string name="live_preview_presentation">Презентація</string>
     <string name="live_preview_song">Пісня</string>

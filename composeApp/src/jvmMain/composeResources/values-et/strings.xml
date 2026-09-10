@@ -959,6 +959,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Miski pole live</string>
+    <string name="collapse_preview">Peida see eelvaade</string>
+    <string name="expand_preview">Näita seda eelvaadet</string>
     <string name="live_preview_bible">Piibel</string>
     <string name="live_preview_song">Laul</string>
     <string name="live_preview_picture">Pilt</string>

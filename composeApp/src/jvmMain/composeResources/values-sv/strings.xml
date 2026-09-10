@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Inget är live</string>
+    <string name="collapse_preview">Dölj den här förhandsvisningen</string>
+    <string name="expand_preview">Visa den här förhandsvisningen</string>
     <string name="live_preview_bible">Bibel</string>
     <string name="live_preview_song">Sång</string>
     <string name="live_preview_picture">Bild</string>

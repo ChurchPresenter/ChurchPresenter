@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Mikään ei ole livenä</string>
+    <string name="collapse_preview">Piilota tämä esikatselu</string>
+    <string name="expand_preview">Näytä tämä esikatselu</string>
     <string name="live_preview_bible">Raamattu</string>
     <string name="live_preview_song">Laulu</string>
     <string name="live_preview_picture">Kuva</string>

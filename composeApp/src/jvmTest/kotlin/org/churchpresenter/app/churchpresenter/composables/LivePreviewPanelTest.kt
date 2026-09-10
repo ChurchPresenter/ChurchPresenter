@@ -4,8 +4,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -54,6 +57,10 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalTestApi::class)
 class LivePreviewPanelTest {
+
+    /** The caret's content descriptions — the only handle the header row exposes. */
+    private val HIDE = "Hide this preview"
+    private val SHOW = "Show this preview"
 
     // ── Display counting / dev-fallback ───────────────────────────────────────────────────────
 
@@ -421,28 +428,20 @@ class LivePreviewPanelTest {
         onNodeWithContentDescription("Lock screen to current tab").assertDoesNotExist()
     }
 
-    // ── Display mode chip ──────────────────────────────────────────────────────────────────────
+    // ── Display mode label ─────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `fullscreen, the default display mode, shows no chip`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
-            }
-        }
-        onNodeWithText("Stage Monitor").assertDoesNotExist()
-        onNodeWithText("Lower Third").assertDoesNotExist()
-    }
-
-    @Test
-    fun `each non-fullscreen display mode shows its own chip`() = runComposeUiTest {
+    fun `every display mode names itself, fullscreen included`() = runComposeUiTest {
         val cases = listOf(
+            // Fullscreen used to be the one mode with no label at all, so the ordinary outputs —
+            // the majority of them — were the ones left unnamed.
+            Constants.DISPLAY_MODE_FULLSCREEN to "Full Screen",
             Constants.DISPLAY_MODE_STAGE_MONITOR to "Stage Monitor",
             // Both stored modes carry the one label: a lower third is a lower third.
             Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL to "Lower Third",
             Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Lower Third",
         )
-        for ((mode, chipText) in cases) {
+        for ((mode, label) in cases) {
             val settings = AppSettings(
                 projectionSettings =
                     ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode)))
@@ -452,8 +451,123 @@ class LivePreviewPanelTest {
                     LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
                 }
             }
-            onNodeWithText(chipText).assertExists("displayMode=\"$mode\" must show the \"$chipText\" chip")
+            onNodeWithText(label).assertExists("displayMode=\"$mode\" must be labelled \"$label\"")
         }
+    }
+
+    @Test
+    fun `a mode names only itself, not its neighbours`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Full Screen").assertExists()
+        onNodeWithText("Stage Monitor").assertDoesNotExist()
+        onNodeWithText("Lower Third").assertDoesNotExist()
+    }
+
+    // ── The header row folds the preview away ──────────────────────────────────────────────────
+
+    @Test
+    fun `a preview starts open, and its caret offers to hide it`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).assertExists()
+        onNodeWithContentDescription(SHOW).assertDoesNotExist()
+        // The output names itself inside its own picture, which is only drawn while open.
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    @Test
+    fun `clicking the header hides the preview and offers to show it again`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+
+        onNodeWithContentDescription(SHOW).assertExists()
+        onNodeWithContentDescription(HIDE).assertDoesNotExist()
+        // The mode label is the row itself and stays; the lock toggle lives inside the picture.
+        onNodeWithText("Full Screen").assertExists()
+        onNodeWithContentDescription("Lock screen to current tab").assertDoesNotExist()
+    }
+
+    @Test
+    fun `clicking the header again brings the preview back`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+        onNodeWithContentDescription(SHOW).performClick()
+
+        onNodeWithContentDescription(HIDE).assertExists()
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    @Test
+    fun `the output name moves into the header once the picture is gone`() = runComposeUiTest {
+        // Open, the name is in the corner of the picture and the header would repeat it. Collapsed,
+        // that corner is gone and a stack of rows reading "Full Screen" could not be told apart.
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(1920, 0, 1280, 720), "Foyer TV"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onAllNodesWithText("Foyer TV").assertCountEquals(1)
+
+        onNodeWithContentDescription(HIDE).performClick()
+        onAllNodesWithText("Foyer TV").assertCountEquals(1)
+    }
+
+    @Test
+    fun `each preview folds on its own`() = runComposeUiTest {
+        val settings = AppSettings(projectionSettings = ProjectionSettings(devWindowCount = 3))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onAllNodesWithContentDescription(HIDE).assertCountEquals(3)
+
+        onAllNodesWithContentDescription(HIDE)[1].performClick()
+
+        onAllNodesWithContentDescription(HIDE).assertCountEquals(2)
+        onAllNodesWithContentDescription(SHOW).assertCountEquals(1)
+        // Screen 2's picture is the one that went; the other two still name themselves in theirs.
+        onNodeWithText("Screen 1").assertExists()
+        onNodeWithText("Screen 3").assertExists()
+    }
+
+    @Test
+    fun `folding a preview leaves its lock alone`() = runComposeUiTest {
+        // Collapsing is a sidebar convenience, not an output setting: what the real presenter window
+        // is doing must not change because the operator wanted the space back.
+        val manager = PresenterManager()
+        manager.setScreenLock(0, Presenting.BIBLE)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = manager, appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+
+        assertEquals(Presenting.BIBLE, manager.screenLocks.value[0])
     }
 
     // ── Website: snapshot vs URL placeholder vs nothing ──────────────────────────────────────

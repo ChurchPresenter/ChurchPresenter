@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Jonli</string>
     <string name="live_preview_nothing">Ekranda hech narsa yoʻq</string>
+    <string name="collapse_preview">Bu oldindan koʻrishni yashirish</string>
+    <string name="expand_preview">Bu oldindan koʻrishni koʻrsatish</string>
     <string name="live_preview_bible">Muqaddas Kitob</string>
     <string name="live_preview_song">Qoʻshiq</string>
     <string name="live_preview_picture">Rasm</string>

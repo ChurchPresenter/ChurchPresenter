@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Niets is live</string>
+    <string name="collapse_preview">Dit voorbeeld verbergen</string>
+    <string name="expand_preview">Dit voorbeeld tonen</string>
     <string name="live_preview_bible">Bijbel</string>
     <string name="live_preview_song">Lied</string>
     <string name="live_preview_picture">Afbeelding</string>

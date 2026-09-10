@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Uživo</string>
     <string name="live_preview_nothing">Ništa nije uživo</string>
+    <string name="collapse_preview">Sakrij ovaj pretpregled</string>
+    <string name="expand_preview">Prikaži ovaj pretpregled</string>
     <string name="live_preview_bible">Biblija</string>
     <string name="live_preview_song">Pjesma</string>
     <string name="live_preview_picture">Slika</string>

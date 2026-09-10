@@ -867,6 +867,8 @@
     <string name="live_preview_lower_third">Dolní třetina</string>
     <string name="live_preview_media">Média</string>
     <string name="live_preview_nothing">Nic není živě</string>
+    <string name="collapse_preview">Skrýt tento náhled</string>
+    <string name="expand_preview">Zobrazit tento náhled</string>
     <string name="live_preview_picture">Obrázek</string>
     <string name="live_preview_presentation">Prezentace</string>
     <string name="live_preview_song">Píseň</string>

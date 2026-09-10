@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">लाइव</string>
     <string name="live_preview_nothing">कुछ भी लाइव नहीं है</string>
+    <string name="collapse_preview">यह झलक छिपाएँ</string>
+    <string name="expand_preview">यह झलक दिखाएँ</string>
     <string name="live_preview_bible">बाइबल</string>
     <string name="live_preview_song">गीत</string>
     <string name="live_preview_picture">चित्र</string>
