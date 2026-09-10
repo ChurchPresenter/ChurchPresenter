@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -300,7 +301,7 @@ class QAManager {
                     votedIps = _votedIps.mapValues { entry -> entry.value.toMap() }
                 )
                 stateFile.parentFile?.mkdirs()
-                stateFile.writeText(json.encodeToString(QAState.serializer(), state))
+                stateFile.writeTextAtomically(json.encodeToString(QAState.serializer(), state))
             } catch (_: Exception) { }
         }
     }

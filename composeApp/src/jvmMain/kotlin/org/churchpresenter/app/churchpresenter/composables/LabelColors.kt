@@ -28,6 +28,7 @@ import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.theme
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.colorSchemeFor
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -116,7 +117,7 @@ internal object RecentLabelColors {
         try {
             val f = file()
             f.parentFile?.mkdirs()
-            f.writeText(Json.encodeToString(combos.toList()))
+            f.writeTextAtomically(Json.encodeToString(combos.toList()))
         } catch (_: Exception) {}
     }
 }

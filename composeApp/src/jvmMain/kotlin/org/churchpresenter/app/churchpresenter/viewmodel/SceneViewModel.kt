@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
@@ -230,7 +231,7 @@ class SceneViewModel {
     fun saveScenes() {
         try {
             appDataDir.mkdirs()
-            scenesFile.writeText(jsonFormat.encodeToString(_scenes.toList()))
+            scenesFile.writeTextAtomically(jsonFormat.encodeToString(_scenes.toList()))
         } catch (_: Exception) {
             // Silently handle write errors
         }

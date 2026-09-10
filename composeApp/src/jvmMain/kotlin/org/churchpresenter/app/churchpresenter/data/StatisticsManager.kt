@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.settings.SettingsManager
 import java.io.File
@@ -204,11 +205,11 @@ class StatisticsManager {
     } catch (_: Exception) { PlayEventLog() }
 
     private fun save() {
-        try { statsFile.writeText(jsonFormat.encodeToString(statistics)) } catch (_: Exception) {}
+        try { statsFile.writeTextAtomically(jsonFormat.encodeToString(statistics)) } catch (_: Exception) {}
     }
 
     private fun saveLog() {
-        try { logFile.writeText(jsonFormat.encodeToString(eventLog)) } catch (_: Exception) {}
+        try { logFile.writeTextAtomically(jsonFormat.encodeToString(eventLog)) } catch (_: Exception) {}
     }
 
     // ── Recording ─────────────────────────────────────────────────────────────
