@@ -24,6 +24,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * What a lower-third output actually puts on screen: a band across the bottom and nothing above it.
@@ -168,6 +169,106 @@ class LowerThirdBandBackgroundRenderTest {
         )
         val (band) = render(appSettings, listOf(EDGE_X to IN_BAND_Y))
         assertRgb(Color(0xFF112233), band, "FollowDefault must hand the band the full-screen card")
+    }
+
+    @Test
+    fun `a wash paints above the band and leaves the band itself alone`() {
+        val appSettings = settings(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#227744",
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_COLOR,
+                    backgroundColor = "#003366",
+                    backgroundOpacity = 1f,
+                ),
+            ),
+        )
+        val (above, band) = render(appSettings, listOf(EDGE_X to ABOVE_BAND_Y, EDGE_X to IN_BAND_Y))
+        assertRgb(Color(0xFF227744), above, "the wash must cover the two thirds above the band")
+        assertRgb(Color(0xFF003366), band, "and must not reach into the band")
+    }
+
+    @Test
+    fun `a surface carrying its own band still takes the default's wash`() {
+        val appSettings = settings(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#227744",
+                // Its own band, so it is not inheriting anything the band's type row can express.
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_COLOR,
+                    backgroundColor = "#003366",
+                    backgroundOpacity = 1f,
+                    aboveBandType = Constants.BACKGROUND_DEFAULT,
+                ),
+            ),
+        )
+        val (above) = render(appSettings, listOf(EDGE_X to ABOVE_BAND_Y))
+        assertRgb(Color(0xFF227744), above, "the wash falls through on its own type")
+    }
+
+    @Test
+    fun `a surface washing itself outranks the default's wash`() {
+        val appSettings = settings(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#227744",
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_COLOR,
+                    backgroundColor = "#003366",
+                    backgroundOpacity = 1f,
+                    aboveBandType = Constants.BACKGROUND_COLOR,
+                    aboveBandColor = "#884400",
+                ),
+            ),
+        )
+        val (above) = render(appSettings, listOf(EDGE_X to ABOVE_BAND_Y))
+        assertRgb(Color(0xFF884400), above, "the surface's own wash wins")
+    }
+
+    @Test
+    fun `a surface on Transparent above the band paints nothing over the default's wash`() {
+        val appSettings = settings(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#227744",
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_COLOR,
+                    backgroundColor = "#003366",
+                    backgroundOpacity = 1f,
+                    aboveBandType = Constants.BACKGROUND_TRANSPARENT,
+                ),
+            ),
+        )
+        val (above) = render(appSettings, listOf(EDGE_X to ABOVE_BAND_Y))
+        assertRgb(Color.Black, above, "Transparent must stop the fall-through, not continue it")
+    }
+
+    @Test
+    fun `the wash meets the band with no gap between them`() {
+        val appSettings = settings(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+                defaultLowerThirdAboveBandColor = "#227744",
+                bibleLowerThirdBackground = BackgroundConfig(
+                    backgroundType = Constants.BACKGROUND_COLOR,
+                    backgroundColor = "#003366",
+                    backgroundOpacity = 1f,
+                ),
+            ),
+        )
+        // Every row across the seam is one or the other; a rounding gap would show the red the
+        // output box is painted with, which is neither.
+        val bandTop = H - H * BAND_PERCENT / 100
+        val samples = (-2..2).map { EDGE_X to bandTop + it }
+        render(appSettings, samples).forEachIndexed { offset, pixel ->
+            val wash = pixel.red < 0.5f && pixel.green > 0.3f
+            assertTrue(
+                wash || pixel.blue > 0.3f,
+                "row ${'$'}{bandTop - 2 + offset} is neither the wash nor the band — got ${'$'}pixel",
+            )
+        }
     }
 
     @Test

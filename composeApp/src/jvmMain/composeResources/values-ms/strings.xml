@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Fail imej</string>
     <string name="background_video_file">Fail video</string>
     <string name="background_opacity_caption">Kelegapan</string>
+    <string name="background_above_band_caption">Di Atas Bar</string>
+    <string name="background_above_band_fill">Warna Isian</string>
+    <string name="background_above_band_opacity">Kelegapan Isian</string>
     <string name="quick_background_title">Latar pantas</string>
     <string name="quick_background_reset">Kembali biasa</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

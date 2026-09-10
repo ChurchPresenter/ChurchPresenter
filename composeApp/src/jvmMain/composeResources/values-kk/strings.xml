@@ -2507,6 +2507,9 @@
     <string name="background_image_file">Сурет файлы</string>
     <string name="background_video_file">Бейне файлы</string>
     <string name="background_opacity_caption">Мөлдірлігі</string>
+    <string name="background_above_band_caption">Жолақ үстінде</string>
+    <string name="background_above_band_fill">Толтыру түсі</string>
+    <string name="background_above_band_opacity">Толтыру мөлдірлігі</string>
     <string name="quick_background_title">Жылдам фондар</string>
     <string name="quick_background_reset">Қалыпқа қайту</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

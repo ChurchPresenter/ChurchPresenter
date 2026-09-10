@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Attēla fails</string>
     <string name="background_video_file">Video fails</string>
     <string name="background_opacity_caption">Necaurredzamība</string>
+    <string name="background_above_band_caption">Virs joslas</string>
+    <string name="background_above_band_fill">Aizpildījuma krāsa</string>
+    <string name="background_above_band_opacity">Aizpildījuma necaurredzamība</string>
     <string name="quick_background_title">Ātrie foni</string>
     <string name="quick_background_reset">Atpakaļ uz parasto</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

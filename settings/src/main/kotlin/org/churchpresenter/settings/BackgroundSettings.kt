@@ -36,6 +36,19 @@ data class BackgroundSettings(
     val defaultBackgroundCamera: CameraDeviceRef = CameraDeviceRef(),
     val defaultLowerThirdBackgroundCamera: CameraDeviceRef = CameraDeviceRef(),
     /**
+     * The default lower third's own wash — see [BackgroundConfig.aboveBandType] for what the three
+     * values mean. Only the lower-third Default has one: the full-screen Default covers the whole
+     * output, so it has no area above a band.
+     *
+     * Starts `Transparent`, not `Default`: this is the top of the wash chain, the way the
+     * full-screen Default is the top of the band's. Its band may follow the full-screen Default;
+     * there is no full-screen wash for its wash to follow, so it answers for itself or paints
+     * nothing — and nothing is what every lower third drew before this existed.
+     */
+    val defaultLowerThirdAboveBandType: String = Constants.BACKGROUND_TRANSPARENT,
+    val defaultLowerThirdAboveBandColor: String = "#000000",
+    val defaultLowerThirdAboveBandOpacity: Float = 1.0f,
+    /**
      * The quick tray's live pick, standing in front of every background above it — and in front of
      * a song's own, since an operator reaching for the tray mid-service is overriding what is on
      * screen right now.

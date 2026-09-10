@@ -2514,6 +2514,9 @@
     <string name="background_image_file">ไฟล์ภาพ</string>
     <string name="background_video_file">ไฟล์วิดีโอ</string>
     <string name="background_opacity_caption">ความทึบ</string>
+    <string name="background_above_band_caption">เหนือแถบ</string>
+    <string name="background_above_band_fill">สีเติม</string>
+    <string name="background_above_band_opacity">ความทึบของสีเติม</string>
     <string name="quick_background_title">พื้นหลังด่วน</string>
     <string name="quick_background_reset">กลับสู่ปกติ</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

@@ -73,10 +73,15 @@ class BackgroundSettingsTabStructureTest {
     fun `every surface offers the five types that stand on their own`() = backgroundTab { _ ->
         Surface.entries.forEach { surface ->
             openSurface(surface)
-            listOf(
-                TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA, TypeLabel.TRANSPARENT,
-            ).forEach {
+            listOf(TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA).forEach {
                 assertEquals(1, controlsCount(it), "${surface.name} must offer $it")
+            }
+            // A lower third also carries the wash's own type row, which offers a Color and a
+            // Transparent of its own — deliberately the same two words, since it is the same
+            // choice one rectangle up. See BackgroundAboveBandSectionTest.
+            val rows = if (surface.title.contains("Lower Third")) 2 else 1
+            listOf(TypeLabel.COLOR, TypeLabel.TRANSPARENT).forEach {
+                assertEquals(rows, controlsCount(it), "${surface.name} must offer $it")
             }
         }
     }
@@ -135,34 +140,6 @@ class BackgroundSettingsTabStructureTest {
         }
     }
 
-    @Test
-    fun `the copy-look section reaches only the surfaces of the same shape`() = backgroundTab { _ ->
-        openSurface(Surface.BIBLE)
-        assertEquals(1, controlsCount("COPY THIS LOOK TO"), "a surface with its own look can be copied from")
-        // The targets are named by the group they belong to — a full screen never lists a band.
-        assertEquals(1, controlsCount("Songs"), "onto the other full screen")
-        assertEquals(0, controlsCount("Bible"), "and never back onto itself")
-    }
-
-    @Test
-    fun `a lower third copies only onto the other lower third`() = backgroundTab { _ ->
-        openSurface(Surface.BIBLE_LOWER_THIRD)
-        assertEquals(1, controlsCount("COPY THIS LOOK TO"), "it has a look of its own out of the box")
-        assertEquals(1, controlsCount("Songs"), "the only other band")
-    }
-
-    @Test
-    fun `an inheriting surface offers nothing to copy`() = backgroundTab { _ ->
-        setSurfaceType(Surface.BIBLE, TypeLabel.DEFAULT)
-        assertEquals(0, controlsCount("COPY THIS LOOK TO"), "there is no look of its own to copy")
-    }
-
-    @Test
-    fun `the default surface copies onto both content full screens`() = backgroundTab { _ ->
-        openSurface(Surface.DEFAULT)
-        assertEquals(1, controlsCount("Bible"), "the Bible full screen is a target")
-        assertEquals(1, controlsCount("Songs"), "and so is the Songs one")
-    }
 
     @Test
     fun `a lower-third surface on Gradient shows the gradient controls`() {

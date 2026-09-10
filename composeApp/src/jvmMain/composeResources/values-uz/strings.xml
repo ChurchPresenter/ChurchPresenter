@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Rasm fayli</string>
     <string name="background_video_file">Video fayli</string>
     <string name="background_opacity_caption">Shaffofligi</string>
+    <string name="background_above_band_caption">Chiziq ustida</string>
+    <string name="background_above_band_fill">Toʻldirish rangi</string>
+    <string name="background_above_band_opacity">Toʻldirish shaffofligi</string>
     <string name="quick_background_title">Tez fonlar</string>
     <string name="quick_background_reset">Odatdagiga qaytish</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

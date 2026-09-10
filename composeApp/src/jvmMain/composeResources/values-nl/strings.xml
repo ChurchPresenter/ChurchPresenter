@@ -2534,6 +2534,9 @@
     <string name="background_image_file">Afbeeldingsbestand</string>
     <string name="background_video_file">Videobestand</string>
     <string name="background_opacity_caption">Dekking</string>
+    <string name="background_above_band_caption">Boven de balk</string>
+    <string name="background_above_band_fill">Vulkleur</string>
+    <string name="background_above_band_opacity">Dekking van vulling</string>
     <string name="quick_background_title">Snelle achtergronden</string>
     <string name="quick_background_reset">Terug naar normaal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

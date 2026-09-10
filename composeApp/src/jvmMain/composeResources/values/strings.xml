@@ -1141,6 +1141,9 @@
     <string name="background_camera_connection">Input</string>
     <string name="background_camera_auto">Auto</string>
     <string name="background_opacity_caption">Opacity</string>
+    <string name="background_above_band_caption">Above The Band</string>
+    <string name="background_above_band_fill">Fill Color</string>
+    <string name="background_above_band_opacity">Fill Opacity</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>

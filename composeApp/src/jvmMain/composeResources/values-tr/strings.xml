@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Resim Dosyası</string>
     <string name="background_video_file">Video Dosyası</string>
     <string name="background_opacity_caption">Opaklık</string>
+    <string name="background_above_band_caption">Bandın Üstü</string>
+    <string name="background_above_band_fill">Dolgu Rengi</string>
+    <string name="background_above_band_opacity">Dolgu Opaklığı</string>
     <string name="quick_background_title">Hızlı arka planlar</string>
     <string name="quick_background_reset">Normale dön</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

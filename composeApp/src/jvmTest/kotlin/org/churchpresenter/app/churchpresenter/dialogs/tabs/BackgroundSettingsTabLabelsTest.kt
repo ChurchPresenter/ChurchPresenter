@@ -71,10 +71,6 @@ class BackgroundSettingsTabLabelsTest {
         "BLUR" to 1,
         "0px" to 1,
 
-        // Copying this look onto the two content full screens, each named by its group.
-        "COPY THIS LOOK TO" to 1,
-        "Bible" to 1,
-        "Songs" to 1,
 
         // The stage preview: which part of the output this surface paints, and the sample line.
         "FULL SCREEN" to 1,

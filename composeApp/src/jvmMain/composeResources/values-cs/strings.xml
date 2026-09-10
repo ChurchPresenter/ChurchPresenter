@@ -2516,6 +2516,9 @@
     <string name="background_image_file">Soubor obrázku</string>
     <string name="background_video_file">Soubor videa</string>
     <string name="background_opacity_caption">Neprůhlednost</string>
+    <string name="background_above_band_caption">Nad pásem</string>
+    <string name="background_above_band_fill">Barva výplně</string>
+    <string name="background_above_band_opacity">Neprůhlednost výplně</string>
     <string name="quick_background_title">Rychlá pozadí</string>
     <string name="quick_background_reset">Zpět do normálu</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
