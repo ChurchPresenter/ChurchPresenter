@@ -989,9 +989,13 @@ private fun RowScope.NavButtons(
     // Clear cache
     ActionIconButton(
         onClick = {
-            val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
-            if (cacheDir.exists()) cacheDir.deleteRecursively()
-            cacheDir.mkdirs()
+            // Ask the engine where it installed rather than assuming the home directory —
+            // on Windows it prefers %ProgramData%, and this button used to clear an empty
+            // legacy folder there while the live cache stayed put.
+            CefManager.webviewCacheDir?.let { cacheDir ->
+                if (cacheDir.exists()) cacheDir.deleteRecursively()
+                cacheDir.mkdirs()
+            }
         },
         tooltipText = stringResource(Res.string.web_clear_cache),
         painter = painterResource(Res.drawable.ic_clear_cache),

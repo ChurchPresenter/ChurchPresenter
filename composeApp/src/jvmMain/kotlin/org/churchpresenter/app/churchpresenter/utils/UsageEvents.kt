@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.utils
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
+import org.churchpresenter.core.models.io.writeTextAtomically
 
 /**
  * Something an operator actually did during a service, as opposed to something they configured.
@@ -186,7 +187,7 @@ open class UsageEventStore(private val fileProvider: () -> File) {
         try {
             val file = fileProvider()
             file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(UsageEventLog.serializer(), log))
+            file.writeTextAtomically(json.encodeToString(UsageEventLog.serializer(), log))
         } catch (_: Exception) {
             // Usage counting must never break a live service — a read-only home directory or a
             // full disk simply means this install reports nothing.

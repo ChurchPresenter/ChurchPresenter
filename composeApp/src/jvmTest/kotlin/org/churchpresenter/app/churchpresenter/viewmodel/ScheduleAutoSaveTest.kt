@@ -120,6 +120,43 @@ class ScheduleAutoSaveTest {
         assertFalse(vm().autoSaveAvailable(), "offering a stale plan mid-setup is worse than offering nothing")
     }
 
+    // ── Discarding what can never be restored ───────────────────────────────────
+
+    @Test
+    fun `an autosave too old to be offered is deleted rather than left on disk`() {
+        plantAutoSave { addSong(1, "Last Week", "Hymnal") }
+        assertTrue(autoSaveFile.setLastModified(System.currentTimeMillis() - 5 * 60 * 60 * 1000L))
+
+        vm()
+
+        assertFalse(
+            autoSaveFile.exists(),
+            "the prompt can never offer this file again, so nothing would ever delete it",
+        )
+    }
+
+    @Test
+    fun `an autosave still inside the window survives construction`() {
+        plantAutoSave { addSong(1, "Amazing Grace", "Hymnal") }
+
+        val vm = vm()
+
+        assertTrue(autoSaveFile.exists())
+        assertTrue(vm.autoSaveAvailable())
+        assertTrue(vm.restoreAutoSave())
+        assertEquals(listOf("Amazing Grace"), vm.titles)
+    }
+
+    @Test
+    fun `an empty autosave file is cleared away`() {
+        autoSaveFile.parentFile.mkdirs()
+        autoSaveFile.writeText("")
+
+        vm()
+
+        assertFalse(autoSaveFile.exists())
+    }
+
     // ── Prompting ───────────────────────────────────────────────────────────────
 
     @Test

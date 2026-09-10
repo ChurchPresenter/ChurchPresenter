@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import kotlinx.serialization.json.Json
 import java.io.File
+import org.churchpresenter.core.models.io.writeTextAtomically
 
 /**
  * Recent picture folders, mirroring `data/RecentPresentationFiles` for the Pictures tab.
@@ -69,7 +70,7 @@ internal object RecentPictureFolders {
         try {
             file.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            file.writeText(json.encodeToString(folders.toList()))
+            file.writeTextAtomically(json.encodeToString(folders.toList()))
         } catch (_: Exception) {}
     }
 
@@ -77,7 +78,7 @@ internal object RecentPictureFolders {
         try {
             pinnedFile.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            pinnedFile.writeText(json.encodeToString(pinned.toList()))
+            pinnedFile.writeTextAtomically(json.encodeToString(pinned.toList()))
         } catch (_: Exception) {}
     }
 }

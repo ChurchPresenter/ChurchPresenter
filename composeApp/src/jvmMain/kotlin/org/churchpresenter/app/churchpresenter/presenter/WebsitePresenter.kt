@@ -250,6 +250,20 @@ object CefManager {
         private set
 
     /**
+     * The root the browser engine actually installed into, once it has.
+     *
+     * Anything that wants to reach the engine's own directories has to ask, rather than assume
+     * `~/.churchpresenter`: on Windows [JcefInstall.rootCandidates] prefers `%ProgramData%`, so a
+     * hardcoded home path names a directory the engine never used — deleting nothing while the
+     * live cache stays where it is.
+     */
+    @Volatile var installRoot: File? = null
+        private set
+
+    /** The engine's disk cache, or null before it has installed. */
+    val webviewCacheDir: File? get() = installRoot?.let { File(it, "webview-cache") }
+
+    /**
      * True when the machine's own software policy refused to load the browser engine.
      *
      * A managed Windows build can carry an Application Control (WDAC/AppLocker) rule that blocks
@@ -373,6 +387,7 @@ object CefManager {
     private fun applyInstallOutcome(outcome: JcefInstall.Outcome) = when (outcome) {
         is JcefInstall.Outcome.Installed -> {
             initialized = true
+            installRoot = outcome.root
             runCatching { CrashReporter.setTag("jcef.install_root", outcome.root.name) }
             // Now that the relocated install works, reclaim the orphaned old footprint.
             cleanupLegacyJcef(outcome.root)

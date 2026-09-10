@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.text.TextBackdrop
 
 /**
@@ -60,7 +61,7 @@ internal object SavedTextBackdrops {
         try {
             file.parentFile?.mkdirs()
             val json = Json { encodeDefaults = true }
-            file.writeText(json.encodeToString(looks.toList()))
+            file.writeTextAtomically(json.encodeToString(looks.toList()))
         } catch (_: Exception) {
         }
     }
