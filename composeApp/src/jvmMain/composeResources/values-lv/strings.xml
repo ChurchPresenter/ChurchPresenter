@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Ekrānā</string>
     <string name="live_preview_nothing">Nekas netiek rādīts</string>
+    <string name="collapse_preview">Paslēpt šo priekšskatījumu</string>
+    <string name="expand_preview">Rādīt šo priekšskatījumu</string>
     <string name="live_preview_bible">Bībele</string>
     <string name="live_preview_song">Dziesma</string>
     <string name="live_preview_picture">Attēls</string>

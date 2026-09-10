@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Canlı</string>
     <string name="live_preview_nothing">Yayında bir şey yok</string>
+    <string name="collapse_preview">Bu ön izlemeyi gizle</string>
+    <string name="expand_preview">Bu ön izlemeyi göster</string>
     <string name="live_preview_bible">Kutsal Kitap</string>
     <string name="live_preview_song">Şarkı</string>
     <string name="live_preview_picture">Resim</string>

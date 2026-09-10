@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">مباشر</string>
     <string name="live_preview_nothing">لا شيء معروض الآن</string>
+    <string name="collapse_preview">إخفاء هذه المعاينة</string>
+    <string name="expand_preview">عرض هذه المعاينة</string>
     <string name="live_preview_bible">الكتاب المقدس</string>
     <string name="live_preview_song">ترنيمة</string>
     <string name="live_preview_picture">صورة</string>

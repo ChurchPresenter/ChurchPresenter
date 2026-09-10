@@ -1093,6 +1093,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">நேரலை</string>
     <string name="live_preview_nothing">எதுவும் நேரலையில் இல்லை</string>
+    <string name="collapse_preview">இந்த முன்னோட்டத்தை மறை</string>
+    <string name="expand_preview">இந்த முன்னோட்டத்தைக் காட்டு</string>
     <string name="live_preview_bible">வேதாகமம்</string>
     <string name="live_preview_song">பாடல்</string>
     <string name="live_preview_picture">படம்</string>

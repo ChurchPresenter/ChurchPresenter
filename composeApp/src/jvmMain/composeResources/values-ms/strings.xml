@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Langsung</string>
     <string name="live_preview_nothing">Tiada apa-apa sedang langsung</string>
+    <string name="collapse_preview">Sembunyikan pratonton ini</string>
+    <string name="expand_preview">Tunjuk pratonton ini</string>
     <string name="live_preview_bible">Alkitab</string>
     <string name="live_preview_song">Lagu</string>
     <string name="live_preview_picture">Gambar</string>

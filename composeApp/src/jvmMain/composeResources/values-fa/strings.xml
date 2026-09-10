@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">زنده</string>
     <string name="live_preview_nothing">چیزی زنده نیست</string>
+    <string name="collapse_preview">پنهان کردن این پیش‌نمایش</string>
+    <string name="expand_preview">نمایش این پیش‌نمایش</string>
     <string name="live_preview_bible">کتاب‌مقدس</string>
     <string name="live_preview_song">سرود</string>
     <string name="live_preview_picture">تصویر</string>

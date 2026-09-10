@@ -1345,6 +1345,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nothing is live</string>
+    <string name="collapse_preview">Hide this preview</string>
+    <string name="expand_preview">Show this preview</string>
     <string name="live_preview_bible">Bible</string>
     <string name="live_preview_song">Song</string>
     <string name="live_preview_picture">Picture</string>

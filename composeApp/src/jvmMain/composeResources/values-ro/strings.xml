@@ -909,6 +909,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nimic nu este live</string>
+    <string name="collapse_preview">Ascunde această previzualizare</string>
+    <string name="expand_preview">Afișează această previzualizare</string>
     <string name="live_preview_bible">Biblie</string>
     <string name="live_preview_song">Cântare</string>
     <string name="live_preview_picture">Imagine</string>

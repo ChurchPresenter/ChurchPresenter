@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Naživo</string>
     <string name="live_preview_nothing">Nič nie je naživo</string>
+    <string name="collapse_preview">Skryť tento náhľad</string>
+    <string name="expand_preview">Zobraziť tento náhľad</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Pieseň</string>
     <string name="live_preview_picture">Obrázok</string>

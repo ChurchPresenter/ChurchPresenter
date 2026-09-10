@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">ライブ</string>
     <string name="live_preview_nothing">ライブ表示中のものはありません</string>
+    <string name="collapse_preview">このプレビューを隠す</string>
+    <string name="expand_preview">このプレビューを表示</string>
     <string name="live_preview_bible">聖書</string>
     <string name="live_preview_song">賛美歌</string>
     <string name="live_preview_picture">画像</string>

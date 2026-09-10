@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Төменгі үштен бір</string>
     <string name="live_preview_media">Медиа</string>
     <string name="live_preview_nothing">Эфирде ештеңе жоқ</string>
+    <string name="collapse_preview">Бұл алдын ала қарауды жасыру</string>
+    <string name="expand_preview">Бұл алдын ала қарауды көрсету</string>
     <string name="live_preview_picture">Сурет</string>
     <string name="live_preview_presentation">Презентация</string>
     <string name="live_preview_song">Әнұран</string>

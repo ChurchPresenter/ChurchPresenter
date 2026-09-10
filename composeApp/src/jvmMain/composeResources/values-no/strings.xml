@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Ingenting er live</string>
+    <string name="collapse_preview">Skjul denne forhåndsvisningen</string>
+    <string name="expand_preview">Vis denne forhåndsvisningen</string>
     <string name="live_preview_bible">Bibel</string>
     <string name="live_preview_song">Sang</string>
     <string name="live_preview_picture">Bilde</string>

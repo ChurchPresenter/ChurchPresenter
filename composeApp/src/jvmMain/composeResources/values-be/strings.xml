@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Ніжняя траціна</string>
     <string name="live_preview_media">Медыя</string>
     <string name="live_preview_nothing">Нічога не ў эфіры</string>
+    <string name="collapse_preview">Схаваць гэты папярэдні прагляд</string>
+    <string name="expand_preview">Паказаць гэты папярэдні прагляд</string>
     <string name="live_preview_picture">Выява</string>
     <string name="live_preview_presentation">Прэзентацыя</string>
     <string name="live_preview_song">Песня</string>
