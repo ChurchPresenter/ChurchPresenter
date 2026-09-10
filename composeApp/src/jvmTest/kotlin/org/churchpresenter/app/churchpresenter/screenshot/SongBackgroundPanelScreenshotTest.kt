@@ -22,6 +22,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundPanel
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.theme.ChurchPresenterTheme
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 /**
@@ -36,6 +38,15 @@ import kotlin.test.Test
  * these render does not depend on what the machine happens to have downloaded.
  */
 class SongBackgroundPanelScreenshotTest {
+
+    /** The picker's "Recent" row is JVM-wide state — see [PinnedRecentColors]. */
+    private val recents = PinnedRecentColors()
+
+    @BeforeTest
+    fun pinRecentColors() = recents.clear()
+
+    @AfterTest
+    fun unpinRecentColors() = recents.restore()
 
     private fun shoot(
         name: String,
