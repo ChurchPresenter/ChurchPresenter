@@ -54,7 +54,7 @@ private const val UNIFORM_FRAME_MAX_BYTES = 16
  * "Send to ATEM" can both stream a ready file instead of rendering on the spot.
  *
  * Keys are content-addressed — md5 of the lottie JSON plus the render parameters — so editing
- * a file naturally produces a fresh entry and stale ones age out via LRU.
+ * a file naturally produces a fresh entry and stale ones age out through [evictOldEntries].
  *
  * File format (.lrcc — "Lottie Render Cache Clip"):
  *   magic "LRCC" (4) | version u8 | flags u8 | width u32 | height u32 |
@@ -74,6 +74,14 @@ object LottieRenderCache {
     private const val VERSION = 1
     internal const val MAX_ENTRIES = 60
     private const val MAX_TOTAL_BYTES = 4L * 1024 * 1024 * 1024
+
+    /**
+     * How long a scratch file must sit untouched before a sweep takes it.
+     *
+     * Comfortably longer than any render: the point is to reap what a crash stranded, never to
+     * pull the file out from under a render still writing it.
+     */
+    private const val STALE_SCRATCH_MS = 60L * 60 * 1000
 
     /** Frame rate desktop playback variants are rendered at. */
     const val PLAYBACK_FPS = 30
@@ -279,6 +287,12 @@ object LottieRenderCache {
      * Called at app startup so playback and uploads are ready without ever opening the tab.
      */
     fun ensureForFolder(folderPath: String, atem: AtemSettings?) {
+        scope.launch(Dispatchers.IO) {
+            // The only eviction pass that does not depend on a render succeeding. Without it a
+            // directory left over cap — or holding a scratch file from a crashed render — is
+            // never trimmed again until something new happens to render.
+            runCatching { evictOldEntries() }
+        }
         if (folderPath.isEmpty()) return
         scope.launch(Dispatchers.IO) {
             File(folderPath).takeIf { it.isDirectory }
@@ -395,7 +409,7 @@ object LottieRenderCache {
     }
 
     // Version in the filename so a format/behavior change invalidates old entries
-    // (leftovers age out through LRU eviction)
+    // (leftovers age out through eviction)
     internal fun cacheFile(key: String) = File(cacheDir, "${key}_v$VERSION.lrcc")
 
     private suspend fun renderToFile(lottieJson: String, v: Variant, dest: File, key: String) {
@@ -446,7 +460,19 @@ object LottieRenderCache {
         }
     }
 
+    /**
+     * Brings the directory back inside [MAX_ENTRIES] and [MAX_TOTAL_BYTES], oldest first.
+     *
+     * "Oldest" is by write time, not by use: reads never touch `lastModified`, so a clip played
+     * every week can still go before one written after it and never played. That is the trade the
+     * cheap policy buys, and it is only ever a re-render.
+     *
+     * Stranded scratch files go first. [renderToFile] deletes its own in a `finally`, so one is
+     * only left when the process died mid-render — and since the sweep below counts `.lrcc` alone,
+     * a leftover would otherwise sit outside both caps for ever.
+     */
     internal fun evictOldEntries() {
+        sweepStaleScratchFiles()
         val entries = cacheDir.listFiles { f -> f.extension == "lrcc" } ?: return
         val byAge = entries.sortedBy { it.lastModified() }
         var totalBytes = entries.sumOf { it.length() }
@@ -456,6 +482,13 @@ object LottieRenderCache {
             totalBytes -= f.length()
             excessCount--
             f.delete()
+        }
+    }
+
+    private fun sweepStaleScratchFiles() {
+        val cutoff = System.currentTimeMillis() - STALE_SCRATCH_MS
+        cacheDir.listFiles { f -> f.isFile && f.extension == "tmp" }?.forEach { scratch ->
+            if (scratch.lastModified() < cutoff) runCatching { scratch.delete() }
         }
     }
 

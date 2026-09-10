@@ -310,6 +310,27 @@ class LottieRenderCacheTest {
         assertFalse(dir.exists(), "eviction must not create the directory it was asked to tidy")
     }
 
+    @Test
+    fun `eviction reaps a scratch file a crashed render stranded`() {
+        val dir = LottieRenderCache.cacheDir
+        check(dir.toPath().startsWith(tempHome)) { "refusing to evict outside the test home: $dir" }
+        dir.mkdirs()
+        // A render deletes its own scratch file in a finally, so one only survives a process that
+        // died mid-render. Eviction counts .lrcc alone, so nothing else would ever remove it.
+        val stranded = File(dir, "abandoned.tmp").apply {
+            writeBytes(ByteArray(1))
+            setLastModified(System.currentTimeMillis() - 2 * 60 * 60 * 1000L)
+        }
+        val inFlight = File(dir, "rendering-now.tmp").apply { writeBytes(ByteArray(1)) }
+        val entry = File(dir, "keep.lrcc").apply { writeBytes(ByteArray(1)) }
+
+        LottieRenderCache.evictOldEntries()
+
+        assertFalse(stranded.exists(), "an hour-old scratch file is a leftover, not a render")
+        assertTrue(inFlight.exists(), "a fresh scratch file may be a render still writing it")
+        assertTrue(entry.exists(), "scratch cleanup must not touch cache entries")
+    }
+
     // ── Decoding a frame that promises more than it holds ────────────────────
 
     @Test

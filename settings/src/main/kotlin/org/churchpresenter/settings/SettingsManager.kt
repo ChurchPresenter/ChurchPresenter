@@ -1,10 +1,12 @@
 package org.churchpresenter.settings
 
 import java.io.File
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.settings.AppSettings.Companion.CURRENT_SETTINGS_VERSION
 import org.churchpresenter.settings.utils.AppDataDir
@@ -30,6 +32,14 @@ private const val VERSION_SCREEN_ASSIGNMENTS = 6
 /** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
 private val CompanionSurfacePlacementPrefixes = listOf("tab", "leftSidebar", "rightSidebar")
+
+/** How many of each settings-backup family survive a prune. */
+private const val BACKUPS_KEPT = 3
+private const val BACKUP_PREFIX = "settings.json"
+private const val CORRUPT_PREFIX = "settings.json.corrupt-"
+
+/** Per process, not per instance: several call sites build a SettingsManager of their own. */
+private val backupsPruned = AtomicBoolean(false)
 
 // Load, migrate, save, import, export and the per-version migration steps, all against one file.
 @Suppress("TooManyFunctions")
@@ -90,6 +100,7 @@ class SettingsManager {
 
     fun loadSettings(): AppSettings {
         cachedSettings?.let { return it }
+        pruneBackupsOnce()
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
@@ -226,6 +237,36 @@ class SettingsManager {
             if (!target.exists()) Files.copy(source.toPath(), target.toPath())
         } catch (_: Exception) {
             // A failed backup must never block startup — carry on with the load.
+        }
+    }
+
+    /**
+     * Keeps the newest [BACKUPS_KEPT] of each backup family and deletes the rest, once per process.
+     *
+     * Both families are written once per event and never cleaned: one `settings.json.v<n>.bak` per
+     * schema version a machine has ever migrated through, and one timestamped
+     * `settings.json.corrupt-<stamp>` per failed load. Each is a full copy of the settings
+     * document, and the oldest of them describe a schema no build in service still reads. The
+     * newest few are the ones worth recovering from; a machine carrying `.v0.bak` alongside
+     * `.v6.bak` and a legacy `.bak` is just carrying clutter through every backup and sync.
+     */
+    private fun pruneBackupsOnce() {
+        if (!backupsPruned.compareAndSet(false, true)) return
+        pruneBackups()
+    }
+
+    internal fun pruneBackups() {
+        try {
+            val files = appDataDir.listFiles() ?: return
+            val schemaBackups = files.filter {
+                it.isFile && it.name.startsWith(BACKUP_PREFIX) && it.name.endsWith(".bak")
+            }
+            val corruptCopies = files.filter { it.isFile && it.name.startsWith(CORRUPT_PREFIX) }
+            for (family in listOf(schemaBackups, corruptCopies)) {
+                family.sortedByDescending { it.lastModified() }.drop(BACKUPS_KEPT).forEach { it.delete() }
+            }
+        } catch (_: Exception) {
+            // Housekeeping must never stop the settings from loading.
         }
     }
 
@@ -566,7 +607,16 @@ class SettingsManager {
             // mid-write (e.g. during the self-updater's exit race) leaves the temp file
             // incomplete but never touches the live settings.json.
             settingsTmpFile.writeText(json)
-            Files.move(settingsTmpFile.toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            try {
+                Files.move(
+                    settingsTmpFile.toPath(), settingsFile.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING,
+                )
+            } catch (_: AtomicMoveNotSupportedException) {
+                // Some network and FUSE filesystems cannot promise atomicity; a plain replace is
+                // still a rename rather than a truncate-in-place.
+                Files.move(settingsTmpFile.toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
         } catch (_: Exception) {
             // Silently handle error
         }

@@ -43,7 +43,6 @@ internal fun Route.presentationRoutes(
     _maxMediaUploadMb: MutableStateFlow<Int>,
     _presentationCatalog: MutableStateFlow<PresentationCatalogResponse>,
     _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _presentationFilePaths: ConcurrentHashMap<String, String>,
     _scheduleItemToPresentationId: ConcurrentHashMap<String, String>,
     _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
@@ -58,16 +57,7 @@ internal fun Route.presentationRoutes(
         json,
         scope
     )
-    presentationUploadRoutes(
-        server,
-        _fileUploadEnabled,
-        _maxMediaUploadMb,
-        _presentationCatalogs,
-        _presentationFilePaths,
-        _slideBytes,
-        json,
-        scope
-    )
+    presentationUploadRoutes(server, _fileUploadEnabled, _maxMediaUploadMb, json, scope)
 }
 
 private fun Route.presentationCatalogRoutes(
@@ -216,9 +206,6 @@ private fun Route.presentationUploadRoutes(
     server: CompanionServer,
     _fileUploadEnabled: MutableStateFlow<Boolean>,
     _maxMediaUploadMb: MutableStateFlow<Int>,
-    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _presentationFilePaths: ConcurrentHashMap<String, String>,
-    _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
     scope: CoroutineScope,
 ) {
@@ -228,9 +215,7 @@ private fun Route.presentationUploadRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
-                    storeUploadedPresentation(
-                        call, server, _presentationCatalogs, _presentationFilePaths, _slideBytes, json, scope
-                    )
+                    storeUploadedPresentation(call, server, json, scope)
                 }
 
                 /**
@@ -333,17 +318,13 @@ private fun Route.mediaUploadRoutes(
 private suspend fun storeUploadedPresentation(
     call: ApplicationCall,
     server: CompanionServer,
-    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _presentationFilePaths: ConcurrentHashMap<String, String>,
-    _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
     scope: CoroutineScope,
 ) {
     try {
         val (safeName, fileBytes) = receiveUploadedDeck(call, json) ?: return
         val ext = safeName.substringAfterLast('.', "").lowercase()
-        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations")
-            .also { it.mkdirs() }
+        val uploadDir = deviceUploadDir.also { it.mkdirs() }
         val uniqueName = if (File(uploadDir, safeName).exists()) {
             val base = safeName.substringBeforeLast('.', safeName)
             "${base}_${System.currentTimeMillis()}.$ext"
@@ -352,14 +333,12 @@ private suspend fun storeUploadedPresentation(
         }
         val file = File(uploadDir, uniqueName)
         file.writeBytes(fileBytes)
+        pruneDeviceUploads()
         val id = file.absolutePath.hashCode().toUInt().toString(16)
         // Evict the previous device-uploaded presentation so the mobile list never accumulates
-        // stale entries — only the latest upload is shown.
-        server.presentations._lastDeviceUploadedPresentationId?.let { oldId ->
-            _presentationCatalogs.remove(oldId)
-            _slideBytes.remove(oldId)
-            _presentationFilePaths.remove(oldId)
-        }
+        // stale entries — only the latest upload is shown — and so its file leaves the disk with it.
+        server.presentations.evictPreviousDeviceUpload()
+        server.presentations._presentationFilePaths[id] = file.absolutePath
         server.presentations._lastDeviceUploadedPresentationId = id
         val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
         scope.launch { server.onPresentationUploaded.emit(file) }
