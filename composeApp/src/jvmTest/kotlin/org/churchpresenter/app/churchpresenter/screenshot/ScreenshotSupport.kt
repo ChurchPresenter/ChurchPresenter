@@ -376,6 +376,13 @@ private fun BufferedImage.trimmed(margin: Int = 8): BufferedImage {
  * because a class that left the singleton empty would change what every later class in the JVM sees
  * — the same reason `RecentFilesSwap` exists.
  *
+ * **Every class that draws a picker needs this, not only the ones named `colour_picker`.** The
+ * background editors embed the row inline rather than behind a button, so
+ * `BackgroundSettingsTabScreenshotTest`, `SongBackgroundPanelScreenshotTest` and
+ * `AppPreviewSettingsScreenshotTest` drew it without pinning it and eight of their images failed
+ * `verifyRoborazziJvm` on a clean tree, at up to 0.64%. Before recording a new picker state, check
+ * whether the class pins.
+ *
  * ```
  * private val recents = PinnedRecentColors()
  * @BeforeTest fun pinRecents() = recents.clear()

@@ -14,9 +14,20 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class AppPreviewSettingsScreenshotTest {
+
+    /** The picker's "Recent" row is JVM-wide state — see [PinnedRecentColors]. */
+    private val recents = PinnedRecentColors()
+
+    @BeforeTest
+    fun pinRecentColors() = recents.clear()
+
+    @AfterTest
+    fun unpinRecentColors() = recents.restore()
 
     private fun settingsTab(name: String, tab: Int) {
         TestSingletons.latchSkikoHostOs()

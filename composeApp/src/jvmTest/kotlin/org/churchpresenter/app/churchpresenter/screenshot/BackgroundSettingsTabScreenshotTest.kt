@@ -30,6 +30,8 @@ import java.awt.GradientPaint
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 /**
@@ -50,6 +52,15 @@ import kotlin.test.Test
  * Camera is offered everywhere but needs ffmpeg or a capture card, which a test machine may lack.
  */
 class BackgroundSettingsTabScreenshotTest {
+
+    /** The picker's "Recent" row is JVM-wide state — see [PinnedRecentColors]. */
+    private val recents = PinnedRecentColors()
+
+    @BeforeTest
+    fun pinRecentColors() = recents.clear()
+
+    @AfterTest
+    fun unpinRecentColors() = recents.restore()
 
     private fun shoot(
         name: String,
