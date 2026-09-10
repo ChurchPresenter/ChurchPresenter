@@ -3,6 +3,7 @@ package org.churchpresenter.core.models.songs
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -27,6 +28,13 @@ data class CachedSong(
 @Serializable
 data class SongCache(
     val storageDirectory: String,
+    /**
+     * Read-only legacy field: caches written before [cachedSongs] existed carry the library here.
+     *
+     * It is no longer written. [CachedSong] embeds the whole [SongItem], so filling both stored
+     * every song twice — on a 7,000-song library that was half of a 27 MB file, rewritten in full
+     * every time the folder watcher saw a change.
+     */
     val songs: List<SongItem> = emptyList(),
     val cachedSongs: List<CachedSong> = emptyList()
 )
@@ -310,13 +318,8 @@ class SongFileParser {
 
         fun saveSongCache(storageDirectory: String, cachedSongs: List<CachedSong>) {
             try {
-                val cache = SongCache(
-                    storageDirectory = storageDirectory,
-                    songs = cachedSongs.map { it.song },
-                    cachedSongs = cachedSongs
-                )
-                cacheFile.parentFile?.mkdirs()
-                cacheFile.writeText(cacheJson.encodeToString(cache), StandardCharsets.UTF_8)
+                val cache = SongCache(storageDirectory = storageDirectory, cachedSongs = cachedSongs)
+                cacheFile.writeTextAtomically(cacheJson.encodeToString(cache), StandardCharsets.UTF_8)
             } catch (_: Exception) {
             }
         }
