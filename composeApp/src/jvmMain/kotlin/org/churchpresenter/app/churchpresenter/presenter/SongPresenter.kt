@@ -922,6 +922,7 @@ fun SongPresenter(
 
                     @Composable
                     fun EndOfSongIndicator() {
+                        if (!ss.showEndOfSongIndicator) return
                         // Always reserve space so lyrics don't shift when the indicator appears on the last section
                         val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
                         val indicatorAlpha = if (visible) 1f else 0f
