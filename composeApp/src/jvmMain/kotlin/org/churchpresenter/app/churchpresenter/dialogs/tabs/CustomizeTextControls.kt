@@ -60,6 +60,9 @@ internal fun StyleControl(
     onShadowChange: (Boolean) -> Unit,
     backdrop: TextBackdrop? = null,
     onBackdropChange: ((TextBackdrop) -> Unit)? = null,
+    /** Likewise optional: the strikethrough button appears only for a caller that can store it. */
+    strikethrough: Boolean = false,
+    onStrikethroughChange: ((Boolean) -> Unit)? = null,
 ) {
     TextStyleButtons(
         bold = bold,
@@ -70,6 +73,8 @@ internal fun StyleControl(
         onItalicChange = onItalicChange,
         onUnderlineChange = onUnderlineChange,
         onShadowChange = onShadowChange,
+        strikethrough = strikethrough,
+        onStrikethroughChange = onStrikethroughChange,
         backdrop = backdrop,
         onBackdropChange = onBackdropChange,
         buttonSize = CHOICE_HEIGHT,

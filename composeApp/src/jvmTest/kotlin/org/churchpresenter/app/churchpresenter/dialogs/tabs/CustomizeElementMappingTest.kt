@@ -30,10 +30,10 @@ class CustomizeElementMappingTest {
     }
 
     @Test
-    fun `Songs offers five elements, lyrics first`() {
+    fun `Songs offers six elements, the title slide first`() {
         val elements = customizeElements(CustomizePane.SONGS)
-        assertEquals(5, elements.size)
-        assertEquals(CustomizeElement.SONG_LYRICS, elements.first())
+        assertEquals(6, elements.size)
+        assertEquals(CustomizeElement.SONG_TITLE_SLIDE, elements.first())
     }
 
     @Test

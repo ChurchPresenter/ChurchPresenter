@@ -18,11 +18,11 @@ import churchpresenter.composeapp.generated.resources.song_element_title
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.show_title
-import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.SongSettings
+import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -57,6 +57,8 @@ internal fun SongCustomizePane(
                 SongLookAheadGroup(ss, lowerThird, fonts, ::update)
             CustomizeElement.SONG_NEXT_SECTION ->
                 SongLookAheadNextGroup(ss, lowerThird, fonts, ::update)
+            CustomizeElement.SONG_TITLE_SLIDE ->
+                SongTitleSlideCustomize(ss, lowerThird, fonts, ::update)
             // No chord colour. A chart is drawn only by `StageMonitorScreen`; all three production
             // `SongPresenter` call sites take its `showChords = false` default, so on a full screen
             // or a lower third -- the only two shapes that reach this pane -- the colour is read by

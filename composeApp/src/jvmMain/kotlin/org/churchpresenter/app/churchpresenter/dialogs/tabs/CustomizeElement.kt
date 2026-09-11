@@ -14,6 +14,7 @@ import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.song_element_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_element_title
+import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
 
@@ -36,6 +37,7 @@ internal enum class CustomizeElement {
     SONG_NUMBER,
     SONG_LOOK_AHEAD,
     SONG_NEXT_SECTION,
+    SONG_TITLE_SLIDE,
     DICTIONARY_WORD,
     DICTIONARY_REFERENCE,
     DICTIONARY_DEFINITION,
@@ -56,6 +58,7 @@ internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = wh
     CustomizePane.STAGE_MONITOR -> emptyList()
     CustomizePane.BIBLE -> listOf(CustomizeElement.BIBLE_TEXT, CustomizeElement.BIBLE_REFERENCE)
     CustomizePane.SONGS -> listOf(
+        CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_LYRICS,
         CustomizeElement.SONG_TITLE,
         CustomizeElement.SONG_NUMBER,
@@ -85,6 +88,7 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
     CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
     CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.song_element_next_section)
+    CustomizeElement.SONG_TITLE_SLIDE -> stringResource(Res.string.song_target_title_slide)
     CustomizeElement.DICTIONARY_WORD -> stringResource(Res.string.customize_group_word)
     CustomizeElement.DICTIONARY_REFERENCE -> stringResource(Res.string.dictionary_settings_reference_text)
     CustomizeElement.DICTIONARY_DEFINITION -> stringResource(Res.string.customize_group_definition)

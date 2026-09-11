@@ -117,7 +117,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `the lyrics carry a text-backing button`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithContentDescription(backdropChip).assertExists()
             onNodeWithContentDescription(backdropCaret).assertExists()
         }
@@ -126,7 +126,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `the backing chip writes the full screen's lyrics`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithContentDescription(backdropChip).performScrollTo().performClick()
             waitForIdle()
 
@@ -143,7 +143,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `the backing chip writes the band's lyrics instead`() {
         projectionTab(output(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithContentDescription(backdropChip).performScrollTo().performClick()
             waitForIdle()
 
@@ -156,7 +156,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `the caret opens the backing dialog over the pane`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithContentDescription(backdropCaret).performScrollTo().performClick()
             waitForIdle()
             // The lyrics start with no backing, so the dialog opens on Off — which shows its Style
@@ -170,7 +170,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `a look chosen in that dialog reaches the full screen's lyrics`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithContentDescription(backdropCaret).performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Border").performClick()
@@ -183,7 +183,7 @@ class ProjectionCustomizeSongExtrasTest {
     @Test
     fun `a look chosen in that dialog reaches the band's lyrics`() {
         projectionTab(output(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithContentDescription(backdropCaret).performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Border").performClick()

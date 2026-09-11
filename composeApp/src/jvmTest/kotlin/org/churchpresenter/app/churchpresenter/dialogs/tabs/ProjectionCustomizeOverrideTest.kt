@@ -48,7 +48,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `a fresh output stores no override for any category`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             val assignment = get().assignment()
             assertNull(assignment.songOverride)
             assertNull(assignment.bibleOverride)
@@ -60,7 +60,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the switch starts off`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG).assertIsOff()
         }
     }
@@ -68,7 +68,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the header counts nothing customized`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithTag(CUSTOMIZE_STATUS_TAG).assertExists()
             onNodeWithText("0 of 4 customized").assertExists()
         }
@@ -77,7 +77,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `Reset hands a customized category back to the global settings`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
             assertEquals(90, assertNotNull(get().assignment().songOverride).lyricsFontSize)
 
@@ -96,7 +96,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `switching it on gives the output its own Songs`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             assertNotNull(get().assignment().songOverride)
         }
@@ -105,7 +105,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the override starts as a copy of the global settings`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             assertEquals(
                 61,
@@ -118,7 +118,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `switching it on reads as on`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             onNodeWithTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG).assertIsOn()
         }
@@ -127,7 +127,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the header counts the category once it is customized`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             onNodeWithText("1 of 4 customized").assertExists()
         }
@@ -136,7 +136,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `a customized category offers to be reset`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             onNodeWithText("Reset to global").assertExists()
         }
@@ -145,7 +145,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `switching one category on leaves the others following`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
 
             val assignment = get().assignment()
@@ -160,7 +160,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `switching it back off gives the category up`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             flipOverride()
             assertNull(get().assignment().songOverride)
@@ -170,7 +170,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `edits made while it was on are dropped with it`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
             assertEquals(90, assertNotNull(get().assignment().songOverride).lyricsFontSize)
 
@@ -182,7 +182,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the header counts back down`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             onNodeWithText("1 of 4 customized").assertExists()
             flipOverride()
@@ -231,7 +231,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `two categories can be customized at once`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             onNodeWithTag(railTag(CustomizePane.BIBLE.name)).performClick()
             waitForIdle()
@@ -261,7 +261,7 @@ class ProjectionCustomizeOverrideTest {
     @Test
     fun `the stage monitor is one of the four categories counted`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             // Four: Bible, Songs, Background, Dictionary. The stage monitor's pane has no elements
             // and is counted separately from these.
             onNodeWithText("0 of 4 customized").assertExists()
