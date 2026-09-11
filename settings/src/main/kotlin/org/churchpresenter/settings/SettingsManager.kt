@@ -200,7 +200,7 @@ class SettingsManager {
     private fun AppSettings.repaired(): AppSettings =
         copy(
             bibleSettings = bibleSettings.migrateTranslations(),
-            songSettings = songSettings.migrateSongNumberStyle(),
+            songSettings = songSettings.migrateSongNumberStyle().migrateElementPositions(),
         )
 
     /**

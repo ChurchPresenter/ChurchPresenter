@@ -125,6 +125,8 @@ object Constants {
     const val SECTION_TYPE_SONG = "song"
     const val SECTION_TYPE_VERSE = "verse"
     const val SECTION_TYPE_CHORUS = "chorus"
+    /** The synthetic section the Songs tab puts in front of a song when title slides are on. */
+    const val SECTION_TYPE_TITLE_SLIDE = "title_slide"
 
     /**
      * The section markers the song editor offers on its Insert row, in the order shown.

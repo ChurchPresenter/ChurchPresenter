@@ -32,7 +32,7 @@ internal fun titleSlideSection(
     tuning: SongTuning,
     showSongNumber: Boolean = true,
 ): LyricSection = LyricSection(
-    type = "title_slide",
+    type = Constants.SECTION_TYPE_TITLE_SLIDE,
     title = song.title,
     secondaryTitle = song.secondaryTitle,
     songNumber = song.number.toIntOrNull() ?: 0,

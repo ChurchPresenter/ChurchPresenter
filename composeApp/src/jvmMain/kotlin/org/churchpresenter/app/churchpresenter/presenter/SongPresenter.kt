@@ -652,8 +652,16 @@ fun SongPresenter(
             fun TextContent(section: LyricSection) {
                 val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
                 val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
-                val shouldShowTitle = shouldShowText(titleDisplay, section)
-                val shouldShowSongNumber = shouldShowText(numberDisplay, section) && section.songNumber > 0
+                // The title slide's lines are the song's title and credit, so they take the Title
+                // element's style -- what the settings tab's Title tab edits -- rather than the
+                // lyrics', and the title row above the lyrics stays out of it: it would repeat the
+                // slide.
+                val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
+                val shouldShowTitle =
+                    shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide
+                val shouldShowSongNumber =
+                    shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex) &&
+                        section.songNumber > 0 && !isTitleSlide
                 // "Configured" means not set to "None" — title/number could appear on some slides
                 val titleConfigured = titleDisplay != Constants.NONE
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
@@ -881,13 +889,19 @@ fun SongPresenter(
                     @Composable
                     fun LyricLine(lineIdx: Int, line: String, laStart: Int, secondary: Boolean = false) {
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
-                        val lineProfile = if (isLookAheadLine) laStyleProfile else lyricsStyleProfile
+                        val isTitleLine = isTitleSlide && !isLookAheadLine
+                        val lineProfile = when {
+                            isLookAheadLine -> laStyleProfile
+                            isTitleLine -> titleStyleProfile
+                            else -> lyricsStyleProfile
+                        }
                         // The next-section lines take their own alignment once one is set; blank
                         // keeps them following the look-ahead's, which is what they always did.
-                        val lineAlign = if (isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank()) {
-                            getTextAlign(laStyleProfile.horizontalAlignment)
-                        } else {
-                            lyricsHorizontalAlignment
+                        val lineAlign = when {
+                            isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank() ->
+                                getTextAlign(laStyleProfile.horizontalAlignment)
+                            isTitleLine -> titleHorizontalAlignment
+                            else -> lyricsHorizontalAlignment
                         }
                         val lineBlock = when {
                             isLookAheadLine && secondary -> laBlockSecondary
@@ -898,8 +912,16 @@ fun SongPresenter(
                         Text(
                             modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
                             textAlign = lineAlign,
-                            fontFamily = if (isLookAheadLine) laFontFamily else lyricsFontFamily,
-                            fontSize = if (isLookAheadLine) scaledLaFontSize else scaledLyricsFontSize,
+                            fontFamily = when {
+                                isLookAheadLine -> laFontFamily
+                                isTitleLine -> titleFontFamily
+                                else -> lyricsFontFamily
+                            },
+                            fontSize = when {
+                                isLookAheadLine -> scaledLaFontSize
+                                isTitleLine -> scaledTitleFontSize
+                                else -> scaledLyricsFontSize
+                            },
                             softWrap = appSettings.songSettings.wordWrap,
                             text = styledDisplayText(
                                 line,
@@ -907,8 +929,16 @@ fun SongPresenter(
                                 spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
                                 spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
                             ),
-                            color = if (isLookAheadLine) laColor else lyricsColor,
-                            style = if (isLookAheadLine) lookAheadTextStyle else lyricsTextStyleScaled,
+                            color = when {
+                                isLookAheadLine -> laColor
+                                isTitleLine -> titleColor
+                                else -> lyricsColor
+                            },
+                            style = when {
+                                isLookAheadLine -> lookAheadTextStyle
+                                isTitleLine -> titleTextStyleScaled
+                                else -> lyricsTextStyleScaled
+                            },
                             onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
                         )
                     }
@@ -1319,6 +1349,38 @@ private fun SectionChordChart(
         }
     }
 }
+
+/**
+ * [shouldShowText], deciding "first page" from where [lyricSection] sits in [allSections] when it
+ * is one of them: the first page is the song's first lyric section, whatever its heading says.
+ *
+ * The heading rule below is the fallback for a section that is not in the list -- the whole-song
+ * slide, or a section pushed on its own. It reads a heading with no number in it as the opening
+ * slide, which is right for `[Verse]` and wrong for `[Chorus]` written in square brackets, and a
+ * song that starts on `[Verse 1.1]` and `[Verse 2.1]` gets the title back on every verse. With
+ * the song's own order to hand there is no need to guess.
+ */
+internal fun shouldShowText(
+    display: String,
+    lyricSection: LyricSection,
+    allSections: List<LyricSection>,
+    displaySectionIndex: Int,
+): Boolean {
+    if (display != Constants.FIRST_PAGE) return shouldShowText(display, lyricSection)
+    val position = displaySectionIndex.takeIf { allSections.getOrNull(it)?.isSamePageAs(lyricSection) == true }
+        ?: allSections.indexOfFirst { it.isSamePageAs(lyricSection) }
+    if (position < 0) return shouldShowText(display, lyricSection)
+    // The title slide is not a lyric page: with one in front, verse 1 is still the first page.
+    return allSections.subList(0, position).none { it.type != Constants.SECTION_TYPE_TITLE_SLIDE }
+}
+
+/**
+ * Whether [other] is this section as pushed to the presenter. Compared on what identifies a page
+ * rather than with `==`, because the section that goes out is stamped with the song's tempo and
+ * capo and the list it came from is not.
+ */
+private fun LyricSection.isSamePageAs(other: LyricSection): Boolean =
+    header == other.header && slideIndex == other.slideIndex && type == other.type && lines == other.lines
 
 private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean {
     return when (display) {

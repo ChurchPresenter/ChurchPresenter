@@ -422,3 +422,24 @@ fun SongSettings.migrateSongNumberStyle(): SongSettings {
         songNumberLowerThirdShadowOpacity = titleLowerThirdShadowOpacity,
     )
 }
+
+/**
+ * Puts the title's and the number's position back onto the two values the presenter draws.
+ *
+ * [titlePosition] used to be a vertical alignment -- `Top`, `Middle`, `Bottom` -- and was renamed
+ * in place, for a while still defaulting to `Middle`, without its stored value ever being
+ * rewritten; so a file from that time says `Middle` to this day.
+ * The old dropdown read anything but `BelowVerse` as "above" and so kept working; the presenter
+ * matches the value against the two rows it draws, and a title whose position is neither is drawn
+ * on neither, whatever its Show setting says. Idempotent: a value already on one of the two is
+ * left as it is.
+ */
+fun SongSettings.migrateElementPositions(): SongSettings {
+    fun aboveUnlessBelow(value: String) = if (value == Constants.BELOW_VERSE) value else Constants.ABOVE_VERSE
+    return copy(
+        titlePosition = aboveUnlessBelow(titlePosition),
+        titleLowerThirdPosition = aboveUnlessBelow(titleLowerThirdPosition),
+        songNumberPosition = aboveUnlessBelow(songNumberPosition),
+        songNumberLowerThirdPosition = aboveUnlessBelow(songNumberLowerThirdPosition),
+    )
+}
