@@ -8,8 +8,8 @@ import org.churchpresenter.settings.withTranslationSettings
 /**
  * The per-language form of [SongStyleElement], or `null` for one that is the same in every language.
  *
- * Only the song number is `null`: the digits do not change with the language, so it has one profile
- * and not four.
+ * The song number is `null`: the digits do not change with the language, so it has one profile and
+ * not four. So are the title slide's credits, for the same reason.
  */
 internal val SongStyleElement.translationElement: SongTranslationElement?
     get() = when (this) {
@@ -18,6 +18,8 @@ internal val SongStyleElement.translationElement: SongTranslationElement?
         SongStyleElement.LYRICS -> SongTranslationElement.LYRICS
         SongStyleElement.LOOK_AHEAD -> SongTranslationElement.LOOK_AHEAD
         SongStyleElement.NEXT_SECTION -> SongTranslationElement.NEXT_SECTION
+        // The title slide's credits name people and numbers, not words in a language.
+        SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO -> null
     }
 
 /**
