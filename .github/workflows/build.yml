@@ -286,7 +286,20 @@ jobs:
             --issuer "$API_ISSUER_ID" \
             --wait
           echo "Stapling notarization ticket..."
-          xcrun stapler staple "$DMG"
+          # The ticket is served from Apple's CDN and can lag the "Accepted" verdict by minutes;
+          # stapling too early fails with "Record not found" (exit 65). Retry before giving up.
+          STAPLED=false
+          for attempt in $(seq 1 10); do
+            if xcrun stapler staple "$DMG"; then
+              STAPLED=true
+              break
+            fi
+            echo "Staple attempt $attempt failed — ticket not yet available, retrying in 30s..."
+            sleep 30
+          done
+          if [ "$STAPLED" != "true" ]; then
+            echo "❌ Could not staple notarization ticket after 10 attempts" && exit 1
+          fi
           echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-arm64 label)
@@ -456,7 +469,20 @@ jobs:
             --issuer "$API_ISSUER_ID" \
             --wait
           echo "Stapling notarization ticket..."
-          xcrun stapler staple "$DMG"
+          # The ticket is served from Apple's CDN and can lag the "Accepted" verdict by minutes;
+          # stapling too early fails with "Record not found" (exit 65). Retry before giving up.
+          STAPLED=false
+          for attempt in $(seq 1 10); do
+            if xcrun stapler staple "$DMG"; then
+              STAPLED=true
+              break
+            fi
+            echo "Staple attempt $attempt failed — ticket not yet available, retrying in 30s..."
+            sleep 30
+          done
+          if [ "$STAPLED" != "true" ]; then
+            echo "❌ Could not staple notarization ticket after 10 attempts" && exit 1
+          fi
           echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-x64 label)
