@@ -286,6 +286,17 @@ class SongPresenterBilingualRenderTest {
     }
 
     @Test
+    fun `the marker is left out entirely when switched off`() {
+        val off = AppSettings(songSettings = SongSettings(showEndOfSongIndicator = false))
+        present(bilingual(isLast = true), off) {
+            assertTrue(
+                textOnScreen().none { it.contains('*') },
+                "no marker, and no space reserved for one: ${textOnScreen()}",
+            )
+        }
+    }
+
+    @Test
     fun `the marker's space is reserved on earlier sections too`() {
         // Drawn at zero alpha rather than omitted, so the lyrics don't shift on the last section.
         // Both cases must therefore render the same set of text nodes.

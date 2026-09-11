@@ -116,6 +116,19 @@ class SongSettingsTabTest {
     }
 
     @Test
+    fun `the end-of-song checkbox is on by default and writes its own flag`() = songTab { get ->
+        onNodeWithTag("song_showEndOfSongIndicator").assertIsOn()
+        val before = song(get)
+
+        onNodeWithTag("song_showEndOfSongIndicator").performClick()
+        waitForIdle()
+
+        onNodeWithTag("song_showEndOfSongIndicator").assertIsOff()
+        assertEquals(before.copy(showEndOfSongIndicator = false), song(get))
+        assertEquals(false, persisted(get()).songSettings.showEndOfSongIndicator)
+    }
+
+    @Test
     fun `the end-of-song spacing field writes its own value`() = songTab { get ->
         onNodeWithText(SongSettings().endOfSongIndicatorSpacing.toString()).performTextReplacement("7")
         waitForIdle()

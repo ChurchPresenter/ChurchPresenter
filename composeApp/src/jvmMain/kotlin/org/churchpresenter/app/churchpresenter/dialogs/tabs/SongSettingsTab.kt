@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -401,6 +402,13 @@ private fun SongTransitionSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            Checkbox(
+                checked = song.showEndOfSongIndicator,
+                onCheckedChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showEndOfSongIndicator = it)) }
+                },
+                modifier = Modifier.size(24.dp).testTag("song_showEndOfSongIndicator"),
+            )
             Text(
                 text = stringResource(Res.string.end_of_song_spacing).removeSuffix(":"),
                 style = MaterialTheme.typography.bodyMedium,

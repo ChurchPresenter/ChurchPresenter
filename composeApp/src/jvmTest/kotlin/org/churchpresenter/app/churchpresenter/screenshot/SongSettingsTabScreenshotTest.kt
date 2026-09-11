@@ -138,6 +138,13 @@ class SongSettingsTabScreenshotTest {
         settings = songSettings { copy(titleSlideEnabled = true) },
     )
 
+    /** The end-of-song marker switched off: its checkbox clears, and the spacing field stays put. */
+    @Test
+    fun `the end-of-song marker switched off`() = shoot(
+        "end_of_song_off",
+        settings = songSettings { copy(showEndOfSongIndicator = false) },
+    )
+
     /** Single: the bilingual layout row has nothing to lay out, so it is not drawn. */
     @Test
     fun `a single language`() = shoot("language_single", settings = singleLanguage())
