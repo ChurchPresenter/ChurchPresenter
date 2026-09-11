@@ -4,6 +4,16 @@ import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 
+/** The credits' default look: a quieter grey than the title, at half its size. */
+private const val CREDIT_COLOR = "#B9C0C8"
+private const val CREDIT_SIZE = 34
+private const val CREDIT_SIZE_LOWER_THIRD = 20
+
+/** The CCLI number and the tempo: smaller and quieter still, being reference rather than credit. */
+private const val DETAIL_COLOR = "#8A9099"
+private const val DETAIL_SIZE = 26
+private const val DETAIL_SIZE_LOWER_THIRD = 16
+
 @Serializable
 data class SongSettings(
     // Song file management
@@ -110,6 +120,43 @@ data class SongSettings(
     // Song Title Slide settings
     val titleSlideEnabled: Boolean = false,
     val titleSlideShowSongNumber: Boolean = true,
+    /**
+     * Which of the song's other details the title slide carries, under its number and title.
+     *
+     * The author and the composer are on by default because the slide always drew them -- as one
+     * "author / composer" line before each had a look of its own -- and a file written then keeps
+     * showing what it showed. The CCLI number and the tempo are new and off.
+     */
+    val titleSlideShowTitle: Boolean = true,
+    val titleSlideShowAuthor: Boolean = true,
+    val titleSlideShowComposer: Boolean = true,
+    val titleSlideShowCcli: Boolean = false,
+    val titleSlideShowTempo: Boolean = false,
+    /**
+     * Whether the number shares the title's row, ahead of it -- "427 Amazing Grace" -- or has a row
+     * of its own above. On by default, which is the one line the slide always drew.
+     */
+    val titleSlideNumberBeforeTitle: Boolean = true,
+    /**
+     * Where the title slide's block -- number, title and credits together -- sits on the screen:
+     * [Constants.TOP], [Constants.MIDDLE] or [Constants.BOTTOM]. Its own rather than the lyrics'
+     * [lyricsAlignment], because a title sits differently from a verse. The lower third ignores it
+     * and keeps the block at the bottom of the band, as it does the lyrics.
+     */
+    val titleSlideVerticalAlignment: String = Constants.MIDDLE,
+    // How each credit is drawn, per output. The number and the title use their own fields above.
+    val titleSlideAuthor: SongCreditStyle = SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE),
+    val titleSlideAuthorLowerThird: SongCreditStyle =
+        SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE_LOWER_THIRD),
+    val titleSlideComposer: SongCreditStyle = SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE),
+    val titleSlideComposerLowerThird: SongCreditStyle =
+        SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE_LOWER_THIRD),
+    val titleSlideCcli: SongCreditStyle = SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE),
+    val titleSlideCcliLowerThird: SongCreditStyle =
+        SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE_LOWER_THIRD),
+    val titleSlideTempo: SongCreditStyle = SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE),
+    val titleSlideTempoLowerThird: SongCreditStyle =
+        SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE_LOWER_THIRD),
 
     // Song number settings
     val songNumberFontSize: Int = 70,

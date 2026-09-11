@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_scope_full_screen
 import churchpresenter.composeapp.generated.resources.bible_scope_lower_third
+import churchpresenter.composeapp.generated.resources.song_scope_title_slide
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
@@ -17,15 +18,18 @@ private const val PERCENT = 100
  * physical screen, so a difference between them would only ever be a discrepancy.
  */
 @Composable
-internal fun songScopeNote(settings: AppSettings, target: SongStyleTarget): String {
+internal fun songScopeNote(settings: AppSettings, target: SongStyleTarget, titleSlide: Boolean = false): String {
     val size = previewOutputSize(settings)
-    return if (target.isLowerThird) {
-        stringResource(
-            Res.string.bible_scope_lower_third,
-            size.width,
-            size.height * settings.songSettings.lowerThirdHeightPercent / PERCENT,
-        )
+    val height = if (target.isLowerThird) {
+        size.height * settings.songSettings.lowerThirdHeightPercent / PERCENT
     } else {
-        stringResource(Res.string.bible_scope_full_screen, size.width, size.height)
+        size.height
+    }
+    return when {
+        // The slide is drawn on whichever output is selected, so the note carries that output's
+        // size: it is the only place the row still says which of the two is being styled.
+        titleSlide -> stringResource(Res.string.song_scope_title_slide, size.width, height)
+        target.isLowerThird -> stringResource(Res.string.bible_scope_lower_third, size.width, height)
+        else -> stringResource(Res.string.bible_scope_full_screen, size.width, height)
     }
 }

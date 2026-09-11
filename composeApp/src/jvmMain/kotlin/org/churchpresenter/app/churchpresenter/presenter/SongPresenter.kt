@@ -673,6 +673,30 @@ fun SongPresenter(
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
+                // The title slide has no verse to fit, no look-ahead and no chart -- it is a
+                // heading and its credits, each drawn in its own element's profile -- so it is
+                // drawn by its own composable, in the same box the lyrics would have had.
+                if (isTitleSlide) {
+                    SongTitleSlideContent(
+                        section = section,
+                        settings = ss,
+                        target = songTarget,
+                        langDisplay = langDisplay,
+                        isKey = isKey,
+                        scaleFactor = scaleFactor,
+                        contentAlignment = if (isLowerThird) {
+                            Alignment.BottomCenter
+                        } else {
+                            when (ss.titleSlideVerticalAlignment) {
+                                Constants.TOP -> Alignment.TopCenter
+                                Constants.BOTTOM -> Alignment.BottomCenter
+                                else -> Alignment.Center
+                            }
+                        },
+                        modifier = innerModifier,
+                    )
+                    return
+                }
                 BoxWithConstraints(
                     modifier = innerModifier,
                     contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment

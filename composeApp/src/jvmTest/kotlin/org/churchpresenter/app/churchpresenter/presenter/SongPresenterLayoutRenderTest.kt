@@ -83,12 +83,15 @@ class SongPresenterLayoutRenderTest {
             songSettings = SongSettings(
                 titleFontSize = 20, lyricsFontSize = 70, lyricsFontSizeAutoFit = false,
                 titleDisplay = Constants.NONE, showNumber = Constants.NONE,
+                // Off, so the line measured is the title alone: the number would share it at
+                // its own size.
+                titleSlideShowSongNumber = false,
             ),
         )
         var titleLineHeight = 0f
         var lyricLineHeight = 0f
         present(settings, lyricSection = titleSlide(), allSections = listOf(titleSlide(), section())) {
-            titleLineHeight = onNodeWithText("John Newton").fetchSemanticsNode().boundsInRoot.height
+            titleLineHeight = onNodeWithText("Amazing Grace").fetchSemanticsNode().boundsInRoot.height
         }
         present(settings, lyricSection = section(), allSections = listOf(titleSlide(), section())) {
             lyricLineHeight =

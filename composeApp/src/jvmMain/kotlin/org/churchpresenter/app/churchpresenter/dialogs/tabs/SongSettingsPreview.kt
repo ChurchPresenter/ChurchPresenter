@@ -17,9 +17,14 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_preview_full_screen
 import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
+import churchpresenter.composeapp.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SongSettings
 import org.jetbrains.compose.resources.stringResource
 
 /** The song number the sample slide carries, chosen to be three digits like a real songbook. */
@@ -47,6 +52,8 @@ internal fun SongPreviewPanel(
     /** The two sections the preview draws -- see [songSampleSections]. */
     sections: List<LyricSection>,
     modifier: Modifier = Modifier,
+    /** The first of [sections] is the title slide, and the badge says so. */
+    titleSlide: Boolean = false,
 ) {
     val output = previewOutputSize(settings)
     val song = settings.songSettings
@@ -91,10 +98,10 @@ internal fun SongPreviewPanel(
         )
         PreviewBadge(
             label = stringResource(
-                if (target.isLowerThird) {
-                    Res.string.song_preview_lower_third
-                } else {
-                    Res.string.song_preview_full_screen
+                when {
+                    titleSlide -> Res.string.song_preview_title_slide
+                    target.isLowerThird -> Res.string.song_preview_lower_third
+                    else -> Res.string.song_preview_full_screen
                 },
             ),
             modifier = Modifier.align(Alignment.TopStart).padding(6.dp),
@@ -249,3 +256,46 @@ private fun longSample(verse: LyricSection, chorus: LyricSection) = listOf(
         ),
     ),
 )
+
+/**
+ * The title slide the preview draws: the sample song's, built the way the songs tab builds a real
+ * one, at [slot]'s length.
+ *
+ * The three lengths do for the title slide what they do for the lyrics: a short single-language
+ * title, the ordinary bilingual one, and a long title with every credit filled in -- the case that
+ * finds a size too large for the band or a margin too generous.
+ */
+internal fun titleSlideSample(settings: SongSettings, slot: PreviewSampleSlot): LyricSection {
+    val song = when (slot) {
+        PreviewSampleSlot.SHORT -> SongItem(
+            number = SAMPLE_SONG_NUMBER.toString(),
+            title = "Grace",
+            author = SAMPLE_AUTHOR,
+        )
+        PreviewSampleSlot.MEDIUM -> SongItem(
+            number = SAMPLE_SONG_NUMBER.toString(),
+            title = SAMPLE_TITLE,
+            secondaryTitle = SAMPLE_SECONDARY_TITLE,
+            author = SAMPLE_AUTHOR,
+            composer = SAMPLE_COMPOSER,
+            ccliNumber = SAMPLE_CCLI,
+        )
+        PreviewSampleSlot.LONG -> SongItem(
+            number = SAMPLE_SONG_NUMBER.toString(),
+            title = "Great Is Thy Faithfulness, O God My Father",
+            secondaryTitle = "Велика верность Твоя, о Боже, Отец наш",
+            author = "Thomas O. Chisholm, William M. Runyan",
+            composer = "William M. Runyan, arr. Chris Tomlin",
+            ccliNumber = SAMPLE_CCLI,
+        )
+    }
+    return titleSlideSection(song, SongTuning(bpm = SAMPLE_BPM), settings)
+}
+
+/** The sample song's credits -- sample data, like the sample lyrics beside it, not UI text. */
+private const val SAMPLE_TITLE = "Amazing Grace"
+private const val SAMPLE_SECONDARY_TITLE = "О, благодать"
+private const val SAMPLE_AUTHOR = "John Newton"
+private const val SAMPLE_COMPOSER = "William Walker"
+private const val SAMPLE_CCLI = "22025"
+private const val SAMPLE_BPM = 84

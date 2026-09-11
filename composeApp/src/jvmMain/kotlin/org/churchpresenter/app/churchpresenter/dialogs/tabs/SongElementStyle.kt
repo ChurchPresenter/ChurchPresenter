@@ -5,12 +5,16 @@ import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
 /**
- * One of the five things a song slide draws.
+ * One of the things a song slide draws.
  *
- * The settings tab edits one at a time rather than showing all five stacked, which is what lets a
+ * The settings tab edits one at a time rather than showing all of them stacked, which is what lets a
  * single set of controls stand for what used to be four scrolling columns.
+ *
+ * The last four appear on the title slide alone -- see [onTitleSlide] -- and are edited from its
+ * own view of the tab. The number and the title are on both: the title slide draws them with the
+ * same profiles the lyric slides do.
  */
-internal enum class SongStyleElement { NUMBER, TITLE, LYRICS, LOOK_AHEAD, NEXT_SECTION }
+internal enum class SongStyleElement { NUMBER, TITLE, LYRICS, LOOK_AHEAD, NEXT_SECTION, AUTHOR, COMPOSER, CCLI, TEMPO }
 
 /** Which output the styling being edited belongs to. */
 internal enum class SongStyleTarget { FULL_SCREEN, LOWER_THIRD }
@@ -40,6 +44,34 @@ internal val SongStyleElement.hasChordColor: Boolean
 /** The two elements that only ever appear on a look-ahead slide. */
 internal val SongStyleElement.onLookAheadSlide: Boolean
     get() = this == SongStyleElement.LOOK_AHEAD || this == SongStyleElement.NEXT_SECTION
+
+/** The four credit lines, which only the title slide draws. */
+internal val SongStyleElement.isCredit: Boolean
+    get() = this == SongStyleElement.AUTHOR ||
+        this == SongStyleElement.COMPOSER ||
+        this == SongStyleElement.CCLI ||
+        this == SongStyleElement.TEMPO
+
+/** What the title slide draws, in the order it draws them; the number's place depends on a setting. */
+internal val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
+    SongStyleElement.NUMBER,
+    SongStyleElement.TITLE,
+    SongStyleElement.AUTHOR,
+    SongStyleElement.COMPOSER,
+    SongStyleElement.CCLI,
+    SongStyleElement.TEMPO,
+)
+
+/** The elements the lyric slides draw, which is what the tab offers outside the title-slide view. */
+internal val LYRIC_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
+    SongStyleElement.NUMBER,
+    SongStyleElement.TITLE,
+    SongStyleElement.LYRICS,
+    SongStyleElement.LOOK_AHEAD,
+    SongStyleElement.NEXT_SECTION,
+)
+
+internal val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_ELEMENTS
 
 /**
  * The appearance of one element on one output, lifted out of [SongSettings].
@@ -89,6 +121,10 @@ internal fun SongSettings.elementStyle(
     SongStyleElement.LYRICS -> lyricsStyle(target)
     SongStyleElement.LOOK_AHEAD -> lookAheadStyle(target)
     SongStyleElement.NEXT_SECTION -> nextSectionStyle(target)
+    SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO ->
+        creditStyle(element, target).toElementStyle(
+            titleFont = if (target.isLowerThird) titleLowerThirdFontType else titleFontType,
+        )
 }
 
 /**
@@ -111,6 +147,8 @@ internal fun SongSettings.withElementStyle(
         if (target.isLowerThird) withLookAheadLowerThird(style) else withLookAhead(style)
     SongStyleElement.NEXT_SECTION ->
         if (target.isLowerThird) withNextSectionLowerThird(style) else withNextSection(style)
+    SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO ->
+        withCreditStyle(element, target, style.toCreditStyle())
 }
 
 /**

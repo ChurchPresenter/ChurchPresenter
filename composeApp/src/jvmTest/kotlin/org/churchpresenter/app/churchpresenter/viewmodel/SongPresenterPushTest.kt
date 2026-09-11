@@ -5,6 +5,7 @@ import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -62,12 +63,14 @@ class SongPresenterPushTest {
 
     // ── titleSlideSection ─────────────────────────────────────────────────────
 
-    @Test fun `a title slide carries heading and credit lines and the given bpm`() {
+    @Test fun `a title slide carries the credits as fields and lines, and the given bpm`() {
         val section = titleSlideSection(song(author = "Newton", composer = "Excell"), SongTuning(bpm = 90))
         assertEquals("title_slide", section.type)
         assertEquals("Amazing Grace", section.title)
         assertEquals(123, section.songNumber)
-        assertEquals(listOf("123 – Amazing Grace", "Newton / Excell"), section.lines)
+        assertEquals("Newton", section.author)
+        assertEquals("Excell", section.composer)
+        assertEquals(listOf("123 – Amazing Grace", "Newton", "Excell"), section.lines)
         assertEquals(90, section.bpm)
     }
 
@@ -77,7 +80,7 @@ class SongPresenterPushTest {
     @Test fun `a title slide can omit the number from its heading`() =
         assertEquals(
             listOf("Amazing Grace"),
-            titleSlideSection(song(), SongTuning(bpm = 0), showSongNumber = false).lines,
+            titleSlideSection(song(), SongTuning(bpm = 0), SongSettings(titleSlideShowSongNumber = false)).lines,
         )
 
     @Test fun `a non-numeric song number becomes zero`() =

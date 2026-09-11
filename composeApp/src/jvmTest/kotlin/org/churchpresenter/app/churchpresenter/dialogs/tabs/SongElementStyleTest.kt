@@ -41,8 +41,8 @@ class SongElementStyleTest {
     )
 
     @Test
-    fun `there are ten profiles`() {
-        assertEquals(10, combinations.size)
+    fun `there are eighteen profiles`() {
+        assertEquals(18, combinations.size)
     }
 
     @Test
