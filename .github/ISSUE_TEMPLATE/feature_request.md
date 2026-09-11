@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-PLEASE KEEP ONE REQUEST PER ISSUE/TICKET
+PLEASE KEEP ONE REQUEST PER ISSUE/TICKET. Submitting more than one request would most likely lead to fist issue being addressed and then issue closed.
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
