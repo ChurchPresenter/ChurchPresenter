@@ -51,6 +51,18 @@ class DictionaryTabBibleSelectorTest {
     private companion object {
         const val LABEL = "SELECT BIBLE TRANSLATION"
         const val PRIMARY = "Primary Bible"
+
+        /**
+         * How long a scan of the Bible folder is given: real filesystem work on `Dispatchers.IO` --
+         * a directory walk, then each `.spb` opened for its title -- which Compose's 1000 ms
+         * default does not always cover on a CI runner already running four test JVMs (#522).
+         * The waits still end on their condition; this only says when a state that never arrives
+         * is reported.
+         */
+        const val SCAN_TIMEOUT_MS = 5_000L
+
+        /** A beat for a cancelled scan to have landed, had it not been cancelled. */
+        const val SETTLE_MS = 200L
     }
 
     private val tempDirs = mutableListOf<File>()
@@ -72,14 +84,14 @@ class DictionaryTabBibleSelectorTest {
 
     /** Waits for the interlinear pre-load the tab starts on its own. */
     private fun ComposeUiTest.awaitInterlinear(vm: DictionaryViewModel) {
-        waitUntil("interlinear data to load") { vm.isInterlinearDataLoaded }
+        waitUntil("interlinear data to load", SCAN_TIMEOUT_MS) { vm.isInterlinearDataLoaded }
     }
 
     /** Puts the tab in the state that draws the selector, with two translations to choose from. */
     private fun ComposeUiTest.withTranslations(vm: DictionaryViewModel) {
         awaitInterlinear(vm)
         vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
-        waitUntil("the translations to be listed") { vm.availableDictBibles.size == 2 }
+        waitUntil("the translations to be listed", SCAN_TIMEOUT_MS) { vm.availableDictBibles.size == 2 }
         waitForIdle()
     }
 
@@ -105,6 +117,8 @@ class DictionaryTabBibleSelectorTest {
         // An empty folder is the ordinary case for anyone who has not put a Bible beside the app.
         awaitInterlinear(vm)
         vm.loadAvailableBibles(bibleFolder())
+        // `waitForIdle` does not cover the scan, which runs on the IO pool: the list is asserted
+        // empty here because it started empty, and the second scan below cancels this one anyway.
         waitForIdle()
 
         onAllNodesWithText(LABEL).assertCountEquals(0)
@@ -112,9 +126,29 @@ class DictionaryTabBibleSelectorTest {
         // Positive twin: the same matcher finds it the moment a translation exists, so the absence
         // above is about the gate and not about the selector being unmatchable.
         vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James"))
-        waitUntil("the translation to be listed") { vm.availableDictBibles.size == 1 }
+        waitUntil("the translation to be listed", SCAN_TIMEOUT_MS) { vm.availableDictBibles.size == 1 }
         waitForIdle()
         onNodeWithText(LABEL).assertIsDisplayed()
+    }
+
+    /**
+     * Two folders named in quick succession answer in the order they were asked, whatever order
+     * their scans finish in. Each scan is real I/O on its own pool thread, so without the newer
+     * scan cancelling the older, a bigger first folder could land its list after a smaller second
+     * one and the selector would show translations from a folder no longer chosen (#522).
+     */
+    @Test
+    fun `a newer folder scan supersedes an older one still in flight`() = dictionaryTab { vm, _ ->
+        awaitInterlinear(vm)
+        vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
+        vm.loadAvailableBibles(bibleFolder("web.spb" to "World English"))
+        waitUntil("the newer folder's translation to be listed", SCAN_TIMEOUT_MS) {
+            vm.availableDictBibles.map { it.second } == listOf("World English")
+        }
+        // Long enough for the older scan to have finished, had it been allowed to write.
+        waitForIdle()
+        Thread.sleep(SETTLE_MS)
+        assertEquals(listOf("World English"), vm.availableDictBibles.map { it.second })
     }
 
     @Test
