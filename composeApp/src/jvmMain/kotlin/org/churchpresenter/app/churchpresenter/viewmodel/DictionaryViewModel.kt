@@ -61,6 +61,9 @@ class DictionaryViewModel {
     private val interlinearRepository = InterlinearRepository()
     private var interlinearJob: Job? = null
 
+    /** The scan of the Bible folder in flight, so a newer one can cancel it -- see [loadAvailableBibles]. */
+    private var availableBiblesJob: Job? = null
+
     var interlinearVerses by mutableStateOf<List<InterlinearVerse>>(emptyList())
         private set
     var isInterlinearLoading by mutableStateOf(false)
@@ -211,8 +214,12 @@ class DictionaryViewModel {
      * bug.
      */
     fun loadAvailableBibles(directory: String, customNames: Map<String, String> = emptyMap()) {
+        // One scan at a time. Each runs on the IO pool and finishes in its own time, so two folders
+        // named in quick succession could answer out of order and the stale scan's list would win
+        // -- an empty folder's `emptyList()` landing after the next folder's translations.
+        availableBiblesJob?.cancel()
         if (directory.isEmpty()) { availableDictBibles = emptyList(); return }
-        viewModelScope.launch {
+        availableBiblesJob = viewModelScope.launch {
             val dir = File(directory)
             if (!dir.exists() || !dir.isDirectory) { availableDictBibles = emptyList(); return@launch }
             availableDictBibles = withContext(Dispatchers.IO) {
