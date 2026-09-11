@@ -2450,6 +2450,14 @@
     <string name="song_element_title">Název</string>
     <string name="song_element_lyrics">Text</string>
     <string name="song_element_next_section">Další sloka</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Skladatel</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titulní snímek</string>
+    <string name="song_show_on_title_slide">Zobrazit na titulním snímku</string>
+    <string name="song_scope_title_slide">Titulní snímek · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Náhled titulního snímku</string>
     <string name="song_chunk_verse">1 sloka</string>
     <string name="song_chunk_line">1 řádek</string>
     <string name="song_preview_chords">Akordy</string>

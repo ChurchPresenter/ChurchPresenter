@@ -2440,6 +2440,14 @@
     <string name="song_element_title">Tytuł</string>
     <string name="song_element_lyrics">Tekst</string>
     <string name="song_element_next_section">Następna zwrotka</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Kompozytor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Slajd tytułowy</string>
+    <string name="song_show_on_title_slide">Pokaż na slajdzie tytułowym</string>
+    <string name="song_scope_title_slide">Slajd tytułowy · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Podgląd slajdu tytułowego</string>
     <string name="song_chunk_verse">1 zwrotka</string>
     <string name="song_chunk_line">1 wiersz</string>
     <string name="song_preview_chords">Akordy</string>

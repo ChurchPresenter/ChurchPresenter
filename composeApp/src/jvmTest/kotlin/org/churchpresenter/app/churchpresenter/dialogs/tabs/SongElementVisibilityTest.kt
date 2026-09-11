@@ -220,4 +220,47 @@ class SongElementVisibilityTest {
         assertEquals(Constants.FIRST_PAGE, preview.showNumber, "the number's own setting must not move")
         assertEquals(Constants.FIRST_PAGE, preview.titleLowerThirdDisplay, "nor the band's title")
     }
+
+    // ── The title slide ───────────────────────────────────────────────────────
+
+    @Test
+    fun `every title-slide element reads and writes its own switch`() {
+        TITLE_SLIDE_ELEMENTS.forEach { element ->
+            val on = SongSettings().withShownOnTitleSlide(element, true)
+            val off = on.withShownOnTitleSlide(element, false)
+            assertEquals(true, on.shownOnTitleSlide(element), "$element on")
+            assertEquals(false, off.shownOnTitleSlide(element), "$element off")
+            // Its neighbours are untouched: only this element's switch moved.
+            TITLE_SLIDE_ELEMENTS.filter { it != element }.forEach { other ->
+                assertEquals(on.shownOnTitleSlide(other), off.shownOnTitleSlide(other), "$other beside $element")
+            }
+        }
+    }
+
+    @Test
+    fun `an element the title slide never draws has no switch`() {
+        listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION).forEach {
+            assertEquals(null, SongSettings().shownOnTitleSlide(it), "$it")
+            assertEquals(SongSettings(), SongSettings().withShownOnTitleSlide(it, false), "$it is a no-op to write")
+        }
+    }
+
+    @Test
+    fun `the title slide's defaults keep what it always showed`() {
+        val s = SongSettings()
+        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.NUMBER))
+        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.TITLE))
+        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.AUTHOR))
+        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.COMPOSER))
+        assertEquals(false, s.shownOnTitleSlide(SongStyleElement.CCLI))
+        assertEquals(false, s.shownOnTitleSlide(SongStyleElement.TEMPO))
+    }
+
+    @Test
+    fun `the preview turns a hidden element on without touching one already shown`() {
+        val hidden = SongSettings(titleSlideShowTempo = false)
+        assertEquals(true, hidden.shownOnTitleSlideForPreview(SongStyleElement.TEMPO).titleSlideShowTempo)
+        assertEquals(hidden, hidden.shownOnTitleSlideForPreview(SongStyleElement.TITLE))
+        assertEquals(hidden, hidden.shownOnTitleSlideForPreview(SongStyleElement.LYRICS))
+    }
 }

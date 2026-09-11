@@ -27,8 +27,9 @@ class SongPresenterPushTest {
         secondaryLyrics: List<String> = emptyList(),
         background: SongBackground = SongBackground(),
         lowerThirdBackground: SongBackground = SongBackground(),
+        ccliNumber: String = "",
     ) = SongItem(
-        number = number, title = title, author = author, composer = composer,
+        number = number, title = title, author = author, composer = composer, ccliNumber = ccliNumber,
         secondaryTitle = secondaryTitle, lyrics = lyrics, secondaryLyrics = secondaryLyrics,
         background = background, lowerThirdBackground = lowerThirdBackground,
     )
@@ -82,6 +83,16 @@ class SongPresenterPushTest {
             listOf("Amazing Grace"),
             titleSlideSection(song(), SongTuning(bpm = 0), SongSettings(titleSlideShowSongNumber = false)).lines,
         )
+
+    @Test fun `a title slide carries the licence number and one line per element the slide shows`() {
+        val section = titleSlideSection(
+            song(author = "Newton", composer = "Excell", ccliNumber = "22025"),
+            SongTuning(bpm = 90),
+            SongSettings(titleSlideShowCcli = true, titleSlideShowTempo = true, titleSlideShowComposer = false),
+        )
+        assertEquals("22025", section.ccli)
+        assertEquals(listOf("123 – Amazing Grace", "Newton", "CCLI #22025", "\u2669 = 90 BPM"), section.lines)
+    }
 
     @Test fun `a non-numeric song number becomes zero`() =
         assertEquals(0, titleSlideSection(song(number = "12b"), SongTuning(bpm = 0)).songNumber)

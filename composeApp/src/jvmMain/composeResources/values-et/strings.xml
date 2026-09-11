@@ -2473,6 +2473,14 @@
     <string name="song_element_title">Pealkiri</string>
     <string name="song_element_lyrics">Sõnad</string>
     <string name="song_element_next_section">Järgmine osa</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Helilooja</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Pealkirjaslaid</string>
+    <string name="song_show_on_title_slide">Näita pealkirjaslaidil</string>
+    <string name="song_scope_title_slide">Pealkirjaslaid · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pealkirjaslaidi eelvaade</string>
     <string name="song_chunk_verse">1 salm</string>
     <string name="song_chunk_line">1 rida</string>
     <string name="song_preview_chords">Akordid</string>

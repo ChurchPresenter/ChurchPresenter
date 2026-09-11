@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Judul</string>
     <string name="song_element_lyrics">Lirik</string>
     <string name="song_element_next_section">Bagian berikutnya</string>
+    <string name="song_element_author">Penulis</string>
+    <string name="song_element_composer">Komposer</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Slide judul</string>
+    <string name="song_show_on_title_slide">Tampilkan di slide judul</string>
+    <string name="song_scope_title_slide">Slide judul · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pratinjau slide judul</string>
     <string name="song_chunk_verse">1 Ayat</string>
     <string name="song_chunk_line">1 Baris</string>
     <string name="song_preview_chords">Akor</string>

@@ -27,8 +27,6 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -44,7 +42,6 @@ import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint
@@ -64,7 +61,8 @@ import kotlin.test.Test
  * Rendered at 1920x1080, which is what these surfaces are drawn onto in practice — and it matters
  * here more than elsewhere, because auto-fit sizes the text against the space it is given.
  *
- * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half.
+ * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half, and
+ * the title slide's states are `PresenterTitleSlideScreenshotTest`.
  */
 class PresenterFullScreenScreenshotTest {
 
@@ -523,38 +521,6 @@ class PresenterFullScreenScreenshotTest {
     @Test
     fun `with the background suppressed`() = shoot("song_no_background") {
         SongPresenter(lyricSection = song(), appSettings = colouredSong(), showBackground = false)
-    }
-
-    // ── The intro slide ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * The slide a song opens on: its title and number on one line, the credit on the next.
-     *
-     * Built by [titleSlideSection], exactly as the songs tab builds it, rather than by turning
-     * `titleSlideEnabled` on, which is the switch that makes the *tab* put this section in front of
-     * the verses. Its lines are drawn in the Title element's style -- here a bold, coloured one, so
-     * the picture shows that it is not the lyrics' style they took.
-     */
-    @Test
-    fun `the intro slide`() = shoot("song_intro_slide") {
-        SongPresenter(
-            lyricSection = introSlide(),
-            appSettings = songSettings(titleSlideEnabled = true, titleBold = true, titleColor = "#FFD54F"),
-        )
-    }
-
-    // Not shot: the intro slide in the second language. The secondary title only replaces the primary
-    // once the slide is drawn in secondary mode *and* carries secondary content, which an intro slide
-    // — title and number, no lines — does not, so it renders identically to `song_intro_slide`.
-
-    @Test
-    fun `the intro slide over a photograph`() = shoot("song_intro_slide_on_image") {
-        SongPresenter(
-            lyricSection = introSlide(),
-            appSettings = songSettings(titleSlideEnabled = true).copy(
-                backgroundSettings = BackgroundSettings(songBackground = imageBackground()),
-            ),
-        )
     }
 
     // ── Shadow, which is what makes words readable over a picture ───────────────────────────────
@@ -1231,12 +1197,6 @@ class PresenterFullScreenScreenshotTest {
 
     private fun imageBackground() =
         BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = photo().absolutePath)
-
-    /** The slide a song opens on: title and number, no lyrics — as the songs tab builds it. */
-    private fun introSlide() = titleSlideSection(
-        SongItem(number = "42", title = "Amazing Grace", author = "John Newton"),
-        SongTuning(),
-    )
 
     /** A second photograph, so a transition has something to move between. */
     private fun secondPhoto(): File {

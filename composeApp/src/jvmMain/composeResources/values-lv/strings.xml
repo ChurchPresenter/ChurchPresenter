@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
     <string name="song_element_next_section">Nākamā daļa</string>
+    <string name="song_element_author">Autors</string>
+    <string name="song_element_composer">Komponists</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Temps</string>
+    <string name="song_target_title_slide">Nosaukuma slaids</string>
+    <string name="song_show_on_title_slide">Rādīt nosaukuma slaidā</string>
+    <string name="song_scope_title_slide">Nosaukuma slaids · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Nosaukuma slaida priekšskatījums</string>
     <string name="song_chunk_verse">1 pants</string>
     <string name="song_chunk_line">1 rinda</string>
     <string name="song_preview_chords">Akordi</string>

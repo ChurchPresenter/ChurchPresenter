@@ -2448,6 +2448,14 @@
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">बोल</string>
     <string name="song_element_next_section">अगला भाग</string>
+    <string name="song_element_author">रचनाकार</string>
+    <string name="song_element_composer">संगीतकार</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">टेम्पो</string>
+    <string name="song_target_title_slide">शीर्षक स्लाइड</string>
+    <string name="song_show_on_title_slide">शीर्षक स्लाइड पर दिखाएँ</string>
+    <string name="song_scope_title_slide">शीर्षक स्लाइड · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">शीर्षक स्लाइड पूर्वावलोकन</string>
     <string name="song_chunk_verse">1 वचन</string>
     <string name="song_chunk_line">1 पंक्ति</string>
     <string name="song_preview_chords">कॉर्ड</string>

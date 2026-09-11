@@ -2441,6 +2441,14 @@
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Text</string>
     <string name="song_element_next_section">Nächster Abschnitt</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Komponist</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titelfolie</string>
+    <string name="song_show_on_title_slide">Auf der Titelfolie anzeigen</string>
+    <string name="song_scope_title_slide">Titelfolie · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Titelfolien-Vorschau</string>
     <string name="song_chunk_verse">1 Strophe</string>
     <string name="song_chunk_line">1 Zeile</string>
     <string name="song_preview_chords">Akkorde</string>

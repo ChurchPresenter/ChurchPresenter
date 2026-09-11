@@ -22,6 +22,10 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -443,6 +447,59 @@ class PresenterLowerThirdScreenshotTest {
     fun `the scripture band mid-crossfade`() =
         shootBible("bible_crossfade", listOf(verse()), transitionAlpha = 0.4f)
 
+    // ── The intro slide ─────────────────────────────────────────────────────────────────────────
+
+    /** The slide a song opens on, in the band: number and title on one line, the credits under. */
+    @Test
+    fun `the intro slide in the band`() = shootSong("song_intro_slide", introSlide(), titleSlideSettings())
+
+    /** Every credit on, both languages: the band's own smaller profiles keep it inside the band. */
+    @Test
+    fun `the intro slide in the band with every credit`() = shootSong(
+        "song_intro_slide_everything",
+        introSlide(),
+        titleSlideSettings(titleSlideShowCcli = true, titleSlideShowTempo = true),
+        languageOverride = Constants.SONG_LANG_BOTH,
+    )
+
+    /** Over a camera feed, with the band's profiles shadowed. */
+    @Test
+    fun `the intro slide in the band over a camera`() = shootSong(
+        "song_intro_slide_on_camera",
+        introSlide(),
+        titleSlideSettings(shadowed = true),
+        overlayPhoto = true,
+    )
+
+    private fun introSlide() = titleSlideSection(
+        SongItem(
+            number = "427",
+            title = "Amazing Grace",
+            secondaryTitle = "О, благодать",
+            author = "John Newton",
+            composer = "William Walker",
+            ccliNumber = "22025",
+        ),
+        SongTuning(bpm = 84),
+        SongSettings(titleSlideShowCcli = true, titleSlideShowTempo = true),
+    )
+
+    private fun titleSlideSettings(
+        titleSlideShowCcli: Boolean = false,
+        titleSlideShowTempo: Boolean = false,
+        shadowed: Boolean = false,
+    ) = AppSettings(
+        songSettings = SongSettings(
+            titleSlideEnabled = true,
+            titleSlideShowCcli = titleSlideShowCcli,
+            titleSlideShowTempo = titleSlideShowTempo,
+            titleLowerThirdShadow = shadowed,
+            songNumberLowerThirdShadow = shadowed,
+            titleSlideAuthorLowerThird = SongCreditStyle(fontSize = 20, shadow = shadowed),
+            titleSlideComposerLowerThird = SongCreditStyle(fontSize = 20, shadow = shadowed),
+        ),
+    )
+
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────
 
     private fun shootSong(
@@ -455,6 +512,7 @@ class PresenterLowerThirdScreenshotTest {
         displayLineIndex: Int = -1,
         overlayPhoto: Boolean = false,
         showChords: Boolean = false,
+        languageOverride: String = "",
     ) = shoot(name) {
         if (overlayPhoto) CameraFeed()
         SongPresenter(
@@ -466,6 +524,7 @@ class PresenterLowerThirdScreenshotTest {
             transitionAlpha = transitionAlpha,
             displayLineIndex = displayLineIndex,
             showChords = showChords,
+            languageOverride = languageOverride,
         )
     }
 

@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Başlık</string>
     <string name="song_element_lyrics">Sözler</string>
     <string name="song_element_next_section">Sonraki Kısım</string>
+    <string name="song_element_author">Söz Yazarı</string>
+    <string name="song_element_composer">Besteci</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Başlık slaydı</string>
+    <string name="song_show_on_title_slide">Başlık slaydında göster</string>
+    <string name="song_scope_title_slide">Başlık slaydı · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Başlık slaydı önizlemesi</string>
     <string name="song_chunk_verse">1 kıta</string>
     <string name="song_chunk_line">1 satır</string>
     <string name="song_preview_chords">Akorlar</string>

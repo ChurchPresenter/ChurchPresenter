@@ -2448,6 +2448,14 @@
     <string name="song_element_title">ชื่อ</string>
     <string name="song_element_lyrics">เนื้อเพลง</string>
     <string name="song_element_next_section">ท่อนถัดไป</string>
+    <string name="song_element_author">ผู้ประพันธ์คำร้อง</string>
+    <string name="song_element_composer">ผู้ประพันธ์ทำนอง</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">จังหวะ</string>
+    <string name="song_target_title_slide">สไลด์ชื่อเพลง</string>
+    <string name="song_show_on_title_slide">แสดงบนสไลด์ชื่อเพลง</string>
+    <string name="song_scope_title_slide">สไลด์ชื่อเพลง · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">ตัวอย่างสไลด์ชื่อเพลง</string>
     <string name="song_chunk_verse">ครั้งละ 1 ท่อน</string>
     <string name="song_chunk_line">ครั้งละ 1 บรรทัด</string>
     <string name="song_preview_chords">คอร์ด</string>

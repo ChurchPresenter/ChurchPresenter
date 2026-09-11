@@ -2470,6 +2470,14 @@
     <string name="song_element_title">Titlu</string>
     <string name="song_element_lyrics">Versuri</string>
     <string name="song_element_next_section">Secțiunea Următoare</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Compozitor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Diapozitiv de titlu</string>
+    <string name="song_show_on_title_slide">Afișează pe diapozitivul de titlu</string>
+    <string name="song_scope_title_slide">Diapozitiv de titlu · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Previzualizare diapozitiv de titlu</string>
     <string name="song_chunk_verse">1 Strofă</string>
     <string name="song_chunk_line">1 Linie</string>
     <string name="song_preview_chords">Acorduri</string>

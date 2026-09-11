@@ -138,6 +138,68 @@ class SongSettingsTabScreenshotTest {
         settings = songSettings { copy(titleSlideEnabled = true) },
     )
 
+    // ── The title-slide view ────────────────────────────────────────────────────────────────────
+
+    /** The switch's third position: the slide's own elements, the Title tab first. */
+    @Test
+    fun `the title slide view`() = shoot(
+        "title_slide_view",
+        settings = songSettings { copy(titleSlideEnabled = true) },
+    ) {
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+    }
+
+    /** The Number tab: the one with the row switch, which is greyed while the number is hidden. */
+    @Test
+    fun `the title slide's number`() = shoot(
+        "title_slide_number",
+        settings = songSettings { copy(titleSlideEnabled = true, titleSlideShowSongNumber = false) },
+    ) {
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+        onNodeWithText("Number").performClick()
+        waitForIdle()
+    }
+
+    /** A credit: no position, no first-page switch, no language -- its profile and its switch. */
+    @Test
+    fun `the title slide's author`() = shoot(
+        "title_slide_author",
+        settings = songSettings {
+            copy(titleSlideEnabled = true, titleSlideShowCcli = true, titleSlideShowTempo = true)
+        },
+    ) {
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+        onNodeWithText("Author").performClick()
+        waitForIdle()
+    }
+
+    /** The band's title slide, and the scope note that says so. */
+    @Test
+    fun `the title slide on the lower third`() = shoot(
+        "title_slide_lower_third",
+        settings = songSettings { copy(titleSlideEnabled = true) },
+    ) {
+        onNodeWithText("Lower Third").performClick()
+        waitForIdle()
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+    }
+
+    /** The long sample: a wrapping bilingual title with the number ahead of it, and long credits. */
+    @Test
+    fun `the title slide's long sample`() = shoot(
+        "title_slide_long",
+        settings = songSettings { copy(titleSlideEnabled = true, titleSlideVerticalAlignment = Constants.TOP) },
+    ) {
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+        onNodeWithText("Long").performClick()
+        waitForIdle()
+    }
+
     /** The end-of-song marker switched off: its checkbox clears, and the spacing field stays put. */
     @Test
     fun `the end-of-song marker switched off`() = shoot(
