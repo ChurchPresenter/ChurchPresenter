@@ -2453,6 +2453,14 @@
     <string name="song_element_title">தலைப்பு</string>
     <string name="song_element_lyrics">பாடல் வரிகள்</string>
     <string name="song_element_next_section">அடுத்த பகுதி</string>
+    <string name="song_element_author">ஆசிரியர்</string>
+    <string name="song_element_composer">இசையமைப்பாளர்</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">டெம்போ</string>
+    <string name="song_target_title_slide">தலைப்பு ஸ்லைடு</string>
+    <string name="song_show_on_title_slide">தலைப்பு ஸ்லைடில் காட்டு</string>
+    <string name="song_scope_title_slide">தலைப்பு ஸ்லைடு · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">தலைப்பு ஸ்லைடு முன்னோட்டம்</string>
     <string name="song_chunk_verse">1 பத்தி</string>
     <string name="song_chunk_line">1 வரி</string>
     <string name="song_preview_chords">நாண்கள்</string>

@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Naslov</string>
     <string name="song_element_lyrics">Tekst pjesme</string>
     <string name="song_element_next_section">Sljedeći dio</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Skladatelj</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Naslovni slajd</string>
+    <string name="song_show_on_title_slide">Prikaži na naslovnom slajdu</string>
+    <string name="song_scope_title_slide">Naslovni slajd · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pregled naslovnog slajda</string>
     <string name="song_chunk_verse">1 stih</string>
     <string name="song_chunk_line">1 redak</string>
     <string name="song_preview_chords">Akordi</string>

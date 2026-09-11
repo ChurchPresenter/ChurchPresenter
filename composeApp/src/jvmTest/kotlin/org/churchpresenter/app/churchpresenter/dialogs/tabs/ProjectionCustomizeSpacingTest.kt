@@ -66,7 +66,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `both spacing sliders show what the full screen has stored`() {
         projectionTab(songOutput()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithText("3px").assertExists("the letter spacing's readout")
             onNodeWithText("7px").assertExists("the word spacing's readout")
         }
@@ -75,7 +75,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `the letter-spacing slider writes the full screen's lyrics`() {
         projectionTab(songOutput()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(letter, "3px", fraction = 0.5f)
 
             val stored = get().storedSong()
@@ -88,7 +88,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `the word-spacing slider writes the full screen's lyrics`() {
         projectionTab(songOutput()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(word, "7px", fraction = 0.5f)
 
             val stored = get().storedSong()
@@ -101,7 +101,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `the letter-spacing slider writes the band's lyrics instead`() {
         projectionTab(songOutput(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(letter, "11px", fraction = 0.5f)
 
             val stored = get().storedSong()
@@ -113,7 +113,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `the word-spacing slider writes the band's lyrics instead`() {
         projectionTab(songOutput(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(word, "15px", fraction = 0.5f)
 
             val stored = get().storedSong()
@@ -125,7 +125,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `spacing can be pulled negative, which is what the track's near end is for`() {
         projectionTab(songOutput()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(letter, "3px", fraction = 0f)
 
             assertEquals(-20, get().storedSong().lyricsLetterSpacing, "letters may be tightened, not only opened")
@@ -135,7 +135,7 @@ class ProjectionCustomizeSpacingTest {
     @Test
     fun `the readout follows the handle`() {
         projectionTab(songOutput()) { _ ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             tapSliderTrack(letter, "3px", fraction = 0.5f)
             onNodeWithText("40px").assertExists("the readout must show what was stored")
         }

@@ -247,7 +247,7 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the lyrics font picker writes the full screen's family`() {
         val family = uniquelyNamedFont()
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             pickFont(SENTINEL_FONT, family)
 
             val stored = get().stored()
@@ -260,7 +260,7 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the lyrics font picker writes the band's family`() {
         val family = uniquelyNamedFont()
         projectionTab(output(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             pickFont(SENTINEL_FONT, family)
 
             val stored = get().stored()
@@ -274,7 +274,7 @@ class ProjectionCustomizeSongLookAheadTest {
     @Test
     fun `the case picker writes the full screen's lyrics`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             chooseSegment("aa")
 
             val stored = get().stored()
@@ -290,7 +290,7 @@ class ProjectionCustomizeSongLookAheadTest {
     @Test
     fun `the case picker writes the band's lyrics`() {
         projectionTab(output(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             chooseSegment("Aa")
 
             val stored = get().stored()
@@ -307,7 +307,7 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the typography row is offered on both shapes`() {
         for (mode in listOf(Constants.DISPLAY_MODE_FULLSCREEN, band)) {
             projectionTab(output(mode)) { _ ->
-                openCustomizePane(CustomizePane.SONGS, override = false)
+                openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
                 onNodeWithText("Aa").assertExists("the case picker belongs to every shape of output")
             }
         }
@@ -316,7 +316,7 @@ class ProjectionCustomizeSongLookAheadTest {
     @Test
     fun `the lyrics element also carries the vertical alignment the look-ahead has not`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithContentDescription("Align Top").assertExists()
         }
     }

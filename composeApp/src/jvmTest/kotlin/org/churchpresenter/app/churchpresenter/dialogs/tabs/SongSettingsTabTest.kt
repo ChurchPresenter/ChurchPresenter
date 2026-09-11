@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -62,14 +63,15 @@ class SongSettingsTabTest {
     }
 
     @Test
-    fun `the number row is disabled until the title slide is on`() = songTab { get ->
-        onNodeWithTag("song_titleSlideShowSongNumber").performClick()
+    fun `the vertical alignment row is inert until the title slide is on`() = songTab { get ->
+        // The title slide's row is the rail's first; the lyrics' own comes after it.
+        onAllNodesWithContentDescription("Align Top").onFirst().performClick()
         waitForIdle()
 
         assertEquals(
-            SongSettings().titleSlideShowSongNumber,
-            song(get).titleSlideShowSongNumber,
-            "the row is disabled while the slide is off, so a click must not reach it",
+            SongSettings().titleSlideVerticalAlignment,
+            song(get).titleSlideVerticalAlignment,
+            "the row is inert while the slide is off, so a click must not reach it",
         )
     }
 
@@ -99,7 +101,8 @@ class SongSettingsTabTest {
     fun `each vertical alignment button selects its own alignment`() = songTab { get ->
         listOf("Align Top" to Constants.TOP, "Align Middle" to Constants.MIDDLE, "Align Bottom" to Constants.BOTTOM)
             .forEach { (description, expected) ->
-                onAllNodesWithContentDescription(description).onFirst().performClick()
+                // The lyrics' row is the rail's second; the title slide's own comes first.
+                onAllNodesWithContentDescription(description).onLast().performClick()
                 waitForIdle()
                 assertEquals(expected, song(get).lyricsAlignment, description)
             }
@@ -455,7 +458,7 @@ class SongSettingsTabTest {
 
     @Test
     fun `every element tab is offered`() = songTab {
-        SongStyleElement.entries.forEach { element ->
+        LYRIC_SLIDE_ELEMENTS.forEach { element ->
             onNodeWithText(element.tabLabel).assertExists()
         }
     }

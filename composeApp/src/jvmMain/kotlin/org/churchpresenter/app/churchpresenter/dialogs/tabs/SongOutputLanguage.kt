@@ -1,8 +1,18 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_language_both
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Which languages a song is presented in -- read and written where it actually lives.
@@ -81,3 +91,29 @@ private fun AppSettings.mapSongModes(
         },
     ),
 )
+
+/** Wide enough for "Secondary" without an ellipsis. */
+private val LANGUAGE_BUTTON_WIDTH = 82.dp
+
+/** The Both / Primary / Secondary switch for [target]'s output, shared by both views of the tab. */
+@Composable
+internal fun SongLanguageScopeButtons(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    target: SongStyleTarget,
+) {
+    SegmentedButton(
+        items = listOf(
+            SegmentedButtonItem(Constants.SONG_LANG_BOTH, stringResource(Res.string.song_language_both)),
+            SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, stringResource(Res.string.song_language_primary)),
+            SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, stringResource(Res.string.song_language_secondary)),
+        ),
+        selectedValue = settings.songLanguageFor(target),
+        onValueChange = { lang ->
+            onSettingsChange { s -> s.withSongLanguage(target, lang) }
+        },
+        buttonWidth = LANGUAGE_BUTTON_WIDTH,
+        buttonHeight = 30.dp,
+        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+    )
+}

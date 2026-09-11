@@ -75,3 +75,39 @@ internal fun SongSettings.shownForPreview(
     } else {
         this
     }
+
+/**
+ * Whether the title slide draws [element]. `null` for an element the title slide never draws.
+ *
+ * Not per output: the slide says the same things on the band as on the screen, and the two outputs
+ * differ in how those things are drawn, which is what the per-target profiles are for.
+ */
+internal fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean? = when (element) {
+    SongStyleElement.NUMBER -> titleSlideShowSongNumber
+    SongStyleElement.TITLE -> titleSlideShowTitle
+    SongStyleElement.AUTHOR -> titleSlideShowAuthor
+    SongStyleElement.COMPOSER -> titleSlideShowComposer
+    SongStyleElement.CCLI -> titleSlideShowCcli
+    SongStyleElement.TEMPO -> titleSlideShowTempo
+    else -> null
+}
+
+/** The inverse of [shownOnTitleSlide]; a no-op for an element the title slide never draws. */
+internal fun SongSettings.withShownOnTitleSlide(element: SongStyleElement, on: Boolean): SongSettings =
+    when (element) {
+        SongStyleElement.NUMBER -> copy(titleSlideShowSongNumber = on)
+        SongStyleElement.TITLE -> copy(titleSlideShowTitle = on)
+        SongStyleElement.AUTHOR -> copy(titleSlideShowAuthor = on)
+        SongStyleElement.COMPOSER -> copy(titleSlideShowComposer = on)
+        SongStyleElement.CCLI -> copy(titleSlideShowCcli = on)
+        SongStyleElement.TEMPO -> copy(titleSlideShowTempo = on)
+        else -> this
+    }
+
+/**
+ * [this], with [element] drawn on the title slide whether or not it is switched on -- for the
+ * preview, never for the output. The same reasoning as [shownForPreview]: the tab must never be
+ * styling something the picture does not show.
+ */
+internal fun SongSettings.shownOnTitleSlideForPreview(element: SongStyleElement): SongSettings =
+    if (shownOnTitleSlide(element) == false) withShownOnTitleSlide(element, true) else this

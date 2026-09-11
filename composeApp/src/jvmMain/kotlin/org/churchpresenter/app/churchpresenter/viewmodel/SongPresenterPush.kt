@@ -4,6 +4,8 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.app.churchpresenter.presenter.titleSlideLines
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.settings.utils.Constants
 
@@ -24,26 +26,32 @@ internal fun songCreditLine(song: SongItem): String =
     listOf(song.author, song.composer).filter { it.isNotBlank() }.joinToString(" / ")
 
 /**
- * The title-slide [LyricSection] for [song] at [tuning]: a heading line plus a credit line when there is
- * one. Its `songNumber` is the numeric part of the song number, or 0 when the number isn't numeric.
+ * The title-slide [LyricSection] for [song] at [tuning], under [settings].
+ *
+ * Carries the song's number, title and credits as fields, which is what the presenter draws -- each
+ * in its own element's profile, see `SongTitleSlideContent` -- and the same content as plain
+ * `lines`, one per element the slide is set to show, for the readers that only ever see text: the
+ * stage monitor and the companion app. Both come from [titleSlideLines], so they cannot disagree.
+ * Its `songNumber` is the numeric part of the song number, or 0 when the number isn't numeric.
  */
 internal fun titleSlideSection(
     song: SongItem,
     tuning: SongTuning,
-    showSongNumber: Boolean = true,
-): LyricSection = LyricSection(
-    type = Constants.SECTION_TYPE_TITLE_SLIDE,
-    title = song.title,
-    secondaryTitle = song.secondaryTitle,
-    songNumber = song.number.toIntOrNull() ?: 0,
-    lines = buildList {
-        add(songTitleLine(song, showSongNumber))
-        val credit = songCreditLine(song)
-        if (credit.isNotBlank()) add(credit)
-    },
-    bpm = tuning.bpm,
-    capo = tuning.capo,
-).withBackgroundsOf(song)
+    settings: SongSettings = SongSettings(),
+): LyricSection {
+    val section = LyricSection(
+        type = Constants.SECTION_TYPE_TITLE_SLIDE,
+        title = song.title,
+        secondaryTitle = song.secondaryTitle,
+        songNumber = song.number.toIntOrNull() ?: 0,
+        author = song.author,
+        composer = song.composer,
+        ccli = song.ccliNumber,
+        bpm = tuning.bpm,
+        capo = tuning.capo,
+    ).withBackgroundsOf(song)
+    return section.copy(lines = titleSlideLines(section, settings).map { it.plainText })
+}
 
 /** Where a live-edited song lands: the section/line to select and the section to send. */
 internal data class EditedSongPush(val sectionIndex: Int, val lineIndex: Int, val section: LyricSection)

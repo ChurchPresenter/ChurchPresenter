@@ -2441,6 +2441,14 @@
     <string name="song_element_title">Атауы</string>
     <string name="song_element_lyrics">Мәтін</string>
     <string name="song_element_next_section">Келесі бөлім</string>
+    <string name="song_element_author">Автор</string>
+    <string name="song_element_composer">Композитор</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Темп</string>
+    <string name="song_target_title_slide">Атау слайды</string>
+    <string name="song_show_on_title_slide">Атау слайдында көрсету</string>
+    <string name="song_scope_title_slide">Атау слайды · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Атау слайдын алдын ала қарау</string>
     <string name="song_chunk_verse">1 шумақ</string>
     <string name="song_chunk_line">1 жол</string>
     <string name="song_preview_chords">Аккордтар</string>

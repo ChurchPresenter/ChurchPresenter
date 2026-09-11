@@ -99,6 +99,12 @@ internal fun SongTypographyPanel(
     onReset: () -> Unit,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
+    /**
+     * Styling the title slide, where the number and the title have one place each and the
+     * above/below-verse position -- shared with the lyric slides -- would be a control that
+     * changes nothing in the picture.
+     */
+    onTitleSlide: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -119,7 +125,7 @@ internal fun SongTypographyPanel(
             // Alignment sits here rather than beside Size: with the Auto box in that row as well,
             // the four cells came to more than the pane and it was clipped off the end.
             SongAlignmentControl(style, onStyleChange)
-            if (element.hasPosition) {
+            if (element.hasPosition && !onTitleSlide) {
                 ControlColumn(stringResource(Res.string.position)) {
                     PositionButtons(
                         selectedPosition = style.position,

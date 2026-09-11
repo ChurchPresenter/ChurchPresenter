@@ -87,7 +87,7 @@ class FadeTogglesTest {
     @Test
     fun `the strip's Fade Out writes the output's own flag`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             toggleCheckbox("Fade Out", scroll = false)
 
             val stored = get().stored()
@@ -100,7 +100,7 @@ class FadeTogglesTest {
     @Test
     fun `the strip's Fade Out writes a band's flag too`() {
         projectionTab(output(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             toggleCheckbox("Fade Out", scroll = false)
 
             assertFalse(get().stored().fadeOut)
@@ -110,7 +110,7 @@ class FadeTogglesTest {
     @Test
     fun `the strip's three fades are independent`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             for (label in listOf("Fade In", "Fade Out", "Crossfade")) {
                 toggleCheckbox(label, scroll = false)
             }
@@ -125,7 +125,7 @@ class FadeTogglesTest {
     @Test
     fun `the strip's fades leave the duration alone`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             toggleCheckbox("Fade Out", scroll = false)
 
             assertEquals(555f, get().stored().transitionDuration)

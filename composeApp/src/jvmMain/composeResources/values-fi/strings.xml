@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Otsikko</string>
     <string name="song_element_lyrics">Sanat</string>
     <string name="song_element_next_section">Seuraava osa</string>
+    <string name="song_element_author">Sanoittaja</string>
+    <string name="song_element_composer">Säveltäjä</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Otsikkodia</string>
+    <string name="song_show_on_title_slide">Näytä otsikkodialla</string>
+    <string name="song_scope_title_slide">Otsikkodia · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Otsikkodian esikatselu</string>
     <string name="song_chunk_verse">1 säkeistö</string>
     <string name="song_chunk_line">1 rivi</string>
     <string name="song_preview_chords">Soinnut</string>

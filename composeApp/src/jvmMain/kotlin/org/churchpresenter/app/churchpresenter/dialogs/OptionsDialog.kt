@@ -20,6 +20,7 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
@@ -264,6 +266,12 @@ internal fun OptionsDialogContent(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     ) {
+                        // What the Apply button below does, for a nested dialog to offer as well.
+                        val applySettings = {
+                            settingsManager.saveSettings(currentSettings)
+                            onSave(currentSettings)
+                        }
+                        CompositionLocalProvider(LocalApplySettings provides applySettings) {
                         when (safeTabIndex) {
                             0 -> SystemSettingsTab(
                                 settings = currentSettings,
@@ -357,6 +365,7 @@ internal fun OptionsDialogContent(
                                 },
                                 viewModel = companionSatelliteViewModel
                             )
+                        }
                         }
                     }
 

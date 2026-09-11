@@ -79,7 +79,7 @@ class ProjectionCustomizeStagePanelTest {
     @Test
     fun `Songs draws a stage`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertExists()
         }
     }
@@ -139,7 +139,7 @@ class ProjectionCustomizeStagePanelTest {
     @Test
     fun `the stage survives chipping between elements`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             for (element in customizeElements(CustomizePane.SONGS)) {
                 openElement(element)
                 onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertExists()
@@ -150,7 +150,7 @@ class ProjectionCustomizeStagePanelTest {
     @Test
     fun `the stage survives the override being switched on`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertExists()
         }
     }

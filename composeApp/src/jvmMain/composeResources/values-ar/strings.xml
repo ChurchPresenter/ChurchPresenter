@@ -2448,6 +2448,14 @@
     <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
     <string name="song_element_next_section">المقطع التالي</string>
+    <string name="song_element_author">المؤلف</string>
+    <string name="song_element_composer">الملحّن</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">الإيقاع</string>
+    <string name="song_target_title_slide">شريحة العنوان</string>
+    <string name="song_show_on_title_slide">إظهار في شريحة العنوان</string>
+    <string name="song_scope_title_slide">شريحة العنوان · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">معاينة شريحة العنوان</string>
     <string name="song_chunk_verse">مقطع واحد</string>
     <string name="song_chunk_line">سطر واحد</string>
     <string name="song_preview_chords">الكوردات</string>

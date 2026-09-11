@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
     <string name="song_element_next_section">Keyingi qism</string>
+    <string name="song_element_author">Muallif</string>
+    <string name="song_element_composer">Bastakor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Temp</string>
+    <string name="song_target_title_slide">Sarlavha slaydi</string>
+    <string name="song_show_on_title_slide">Sarlavha slaydida ko'rsatish</string>
+    <string name="song_scope_title_slide">Sarlavha slaydi · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Sarlavha slaydi ko'rinishi</string>
     <string name="song_chunk_verse">1 band</string>
     <string name="song_chunk_line">1 satr</string>
     <string name="song_preview_chords">Akkordlar</string>

@@ -2440,6 +2440,14 @@
     <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Тэкст</string>
     <string name="song_element_next_section">Наступная страфа</string>
+    <string name="song_element_author">Аўтар</string>
+    <string name="song_element_composer">Кампазітар</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Тэмп</string>
+    <string name="song_target_title_slide">Слайд назвы</string>
+    <string name="song_show_on_title_slide">Паказваць на слайдзе назвы</string>
+    <string name="song_scope_title_slide">Слайд назвы · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Прагляд слайда назвы</string>
     <string name="song_chunk_verse">1 куплет</string>
     <string name="song_chunk_line">1 радок</string>
     <string name="song_preview_chords">Акорды</string>

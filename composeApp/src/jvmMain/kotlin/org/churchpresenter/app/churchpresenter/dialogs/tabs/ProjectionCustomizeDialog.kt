@@ -60,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_count
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
+import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.customize_done
 import churchpresenter.composeapp.generated.resources.customize_pane_header
 import churchpresenter.composeapp.generated.resources.customize_reset_to_global
@@ -265,40 +266,75 @@ internal fun OutputCustomizeDialog(
             }
         },
         confirmButton = {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton(
-                    shape = RoundedCornerShape(8.dp),
-                    onClick = { setOverridden(false) },
-                    enabled = overridden,
-                    contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.customize_reset_to_global),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = paneHint(pane, overridden),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Button(
-                    shape = RoundedCornerShape(8.dp),
-                    onClick = onDismiss,
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.customize_done),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-            }
+            CustomizeDialogButtons(
+                pane = pane,
+                overridden = overridden,
+                onReset = { setOverridden(false) },
+                onDismiss = onDismiss,
+            )
         },
     )
+}
+
+/**
+ * Reset to global, the hint, and -- when an Options draft is there to apply -- Apply beside Done.
+ */
+@Composable
+private fun CustomizeDialogButtons(
+    pane: CustomizePane,
+    overridden: Boolean,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        OutlinedButton(
+            shape = RoundedCornerShape(8.dp),
+            onClick = onReset,
+            enabled = overridden,
+            contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.customize_reset_to_global),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = paneHint(pane, overridden),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        // Apply: the Options dialog's own, offered here so a change can be seen on the
+        // screen without closing this dialog and finding that button first. Only where a
+        // draft exists to apply -- a test composing this dialog alone gets Done alone.
+        LocalApplySettings.current?.let { apply ->
+            OutlinedButton(
+                shape = RoundedCornerShape(8.dp),
+                onClick = apply,
+                contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
+                modifier = Modifier.testTag(CUSTOMIZE_APPLY_TAG),
+            ) {
+                Text(
+                    text = stringResource(Res.string.apply),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Button(
+            shape = RoundedCornerShape(8.dp),
+            onClick = onDismiss,
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.customize_done),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+    }
 }
 
 /**
@@ -464,6 +500,9 @@ internal fun CustomizeOutputCell(
         )
     }
 }
+
+/** Test handle for the Apply button, which appears only under an Options dialog. */
+internal const val CUSTOMIZE_APPLY_TAG = "customize_apply"
 
 /** Test handle for one rail row, by `CustomizePane` name. */
 internal fun railTag(paneName: String): String = "customize_rail_$paneName"

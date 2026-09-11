@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -84,48 +85,41 @@ class SongSettingsTabLayoutTest {
         onNodeWithText("2 · Bilingual").assertExists()
     }
 
-    // ── The title slide's dependent checkbox ──────────────────────────────────
+    // ── The title slide's number, from the editing card's title-slide view ────
 
-    @Test
-    fun `the number checkbox is inert while the title slide is off`() = songTab { get ->
-        onNodeWithTag("song_titleSlideEnabled").performScrollTo()
-        assertFalse(get().songSettings.titleSlideEnabled, "the slide ships off")
-        assertTrue(get().songSettings.titleSlideShowSongNumber, "and the number ships on under it")
-
-        onNodeWithTag("song_titleSlideShowSongNumber").performScrollTo().performClick()
+    private fun ComposeUiTest.openTitleSlideNumber() {
+        onNodeWithTag("song_titleSlideEnabled").performScrollTo().performClick()
         waitForIdle()
-        assertTrue(
-            get().songSettings.titleSlideShowSongNumber,
-            "a disabled checkbox must not store anything",
-        )
+        onNodeWithText("Title Slide").performClick()
+        waitForIdle()
+        onNodeWithText("Number").performClick()
+        waitForIdle()
     }
 
     @Test
     fun `turning the title slide on makes the number checkbox live`() = songTab { get ->
-        onNodeWithTag("song_titleSlideEnabled").performScrollTo().performClick()
-        waitForIdle()
+        openTitleSlideNumber()
         assertTrue(get().songSettings.titleSlideEnabled)
+        assertTrue(get().songSettings.titleSlideShowSongNumber, "the number ships on")
 
-        onNodeWithTag("song_titleSlideShowSongNumber").performScrollTo().performClick()
+        onNodeWithTag("song_show_on_title_slide").performClick()
         waitForIdle()
         assertFalse(get().songSettings.titleSlideShowSongNumber, "it was on and must have gone off")
     }
 
     @Test
     fun `the number checkbox turns back on`() = songTab { get ->
-        onNodeWithTag("song_titleSlideEnabled").performScrollTo().performClick()
+        openTitleSlideNumber()
+        onNodeWithTag("song_show_on_title_slide").performClick()
         waitForIdle()
-        onNodeWithTag("song_titleSlideShowSongNumber").performScrollTo().performClick()
-        waitForIdle()
-        onNodeWithTag("song_titleSlideShowSongNumber").performClick()
+        onNodeWithTag("song_show_on_title_slide").performClick()
         waitForIdle()
         assertTrue(get().songSettings.titleSlideShowSongNumber)
     }
 
     @Test
-    fun `both title-slide checkboxes report their state`() = songTab { _ ->
+    fun `the title-slide checkbox reports its state`() = songTab { _ ->
         onNodeWithTag("song_titleSlideEnabled").performScrollTo().assertIsOff()
-        onNodeWithTag("song_titleSlideShowSongNumber").assertIsOn()
 
         onNodeWithTag("song_titleSlideEnabled").performClick()
         waitForIdle()
@@ -133,9 +127,9 @@ class SongSettingsTabLayoutTest {
     }
 
     @Test
-    fun `the section names itself and its two rows`() = songTab { _ ->
+    fun `the section names itself and its rows`() = songTab { _ ->
         onNodeWithText("Enabled").assertExists()
-        onNodeWithText("Show song number before title").assertExists()
+        onNodeWithTag("song_titleSlideVerticalAlignment").assertExists()
     }
 
     // ── The layout section's own checkboxes ───────────────────────────────────

@@ -60,7 +60,7 @@ internal fun CustomizeStagePanel(
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
             CustomizePane.BIBLE -> BibleStage(settings, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, assignment, lowerThird, slot)
+            CustomizePane.SONGS -> SongStage(settings, assignment, lowerThird, slot, element)
             CustomizePane.DICTIONARY -> DictionaryStage(settings)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
@@ -94,21 +94,27 @@ private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: Preview
     )
 }
 
-/** A verse and the chorus behind it, with the look-ahead this output is set up for. */
+/**
+ * A verse and the chorus behind it, with the look-ahead this output is set up for -- or, under the
+ * Title Slide chip, the title slide that opens the song.
+ */
 @Composable
 private fun SongStage(
     settings: AppSettings,
     assignment: ScreenAssignment,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
+    element: CustomizeElement?,
 ) {
+    val titleSlide = element == CustomizeElement.SONG_TITLE_SLIDE
+    val lyricSections = songSampleSections(slot)
     SongPreviewPanel(
         settings = settings,
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
         // Taken from this output's own assignment rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
-        // answered whether it carries a look-ahead line.
-        showLookAhead = assignment.songLookAhead,
+        // answered whether it carries a look-ahead line. A title slide has none.
+        showLookAhead = assignment.songLookAhead && !titleSlide,
         // Never a chord chart. The chart is for whoever is playing, so it is drawn on the stage
         // monitor and nowhere the congregation can see -- `ProjectionSettingsTab` shows the Show
         // Chords column only for a stage monitor, and `PresenterOutputContent` passes `showChords`
@@ -117,7 +123,12 @@ private fun SongStage(
         // -- so reading it here drew a chart on every song preview that the screen never shows.
         // `SongSettingsTab`'s own preview passes `false` for the same reason.
         showChords = false,
-        sections = songSampleSections(slot),
+        sections = if (titleSlide) {
+            listOf(titleSlideSample(settings.songSettings, slot)) + lyricSections
+        } else {
+            lyricSections
+        },
+        titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )
 }

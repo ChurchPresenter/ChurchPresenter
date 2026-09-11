@@ -2448,6 +2448,14 @@
     <string name="song_element_title">ຫົວຂໍ້</string>
     <string name="song_element_lyrics">ເນື້ອເພງ</string>
     <string name="song_element_next_section">ທ່ອນຕໍ່ໄປ</string>
+    <string name="song_element_author">ຜູ້ແຕ່ງຄຳຮ້ອງ</string>
+    <string name="song_element_composer">ຜູ້ແຕ່ງທຳນອງ</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">ຈັງຫວະ</string>
+    <string name="song_target_title_slide">ສະໄລ້ຫົວຂໍ້</string>
+    <string name="song_show_on_title_slide">ສະແດງໃນສະໄລ້ຫົວຂໍ້</string>
+    <string name="song_scope_title_slide">ສະໄລ້ຫົວຂໍ້ · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">ຕົວຢ່າງສະໄລ້ຫົວຂໍ້</string>
     <string name="song_chunk_verse">1 ບົດ</string>
     <string name="song_chunk_line">1 ແຖວ</string>
     <string name="song_preview_chords">ຄອດ</string>

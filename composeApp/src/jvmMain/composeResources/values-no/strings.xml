@@ -2448,6 +2448,14 @@
     <string name="song_element_title">Tittel</string>
     <string name="song_element_lyrics">Sangtekst</string>
     <string name="song_element_next_section">Neste avsnitt</string>
+    <string name="song_element_author">Forfatter</string>
+    <string name="song_element_composer">Komponist</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Tittellysbilde</string>
+    <string name="song_show_on_title_slide">Vis på tittellysbildet</string>
+    <string name="song_scope_title_slide">Tittellysbilde · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Forhåndsvisning av tittellysbilde</string>
     <string name="song_chunk_verse">1 vers</string>
     <string name="song_chunk_line">1 linje</string>
     <string name="song_preview_chords">Akkorder</string>

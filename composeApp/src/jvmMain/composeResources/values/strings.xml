@@ -885,6 +885,14 @@
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
     <string name="song_element_next_section">Next Section</string>
+    <string name="song_element_author">Author</string>
+    <string name="song_element_composer">Composer</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Title Slide</string>
+    <string name="song_show_on_title_slide">Show on title slide</string>
+    <string name="song_scope_title_slide">Title slide · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Title slide preview</string>
     <string name="song_chunk">Chunk</string>
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>

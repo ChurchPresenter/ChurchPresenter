@@ -193,7 +193,7 @@ fun SongsTab(
         val song = items.getOrNull(idx)
         val tuning = song?.let { appSettings.tuningFor(it.songId) } ?: SongTuning()
         val titleSlide = song?.takeIf { live.titleSlideSelected && appSettings.songSettings.titleSlideEnabled }
-            ?.let { titleSlideSection(it, tuning, appSettings.songSettings.titleSlideShowSongNumber) }
+            ?.let { titleSlideSection(it, tuning, appSettings.songSettings) }
         if (titleSlide != null) {
             onAllSectionsChanged(listOf(titleSlide) + viewModel.getLyricSections())
             onSectionIndexChanged(0)
