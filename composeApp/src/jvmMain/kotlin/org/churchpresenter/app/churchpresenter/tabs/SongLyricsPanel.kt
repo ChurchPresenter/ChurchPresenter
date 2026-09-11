@@ -75,7 +75,6 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.viewmodel.songCreditLine
 import org.churchpresenter.app.churchpresenter.viewmodel.songTitleLine
-import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
@@ -112,10 +111,6 @@ internal fun RowScope.SongLyricsPanel(
     onSectionSelected: (Int) -> Unit,
     onLineSelected: (Int) -> Unit,
     onBackToLiveSong: () -> Unit,
-    onSectionIndexChanged: (Int) -> Unit,
-    onLineIndexChanged: (Int) -> Unit,
-    onAllSectionsChanged: (List<LyricSection>) -> Unit,
-    onSongItemSelected: (LyricSection) -> Unit,
     onAddToSchedule: ((Int, String, String, String) -> Unit)?,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
@@ -319,24 +314,11 @@ internal fun RowScope.SongLyricsPanel(
                         )
                         val creditLine = songCreditLine(currentSong)
 
-                        fun buildTitleSection() =
-                            titleSlideSection(
-                                currentSong,
-                                appSettings.tuningFor(currentSong.songId),
-                                appSettings.songSettings.titleSlideShowSongNumber,
-                            )
-
-                        fun sendTitleSlide() {
-                            val ts = buildTitleSection()
-                            val allSections = listOf(ts) + lyricSections()
-                            onAllSectionsChanged(allSections)
-                            onSectionIndexChanged(0)
-                            onLineIndexChanged(0)
-                            onSongItemSelected(ts)
+                        // Selecting it, then the same push every section takes -- so Go Live and
+                        // the arrow keys afterwards see the title slide, not verse 1.
+                        fun sendTitleSlide(goLive: Boolean) {
                             live.titleSlideSelected = true
-                            live.songId = currentSong.songId
-                            live.sectionIndex = -1
-                            live.lineIndex = 0
+                            sendToPresenter(goLive)
                         }
 
                         val contentColor = if (live.titleSlideSelected)
@@ -356,9 +338,9 @@ internal fun RowScope.SongLyricsPanel(
                                     // Clicking in this pane also takes the keyboard back: it is
                                     // the operator saying "I am working here now", and a caret left
                                     // in the search box means the verse keys still do nothing.
-                                    onClick = { sendTitleSlide(); tabFocusRequester.requestFocus() },
+                                    onClick = { sendTitleSlide(isPresenting); tabFocusRequester.requestFocus() },
                                     onDoubleClick = {
-                                        sendTitleSlide()
+                                        sendTitleSlide(true)
                                         onPresenting(Presenting.LYRICS)
                                         tabFocusRequester.requestFocus()
                                     }

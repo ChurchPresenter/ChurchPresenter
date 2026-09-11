@@ -88,6 +88,7 @@ import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.viewmodel.resolveEditedSongPush
+import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -181,15 +182,30 @@ fun SongsTab(
     // Helper: push current viewModel selection to presenter and track as live.
     // goLive=true marks this call as an explicit "go live" action so statistics are
     // recorded even though the isPresenting flag has not yet propagated.
+    //
+    // The title slide is not one of the view model's sections -- the panel puts it in front of
+    // them -- so while it is the selection, it is what goes out, ahead of the song's own sections.
+    // Every push comes through here, Go Live and the arrow keys included; a path that read the
+    // view model's selection directly sent verse 1 out from under a staged title slide.
     fun sendToPresenter(goLive: Boolean = false) {
-        onAllSectionsChanged(viewModel.getLyricSections())
-        onSectionIndexChanged(viewModel.selectedSectionIndex.value)
-        onLineIndexChanged(viewModel.selectedLineIndex.value)
         val idx = viewModel.selectedSongIndex.value
         val items = viewModel.filteredSongItems.value
-        val tuning = items.getOrNull(idx)?.let { appSettings.tuningFor(it.songId) } ?: SongTuning()
-        viewModel.getSelectedLyricSection()?.let {
-            onSongItemSelected(it.copy(bpm = tuning.bpm, capo = tuning.capo))
+        val song = items.getOrNull(idx)
+        val tuning = song?.let { appSettings.tuningFor(it.songId) } ?: SongTuning()
+        val titleSlide = song?.takeIf { live.titleSlideSelected && appSettings.songSettings.titleSlideEnabled }
+            ?.let { titleSlideSection(it, tuning, appSettings.songSettings.titleSlideShowSongNumber) }
+        if (titleSlide != null) {
+            onAllSectionsChanged(listOf(titleSlide) + viewModel.getLyricSections())
+            onSectionIndexChanged(0)
+            onLineIndexChanged(0)
+            onSongItemSelected(titleSlide)
+        } else {
+            onAllSectionsChanged(viewModel.getLyricSections())
+            onSectionIndexChanged(viewModel.selectedSectionIndex.value)
+            onLineIndexChanged(viewModel.selectedLineIndex.value)
+            viewModel.getSelectedLyricSection()?.let {
+                onSongItemSelected(it.copy(bpm = tuning.bpm, capo = tuning.capo))
+            }
         }
         // Record song display for statistics — only when the song is actually live
         // (or being sent live), and only when a different song is presented.
@@ -237,9 +253,30 @@ fun SongsTab(
                 onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value, viewModel.selectedLineIndex.value)
             }
         }
-        live.songId = items.getOrNull(idx)?.songId
-        live.sectionIndex = viewModel.selectedSectionIndex.value
-        live.lineIndex = viewModel.selectedLineIndex.value
+        live.songId = song?.songId
+        live.sectionIndex = if (titleSlide != null) -1 else viewModel.selectedSectionIndex.value
+        live.lineIndex = if (titleSlide != null) 0 else viewModel.selectedLineIndex.value
+    }
+
+    /**
+     * Steps off the title slide onto the song's first section. False when it was not selected, so
+     * the caller moves the view model instead.
+     */
+    fun leaveTitleSlide(): Boolean {
+        if (!live.titleSlideSelected) return false
+        live.titleSlideSelected = false
+        viewModel.selectSection(-1)
+        viewModel.navigateNextSection()
+        return true
+    }
+
+    /** Steps back onto the title slide from the song's first section, when there is one to step onto. */
+    fun backToTitleSlide(): Boolean {
+        val offered = appSettings.songSettings.titleSlideEnabled &&
+            viewModel.selectedSongIndex.value in viewModel.filteredSongItems.value.indices
+        if (!offered || live.titleSlideSelected) return false
+        live.titleSlideSelected = true
+        return true
     }
 
     // Re-pushes freshly-edited content to the presenter when the just-saved song is the one
@@ -308,6 +345,7 @@ fun SongsTab(
             }
             val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
             if (found) {
+                live.titleSlideSelected = false
                 sendToPresenter()
                 tabFocusRequester.requestFocus()
             }
@@ -439,29 +477,38 @@ fun SongsTab(
                     when {
                         shortcuts.matches(ShortcutAction.SONGS_PREVIOUS, keyEvent) -> {
                             if (isLineMode) {
-                                viewModel.navigatePreviousLine()
+                                if (!live.titleSlideSelected && !viewModel.navigatePreviousLine()) backToTitleSlide()
                                 sendToPresenter(goLive = isPresenting)
                             } else if (!isPresenting) {
+                                live.titleSlideSelected = false
                                 viewModel.navigatePreviousSong()
                             }
                             true
                         }
                         shortcuts.matches(ShortcutAction.SONGS_NEXT, keyEvent) -> {
                             if (isLineMode) {
-                                viewModel.navigateNextLine()
+                                if (!leaveTitleSlide()) viewModel.navigateNextLine()
                                 sendToPresenter(goLive = isPresenting)
                             } else if (!isPresenting) {
+                                live.titleSlideSelected = false
                                 viewModel.navigateNextSong()
                             }
                             true
                         }
                         shortcuts.matches(ShortcutAction.SONGS_PREVIOUS_SECTION, keyEvent) -> {
-                            if (!viewModel.navigatePreviousSection() && !isPresenting) viewModel.navigatePreviousSong()
+                            val atStart = live.titleSlideSelected ||
+                                (!viewModel.navigatePreviousSection() && !backToTitleSlide())
+                            if (atStart && !isPresenting) {
+                                live.titleSlideSelected = false
+                                viewModel.navigatePreviousSong()
+                            }
                             sendToPresenter(goLive = isPresenting)
                             true
                         }
                         shortcuts.matches(ShortcutAction.SONGS_NEXT_SECTION, keyEvent) -> {
-                            if (!viewModel.navigateNextSection() && !isPresenting) viewModel.navigateNextSong()
+                            if (!leaveTitleSlide() && !viewModel.navigateNextSection() && !isPresenting) {
+                                viewModel.navigateNextSong()
+                            }
                             sendToPresenter(goLive = isPresenting)
                             true
                         }
@@ -575,10 +622,6 @@ fun SongsTab(
             onSectionSelected = { viewModel.selectSection(it) },
             onLineSelected = { viewModel.setLineIndex(it) },
             onBackToLiveSong = { live.songId?.let { viewModel.selectSongById(it) } },
-            onSectionIndexChanged = onSectionIndexChanged,
-            onLineIndexChanged = onLineIndexChanged,
-            onAllSectionsChanged = onAllSectionsChanged,
-            onSongItemSelected = onSongItemSelected,
             onAddToSchedule = onAddToSchedule,
             onPresenting = onPresenting,
             sendToPresenter = ::sendToPresenter,

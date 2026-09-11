@@ -61,6 +61,63 @@ class SongPresenterTitleRuleTest {
         }
     }
 
+    // ── The first page, from the song's own order ───────────────────────────────
+
+    private val verse1 = section("[Verse 1]")
+    private val chorus = section("[Chorus]") // square brackets: typed as a verse, no number in it
+    private val verse21 = section("[Verse 2.1]")
+    private val song = listOf(verse1, chorus, verse21)
+
+    private fun firstPageOf(section: LyricSection, all: List<LyricSection> = song, index: Int = -1) =
+        shouldShowText(Constants.FIRST_PAGE, section, all, index)
+
+    @Test
+    fun `the first section of the song is the first page whatever it is headed`() {
+        assertTrue(firstPageOf(verse1))
+        assertTrue(firstPageOf(chorus, all = listOf(chorus, verse1)), "a song that opens on its chorus")
+    }
+
+    @Test
+    fun `later sections are not, even when their heading reads like an opening one`() {
+        // Both pass the heading rule -- no number, and a trailing 1 -- and both are mid-song.
+        assertFalse(firstPageOf(chorus))
+        assertFalse(firstPageOf(verse21))
+    }
+
+    @Test
+    fun `the section is found by what it is, not by identity`() {
+        // What goes out is stamped with the song's tempo and capo; the list is not.
+        assertTrue(firstPageOf(verse1.copy(bpm = 96, capo = 2)))
+        assertFalse(firstPageOf(chorus.copy(bpm = 96, capo = 2)))
+    }
+
+    @Test
+    fun `the display index is trusted when it points at the section`() {
+        // Two identical choruses: the index says which of them is on screen.
+        val repeat = listOf(chorus, verse1, chorus)
+        assertTrue(firstPageOf(chorus, all = repeat, index = 0))
+        assertFalse(firstPageOf(chorus, all = repeat, index = 2))
+    }
+
+    @Test
+    fun `a title slide in front does not take the first page from verse one`() {
+        val titleSlide = LyricSection(type = Constants.SECTION_TYPE_TITLE_SLIDE, lines = listOf("Amazing Grace"))
+        assertTrue(firstPageOf(verse1, all = listOf(titleSlide, verse1, chorus), index = 1))
+    }
+
+    @Test
+    fun `a section not in the list falls back to the heading rule`() {
+        val wholeSong = LyricSection(type = Constants.SECTION_TYPE_SONG, lines = listOf("all of it"))
+        assertTrue(firstPageOf(wholeSong), "the whole-song slide is unheaded, so it is the first")
+        assertFalse(firstPageOf(section("[Verse 3]"), all = emptyList()))
+    }
+
+    @Test
+    fun `every page and none are unchanged by the order`() {
+        assertTrue(shouldShowText(Constants.EVERY_PAGE, verse21, song, 2))
+        assertFalse(shouldShowText(Constants.NONE, verse1, song, 0))
+    }
+
     // ── Showing on the first slide only ─────────────────────────────────────────
 
     @Test

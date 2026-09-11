@@ -2,8 +2,13 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import org.churchpresenter.settings.SongSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -97,6 +102,45 @@ class SongsTabChartAndTitleSlideTest {
             waitForIdle()
 
             assertNotNull(reports.selectedSection)
+        }
+
+    @Test
+    fun `go live after choosing the title slide sends the title slide, not verse one`() =
+        songsTab(songs = chordedSong, songSettings = SongSettings(titleSlideEnabled = true)) { _, reports ->
+            onNodeWithText(TITLE_SLIDE).performClick()
+            waitForIdle()
+
+            onAllNodes(hasContentDescription("Go Live"))[0].performClick()
+            waitForIdle()
+
+            val sent = reports.selectedSection
+            assertNotNull(sent)
+            assertEquals("title_slide", sent.type, "Go Live read the view model's selection, which is verse 1")
+            assertEquals(0, reports.sectionIndex)
+        }
+
+    @Test
+    fun `the next-section key steps off the title slide onto verse one`() =
+        songsTab(songs = chordedSong, songSettings = SongSettings(titleSlideEnabled = true)) { _, reports ->
+            onNodeWithText(TITLE_SLIDE).performClick()
+            waitForIdle()
+
+            onRoot().performKeyInput { pressKey(Key.DirectionDown) }
+            waitForIdle()
+
+            assertEquals("[Verse 1]", reports.selectedSection?.header, "not verse 2, and not the title slide again")
+        }
+
+    @Test
+    fun `the previous-section key steps back onto the title slide from verse one`() =
+        songsTab(songs = chordedSong, songSettings = SongSettings(titleSlideEnabled = true)) { _, reports ->
+            onNodeWithText("one two").performClick()
+            waitForIdle()
+
+            onRoot().performKeyInput { pressKey(Key.DirectionUp) }
+            waitForIdle()
+
+            assertEquals("title_slide", reports.selectedSection?.type)
         }
 
     // ── Tempo and capo reach the section that goes out ──────────────────────────
