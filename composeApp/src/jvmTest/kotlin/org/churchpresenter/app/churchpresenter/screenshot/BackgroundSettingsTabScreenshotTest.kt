@@ -232,11 +232,38 @@ class BackgroundSettingsTabScreenshotTest {
     }
 
     /**
-     * The default lower third open, which is the one surface that paints *above* the band rather
-     * than the band itself — so its stage preview is the odd one out.
+     * The default lower third open. Its stage preview is the odd one out among the Defaults: like
+     * every lower-third surface it paints the band and nothing above it, so the preview draws a
+     * band rather than filling the screen.
      */
     @Test
     fun `the default lower third open`() = shoot("scope_default_lower_third") {
+        openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
+    }
+
+    // ── The wash above the band ─────────────────────────────────────────────────────────────────
+
+    /**
+     * The Above The Band section as a lower third meets it: the band's own type row, then the
+     * wash's below it, offering Color and Transparent and nothing else.
+     *
+     * The Default Lower Third is the top of the wash chain and so has no Default segment of its
+     * own, which is the difference between this image and [a content lower third's wash].
+     */
+    @Test
+    fun `the default lower third's wash`() = shoot("above_band_default_lower_third") {
+        openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
+    }
+
+    /** A content lower third: the same section, with a Default to defer by. */
+    @Test
+    fun `a content lower third's wash`() = shoot("above_band_content") {
+        openRailRow(LOWER_THIRD, nth = 0)
+    }
+
+    /** The wash switched on, which is what reveals the colour field and the opacity slider. */
+    @Test
+    fun `a wash set to a colour`() = shoot("above_band_colour", settings = withWash()) {
         openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
     }
 
@@ -320,6 +347,20 @@ class BackgroundSettingsTabScreenshotTest {
         }
         return file
     }
+
+    /**
+     * The Default Lower Third washing the area above its band, and a band under it to see it
+     * against — the stage preview is the only place the two are shown meeting.
+     */
+    private fun withWash() = AppSettings(
+        backgroundSettings = BackgroundSettings(
+            defaultLowerThirdBackgroundType = Constants.BACKGROUND_COLOR,
+            defaultLowerThirdBackgroundColor = "#1B2A5B",
+            defaultLowerThirdAboveBandType = Constants.BACKGROUND_COLOR,
+            defaultLowerThirdAboveBandColor = "#2E6B4F",
+            defaultLowerThirdAboveBandOpacity = 0.75f,
+        )
+    )
 
     /** A tray of three, so the shelf shows tiles, their names and the slot each answers to. */
     private fun withQuickTray() = AppSettings(

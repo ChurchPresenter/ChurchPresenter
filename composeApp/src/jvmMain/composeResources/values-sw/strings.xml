@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Hakuna kilicho live</string>
+    <string name="collapse_preview">Ficha onyesho hili la awali</string>
+    <string name="expand_preview">Onyesha onyesho hili la awali</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Wimbo</string>
     <string name="live_preview_picture">Picha</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Kichwa</string>
     <string name="song_element_lyrics">Maneno ya Wimbo</string>
     <string name="song_element_next_section">Sehemu Inayofuata</string>
+    <string name="song_element_author">Mwandishi</string>
+    <string name="song_element_composer">Mtunzi</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Mwendo</string>
+    <string name="song_target_title_slide">Slaidi ya kichwa</string>
+    <string name="song_show_on_title_slide">Onyesha kwenye slaidi ya kichwa</string>
+    <string name="song_scope_title_slide">Slaidi ya kichwa · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Onyesho la slaidi ya kichwa</string>
     <string name="song_chunk_verse">Ubeti 1</string>
     <string name="song_chunk_line">Mstari 1</string>
     <string name="song_preview_chords">Kodi</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Faili ya picha</string>
     <string name="background_video_file">Faili ya video</string>
     <string name="background_opacity_caption">Ukolezi</string>
+    <string name="background_above_band_caption">Juu ya Mstari</string>
+    <string name="background_above_band_fill">Rangi ya Kujaza</string>
+    <string name="background_above_band_opacity">Ukolezi wa Kujaza</string>
     <string name="quick_background_title">Usuli wa haraka</string>
     <string name="quick_background_reset">Rudi kawaida</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

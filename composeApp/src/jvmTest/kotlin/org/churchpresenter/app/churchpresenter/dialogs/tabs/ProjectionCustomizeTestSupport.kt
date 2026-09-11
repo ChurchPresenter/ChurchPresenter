@@ -6,7 +6,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 
@@ -60,9 +60,15 @@ internal fun ComposeUiTest.toggleCheckbox(label: String, scroll: Boolean = true)
     waitForIdle()
 }
 
-/** Picks [option] from a `ChoiceControl`, whose segments are plain labelled buttons. */
-internal fun ComposeUiTest.chooseSegment(option: String, scroll: Boolean = true) {
-    val node = onNodeWithText(option)
+/**
+ * Picks [option] from a `ChoiceControl`, whose segments are plain labelled buttons.
+ *
+ * [nth] because a lower-third surface has two such rows carrying the same words — the band's type
+ * row and, below it, the wash above the band, which is drawn with the band's own labels on purpose.
+ * They come out in composition order, so 0 is the band's and 1 is the wash's.
+ */
+internal fun ComposeUiTest.chooseSegment(option: String, scroll: Boolean = true, nth: Int = 0) {
+    val node = onAllNodesWithText(option)[nth]
     if (scroll) node.performScrollTo()
     node.performClick()
     waitForIdle()

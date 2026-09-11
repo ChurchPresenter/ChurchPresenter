@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">上屏</string>
     <string name="live_preview_nothing">当前没有内容上屏</string>
+    <string name="collapse_preview">隐藏此预览</string>
+    <string name="expand_preview">显示此预览</string>
     <string name="live_preview_bible">圣经</string>
     <string name="live_preview_song">歌曲</string>
     <string name="live_preview_picture">图片</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">标题</string>
     <string name="song_element_lyrics">歌词</string>
     <string name="song_element_next_section">下一段</string>
+    <string name="song_element_author">作词</string>
+    <string name="song_element_composer">作曲</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">速度</string>
+    <string name="song_target_title_slide">标题幻灯片</string>
+    <string name="song_show_on_title_slide">在标题幻灯片上显示</string>
+    <string name="song_scope_title_slide">标题幻灯片 · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">标题幻灯片预览</string>
     <string name="song_chunk_verse">每次 1 段</string>
     <string name="song_chunk_line">每次 1 行</string>
     <string name="song_preview_chords">和弦</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">图片文件</string>
     <string name="background_video_file">视频文件</string>
     <string name="background_opacity_caption">不透明度</string>
+    <string name="background_above_band_caption">条带上方</string>
+    <string name="background_above_band_fill">填充颜色</string>
+    <string name="background_above_band_opacity">填充不透明度</string>
     <string name="quick_background_title">快捷背景</string>
     <string name="quick_background_reset">恢复正常</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

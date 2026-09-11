@@ -885,6 +885,14 @@
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
     <string name="song_element_next_section">Next Section</string>
+    <string name="song_element_author">Author</string>
+    <string name="song_element_composer">Composer</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Title Slide</string>
+    <string name="song_show_on_title_slide">Show on title slide</string>
+    <string name="song_scope_title_slide">Title slide · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Title slide preview</string>
     <string name="song_chunk">Chunk</string>
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>
@@ -1145,6 +1153,9 @@
     <string name="background_camera_connection">Input</string>
     <string name="background_camera_auto">Auto</string>
     <string name="background_opacity_caption">Opacity</string>
+    <string name="background_above_band_caption">Above The Band</string>
+    <string name="background_above_band_fill">Fill Color</string>
+    <string name="background_above_band_opacity">Fill Opacity</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>
@@ -1349,6 +1360,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nothing is live</string>
+    <string name="collapse_preview">Hide this preview</string>
+    <string name="expand_preview">Show this preview</string>
     <string name="live_preview_bible">Bible</string>
     <string name="live_preview_song">Song</string>
     <string name="live_preview_picture">Picture</string>

@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Uživo</string>
     <string name="live_preview_nothing">Ništa nije uživo</string>
+    <string name="collapse_preview">Sakrij ovaj pretpregled</string>
+    <string name="expand_preview">Prikaži ovaj pretpregled</string>
     <string name="live_preview_bible">Biblija</string>
     <string name="live_preview_song">Pjesma</string>
     <string name="live_preview_picture">Slika</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Naslov</string>
     <string name="song_element_lyrics">Tekst pjesme</string>
     <string name="song_element_next_section">Sljedeći dio</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Skladatelj</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Naslovni slajd</string>
+    <string name="song_show_on_title_slide">Prikaži na naslovnom slajdu</string>
+    <string name="song_scope_title_slide">Naslovni slajd · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pregled naslovnog slajda</string>
     <string name="song_chunk_verse">1 stih</string>
     <string name="song_chunk_line">1 redak</string>
     <string name="song_preview_chords">Akordi</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Datoteka slike</string>
     <string name="background_video_file">Datoteka videa</string>
     <string name="background_opacity_caption">Prozirnost</string>
+    <string name="background_above_band_caption">Iznad trake</string>
+    <string name="background_above_band_fill">Boja ispune</string>
+    <string name="background_above_band_opacity">Prozirnost ispune</string>
     <string name="quick_background_title">Brze pozadine</string>
     <string name="quick_background_reset">Natrag na normalno</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

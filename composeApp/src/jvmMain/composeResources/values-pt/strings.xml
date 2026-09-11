@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Ao Vivo</string>
     <string name="live_preview_nothing">Nada ao vivo</string>
+    <string name="collapse_preview">Ocultar esta pré-visualização</string>
+    <string name="expand_preview">Mostrar esta pré-visualização</string>
     <string name="live_preview_bible">Bíblia</string>
     <string name="live_preview_song">Música</string>
     <string name="live_preview_picture">Imagem</string>
@@ -2467,6 +2469,14 @@
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
     <string name="song_element_next_section">Próxima Seção</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Compositor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Andamento</string>
+    <string name="song_target_title_slide">Diapositivo de título</string>
+    <string name="song_show_on_title_slide">Mostrar no diapositivo de título</string>
+    <string name="song_scope_title_slide">Diapositivo de título · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pré-visualização do diapositivo de título</string>
     <string name="song_chunk_verse">1 Verso</string>
     <string name="song_chunk_line">1 Linha</string>
     <string name="song_preview_chords">Acordes</string>
@@ -2533,6 +2543,9 @@
     <string name="background_image_file">Arquivo de imagem</string>
     <string name="background_video_file">Arquivo de vídeo</string>
     <string name="background_opacity_caption">Opacidade</string>
+    <string name="background_above_band_caption">Acima da faixa</string>
+    <string name="background_above_band_fill">Cor de preenchimento</string>
+    <string name="background_above_band_opacity">Opacidade do preenchimento</string>
     <string name="quick_background_title">Fundos rápidos</string>
     <string name="quick_background_reset">Voltar ao normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

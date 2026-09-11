@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Jonli</string>
     <string name="live_preview_nothing">Ekranda hech narsa yoʻq</string>
+    <string name="collapse_preview">Bu oldindan koʻrishni yashirish</string>
+    <string name="expand_preview">Bu oldindan koʻrishni koʻrsatish</string>
     <string name="live_preview_bible">Muqaddas Kitob</string>
     <string name="live_preview_song">Qoʻshiq</string>
     <string name="live_preview_picture">Rasm</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
     <string name="song_element_next_section">Keyingi qism</string>
+    <string name="song_element_author">Muallif</string>
+    <string name="song_element_composer">Bastakor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Temp</string>
+    <string name="song_target_title_slide">Sarlavha slaydi</string>
+    <string name="song_show_on_title_slide">Sarlavha slaydida ko'rsatish</string>
+    <string name="song_scope_title_slide">Sarlavha slaydi · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Sarlavha slaydi ko'rinishi</string>
     <string name="song_chunk_verse">1 band</string>
     <string name="song_chunk_line">1 satr</string>
     <string name="song_preview_chords">Akkordlar</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Rasm fayli</string>
     <string name="background_video_file">Video fayli</string>
     <string name="background_opacity_caption">Shaffofligi</string>
+    <string name="background_above_band_caption">Chiziq ustida</string>
+    <string name="background_above_band_fill">Toʻldirish rangi</string>
+    <string name="background_above_band_opacity">Toʻldirish shaffofligi</string>
     <string name="quick_background_title">Tez fonlar</string>
     <string name="quick_background_reset">Odatdagiga qaytish</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

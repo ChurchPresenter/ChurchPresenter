@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">ライブ</string>
     <string name="live_preview_nothing">ライブ表示中のものはありません</string>
+    <string name="collapse_preview">このプレビューを隠す</string>
+    <string name="expand_preview">このプレビューを表示</string>
     <string name="live_preview_bible">聖書</string>
     <string name="live_preview_song">賛美歌</string>
     <string name="live_preview_picture">画像</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">タイトル</string>
     <string name="song_element_lyrics">歌詞</string>
     <string name="song_element_next_section">次のセクション</string>
+    <string name="song_element_author">作詞者</string>
+    <string name="song_element_composer">作曲者</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">テンポ</string>
+    <string name="song_target_title_slide">タイトルスライド</string>
+    <string name="song_show_on_title_slide">タイトルスライドに表示</string>
+    <string name="song_scope_title_slide">タイトルスライド · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">タイトルスライドのプレビュー</string>
     <string name="song_chunk_verse">1 節ずつ</string>
     <string name="song_chunk_line">1 行ずつ</string>
     <string name="song_preview_chords">コード</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">画像ファイル</string>
     <string name="background_video_file">動画ファイル</string>
     <string name="background_opacity_caption">不透明度</string>
+    <string name="background_above_band_caption">帯の上</string>
+    <string name="background_above_band_fill">塗りの色</string>
+    <string name="background_above_band_opacity">塗りの不透明度</string>
     <string name="quick_background_title">クイック背景</string>
     <string name="quick_background_reset">元に戻す</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

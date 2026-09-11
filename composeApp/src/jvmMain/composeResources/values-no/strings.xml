@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Ingenting er live</string>
+    <string name="collapse_preview">Skjul denne forhåndsvisningen</string>
+    <string name="expand_preview">Vis denne forhåndsvisningen</string>
     <string name="live_preview_bible">Bibel</string>
     <string name="live_preview_song">Sang</string>
     <string name="live_preview_picture">Bilde</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Tittel</string>
     <string name="song_element_lyrics">Sangtekst</string>
     <string name="song_element_next_section">Neste avsnitt</string>
+    <string name="song_element_author">Forfatter</string>
+    <string name="song_element_composer">Komponist</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Tittellysbilde</string>
+    <string name="song_show_on_title_slide">Vis på tittellysbildet</string>
+    <string name="song_scope_title_slide">Tittellysbilde · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Forhåndsvisning av tittellysbilde</string>
     <string name="song_chunk_verse">1 vers</string>
     <string name="song_chunk_line">1 linje</string>
     <string name="song_preview_chords">Akkorder</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Bildefil</string>
     <string name="background_video_file">Videofil</string>
     <string name="background_opacity_caption">Dekkevne</string>
+    <string name="background_above_band_caption">Over feltet</string>
+    <string name="background_above_band_fill">Fyllfarge</string>
+    <string name="background_above_band_opacity">Fyllets dekkevne</string>
     <string name="quick_background_title">Hurtigbakgrunner</string>
     <string name="quick_background_reset">Tilbake til normalt</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

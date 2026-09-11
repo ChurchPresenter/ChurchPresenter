@@ -587,6 +587,15 @@ fun SongPresenter(
             // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
             // than scaled: the picture is cropped from a slightly larger rectangle instead of
             // being stretched, which a band is wide enough to show.
+            // The wash over the two thirds the band does not cover. Drawn before the band, and
+            // sized as the band's complement so the two are computed from the same constraint —
+            // deriving a height in Dp instead can land a device pixel short and leave a hairline.
+            AboveBandFill(
+                fill = if (showBackground) {
+                    aboveBandFill(appSettings.backgroundSettings, bgConfig)
+                } else null,
+                bandFraction = lowerThirdFraction,
+            )
             val bandBleed = if (blurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
             val bandFillWidth = maxWidth + bandBleed * 2
@@ -678,8 +687,16 @@ fun SongPresenter(
             fun TextContent(section: LyricSection) {
                 val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
                 val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
-                val shouldShowTitle = shouldShowText(titleDisplay, section)
-                val shouldShowSongNumber = shouldShowText(numberDisplay, section) && section.songNumber > 0
+                // The title slide's lines are the song's title and credit, so they take the Title
+                // element's style -- what the settings tab's Title tab edits -- rather than the
+                // lyrics', and the title row above the lyrics stays out of it: it would repeat the
+                // slide.
+                val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
+                val shouldShowTitle =
+                    shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide
+                val shouldShowSongNumber =
+                    shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex) &&
+                        section.songNumber > 0 && !isTitleSlide
                 // "Configured" means not set to "None" — title/number could appear on some slides
                 val titleConfigured = titleDisplay != Constants.NONE
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
@@ -691,6 +708,30 @@ fun SongPresenter(
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
+                // The title slide has no verse to fit, no look-ahead and no chart -- it is a
+                // heading and its credits, each drawn in its own element's profile -- so it is
+                // drawn by its own composable, in the same box the lyrics would have had.
+                if (isTitleSlide) {
+                    SongTitleSlideContent(
+                        section = section,
+                        settings = ss,
+                        target = songTarget,
+                        languages = activeLanguages,
+                        isKey = isKey,
+                        scaleFactor = scaleFactor,
+                        contentAlignment = if (isLowerThird) {
+                            Alignment.BottomCenter
+                        } else {
+                            when (ss.titleSlideVerticalAlignment) {
+                                Constants.TOP -> Alignment.TopCenter
+                                Constants.BOTTOM -> Alignment.BottomCenter
+                                else -> Alignment.Center
+                            }
+                        },
+                        modifier = innerModifier,
+                    )
+                    return
+                }
                 BoxWithConstraints(
                     modifier = innerModifier,
                     contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
@@ -902,6 +943,7 @@ fun SongPresenter(
 
                     @Composable
                     fun EndOfSongIndicator() {
+                        if (!ss.showEndOfSongIndicator) return
                         // Always reserve space so lyrics don't shift when the indicator appears on the last section
                         val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
                         val indicatorAlpha = if (visible) 1f else 0f
@@ -1300,6 +1342,38 @@ private fun SectionChordChart(
         }
     }
 }
+
+/**
+ * [shouldShowText], deciding "first page" from where [lyricSection] sits in [allSections] when it
+ * is one of them: the first page is the song's first lyric section, whatever its heading says.
+ *
+ * The heading rule below is the fallback for a section that is not in the list -- the whole-song
+ * slide, or a section pushed on its own. It reads a heading with no number in it as the opening
+ * slide, which is right for `[Verse]` and wrong for `[Chorus]` written in square brackets, and a
+ * song that starts on `[Verse 1.1]` and `[Verse 2.1]` gets the title back on every verse. With
+ * the song's own order to hand there is no need to guess.
+ */
+internal fun shouldShowText(
+    display: String,
+    lyricSection: LyricSection,
+    allSections: List<LyricSection>,
+    displaySectionIndex: Int,
+): Boolean {
+    if (display != Constants.FIRST_PAGE) return shouldShowText(display, lyricSection)
+    val position = displaySectionIndex.takeIf { allSections.getOrNull(it)?.isSamePageAs(lyricSection) == true }
+        ?: allSections.indexOfFirst { it.isSamePageAs(lyricSection) }
+    if (position < 0) return shouldShowText(display, lyricSection)
+    // The title slide is not a lyric page: with one in front, verse 1 is still the first page.
+    return allSections.subList(0, position).none { it.type != Constants.SECTION_TYPE_TITLE_SLIDE }
+}
+
+/**
+ * Whether [other] is this section as pushed to the presenter. Compared on what identifies a page
+ * rather than with `==`, because the section that goes out is stamped with the song's tempo and
+ * capo and the list it came from is not.
+ */
+private fun LyricSection.isSamePageAs(other: LyricSection): Boolean =
+    header == other.header && slideIndex == other.slideIndex && type == other.type && lines == other.lines
 
 private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean {
     return when (display) {

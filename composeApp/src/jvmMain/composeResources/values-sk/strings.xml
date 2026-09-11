@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Naživo</string>
     <string name="live_preview_nothing">Nič nie je naživo</string>
+    <string name="collapse_preview">Skryť tento náhľad</string>
+    <string name="expand_preview">Zobraziť tento náhľad</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Pieseň</string>
     <string name="live_preview_picture">Obrázok</string>
@@ -2468,6 +2470,14 @@
     <string name="song_element_title">Názov</string>
     <string name="song_element_lyrics">Text piesne</string>
     <string name="song_element_next_section">Nasledujúca sekcia</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Skladateľ</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titulná snímka</string>
+    <string name="song_show_on_title_slide">Zobraziť na titulnej snímke</string>
+    <string name="song_scope_title_slide">Titulná snímka · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Náhľad titulnej snímky</string>
     <string name="song_chunk_verse">1 verš</string>
     <string name="song_chunk_line">1 riadok</string>
     <string name="song_preview_chords">Akordy</string>
@@ -2534,6 +2544,9 @@
     <string name="background_image_file">Súbor obrázka</string>
     <string name="background_video_file">Súbor videa</string>
     <string name="background_opacity_caption">Nepriehľadnosť</string>
+    <string name="background_above_band_caption">Nad pásom</string>
+    <string name="background_above_band_fill">Farba výplne</string>
+    <string name="background_above_band_opacity">Nepriehľadnosť výplne</string>
     <string name="quick_background_title">Rýchle pozadia</string>
     <string name="quick_background_reset">Späť do normálu</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

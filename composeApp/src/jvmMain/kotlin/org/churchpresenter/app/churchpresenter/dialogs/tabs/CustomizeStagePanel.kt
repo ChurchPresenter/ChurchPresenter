@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
@@ -58,7 +60,7 @@ internal fun CustomizeStagePanel(
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
             CustomizePane.BIBLE -> BibleStage(settings, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, assignment, lowerThird, slot)
+            CustomizePane.SONGS -> SongStage(settings, assignment, lowerThird, slot, element)
             CustomizePane.DICTIONARY -> DictionaryStage(settings)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
@@ -92,21 +94,27 @@ private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: Preview
     )
 }
 
-/** A verse and the chorus behind it, with the look-ahead this output is set up for. */
+/**
+ * A verse and the chorus behind it, with the look-ahead this output is set up for -- or, under the
+ * Title Slide chip, the title slide that opens the song.
+ */
 @Composable
 private fun SongStage(
     settings: AppSettings,
     assignment: ScreenAssignment,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
+    element: CustomizeElement?,
 ) {
+    val titleSlide = element == CustomizeElement.SONG_TITLE_SLIDE
+    val lyricSections = songSampleSections(slot)
     SongPreviewPanel(
         settings = settings,
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
         // Taken from this output's own assignment rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
-        // answered whether it carries a look-ahead line.
-        showLookAhead = assignment.songLookAhead,
+        // answered whether it carries a look-ahead line. A title slide has none.
+        showLookAhead = assignment.songLookAhead && !titleSlide,
         // Never a chord chart. The chart is for whoever is playing, so it is drawn on the stage
         // monitor and nowhere the congregation can see -- `ProjectionSettingsTab` shows the Show
         // Chords column only for a stage monitor, and `PresenterOutputContent` passes `showChords`
@@ -115,7 +123,12 @@ private fun SongStage(
         // -- so reading it here drew a chart on every song preview that the screen never shows.
         // `SongSettingsTab`'s own preview passes `false` for the same reason.
         showChords = false,
-        sections = songSampleSections(slot),
+        sections = if (titleSlide) {
+            listOf(titleSlideSample(settings.songSettings, slot)) + lyricSections
+        } else {
+            lyricSections
+        },
+        titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -142,13 +155,38 @@ private fun DictionaryStage(settings: AppSettings) {
  * with — colour, gradient or picture, dimmed and faded the way the presenter draws it. A video
  * shows as black there and here alike: spinning up VLC for a few hundred dp is not worth what it
  * costs, and the alternative is two different answers to "what does this background look like".
+ *
+ * **A lower-third surface is drawn as the band it actually is**, with its wash above it. This tile
+ * used to fill the whole stage whatever the output's shape, which told an operator setting a band
+ * colour that their whole screen was about to turn that colour — a look the output never produces
+ * — and left the wash above the band with nowhere to appear at all. The global Background tab's
+ * preview has always split it this way; this is the same split, against this output's own band
+ * height rather than the taller of the two.
  */
 @Composable
 private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, lowerThird: Boolean) {
     val scope = (element ?: CustomizeElement.BACKGROUND_DEFAULT).backgroundScope(lowerThird)
     val config = settings.backgroundSettings.configFor(scope)
     StageFrame(settings) {
-        BackgroundConfigFill(config, Modifier.fillMaxSize())
+        if (!scope.lowerThird) {
+            BackgroundConfigFill(config, Modifier.fillMaxSize())
+            return@StageFrame
+        }
+        val band = settings.bandFractionFor(scope)
+        val above = aboveBandFill(settings.backgroundSettings, config)
+        Column(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f - band)
+                    .then(if (above != null) Modifier.background(above) else Modifier)
+            )
+            // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
+            // and without this it spills up over the band line.
+            Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {
+                BackgroundConfigFill(config, Modifier.fillMaxSize())
+            }
+        }
     }
 }
 

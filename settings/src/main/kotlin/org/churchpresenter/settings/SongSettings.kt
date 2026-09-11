@@ -5,6 +5,16 @@ import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 
+/** The credits' default look: a quieter grey than the title, at half its size. */
+private const val CREDIT_COLOR = "#B9C0C8"
+private const val CREDIT_SIZE = 34
+private const val CREDIT_SIZE_LOWER_THIRD = 20
+
+/** The CCLI number and the tempo: smaller and quieter still, being reference rather than credit. */
+private const val DETAIL_COLOR = "#8A9099"
+private const val DETAIL_SIZE = 26
+private const val DETAIL_SIZE_LOWER_THIRD = 16
+
 @Serializable
 data class SongSettings(
     // Song file management
@@ -111,6 +121,43 @@ data class SongSettings(
     // Song Title Slide settings
     val titleSlideEnabled: Boolean = false,
     val titleSlideShowSongNumber: Boolean = true,
+    /**
+     * Which of the song's other details the title slide carries, under its number and title.
+     *
+     * The author and the composer are on by default because the slide always drew them -- as one
+     * "author / composer" line before each had a look of its own -- and a file written then keeps
+     * showing what it showed. The CCLI number and the tempo are new and off.
+     */
+    val titleSlideShowTitle: Boolean = true,
+    val titleSlideShowAuthor: Boolean = true,
+    val titleSlideShowComposer: Boolean = true,
+    val titleSlideShowCcli: Boolean = false,
+    val titleSlideShowTempo: Boolean = false,
+    /**
+     * Whether the number shares the title's row, ahead of it -- "427 Amazing Grace" -- or has a row
+     * of its own above. On by default, which is the one line the slide always drew.
+     */
+    val titleSlideNumberBeforeTitle: Boolean = true,
+    /**
+     * Where the title slide's block -- number, title and credits together -- sits on the screen:
+     * [Constants.TOP], [Constants.MIDDLE] or [Constants.BOTTOM]. Its own rather than the lyrics'
+     * [lyricsAlignment], because a title sits differently from a verse. The lower third ignores it
+     * and keeps the block at the bottom of the band, as it does the lyrics.
+     */
+    val titleSlideVerticalAlignment: String = Constants.MIDDLE,
+    // How each credit is drawn, per output. The number and the title use their own fields above.
+    val titleSlideAuthor: SongCreditStyle = SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE),
+    val titleSlideAuthorLowerThird: SongCreditStyle =
+        SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE_LOWER_THIRD),
+    val titleSlideComposer: SongCreditStyle = SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE),
+    val titleSlideComposerLowerThird: SongCreditStyle =
+        SongCreditStyle(color = CREDIT_COLOR, fontSize = CREDIT_SIZE_LOWER_THIRD),
+    val titleSlideCcli: SongCreditStyle = SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE),
+    val titleSlideCcliLowerThird: SongCreditStyle =
+        SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE_LOWER_THIRD),
+    val titleSlideTempo: SongCreditStyle = SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE),
+    val titleSlideTempoLowerThird: SongCreditStyle =
+        SongCreditStyle(color = DETAIL_COLOR, fontSize = DETAIL_SIZE_LOWER_THIRD),
 
     // Song number settings
     val songNumberFontSize: Int = 70,
@@ -223,7 +270,9 @@ data class SongSettings(
     val lowerThirdDisplayMode: String = Constants.SONG_DISPLAY_MODE_LINE, // "verse" or "line"
     val lowerThirdLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
 
-    // End-of-song indicator spacing (number of spaces between each asterisk)
+    // End-of-song indicator: whether the asterisks are drawn under the last section at all,
+    // and the number of spaces between each asterisk
+    val showEndOfSongIndicator: Boolean = true,
     val endOfSongIndicatorSpacing: Int = 2,
 
     // Bilingual layout: "side_by_side" or "top_bottom"
@@ -476,4 +525,25 @@ fun SongSettings.translationStyle(
     val settings = translationSettings(translation - 1)
     return if (settings.overrideStyle) settings.style(element, lowerThird)
     else primaryStyle(element, lowerThird)
+}
+
+/**
+ * Puts the title's and the number's position back onto the two values the presenter draws.
+ *
+ * [titlePosition] used to be a vertical alignment -- `Top`, `Middle`, `Bottom` -- and was renamed
+ * in place, for a while still defaulting to `Middle`, without its stored value ever being
+ * rewritten; so a file from that time says `Middle` to this day.
+ * The old dropdown read anything but `BelowVerse` as "above" and so kept working; the presenter
+ * matches the value against the two rows it draws, and a title whose position is neither is drawn
+ * on neither, whatever its Show setting says. Idempotent: a value already on one of the two is
+ * left as it is.
+ */
+fun SongSettings.migrateElementPositions(): SongSettings {
+    fun aboveUnlessBelow(value: String) = if (value == Constants.BELOW_VERSE) value else Constants.ABOVE_VERSE
+    return copy(
+        titlePosition = aboveUnlessBelow(titlePosition),
+        titleLowerThirdPosition = aboveUnlessBelow(titleLowerThirdPosition),
+        songNumberPosition = aboveUnlessBelow(songNumberPosition),
+        songNumberLowerThirdPosition = aboveUnlessBelow(songNumberLowerThirdPosition),
+    )
 }

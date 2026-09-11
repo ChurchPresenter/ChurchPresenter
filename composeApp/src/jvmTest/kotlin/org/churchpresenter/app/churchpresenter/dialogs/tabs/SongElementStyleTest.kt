@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -41,8 +42,8 @@ class SongElementStyleTest {
     )
 
     @Test
-    fun `there are ten profiles`() {
-        assertEquals(10, combinations.size)
+    fun `there are eighteen profiles`() {
+        assertEquals(18, combinations.size)
     }
 
     @Test
@@ -62,7 +63,7 @@ class SongElementStyleTest {
     }
 
     @Test
-    fun `writing one combination leaves the other nine alone`() {
+    fun `writing one combination leaves the other seventeen alone`() {
         combinations.forEachIndexed { index, (element, target) ->
             val written = SongSettings().withElementStyle(element, target, distinct(index))
 
@@ -155,5 +156,48 @@ class SongElementStyleTest {
         assertEquals(Constants.SONG_DISPLAY_MODE_VERSE, settings.lowerThirdDisplayMode)
         assertEquals(SongSettings().lookAheadDisplayMode, settings.lookAheadDisplayMode)
         assertEquals(SongSettings().fullscreenDisplayMode, settings.fullscreenDisplayMode)
+    }
+
+    // ── The credits ───────────────────────────────────────────────────────────
+
+    @Test
+    fun `the four credits are the title slide's alone`() {
+        listOf(SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO)
+            .forEach { assertTrue(it.isCredit && it.onTitleSlide, "$it") }
+        listOf(SongStyleElement.NUMBER, SongStyleElement.TITLE).forEach {
+            assertTrue(it.onTitleSlide && !it.isCredit, "$it")
+        }
+        listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION).forEach {
+            assertTrue(!it.onTitleSlide && !it.isCredit, "$it")
+        }
+    }
+
+    @Test
+    fun `a credit with no face of its own reads the title's, on the same output`() {
+        val settings = SongSettings(
+            titleFontType = "Georgia",
+            titleLowerThirdFontType = "Verdana",
+            titleSlideAuthor = SongCreditStyle(fontType = ""),
+            titleSlideAuthorLowerThird = SongCreditStyle(fontType = ""),
+        )
+        assertEquals("Georgia", settings.elementStyle(SongStyleElement.AUTHOR, SongStyleTarget.FULL_SCREEN).fontType)
+        assertEquals("Verdana", settings.elementStyle(SongStyleElement.AUTHOR, SongStyleTarget.LOWER_THIRD).fontType)
+    }
+
+    @Test
+    fun `a credit's own face is read as it is`() {
+        val settings = SongSettings(titleSlideCcli = SongCreditStyle(fontType = "Courier New"))
+        assertEquals("Courier New", settings.elementStyle(SongStyleElement.CCLI, SongStyleTarget.FULL_SCREEN).fontType)
+    }
+
+    @Test
+    fun `the credits default smaller and quieter than the title, and smaller again on the band`() {
+        val author = defaultSongElementStyle(SongStyleElement.AUTHOR, SongStyleTarget.FULL_SCREEN)
+        val authorBand = defaultSongElementStyle(SongStyleElement.AUTHOR, SongStyleTarget.LOWER_THIRD)
+        val ccli = defaultSongElementStyle(SongStyleElement.CCLI, SongStyleTarget.FULL_SCREEN)
+        assertTrue(author.fontSize < SongSettings().titleFontSize)
+        assertTrue(authorBand.fontSize < author.fontSize)
+        assertTrue(ccli.fontSize < author.fontSize)
+        assertEquals("Arial", author.fontType)
     }
 }

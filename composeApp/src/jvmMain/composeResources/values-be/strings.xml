@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Ніжняя траціна</string>
     <string name="live_preview_media">Медыя</string>
     <string name="live_preview_nothing">Нічога не ў эфіры</string>
+    <string name="collapse_preview">Схаваць гэты папярэдні прагляд</string>
+    <string name="expand_preview">Паказаць гэты папярэдні прагляд</string>
     <string name="live_preview_picture">Выява</string>
     <string name="live_preview_presentation">Прэзентацыя</string>
     <string name="live_preview_song">Песня</string>
@@ -2438,6 +2440,14 @@
     <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Тэкст</string>
     <string name="song_element_next_section">Наступная страфа</string>
+    <string name="song_element_author">Аўтар</string>
+    <string name="song_element_composer">Кампазітар</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Тэмп</string>
+    <string name="song_target_title_slide">Слайд назвы</string>
+    <string name="song_show_on_title_slide">Паказваць на слайдзе назвы</string>
+    <string name="song_scope_title_slide">Слайд назвы · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Прагляд слайда назвы</string>
     <string name="song_chunk_verse">1 куплет</string>
     <string name="song_chunk_line">1 радок</string>
     <string name="song_preview_chords">Акорды</string>
@@ -2504,6 +2514,9 @@
     <string name="background_image_file">Файл выявы</string>
     <string name="background_video_file">Файл відэа</string>
     <string name="background_opacity_caption">Празрыстасць</string>
+    <string name="background_above_band_caption">Над паласой</string>
+    <string name="background_above_band_fill">Колер заліўкі</string>
+    <string name="background_above_band_opacity">Празрыстасць заліўкі</string>
     <string name="quick_background_title">Хуткія фоны</string>
     <string name="quick_background_reset">Вярнуць як было</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

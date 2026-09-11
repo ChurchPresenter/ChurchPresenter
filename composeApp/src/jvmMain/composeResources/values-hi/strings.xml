@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">लाइव</string>
     <string name="live_preview_nothing">कुछ भी लाइव नहीं है</string>
+    <string name="collapse_preview">यह झलक छिपाएँ</string>
+    <string name="expand_preview">यह झलक दिखाएँ</string>
     <string name="live_preview_bible">बाइबल</string>
     <string name="live_preview_song">गीत</string>
     <string name="live_preview_picture">चित्र</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">बोल</string>
     <string name="song_element_next_section">अगला भाग</string>
+    <string name="song_element_author">रचनाकार</string>
+    <string name="song_element_composer">संगीतकार</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">टेम्पो</string>
+    <string name="song_target_title_slide">शीर्षक स्लाइड</string>
+    <string name="song_show_on_title_slide">शीर्षक स्लाइड पर दिखाएँ</string>
+    <string name="song_scope_title_slide">शीर्षक स्लाइड · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">शीर्षक स्लाइड पूर्वावलोकन</string>
     <string name="song_chunk_verse">1 वचन</string>
     <string name="song_chunk_line">1 पंक्ति</string>
     <string name="song_preview_chords">कॉर्ड</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">चित्र फ़ाइल</string>
     <string name="background_video_file">वीडियो फ़ाइल</string>
     <string name="background_opacity_caption">अपारदर्शिता</string>
+    <string name="background_above_band_caption">पट्टी के ऊपर</string>
+    <string name="background_above_band_fill">भरण रंग</string>
+    <string name="background_above_band_opacity">भरण अपारदर्शिता</string>
     <string name="quick_background_title">त्वरित बैकग्राउंड</string>
     <string name="quick_background_reset">सामान्य पर वापस</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

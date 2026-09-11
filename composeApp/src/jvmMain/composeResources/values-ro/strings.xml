@@ -909,6 +909,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nimic nu este live</string>
+    <string name="collapse_preview">Ascunde această previzualizare</string>
+    <string name="expand_preview">Afișează această previzualizare</string>
     <string name="live_preview_bible">Biblie</string>
     <string name="live_preview_song">Cântare</string>
     <string name="live_preview_picture">Imagine</string>
@@ -2468,6 +2470,14 @@
     <string name="song_element_title">Titlu</string>
     <string name="song_element_lyrics">Versuri</string>
     <string name="song_element_next_section">Secțiunea Următoare</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Compozitor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Diapozitiv de titlu</string>
+    <string name="song_show_on_title_slide">Afișează pe diapozitivul de titlu</string>
+    <string name="song_scope_title_slide">Diapozitiv de titlu · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Previzualizare diapozitiv de titlu</string>
     <string name="song_chunk_verse">1 Strofă</string>
     <string name="song_chunk_line">1 Linie</string>
     <string name="song_preview_chords">Acorduri</string>
@@ -2534,6 +2544,9 @@
     <string name="background_image_file">Fișier imagine</string>
     <string name="background_video_file">Fișier video</string>
     <string name="background_opacity_caption">Opacitate</string>
+    <string name="background_above_band_caption">Deasupra benzii</string>
+    <string name="background_above_band_fill">Culoare de umplere</string>
+    <string name="background_above_band_opacity">Opacitate umplere</string>
     <string name="quick_background_title">Fundaluri rapide</string>
     <string name="quick_background_reset">Înapoi la normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

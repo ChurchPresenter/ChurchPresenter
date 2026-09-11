@@ -867,6 +867,8 @@
     <string name="live_preview_lower_third">Dolní třetina</string>
     <string name="live_preview_media">Média</string>
     <string name="live_preview_nothing">Nic není živě</string>
+    <string name="collapse_preview">Skrýt tento náhled</string>
+    <string name="expand_preview">Zobrazit tento náhled</string>
     <string name="live_preview_picture">Obrázek</string>
     <string name="live_preview_presentation">Prezentace</string>
     <string name="live_preview_song">Píseň</string>
@@ -2448,6 +2450,14 @@
     <string name="song_element_title">Název</string>
     <string name="song_element_lyrics">Text</string>
     <string name="song_element_next_section">Další sloka</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Skladatel</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titulní snímek</string>
+    <string name="song_show_on_title_slide">Zobrazit na titulním snímku</string>
+    <string name="song_scope_title_slide">Titulní snímek · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Náhled titulního snímku</string>
     <string name="song_chunk_verse">1 sloka</string>
     <string name="song_chunk_line">1 řádek</string>
     <string name="song_preview_chords">Akordy</string>
@@ -2514,6 +2524,9 @@
     <string name="background_image_file">Soubor obrázku</string>
     <string name="background_video_file">Soubor videa</string>
     <string name="background_opacity_caption">Neprůhlednost</string>
+    <string name="background_above_band_caption">Nad pásem</string>
+    <string name="background_above_band_fill">Barva výplně</string>
+    <string name="background_above_band_opacity">Neprůhlednost výplně</string>
     <string name="quick_background_title">Rychlá pozadí</string>
     <string name="quick_background_reset">Zpět do normálu</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

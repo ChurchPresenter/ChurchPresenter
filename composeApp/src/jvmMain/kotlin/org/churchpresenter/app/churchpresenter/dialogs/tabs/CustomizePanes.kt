@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -63,16 +67,21 @@ internal const val SPACING_RANGE_MIN = -20
 internal const val SPACING_RANGE_MAX = 100
 internal val PANE_PADDING = 16.dp
 
+/** The control column: scrolling, with the scrollbar every settings tab draws down its edge. */
 @Composable
-internal fun PaneScaffold(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = PANE_PADDING, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-        content = content,
-    )
+internal fun PaneScaffold(content: @Composable ColumnScope.() -> Unit) {
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(start = PANE_PADDING, end = SettingsScrollbarGutter, top = 12.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            content = content,
+        )
+        SettingsScrollbar(scrollState)
+    }
 }
 
 /** The transform picker, labelled by example — AA, aa, Aa — rather than by name. */
@@ -178,7 +187,7 @@ internal fun TypographyGroup(
             SliderControl(wordSpacing, onWordSpacing, SPACING_RANGE_MIN..SPACING_RANGE_MAX, pixels)
         }
         CustomizeRow(stringResource(Res.string.customize_text_transform)) {
-            ChoiceControl(transformOptions(), transform, onTransform)
+            ChoiceControl(transformOptions(), transform, onSelect = onTransform)
         }
     }
 }

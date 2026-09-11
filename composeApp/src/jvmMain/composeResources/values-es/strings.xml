@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">En vivo</string>
     <string name="live_preview_nothing">Nada en vivo</string>
+    <string name="collapse_preview">Ocultar esta vista previa</string>
+    <string name="expand_preview">Mostrar esta vista previa</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Canto</string>
     <string name="live_preview_picture">Imagen</string>
@@ -2466,6 +2468,14 @@
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
     <string name="song_element_next_section">Sección siguiente</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Compositor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Diapositiva de título</string>
+    <string name="song_show_on_title_slide">Mostrar en la diapositiva de título</string>
+    <string name="song_scope_title_slide">Diapositiva de título · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Vista previa de la diapositiva de título</string>
     <string name="song_chunk_verse">1 versículo</string>
     <string name="song_chunk_line">1 línea</string>
     <string name="song_preview_chords">Acordes</string>
@@ -2532,6 +2542,9 @@
     <string name="background_image_file">Archivo de imagen</string>
     <string name="background_video_file">Archivo de video</string>
     <string name="background_opacity_caption">Opacidad</string>
+    <string name="background_above_band_caption">Sobre la banda</string>
+    <string name="background_above_band_fill">Color de relleno</string>
+    <string name="background_above_band_opacity">Opacidad del relleno</string>
     <string name="quick_background_title">Fondos rápidos</string>
     <string name="quick_background_reset">Volver a lo normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

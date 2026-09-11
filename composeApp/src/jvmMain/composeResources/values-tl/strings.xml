@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Walang live</string>
+    <string name="collapse_preview">Itago ang preview na ito</string>
+    <string name="expand_preview">Ipakita ang preview na ito</string>
     <string name="live_preview_bible">Biblia</string>
     <string name="live_preview_song">Awit</string>
     <string name="live_preview_picture">Larawan</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Pamagat</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_next_section">Susunod na Seksyon</string>
+    <string name="song_element_author">May-akda</string>
+    <string name="song_element_composer">Kompositor</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Title slide</string>
+    <string name="song_show_on_title_slide">Ipakita sa title slide</string>
+    <string name="song_scope_title_slide">Title slide · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Preview ng title slide</string>
     <string name="song_chunk_verse">1 Talata</string>
     <string name="song_chunk_line">1 Linya</string>
     <string name="song_preview_chords">Mga Chord</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">File ng Larawan</string>
     <string name="background_video_file">File ng Video</string>
     <string name="background_opacity_caption">Opacity</string>
+    <string name="background_above_band_caption">Sa Itaas ng Banda</string>
+    <string name="background_above_band_fill">Kulay ng Fill</string>
+    <string name="background_above_band_opacity">Opacity ng Fill</string>
     <string name="quick_background_title">Mabilisang background</string>
     <string name="quick_background_reset">Balik sa normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

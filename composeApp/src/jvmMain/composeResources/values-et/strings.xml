@@ -959,6 +959,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Miski pole live</string>
+    <string name="collapse_preview">Peida see eelvaade</string>
+    <string name="expand_preview">Näita seda eelvaadet</string>
     <string name="live_preview_bible">Piibel</string>
     <string name="live_preview_song">Laul</string>
     <string name="live_preview_picture">Pilt</string>
@@ -2471,6 +2473,14 @@
     <string name="song_element_title">Pealkiri</string>
     <string name="song_element_lyrics">Sõnad</string>
     <string name="song_element_next_section">Järgmine osa</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Helilooja</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Pealkirjaslaid</string>
+    <string name="song_show_on_title_slide">Näita pealkirjaslaidil</string>
+    <string name="song_scope_title_slide">Pealkirjaslaid · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pealkirjaslaidi eelvaade</string>
     <string name="song_chunk_verse">1 salm</string>
     <string name="song_chunk_line">1 rida</string>
     <string name="song_preview_chords">Akordid</string>
@@ -2537,6 +2547,9 @@
     <string name="background_image_file">Pildifail</string>
     <string name="background_video_file">Videofail</string>
     <string name="background_opacity_caption">Läbipaistmatus</string>
+    <string name="background_above_band_caption">Riba kohal</string>
+    <string name="background_above_band_fill">Täitevärv</string>
+    <string name="background_above_band_opacity">Täite läbipaistmatus</string>
     <string name="quick_background_title">Kiirtaustad</string>
     <string name="quick_background_reset">Tagasi tavaolekusse</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

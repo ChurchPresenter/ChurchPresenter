@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Ekrānā</string>
     <string name="live_preview_nothing">Nekas netiek rādīts</string>
+    <string name="collapse_preview">Paslēpt šo priekšskatījumu</string>
+    <string name="expand_preview">Rādīt šo priekšskatījumu</string>
     <string name="live_preview_bible">Bībele</string>
     <string name="live_preview_song">Dziesma</string>
     <string name="live_preview_picture">Attēls</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
     <string name="song_element_next_section">Nākamā daļa</string>
+    <string name="song_element_author">Autors</string>
+    <string name="song_element_composer">Komponists</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Temps</string>
+    <string name="song_target_title_slide">Nosaukuma slaids</string>
+    <string name="song_show_on_title_slide">Rādīt nosaukuma slaidā</string>
+    <string name="song_scope_title_slide">Nosaukuma slaids · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Nosaukuma slaida priekšskatījums</string>
     <string name="song_chunk_verse">1 pants</string>
     <string name="song_chunk_line">1 rinda</string>
     <string name="song_preview_chords">Akordi</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Attēla fails</string>
     <string name="background_video_file">Video fails</string>
     <string name="background_opacity_caption">Necaurredzamība</string>
+    <string name="background_above_band_caption">Virs joslas</string>
+    <string name="background_above_band_fill">Aizpildījuma krāsa</string>
+    <string name="background_above_band_opacity">Aizpildījuma necaurredzamība</string>
     <string name="quick_background_title">Ātrie foni</string>
     <string name="quick_background_reset">Atpakaļ uz parasto</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

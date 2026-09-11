@@ -875,6 +875,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Niets is live</string>
+    <string name="collapse_preview">Dit voorbeeld verbergen</string>
+    <string name="expand_preview">Dit voorbeeld tonen</string>
     <string name="live_preview_bible">Bijbel</string>
     <string name="live_preview_song">Lied</string>
     <string name="live_preview_picture">Afbeelding</string>
@@ -2466,6 +2468,14 @@
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Liedtekst</string>
     <string name="song_element_next_section">Volgende sectie</string>
+    <string name="song_element_author">Auteur</string>
+    <string name="song_element_composer">Componist</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titeldia</string>
+    <string name="song_show_on_title_slide">Tonen op de titeldia</string>
+    <string name="song_scope_title_slide">Titeldia · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Voorbeeld titeldia</string>
     <string name="song_chunk_verse">1 vers</string>
     <string name="song_chunk_line">1 regel</string>
     <string name="song_preview_chords">Akkoorden</string>
@@ -2532,6 +2542,9 @@
     <string name="background_image_file">Afbeeldingsbestand</string>
     <string name="background_video_file">Videobestand</string>
     <string name="background_opacity_caption">Dekking</string>
+    <string name="background_above_band_caption">Boven de balk</string>
+    <string name="background_above_band_fill">Vulkleur</string>
+    <string name="background_above_band_opacity">Dekking van vulling</string>
     <string name="quick_background_title">Snelle achtergronden</string>
     <string name="quick_background_reset">Terug naar normaal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

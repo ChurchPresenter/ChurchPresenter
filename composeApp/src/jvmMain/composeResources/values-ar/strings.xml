@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">مباشر</string>
     <string name="live_preview_nothing">لا شيء معروض الآن</string>
+    <string name="collapse_preview">إخفاء هذه المعاينة</string>
+    <string name="expand_preview">عرض هذه المعاينة</string>
     <string name="live_preview_bible">الكتاب المقدس</string>
     <string name="live_preview_song">ترنيمة</string>
     <string name="live_preview_picture">صورة</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
     <string name="song_element_next_section">المقطع التالي</string>
+    <string name="song_element_author">المؤلف</string>
+    <string name="song_element_composer">الملحّن</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">الإيقاع</string>
+    <string name="song_target_title_slide">شريحة العنوان</string>
+    <string name="song_show_on_title_slide">إظهار في شريحة العنوان</string>
+    <string name="song_scope_title_slide">شريحة العنوان · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">معاينة شريحة العنوان</string>
     <string name="song_chunk_verse">مقطع واحد</string>
     <string name="song_chunk_line">سطر واحد</string>
     <string name="song_preview_chords">الكوردات</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">ملف الصورة</string>
     <string name="background_video_file">ملف الفيديو</string>
     <string name="background_opacity_caption">العتامة</string>
+    <string name="background_above_band_caption">فوق الشريط</string>
+    <string name="background_above_band_fill">لون التعبئة</string>
+    <string name="background_above_band_opacity">عتامة التعبئة</string>
     <string name="quick_background_title">خلفيات سريعة</string>
     <string name="quick_background_reset">العودة إلى الوضع الطبيعي</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

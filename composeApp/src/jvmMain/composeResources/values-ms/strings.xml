@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">Langsung</string>
     <string name="live_preview_nothing">Tiada apa-apa sedang langsung</string>
+    <string name="collapse_preview">Sembunyikan pratonton ini</string>
+    <string name="expand_preview">Tunjuk pratonton ini</string>
     <string name="live_preview_bible">Alkitab</string>
     <string name="live_preview_song">Lagu</string>
     <string name="live_preview_picture">Gambar</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">Tajuk</string>
     <string name="song_element_lyrics">Lirik</string>
     <string name="song_element_next_section">Bahagian Seterusnya</string>
+    <string name="song_element_author">Penulis</string>
+    <string name="song_element_composer">Komposer</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Slaid tajuk</string>
+    <string name="song_show_on_title_slide">Tunjukkan pada slaid tajuk</string>
+    <string name="song_scope_title_slide">Slaid tajuk · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Pratonton slaid tajuk</string>
     <string name="song_chunk_verse">1 Rangkap</string>
     <string name="song_chunk_line">1 Baris</string>
     <string name="song_preview_chords">Kord</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">Fail imej</string>
     <string name="background_video_file">Fail video</string>
     <string name="background_opacity_caption">Kelegapan</string>
+    <string name="background_above_band_caption">Di Atas Bar</string>
+    <string name="background_above_band_fill">Warna Isian</string>
+    <string name="background_above_band_opacity">Kelegapan Isian</string>
     <string name="quick_background_title">Latar pantas</string>
     <string name="quick_background_reset">Kembali biasa</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

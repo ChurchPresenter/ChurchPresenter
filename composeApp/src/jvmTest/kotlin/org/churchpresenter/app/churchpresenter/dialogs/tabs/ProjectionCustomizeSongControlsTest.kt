@@ -65,7 +65,7 @@ class ProjectionCustomizeSongControlsTest {
     @Test
     fun `size, auto-fit, colour and the style quartet write the full-screen lyrics`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 72)
             toggleCheckbox("Auto")
             recolor("#AABBCC", "#112233")
@@ -87,7 +87,7 @@ class ProjectionCustomizeSongControlsTest {
     @Test
     fun `the same controls write the band's lyrics instead`() {
         projectionTab(output(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(62, 26)
             recolor("#DDEEFF", "#334455")
             styleButton(group = 0, label = "B").performScrollTo().performClick()
@@ -105,7 +105,7 @@ class ProjectionCustomizeSongControlsTest {
     @Test
     fun `the alignments and the case picker write the lyrics`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             horizontalAlignButton(group = 0, which = HAlign.LEFT).performScrollTo().performClick()
             waitForIdle()
             onNodeWithContentDescription("Align Top").performScrollTo().performClick()
@@ -220,7 +220,7 @@ class ProjectionCustomizeSongControlsTest {
     @Test
     fun `the strip writes the margins, the fades and their duration`() {
         projectionTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(11, 12)
             retypeNumberField(22, 23)
             retypeNumberField(33, 34)
@@ -244,7 +244,7 @@ class ProjectionCustomizeSongControlsTest {
     fun `a bilingual band's strip writes its height and how the two languages sit`() {
         val bilingualBand = output(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL, Constants.SONG_LANG_BOTH)
         projectionTab(bilingualBand) { get ->
-            openCustomizePane(CustomizePane.SONGS)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(29, 40)
             chooseSegment("Top / Bottom", scroll = false)
 
@@ -257,7 +257,7 @@ class ProjectionCustomizeSongControlsTest {
     @Test
     fun `a single-language output is offered no bilingual layout`() {
         projectionTab(output()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, override = false)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             onNodeWithText("Top / Bottom").assertDoesNotExist()
         }
     }

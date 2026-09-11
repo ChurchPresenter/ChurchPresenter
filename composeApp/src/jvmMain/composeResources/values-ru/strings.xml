@@ -856,6 +856,8 @@
     <string name="live_preview_lower_third">Нижняя треть</string>
     <string name="live_preview_media">Медиа</string>
     <string name="live_preview_nothing">Ничего не транслируется</string>
+    <string name="collapse_preview">Скрыть этот предпросмотр</string>
+    <string name="expand_preview">Показать этот предпросмотр</string>
     <string name="live_preview_picture">Изображение</string>
     <string name="live_preview_presentation">Презентация</string>
     <string name="live_preview_song">Песня</string>
@@ -2441,6 +2443,14 @@
     <string name="song_element_title">Название</string>
     <string name="song_element_lyrics">Текст</string>
     <string name="song_element_next_section">Следующий раздел</string>
+    <string name="song_element_author">Автор</string>
+    <string name="song_element_composer">Композитор</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Темп</string>
+    <string name="song_target_title_slide">Титульный слайд</string>
+    <string name="song_show_on_title_slide">Показывать на титульном слайде</string>
+    <string name="song_scope_title_slide">Титульный слайд · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Предпросмотр титульного слайда</string>
     <string name="song_chunk_verse">1 куплет</string>
     <string name="song_chunk_line">1 строка</string>
     <string name="song_preview_chords">Аккорды</string>
@@ -2507,6 +2517,9 @@
     <string name="background_image_file">Файл изображения</string>
     <string name="background_video_file">Файл видео</string>
     <string name="background_opacity_caption">Непрозрачность</string>
+    <string name="background_above_band_caption">Над полосой</string>
+    <string name="background_above_band_fill">Цвет заливки</string>
+    <string name="background_above_band_opacity">Непрозрачность заливки</string>
     <string name="quick_background_title">Быстрые фоны</string>
     <string name="quick_background_reset">Вернуть как было</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

@@ -62,7 +62,8 @@ import kotlin.test.Test
  * Rendered at 1920x1080, which is what these surfaces are drawn onto in practice — and it matters
  * here more than elsewhere, because auto-fit sizes the text against the space it is given.
  *
- * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half.
+ * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half, and
+ * the title slide's states are `PresenterTitleSlideScreenshotTest`.
  */
 class PresenterFullScreenScreenshotTest {
 
@@ -521,34 +522,6 @@ class PresenterFullScreenScreenshotTest {
     @Test
     fun `with the background suppressed`() = shoot("song_no_background") {
         SongPresenter(lyricSection = song(), appSettings = colouredSong(), showBackground = false)
-    }
-
-    // ── The intro slide ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * The slide a song opens on: its title and number, no lyrics.
-     *
-     * Built as the songs tab builds it — a section of type `song` carrying the title and no lines —
-     * rather than by turning `titleSlideEnabled` on, which is the switch that makes the *tab* put
-     * this section in front of the verses.
-     */
-    @Test
-    fun `the intro slide`() = shoot("song_intro_slide") {
-        SongPresenter(lyricSection = introSlide(), appSettings = songSettings(titleSlideEnabled = true))
-    }
-
-    // Not shot: the intro slide in the second language. The secondary title only replaces the primary
-    // once the slide is drawn in secondary mode *and* carries secondary content, which an intro slide
-    // — title and number, no lines — does not, so it renders identically to `song_intro_slide`.
-
-    @Test
-    fun `the intro slide over a photograph`() = shoot("song_intro_slide_on_image") {
-        SongPresenter(
-            lyricSection = introSlide(),
-            appSettings = songSettings(titleSlideEnabled = true).copy(
-                backgroundSettings = BackgroundSettings(songBackground = imageBackground()),
-            ),
-        )
     }
 
     // ── Shadow, which is what makes words readable over a picture ───────────────────────────────
@@ -1225,13 +1198,6 @@ class PresenterFullScreenScreenshotTest {
 
     private fun imageBackground() =
         BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = photo().absolutePath)
-
-    /** The slide a song opens on: title and number, no lyrics — as the songs tab builds it. */
-    private fun introSlide() = LyricSection(
-        title = "Amazing Grace",
-        songNumber = 42,
-        type = Constants.SECTION_TYPE_SONG,
-    )
 
     /** A second photograph, so a transition has something to move between. */
     private fun secondPhoto(): File {

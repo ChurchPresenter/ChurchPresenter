@@ -75,6 +75,10 @@ internal val SongStyleElement.tabLabel: String
         SongStyleElement.LYRICS -> "Lyrics"
         SongStyleElement.LOOK_AHEAD -> "Look Ahead"
         SongStyleElement.NEXT_SECTION -> "Next Section"
+        SongStyleElement.AUTHOR -> "Author"
+        SongStyleElement.COMPOSER -> "Composer"
+        SongStyleElement.CCLI -> "CCLI"
+        SongStyleElement.TEMPO -> "Tempo"
     }
 
 /** The label each output switch carries. */
@@ -94,6 +98,9 @@ internal fun ComposeUiTest.pointAt(element: SongStyleElement, target: SongStyleT
     waitForIdle()
 }
 
-/** Every element on every output, which is what a per-profile test walks. */
+/**
+ * Every lyric-slide element on every output, which is what a per-profile test walks. The credits
+ * are reached through the title-slide view, not these tabs.
+ */
 internal val songProfiles: List<Pair<SongStyleElement, SongStyleTarget>> =
-    SongStyleElement.entries.flatMap { element -> SongStyleTarget.entries.map { element to it } }
+    LYRIC_SLIDE_ELEMENTS.flatMap { element -> SongStyleTarget.entries.map { element to it } }

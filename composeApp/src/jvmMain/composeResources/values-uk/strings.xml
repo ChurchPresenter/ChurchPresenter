@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Нижня третина</string>
     <string name="live_preview_media">Медіа</string>
     <string name="live_preview_nothing">Нічого не в ефірі</string>
+    <string name="collapse_preview">Сховати цей попередній перегляд</string>
+    <string name="expand_preview">Показати цей попередній перегляд</string>
     <string name="live_preview_picture">Зображення</string>
     <string name="live_preview_presentation">Презентація</string>
     <string name="live_preview_song">Пісня</string>
@@ -2438,6 +2440,14 @@
     <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Текст</string>
     <string name="song_element_next_section">Наступний куплет</string>
+    <string name="song_element_author">Автор</string>
+    <string name="song_element_composer">Композитор</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Темп</string>
+    <string name="song_target_title_slide">Титульний слайд</string>
+    <string name="song_show_on_title_slide">Показувати на титульному слайді</string>
+    <string name="song_scope_title_slide">Титульний слайд · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Перегляд титульного слайда</string>
     <string name="song_chunk_verse">1 куплет</string>
     <string name="song_chunk_line">1 рядок</string>
     <string name="song_preview_chords">Акорди</string>
@@ -2504,6 +2514,9 @@
     <string name="background_image_file">Файл зображення</string>
     <string name="background_video_file">Файл відео</string>
     <string name="background_opacity_caption">Прозорість</string>
+    <string name="background_above_band_caption">Над смугою</string>
+    <string name="background_above_band_fill">Колір заливки</string>
+    <string name="background_above_band_opacity">Прозорість заливки</string>
     <string name="quick_background_title">Швидкі фони</string>
     <string name="quick_background_reset">Повернути як було</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

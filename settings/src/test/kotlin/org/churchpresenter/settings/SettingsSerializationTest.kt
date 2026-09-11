@@ -73,6 +73,7 @@ class SettingsSerializationTest {
     @Test
     fun `content and library settings round-trip`() {
         assertRoundTrips(SongSettings())
+        assertRoundTrips(SongCreditStyle())
         assertRoundTrips(BibleSettings())
         assertRoundTrips(DictionarySettings())
         assertRoundTrips(PresentationSettings())

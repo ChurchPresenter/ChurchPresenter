@@ -16,6 +16,14 @@ data class LyricSection(
     val labelName: String = "",
     val title: String = "",
     val songNumber: Int = 0,
+    /**
+     * The song's credits, for a title slide to draw -- carried for the same reason [bpm], [capo]
+     * and [background] are: the presenter is handed a section, never the [SongItem] it came from.
+     * Blank on every other kind of section, which draws none of them.
+     */
+    val author: String = "",
+    val composer: String = "",
+    val ccli: String = "",
     val type: String = "", // "verse", "chorus"
     val lines: List<String> = emptyList(),
     /**

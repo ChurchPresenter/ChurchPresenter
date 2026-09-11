@@ -17,6 +17,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Where the title and song number land relative to the verse, and how the auto-fit search folds
@@ -66,6 +67,43 @@ class SongPresenterLayoutRenderTest {
             }
         }
         block()
+    }
+
+    // ── The title slide ─────────────────────────────────────────────────────────
+
+    private fun titleSlide() = LyricSection(
+        type = Constants.SECTION_TYPE_TITLE_SLIDE,
+        title = "Amazing Grace",
+        songNumber = 42,
+        lines = listOf("42 Amazing Grace", "John Newton"),
+    )
+
+    @Test
+    fun `the title slide is drawn in the title's size, not the lyrics'`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                titleFontSize = 20, lyricsFontSize = 70, lyricsFontSizeAutoFit = false,
+                titleDisplay = Constants.NONE, showNumber = Constants.NONE,
+                // Off, so the line measured is the title alone: the number would share it at
+                // its own size.
+                titleSlideShowSongNumber = false,
+            ),
+        )
+        var titleLineHeight = 0f
+        var lyricLineHeight = 0f
+        present(settings, lyricSection = titleSlide(), allSections = listOf(titleSlide(), section())) {
+            titleLineHeight = onNodeWithText("Amazing Grace").fetchSemanticsNode().boundsInRoot.height
+        }
+        present(settings, lyricSection = section(), allSections = listOf(titleSlide(), section())) {
+            lyricLineHeight =
+                onNodeWithText("Amazing grace how sweet the sound").fetchSemanticsNode().boundsInRoot.height
+        }
+
+        assertTrue(
+            titleLineHeight < lyricLineHeight / 2,
+            "title slide line $titleLineHeight vs lyric line $lyricLineHeight: " +
+                "it took the lyrics' 70, not the title's 20",
+        )
     }
 
     // ── Title and number sharing a position ─────────────────────────────────────

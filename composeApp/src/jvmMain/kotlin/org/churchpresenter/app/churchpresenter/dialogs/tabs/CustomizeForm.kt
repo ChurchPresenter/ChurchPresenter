@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.utils.Constants
@@ -278,12 +279,17 @@ internal fun DropdownControl(
 internal fun ChoiceControl(
     options: List<Pair<String, String>>,
     selected: String,
+    /**
+     * A segment width of the caller's own, for a list that has to fit one row of the column and
+     * whose labels are known to fit it -- the derived width below is generous by design.
+     */
+    buttonWidth: Dp? = null,
     onSelect: (String) -> Unit,
 ) {
     // Sized to the longest label rather than a fixed width: `SegmentedButton` gives every segment
     // the same width and clips at one line, so a fixed width cut "Transparent" and "Video Loop"
     // off mid-word in the background list.
-    val width = (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
+    val width = buttonWidth ?: (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
         .coerceAtLeast(CHOICE_MIN_WIDTH.value).dp
     CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
         SegmentedButton(

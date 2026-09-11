@@ -1088,6 +1088,8 @@
     <!-- Live preview -->
     <string name="live_preview_title">प्रस्तुतिमा</string>
     <string name="live_preview_nothing">केही पनि प्रस्तुतिमा छैन</string>
+    <string name="collapse_preview">यो पूर्वदृश्य लुकाउनुहोस्</string>
+    <string name="expand_preview">यो पूर्वदृश्य देखाउनुहोस्</string>
     <string name="live_preview_bible">बाइबल</string>
     <string name="live_preview_song">गीत</string>
     <string name="live_preview_picture">तस्बिर</string>
@@ -2446,6 +2448,14 @@
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">गीतको बोल</string>
     <string name="song_element_next_section">अर्को खण्ड</string>
+    <string name="song_element_author">रचनाकार</string>
+    <string name="song_element_composer">सङ्गीतकार</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">टेम्पो</string>
+    <string name="song_target_title_slide">शीर्षक स्लाइड</string>
+    <string name="song_show_on_title_slide">शीर्षक स्लाइडमा देखाउनुहोस्</string>
+    <string name="song_scope_title_slide">शीर्षक स्लाइड · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">शीर्षक स्लाइड पूर्वावलोकन</string>
     <string name="song_chunk_verse">१ पद</string>
     <string name="song_chunk_line">१ हरफ</string>
     <string name="song_preview_chords">कर्ड</string>
@@ -2512,6 +2522,9 @@
     <string name="background_image_file">तस्बिर फाइल</string>
     <string name="background_video_file">भिडियो फाइल</string>
     <string name="background_opacity_caption">गाढापन</string>
+    <string name="background_above_band_caption">पट्टीमाथि</string>
+    <string name="background_above_band_fill">भर्ने रङ</string>
+    <string name="background_above_band_opacity">भर्ने गाढापन</string>
     <string name="quick_background_title">द्रुत पृष्ठभूमि</string>
     <string name="quick_background_reset">सामान्यमा फर्कनुहोस्</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

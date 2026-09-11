@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_camera_required
 import churchpresenter.composeapp.generated.resources.background_color_caption
-import churchpresenter.composeapp.generated.resources.background_copy_look_to
 import churchpresenter.composeapp.generated.resources.background_image_file
 import churchpresenter.composeapp.generated.resources.background_opacity_caption
 import churchpresenter.composeapp.generated.resources.background_type_caption
@@ -111,10 +110,12 @@ internal fun BackgroundControlsColumn(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 BackgroundLookSliders(config = config, onConfigChange = onConfigChange)
             }
-            val targets = scope.copyTargets()
-            if (targets.isNotEmpty() && config.backgroundType != scope.inheritType) {
+            // Every lower-third surface, whatever its band is set to. The wash falls through on
+            // its own field rather than on the band's type, so a surface drawing a picture of its
+            // own still has a say in what sits above it.
+            if (scope.lowerThird) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                CopyLookSection(targets = targets, config = config, onSettingsChange = onSettingsChange)
+                AboveBandSection(scope = scope, config = config, onConfigChange = onConfigChange)
             }
         }
         SettingsScrollbar(scrollState)
@@ -138,18 +139,19 @@ private fun BackgroundTypeSegments(
     LaunchedEffect(Unit) {
         captureAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() || DeckLinkManager.isAvailable() }
     }
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        PanelCaption(stringResource(Res.string.background_type_caption))
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .padding(2.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            scope.typeOptions().forEach { type ->
+    BackgroundTypeRow(
+        caption = stringResource(Res.string.background_type_caption),
+        options = scope.typeOptions(),
+        selected = config.backgroundType,
+        onSelect = { type ->
+            onConfigChange(
+                config.copy(
+                    backgroundType = type,
+                    gradientEnabled = type == Constants.BACKGROUND_GRADIENT
+                )
+            )
+        },
+        segmentFor = { type, draw ->
                 val videoWithoutVlc = type == Constants.BACKGROUND_VIDEO && !isVlcAvailable
                 // Camera does not go through VLC — it wants ffmpeg or a DeckLink card.
                 val cameraWithoutCapture =
@@ -159,25 +161,52 @@ private fun BackgroundTypeSegments(
                     cameraWithoutCapture -> cameraMissingHint
                     else -> null
                 }
-                val segment = @Composable {
+            // A machine without VLC still shows the Video segment, and one with no capture
+            // device still shows Camera; hovering says why it is dead, which "it does nothing
+            // when clicked" does not.
+            val segment = @Composable { draw(disabledHint == null) }
+            if (disabledHint != null) HintTooltip(disabledHint, segment) else segment()
+        },
+    )
+}
+
+/**
+ * A captioned row of type segments — the band's, and the wash's above it.
+ *
+ * [segmentFor] wraps one segment before it is drawn, which is how the band hangs a "needs VLC"
+ * tooltip on a dead one; it is handed the segment as a function of `enabled` so the wrapper decides
+ * both. The wash passes nothing: a color and a transparency are available on every machine.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun BackgroundTypeRow(
+    caption: String,
+    options: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    segmentFor: @Composable (type: String, draw: @Composable (enabled: Boolean) -> Unit) -> Unit =
+        { _, draw -> draw(true) },
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        PanelCaption(caption)
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                .padding(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            options.forEach { type ->
+                segmentFor(type) { enabled ->
                     Segment(
                         label = stringResource(backgroundTypeLabel(type)),
-                        selected = config.backgroundType == type,
-                        enabled = disabledHint == null,
-                        onClick = {
-                            onConfigChange(
-                                config.copy(
-                                    backgroundType = type,
-                                    gradientEnabled = type == Constants.BACKGROUND_GRADIENT
-                                )
-                            )
-                        }
+                        selected = selected == type,
+                        enabled = enabled,
+                        onClick = { onSelect(type) },
                     )
                 }
-                // A machine without VLC still shows the Video segment, and one with no capture
-                // device still shows Camera; hovering says why it is dead, which "it does nothing
-                // when clicked" does not.
-                if (disabledHint != null) HintTooltip(disabledHint, segment) else segment()
             }
         }
     }
@@ -233,16 +262,26 @@ private fun BackgroundSourceSection(
 /** The color itself, and the six one-click solids under it the song panel offers too. */
 @Composable
 private fun BackgroundColorSection(config: BackgroundConfig, onConfigChange: (BackgroundConfig) -> Unit) {
+    BackgroundColorPicker(
+        caption = stringResource(Res.string.background_color_caption),
+        color = config.backgroundColor,
+        onColorChange = { onConfigChange(config.copy(backgroundColor = it)) },
+    )
+}
+
+/** A captioned color field over the six one-click solids — the band's, and the wash's above it. */
+@Composable
+internal fun BackgroundColorPicker(caption: String, color: String, onColorChange: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        PanelCaption(stringResource(Res.string.background_color_caption))
+        PanelCaption(caption)
         ColorPickerField(
-            color = config.backgroundColor,
-            onColorChange = { onConfigChange(config.copy(backgroundColor = it)) },
+            color = color,
+            onColorChange = onColorChange,
             modifier = Modifier.width(COLOR_FIELD_WIDTH)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
             backgroundSwatches(RecentColors.colors).forEach { hex ->
-                val selected = config.backgroundColor.equals(hex, ignoreCase = true)
+                val selected = color.equals(hex, ignoreCase = true)
                 Box(
                     Modifier
                         .weight(1f)
@@ -255,7 +294,7 @@ private fun BackgroundColorSection(config: BackgroundConfig, onConfigChange: (Ba
                             else MaterialTheme.colorScheme.outlineVariant,
                             RoundedCornerShape(6.dp)
                         )
-                        .clickable { onConfigChange(config.copy(backgroundColor = hex)) }
+                        .clickable { onColorChange(hex) }
                 )
             }
         }
@@ -347,53 +386,9 @@ private fun BackgroundLookSliders(config: BackgroundConfig, onConfigChange: (Bac
     }
 }
 
-/**
- * Putting this look on the other content surfaces of the same shape.
- *
- * Only ever full screen onto full screen, or band onto band: the two are cropped differently and a
- * picture chosen for one is rarely the picture for the other.
- */
-@Composable
-private fun CopyLookSection(
-    targets: List<BackgroundScope>,
-    config: BackgroundConfig,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        PanelCaption(stringResource(Res.string.background_copy_look_to))
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            targets.forEach { target ->
-                Box(
-                    modifier = Modifier
-                        .height(26.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                        .clickable {
-                            onSettingsChange { s ->
-                                s.copy(
-                                    backgroundSettings = s.backgroundSettings.withConfigFor(target, config)
-                                )
-                            }
-                        }
-                        .padding(horizontal = 11.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(backgroundGroupLabel(target.group)),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
 /** A caption, its readout, and the track between them — the shape every slider here takes. */
 @Composable
-private fun CaptionedSlider(
+internal fun CaptionedSlider(
     caption: String,
     readout: String,
     value: Float,
@@ -422,7 +417,7 @@ private fun CaptionedSlider(
     }
 }
 
-private fun percentReadout(fraction: Float): String = "${(fraction * PERCENT).toInt()}%"
+internal fun percentReadout(fraction: Float): String = "${(fraction * PERCENT).toInt()}%"
 
 /** The types that have something to fade, dim or blur. */
 private val ADJUSTABLE_TYPES = setOf(

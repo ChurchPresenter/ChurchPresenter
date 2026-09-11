@@ -819,6 +819,8 @@
     <string name="live_preview_lower_third">Unteres Drittel</string>
     <string name="live_preview_media">Medien</string>
     <string name="live_preview_nothing">Nichts ist live</string>
+    <string name="collapse_preview">Diese Vorschau ausblenden</string>
+    <string name="expand_preview">Diese Vorschau anzeigen</string>
     <string name="live_preview_picture">Bild</string>
     <string name="live_preview_presentation">Präsentation</string>
     <string name="live_preview_song">Lied</string>
@@ -2439,6 +2441,14 @@
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Text</string>
     <string name="song_element_next_section">Nächster Abschnitt</string>
+    <string name="song_element_author">Autor</string>
+    <string name="song_element_composer">Komponist</string>
+    <string name="song_element_ccli">CCLI</string>
+    <string name="song_element_tempo">Tempo</string>
+    <string name="song_target_title_slide">Titelfolie</string>
+    <string name="song_show_on_title_slide">Auf der Titelfolie anzeigen</string>
+    <string name="song_scope_title_slide">Titelfolie · %1$d × %2$d</string>
+    <string name="song_preview_title_slide">Titelfolien-Vorschau</string>
     <string name="song_chunk_verse">1 Strophe</string>
     <string name="song_chunk_line">1 Zeile</string>
     <string name="song_preview_chords">Akkorde</string>
@@ -2505,6 +2515,9 @@
     <string name="background_image_file">Bilddatei</string>
     <string name="background_video_file">Videodatei</string>
     <string name="background_opacity_caption">Deckkraft</string>
+    <string name="background_above_band_caption">Über dem Band</string>
+    <string name="background_above_band_fill">Füllfarbe</string>
+    <string name="background_above_band_opacity">Deckkraft der Füllung</string>
     <string name="quick_background_title">Schnellhintergründe</string>
     <string name="quick_background_reset">Zurück zum Normalzustand</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

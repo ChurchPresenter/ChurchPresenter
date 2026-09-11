@@ -34,6 +34,8 @@ internal fun SongEditingCard(
     target: SongStyleTarget,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
+    /** Editing the title slide's elements rather than the lyric slides' -- see [SongElementRow]. */
+    titleSlideView: Boolean = false,
 ) {
     val style = settings.songSettings.elementStyle(element, target)
     val editingScroll = rememberScrollState()
@@ -51,11 +53,12 @@ internal fun SongEditingCard(
                     element = element,
                     onElementChange = onElementChange,
                     target = target,
+                    titleSlideView = titleSlideView,
                 )
                 // Keyed on what the panel is pointed at: the controls below are one set standing for
                 // ten stored profiles, and without this Compose keeps the subtree across a switch and
                 // hands each control the state of whichever control held its slot before.
-                key(element, target) {
+                key(element, target, titleSlideView) {
                     SongTypographyPanel(
                         element = element,
                         style = style,
@@ -76,6 +79,7 @@ internal fun SongEditingCard(
                             }
                         },
                         availableFonts = availableFonts,
+                        onTitleSlide = titleSlideView,
                     )
                 }
             }
