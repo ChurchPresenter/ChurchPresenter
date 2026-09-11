@@ -11,9 +11,12 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
@@ -245,6 +248,54 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
         blurReferencePx = settings.defaultBackgroundBlur,
         camera = settings.defaultBackgroundCamera,
     )
+
+/**
+ * What to wash over the part of a lower-third output the band does not cover, or null for nothing.
+ *
+ * The band and the area above it are two different decisions, so this does not go through
+ * [resolveBackground]: a quick-tray pick or a song's own background replaces the *band*, and
+ * neither of them says anything about the two thirds above it, which stay as the surface was
+ * configured.
+ *
+ * **It follows its own type, not the band's.** `Default` on a content lower third means "follow
+ * the Default Lower Third's wash", exactly as `Default` in the band's type row means "follow the
+ * Default's band" — so a wash set once reaches Bible and Songs without being set twice, and a
+ * surface can carry a picture of its own while still taking the shared wash above it. Reading the
+ * band's type instead would have made "has its own picture" silently mean "loses the wash".
+ *
+ * `Transparent` at the end of the chain returns null rather than [Color.Transparent]: nothing is
+ * drawn there at all, which is what a Browser Source or NDI alpha output needs in order to key.
+ */
+internal fun aboveBandFill(settings: BackgroundSettings, config: BackgroundConfig): Color? {
+    val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
+    val type = if (defers) settings.defaultLowerThirdAboveBandType else config.aboveBandType
+    if (type != Constants.BACKGROUND_COLOR) return null
+    val hex = if (defers) settings.defaultLowerThirdAboveBandColor else config.aboveBandColor
+    val opacity = if (defers) settings.defaultLowerThirdAboveBandOpacity else config.aboveBandOpacity
+    return parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f))
+}
+
+/**
+ * [fill] painted over everything above a lower-third band [bandFraction] of the output tall.
+ *
+ * Sized as the band's complement — `fillMaxHeight(1f - bandFraction)` against the same constraint
+ * the band's own `fillMaxHeight(bandFraction)` reads — so the two either meet exactly or overlap by
+ * a single pixel the band then draws over. Measuring a height in Dp instead can round the other
+ * way and leave a hairline of whatever is behind, which on an alpha output is a transparent line.
+ *
+ * Draws nothing at all when [fill] is null; see [aboveBandFill] for why that is not black at 0%.
+ */
+@Composable
+internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float) {
+    if (fill == null) return
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(1f - bandFraction)
+            .align(Alignment.TopCenter)
+            .background(fill)
+    )
+}
 
 /** [background]'s picture, decoded once per path. Null unless it is an image that still exists. */
 @Composable

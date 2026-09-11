@@ -2507,6 +2507,9 @@
     <string name="background_image_file">Bilddatei</string>
     <string name="background_video_file">Videodatei</string>
     <string name="background_opacity_caption">Deckkraft</string>
+    <string name="background_above_band_caption">Über dem Band</string>
+    <string name="background_above_band_fill">Füllfarbe</string>
+    <string name="background_above_band_opacity">Deckkraft der Füllung</string>
     <string name="quick_background_title">Schnellhintergründe</string>
     <string name="quick_background_reset">Zurück zum Normalzustand</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

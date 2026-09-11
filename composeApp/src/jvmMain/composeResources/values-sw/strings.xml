@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Faili ya picha</string>
     <string name="background_video_file">Faili ya video</string>
     <string name="background_opacity_caption">Ukolezi</string>
+    <string name="background_above_band_caption">Juu ya Mstari</string>
+    <string name="background_above_band_fill">Rangi ya Kujaza</string>
+    <string name="background_above_band_opacity">Ukolezi wa Kujaza</string>
     <string name="quick_background_title">Usuli wa haraka</string>
     <string name="quick_background_reset">Rudi kawaida</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

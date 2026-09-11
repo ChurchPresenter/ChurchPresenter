@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Bildefil</string>
     <string name="background_video_file">Videofil</string>
     <string name="background_opacity_caption">Dekkevne</string>
+    <string name="background_above_band_caption">Over feltet</string>
+    <string name="background_above_band_fill">Fyllfarge</string>
+    <string name="background_above_band_opacity">Fyllets dekkevne</string>
     <string name="quick_background_title">Hurtigbakgrunner</string>
     <string name="quick_background_reset">Tilbake til normalt</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

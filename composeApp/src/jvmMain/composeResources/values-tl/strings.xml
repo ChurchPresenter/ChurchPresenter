@@ -2514,6 +2514,9 @@
     <string name="background_image_file">File ng Larawan</string>
     <string name="background_video_file">File ng Video</string>
     <string name="background_opacity_caption">Opacity</string>
+    <string name="background_above_band_caption">Sa Itaas ng Banda</string>
+    <string name="background_above_band_fill">Kulay ng Fill</string>
+    <string name="background_above_band_opacity">Opacity ng Fill</string>
     <string name="quick_background_title">Mabilisang background</string>
     <string name="quick_background_reset">Balik sa normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

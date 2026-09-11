@@ -2509,6 +2509,9 @@
     <string name="background_image_file">Файл изображения</string>
     <string name="background_video_file">Файл видео</string>
     <string name="background_opacity_caption">Непрозрачность</string>
+    <string name="background_above_band_caption">Над полосой</string>
+    <string name="background_above_band_fill">Цвет заливки</string>
+    <string name="background_above_band_opacity">Непрозрачность заливки</string>
     <string name="quick_background_title">Быстрые фоны</string>
     <string name="quick_background_reset">Вернуть как было</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

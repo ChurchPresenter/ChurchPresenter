@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Bildfil</string>
     <string name="background_video_file">Videofil</string>
     <string name="background_opacity_caption">Opacitet</string>
+    <string name="background_above_band_caption">Ovanför bandet</string>
+    <string name="background_above_band_fill">Fyllningsfärg</string>
+    <string name="background_above_band_opacity">Fyllningens opacitet</string>
     <string name="quick_background_title">Snabbbakgrunder</string>
     <string name="quick_background_reset">Tillbaka till normalt</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

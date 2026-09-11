@@ -2514,6 +2514,9 @@
     <string name="background_image_file">चित्र फ़ाइल</string>
     <string name="background_video_file">वीडियो फ़ाइल</string>
     <string name="background_opacity_caption">अपारदर्शिता</string>
+    <string name="background_above_band_caption">पट्टी के ऊपर</string>
+    <string name="background_above_band_fill">भरण रंग</string>
+    <string name="background_above_band_opacity">भरण अपारदर्शिता</string>
     <string name="quick_background_title">त्वरित बैकग्राउंड</string>
     <string name="quick_background_reset">सामान्य पर वापस</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

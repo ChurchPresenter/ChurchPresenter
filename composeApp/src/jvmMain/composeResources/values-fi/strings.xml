@@ -2514,6 +2514,9 @@
     <string name="background_image_file">Kuvatiedosto</string>
     <string name="background_video_file">Videotiedosto</string>
     <string name="background_opacity_caption">Peittävyys</string>
+    <string name="background_above_band_caption">Palkin yläpuolella</string>
+    <string name="background_above_band_fill">Täyttöväri</string>
+    <string name="background_above_band_opacity">Täytön peittävyys</string>
     <string name="quick_background_title">Pikataustat</string>
     <string name="quick_background_reset">Takaisin normaaliin</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

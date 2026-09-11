@@ -2514,6 +2514,9 @@
     <string name="background_image_file">तस्बिर फाइल</string>
     <string name="background_video_file">भिडियो फाइल</string>
     <string name="background_opacity_caption">गाढापन</string>
+    <string name="background_above_band_caption">पट्टीमाथि</string>
+    <string name="background_above_band_fill">भर्ने रङ</string>
+    <string name="background_above_band_opacity">भर्ने गाढापन</string>
     <string name="quick_background_title">द्रुत पृष्ठभूमि</string>
     <string name="quick_background_reset">सामान्यमा फर्कनुहोस्</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

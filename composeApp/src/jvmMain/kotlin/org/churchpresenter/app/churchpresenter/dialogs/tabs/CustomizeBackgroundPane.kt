@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background_above_band_caption
+import churchpresenter.composeapp.generated.resources.background_above_band_fill
+import churchpresenter.composeapp.generated.resources.background_above_band_opacity
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.percent_suffix
@@ -26,6 +29,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -143,6 +147,50 @@ private fun BackgroundSurfaceRows(
             SliderControl(config.blur, { v -> onConfig(config.copy(blur = v)) }, BLUR_RANGE, pixels)
         }
     }
+    // Every lower-third surface, whatever its band is set to: the wash falls through on its own
+    // field rather than on the band's type, so a surface drawing a picture still has a say above it.
+    if (scope.lowerThird) {
+        AboveBandRows(scope, config, onConfig)
+    }
+}
+
+/**
+ * The wash over the two thirds this output's band does not cover.
+ *
+ * The band's own rows one rectangle up: the same type control, off the same labels, and the same
+ * color field under it. `Default` means here what it means in the row above — follow the Default
+ * Lower Third — and the Default Lower Third itself is not offered one, being the top of this chain.
+ * See `aboveBandTypeOptions` for the list and why it is the short one.
+ *
+ * Named "Fill Color" and "Fill Opacity", not the plain words: the band's own color and opacity rows
+ * are in the same column, and a second "Color" there names nothing anyone can tell apart.
+ */
+@Composable
+private fun AboveBandRows(
+    scope: BackgroundScope,
+    config: BackgroundConfig,
+    onConfig: (BackgroundConfig) -> Unit,
+) {
+    CustomizeRow(stringResource(Res.string.background_above_band_caption)) {
+        ChoiceControl(
+            options = scope.aboveBandTypeOptions().map { it to stringResource(customizeTypeLabel(it)) },
+            selected = config.aboveBandType,
+            onSelect = { v -> onConfig(config.copy(aboveBandType = v)) },
+        )
+    }
+    if (config.aboveBandType != Constants.BACKGROUND_COLOR) return
+    val fill = stringResource(Res.string.background_above_band_fill)
+    CustomizeRow(fill, labelInsideControl = true) {
+        ColorControl(fill, config.aboveBandColor) { v -> onConfig(config.copy(aboveBandColor = v)) }
+    }
+    CustomizeRow(stringResource(Res.string.background_above_band_opacity)) {
+        SliderControl(
+            value = (config.aboveBandOpacity * PERCENT).toInt(),
+            onValueChange = { v -> onConfig(config.copy(aboveBandOpacity = v / PERCENT)) },
+            range = PERCENT_RANGE,
+            suffix = stringResource(Res.string.percent_suffix),
+        )
+    }
 }
 
 /** The two ends of a gradient, and where it turns over. */
@@ -172,14 +220,36 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
 private fun backgroundTypeOptions(scope: BackgroundScope): List<Pair<String, String>> = buildList {
     // The same list the Background tab's segmented control offers, in the same order, so a surface
     // set there reads the same here — including the "Default" a content surface falls through by.
-    scope.inheritType?.let { add(it to stringResource(Res.string.customize_type_default)) }
-    add(Constants.BACKGROUND_COLOR to stringResource(Res.string.customize_type_color))
-    add(Constants.BACKGROUND_IMAGE to stringResource(Res.string.customize_type_image))
-    add(Constants.BACKGROUND_VIDEO to stringResource(Res.string.customize_type_video))
-    add(Constants.BACKGROUND_TRANSPARENT to stringResource(Res.string.customize_type_transparent))
+    scope.inheritType?.let { add(it to stringResource(customizeTypeLabel(it))) }
+    add(Constants.BACKGROUND_COLOR to stringResource(customizeTypeLabel(Constants.BACKGROUND_COLOR)))
+    add(Constants.BACKGROUND_IMAGE to stringResource(customizeTypeLabel(Constants.BACKGROUND_IMAGE)))
+    add(Constants.BACKGROUND_VIDEO to stringResource(customizeTypeLabel(Constants.BACKGROUND_VIDEO)))
+    add(
+        Constants.BACKGROUND_TRANSPARENT
+            to stringResource(customizeTypeLabel(Constants.BACKGROUND_TRANSPARENT)),
+    )
     if (scope.offersGradient) {
-        add(Constants.BACKGROUND_GRADIENT to stringResource(Res.string.customize_type_gradient))
+        add(
+            Constants.BACKGROUND_GRADIENT
+                to stringResource(customizeTypeLabel(Constants.BACKGROUND_GRADIENT)),
+        )
     }
+}
+
+/**
+ * What this pane calls a background type — the band's row and the wash's read off one list.
+ *
+ * Its own rather than the Background tab's [backgroundTypeLabel]: this dialog's segments are
+ * narrower, so `Follow Default` and `Video Loop` are shortened here, and the wash has to be
+ * labelled the same way the band beside it is.
+ */
+private fun customizeTypeLabel(type: String): StringResource = when (type) {
+    Constants.BACKGROUND_IMAGE -> Res.string.customize_type_image
+    Constants.BACKGROUND_VIDEO -> Res.string.customize_type_video
+    Constants.BACKGROUND_TRANSPARENT -> Res.string.customize_type_transparent
+    Constants.BACKGROUND_GRADIENT -> Res.string.customize_type_gradient
+    Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
+    else -> Res.string.customize_type_default
 }
 
 private const val PERCENT = 100f

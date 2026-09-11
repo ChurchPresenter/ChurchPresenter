@@ -2539,6 +2539,9 @@
     <string name="background_image_file">Pildifail</string>
     <string name="background_video_file">Videofail</string>
     <string name="background_opacity_caption">Läbipaistmatus</string>
+    <string name="background_above_band_caption">Riba kohal</string>
+    <string name="background_above_band_fill">Täitevärv</string>
+    <string name="background_above_band_opacity">Täite läbipaistmatus</string>
     <string name="quick_background_title">Kiirtaustad</string>
     <string name="quick_background_reset">Tagasi tavaolekusse</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

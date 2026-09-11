@@ -14,6 +14,7 @@ import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.song_element_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_element_title
+import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -89,13 +90,16 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.DICTIONARY_DEFINITION -> stringResource(Res.string.customize_group_definition)
     CustomizeElement.DICTIONARY_KJV -> stringResource(Res.string.dictionary_settings_kjv_usage)
     CustomizeElement.DICTIONARY_CARD -> stringResource(Res.string.customize_group_card)
-    // Named by the surface rather than by the output's shape: the chip says "Bible", and whether
-    // that writes the full-screen or the lower-third surface is the output's business, not a
-    // choice the operator makes here.
+    // Named for the surface this output actually writes. Which of the pair that is follows from
+    // the output's own shape rather than from anything chosen here -- but the chip still has to
+    // say which, because the title it produces names it: hardcoding the full-screen scope made a
+    // Lower Third output's chips read "Bible - Full Screen" while they edited the band.
     CustomizeElement.BACKGROUND_DEFAULT,
     CustomizeElement.BACKGROUND_BIBLE,
     CustomizeElement.BACKGROUND_SONG,
-    -> backgroundScopeTitle(backgroundScope(lowerThird = false))
+    -> backgroundScopeTitle(
+        backgroundScope(lowerThird = LocalOutputStyleScope.current == OutputStyleScope.LOWER_THIRD),
+    )
 }
 
 /**

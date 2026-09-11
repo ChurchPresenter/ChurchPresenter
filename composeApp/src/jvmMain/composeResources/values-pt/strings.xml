@@ -2535,6 +2535,9 @@
     <string name="background_image_file">Arquivo de imagem</string>
     <string name="background_video_file">Arquivo de vídeo</string>
     <string name="background_opacity_caption">Opacidade</string>
+    <string name="background_above_band_caption">Acima da faixa</string>
+    <string name="background_above_band_fill">Cor de preenchimento</string>
+    <string name="background_above_band_opacity">Opacidade do preenchimento</string>
     <string name="quick_background_title">Fundos rápidos</string>
     <string name="quick_background_reset">Voltar ao normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

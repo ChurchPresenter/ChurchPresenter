@@ -78,6 +78,26 @@ internal fun BackgroundScope.typeOptions(): List<String> = buildList {
     if (offersGradient) add(Constants.BACKGROUND_GRADIENT)
 }
 
+/**
+ * The types the wash above [this] surface's band offers, in the order its segments show them.
+ *
+ * The band's [typeOptions] minus everything that is not a color: no picture, no clip, no camera and
+ * no gradient, because the band is where those belong and the two thirds above it are a flat wash
+ * or nothing at all.
+ *
+ * `Default` appears for the same reason it does in the band's row — and is absent from the Default
+ * Lower Third for a reason the band does not share. That surface's *band* can follow the
+ * full-screen Default; its wash has nothing to follow, since a full screen has no area above a
+ * band, so it is the top of this chain and answers for itself.
+ */
+internal fun BackgroundScope.aboveBandTypeOptions(): List<String> = buildList {
+    if (this@aboveBandTypeOptions != BackgroundScope.DEFAULT_LOWER_THIRD) {
+        add(Constants.BACKGROUND_DEFAULT)
+    }
+    add(Constants.BACKGROUND_COLOR)
+    add(Constants.BACKGROUND_TRANSPARENT)
+}
+
 /** What [scope] is set to, as a config — flat Default fields included. */
 internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundConfig = when (scope) {
     BackgroundScope.DEFAULT -> BackgroundConfig(
@@ -99,6 +119,9 @@ internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundCon
         dim = defaultLowerThirdBackgroundDim,
         blur = defaultLowerThirdBackgroundBlur,
         camera = defaultLowerThirdBackgroundCamera,
+        aboveBandType = defaultLowerThirdAboveBandType,
+        aboveBandColor = defaultLowerThirdAboveBandColor,
+        aboveBandOpacity = defaultLowerThirdAboveBandOpacity,
     )
     BackgroundScope.BIBLE -> bibleBackground
     BackgroundScope.BIBLE_LOWER_THIRD -> bibleLowerThirdBackground
@@ -130,6 +153,9 @@ internal fun BackgroundSettings.withConfigFor(
         defaultLowerThirdBackgroundDim = config.dim,
         defaultLowerThirdBackgroundBlur = config.blur,
         defaultLowerThirdBackgroundCamera = config.camera,
+        defaultLowerThirdAboveBandType = config.aboveBandType,
+        defaultLowerThirdAboveBandColor = config.aboveBandColor,
+        defaultLowerThirdAboveBandOpacity = config.aboveBandOpacity,
     )
     BackgroundScope.BIBLE -> copy(bibleBackground = config)
     BackgroundScope.BIBLE_LOWER_THIRD -> copy(bibleLowerThirdBackground = config)
@@ -180,11 +206,3 @@ internal val BackgroundScope.coverage: BackgroundCoverage
 internal fun BackgroundSettings.isSetExplicitly(scope: BackgroundScope): Boolean =
     scope.inheritType != null && configFor(scope).backgroundType != scope.inheritType
 
-/**
- * The surfaces a look can be copied onto: the other content surfaces of the same shape, so a
- * full screen never lands on a lower-third band or the other way round.
- */
-internal fun BackgroundScope.copyTargets(): List<BackgroundScope> =
-    BackgroundScope.entries.filter {
-        it != this && it.lowerThird == lowerThird && it.group != BackgroundScopeGroup.DEFAULTS
-    }

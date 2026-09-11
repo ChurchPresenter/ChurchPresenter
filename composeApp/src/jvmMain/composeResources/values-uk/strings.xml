@@ -2506,6 +2506,9 @@
     <string name="background_image_file">Файл зображення</string>
     <string name="background_video_file">Файл відео</string>
     <string name="background_opacity_caption">Прозорість</string>
+    <string name="background_above_band_caption">Над смугою</string>
+    <string name="background_above_band_fill">Колір заливки</string>
+    <string name="background_above_band_opacity">Прозорість заливки</string>
     <string name="quick_background_title">Швидкі фони</string>
     <string name="quick_background_reset">Повернути як було</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

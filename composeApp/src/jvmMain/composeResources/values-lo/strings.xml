@@ -2514,6 +2514,9 @@
     <string name="background_image_file">ໄຟລ໌ຮູບ</string>
     <string name="background_video_file">ໄຟລ໌ວິດີໂອ</string>
     <string name="background_opacity_caption">ຄວາມທຶບ</string>
+    <string name="background_above_band_caption">ເໜືອແຖບ</string>
+    <string name="background_above_band_fill">ສີເຕີມ</string>
+    <string name="background_above_band_opacity">ຄວາມທຶບຂອງສີເຕີມ</string>
     <string name="quick_background_title">ພື້ນຫຼັງດ່ວນ</string>
     <string name="quick_background_reset">ກັບສູ່ປົກກະຕິ</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>

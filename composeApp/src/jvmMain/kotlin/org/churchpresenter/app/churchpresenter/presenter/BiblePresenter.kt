@@ -552,6 +552,13 @@ fun BiblePresenter(
             // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
             // than scaled: the picture is cropped from a slightly larger rectangle instead of
             // being stretched, which a band is wide enough to show.
+            // The wash over the two thirds the band does not cover — see AboveBandFill.
+            AboveBandFill(
+                fill = if (showBackground) {
+                    aboveBandFill(appSettings.backgroundSettings, bgConfig)
+                } else null,
+                bandFraction = lowerThirdFraction,
+            )
             val bandBleed = if (resolvedBg.isBlurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
             val bandFillWidth = maxWidth + bandBleed * 2

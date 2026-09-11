@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
@@ -142,13 +144,38 @@ private fun DictionaryStage(settings: AppSettings) {
  * with — colour, gradient or picture, dimmed and faded the way the presenter draws it. A video
  * shows as black there and here alike: spinning up VLC for a few hundred dp is not worth what it
  * costs, and the alternative is two different answers to "what does this background look like".
+ *
+ * **A lower-third surface is drawn as the band it actually is**, with its wash above it. This tile
+ * used to fill the whole stage whatever the output's shape, which told an operator setting a band
+ * colour that their whole screen was about to turn that colour — a look the output never produces
+ * — and left the wash above the band with nowhere to appear at all. The global Background tab's
+ * preview has always split it this way; this is the same split, against this output's own band
+ * height rather than the taller of the two.
  */
 @Composable
 private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, lowerThird: Boolean) {
     val scope = (element ?: CustomizeElement.BACKGROUND_DEFAULT).backgroundScope(lowerThird)
     val config = settings.backgroundSettings.configFor(scope)
     StageFrame(settings) {
-        BackgroundConfigFill(config, Modifier.fillMaxSize())
+        if (!scope.lowerThird) {
+            BackgroundConfigFill(config, Modifier.fillMaxSize())
+            return@StageFrame
+        }
+        val band = settings.bandFractionFor(scope)
+        val above = aboveBandFill(settings.backgroundSettings, config)
+        Column(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f - band)
+                    .then(if (above != null) Modifier.background(above) else Modifier)
+            )
+            // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
+            // and without this it spills up over the band line.
+            Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {
+                BackgroundConfigFill(config, Modifier.fillMaxSize())
+            }
+        }
     }
 }
 
