@@ -222,7 +222,9 @@ data class SongSettings(
     val lowerThirdDisplayMode: String = Constants.SONG_DISPLAY_MODE_LINE, // "verse" or "line"
     val lowerThirdLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
 
-    // End-of-song indicator spacing (number of spaces between each asterisk)
+    // End-of-song indicator: whether the asterisks are drawn under the last section at all,
+    // and the number of spaces between each asterisk
+    val showEndOfSongIndicator: Boolean = true,
     val endOfSongIndicatorSpacing: Int = 2,
 
     // Bilingual layout: "side_by_side" or "top_bottom"
