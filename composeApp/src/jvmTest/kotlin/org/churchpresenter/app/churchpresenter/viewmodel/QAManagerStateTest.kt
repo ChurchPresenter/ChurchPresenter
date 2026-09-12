@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
@@ -33,6 +34,15 @@ import kotlin.test.assertTrue
  *
  * `user.home` is swapped per test, as in [QAManagerTest]: the manager resolves its state file at
  * construction, so a "restart" here is just a second manager built against the same temp home.
+ *
+ * Every wait here is a **join**, never a poll. These tests used to watch the file for up to five
+ * seconds after each action and fail on the timeout, because `QAManager.saveState()` fired
+ * unordered, untracked coroutines: a save that had not been scheduled yet was indistinguishable
+ * from one that would never come, and under load the guess went wrong often enough to make the
+ * suite flaky — it failed here on a clean tree one run in one, two the next, three the next.
+ * `saveState` now snapshots on the calling thread and chains its writes, so [joinSaves] can wait
+ * for exactly the writes that were asked for. Do not reintroduce a timeout to "fix" a failure
+ * here; a failure now means the state really is wrong.
  */
 class QAManagerStateTest {
 
@@ -48,41 +58,55 @@ class QAManagerStateTest {
         System.setProperty("user.home", tempHome.absolutePath)
     }
 
+    /**
+     * Every manager built by this test, so [joinSaves] can wait for all of them.
+     *
+     * A restart test has two live managers against one home, and either may have a write in
+     * flight; joining only the newest would still race the older one's.
+     */
+    private val managers = mutableListOf<QAManager>()
+
+    private fun track(manager: QAManager): QAManager = manager.also { managers += it }
+
+    /** Waits for every requested save to reach disk. Returns when the file is final. */
+    private fun joinSaves() = runBlocking { managers.forEach { it.awaitPendingSave() } }
+
     @AfterTest
     fun restoreHome() {
+        // Before deleting the home, not after: a save still in flight would otherwise recreate
+        // `.churchpresenter/` under a directory the next test is about to claim.
+        joinSaves()
         realHome?.let { System.setProperty("user.home", it) }
         tempHome.deleteRecursively()
     }
 
-    private fun awaitUntil(what: String, timeoutMs: Long = 5_000, condition: () -> Boolean) {
-        val deadline = System.currentTimeMillis() + timeoutMs
-        while (System.currentTimeMillis() < deadline) {
-            if (condition()) return
-            Thread.sleep(10)
-        }
-        throw AssertionError("timed out after ${timeoutMs}ms waiting for $what")
+    /**
+     * The saved state, once every in-flight write has landed.
+     *
+     * This used to poll the file for up to five seconds and fail on the timeout, which made the
+     * suite flaky under load: a save that had not been scheduled yet looked identical to one that
+     * was never going to happen. `QAManager` now chains its writes and exposes a join point, so
+     * the state can simply be read once it is final -- no polling, no timeout, no wall-clock cost.
+     */
+    private fun saved(): JsonObject {
+        joinSaves()
+        assertTrue(stateFile.exists(), "no state file was ever written")
+        return Json.parseToJsonElement(stateFile.readText()).jsonObject
     }
 
-    /**
-     * Waits until the saved state satisfies [predicate].
-     *
-     * Every action triggers its own off-thread save, so waiting for a substring is not enough: the
-     * text of a question reaches the file on the save that *created* it, long before the save that
-     * archived or moderated it. Each wait therefore describes the shape it is expecting. A torn
-     * half-written file simply fails to parse and the poll continues.
-     *
-     * These tests also wait after EVERY action rather than only at the end. `QAManager.saveState()`
-     * launches an independent coroutine that snapshots the state when it runs, so two actions in
-     * quick succession put two writes in flight with no ordering between them — and if the older
-     * one lands last, the file keeps a stale snapshot for good. Letting each save finish before the
-     * next action starts sidesteps that; see the note in the class doc.
-     */
-    private fun awaitState(what: String, predicate: (JsonObject) -> Boolean) =
-        awaitUntil(what) {
-            stateFile.exists() && runCatching {
-                predicate(Json.parseToJsonElement(stateFile.readText()).jsonObject)
-            }.getOrDefault(false)
-        }
+    /** Asserts [predicate] holds of the saved state, described by [what] when it does not. */
+    private fun awaitState(what: String, predicate: (JsonObject) -> Boolean) {
+        val state = saved()
+        assertTrue(predicate(state), "the saved state does not show $what: $state")
+    }
+
+    /** Asserts the saved state contains [marker] -- enough when only one save can produce it. */
+    private fun awaitSaved(marker: String) {
+        joinSaves()
+        assertTrue(stateFile.exists(), "no state file was ever written")
+        val text = stateFile.readText()
+        assertTrue(marker in text, "the saved state does not record \"$marker\": $text")
+    }
 
     private fun JsonObject.entries(name: String): List<JsonObject> =
         this[name]?.jsonArray?.map { it.jsonObject }.orEmpty()
@@ -92,12 +116,6 @@ class QAManagerStateTest {
 
     private fun JsonObject.statuses(): List<String> =
         entries("questions").mapNotNull { it["status"]?.jsonPrimitive?.content }
-
-    /** Waits for the state file to contain [marker] — enough when only one save can produce it. */
-    private fun awaitSaved(marker: String) =
-        awaitUntil("the state file to record \"$marker\"") {
-            stateFile.exists() && stateFile.readText().contains(marker)
-        }
 
     /** Events are emitted from a coroutine on the Swing event queue; draining it delivers them. */
     private fun settle() = repeat(2) { SwingUtilities.invokeAndWait { } }
@@ -128,9 +146,9 @@ class QAManagerStateTest {
      * queue permanently. The state file does not exist until this first save completes, so its
      * mere existence is the signal.
      */
-    private fun openSession(): QAManager = QAManager().also {
+    private fun openSession(): QAManager = track(QAManager()).also {
         it.toggleSession()
-        awaitUntil("the opened session to be saved") { stateFile.exists() }
+        joinSaves()
     }
 
     /** Submits and approves [text], letting each save land before the next action. */
@@ -148,7 +166,7 @@ class QAManagerStateTest {
     }
 
     /** A second manager against the same home — i.e. the app restarted. */
-    private fun restarted(): QAManager = QAManager()
+    private fun restarted(): QAManager = track(QAManager())
 
     // ── Surviving a restart ─────────────────────────────────────────────────────
 
@@ -362,7 +380,7 @@ class QAManagerStateTest {
 
     @Test
     fun `opening and closing the session is broadcast`() {
-        val qa = QAManager()
+        val qa = track(QAManager())
 
         val opening = qa.eventsDuring { qa.toggleSession() }
         assertEquals(true, opening.filterIsInstance<QAEvent.SessionChanged>().single().active)

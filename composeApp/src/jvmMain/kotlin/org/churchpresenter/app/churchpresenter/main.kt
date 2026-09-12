@@ -38,6 +38,7 @@ import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
+import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
@@ -275,6 +276,11 @@ fun main() {
     // different evidence. Set here rather than with the availability tags below: a render fault
     // can arrive before those run.
     CrashReporter.setTag("render.api", System.getProperty("skiko.renderApi") ?: "default")
+    // Which renderer ran is only half the fact: whether a GPU driver fault is an NVIDIA, AMD or
+    // Intel problem is the axis such a group has to be split by, and no report carried it at all.
+    // Empty off Windows and on any machine the call fails, so an absent tag means "not known"
+    // rather than a guess. Beside render.api for the same reason: a render fault can arrive early.
+    CrashReporter.setConfigTags(GpuInfo.crashTags())
 
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 

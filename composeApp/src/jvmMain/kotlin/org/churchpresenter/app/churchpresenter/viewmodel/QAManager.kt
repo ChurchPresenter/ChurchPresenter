@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,6 +19,7 @@ import org.churchpresenter.core.models.qa.toDto
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 private const val MILLIS_PER_SECOND = 1000L
 
@@ -292,18 +294,56 @@ class QAManager {
 
     // ── Persistence ─────────────────────────────────────────────────
 
+    /** The most recently requested save, or null when every save has finished. */
+    private val pendingSave = AtomicReference<Job?>(null)
+
+    /**
+     * Writes the session to disk after every action that changes it.
+     *
+     * Two things here are load-bearing, and this used to do neither.
+     *
+     * The snapshot is taken **on the calling thread**, not inside the coroutine. Taken inside, it
+     * described whatever the state happened to be when the coroutine was scheduled, so the file
+     * could record a moment that never corresponded to the action that triggered the save.
+     *
+     * The writes are then **chained**, so they land in the order they were requested. Each save
+     * used to be an independent `launch`, and two actions in quick succession put two writes in
+     * flight with nothing ordering them: if the older one landed last, the file kept a stale
+     * snapshot for good. That is not only a test problem — moderating quickly during a live
+     * session could persist a state the operator had already moved on from, and because the write
+     * is wrapped in a `try`/`catch` that swallows everything, it failed silently and only showed
+     * up after a restart.
+     */
     private fun saveState() {
-        scope.launch(Dispatchers.IO) {
+        val state = QAState(
+            questions = _questions.map { it.toDto() },
+            history = _history.map { it.toDto() },
+            votedIps = _votedIps.mapValues { entry -> entry.value.toMap() }
+        )
+        val previous = pendingSave.get()
+        val job = scope.launch(Dispatchers.IO) {
+            previous?.join()
             try {
-                val state = QAState(
-                    questions = _questions.map { it.toDto() },
-                    history = _history.map { it.toDto() },
-                    votedIps = _votedIps.mapValues { entry -> entry.value.toMap() }
-                )
                 stateFile.parentFile?.mkdirs()
                 stateFile.writeTextAtomically(json.encodeToString(QAState.serializer(), state))
             } catch (_: Exception) { }
         }
+        // Only clear the chain head when it is still the job we put there, so a save started on
+        // another thread in the meantime keeps its place in the order.
+        pendingSave.set(job)
+        job.invokeOnCompletion { pendingSave.compareAndSet(job, null) }
+    }
+
+    /**
+     * Suspends until every requested save has been written.
+     *
+     * For tests: the state file is written off-thread, so without this a test has to poll for the
+     * shape it expects and time out when it guesses wrong — which is what made
+     * `QAManagerStateTest` flaky. Joining the chain head is enough because each save waits for its
+     * predecessor. Nothing in the app waits for a save; it is fire-and-forget by design.
+     */
+    internal suspend fun awaitPendingSave() {
+        pendingSave.get()?.join()
     }
 
     private fun loadState() {

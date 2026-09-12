@@ -555,36 +555,19 @@ compose.desktop {
             // Bundle ALL dependency JARs into the distribution — critical for standalone mode
             includeAllModules = true
 
-            val commonJvmArgs = listOf(
-                "-Xms512m",
-                "-Xmx3072m",
-                "-XX:+UseG1GC",
-                "-XX:+UnlockExperimentalVMOptions",
-                "-XX:G1NewSizePercent=20",
-                "-XX:G1ReservePercent=20",
-                "-XX:MaxGCPauseMillis=50",
-                "-XX:+UseStringDeduplication",
-                "-Dawt.useSystemAAFontSettings=on",
-                "-Dswing.aatext=true",
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
-                "--add-opens=java.base/java.util=ALL-UNNAMED",
-                "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
-                "--add-opens=java.base/java.io=ALL-UNNAMED",
-                "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
-            )
+            // No jvmArgs here or in the platform blocks below. The application-level
+            // jvmArgs(...) above already carries this list, and it reaches every platform:
+            // `jvmArgs` is declared only on JvmApplication, so a call inside macOS { } /
+            // windows { } / linux { } resolves against the enclosing application { } and
+            // applies everywhere. A second copy per platform block therefore did not scope
+            // anything to that platform -- it just wrote the same 24 options into the
+            // artifact four times over (measured in ChurchPresenter.cfg before this was
+            // removed). Anything genuinely platform-specific has to be decided at runtime,
+            // the way MainLogic.preferredRenderApi decides the render API.
 
             macOS {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
 
                 // ── No renderApi here ─────────────────────────────────────────
                 // A platform block has NO jvmArgs of its own: `jvmArgs` is declared only on
@@ -641,7 +624,6 @@ compose.desktop {
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
 
                 // ── No renderApi here, deliberately ───────────────────────────
                 // This used to pin OPENGL, overriding skiko's own Direct3D default, and that is
@@ -659,7 +641,6 @@ compose.desktop {
 
             linux {
                 iconFile.set(project.file("src/jvmMain/appResources/linux/icon.png"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
             }
         }
     }
@@ -1616,9 +1597,51 @@ fun sha256Of(file: File): String =
         digest.digest().joinToString("") { "%02x".format(it) }
     }
 
+// ── Signing the bundled ffmpeg ────────────────────────────────────────────────
+// Compose signs the launcher, the runtime and the native libraries inside jars, but treats
+// everything under appResources as data and never codesigns it — so the ffmpeg lands in the .app
+// at Contents/app/resources/ffmpeg exactly as the publisher shipped it, and notarization rejects
+// the whole DMG for it: no Developer ID signature, no secure timestamp, no hardened runtime.
+// The signature lives inside the Mach-O file, so signing the fetched copy before
+// prepareAppResources picks it up is enough; Compose does not touch it afterwards.
+val signBundledFfmpeg by tasks.registering {
+    description = "Codesigns the bundled macOS ffmpeg with the Developer ID identity, for notarization."
+    group = "signing"
+    dependsOn(fetchBundledFfmpeg)
+
+    val identity = macSigningProps.getProperty("identityName", "")
+    val keychain = macSigningProps.getProperty("keychain", "")
+    val ffmpeg = layout.projectDirectory.file("src/jvmMain/appResources/macos/ffmpeg").asFile
+    val entitlements = rootProject.file("desktop/macos/ffmpeg.entitlements")
+
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX && identity.isConfigured() && ffmpeg.isFile }
+    // The output is the input, re-signed in place; `--force` makes that idempotent.
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val command = buildList {
+            add("codesign")
+            add("--force")
+            add("--sign"); add(identity)
+            add("--options"); add("runtime")
+            add("--timestamp")
+            add("--entitlements"); add(entitlements.absolutePath)
+            if (keychain.isNotBlank()) { add("--keychain"); add(keychain) }
+            add(ffmpeg.absolutePath)
+        }
+        val process = ProcessBuilder(command).redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        check(process.waitFor() == 0) { "codesign failed for the bundled ffmpeg:\n$output" }
+        logger.lifecycle("Signed bundled ffmpeg with \"$identity\"")
+    }
+}
+
 // prepareAppResources copies the per-OS directory into the bundle, and `run` reads the same one.
 tasks.matching { it.name == "prepareAppResources" || it.name == "run" }.configureEach {
     dependsOn(fetchBundledFfmpeg)
+}
+tasks.matching { it.name == "prepareAppResources" }.configureEach {
+    dependsOn(signBundledFfmpeg)
 }
 
 // ── The runtime jpackage will bundle has to be self-contained ─────────────────
