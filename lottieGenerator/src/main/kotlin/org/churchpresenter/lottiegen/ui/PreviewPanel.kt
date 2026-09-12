@@ -44,6 +44,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -118,6 +119,8 @@ fun PreviewPanel(
     canvasW: Int = 0,
     canvasH: Int = 0,
     durationSeconds: Float = 0f,
+    /** The canvas card's corner. A full-band template wants 0 so its own corners are what shows. */
+    canvasCornerRadius: Dp = PREVIEW_CANVAS_RADIUS,
 ) {
     var isPlaying by remember { mutableStateOf(true) }
     var seekValue by remember { mutableStateOf(0f) }
@@ -131,6 +134,7 @@ fun PreviewPanel(
             isPlaying = isPlaying,
             seekValue = seekValue,
             onProgress = { seekValue = it },
+            cornerRadius = canvasCornerRadius,
             modifier = Modifier.fillMaxWidth().weight(1f).padding(26.dp),
         )
         if (statusText.isNotEmpty()) {
@@ -211,14 +215,15 @@ private fun PreviewCanvas(
     seekValue: Float,
     onProgress: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    cornerRadius: Dp = PREVIEW_CANVAS_RADIUS,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .aspectRatio(aspectRatio)
                 .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp))
-                .border(1.dp, Tokens.CardBorder, RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(cornerRadius))
+                .border(1.dp, Tokens.CardBorder, RoundedCornerShape(cornerRadius)),
             contentAlignment = Alignment.Center
         ) {
             CheckerBoard(Modifier.fillMaxSize())
@@ -288,3 +293,5 @@ private fun TransportBar(
         )
     }
 }
+
+private val PREVIEW_CANVAS_RADIUS = 12.dp

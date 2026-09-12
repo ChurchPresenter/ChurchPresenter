@@ -147,7 +147,8 @@ class LottieBuilder(
         transform: JsonObject,
         td: Int? = null,
         tt: Int? = null,
-        parent: Int? = null
+        parent: Int? = null,
+        tp: Int? = null,
     ): Int {
         val idx = layerIndex++
         val layer = buildJsonObject {
@@ -166,6 +167,7 @@ class LottieBuilder(
             if (td != null) put("td", JsonPrimitive(td))
             if (tt != null) put("tt", JsonPrimitive(tt))
             if (parent != null) put("parent", JsonPrimitive(parent))
+            if (tp != null) put("tp", JsonPrimitive(tp))
         }
         layers.add(layer)
         return idx

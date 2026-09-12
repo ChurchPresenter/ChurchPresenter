@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.lottiegen.band.BandColorRole
 import org.churchpresenter.lottiegen.band.BandEntrance
 import org.churchpresenter.lottiegen.band.BandStyle
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
@@ -39,12 +40,17 @@ import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.lottiegen.ui.components.AccentButton
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
+import org.churchpresenter.lottiegen.ui.components.DeleteIconButton
+import org.churchpresenter.lottiegen.ui.components.SubtleButton
 import org.churchpresenter.lottiegen.ui.components.ColorPickerRow
 import org.churchpresenter.lottiegen.ui.components.LottieCheckbox
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SliderWithLabel
+import javax.swing.JFileChooser
+import javax.swing.SwingUtilities
+import javax.swing.filechooser.FileNameExtensionFilter
 
 private const val MAX_BORDER_PX = 12f
 private const val MAX_CORNER_PX = 120f
@@ -97,27 +103,33 @@ private fun BandSection(viewModel: BibleLottieGenViewModel) {
             viewModel.updateConfig { it.copy(bandStyle = v) }
         }
         ColorPickerRow(
-            Strings.bandColorBackground, cfg.bgColor, cfg.bgAlpha,
+            if (cfg.hasBackgroundImage) Strings.bandColorTint else Strings.bandColorBackground, cfg.bgColor, cfg.bgAlpha,
             onColorChange = { c -> viewModel.updateConfig { it.copy(bgColor = c) } },
             onAlphaChange = { a -> viewModel.updateConfig { it.copy(bgAlpha = a) } },
         )
+        RoleImageRow(viewModel, BandColorRole.BACKGROUND)
+        if (cfg.bandStyle.usesSecond) {
+            ColorPickerRow(
+                Strings.bandColorGradient, cfg.gradientColor, BibleLottieGenConfig.FULL_ALPHA,
+                onColorChange = { c -> viewModel.updateConfig { it.copy(gradientColor = c) } },
+                onAlphaChange = {},
+            )
+            RoleImageRow(viewModel, BandColorRole.SECOND)
+        }
         ColorPickerRow(
             Strings.bandColorAccent, cfg.accentColor, cfg.accentAlpha,
             onColorChange = { c -> viewModel.updateConfig { it.copy(accentColor = c) } },
             onAlphaChange = { a -> viewModel.updateConfig { it.copy(accentAlpha = a) } },
         )
-        if (cfg.bandStyle == BandStyle.GRADIENT_BAR) {
+        RoleImageRow(viewModel, BandColorRole.ACCENT)
+        if (cfg.bandStyle.usesTertiary) {
             ColorPickerRow(
-                Strings.bandColorGradient, cfg.gradientColor, cfg.bgAlpha,
-                onColorChange = { c -> viewModel.updateConfig { it.copy(gradientColor = c) } },
-                onAlphaChange = { a -> viewModel.updateConfig { it.copy(bgAlpha = a) } },
+                Strings.bandColorThird, cfg.tertiaryColor, cfg.tertiaryAlpha,
+                onColorChange = { c -> viewModel.updateConfig { it.copy(tertiaryColor = c) } },
+                onAlphaChange = { a -> viewModel.updateConfig { it.copy(tertiaryAlpha = a) } },
             )
+            RoleImageRow(viewModel, BandColorRole.TERTIARY)
         }
-        ColorPickerRow(
-            Strings.bandColorBorder, cfg.borderColor, cfg.borderAlpha,
-            onColorChange = { c -> viewModel.updateConfig { it.copy(borderColor = c) } },
-            onAlphaChange = { a -> viewModel.updateConfig { it.copy(borderAlpha = a) } },
-        )
         PxSlider(Strings.bandBorderThickness, cfg.borderThickness, MAX_BORDER_PX) { v ->
             viewModel.updateConfig { it.copy(borderThickness = v) }
         }
@@ -129,6 +141,38 @@ private fun BandSection(viewModel: BibleLottieGenViewModel) {
         }
         PxSlider(Strings.bandPadding, cfg.paddingPx, MAX_PADDING_PX) { v ->
             viewModel.updateConfig { it.copy(paddingPx = v) }
+        }
+    }
+}
+
+/** Under a colour row: the picture standing in for that colour, if any, a chooser, and a way to drop it. */
+@Composable
+private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole) {
+    val image = viewModel.config.images[role]
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = image?.name ?: Strings.bandImageNone,
+            fontSize = 11.sp,
+            color = Tokens.FieldLabel,
+            modifier = Modifier.weight(1f),
+        )
+        SubtleButton(
+            Strings.bandImageChoose,
+            onClick = {
+                SwingUtilities.invokeLater {
+                    val chooser = JFileChooser()
+                    chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
+                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) viewModel.loadBandImage(role, chooser.selectedFile)
+                }
+            },
+            compact = true,
+        )
+        if (image != null) {
+            DeleteIconButton(onClick = { viewModel.clearBandImage(role) }, contentDescription = Strings.bandImageClear)
         }
     }
 }

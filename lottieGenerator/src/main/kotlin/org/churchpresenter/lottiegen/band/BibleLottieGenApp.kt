@@ -77,6 +77,7 @@ fun BibleLottieGenApp(
                     canvasW = viewModel.config.canvasW,
                     canvasH = viewModel.config.canvasH,
                     durationSeconds = viewModel.timeline.totalSeconds,
+                    canvasCornerRadius = 0.dp,
                 )
             }
         }

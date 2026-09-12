@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.ui
 
+import java.text.MessageFormat
 import java.util.Locale
 import java.util.ResourceBundle
 
@@ -383,6 +384,12 @@ object Strings {
     val bandColorBackground: String get() = bundle.getString("band_color_background")
     val bandColorAccent: String get() = bundle.getString("band_color_accent")
     val bandColorGradient: String get() = bundle.getString("band_color_gradient")
+    val bandColorThird: String get() = bundle.getString("band_color_third")
+    val bandColorTint: String get() = bundle.getString("band_color_tint")
+    val bandImage: String get() = bundle.getString("band_image")
+    val bandImageNone: String get() = bundle.getString("band_image_none")
+    val bandImageChoose: String get() = bundle.getString("band_image_choose")
+    val bandImageClear: String get() = bundle.getString("band_image_clear")
     val bandColorBorder: String get() = bundle.getString("band_color_border")
     val bandBorderThickness: String get() = bundle.getString("band_border_thickness")
     val bandCornerRadius: String get() = bundle.getString("band_corner_radius")
@@ -409,6 +416,10 @@ object Strings {
     val bandSaveHint: String get() = bundle.getString("band_save_hint")
     val bandUnitSeconds: String get() = bundle.getString("band_unit_seconds")
     val bandUnitPx: String get() = bundle.getString("band_unit_px")
+    fun bandStatusSaved(name: String): String = MessageFormat.format(bundle.getString("band_status_saved"), name)
+    fun bandStatusError(message: String): String = MessageFormat.format(bundle.getString("band_status_error"), message)
+    fun bandStatusPictureUnreadable(name: String): String =
+        MessageFormat.format(bundle.getString("band_status_picture_unreadable"), name)
 
     /** Labels for the band enums, looked up by `band_<prefix>_<constant>`. */
     fun bandEnumLabel(prefix: String, constant: String): String =

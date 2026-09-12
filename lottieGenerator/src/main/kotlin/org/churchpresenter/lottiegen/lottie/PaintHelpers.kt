@@ -72,7 +72,17 @@ fun makeTwoColorGradientFill(
     opacity: Double = 100.0,
     startPt: List<Double>,
     endPt: List<Double>,
+): JsonObject = makeGradientFillStops(listOf(startColor, endColor), opacity, startPt, endPt)
+
+/** A linear gradient through [colors], spread evenly from [startPt] to [endPt], fully opaque throughout. */
+fun makeGradientFillStops(
+    colors: List<List<Double>>,
+    opacity: Double = 100.0,
+    startPt: List<Double>,
+    endPt: List<Double>,
 ): JsonObject = buildJsonObject {
+    require(colors.size >= 2) { "A gradient needs at least two colours" }
+    val step = 1.0 / (colors.size - 1)
     put("ty", JsonPrimitive("gf"))
     put("o", buildJsonObject {
         put("a", JsonPrimitive(0))
@@ -90,12 +100,13 @@ fun makeTwoColorGradientFill(
         put("k", jsonArrayOf(endPt))
     })
     put("g", buildJsonObject {
-        put("p", JsonPrimitive(2))
+        put("p", JsonPrimitive(colors.size))
         put("k", buildJsonObject {
             put("a", JsonPrimitive(0))
             put("k", buildJsonArray {
-                add(JsonPrimitive(0.0)); startColor.take(3).forEach { add(JsonPrimitive(it)) }
-                add(JsonPrimitive(1.0)); endColor.take(3).forEach { add(JsonPrimitive(it)) }
+                colors.forEachIndexed { i, c ->
+                    add(JsonPrimitive(i * step)); c.take(3).forEach { add(JsonPrimitive(it)) }
+                }
                 add(JsonPrimitive(0.0)); add(JsonPrimitive(1.0))
                 add(JsonPrimitive(1.0)); add(JsonPrimitive(1.0))
             })

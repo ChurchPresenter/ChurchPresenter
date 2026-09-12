@@ -81,9 +81,14 @@ private fun previewWrapBox(slot: TextSlot, cfg: BibleLottieGenConfig, weight: In
     val lineHeight = sizePx * LINE_HEIGHT
     val lines = countWrappedLines(slot, cfg, weight, sizePx)
     val blockH = lines * lineHeight
-    val y = slot.box.y + ((slot.box.h - blockH) / 2).coerceAtLeast(0.0)
-    return TextWrapBox(slot.box.x, y, slot.box.w, slot.box.h)
+    val top = slot.box.y + ((slot.box.h - blockH) / 2).coerceAtLeast(0.0)
+    // Players put the first baseline at the box's y (the font's ascent is lost on their copy of
+    // the file), so the box starts an ascent below the block's top to land the glyphs there.
+    return TextWrapBox(slot.box.x, top + sizePx * GLYPH_ASCENT, slot.box.w, slot.box.h)
 }
+
+/** The synthetic ascent the font list declares, as a fraction of the em. */
+private const val GLYPH_ASCENT = 0.726
 
 /**
  * The sample's size, stepped down until its wrapped lines fit the slot — the same shrink-to-fit

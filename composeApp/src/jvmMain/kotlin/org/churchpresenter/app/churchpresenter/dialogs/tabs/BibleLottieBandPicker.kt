@@ -186,7 +186,10 @@ internal fun LowerThirdAnimationSection(
         BibleLottieGeneratorWindow(
             outputDir = generatorDir,
             seed = bibleLottieSeed(settings),
-            onSaved = { file -> update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) } },
+            onSaved = { file ->
+                update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) }
+                showGenerator = false
+            },
             onClose = { showGenerator = false },
         )
     }

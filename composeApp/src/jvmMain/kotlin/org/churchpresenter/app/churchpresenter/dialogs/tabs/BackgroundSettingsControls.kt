@@ -288,7 +288,10 @@ private fun LottieBandSourceSection(
         BibleLottieGeneratorWindow(
             outputDir = bibleLowerThirdsDir,
             seed = bibleLottieSeed(settings),
-            onSaved = { file -> onConfigChange(config.copy(backgroundLottie = file.absolutePath)) },
+            onSaved = { file ->
+                onConfigChange(config.copy(backgroundLottie = file.absolutePath))
+                showGenerator = false
+            },
             onClose = { showGenerator = false },
         )
     }

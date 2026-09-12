@@ -33,11 +33,83 @@ object BandLayerNames {
     const val BAND_PREFIX = "Band"
 }
 
-/** Where everything goes, from the canvas, the inset, the padding and the slot layout alone. */
+/**
+ * The proportions the styles are drawn to, as fractions of the band's width and height. Shared
+ * by the decorations that paint them and the layout that keeps the text off them.
+ */
+internal object BandGeometry {
+    const val SLANT = 0.08
+    const val THIRD_BAND = 0.22
+    const val BLADE_TOP = 0.28
+    const val BLADE_BOTTOM = 0.2
+    const val THIRD_LEFT = 0.2
+    const val THIRD_RIGHT = 0.82
+    const val DIVIDER_W = 0.02
+    const val TRI_1 = 0.4
+    const val TRI_2 = 0.72
+    const val CROSS_START = 0.7
+    const val CROSS_W = 0.09
+    const val CHEVRON_W = 0.22
+    const val CHEVRON_POINT = 0.05
+    const val CHEVRON_ECHO = 0.015
+    const val CHEVRON_ECHO_W = 0.008
+    const val WEDGE_W = 0.2
+    const val WEDGE_TIP = 0.09
+    const val WEDGE_TIP_H = 0.4
+    const val ARCH_W = 0.7
+    const val ARCH_H = 0.42
+    const val ARCH_RING = 0.06
+    const val ARCH_BASE_H = 0.07
+    const val SPOT_W = 0.55
+    const val SPLIT_TOP = 0.62
+    const val SPLIT_BOTTOM = 0.55
+    const val FOLD_W = 0.24
+    const val FOLD_H = 0.9
+    const val FOLD_NOTCH = 0.14
+    const val FOLD_TAIL = 0.04
+    const val FOLD_BAND_Y = 0.3
+    const val FOLD_BAND_H = 0.1
+    const val WAVE_TOP = 0.26
+    const val WAVE_AMPLITUDE = 0.07
+    const val WAVE_CREST = 0.05
+    const val WAVE_SWELL = 0.11
+}
+
+/** Fractions of the band's width and height a style paints solid colour over, edge by edge. */
+internal data class StyleInsets(val left: Double = 0.0, val top: Double = 0.0, val right: Double = 0.0, val bottom: Double = 0.0)
+
+/**
+ * Where a style's colour blocks are, so the text is laid out beside them rather than across them.
+ * Gradients and full-band splits reserve nothing: their colour is the backdrop, not a block.
+ */
+internal fun BandStyle.textInsets(): StyleInsets = with(BandGeometry) {
+    when (this@textInsets) {
+        BandStyle.HORIZONTAL_BANDS -> StyleInsets(top = THIRD_BAND, bottom = THIRD_BAND)
+        BandStyle.ANGLED_BLADE -> StyleInsets(left = BLADE_TOP)
+        BandStyle.SLANTED_THIRDS -> StyleInsets(left = THIRD_LEFT + DIVIDER_W, right = 1.0 - THIRD_RIGHT + SLANT)
+        BandStyle.CROSSED_BANDS -> StyleInsets(right = 1.0 - (CROSS_START - SLANT))
+        BandStyle.CHEVRON_TAG -> StyleInsets(left = CHEVRON_W + CHEVRON_POINT + CHEVRON_ECHO + CHEVRON_ECHO_W)
+        BandStyle.CORNER_WEDGES -> StyleInsets(left = WEDGE_W, right = WEDGE_W)
+        BandStyle.ARCH_DECK -> StyleInsets(bottom = ARCH_H + ARCH_RING)
+        BandStyle.DIAGONAL_SPLIT -> StyleInsets(right = 1.0 - SPLIT_BOTTOM)
+        BandStyle.RIBBON_FOLD -> StyleInsets(left = FOLD_W + FOLD_TAIL)
+        BandStyle.WAVE_DECK -> StyleInsets(bottom = WAVE_TOP + WAVE_AMPLITUDE + WAVE_SWELL)
+        else -> StyleInsets()
+    }
+}
+
+/** Where everything goes, from the canvas, the inset, the style's blocks, the padding and the slot layout. */
 fun computeSlots(cfg: BibleLottieGenConfig): BandSlots {
     val inset = cfg.insetPx.toDouble()
     val band = SlotBox(inset, inset, cfg.canvasW - 2 * inset, cfg.canvasH - 2 * inset)
-    val inner = band.inset(cfg.paddingPx.toDouble())
+    val reserved = cfg.bandStyle.textInsets()
+    val clear = SlotBox(
+        band.x + band.w * reserved.left,
+        band.y + band.h * reserved.top,
+        band.w * (1.0 - reserved.left - reserved.right),
+        band.h * (1.0 - reserved.top - reserved.bottom),
+    )
+    val inner = clear.inset(cfg.paddingPx.toDouble())
     val gap = cfg.paddingPx.toDouble()
     return when (cfg.layout) {
         SlotLayout.SINGLE -> {
