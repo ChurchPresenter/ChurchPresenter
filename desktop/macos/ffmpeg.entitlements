@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- The bundled ffmpeg is signed with the hardened runtime (notarization requires it), and
+         the hardened runtime denies camera and microphone access to a process that does not
+         carry these entitlements itself — the app's own entitlements do not flow down to a child
+         it spawns. Without them a capture device is listed and delivers no frames, the same
+         symptom as issue #431. -->
+    <key>com.apple.security.device.camera</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
