@@ -2,6 +2,7 @@ package org.churchpresenter.lottiegen.band
 
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
 
@@ -24,7 +25,7 @@ object BibleLottieGenerator {
         textSlots(cfg, slots).forEach { builder.addTextSlot(it, cfg, timeline) }
         builder.addBandBackground(cfg, slots, timeline)
         timeline.emitMarkers(builder)
-        return withMetadata(builder.toJson(), cfg)
+        return withMetadata(builder.toJson(), cfg, slots)
     }
 
     /**
@@ -32,7 +33,7 @@ object BibleLottieGenerator {
      * motions are the player's to drive, and how fast a ticker runs. Players that are not
      * ChurchPresenter skip unknown keys, so the file stays an ordinary Lottie.
      */
-    private fun withMetadata(lottie: JsonObject, cfg: BibleLottieGenConfig): JsonObject = buildJsonObject {
+    private fun withMetadata(lottie: JsonObject, cfg: BibleLottieGenConfig, slots: BandSlots): JsonObject = buildJsonObject {
         lottie.forEach { (key, value) -> put(key, value) }
         put(
             METADATA_KEY,
@@ -43,8 +44,24 @@ object BibleLottieGenerator {
                 put(METADATA_TICKER_SPEED, JsonPrimitive(cfg.tickerPxPerSecond))
                 put(METADATA_TEXT_ALIGN, JsonPrimitive(cfg.textAlign.name))
                 put(METADATA_REFERENCE_ALIGN, JsonPrimitive(cfg.referenceAlign.name))
+                // The slot boxes themselves. The text documents' `ps` is where the sample's
+                // baseline sits, not the box, so a player that laid live text out from it would
+                // start an ascent too low and the matte would cut the glyphs' bottoms.
+                put(
+                    METADATA_SLOTS,
+                    buildJsonObject {
+                        put(BandLayerNames.TEXT_1, slots.text1.toJson())
+                        put(BandLayerNames.REFERENCE_1, slots.reference1.toJson())
+                        slots.text2?.let { put(BandLayerNames.TEXT_2, it.toJson()) }
+                        slots.reference2?.let { put(BandLayerNames.REFERENCE_2, it.toJson()) }
+                    },
+                )
             },
         )
+    }
+
+    private fun SlotBox.toJson() = buildJsonArray {
+        add(JsonPrimitive(x)); add(JsonPrimitive(y)); add(JsonPrimitive(w)); add(JsonPrimitive(h))
     }
 
     const val METADATA_KEY = "cp"
@@ -56,6 +73,7 @@ object BibleLottieGenerator {
     const val METADATA_TICKER_SPEED = "tickerPxPerSecond"
     const val METADATA_TEXT_ALIGN = "textAlign"
     const val METADATA_REFERENCE_ALIGN = "referenceAlign"
+    const val METADATA_SLOTS = "slots"
 
     private fun textSlots(cfg: BibleLottieGenConfig, slots: BandSlots): List<TextSlot> = buildList {
         add(TextSlot(BandLayerNames.TEXT_1, slots.text1, cfg.previewText1, cfg.previewTextSizePx.toDouble(), cfg.previewTextColor))

@@ -264,6 +264,8 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
             previewBold = song.lyricsLowerThirdBold,
             previewText1 = SONG_SAMPLE_LINES,
             previewReference1 = SONG_SAMPLE_TITLE,
+            previewText2 = SONG_SAMPLE_LINES_2,
+            previewReference2 = SONG_SAMPLE_TITLE_2,
         )
     } else {
         val bible = settings.bibleSettings
@@ -286,9 +288,11 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
     }
 }
 
-/** The sample a song band is previewed with: two lines of a public-domain hymn, and its title. */
+/** The sample a song band is previewed with: two lines of a public-domain hymn, its title, and the same in Spanish. */
 private const val SONG_SAMPLE_LINES = "Amazing grace, how sweet the sound\nThat saved a wretch like me"
 private const val SONG_SAMPLE_TITLE = "Amazing Grace"
+private const val SONG_SAMPLE_LINES_2 = "Sublime gracia del Señor\nQue a un pecador salvó"
+private const val SONG_SAMPLE_TITLE_2 = "Sublime Gracia"
 
 /** Where the app keeps downloaded and materialised stock backgrounds; the home directory if it has none yet. */
 private fun stockBackgroundsDir(): java.nio.file.Path {

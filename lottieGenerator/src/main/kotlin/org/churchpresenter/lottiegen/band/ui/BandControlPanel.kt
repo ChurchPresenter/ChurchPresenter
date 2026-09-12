@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -110,6 +109,7 @@ internal fun BandControlPanel(viewModel: BibleLottieGenViewModel, panelWidth: Dp
 
 private val SCROLLBAR_GUTTER = 10.dp
 private val MENU_MAX_HEIGHT = 380.dp
+private val MENU_ITEM_HEIGHT = 48.dp
 
 @Composable
 private fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend () -> File?)?) {
@@ -212,10 +212,15 @@ private fun LayoutSection(viewModel: BibleLottieGenViewModel) {
         ) { v ->
             viewModel.updateConfig { it.copy(referencePlacement = v) }
         }
-        EnumDropdown(Strings.bandLabel("text_align", kind), "align", cfg.textAlign, BandTextAlign.entries) { v ->
+        // "Follow settings" names whose settings it follows; the three fixed alignments do not.
+        val alignLabel: (BandTextAlign) -> String = {
+            if (it == BandTextAlign.FOLLOW_SETTINGS) Strings.bandLabel("align_follow_settings", kind)
+            else Strings.bandEnumLabel("align", it.name)
+        }
+        EnumDropdown(Strings.bandLabel("text_align", kind), "align", cfg.textAlign, BandTextAlign.entries, alignLabel) { v ->
             viewModel.updateConfig { it.copy(textAlign = v) }
         }
-        EnumDropdown(Strings.bandLabel("reference_align", kind), "align", cfg.referenceAlign, BandTextAlign.entries) { v ->
+        EnumDropdown(Strings.bandLabel("reference_align", kind), "align", cfg.referenceAlign, BandTextAlign.entries, alignLabel) { v ->
             viewModel.updateConfig { it.copy(referenceAlign = v) }
         }
         SliderWithLabel(
@@ -365,7 +370,10 @@ private fun <T : Enum<T>> EnumDropdown(
             // The list scrolls inside a capped box of its own, with a scrollbar beside it — the
             // menu's built-in scroll has no bar, and twenty-odd styles run off the screen without one.
             val listState = rememberScrollState()
-            Box(modifier = Modifier.heightIn(max = MENU_MAX_HEIGHT)) {
+            // An explicit height, not a cap: the menu measures its content's intrinsic size, and a
+            // scrollbar filling an uncapped box reports an infinite height there and crashes.
+            val listHeight = (MENU_ITEM_HEIGHT * entries.size).coerceAtMost(MENU_MAX_HEIGHT)
+            Box(modifier = Modifier.height(listHeight)) {
                 Column(modifier = Modifier.verticalScroll(listState).padding(end = SCROLLBAR_GUTTER)) {
                     entries.forEach { entry ->
                         DropdownMenuItem(

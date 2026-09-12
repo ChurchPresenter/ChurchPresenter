@@ -140,7 +140,7 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
             height = h,
             totalFrames = op - ip,
             segments = readSegments(obj["markers"] as? JsonArray, op - ip),
-            slots = readSlots(layers),
+            slots = readSlots(meta, layers),
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
             textMotion = readTextMotion(meta),
             tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
@@ -176,7 +176,45 @@ private fun readSegments(markers: JsonArray?, totalFrames: Float): Map<String, L
     )
 }
 
-private fun readSlots(layers: List<JsonObject>): Map<String, LottieSlotBox> = buildMap {
+/**
+ * The slot boxes: from the generator's metadata when it is there, otherwise from each text
+ * document's wrap box — a hand-made file's `ps` is its box origin, a generated file's is where the
+ * sample's baseline sits, which is why the generated one says so separately.
+ */
+private fun readSlots(meta: JsonObject?, layers: List<JsonObject>): Map<String, LottieSlotBox> {
+    val declared = (meta?.get("slots") as? JsonObject)?.mapNotNull { (name, value) ->
+        val box = (value as? JsonArray)?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@mapNotNull null
+        if (box.size < 4) null else name to LottieSlotBox(box[0], box[1], box[2], box[3])
+    }?.toMap()
+    if (!declared.isNullOrEmpty()) return declared
+    val fromDocuments = readDocumentSlots(layers)
+    // A file from before the metadata carried its boxes: where a slot has a matte, the matte is
+    // the box (plus a hair of padding), and that is nearer the truth than the baseline `ps`.
+    val mattes = readMatteSlots(layers)
+    return fromDocuments.mapValues { (name, box) -> mattes[name] ?: box }
+}
+
+private const val MATTE_PAD = 4f
+
+private fun readMatteSlots(layers: List<JsonObject>): Map<String, LottieSlotBox> = buildMap {
+    layers.forEach { layer ->
+        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@forEach
+        if (!name.endsWith("Matte") || layer["td"]?.jsonPrimitive?.intOrNull != 1) return@forEach
+        val slot = name.removeSuffix("Matte")
+        if (slot !in BibleLottieTemplate.TEXT_LAYERS) return@forEach
+        val group = layer["shapes"]?.jsonArray?.firstOrNull()?.jsonObject ?: return@forEach
+        val rect = group["it"]?.jsonArray?.mapNotNull { it as? JsonObject }
+            ?.firstOrNull { it["ty"]?.jsonPrimitive?.contentOrNull == "rc" } ?: return@forEach
+        val size = (rect["s"] as? JsonObject)?.get("k")?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
+        val pos = (rect["p"] as? JsonObject)?.get("k")?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
+        if (size.size < 2 || pos.size < 2) return@forEach
+        val w = size[0] - MATTE_PAD
+        val h = size[1] - MATTE_PAD
+        put(slot, LottieSlotBox(pos[0] - w / 2, pos[1] - h / 2, w, h))
+    }
+}
+
+private fun readDocumentSlots(layers: List<JsonObject>): Map<String, LottieSlotBox> = buildMap {
     layers.forEach { layer ->
         if (layer["ty"]?.jsonPrimitive?.intOrNull != TEXT_LAYER_TYPE) return@forEach
         val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@forEach
