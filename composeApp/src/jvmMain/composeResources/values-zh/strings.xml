@@ -2649,4 +2649,16 @@
     <string name="setup_summary_bible">圣经译本</string>
     <string name="setup_summary_bible_value">已安装 %1$d 个</string>
     <string name="setup_summary_songs_value">%1$d 本 · %2$d 首</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">下三分之一动画</string>
+    <string name="lower_third_animation_use_lottie">使用 Lottie 模板为字幕条添加动画</string>
+    <string name="lower_third_animation_file">模板</string>
+    <string name="lower_third_animation_none">未选择模板</string>
+    <string name="lower_third_animation_generate">生成…</string>
+    <string name="lower_third_animation_clear">清除模板</string>
+    <string name="lottie_files_filter">Lottie 文件</string>
+    <string name="bible_lottie_gen_window_title">下三分之一生成器</string>
+    <string name="song_lottie_unsupported_note">模板决定版式和标题的位置。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线、词间距、下一段预览和和弦不适用。</string>
+    <string name="bible_lottie_unsupported_note">模板决定版式、经文出处的位置以及两种语言如何共用字幕条。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线和词间距不适用。</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

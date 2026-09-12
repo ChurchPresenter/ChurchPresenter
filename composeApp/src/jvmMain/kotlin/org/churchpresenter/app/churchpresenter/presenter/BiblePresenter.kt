@@ -46,6 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
@@ -444,6 +445,34 @@ fun BiblePresenter(
 
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
     else appSettings.backgroundSettings.bibleBackground
+
+    // A Lottie band draws the whole band itself — text included — so it replaces everything
+    // below rather than sitting under it. A file that is missing or is not a template falls
+    // through to the classic band, the same way a missing picture falls back to the color.
+    if (isLowerThird && usesBibleLottieBand(bgConfig)) {
+        val template by rememberBibleLottieTemplate(bgConfig.backgroundLottie)
+        val loaded = template
+        if (loaded != null) {
+            val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / PERCENT
+            Box(modifier.fillMaxSize()) {
+                AboveBandFill(
+                    fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
+                    bandFraction = lowerThirdFraction,
+                )
+                BibleLottieBand(
+                    template = loaded,
+                    verses = effectiveVerses,
+                    t0 = t0,
+                    t1 = t1,
+                    bandFraction = lowerThirdFraction,
+                    bandClock = LocalLottieBandClock.current,
+                    isKey = isKey,
+                    showBackground = showBackground,
+                )
+            }
+            return
+        }
+    }
 
     // A verse carries no background of its own, so this is the quick tray's pick, then the Bible
     // background, then the defaults — the same order and the same resolver songs go through.

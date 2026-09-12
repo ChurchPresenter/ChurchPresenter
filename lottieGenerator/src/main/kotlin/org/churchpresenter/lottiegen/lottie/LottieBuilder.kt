@@ -15,6 +15,7 @@ class LottieBuilder(
     val layers = mutableListOf<JsonObject>()
     val assets = mutableListOf<JsonObject>()
     val fonts = mutableListOf<JsonObject>()
+    val markers = mutableListOf<JsonObject>()
     val ip = 0
     var op = 0
         private set
@@ -33,6 +34,18 @@ class LottieBuilder(
         this.holdFrames = holdFrames
         this.outFrames = outFrames
         this.op = inFrames + holdFrames + outFrames
+    }
+
+    /**
+     * A named span of the timeline, written to the file's `markers` array. A player that knows
+     * the names can seek to a segment instead of guessing where the hold begins.
+     */
+    fun addMarker(name: String, startFrame: Int, durationFrames: Int) {
+        markers.add(buildJsonObject {
+            put("cm", JsonPrimitive(name))
+            put("tm", JsonPrimitive(startFrame))
+            put("dr", JsonPrimitive(durationFrames))
+        })
     }
 
     fun addImageAsset(id: String, dataUrl: String, w: Int, h: Int) {
@@ -66,7 +79,9 @@ class LottieBuilder(
         transform: JsonObject,
         td: Int? = null,
         tt: Int? = null,
-        parent: Int? = null
+        parent: Int? = null,
+        tp: Int? = null,
+        hidden: Boolean = false,
     ): Int {
         val idx = layerIndex++
         val layer = buildJsonObject {
@@ -85,6 +100,8 @@ class LottieBuilder(
             if (td != null) put("td", JsonPrimitive(td))
             if (tt != null) put("tt", JsonPrimitive(tt))
             if (parent != null) put("parent", JsonPrimitive(parent))
+            if (tp != null) put("tp", JsonPrimitive(tp))
+            if (hidden) put("hd", JsonPrimitive(true))
         }
         layers.add(layer)
         return idx
@@ -96,7 +113,9 @@ class LottieBuilder(
         transform: JsonObject,
         td: Int? = null,
         tt: Int? = null,
-        parent: Int? = null
+        parent: Int? = null,
+        tp: Int? = null,
+        hidden: Boolean = false,
     ): Int {
         val idx = layerIndex++
         val layer = buildJsonObject {
@@ -115,6 +134,8 @@ class LottieBuilder(
             if (td != null) put("td", JsonPrimitive(td))
             if (tt != null) put("tt", JsonPrimitive(tt))
             if (parent != null) put("parent", JsonPrimitive(parent))
+            if (tp != null) put("tp", JsonPrimitive(tp))
+            if (hidden) put("hd", JsonPrimitive(true))
         }
         layers.add(layer)
         return idx
@@ -126,7 +147,8 @@ class LottieBuilder(
         transform: JsonObject,
         td: Int? = null,
         tt: Int? = null,
-        parent: Int? = null
+        parent: Int? = null,
+        tp: Int? = null,
     ): Int {
         val idx = layerIndex++
         val layer = buildJsonObject {
@@ -145,6 +167,7 @@ class LottieBuilder(
             if (td != null) put("td", JsonPrimitive(td))
             if (tt != null) put("tt", JsonPrimitive(tt))
             if (parent != null) put("parent", JsonPrimitive(parent))
+            if (tp != null) put("tp", JsonPrimitive(tp))
         }
         layers.add(layer)
         return idx
@@ -161,6 +184,9 @@ class LottieBuilder(
         put("ddd", JsonPrimitive(0))
         put("assets", buildJsonArray { assets.forEach { add(it) } })
         put("layers", buildJsonArray { layers.forEach { add(it) } })
+        if (markers.isNotEmpty()) {
+            put("markers", buildJsonArray { markers.forEach { add(it) } })
+        }
         if (fonts.isNotEmpty()) {
             put("fonts", buildJsonObject {
                 put("list", buildJsonArray { fonts.forEach { add(it) } })

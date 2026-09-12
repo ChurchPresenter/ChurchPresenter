@@ -31,6 +31,14 @@ The app renders the generated files itself (`presenter/LowerThirdPresenter.kt`,
 `LowerThirdOffscreenRenderer`, `LottieFrameStream`); nothing in this module is involved at
 presentation time.
 
+`org.churchpresenter.lottiegen.band.BibleLottieGenApp` is the second entry point: the **Bible
+lower-third band** generator, opened from Settings → Bible → Lower Third Animation and from the
+Background tab's Bible Lower Third surface (`dialogs/tabs/BibleLottieBandPicker.kt`). It takes an
+`outputDir`, an `onFileSaved: (File) -> Unit` and a `BibleLottieGenConfig` seed, and shares the
+engine, `PreviewPanel` and palette with the main generator. The app plays its files through
+`presenter/BibleLottieBand.kt`, which fills the named text layers at run time — see the contract
+under `band/` below.
+
 ## Layout
 
 `src/main/kotlin/lottiegen/`
@@ -43,9 +51,21 @@ presentation time.
 | `lottie/styles/` | The twelve hand-written style generators plus `StyleGenerator` |
 | `spec/` | The data-driven styles: `StyleSpec`, `SpecJson`, `SpecLayout`, `SpecStyleGenerator`, `StyleRegistry` |
 | `editor/` | The Animation Style Editor — `StyleEditorApp`, `EditorViewModel`, `SpecEditOps`, `BuildRegistrar`, `ImageImport`, and its own `ui/` |
+| `band/` | The Bible band generator: `BibleLottieGenConfig` + enums, `BandTimeline` (the five marked segments), `BandLayout` (slot boxes), `BandBackgroundLayers`, `BandTextLayers`, `BibleLottieGenerator`, `BibleLottieGenViewModel`, `BibleLottieGenApp`, and its own `ui/` |
 | `viewmodel/` | `LottieGenViewModel` — debounced regeneration |
 | `ui/` | The generator's Compose UI: control panel, preview, components, theme, `Strings` |
 | `persistence/` | Preset, color-theme, logo and spec file I/O |
+
+**The band template contract.** A band file is an ordinary Lottie plus what the player relies
+on: `markers` named `bg_in`, `text_in`, `hold`, `text_out`, `bg_out`; text layers named `Text1`,
+`Reference1`, `Text2`, `Reference2` with a wrap box (`sz`/`ps`) in their document; a hidden
+`<Slot>Shadow` twin under each; `<Slot>Matte` and `Band*` shape layers; and a top-level `cp`
+object carrying `textAnimation` and `tickerPxPerSecond`. Fonts, sizes, colours, tracking and the
+strings themselves are replaced by the player from the Bible settings, so the `preview*` fields of
+the config never reach the output. Keyframes are the entrance mirrored into the exit
+(`buildKeyframes(startFrame = …)`); `TYPEWRITER`, `TYPEWRITER_WORDS` and `TICKER` are emitted
+static because the Compottie runtime has no text range selectors — the player reveals or scrolls
+the string itself.
 
 **Two ways to add a style.** A code style is a new `styles/Style*.kt` plus registration; a spec
 style is authored in the editor and needs **no code edit** at all. `ADDING_ANIMATIONS.md` decides

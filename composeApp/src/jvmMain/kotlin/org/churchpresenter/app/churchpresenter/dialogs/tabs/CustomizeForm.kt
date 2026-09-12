@@ -284,6 +284,12 @@ internal fun ChoiceControl(
      * whose labels are known to fit it -- the derived width below is generous by design.
      */
     buttonWidth: Dp? = null,
+    /**
+     * How many segments one row holds before the rest continue on the next. A segmented control
+     * is one row of equal widths, so a long list — the seven background types — runs off the
+     * column unless it is broken up; the rows still act as one choice.
+     */
+    maxPerRow: Int = Int.MAX_VALUE,
     onSelect: (String) -> Unit,
 ) {
     // Sized to the longest label rather than a fixed width: `SegmentedButton` gives every segment
@@ -292,13 +298,19 @@ internal fun ChoiceControl(
     val width = buttonWidth ?: (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
         .coerceAtLeast(CHOICE_MIN_WIDTH.value).dp
     CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
-        SegmentedButton(
-            items = options.map { (value, label) -> SegmentedButtonItem(value, label) },
-            selectedValue = selected,
-            onValueChange = onSelect,
-            buttonWidth = width,
-            buttonHeight = CHOICE_HEIGHT,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(CHOICE_ROW_GAP)) {
+            options.chunked(maxPerRow.coerceAtLeast(1)).forEach { row ->
+                SegmentedButton(
+                    items = row.map { (value, label) -> SegmentedButtonItem(value, label) },
+                    selectedValue = selected,
+                    onValueChange = onSelect,
+                    buttonWidth = width,
+                    buttonHeight = CHOICE_HEIGHT,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                )
+            }
+        }
     }
 }
+
+private val CHOICE_ROW_GAP = 6.dp

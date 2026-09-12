@@ -7,6 +7,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.QuickBackground
+import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.SongSettings
@@ -366,6 +367,30 @@ internal fun shouldFadeOnClear(
     Presenting.BIBLE -> bible.fadeOut
     Presenting.LYRICS -> song.fadeOut
     else -> false
+}
+
+/**
+ * Whether a Bible lower-third background is a Lottie template rather than a backdrop — the band
+ * then draws its own text and plays its own entrance and exit, so the fade on clear gives way to
+ * the template's exit segment.
+ */
+internal fun usesBibleLottieBand(config: BackgroundConfig): Boolean =
+    config.backgroundType == Constants.BACKGROUND_LOTTIE && config.backgroundLottie.isNotBlank()
+
+/**
+ * The Lottie band template the clear and text-change choreography for [mode] is timed against:
+ * that content's global lower third, or failing that the first per-output override's. Null means
+ * no output uses one and the classic fade applies — and always null for content with no band.
+ */
+internal fun lottieBandPath(settings: AppSettings, mode: Presenting): String? {
+    fun BackgroundSettings.bandFor(): BackgroundConfig? = when (mode) {
+        Presenting.BIBLE -> bibleLowerThirdBackground
+        Presenting.LYRICS -> songLowerThirdBackground
+        else -> null
+    }
+    val candidates = listOfNotNull(settings.backgroundSettings.bandFor()) +
+        settings.projectionSettings.screenAssignments.mapNotNull { it.backgroundOverride?.bandFor() }
+    return candidates.firstOrNull { usesBibleLottieBand(it) }?.backgroundLottie
 }
 
 /** How long that fade-out runs, per content type, never below [MIN_TRANSITION_MS]. */

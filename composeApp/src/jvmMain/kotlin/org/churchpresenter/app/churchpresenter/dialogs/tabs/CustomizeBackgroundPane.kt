@@ -2,6 +2,10 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_above_band_caption
@@ -11,6 +15,8 @@ import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
+import churchpresenter.composeapp.generated.resources.customize_type_lottie
+import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.customize_type_default
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
@@ -26,6 +32,7 @@ import churchpresenter.composeapp.generated.resources.customize_type_transparent
 import churchpresenter.composeapp.generated.resources.customize_type_video
 import churchpresenter.composeapp.generated.resources.position
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
@@ -90,7 +97,7 @@ private fun BackgroundSurfaceRows(
     }
 
     CustomizeRow(stringResource(Res.string.customize_background_type)) {
-        ChoiceControl(backgroundTypeOptions(scope), config.backgroundType) { v ->
+        ChoiceControl(backgroundTypeOptions(scope), config.backgroundType, maxPerRow = TYPES_PER_ROW) { v ->
             onConfig(config.copy(backgroundType = v))
         }
     }
@@ -125,9 +132,35 @@ private fun BackgroundSurfaceRows(
             )
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
+        Constants.BACKGROUND_LOTTIE -> {
+            var showGenerator by remember { mutableStateOf(false) }
+            val templatesDir = remember { SettingsManager.bibleLowerThirdsDir() }
+            CustomizeRow(stringResource(Res.string.lower_third_animation_file)) {
+                LottieBandPickerRow(
+                    path = config.backgroundLottie,
+                    onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
+                    startDir = templatesDir,
+                    onGenerate = { showGenerator = true },
+                    modifier = Modifier.width(SOURCE_FIELD_WIDTH),
+                )
+            }
+            if (showGenerator) {
+                BibleLottieGeneratorWindow(
+                    outputDir = templatesDir,
+                    seed = lottieBandSeed(settings, scope),
+                    onSaved = { file ->
+                        onConfig(config.copy(backgroundLottie = file.absolutePath))
+                        showGenerator = false
+                    },
+                    onClose = { showGenerator = false },
+                )
+            }
+        }
         else -> Unit
     }
-    if (config.backgroundType != Constants.BACKGROUND_TRANSPARENT) {
+    val hasLook = config.backgroundType != Constants.BACKGROUND_TRANSPARENT &&
+        config.backgroundType != Constants.BACKGROUND_LOTTIE
+    if (hasLook) {
         // Sliders, as on the Background tab: these are nudged until the picture reads well behind
         // text, not typed to a number anyone knows in advance.
         val percent = stringResource(Res.string.percent_suffix)
@@ -234,6 +267,9 @@ private fun backgroundTypeOptions(scope: BackgroundScope): List<Pair<String, Str
                 to stringResource(customizeTypeLabel(Constants.BACKGROUND_GRADIENT)),
         )
     }
+    if (scope.offersLottie) {
+        add(Constants.BACKGROUND_LOTTIE to stringResource(customizeTypeLabel(Constants.BACKGROUND_LOTTIE)))
+    }
 }
 
 /**
@@ -248,8 +284,12 @@ private fun customizeTypeLabel(type: String): StringResource = when (type) {
     Constants.BACKGROUND_VIDEO -> Res.string.customize_type_video
     Constants.BACKGROUND_TRANSPARENT -> Res.string.customize_type_transparent
     Constants.BACKGROUND_GRADIENT -> Res.string.customize_type_gradient
+    Constants.BACKGROUND_LOTTIE -> Res.string.customize_type_lottie
     Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
     else -> Res.string.customize_type_default
 }
 
 private const val PERCENT = 100f
+
+/** Four types to a row: the surfaces that offer seven would otherwise run off the column. */
+private const val TYPES_PER_ROW = 4

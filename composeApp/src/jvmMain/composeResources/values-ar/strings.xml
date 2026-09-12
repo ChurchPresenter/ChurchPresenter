@@ -2649,4 +2649,16 @@
     <string name="setup_summary_bible">ترجمات الكتاب المقدس</string>
     <string name="setup_summary_bible_value">%1$d مثبتة</string>
     <string name="setup_summary_songs_value">%1$d كتب · %2$d ترنيمة</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">حركة الثلث السفلي</string>
+    <string name="lower_third_animation_use_lottie">تحريك الشريط بقالب Lottie</string>
+    <string name="lower_third_animation_file">القالب</string>
+    <string name="lower_third_animation_none">لم يتم اختيار قالب</string>
+    <string name="lower_third_animation_generate">إنشاء…</string>
+    <string name="lower_third_animation_clear">إزالة القالب</string>
+    <string name="lottie_files_filter">ملفات Lottie</string>
+    <string name="bible_lottie_gen_window_title">مولّد الثلث السفلي</string>
+    <string name="song_lottie_unsupported_note">يحدد القالب التخطيط وموضع العنوان. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات ومعاينة التالي والأوتار.</string>
+    <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

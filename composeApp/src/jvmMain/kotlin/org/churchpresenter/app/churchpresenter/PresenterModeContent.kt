@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.compottie.LottieComposition
@@ -14,6 +15,8 @@ import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
@@ -82,7 +85,15 @@ internal fun PresenterModeContent(
     val qaTransitionAlpha by presenterManager.qaTransitionAlpha
     val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
+    val lottieBandClock by presenterManager.lottieBandClock
+    val bandSongLineIndex by presenterManager.bandSongLineIndex
 
+    // The Lottie band's clock and line travel as locals: the two presenters that read them are
+    // long past their parameter budget, and every output has exactly one of each anyway.
+    CompositionLocalProvider(
+        LocalLottieBandClock provides lottieBandClock,
+        LocalBandSongLineIndex provides bandSongLineIndex,
+    ) {
     when (mode) {
         Presenting.BIBLE ->
             if (screenAssignment.showBible) {
@@ -95,7 +106,7 @@ internal fun PresenterModeContent(
                     transitionAlpha = bibleTransitionAlpha,
                     showBackground = showBackgroundOverride ?: (showBg && screenAssignment.showBibleBackground),
                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                    bibleTranslations = screenAssignment.bibleTranslations
+                    bibleTranslations = screenAssignment.bibleTranslations,
                 )
             }
 
@@ -223,5 +234,6 @@ internal fun PresenterModeContent(
                 )
         Presenting.NONE -> { /* nothing */
         }
+    }
     }
 }

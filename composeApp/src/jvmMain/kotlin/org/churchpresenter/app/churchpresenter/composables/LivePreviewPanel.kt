@@ -90,6 +90,8 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
@@ -260,6 +262,8 @@ private fun SingleDisplayPreview(
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    val lottieBandClock by presenterManager.lottieBandClock
+    val bandSongLineIndex by presenterManager.bandSongLineIndex
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
@@ -403,6 +407,10 @@ private fun SingleDisplayPreview(
                                 outputSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
                         Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        CompositionLocalProvider(
+                            LocalLottieBandClock provides lottieBandClock,
+                            LocalBandSongLineIndex provides bandSongLineIndex,
+                        ) {
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -414,7 +422,7 @@ private fun SingleDisplayPreview(
                                     transitionAlpha = bibleTransitionAlpha,
                                     showBackground = showsBackground && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = outputSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations
+                                    bibleTranslations = screenAssignment.bibleTranslations,
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -501,6 +509,7 @@ private fun SingleDisplayPreview(
                                     transitionAlpha = 1f,
                                 )
                             else -> {}
+                        }
                         }
                         }
                     }

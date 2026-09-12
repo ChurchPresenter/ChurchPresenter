@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.DictionarySettings
@@ -200,6 +202,25 @@ class ProjectionCustomizeSurfaceControlsTest {
                 stored.configFor(BackgroundScope.SONG).backgroundType,
                 "the full screen's Song surface must be untouched",
             )
+        }
+    }
+
+    @Test
+    fun `a band surface offers Lottie and writes the type, and a full screen does not offer it`() {
+        projectionTab(backgroundOutput(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
+            openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE)
+            chooseSegment("Lottie")
+
+            val stored = get().storedBackground()
+            assertEquals(
+                Constants.BACKGROUND_LOTTIE,
+                stored.configFor(BackgroundScope.BIBLE_LOWER_THIRD).backgroundType,
+            )
+            onAllNodesWithText("No template selected").assertCountEquals(1)
+        }
+        projectionTab(backgroundOutput()) {
+            openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE)
+            onAllNodesWithText("Lottie").assertCountEquals(0)
         }
     }
 }

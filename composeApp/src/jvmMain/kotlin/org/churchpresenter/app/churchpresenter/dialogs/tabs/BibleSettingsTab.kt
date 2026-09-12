@@ -99,6 +99,7 @@ import org.churchpresenter.settings.removeBibleTranslation
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 /** The rail is a fixed column of cards; the styling side takes whatever is left. */
 private val RAIL_MIN_WIDTH = 300.dp
@@ -161,7 +162,9 @@ private const val CHIP_COMPACT_COLUMNS = 3
 fun BibleSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    /** Where the Bible band generator saves; null hides its button and leaves the picker. */
+    bibleLowerThirdsDir: File? = null,
 ) {
     val availableFonts = rememberSystemFonts()
     // Null while the folder is still being read. Walking it and reading a header out of every module
@@ -208,6 +211,7 @@ fun BibleSettingsTab(
                     LeftRail(
                         settings = settings,
                         onSettingsChange = onSettingsChange,
+                        bibleLowerThirdsDir = bibleLowerThirdsDir,
                         bibleFilesInDirectory = bibleFilesInDirectory,
                         bibleFileDisplayNames = bibleFileDisplayNames,
                         scanning = listing == null,
@@ -242,6 +246,7 @@ fun BibleSettingsTab(
 private fun LeftRail(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File?,
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
     scanning: Boolean,
@@ -265,6 +270,7 @@ private fun LeftRail(
             onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdHeightPercent = percent)) }
         },
     )
+    LowerThirdAnimationSection(settings, onSettingsChange, bibleLowerThirdsDir)
     MarginsSection(settings, onSettingsChange)
 }
 

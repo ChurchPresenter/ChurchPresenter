@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Tafsiri za Biblia</string>
     <string name="setup_summary_bible_value">%1$d zimesakinishwa</string>
     <string name="setup_summary_songs_value">Vitabu %1$d · nyimbo %2$d</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Uhuishaji wa theluthi ya chini</string>
+    <string name="lower_third_animation_use_lottie">Huisha mkanda kwa kiolezo cha Lottie</string>
+    <string name="lower_third_animation_file">Kiolezo</string>
+    <string name="lower_third_animation_none">Hakuna kiolezo kilichochaguliwa</string>
+    <string name="lower_third_animation_generate">Tengeneza…</string>
+    <string name="lower_third_animation_clear">Ondoa kiolezo</string>
+    <string name="lottie_files_filter">Faili za Lottie</string>
+    <string name="bible_lottie_gen_window_title">Kitengeneza Theluthi ya Chini</string>
+    <string name="song_lottie_unsupported_note">Kiolezo huamua mpangilio na mahali pa kichwa. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta, nafasi ya maneno, hakikisho la sehemu inayofuata na kodi hazitumiki.</string>
+    <string name="bible_lottie_unsupported_note">Kiolezo huamua mpangilio, mahali pa rejeleo na jinsi lugha mbili zinavyogawana mkanda. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta na nafasi ya maneno hazitumiki.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

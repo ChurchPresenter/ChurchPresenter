@@ -48,6 +48,8 @@ class SettingsManager {
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
+    /** Where the lower-third band generator saves its templates, and where the picker starts. */
+    val bibleLowerThirdsDir: File = bibleLowerThirdsDir(appDataDir)
 
     private val jsonFormat = Json {
         ignoreUnknownKeys = true // ignore extra fields in JSON
@@ -63,6 +65,9 @@ class SettingsManager {
         }
         if (!lottiePresetsDir.exists()) {
             lottiePresetsDir.mkdirs()
+        }
+        if (!bibleLowerThirdsDir.exists()) {
+            bibleLowerThirdsDir.mkdirs()
         }
     }
 
@@ -620,5 +625,13 @@ class SettingsManager {
         } catch (_: Exception) {
             // Silently handle error
         }
+    }
+
+    companion object {
+        /**
+         * The band templates folder under [appDataDir], for a caller with no manager at hand —
+         * the per-output customise dialog sits several composables away from the one that has it.
+         */
+        fun bibleLowerThirdsDir(appDataDir: File = AppDataDir.resolve()): File = File(appDataDir, "bible_lower_thirds")
     }
 }

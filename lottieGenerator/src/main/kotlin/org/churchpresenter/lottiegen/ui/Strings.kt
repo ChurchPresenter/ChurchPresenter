@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.ui
 
+import java.text.MessageFormat
 import java.util.Locale
 import java.util.ResourceBundle
 
@@ -366,6 +367,61 @@ object Strings {
     val editorVertexIn: String get() = bundle.getString("editor_vertex_in")
     val editorVertexOut: String get() = bundle.getString("editor_vertex_out")
     val editorNewFromVine: String get() = bundle.getString("editor_new_from_vine")
+
+    // Bible band generator
+    val bandAppTitle: String get() = bundle.getString("band_app_title")
+    val bandSectionBand: String get() = bundle.getString("band_section_band")
+    val bandSectionLayout: String get() = bundle.getString("band_section_layout")
+    val bandSectionAnimation: String get() = bundle.getString("band_section_animation")
+    val bandSectionPreviewText: String get() = bundle.getString("band_section_preview_text")
+    val bandSectionSave: String get() = bundle.getString("band_section_save")
+    val bandStyle: String get() = bundle.getString("band_style")
+    val bandEntrance: String get() = bundle.getString("band_entrance")
+    val bandTextAnimation: String get() = bundle.getString("band_text_animation")
+    val bandLayout: String get() = bundle.getString("band_layout")
+    val bandColorBackground: String get() = bundle.getString("band_color_background")
+    val bandColorAccent: String get() = bundle.getString("band_color_accent")
+    val bandColorGradient: String get() = bundle.getString("band_color_gradient")
+    val bandColorThird: String get() = bundle.getString("band_color_third")
+    val bandColorTint: String get() = bundle.getString("band_color_tint")
+    val bandImage: String get() = bundle.getString("band_image")
+    val bandImageNone: String get() = bundle.getString("band_image_none")
+    val bandImageChoose: String get() = bundle.getString("band_image_choose")
+    val bandImageClear: String get() = bundle.getString("band_image_clear")
+    val bandColorBorder: String get() = bundle.getString("band_color_border")
+    val bandBorderThickness: String get() = bundle.getString("band_border_thickness")
+    val bandCornerRadius: String get() = bundle.getString("band_corner_radius")
+    val bandInset: String get() = bundle.getString("band_inset")
+    val bandPadding: String get() = bundle.getString("band_padding")
+    val bandTimeBandIn: String get() = bundle.getString("band_time_band_in")
+    val bandTimeTextIn: String get() = bundle.getString("band_time_text_in")
+    val bandTimeHold: String get() = bundle.getString("band_time_hold")
+    val bandTimeTextOut: String get() = bundle.getString("band_time_text_out")
+    val bandTimeBandOut: String get() = bundle.getString("band_time_band_out")
+    val bandTickerSpeed: String get() = bundle.getString("band_ticker_speed")
+    val bandPreviewFont: String get() = bundle.getString("band_preview_font")
+    val bandPreviewBold: String get() = bundle.getString("band_preview_bold")
+    val bandPreviewTextColor: String get() = bundle.getString("band_preview_text_color")
+    val bandPreviewReferenceColor: String get() = bundle.getString("band_preview_reference_color")
+    val bandFileName: String get() = bundle.getString("band_file_name")
+    val bandSave: String get() = bundle.getString("band_save")
+    val bandSaveHint: String get() = bundle.getString("band_save_hint")
+    val bandUnitSeconds: String get() = bundle.getString("band_unit_seconds")
+    val bandUnitPx: String get() = bundle.getString("band_unit_px")
+    fun bandStatusSaved(name: String): String = MessageFormat.format(bundle.getString("band_status_saved"), name)
+    fun bandStatusError(message: String): String = MessageFormat.format(bundle.getString("band_status_error"), message)
+    fun bandStatusPictureUnreadable(name: String): String =
+        MessageFormat.format(bundle.getString("band_status_picture_unreadable"), name)
+
+    /** Labels for the band enums, looked up by `band_<prefix>_<constant>`. */
+    fun bandEnumLabel(prefix: String, constant: String): String =
+        bundle.getString("band_${prefix}_${constant.lowercase()}")
+
+    /**
+     * A band label that reads differently for scripture and for a song — "Reference" against
+     * "Title", "Verse 1" against "Lyrics 1" — looked up by `band_<key>_<bible|song>`.
+     */
+    fun bandLabel(key: String, kind: String): String = bundle.getString("band_${key}_$kind")
 }
 
 /**
