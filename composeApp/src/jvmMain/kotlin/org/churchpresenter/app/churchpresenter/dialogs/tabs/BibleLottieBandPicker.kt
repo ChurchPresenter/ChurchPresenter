@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +17,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +49,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.lottiegen.band.BandContentKind
 import org.churchpresenter.lottiegen.band.BibleLottieGenApp
@@ -63,6 +66,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.math.roundToInt
 
+private val PICKER_ROW_HEIGHT = 32.dp
 private val GENERATOR_WINDOW_WIDTH = 1240.dp
 private val GENERATOR_WINDOW_HEIGHT = 820.dp
 private const val PERCENT = 100f
@@ -91,10 +95,13 @@ internal fun LottieBandPickerRow(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .height(32.dp)
+                .height(PICKER_ROW_HEIGHT)
                 .clickable {
                     scope.launch {
-                        val start = if (path.isNotBlank()) Path(path) else (startDir?.toPath() ?: Path(System.getProperty("user.home")))
+                        val start = when {
+                            path.isNotBlank() -> Path(path)
+                            else -> startDir?.toPath() ?: Path(System.getProperty("user.home"))
+                        }
                         val file = FileChooser.platformInstance.chooseSingle(
                             path = start,
                             filters = listOf(FileNameExtensionFilter(filterLabel, "json")),
@@ -127,7 +134,23 @@ internal fun LottieBandPickerRow(
             }
         }
         if (onGenerate != null) {
-            OutlinedButton(onClick = onGenerate) { Text(stringResource(Res.string.lower_third_animation_generate)) }
+            // Shaped like the app's other settings buttons — the Browse button beside a folder —
+            // not Material's default pill.
+            Button(
+                onClick = onGenerate,
+                modifier = Modifier.height(PICKER_ROW_HEIGHT),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp),
+            ) {
+                Text(
+                    stringResource(Res.string.lower_third_animation_generate),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
     }
 }
@@ -147,7 +170,8 @@ internal fun LowerThirdAnimationSection(
     val config = settings.backgroundSettings.configFor(scope)
     val usesLottie = config.backgroundType == Constants.BACKGROUND_LOTTIE
     fun update(transform: (BackgroundConfig) -> BackgroundConfig) = onSettingsChange { s ->
-        s.copy(backgroundSettings = s.backgroundSettings.withConfigFor(scope, transform(s.backgroundSettings.configFor(scope))))
+        val backgrounds = s.backgroundSettings
+        s.copy(backgroundSettings = backgrounds.withConfigFor(scope, transform(backgrounds.configFor(scope))))
     }
     var showGenerator by remember { mutableStateOf(false) }
     SettingsSection(title = stringResource(Res.string.lower_third_animation)) {
@@ -155,7 +179,8 @@ internal fun LowerThirdAnimationSection(
             LabeledSwitch(
                 checked = usesLottie,
                 onCheckedChange = { on ->
-                    update { it.copy(backgroundType = if (on) Constants.BACKGROUND_LOTTIE else Constants.BACKGROUND_DEFAULT) }
+                    val type = if (on) Constants.BACKGROUND_LOTTIE else Constants.BACKGROUND_DEFAULT
+                    update { it.copy(backgroundType = type) }
                 },
                 label = stringResource(Res.string.lower_third_animation_use_lottie),
                 controlAtEnd = true,
@@ -191,6 +216,39 @@ internal fun LowerThirdAnimationSection(
             seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) }
+                showGenerator = false
+            },
+            onClose = { showGenerator = false },
+        )
+    }
+}
+
+/** The template picker, and the generator that writes a new template straight into it. */
+@Composable
+internal fun LottieBandSourceSection(
+    scope: BackgroundScope,
+    settings: AppSettings,
+    config: BackgroundConfig,
+    onConfigChange: (BackgroundConfig) -> Unit,
+    bibleLowerThirdsDir: File?,
+) {
+    var showGenerator by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        PanelCaption(stringResource(Res.string.lower_third_animation_file))
+        LottieBandPickerRow(
+            path = config.backgroundLottie,
+            onPathChange = { onConfigChange(config.copy(backgroundLottie = it)) },
+            startDir = bibleLowerThirdsDir,
+            onGenerate = if (bibleLowerThirdsDir != null) ({ showGenerator = true }) else null,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    if (showGenerator && bibleLowerThirdsDir != null) {
+        BibleLottieGeneratorWindow(
+            outputDir = bibleLowerThirdsDir,
+            seed = lottieBandSeed(settings, scope),
+            onSaved = { file ->
+                onConfigChange(config.copy(backgroundLottie = file.absolutePath))
                 showGenerator = false
             },
             onClose = { showGenerator = false },
@@ -254,8 +312,7 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
             canvasH = canvasH,
             kind = BandContentKind.SONG,
             layout = SlotLayout.SINGLE,
-            referencePlacement = if (song.titleLowerThirdPosition == Constants.ABOVE_VERSE) ReferencePlacement.ABOVE
-            else ReferencePlacement.BELOW,
+            referencePlacement = placementOf(song.titleLowerThirdPosition == Constants.ABOVE_VERSE),
             previewFontFamily = song.lyricsLowerThirdFontType,
             previewTextSizePx = (song.lyricsLowerThirdFontSize * pxPerPoint).roundToInt(),
             previewReferenceSizePx = (song.titleLowerThirdFontSize * pxPerPoint).roundToInt(),
@@ -276,8 +333,7 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
             canvasW = output.width,
             canvasH = canvasH,
             layout = if (stack.size >= 2) SlotLayout.SIDE_BY_SIDE else SlotLayout.SINGLE,
-            referencePlacement = if (t0.lowerThirdReferencePosition == Constants.POSITION_ABOVE) ReferencePlacement.ABOVE
-            else ReferencePlacement.BELOW,
+            referencePlacement = placementOf(t0.lowerThirdReferencePosition == Constants.POSITION_ABOVE),
             previewFontFamily = t0.lowerThirdTextFontType,
             previewTextSizePx = (t0.lowerThirdTextFontSize * pxPerPoint).roundToInt(),
             previewReferenceSizePx = (t0.lowerThirdReferenceFontSize * pxPerPoint).roundToInt(),
@@ -287,6 +343,9 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
         )
     }
 }
+
+private fun placementOf(above: Boolean): ReferencePlacement =
+    if (above) ReferencePlacement.ABOVE else ReferencePlacement.BELOW
 
 /** The sample a song band is previewed with: two lines of a public-domain hymn, its title, and the same in Spanish. */
 private const val SONG_SAMPLE_LINES = "Amazing grace, how sweet the sound\nThat saved a wretch like me"

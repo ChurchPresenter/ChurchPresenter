@@ -17,16 +17,6 @@ import org.churchpresenter.lottiegen.lottie.makeGroup
 import org.churchpresenter.lottiegen.lottie.makeRect
 import org.churchpresenter.lottiegen.lottie.makeTextData
 
-/** One text slot as the generator sees it: where it goes, what sample it shows, how big. */
-internal class TextSlot(
-    val name: String,
-    val box: SlotBox,
-    val sampleText: String,
-    val fontSizePx: Double,
-    val color: String,
-    val isReference: Boolean = false,
-)
-
 /**
  * A text slot's layers: the text itself, a hidden shadow twin beneath it, and the matte each is
  * cut by when the animation calls for one. The twin ships hidden because whether there is a

@@ -105,7 +105,7 @@ fun makeGradientFillStops(
             put("a", JsonPrimitive(0))
             put("k", buildJsonArray {
                 colors.forEachIndexed { i, c ->
-                    add(JsonPrimitive(i * step)); c.take(3).forEach { add(JsonPrimitive(it)) }
+                    add(JsonPrimitive(i * step)); c.take(RGB_CHANNELS).forEach { add(JsonPrimitive(it)) }
                 }
                 add(JsonPrimitive(0.0)); add(JsonPrimitive(1.0))
                 add(JsonPrimitive(1.0)); add(JsonPrimitive(1.0))
@@ -186,3 +186,6 @@ private fun makeDashArray(dashPx: Double): JsonArray = buildJsonArray {
         })
     })
 }
+
+/** A gradient stop carries red, green and blue; alpha is a separate stop list. */
+private const val RGB_CHANNELS = 3

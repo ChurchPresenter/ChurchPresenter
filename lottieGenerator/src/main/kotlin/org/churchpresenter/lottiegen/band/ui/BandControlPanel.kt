@@ -75,7 +75,11 @@ private const val MAX_PREVIEW_SIZE = 200f
 
 /** The band generator's left pane: every knob the template has, top to bottom. */
 @Composable
-internal fun BandControlPanel(viewModel: BibleLottieGenViewModel, panelWidth: Dp, pickImage: (suspend () -> File?)? = null) {
+internal fun BandControlPanel(
+    viewModel: BibleLottieGenViewModel,
+    panelWidth: Dp,
+    pickImage: (suspend () -> File?)? = null,
+) {
     val scrollState = rememberScrollState()
     Column(modifier = Modifier.fillMaxHeight().width(panelWidth).background(Tokens.PanelBg)) {
         Row(
@@ -119,7 +123,9 @@ private fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend 
             viewModel.updateConfig { it.copy(bandStyle = v) }
         }
         ColorPickerRow(
-            if (cfg.hasBackgroundImage) Strings.bandColorTint else Strings.bandColorBackground, cfg.bgColor, cfg.bgAlpha,
+            if (cfg.hasBackgroundImage) Strings.bandColorTint else Strings.bandColorBackground,
+            cfg.bgColor,
+            cfg.bgAlpha,
             onColorChange = { c -> viewModel.updateConfig { it.copy(bgColor = c) } },
             onAlphaChange = { a -> viewModel.updateConfig { it.copy(bgAlpha = a) } },
         )
@@ -186,7 +192,9 @@ private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole
                     SwingUtilities.invokeLater {
                         val chooser = JFileChooser()
                         chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) viewModel.loadBandImage(role, chooser.selectedFile)
+                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            viewModel.loadBandImage(role, chooser.selectedFile)
+                        }
                     }
                 }
             },
@@ -217,10 +225,11 @@ private fun LayoutSection(viewModel: BibleLottieGenViewModel) {
             if (it == BandTextAlign.FOLLOW_SETTINGS) Strings.bandLabel("align_follow_settings", kind)
             else Strings.bandEnumLabel("align", it.name)
         }
-        EnumDropdown(Strings.bandLabel("text_align", kind), "align", cfg.textAlign, BandTextAlign.entries, alignLabel) { v ->
+        val aligns = BandTextAlign.entries
+        EnumDropdown(Strings.bandLabel("text_align", kind), "align", cfg.textAlign, aligns, alignLabel) { v ->
             viewModel.updateConfig { it.copy(textAlign = v) }
         }
-        EnumDropdown(Strings.bandLabel("reference_align", kind), "align", cfg.referenceAlign, BandTextAlign.entries, alignLabel) { v ->
+        EnumDropdown(Strings.bandLabel("reference_align", kind), "align", cfg.referenceAlign, aligns, alignLabel) { v ->
             viewModel.updateConfig { it.copy(referenceAlign = v) }
         }
         SliderWithLabel(
@@ -297,10 +306,12 @@ private fun PreviewTextSection(viewModel: BibleLottieGenViewModel) {
             checked = cfg.previewBold,
             onCheckedChange = { v -> viewModel.updateConfig { it.copy(previewBold = v) } },
         )
-        PxSlider(Strings.bandLabel("preview_text_size", kind), cfg.previewTextSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
+        val textSizeLabel = Strings.bandLabel("preview_text_size", kind)
+        PxSlider(textSizeLabel, cfg.previewTextSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
             viewModel.updateConfig { it.copy(previewTextSizePx = v) }
         }
-        PxSlider(Strings.bandLabel("preview_reference_size", kind), cfg.previewReferenceSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
+        val referenceSizeLabel = Strings.bandLabel("preview_reference_size", kind)
+        PxSlider(referenceSizeLabel, cfg.previewReferenceSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
             viewModel.updateConfig { it.copy(previewReferenceSizePx = v) }
         }
         LottieTextField(

@@ -84,7 +84,8 @@ LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
     if (template == null) {
         // A screen locked to the content keeps its band up while the rest of the outputs move on.
         val locks = presenterManager.screenLocks.value
-        val anyBandLocked = isAnyScreenLockedTo(locks, Presenting.BIBLE) || isAnyScreenLockedTo(locks, Presenting.LYRICS)
+        val anyBandLocked = isAnyScreenLockedTo(locks, Presenting.BIBLE) ||
+            isAnyScreenLockedTo(locks, Presenting.LYRICS)
         if (!anyBandLocked) presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
         return@LaunchedEffect
     }

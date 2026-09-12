@@ -76,7 +76,12 @@ internal object BandGeometry {
 }
 
 /** Fractions of the band's width and height a style paints solid colour over, edge by edge. */
-internal data class StyleInsets(val left: Double = 0.0, val top: Double = 0.0, val right: Double = 0.0, val bottom: Double = 0.0)
+internal data class StyleInsets(
+    val left: Double = 0.0,
+    val top: Double = 0.0,
+    val right: Double = 0.0,
+    val bottom: Double = 0.0,
+)
 
 /**
  * Where a style's colour blocks are, so the text is laid out beside them rather than across them.

@@ -108,7 +108,9 @@ class BibleLottieGenViewModel(
             delay(SETTLE_DEBOUNCE_MS)
             try {
                 val lottieJson: JsonObject = withContext(Dispatchers.Default) { BibleLottieGenerator.generate(config) }
-                generatedJson = withContext(Dispatchers.Default) { json.encodeToString(JsonObject.serializer(), lottieJson) }
+                generatedJson = withContext(Dispatchers.Default) {
+                    json.encodeToString(JsonObject.serializer(), lottieJson)
+                }
                 statusText = ""
             } catch (e: CancellationException) {
                 throw e

@@ -2640,4 +2640,16 @@
     <string name="setup_summary_bible">Пераклады Бібліі</string>
     <string name="setup_summary_bible_value">усталявана: %1$d</string>
     <string name="setup_summary_songs_value">%1$d зборнікаў · %2$d песень</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Анімацыя ніжняй трэці</string>
+    <string name="lower_third_animation_use_lottie">Анімаваць паласу шаблонам Lottie</string>
+    <string name="lower_third_animation_file">Шаблон</string>
+    <string name="lower_third_animation_none">Шаблон не выбраны</string>
+    <string name="lower_third_animation_generate">Стварыць…</string>
+    <string name="lower_third_animation_clear">Прыбраць шаблон</string>
+    <string name="lottie_files_filter">Файлы Lottie</string>
+    <string name="bible_lottie_gen_window_title">Генератар ніжніх цітраў</string>
+    <string name="song_lottie_unsupported_note">Шаблон вызначае макет і месца назвы. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне, міжслоўны інтэрвал, папярэдні прагляд наступнага і акорды не ўжываюцца.</string>
+    <string name="bible_lottie_unsupported_note">Шаблон вызначае макет, месца спасылкі і тое, як дзве мовы дзеляць паласу. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне і міжслоўны інтэрвал не ўжываюцца.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

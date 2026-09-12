@@ -47,7 +47,10 @@ enum class BandStyle(
     /** A chevron in the second colour on the left, echoed by a thin stripe in the third. */
     CHEVRON_TAG(usesSecond = true, usesTertiary = true),
 
-    /** A big wedge in the top-left corner in the second colour, one in the bottom-right in the accent, a third-colour tip. */
+    /**
+     * A big wedge in the top-left corner in the second colour, one in the bottom-right in the
+     * accent, and a third-colour tip.
+     */
     CORNER_WEDGES(usesSecond = true, usesTertiary = true),
 
     /** An arch rising from the bottom edge in the second colour, ringed in the accent, on a third-colour base. */
@@ -62,7 +65,10 @@ enum class BandStyle(
     /** A ribbon hanging down the left in the second colour, folded over in the accent, banded in the third. */
     RIBBON_FOLD(usesSecond = true, usesTertiary = true),
 
-    /** A wave rolling along the bottom in the second colour, with an accent crest and a third-colour swell behind it. */
+    /**
+     * A wave rolling along the bottom in the second colour, with an accent crest and a
+     * third-colour swell behind it.
+     */
     WAVE_DECK(usesSecond = true, usesTertiary = true),
 }
 

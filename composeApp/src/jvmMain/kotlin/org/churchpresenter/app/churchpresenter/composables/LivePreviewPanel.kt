@@ -90,6 +90,8 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
@@ -405,6 +407,10 @@ private fun SingleDisplayPreview(
                                 outputSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
                         Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        CompositionLocalProvider(
+                            LocalLottieBandClock provides lottieBandClock,
+                            LocalBandSongLineIndex provides bandSongLineIndex,
+                        ) {
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -417,7 +423,6 @@ private fun SingleDisplayPreview(
                                     showBackground = showsBackground && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = outputSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations,
-                                    bandClock = lottieBandClock,
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -434,8 +439,6 @@ private fun SingleDisplayPreview(
                                     showBackground = showsBackground && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
-                                    bandClock = lottieBandClock,
-                                    bandLineIndex = bandSongLineIndex,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(
@@ -506,6 +509,7 @@ private fun SingleDisplayPreview(
                                     transitionAlpha = 1f,
                                 )
                             else -> {}
+                        }
                         }
                         }
                     }

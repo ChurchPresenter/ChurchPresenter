@@ -2670,4 +2670,16 @@
     <string name="setup_summary_bible">Traduceri ale Bibliei</string>
     <string name="setup_summary_bible_value">%1$d instalate</string>
     <string name="setup_summary_songs_value">%1$d cărți · %2$d cântări</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animația treimii inferioare</string>
+    <string name="lower_third_animation_use_lottie">Animează banda cu un șablon Lottie</string>
+    <string name="lower_third_animation_file">Șablon</string>
+    <string name="lower_third_animation_none">Niciun șablon selectat</string>
+    <string name="lower_third_animation_generate">Generează…</string>
+    <string name="lower_third_animation_clear">Elimină șablonul</string>
+    <string name="lottie_files_filter">Fișiere Lottie</string>
+    <string name="bible_lottie_gen_window_title">Generator de treimi inferioare</string>
+    <string name="song_lottie_unsupported_note">Șablonul decide aspectul și locul titlului. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea, spațierea cuvintelor, previzualizarea următoarei părți și acordurile nu se aplică.</string>
+    <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

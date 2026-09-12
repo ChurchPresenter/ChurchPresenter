@@ -37,15 +37,8 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.applyTextTransform
-import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.math.ceil
-
-/** Lottie's own default line height, which the generator writes and the player assumes. */
-private const val LINE_HEIGHT_FACTOR = 1.2f
 
 /** The output height the Bible font sizes are specified against, as the classic band scales them. */
 private const val REFERENCE_OUTPUT_HEIGHT = 1080f
@@ -57,6 +50,9 @@ private const val TRACKING_SCALE = 10f
 private const val SHADOW_OFFSET_PX = 6f
 
 private const val NANOS_PER_SECOND = 1_000_000_000f
+
+/** How much of the box the pre-wrapped lines may use, leaving the player no reason to wrap again. */
+private const val WRAP_SAFETY = 0.97f
 
 /** What one text layer is told to draw this frame. */
 private data class SlotRender(
@@ -92,42 +88,16 @@ internal data class BandSlotStyle(
     val shadowOpacityPercent: Int,
 )
 
-internal fun BibleTranslationSettings.textSlotStyle(isKey: Boolean) = BandSlotStyle(
-    font = BandFontKey(lowerThirdTextFontType, lowerThirdTextBold, lowerThirdTextItalic),
-    fontSizePt = lowerThirdTextFontSize,
-    color = if (isKey) Color.White else parseHexColor(lowerThirdTextColor),
-    letterSpacingPt = lowerThirdTextLetterSpacing,
-    transform = lowerThirdTextTransform,
-    justify = justifyOf(lowerThirdTextHorizontalAlignment),
-    shadow = lowerThirdTextShadow,
-    shadowColor = parseHexColor(lowerThirdTextShadowColor),
-    shadowSizePercent = lowerThirdTextShadowSize,
-    shadowOpacityPercent = lowerThirdTextShadowOpacity,
-)
-
-internal fun BibleTranslationSettings.referenceSlotStyle(isKey: Boolean) = BandSlotStyle(
-    font = BandFontKey(lowerThirdReferenceFontType, lowerThirdReferenceBold, lowerThirdReferenceItalic),
-    fontSizePt = lowerThirdReferenceFontSize,
-    color = if (isKey) Color.White else parseHexColor(lowerThirdReferenceColor),
-    letterSpacingPt = lowerThirdReferenceLetterSpacing,
-    transform = lowerThirdReferenceTransform,
-    justify = justifyOf(lowerThirdReferenceHorizontalAlignment),
-    shadow = lowerThirdReferenceShadow,
-    shadowColor = parseHexColor(lowerThirdReferenceShadowColor),
-    shadowSizePercent = lowerThirdReferenceShadowSize,
-    shadowOpacityPercent = lowerThirdReferenceShadowOpacity,
-)
+internal fun justifyOf(alignment: String): TextJustify = when (alignment) {
+    Constants.LEFT -> TextJustify.Left
+    Constants.RIGHT -> TextJustify.Right
+    else -> TextJustify.Center
+}
 
 private fun BandTextAlign.toJustify(): TextJustify = when (this) {
     BandTextAlign.LEFT -> TextJustify.Left
     BandTextAlign.RIGHT -> TextJustify.Right
     BandTextAlign.CENTER -> TextJustify.Center
-}
-
-internal fun justifyOf(alignment: String): TextJustify = when (alignment) {
-    Constants.LEFT -> TextJustify.Left
-    Constants.RIGHT -> TextJustify.Right
-    else -> TextJustify.Center
 }
 
 /** A slot's text and the typography it is set in. */
@@ -156,14 +126,16 @@ internal fun BoxScope.LottieBand(
     val styles = slots.mapValues { it.value.style }
     // A ticker carries its reference at the head of the scrolling line; the reference slot itself
     // is left empty so nothing sits still beside the motion.
-    val texts = remember(slots, template.textMotion) {
-        if (template.textMotion != BandTextMotion.TICKER) {
+    val texts = remember(slots, template.meta.textMotion) {
+        if (template.meta.textMotion != BandTextMotion.TICKER) {
             slots.mapValues { it.value.text }
         } else {
             slots.mapValues { (name, slot) ->
                 when (name) {
-                    BibleLottieTemplate.LAYER_TEXT_1 -> tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_1]?.text, slot.text)
-                    BibleLottieTemplate.LAYER_TEXT_2 -> tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_2]?.text, slot.text)
+                    BibleLottieTemplate.LAYER_TEXT_1 ->
+                        tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_1]?.text, slot.text)
+                    BibleLottieTemplate.LAYER_TEXT_2 ->
+                        tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_2]?.text, slot.text)
                     BibleLottieTemplate.LAYER_REFERENCE_1, BibleLottieTemplate.LAYER_REFERENCE_2 -> ""
                     else -> slot.text
                 }
@@ -194,14 +166,15 @@ internal fun BoxScope.LottieBand(
             val text = texts[name].orEmpty()
             val box = template.slots[name] ?: LottieSlotBox(0f, 0f, template.width, template.height)
             val singleLine = name.startsWith(BibleLottieTemplate.LAYER_REFERENCE_1.dropLast(1))
-            // The template may pin a justification; otherwise the Bible settings' own applies.
-            val pinned = if (singleLine) template.referenceAlign else template.textAlign
+            // The template may pin a justification; otherwise the content's own settings apply.
+            val pinned = if (singleLine) template.meta.referenceAlign else template.meta.textAlign
             val effectiveStyle = when (pinned) {
                 null -> style
                 else -> style.copy(justify = pinned.toJustify())
             }
-            val render = remember(effectiveStyle, text, box, pxPerPoint, template.textMotion, measurer) {
-                layoutSlot(effectiveStyle, text, box, pxPerPoint, singleLine, template.textMotion, measurer)
+            val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion)
+            val render = remember(effectiveStyle, text, geometry, measurer) {
+                layoutSlot(BandSlotText(text, effectiveStyle), geometry, measurer)
             }
             rememberUpdatedState(render)
         }
@@ -209,7 +182,7 @@ internal fun BoxScope.LottieBand(
     val clockState = rememberUpdatedState(bandClock)
     val showBackgroundState = rememberUpdatedState(showBackground)
     var tickerSeconds by remember { mutableStateOf(0f) }
-    if (template.textMotion == BandTextMotion.TICKER) {
+    if (template.meta.textMotion == BandTextMotion.TICKER) {
         // Restarted on every text change, so a new verse enters from the right edge rather than
         // replacing the old one part-way across.
         LaunchedEffect(template, texts) {
@@ -227,7 +200,9 @@ internal fun BoxScope.LottieBand(
         renders.forEach { (name, state) ->
             textLayer(name) { bindSlot(template, state, tickerState, shadow = false) }
             if (template.hasLayer(name + BibleLottieTemplate.SHADOW_SUFFIX)) {
-                textLayer(name + BibleLottieTemplate.SHADOW_SUFFIX) { bindSlot(template, state, tickerState, shadow = true) }
+                textLayer(name + BibleLottieTemplate.SHADOW_SUFFIX) {
+                    bindSlot(template, state, tickerState, shadow = true)
+                }
             }
         }
     }
@@ -257,19 +232,25 @@ private fun rememberBandTextMeasurer(): TextMeasurer {
     return remember(resolver) { TextMeasurer(resolver, Density(1f), LayoutDirection.Ltr) }
 }
 
+/** Where a slot sits and how it moves: everything about it that is not its text or its style. */
+private data class SlotGeometry(
+    val box: LottieSlotBox,
+    val pxPerPoint: Float,
+    val singleLine: Boolean,
+    val motion: BandTextMotion,
+)
+
 /** The fitted, centred layout of one slot, from its text and style alone. */
-private fun layoutSlot(
-    style: BandSlotStyle,
-    text: String,
-    box: LottieSlotBox,
-    pxPerPoint: Float,
-    singleLine: Boolean,
-    motion: BandTextMotion,
-    measurer: TextMeasurer,
-): SlotRender {
+private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: TextMeasurer): SlotRender {
+    val (text, style) = slot
+    val box = geometry.box
+    val pxPerPoint = geometry.pxPerPoint
+    val singleLine = geometry.singleLine
+    val motion = geometry.motion
     val baseSize = style.fontSizePt * pxPerPoint
     val trackingPx = style.letterSpacingPt * pxPerPoint
-    val fontFamily = LottieFonts.loadFont(style.font.family, style.font.bold, if (style.font.italic) FontStyle.Italic else FontStyle.Normal)
+    val fontStyle = if (style.font.italic) FontStyle.Italic else FontStyle.Normal
+    val fontFamily = LottieFonts.loadFont(style.font.family, style.font.bold, fontStyle)
         ?.let { FontFamily(it) } ?: FontFamily.Default
     val textStyle = TextStyle(
         fontFamily = fontFamily,
@@ -283,8 +264,12 @@ private fun layoutSlot(
     }
     // Only the verse runs as a ticker; its reference stays put.
     val isTicker = motion == BandTextMotion.TICKER && !singleLine
-    val fitBox = if (isTicker) box.copy(w = Float.MAX_VALUE) else box
-    val fitted = fitLottieSlot(text, fitBox, baseSize, trackingPx, LINE_HEIGHT_FACTOR, singleLine && !isTicker, charWidth)
+    // Wrapped a hair narrower than the box, and handed to the player already broken into lines:
+    // the player numbers a line it wraps itself the same as the next written line, so the two
+    // draw over each other. Given lines that fit, it never wraps, and the margin keeps a
+    // rounding difference between its measure and this one from making it.
+    val fitBox = if (isTicker) box.copy(w = Float.MAX_VALUE) else box.copy(w = box.w * WRAP_SAFETY)
+    val fitted = fitLottieSlot(SlotFitRequest(text, fitBox, baseSize, trackingPx, singleLine && !isTicker), charWidth)
     val lineHeight = fitted.fontSize * LINE_HEIGHT_FACTOR
     val blockHeight = fitted.lines.size * lineHeight
     // The player draws the first line's top at `ps.y - fontSize` when it resolves a real face.
@@ -292,7 +277,7 @@ private fun layoutSlot(
     val shadowScale = style.shadowSizePercent / PERCENT
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
     return SlotRender(
-        text = text,
+        text = if (isTicker) text else fitted.lines.joinToString("\n"),
         fontSize = fitted.fontSize,
         color = style.color,
         tracking = (fitted.fontSize / baseSize) * trackingPx * TRACKING_SCALE,
@@ -348,7 +333,7 @@ private fun tickerPosition(template: BibleLottieTemplate, r: SlotRender, seconds
     val slot = r.slot
     val travel = r.lineWidth + slot.w
     if (travel <= 0f) return r.position
-    val offset = (seconds * template.tickerPxPerSecond) % travel
+    val offset = (seconds * template.meta.tickerPxPerSecond) % travel
     return Offset(slot.x + slot.w - offset, r.position.y)
 }
 
@@ -358,7 +343,7 @@ private fun tickerPosition(template: BibleLottieTemplate, r: SlotRender, seconds
  * let the file do the moving.
  */
 private fun revealedText(template: BibleLottieTemplate, text: String, frame: Float): String {
-    val motion = template.textMotion
+    val motion = template.meta.textMotion
     if (motion == BandTextMotion.NONE || motion == BandTextMotion.TICKER) return text
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
     val textOut = template.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
@@ -395,53 +380,3 @@ internal fun BibleLottieStillFrame(path: String, modifier: Modifier = Modifier) 
     )
     Image(painter = painter, contentDescription = null, contentScale = ContentScale.FillBounds, modifier = modifier)
 }
-
-/**
- * The Bible band: the first two verses of the stack and their references, in their translations'
- * faces. A template with one text slot shows both languages stacked in it, the way the classic
- * band stacks them, with the two references side by side.
- */
-@Composable
-internal fun BoxScope.BibleLottieBand(
-    template: BibleLottieTemplate,
-    verses: List<SelectedVerse>,
-    t0: BibleTranslationSettings,
-    t1: BibleTranslationSettings,
-    bandFraction: Float,
-    bandClock: BibleBandClock,
-    isKey: Boolean,
-    showBackground: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val primary = verses.firstOrNull() ?: return
-    val secondary = verses.getOrNull(1)
-    val hasSecondSlot = template.hasLayer(BibleLottieTemplate.LAYER_TEXT_2)
-    val slots = remember(primary, secondary, t0, t1, isKey, hasSecondSlot) {
-        val text1 = t0.textSlotStyle(isKey)
-        val ref1 = t0.referenceSlotStyle(isKey)
-        val text2 = t1.textSlotStyle(isKey)
-        val ref2 = t1.referenceSlotStyle(isKey)
-        val primaryText = applyTextTransform(primary.verseText, text1.transform)
-        val primaryRef = applyTextTransform(buildRefText(primary, t0), ref1.transform)
-        val secondaryText = secondary?.let { applyTextTransform(it.verseText, text2.transform) }.orEmpty()
-        val secondaryRef = secondary?.let { applyTextTransform(buildRefText(it, t1), ref2.transform) }.orEmpty()
-        if (hasSecondSlot || secondary == null) {
-            mapOf(
-                BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText(primaryText, text1),
-                BibleLottieTemplate.LAYER_REFERENCE_1 to BandSlotText(primaryRef, ref1),
-                BibleLottieTemplate.LAYER_TEXT_2 to BandSlotText(secondaryText, text2),
-                BibleLottieTemplate.LAYER_REFERENCE_2 to BandSlotText(secondaryRef, ref2),
-            )
-        } else {
-            mapOf(
-                BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText("$primaryText\n$secondaryText", text1),
-                BibleLottieTemplate.LAYER_REFERENCE_1 to
-                    BandSlotText(listOf(primaryRef, secondaryRef).filter { it.isNotBlank() }.joinToString(REFERENCE_SEPARATOR), ref1),
-            )
-        }
-    }
-    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, modifier)
-}
-
-/** Between two references sharing one line. */
-private const val REFERENCE_SEPARATOR = "  ·  "

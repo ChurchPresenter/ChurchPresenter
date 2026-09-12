@@ -166,6 +166,10 @@ internal fun OffscreenOutputContent(
                     ) { mode ->
                         val showsContent = showsContentFor(mode, screenAssignment)
                         if (mode != Presenting.NONE && showsContent) {
+                            CompositionLocalProvider(
+                                LocalLottieBandClock provides presenterManager.lottieBandClock.value,
+                                LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
+                            ) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(
                                     selectedVerses = presenterManager.displayedVerses.value,
@@ -177,7 +181,6 @@ internal fun OffscreenOutputContent(
                                     showBackground = showBg && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations,
-                                    bandClock = presenterManager.lottieBandClock.value,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,
@@ -193,8 +196,6 @@ internal fun OffscreenOutputContent(
                                     showBackground = showBg && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
-                                    bandClock = presenterManager.lottieBandClock.value,
-                                    bandLineIndex = presenterManager.bandSongLineIndex.value,
                                 )
                                 Presenting.PICTURES -> PicturePresenter(
                                     imagePath = presenterManager.displayedImagePath.value,
@@ -291,6 +292,7 @@ internal fun OffscreenOutputContent(
                                     transitionAlpha = 1f
                                 )
                                 Presenting.NONE -> {}
+                            }
                             }
                         }
                     }

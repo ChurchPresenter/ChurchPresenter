@@ -71,7 +71,8 @@ fun BibleLottieGenApp(
                         .pointerInput(Unit) {
                             detectDragGestures { _, dragAmount ->
                                 val deltaDp = with(density) { dragAmount.x.toDp().value }
-                                controlPanelWidth = (controlPanelWidth + deltaDp).coerceIn(MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+                                controlPanelWidth = (controlPanelWidth + deltaDp)
+                                    .coerceIn(MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
                             }
                         },
                 )

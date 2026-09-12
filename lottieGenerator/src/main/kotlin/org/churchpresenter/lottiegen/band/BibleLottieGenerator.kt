@@ -33,7 +33,11 @@ object BibleLottieGenerator {
      * motions are the player's to drive, and how fast a ticker runs. Players that are not
      * ChurchPresenter skip unknown keys, so the file stays an ordinary Lottie.
      */
-    private fun withMetadata(lottie: JsonObject, cfg: BibleLottieGenConfig, slots: BandSlots): JsonObject = buildJsonObject {
+    private fun withMetadata(
+        lottie: JsonObject,
+        cfg: BibleLottieGenConfig,
+        slots: BandSlots,
+    ): JsonObject = buildJsonObject {
         lottie.forEach { (key, value) -> put(key, value) }
         put(
             METADATA_KEY,
@@ -76,7 +80,8 @@ object BibleLottieGenerator {
     const val METADATA_SLOTS = "slots"
 
     private fun textSlots(cfg: BibleLottieGenConfig, slots: BandSlots): List<TextSlot> = buildList {
-        add(TextSlot(BandLayerNames.TEXT_1, slots.text1, cfg.previewText1, cfg.previewTextSizePx.toDouble(), cfg.previewTextColor))
+        val textSize = cfg.previewTextSizePx.toDouble()
+        add(TextSlot(BandLayerNames.TEXT_1, slots.text1, cfg.previewText1, textSize, cfg.previewTextColor))
         add(
             TextSlot(
                 BandLayerNames.REFERENCE_1, slots.reference1, cfg.previewReference1,
@@ -86,7 +91,7 @@ object BibleLottieGenerator {
         val text2 = slots.text2
         val reference2 = slots.reference2
         if (text2 != null && reference2 != null) {
-            add(TextSlot(BandLayerNames.TEXT_2, text2, cfg.previewText2, cfg.previewTextSizePx.toDouble(), cfg.previewTextColor))
+            add(TextSlot(BandLayerNames.TEXT_2, text2, cfg.previewText2, textSize, cfg.previewTextColor))
             add(
                 TextSlot(
                     BandLayerNames.REFERENCE_2, reference2, cfg.previewReference2,

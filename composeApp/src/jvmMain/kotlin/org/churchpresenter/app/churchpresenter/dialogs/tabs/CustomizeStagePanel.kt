@@ -21,10 +21,12 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
+import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.ScreenAssignment
@@ -184,7 +186,12 @@ private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, l
             // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
             // and without this it spills up over the band line.
             Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {
-                BackgroundConfigFill(config, Modifier.fillMaxSize())
+                if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
+                    // The template at rest, sample text and all: it is the band, not a fill.
+                    BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
+                } else {
+                    BackgroundConfigFill(config, Modifier.fillMaxSize())
+                }
             }
         }
     }

@@ -8,12 +8,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
-import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -34,6 +30,25 @@ internal enum class BandTextMotion { NONE, TYPEWRITER, TYPEWRITER_WORDS, TICKER 
 /** A justification the template pins; null means the Bible settings decide. */
 internal enum class BandTextAlign { LEFT, CENTER, RIGHT }
 
+/** A template's frame timing and canvas, in its own pixels. */
+internal data class LottieTemplateSize(
+    val frameRate: Float,
+    val width: Float,
+    val height: Float,
+    val totalFrames: Float,
+) {
+    /** A file with no frames or no canvas cannot be played, however well-formed. */
+    val isPlayable: Boolean get() = frameRate > 0f && totalFrames > 0f && width > 0f && height > 0f
+}
+
+/** What the generator wrote under `cp` for the player: the text motions it drives, and pinned alignments. */
+internal data class BandTemplateMeta(
+    val textMotion: BandTextMotion = BandTextMotion.NONE,
+    val tickerPxPerSecond: Float = DEFAULT_TICKER_SPEED,
+    val textAlign: BandTextAlign? = null,
+    val referenceAlign: BandTextAlign? = null,
+)
+
 /**
  * A Bible band template as the player reads it: the JSON, the segments the generator marked, the
  * text slots and their boxes, and the metadata under `cp`. Anything the file lacks gets a
@@ -42,18 +57,17 @@ internal enum class BandTextAlign { LEFT, CENTER, RIGHT }
  */
 internal class BibleLottieTemplate(
     val json: String,
-    val frameRate: Float,
-    val width: Float,
-    val height: Float,
-    val totalFrames: Float,
+    val size: LottieTemplateSize,
     val segments: Map<String, LottieSegment>,
     val slots: Map<String, LottieSlotBox>,
     val layerNames: Set<String>,
-    val textMotion: BandTextMotion,
-    val tickerPxPerSecond: Float,
-    val textAlign: BandTextAlign? = null,
-    val referenceAlign: BandTextAlign? = null,
+    val meta: BandTemplateMeta = BandTemplateMeta(),
 ) {
+    val frameRate: Float get() = size.frameRate
+    val width: Float get() = size.width
+    val height: Float get() = size.height
+    val totalFrames: Float get() = size.totalFrames
+
     fun segment(name: String): LottieSegment = segments.getValue(name)
 
     /** The frame a [clock] lands on. ENTER runs from the start to the hold; EXIT from the hold to the end. */
@@ -108,7 +122,6 @@ internal class BibleLottieTemplate(
 }
 
 private const val MILLIS_PER_SECOND = 1000.0
-private const val TEXT_LAYER_TYPE = 5
 private const val METADATA_KEY = "cp"
 private const val DEFAULT_TICKER_SPEED = 120f
 
@@ -128,24 +141,24 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
     val op = obj["op"]?.jsonPrimitive?.floatOrNull ?: return null
     val w = obj["w"]?.jsonPrimitive?.floatOrNull ?: return null
     val h = obj["h"]?.jsonPrimitive?.floatOrNull ?: return null
-    if (fr <= 0f || op <= ip || w <= 0f || h <= 0f) {
+    val size = LottieTemplateSize(frameRate = fr, width = w, height = h, totalFrames = op - ip)
+    if (!size.isPlayable) {
         null
     } else {
         val layers = obj["layers"]?.jsonArray.orEmpty().mapNotNull { it as? JsonObject }
         val meta = obj[METADATA_KEY] as? JsonObject
         BibleLottieTemplate(
             json = json,
-            frameRate = fr,
-            width = w,
-            height = h,
-            totalFrames = op - ip,
-            segments = readSegments(obj["markers"] as? JsonArray, op - ip),
+            size = size,
+            segments = readSegments(obj["markers"] as? JsonArray, size.totalFrames),
             slots = readSlots(meta, layers),
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
-            textMotion = readTextMotion(meta),
-            tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
-            textAlign = readAlign(meta, "textAlign"),
-            referenceAlign = readAlign(meta, "referenceAlign"),
+            meta = BandTemplateMeta(
+                textMotion = readTextMotion(meta),
+                tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
+                textAlign = readAlign(meta, "textAlign"),
+                referenceAlign = readAlign(meta, "referenceAlign"),
+            ),
         )
     }
 } catch (_: IllegalArgumentException) {
@@ -167,68 +180,12 @@ private fun readSegments(markers: JsonArray?, totalFrames: Float): Map<String, L
     )
     if (required.all { it in named }) return named
     val fifth = totalFrames * FALLBACK_SEGMENT_FRACTION
-    return mapOf(
-        BibleLottieTemplate.SEGMENT_BG_IN to LottieSegment(0f, fifth),
-        BibleLottieTemplate.SEGMENT_TEXT_IN to LottieSegment(fifth, fifth),
-        BibleLottieTemplate.SEGMENT_HOLD to LottieSegment(fifth * 2, fifth),
-        BibleLottieTemplate.SEGMENT_TEXT_OUT to LottieSegment(fifth * 3, fifth),
-        BibleLottieTemplate.SEGMENT_BG_OUT to LottieSegment(fifth * 4, fifth),
+    val order = listOf(
+        BibleLottieTemplate.SEGMENT_BG_IN, BibleLottieTemplate.SEGMENT_TEXT_IN, BibleLottieTemplate.SEGMENT_HOLD,
+        BibleLottieTemplate.SEGMENT_TEXT_OUT, BibleLottieTemplate.SEGMENT_BG_OUT,
     )
+    return order.mapIndexed { i, name -> name to LottieSegment(fifth * i, fifth) }.toMap()
 }
-
-/**
- * The slot boxes: from the generator's metadata when it is there, otherwise from each text
- * document's wrap box — a hand-made file's `ps` is its box origin, a generated file's is where the
- * sample's baseline sits, which is why the generated one says so separately.
- */
-private fun readSlots(meta: JsonObject?, layers: List<JsonObject>): Map<String, LottieSlotBox> {
-    val declared = (meta?.get("slots") as? JsonObject)?.mapNotNull { (name, value) ->
-        val box = (value as? JsonArray)?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@mapNotNull null
-        if (box.size < 4) null else name to LottieSlotBox(box[0], box[1], box[2], box[3])
-    }?.toMap()
-    if (!declared.isNullOrEmpty()) return declared
-    val fromDocuments = readDocumentSlots(layers)
-    // A file from before the metadata carried its boxes: where a slot has a matte, the matte is
-    // the box (plus a hair of padding), and that is nearer the truth than the baseline `ps`.
-    val mattes = readMatteSlots(layers)
-    return fromDocuments.mapValues { (name, box) -> mattes[name] ?: box }
-}
-
-private const val MATTE_PAD = 4f
-
-private fun readMatteSlots(layers: List<JsonObject>): Map<String, LottieSlotBox> = buildMap {
-    layers.forEach { layer ->
-        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@forEach
-        if (!name.endsWith("Matte") || layer["td"]?.jsonPrimitive?.intOrNull != 1) return@forEach
-        val slot = name.removeSuffix("Matte")
-        if (slot !in BibleLottieTemplate.TEXT_LAYERS) return@forEach
-        val group = layer["shapes"]?.jsonArray?.firstOrNull()?.jsonObject ?: return@forEach
-        val rect = group["it"]?.jsonArray?.mapNotNull { it as? JsonObject }
-            ?.firstOrNull { it["ty"]?.jsonPrimitive?.contentOrNull == "rc" } ?: return@forEach
-        val size = (rect["s"] as? JsonObject)?.get("k")?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
-        val pos = (rect["p"] as? JsonObject)?.get("k")?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
-        if (size.size < 2 || pos.size < 2) return@forEach
-        val w = size[0] - MATTE_PAD
-        val h = size[1] - MATTE_PAD
-        put(slot, LottieSlotBox(pos[0] - w / 2, pos[1] - h / 2, w, h))
-    }
-}
-
-private fun readDocumentSlots(layers: List<JsonObject>): Map<String, LottieSlotBox> = buildMap {
-    layers.forEach { layer ->
-        if (layer["ty"]?.jsonPrimitive?.intOrNull != TEXT_LAYER_TYPE) return@forEach
-        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@forEach
-        val doc = firstTextDocument(layer) ?: return@forEach
-        val sz = doc["sz"]?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
-        val ps = doc["ps"]?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@forEach
-        if (sz.size >= 2 && ps.size >= 2) put(name, LottieSlotBox(ps[0], ps[1], sz[0], sz[1]))
-    }
-}
-
-private fun firstTextDocument(layer: JsonObject): JsonObject? =
-    ((layer["t"] as? JsonObject)?.get("d") as? JsonObject)
-        ?.get("k")?.jsonArray?.firstOrNull()?.jsonObject
-        ?.get("s") as? JsonObject
 
 private fun readAlign(meta: JsonObject?, key: String): BandTextAlign? =
     when (meta?.get(key)?.jsonPrimitive?.contentOrNull) {
@@ -245,70 +202,6 @@ private fun readTextMotion(meta: JsonObject?): BandTextMotion =
         "TICKER" -> BandTextMotion.TICKER
         else -> BandTextMotion.NONE
     }
-
-/** The face a slot is set in, as the Bible settings describe it. */
-internal data class BandFontKey(val family: String, val bold: Boolean, val italic: Boolean) {
-    /** Lottie's name for the face; the style words are what the player derives weight and slant from. */
-    val styleName: String get() = listOfNotNull(if (bold) "Bold" else null, if (italic) "Italic" else null)
-        .ifEmpty { listOf("Regular") }.joinToString(" ")
-    val lottieName: String get() = "$family-${styleName.replace(" ", "")}"
-}
-
-/**
- * The template with its text set in the Bible's own faces: one font-list entry per distinct face,
- * each text layer's document pointing at its own, and the embedded glyph outlines dropped — they
- * only cover the characters the generator's sample used, and a player that falls back to them
- * silently skips every character they lack.
- */
-internal fun rewriteTemplateFonts(json: String, fontsByLayer: Map<String, BandFontKey>): String {
-    val obj = Json.parseToJsonElement(json).jsonObject
-    val faces = fontsByLayer.values.distinct()
-    val fontList = buildJsonArray {
-        faces.forEach { face ->
-            add(
-                buildJsonObject {
-                    put("fName", JsonPrimitive(face.lottieName))
-                    put("fFamily", JsonPrimitive(face.family))
-                    put("fStyle", JsonPrimitive(face.styleName))
-                    put("ascent", JsonPrimitive(SYNTHETIC_FONT_ASCENT))
-                },
-            )
-        }
-    }
-    val layers = obj["layers"]?.jsonArray.orEmpty().map { element ->
-        val layer = element as? JsonObject ?: return@map element
-        val name = layer["nm"]?.jsonPrimitive?.contentOrNull
-        val face = name?.let(fontsByLayer::get) ?: return@map element
-        withFontName(layer, face.lottieName)
-    }
-    val rewritten = buildJsonObject {
-        obj.forEach { (key, value) ->
-            when (key) {
-                "chars" -> Unit
-                "layers" -> put(key, JsonArray(layers))
-                "fonts" -> put(key, buildJsonObject { put("list", fontList) })
-                else -> put(key, value)
-            }
-        }
-        if ("fonts" !in obj) put("fonts", buildJsonObject { put("list", fontList) })
-    }
-    return rewritten.toString()
-}
-
-private fun withFontName(layer: JsonObject, fontName: String): JsonObject {
-    val t = layer["t"] as? JsonObject ?: return layer
-    val d = t["d"] as? JsonObject ?: return layer
-    val k = d["k"]?.jsonArray ?: return layer
-    val keyframes = k.map { kf ->
-        val kfObj = kf as? JsonObject ?: return@map kf
-        val s = kfObj["s"] as? JsonObject ?: return@map kf
-        val doc = JsonObject(s + ("f" to JsonPrimitive(fontName)))
-        JsonObject(kfObj + ("s" to doc))
-    }
-    val newD = JsonObject(d + ("k" to JsonArray(keyframes)))
-    val newT = JsonObject(t + ("d" to newD))
-    return JsonObject(layer + ("t" to newT))
-}
 
 /** Reads and parses [path] off the UI thread; null while loading and for a file that is not a template. */
 @Composable
@@ -329,5 +222,3 @@ internal fun loadBibleLottieTemplate(path: String): BibleLottieTemplate? {
     return parseBibleLottieTemplate(text)
 }
 
-/** The same synthetic ascent the generator writes; the player ignores it after its first copy anyway. */
-private const val SYNTHETIC_FONT_ASCENT = 72.6

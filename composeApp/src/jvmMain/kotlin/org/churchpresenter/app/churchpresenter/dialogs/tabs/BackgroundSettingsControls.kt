@@ -48,7 +48,6 @@ import churchpresenter.composeapp.generated.resources.background_image_file
 import churchpresenter.composeapp.generated.resources.background_opacity_caption
 import churchpresenter.composeapp.generated.resources.background_type_caption
 import churchpresenter.composeapp.generated.resources.background_video_file
-import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
@@ -262,41 +261,9 @@ private fun BackgroundSourceSection(
         }
         Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
-        Constants.BACKGROUND_LOTTIE -> LottieBandSourceSection(scope, settings, config, onConfigChange, bibleLowerThirdsDir)
+        Constants.BACKGROUND_LOTTIE ->
+            LottieBandSourceSection(scope, settings, config, onConfigChange, bibleLowerThirdsDir)
         else -> Unit
-    }
-}
-
-/** The template picker, and the generator that writes a new template straight into it. */
-@Composable
-private fun LottieBandSourceSection(
-    scope: BackgroundScope,
-    settings: AppSettings,
-    config: BackgroundConfig,
-    onConfigChange: (BackgroundConfig) -> Unit,
-    bibleLowerThirdsDir: File?,
-) {
-    var showGenerator by remember { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        PanelCaption(stringResource(Res.string.lower_third_animation_file))
-        LottieBandPickerRow(
-            path = config.backgroundLottie,
-            onPathChange = { onConfigChange(config.copy(backgroundLottie = it)) },
-            startDir = bibleLowerThirdsDir,
-            onGenerate = if (bibleLowerThirdsDir != null) ({ showGenerator = true }) else null,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-    if (showGenerator && bibleLowerThirdsDir != null) {
-        BibleLottieGeneratorWindow(
-            outputDir = bibleLowerThirdsDir,
-            seed = lottieBandSeed(settings, scope),
-            onSaved = { file ->
-                onConfigChange(config.copy(backgroundLottie = file.absolutePath))
-                showGenerator = false
-            },
-            onClose = { showGenerator = false },
-        )
     }
 }
 

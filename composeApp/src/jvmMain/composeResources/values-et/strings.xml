@@ -2673,4 +2673,16 @@
     <string name="setup_summary_bible">Piibli tõlked</string>
     <string name="setup_summary_bible_value">%1$d paigaldatud</string>
     <string name="setup_summary_songs_value">%1$d raamatut · %2$d laulu</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Alumise kolmandiku animatsioon</string>
+    <string name="lower_third_animation_use_lottie">Animeeri riba Lottie malliga</string>
+    <string name="lower_third_animation_file">Mall</string>
+    <string name="lower_third_animation_none">Malli pole valitud</string>
+    <string name="lower_third_animation_generate">Loo…</string>
+    <string name="lower_third_animation_clear">Eemalda mall</string>
+    <string name="lottie_files_filter">Lottie failid</string>
+    <string name="bible_lottie_gen_window_title">Alumise kolmandiku generaator</string>
+    <string name="song_lottie_unsupported_note">Mall määrab paigutuse ja pealkirja koha. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus, sõnavahe, järgmise eelvaade ja akordid ei kehti.</string>
+    <string name="bible_lottie_unsupported_note">Mall määrab paigutuse, viite koha ja selle, kuidas kaks keelt riba jagavad. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus ja sõnavahe ei kehti.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

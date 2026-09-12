@@ -88,7 +88,9 @@ private fun borderPiece(cfg: BibleLottieGenConfig, band: SlotBox): BandPiece? {
     val stroke = makeStroke(hexToLottie(cfg.borderColor), borderPx, cfg.borderAlpha.toDouble()) ?: return null
     val corner = cfg.cornerRadiusPx.toDouble()
     return BandPiece.Painted(
-        makeGroup(listOf(makeRect(band.w - borderPx, band.h - borderPx, corner, listOf(band.centerX, band.centerY)), stroke)),
+        makeGroup(
+            listOf(makeRect(band.w - borderPx, band.h - borderPx, corner, listOf(band.centerX, band.centerY)), stroke),
+        ),
     )
 }
 
@@ -143,7 +145,8 @@ private class BandPieceEmitter(
             is BandPiece.Shaped -> {
                 val image = cfg.images[piece.role]?.takeIf { it.isUsable }
                 if (image == null) {
-                    shapeLayer(name, makeGroup(listOf(piece.shape, makeFill(palette.color(piece.role), palette.alpha(piece.role)))))
+                    val fill = makeFill(palette.color(piece.role), palette.alpha(piece.role))
+                    shapeLayer(name, makeGroup(listOf(piece.shape, fill)))
                 } else {
                     imageLayer(name, piece.role, image, piece.shape)
                 }
@@ -205,178 +208,51 @@ private class BandPalette(private val cfg: BibleLottieGenConfig) {
     }
 }
 
-/**
- * What each style draws over its fill. Geometry is in canvas pixels off the band's rectangle;
- * fractions of its width and height keep a style's proportions at any canvas size.
- */
-private class BandDecorations(private val cfg: BibleLottieGenConfig, private val b: SlotBox) {
-    private val p = BandPalette(cfg)
+/** The primitive shapes the styles are built from, each placed on the band rectangle [b]. */
+private open class BandShapes(protected val b: SlotBox) {
+    protected val x = b.x
+    protected val y = b.y
+    protected val w = b.w
+    protected val h = b.h
+    protected val right = b.right
+    protected val bottom = b.bottom
 
-    private fun rect(role: BandColorRole, x: Double, y: Double, w: Double, h: Double): BandPiece =
+    protected fun rect(role: BandColorRole, x: Double, y: Double, w: Double, h: Double): BandPiece =
         BandPiece.Shaped(role, makeRect(w, h, 0.0, listOf(x + w / 2, y + h / 2)))
 
-    private fun poly(role: BandColorRole, vararg points: Pair<Double, Double>): BandPiece =
+    protected fun poly(role: BandColorRole, vararg points: Pair<Double, Double>): BandPiece =
         BandPiece.Shaped(role, makePath(points.map { listOf(it.first, it.second) }))
 
-    private fun accent(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.ACCENT, x, y, w, h)
-    private fun second(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.SECOND, x, y, w, h)
-    private fun tertiary(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.TERTIARY, x, y, w, h)
+    protected fun accent(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.ACCENT, x, y, w, h)
+    protected fun second(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.SECOND, x, y, w, h)
+    protected fun tertiary(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.TERTIARY, x, y, w, h)
 
-    fun pieces(): List<BandPiece> {
-        val x = b.x
-        val y = b.y
-        val w = b.w
-        val h = b.h
-        val bottom = b.bottom
-        return when (cfg.bandStyle) {
-            BandStyle.SOLID_BAR, BandStyle.GRADIENT_BAR, BandStyle.GRADIENT_HORIZONTAL, BandStyle.GRADIENT_ANGLED,
-            BandStyle.GRADIENT_TRIO -> emptyList<BandPiece>()
-            BandStyle.ACCENT_EDGE_BAR -> listOf(accent(x, y, ACCENT_EDGE_PX, h))
-            BandStyle.GLASS_PANEL -> listOf(accent(x, bottom - GLASS_UNDERLINE_PX, w, GLASS_UNDERLINE_PX))
-            BandStyle.RIBBON -> listOf(accent(x, y, w, RIBBON_STRIPE_PX))
-            BandStyle.SPLIT_SHUTTER -> listOf(second(x, y + h / 2, w, h / 2))
-            BandStyle.HORIZONTAL_BANDS -> listOf(
-                accent(x, y, w, h * THIRD_BAND),
-                second(x, bottom - h * THIRD_BAND, w, h * THIRD_BAND),
-            )
-            BandStyle.TRICOLOR_DIAGONAL -> listOf(
-                poly(BandColorRole.ACCENT, x to y, x + w * TRI_1 to y, x + w * (TRI_1 - SLANT) to bottom, x to bottom),
-                poly(
-                    BandColorRole.SECOND, x + w * TRI_1 to y, x + w * TRI_2 to y, x + w * (TRI_2 - SLANT) to bottom, x + w * (TRI_1 - SLANT) to bottom,
-                ),
-                poly(BandColorRole.TERTIARY, x + w * TRI_2 to y, b.right to y, b.right to bottom, x + w * (TRI_2 - SLANT) to bottom),
-            )
-            BandStyle.ANGLED_BLADE -> listOf(
-                poly(BandColorRole.SECOND, x to y, x + w * BLADE_TOP to y, x + w * BLADE_BOTTOM to bottom, x to bottom),
-            )
-            BandStyle.SLANTED_THIRDS -> listOf(
-                slant(BandColorRole.ACCENT, 0.0 + SLANT, THIRD_LEFT),
-                slant(BandColorRole.TERTIARY, THIRD_LEFT, THIRD_LEFT + DIVIDER_W),
-                poly(BandColorRole.SECOND, x + w * THIRD_RIGHT to y, b.right to y, b.right to bottom, x + w * (THIRD_RIGHT - SLANT) to bottom),
-                poly(BandColorRole.ACCENT, x to y, x + w * SLANT to y, x to bottom),
-            )
-            BandStyle.CROSSED_BANDS -> listOf(
-                slant(BandColorRole.ACCENT, CROSS_START, CROSS_START + CROSS_W),
-                poly(
-                    BandColorRole.SECOND, x + w * (CROSS_START - SLANT) to y, x + w * (CROSS_START + CROSS_W - SLANT) to y,
-                    x + w * (CROSS_START + CROSS_W) to bottom, x + w * CROSS_START to bottom,
-                ),
-            )
-            BandStyle.CHEVRON_TAG -> chevron()
-            BandStyle.CORNER_WEDGES -> listOf(
-                poly(BandColorRole.TERTIARY, x to y, x + w * WEDGE_TIP to y, x to y + h * WEDGE_TIP_H),
-                poly(BandColorRole.SECOND, x to y, x + w * WEDGE_W to y, x to bottom),
-                poly(BandColorRole.ACCENT, b.right to bottom, b.right - w * WEDGE_W to bottom, b.right to y),
-            )
-            BandStyle.WAVE_DECK -> listOf(
-                wave(BandColorRole.SECOND, 0.0),
-                wave(BandColorRole.ACCENT, WAVE_CREST),
-                wave(BandColorRole.TERTIARY, WAVE_SWELL, flip = true),
-            )
-            BandStyle.ARCH_DECK -> listOf(
-                tertiary(x, bottom - h * ARCH_BASE_H, w, h * ARCH_BASE_H),
-                arch(BandColorRole.SECOND, 0.0),
-                arch(BandColorRole.ACCENT, ARCH_RING),
-            )
-            BandStyle.SPOTLIGHT_BAND -> listOf(
-                second(x, y, SPOT_EDGE_PX, h),
-                tertiary(x, bottom - RULE_PX, w, RULE_PX),
-                BandPiece.Painted(
-                    makeGroup(
-                        listOf(
-                            makeRect(w * SPOT_W, h, 0.0, listOf(x + w * SPOT_W / 2, b.centerY)),
-                            makeGradientFill(
-                                p.accent, p.alpha(BandColorRole.ACCENT), listOf(x, b.centerY), listOf(x + w * SPOT_W, b.centerY),
-                            ),
-                        ),
-                    ),
-                ),
-            )
-            BandStyle.DIAGONAL_SPLIT -> listOf(
-                poly(
-                    BandColorRole.ACCENT, x + w * SPLIT_TOP - RULE_PX to y, x + w * SPLIT_TOP + RULE_PX to y,
-                    x + w * SPLIT_BOTTOM + RULE_PX to bottom, x + w * SPLIT_BOTTOM - RULE_PX to bottom,
-                ),
-                tertiary(x, bottom - RULE_PX, w * SPLIT_BOTTOM, RULE_PX),
-                poly(BandColorRole.SECOND, x + w * SPLIT_TOP to y, b.right to y, b.right to bottom, x + w * SPLIT_BOTTOM to bottom),
-            )
-            BandStyle.RIBBON_FOLD -> listOf(
-                tertiary(x, y + h * FOLD_BAND_Y, w * FOLD_W, h * FOLD_BAND_H),
-                poly(
-                    BandColorRole.SECOND, x to y, x + w * FOLD_W to y, x + w * FOLD_W to y + h * FOLD_H,
-                    x + w * FOLD_W / 2 to y + h * (FOLD_H - FOLD_NOTCH), x to y + h * FOLD_H,
-                ),
-                poly(
-                    BandColorRole.ACCENT, x + w * FOLD_W to y, x + w * (FOLD_W + FOLD_TAIL) to y, x + w * FOLD_W to y + w * FOLD_TAIL,
-                ),
-            )
-            BandStyle.SPOTLIGHT_BAND -> listOf(
-                second(x, y, SPOT_EDGE_PX, h),
-                tertiary(x, bottom - RULE_PX, w, RULE_PX),
-                BandPiece.Painted(
-                    makeGroup(
-                        listOf(
-                            makeRect(w * SPOT_W, h, 0.0, listOf(x + w * SPOT_W / 2, b.centerY)),
-                            makeGradientFill(
-                                p.accent, p.alpha(BandColorRole.ACCENT), listOf(x, b.centerY), listOf(x + w * SPOT_W, b.centerY),
-                            ),
-                        ),
-                    ),
-                ),
-            )
-            BandStyle.DIAGONAL_SPLIT -> listOf(
-                poly(
-                    BandColorRole.ACCENT, x + w * SPLIT_TOP - RULE_PX to y, x + w * SPLIT_TOP + RULE_PX to y,
-                    x + w * SPLIT_BOTTOM + RULE_PX to bottom, x + w * SPLIT_BOTTOM - RULE_PX to bottom,
-                ),
-                tertiary(x, bottom - RULE_PX, w * SPLIT_BOTTOM, RULE_PX),
-                poly(BandColorRole.SECOND, x + w * SPLIT_TOP to y, b.right to y, b.right to bottom, x + w * SPLIT_BOTTOM to bottom),
-            )
-            BandStyle.RIBBON_FOLD -> listOf(
-                tertiary(x, y + h * FOLD_BAND_Y, w * FOLD_W, h * FOLD_BAND_H),
-                second(x, y, w * FOLD_W, h * FOLD_H),
-                poly(
-                    BandColorRole.ACCENT, x + w * FOLD_W to y + h * FOLD_H, x + w * (FOLD_W + FOLD_TAIL) to y + h * FOLD_H,
-                    x + w * FOLD_W to bottom,
-                ),
-                poly(
-                    BandColorRole.ACCENT, x to y + h * FOLD_H, x + w * FOLD_W to y + h * FOLD_H, x + w * FOLD_W to bottom,
-                ),
-            )
-        }
-    }
+    /** Where the band's width fraction [f] lands, in canvas pixels. */
+    protected fun fx(f: Double): Double = x + w * f
 
     /** A slanted stripe [from]..[to] of the band's width at the top, leaning back by [SLANT] at the bottom. */
-    private fun slant(role: BandColorRole, from: Double, to: Double): BandPiece {
-        val x = b.x
-        val w = b.w
-        return poly(
-            role,
-            x + w * from to b.y, x + w * to to b.y, x + w * (to - SLANT) to b.bottom, x + w * (from - SLANT) to b.bottom,
-        )
-    }
+    protected fun slant(role: BandColorRole, from: Double, to: Double): BandPiece =
+        poly(role, fx(from) to y, fx(to) to y, fx(to - SLANT) to bottom, fx(from - SLANT) to bottom)
 
     /**
      * A wave across the band, its crest [lift] of the height above the base line, filled down to
      * the bottom edge. [flip] mirrors the wave so two of them cross rather than stack.
      */
-    private fun wave(role: BandColorRole, lift: Double, flip: Boolean = false): BandPiece {
-        val w = b.w
-        val h = b.h
-        val baseY = b.bottom - h * (WAVE_TOP + lift)
+    protected fun wave(role: BandColorRole, lift: Double, flip: Boolean = false): BandPiece {
+        val baseY = bottom - h * (WAVE_TOP + lift)
         val amp = h * WAVE_AMPLITUDE * (if (flip) -1.0 else 1.0)
         val quarter = w / 4
         val handle = listOf(quarter / 2, 0.0)
         val negHandle = listOf(-quarter / 2, 0.0)
         val none = listOf(0.0, 0.0)
         val vertices = listOf(
-            listOf(b.x, baseY),
-            listOf(b.x + quarter, baseY - amp),
-            listOf(b.x + 2 * quarter, baseY),
-            listOf(b.x + 3 * quarter, baseY + amp),
-            listOf(b.right, baseY),
-            listOf(b.right, b.bottom),
-            listOf(b.x, b.bottom),
+            listOf(x, baseY),
+            listOf(x + quarter, baseY - amp),
+            listOf(x + 2 * quarter, baseY),
+            listOf(x + 3 * quarter, baseY + amp),
+            listOf(right, baseY),
+            listOf(right, bottom),
+            listOf(x, bottom),
         )
         val inTangents = listOf(none, negHandle, negHandle, negHandle, negHandle, none, none)
         val outTangents = listOf(handle, handle, handle, handle, none, none, none)
@@ -384,24 +260,137 @@ private class BandDecorations(private val cfg: BibleLottieGenConfig, private val
     }
 
     /** An ellipse centred on the bottom edge, so its upper half stands as an arch; [grow] widens it for a ring. */
-    private fun arch(role: BandColorRole, grow: Double): BandPiece = BandPiece.Shaped(
-        role, makeEllipse(b.w * (ARCH_W + grow * 2), b.h * (ARCH_H + grow) * 2, listOf(b.centerX, b.bottom)),
+    protected fun arch(role: BandColorRole, grow: Double): BandPiece = BandPiece.Shaped(
+        role, makeEllipse(w * (ARCH_W + grow * 2), h * (ARCH_H + grow) * 2, listOf(b.centerX, bottom)),
     )
+}
+
+/**
+ * What each style draws over its fill. Geometry is in canvas pixels off the band's rectangle;
+ * fractions of its width and height keep a style's proportions at any canvas size.
+ */
+private class BandDecorations(private val cfg: BibleLottieGenConfig, b: SlotBox) : BandShapes(b) {
+    private val p = BandPalette(cfg)
+
+    fun pieces(): List<BandPiece> = when (cfg.bandStyle) {
+        BandStyle.SOLID_BAR, BandStyle.GRADIENT_BAR, BandStyle.GRADIENT_HORIZONTAL, BandStyle.GRADIENT_ANGLED,
+        BandStyle.GRADIENT_TRIO -> emptyList()
+        BandStyle.ACCENT_EDGE_BAR -> listOf(accent(x, y, ACCENT_EDGE_PX, h))
+        BandStyle.GLASS_PANEL -> listOf(accent(x, bottom - GLASS_UNDERLINE_PX, w, GLASS_UNDERLINE_PX))
+        BandStyle.RIBBON -> listOf(accent(x, y, w, RIBBON_STRIPE_PX))
+        BandStyle.SPLIT_SHUTTER -> listOf(second(x, y + h / 2, w, h / 2))
+        BandStyle.HORIZONTAL_BANDS -> listOf(
+            accent(x, y, w, h * THIRD_BAND),
+            second(x, bottom - h * THIRD_BAND, w, h * THIRD_BAND),
+        )
+        BandStyle.TRICOLOR_DIAGONAL -> tricolorDiagonal()
+        BandStyle.ANGLED_BLADE -> listOf(
+            poly(BandColorRole.SECOND, x to y, fx(BLADE_TOP) to y, fx(BLADE_BOTTOM) to bottom, x to bottom),
+        )
+        BandStyle.SLANTED_THIRDS -> slantedThirds()
+        BandStyle.CROSSED_BANDS -> crossedBands()
+        BandStyle.CHEVRON_TAG -> chevron()
+        BandStyle.CORNER_WEDGES -> listOf(
+            poly(BandColorRole.TERTIARY, x to y, fx(WEDGE_TIP) to y, x to y + h * WEDGE_TIP_H),
+            poly(BandColorRole.SECOND, x to y, fx(WEDGE_W) to y, x to bottom),
+            poly(BandColorRole.ACCENT, right to bottom, right - w * WEDGE_W to bottom, right to y),
+        )
+        BandStyle.ARCH_DECK -> listOf(
+            tertiary(x, bottom - h * ARCH_BASE_H, w, h * ARCH_BASE_H),
+            arch(BandColorRole.SECOND, 0.0),
+            arch(BandColorRole.ACCENT, ARCH_RING),
+        )
+        BandStyle.SPOTLIGHT_BAND -> spotlight()
+        BandStyle.DIAGONAL_SPLIT -> diagonalSplit()
+        BandStyle.RIBBON_FOLD -> ribbonFold()
+        BandStyle.WAVE_DECK -> listOf(
+            wave(BandColorRole.SECOND, 0.0),
+            wave(BandColorRole.ACCENT, WAVE_CREST),
+            wave(BandColorRole.TERTIARY, WAVE_SWELL, flip = true),
+        )
+    }
+
+    private fun tricolorDiagonal(): List<BandPiece> = listOf(
+        poly(BandColorRole.ACCENT, x to y, fx(TRI_1) to y, fx(TRI_1 - SLANT) to bottom, x to bottom),
+        poly(
+            BandColorRole.SECOND,
+            fx(TRI_1) to y, fx(TRI_2) to y, fx(TRI_2 - SLANT) to bottom, fx(TRI_1 - SLANT) to bottom,
+        ),
+        poly(BandColorRole.TERTIARY, fx(TRI_2) to y, right to y, right to bottom, fx(TRI_2 - SLANT) to bottom),
+    )
+
+    private fun slantedThirds(): List<BandPiece> = listOf(
+        slant(BandColorRole.ACCENT, SLANT, THIRD_LEFT),
+        slant(BandColorRole.TERTIARY, THIRD_LEFT, THIRD_LEFT + DIVIDER_W),
+        poly(
+            BandColorRole.SECOND,
+            fx(THIRD_RIGHT) to y, right to y, right to bottom, fx(THIRD_RIGHT - SLANT) to bottom,
+        ),
+        poly(BandColorRole.ACCENT, x to y, fx(SLANT) to y, x to bottom),
+    )
+
+    private fun crossedBands(): List<BandPiece> = listOf(
+        slant(BandColorRole.ACCENT, CROSS_START, CROSS_START + CROSS_W),
+        poly(
+            BandColorRole.SECOND,
+            fx(CROSS_START - SLANT) to y, fx(CROSS_START + CROSS_W - SLANT) to y,
+            fx(CROSS_START + CROSS_W) to bottom, fx(CROSS_START) to bottom,
+        ),
+    )
+
+    private fun spotlight(): List<BandPiece> = listOf(
+        second(x, y, SPOT_EDGE_PX, h),
+        tertiary(x, bottom - RULE_PX, w, RULE_PX),
+        BandPiece.Painted(
+            makeGroup(
+                listOf(
+                    makeRect(w * SPOT_W, h, 0.0, listOf(fx(SPOT_W / 2), b.centerY)),
+                    makeGradientFill(
+                        p.accent, p.alpha(BandColorRole.ACCENT), listOf(x, b.centerY), listOf(fx(SPOT_W), b.centerY),
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    private fun diagonalSplit(): List<BandPiece> = listOf(
+        poly(
+            BandColorRole.ACCENT,
+            fx(SPLIT_TOP) - RULE_PX to y, fx(SPLIT_TOP) + RULE_PX to y,
+            fx(SPLIT_BOTTOM) + RULE_PX to bottom, fx(SPLIT_BOTTOM) - RULE_PX to bottom,
+        ),
+        tertiary(x, bottom - RULE_PX, w * SPLIT_BOTTOM, RULE_PX),
+        poly(BandColorRole.SECOND, fx(SPLIT_TOP) to y, right to y, right to bottom, fx(SPLIT_BOTTOM) to bottom),
+    )
+
+    private fun ribbonFold(): List<BandPiece> {
+        val foldY = y + h * FOLD_H
+        return listOf(
+            tertiary(x, y + h * FOLD_BAND_Y, w * FOLD_W, h * FOLD_BAND_H),
+            poly(
+                BandColorRole.SECOND,
+                x to y, fx(FOLD_W) to y, fx(FOLD_W) to foldY,
+                fx(FOLD_W / 2) to y + h * (FOLD_H - FOLD_NOTCH), x to foldY,
+            ),
+            poly(BandColorRole.ACCENT, fx(FOLD_W) to y, fx(FOLD_W + FOLD_TAIL) to y, fx(FOLD_W) to y + w * FOLD_TAIL),
+        )
+    }
 
     /** A chevron in the second colour on the left, echoed by a thin chevron stripe in the third. */
     private fun chevron(): List<BandPiece> {
-        val x = b.x
-        val y = b.y
-        val w = b.w
-        val bottom = b.bottom
         val tip = CHEVRON_W + CHEVRON_POINT
         val echo = CHEVRON_W + CHEVRON_ECHO
         val echoOuter = echo + CHEVRON_ECHO_W
+        val mid = b.centerY
         return listOf(
-            poly(BandColorRole.SECOND, x to y, x + w * CHEVRON_W to y, x + w * tip to b.centerY, x + w * CHEVRON_W to bottom, x to bottom),
             poly(
-                BandColorRole.TERTIARY, x + w * echo to y, x + w * echoOuter to y, x + w * (echoOuter + CHEVRON_POINT) to b.centerY,
-                x + w * echoOuter to bottom, x + w * echo to bottom, x + w * (echo + CHEVRON_POINT) to b.centerY,
+                BandColorRole.SECOND,
+                x to y, fx(CHEVRON_W) to y, fx(tip) to mid, fx(CHEVRON_W) to bottom, x to bottom,
+            ),
+            poly(
+                BandColorRole.TERTIARY,
+                fx(echo) to y, fx(echoOuter) to y, fx(echoOuter + CHEVRON_POINT) to mid,
+                fx(echoOuter) to bottom, fx(echo) to bottom, fx(echo + CHEVRON_POINT) to mid,
             ),
         )
     }
@@ -461,8 +450,10 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
     val usesWipe: Boolean get() = entrance == BandEntrance.WIPE_LEFT || entrance == BandEntrance.WIPE_RIGHT ||
         entrance == BandEntrance.SWIPE
 
-    fun keyframes(vararg points: KeyframeInput): JsonArray = buildKeyframes(
-        points.toList(),
+    fun keyframes(vararg points: KeyframeInput): JsonArray = keyframesOf(points.toList())
+
+    fun keyframesOf(points: List<KeyframeInput>): JsonArray = buildKeyframes(
+        points,
         inFrames = timeline.bgInFrames,
         holdFrames = timeline.bandHoldFrames,
         outFrames = timeline.bgOutFrames,
@@ -537,7 +528,7 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
         return LottieBuilder.defaultTransform(
             anchor = LottieBuilder.staticPropArray(ax, ay, 0.0),
             position = LottieBuilder.staticPropArray(ax, ay, 0.0),
-            scale = LottieBuilder.animatedProp(keyframes(*points.toTypedArray())),
+            scale = LottieBuilder.animatedProp(keyframesOf(points)),
         )
     }
 
@@ -559,7 +550,6 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
 private val WHITE = listOf(1.0, 1.0, 1.0)
 private const val FULL = 100.0
 private const val RULE_PX = 4.0
-private const val STRIPE_PX = 12.0
 private const val SPOT_EDGE_PX = 10.0
 private const val END_PCT = 100.0
 private const val ACCENT_EDGE_PX = 16.0

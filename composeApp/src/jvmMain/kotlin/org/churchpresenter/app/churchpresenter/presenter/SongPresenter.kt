@@ -131,10 +131,6 @@ fun SongPresenter(
     crossfadeEnabled: Boolean = false,
     languageOverride: String = "",
     showChords: Boolean = false,
-    /** Only read by the Lottie band; the default is a settled band, which is what previews want. */
-    bandClock: BibleBandClock = BibleBandClock(),
-    /** The line the Lottie band shows — the driver's, which lags [displayLineIndex] while the text swaps. */
-    bandLineIndex: Int = displayLineIndex,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -322,11 +318,11 @@ fun SongPresenter(
                     section = lyricSection,
                     settings = ss,
                     languageDisplay = effectiveLangDisplay,
-                    lineIndex = bandLineIndex,
+                    lineIndex = LocalBandSongLineIndex.current.takeIf { it >= 0 } ?: displayLineIndex,
                     allSections = allLyricSections,
                     displaySectionIndex = displaySectionIndex,
                     bandFraction = lowerThirdFraction,
-                    bandClock = bandClock,
+                    bandClock = LocalLottieBandClock.current,
                     isKey = isKey,
                     showBackground = showBackground,
                 )

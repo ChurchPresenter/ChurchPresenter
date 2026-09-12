@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Prijevodi Biblije</string>
     <string name="setup_summary_bible_value">instalirano: %1$d</string>
     <string name="setup_summary_songs_value">%1$d pjesmarica · %2$d pjesama</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animacija donje trećine</string>
+    <string name="lower_third_animation_use_lottie">Animiraj traku Lottie predloškom</string>
+    <string name="lower_third_animation_file">Predložak</string>
+    <string name="lower_third_animation_none">Nije odabran predložak</string>
+    <string name="lower_third_animation_generate">Generiraj…</string>
+    <string name="lower_third_animation_clear">Ukloni predložak</string>
+    <string name="lottie_files_filter">Lottie datoteke</string>
+    <string name="bible_lottie_gen_window_title">Generator donjih trećina</string>
+    <string name="song_lottie_unsupported_note">Predložak određuje raspored i mjesto naslova. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje, razmak riječi, pregled sljedećeg i akordi se ne primjenjuju.</string>
+    <string name="bible_lottie_unsupported_note">Predložak određuje raspored, mjesto reference i kako dva jezika dijele traku. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje i razmak riječi se ne primjenjuju.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

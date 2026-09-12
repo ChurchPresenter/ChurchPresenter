@@ -161,8 +161,6 @@ fun BiblePresenter(
     crossfadeEnabled: Boolean = false,
     /** Positions in the translation stack this output shows; empty means all of them. */
     bibleTranslations: List<Int> = emptyList(),
-    /** Only read by the Lottie band; the default is a settled band, which is what previews want. */
-    bandClock: BibleBandClock = BibleBandClock(),
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
@@ -467,7 +465,7 @@ fun BiblePresenter(
                     t0 = t0,
                     t1 = t1,
                     bandFraction = lowerThirdFraction,
-                    bandClock = bandClock,
+                    bandClock = LocalLottieBandClock.current,
                     isKey = isKey,
                     showBackground = showBackground,
                 )

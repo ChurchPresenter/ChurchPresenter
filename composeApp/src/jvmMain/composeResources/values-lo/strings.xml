@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">ສະບັບແປພຣະຄຳພີ</string>
     <string name="setup_summary_bible_value">ຕິດຕັ້ງແລ້ວ %1$d</string>
     <string name="setup_summary_songs_value">%1$d ຫົວ · %2$d ເພງ</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">ອະນິເມຊັນແຖບລຸ່ມ</string>
+    <string name="lower_third_animation_use_lottie">ເຮັດອະນິເມຊັນແຖບດ້ວຍແມ່ແບບ Lottie</string>
+    <string name="lower_third_animation_file">ແມ່ແບບ</string>
+    <string name="lower_third_animation_none">ຍັງບໍ່ໄດ້ເລືອກແມ່ແບບ</string>
+    <string name="lower_third_animation_generate">ສ້າງ…</string>
+    <string name="lower_third_animation_clear">ລຶບແມ່ແບບ</string>
+    <string name="lottie_files_filter">ໄຟລ໌ Lottie</string>
+    <string name="bible_lottie_gen_window_title">ຕົວສ້າງແຖບລຸ່ມ</string>
+    <string name="song_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ ແລະ ຕຳແໜ່ງຂອງຊື່ເພງ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ, ໄລຍະຫ່າງຄຳ, ການເບິ່ງທ່ອນຖັດໄປ ແລະ ຄອດບໍ່ມີຜົນ.</string>
+    <string name="bible_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ, ຕຳແໜ່ງຂອງຂໍ້ອ້າງອີງ ແລະ ວິທີທີ່ສອງພາສາແບ່ງແຖບ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ ແລະ ໄລຍະຫ່າງຄຳບໍ່ມີຜົນ.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

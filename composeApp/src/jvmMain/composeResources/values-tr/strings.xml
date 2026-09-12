@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Kutsal Kitap çevirileri</string>
     <string name="setup_summary_bible_value">%1$d kurulu</string>
     <string name="setup_summary_songs_value">%1$d kitap · %2$d ilahi</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Alt üçte bir animasyonu</string>
+    <string name="lower_third_animation_use_lottie">Bandı bir Lottie şablonuyla canlandır</string>
+    <string name="lower_third_animation_file">Şablon</string>
+    <string name="lower_third_animation_none">Şablon seçilmedi</string>
+    <string name="lower_third_animation_generate">Oluştur…</string>
+    <string name="lower_third_animation_clear">Şablonu kaldır</string>
+    <string name="lottie_files_filter">Lottie dosyaları</string>
+    <string name="bible_lottie_gen_window_title">Alt Üçte Bir Oluşturucu</string>
+    <string name="song_lottie_unsupported_note">Şablon, yerleşimi ve başlığın yerini belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili, kelime aralığı, sonrakini önizleme ve akorlar uygulanmaz.</string>
+    <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

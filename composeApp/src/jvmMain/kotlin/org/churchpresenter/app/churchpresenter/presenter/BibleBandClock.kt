@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.runtime.compositionLocalOf
+
 /**
  * Where a Bible Lottie band is in its life. The driver in `PresenterTransitionEffects` moves it
  * through these; every output maps the phase onto its own template's markers, so two outputs
@@ -30,3 +32,16 @@ data class BibleBandClock(
     val phase: BibleBandPhase = BibleBandPhase.HOLD,
     val progress: Float = 1f,
 )
+
+/**
+ * The band clock for whatever output is composing, provided by the output content and the live
+ * preview around their presenters. The default is a settled band, which is what a settings
+ * preview — composed with no output around it — wants to show.
+ */
+val LocalLottieBandClock = compositionLocalOf { BibleBandClock() }
+
+/**
+ * The lyric line the song band shows — the driver's, which lags the selected line while the old
+ * one plays out. Negative means "the presenter's own line index", which a preview passes through.
+ */
+val LocalBandSongLineIndex = compositionLocalOf { -1 }

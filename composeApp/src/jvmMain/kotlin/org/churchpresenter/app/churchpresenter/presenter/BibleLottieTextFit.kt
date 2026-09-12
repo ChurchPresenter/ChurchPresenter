@@ -57,21 +57,28 @@ internal fun wrapLikeLottie(
 /** A slot's fitted type: the size and the lines it wraps to at that size. */
 internal data class FittedSlot(val fontSize: Float, val lines: List<String>, val lineWidthPx: Float)
 
+/** What a slot has to fit: its text, its box, the size it would like, and the tracking at that size. */
+internal data class SlotFitRequest(
+    val text: String,
+    val box: LottieSlotBox,
+    val baseSize: Float,
+    val trackingAtBase: Float,
+    /** A reference or a ticker fits its width on one line instead of wrapping to its height. */
+    val singleLine: Boolean,
+)
+
 /**
- * The largest size at or below [baseSize] whose wrapped lines fit inside the box, found by the
- * same binary search the classic band uses. [charWidthAtBase] measures a character at
- * [baseSize]; glyph widths scale with the size, so smaller sizes are derived rather than
- * re-measured. A [singleLine] slot (a reference, or a ticker) fits its width instead of its height.
+ * The largest size at or below the request's base size whose wrapped lines fit inside the box,
+ * found by the same binary search the classic band uses. [charWidthAtBase] measures a character
+ * at the base size; glyph widths scale with the size, so smaller sizes are derived rather than
+ * re-measured.
  */
-internal fun fitLottieSlot(
-    text: String,
-    box: LottieSlotBox,
-    baseSize: Float,
-    trackingAtBase: Float,
-    lineHeightFactor: Float,
-    singleLine: Boolean,
-    charWidthAtBase: (Char) -> Float,
-): FittedSlot {
+internal fun fitLottieSlot(request: SlotFitRequest, charWidthAtBase: (Char) -> Float): FittedSlot {
+    val text = request.text
+    val box = request.box
+    val baseSize = request.baseSize
+    val trackingAtBase = request.trackingAtBase
+    val singleLine = request.singleLine
     if (text.isEmpty() || baseSize <= 0f) return FittedSlot(baseSize.coerceAtLeast(1f), emptyList(), 0f)
     // A lyric keeps its own line breaks: each written line wraps on its own, as the player does.
     fun linesAt(scale: Float): List<String> {
@@ -86,9 +93,9 @@ internal fun fitLottieSlot(
         val size = baseSize * scale
         val lines = linesAt(scale)
         return if (singleLine) {
-            lines.size <= 1 && widthAt(scale, lines.firstOrNull() ?: "") <= box.w && size * lineHeightFactor <= box.h
+            lines.size <= 1 && widthAt(scale, lines.firstOrNull() ?: "") <= box.w && size * LINE_HEIGHT_FACTOR <= box.h
         } else {
-            lines.size * size * lineHeightFactor <= box.h
+            lines.size * size * LINE_HEIGHT_FACTOR <= box.h
         }
     }
     val scale = binarySearchFitScale(iterations = FIT_ITERATIONS) { fits(it) }
@@ -96,5 +103,8 @@ internal fun fitLottieSlot(
     val widest = lines.maxOfOrNull { widthAt(scale, it) } ?: 0f
     return FittedSlot(baseSize * scale, lines, widest)
 }
+
+/** Lottie's own default line height, which the generator writes and the player assumes. */
+internal const val LINE_HEIGHT_FACTOR = 1.2f
 
 private const val FIT_ITERATIONS = 10

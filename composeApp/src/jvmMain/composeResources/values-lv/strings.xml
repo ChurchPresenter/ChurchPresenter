@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Bībeles tulkojumi</string>
     <string name="setup_summary_bible_value">%1$d uzstādīti</string>
     <string name="setup_summary_songs_value">%1$d grāmatas · %2$d dziesmas</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Apakšējās trešdaļas animācija</string>
+    <string name="lower_third_animation_use_lottie">Animēt joslu ar Lottie veidni</string>
+    <string name="lower_third_animation_file">Veidne</string>
+    <string name="lower_third_animation_none">Veidne nav izvēlēta</string>
+    <string name="lower_third_animation_generate">Izveidot…</string>
+    <string name="lower_third_animation_clear">Noņemt veidni</string>
+    <string name="lottie_files_filter">Lottie faili</string>
+    <string name="bible_lottie_gen_window_title">Apakšējo trešdaļu ģenerators</string>
+    <string name="song_lottie_unsupported_note">Veidne nosaka izkārtojumu un nosaukuma vietu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums, vārdu atstarpe, nākamās daļas priekšskatījums un akordi netiek piemēroti.</string>
+    <string name="bible_lottie_unsupported_note">Veidne nosaka izkārtojumu, atsauces vietu un to, kā divas valodas dala joslu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums un vārdu atstarpe netiek piemēroti.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

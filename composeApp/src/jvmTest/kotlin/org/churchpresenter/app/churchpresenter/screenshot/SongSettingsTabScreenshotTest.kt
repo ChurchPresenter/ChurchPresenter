@@ -14,8 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
@@ -89,6 +91,16 @@ class SongSettingsTabScreenshotTest {
     @Test
     fun `the lower third`() = shoot("lower_third") {
         onNodeWithText("Lower Third").performClick()
+        waitForIdle()
+    }
+
+    /** The Lottie band section: the switch, the picker with no template yet, and the note on what it honours. */
+    @Test
+    fun `the lower third animation section`() = shoot("lower_third_animation") {
+        onNodeWithText("Animate the band with a Lottie template").performScrollTo().performClick()
+        waitForIdle()
+        // The section sits at the foot of the column; its note is the last thing in it.
+        onNode(hasText("do not apply", substring = true)).performScrollTo()
         waitForIdle()
     }
 
