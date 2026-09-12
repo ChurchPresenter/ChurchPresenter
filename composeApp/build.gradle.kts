@@ -555,36 +555,19 @@ compose.desktop {
             // Bundle ALL dependency JARs into the distribution — critical for standalone mode
             includeAllModules = true
 
-            val commonJvmArgs = listOf(
-                "-Xms512m",
-                "-Xmx3072m",
-                "-XX:+UseG1GC",
-                "-XX:+UnlockExperimentalVMOptions",
-                "-XX:G1NewSizePercent=20",
-                "-XX:G1ReservePercent=20",
-                "-XX:MaxGCPauseMillis=50",
-                "-XX:+UseStringDeduplication",
-                "-Dawt.useSystemAAFontSettings=on",
-                "-Dswing.aatext=true",
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
-                "--add-opens=java.base/java.util=ALL-UNNAMED",
-                "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
-                "--add-opens=java.base/java.io=ALL-UNNAMED",
-                "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
-                "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
-                "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
-            )
+            // No jvmArgs here or in the platform blocks below. The application-level
+            // jvmArgs(...) above already carries this list, and it reaches every platform:
+            // `jvmArgs` is declared only on JvmApplication, so a call inside macOS { } /
+            // windows { } / linux { } resolves against the enclosing application { } and
+            // applies everywhere. A second copy per platform block therefore did not scope
+            // anything to that platform -- it just wrote the same 24 options into the
+            // artifact four times over (measured in ChurchPresenter.cfg before this was
+            // removed). Anything genuinely platform-specific has to be decided at runtime,
+            // the way MainLogic.preferredRenderApi decides the render API.
 
             macOS {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
 
                 // ── No renderApi here ─────────────────────────────────────────
                 // A platform block has NO jvmArgs of its own: `jvmArgs` is declared only on
@@ -641,7 +624,6 @@ compose.desktop {
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
 
                 // ── No renderApi here, deliberately ───────────────────────────
                 // This used to pin OPENGL, overriding skiko's own Direct3D default, and that is
@@ -659,7 +641,6 @@ compose.desktop {
 
             linux {
                 iconFile.set(project.file("src/jvmMain/appResources/linux/icon.png"))
-                jvmArgs(*commonJvmArgs.toTypedArray())
             }
         }
     }
