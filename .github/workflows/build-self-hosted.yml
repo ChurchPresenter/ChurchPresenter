@@ -280,13 +280,39 @@ jobs:
 
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
           echo "Submitting for notarization: $(basename "$DMG")"
-          xcrun notarytool submit "$DMG" \
+          # `--wait` exits 0 on "Invalid" too, so the verdict has to be read from the output;
+          # otherwise the staple below fails with "Record not found" and the real reason — which
+          # file Apple rejected and why — is only in `notarytool log`.
+          SUBMIT_OUT=$( xcrun notarytool submit "$DMG" \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --wait
+            --wait 2>&1 | tee /dev/stderr )
+          SUBMISSION_ID=$(echo "$SUBMIT_OUT" | grep -m1 -E '^\s*id:' | awk '{print $2}')
+          STATUS=$(echo "$SUBMIT_OUT" | grep -E '^\s*status:' | tail -1 | awk '{print $2}')
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "❌ Notarization ${STATUS:-failed} (submission $SUBMISSION_ID) — Apple's log:"
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
+              --key-id "$API_KEY_ID" \
+              --issuer "$API_ISSUER_ID" || true
+            exit 1
+          fi
           echo "Stapling notarization ticket..."
-          xcrun stapler staple "$DMG"
+          # The ticket is served from Apple's CDN and can lag the "Accepted" verdict by minutes;
+          # stapling too early fails with "Record not found" (exit 65). Retry before giving up.
+          STAPLED=false
+          for attempt in $(seq 1 10); do
+            if xcrun stapler staple "$DMG"; then
+              STAPLED=true
+              break
+            fi
+            echo "Staple attempt $attempt failed — ticket not yet available, retrying in 30s..."
+            sleep 30
+          done
+          if [ "$STAPLED" != "true" ]; then
+            echo "❌ Could not staple notarization ticket after 10 attempts" && exit 1
+          fi
           echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-arm64 label)
@@ -448,13 +474,39 @@ jobs:
 
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
           echo "Submitting for notarization: $(basename "$DMG")"
-          xcrun notarytool submit "$DMG" \
+          # `--wait` exits 0 on "Invalid" too, so the verdict has to be read from the output;
+          # otherwise the staple below fails with "Record not found" and the real reason — which
+          # file Apple rejected and why — is only in `notarytool log`.
+          SUBMIT_OUT=$( xcrun notarytool submit "$DMG" \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --wait
+            --wait 2>&1 | tee /dev/stderr )
+          SUBMISSION_ID=$(echo "$SUBMIT_OUT" | grep -m1 -E '^\s*id:' | awk '{print $2}')
+          STATUS=$(echo "$SUBMIT_OUT" | grep -E '^\s*status:' | tail -1 | awk '{print $2}')
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "❌ Notarization ${STATUS:-failed} (submission $SUBMISSION_ID) — Apple's log:"
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
+              --key-id "$API_KEY_ID" \
+              --issuer "$API_ISSUER_ID" || true
+            exit 1
+          fi
           echo "Stapling notarization ticket..."
-          xcrun stapler staple "$DMG"
+          # The ticket is served from Apple's CDN and can lag the "Accepted" verdict by minutes;
+          # stapling too early fails with "Record not found" (exit 65). Retry before giving up.
+          STAPLED=false
+          for attempt in $(seq 1 10); do
+            if xcrun stapler staple "$DMG"; then
+              STAPLED=true
+              break
+            fi
+            echo "Staple attempt $attempt failed — ticket not yet available, retrying in 30s..."
+            sleep 30
+          done
+          if [ "$STAPLED" != "true" ]; then
+            echo "❌ Could not staple notarization ticket after 10 attempts" && exit 1
+          fi
           echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-x64 label)
