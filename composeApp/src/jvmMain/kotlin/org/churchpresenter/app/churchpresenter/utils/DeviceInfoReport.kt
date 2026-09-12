@@ -42,6 +42,8 @@ object DeviceInfoReport {
         val analyticsEnabled: Boolean,
         /** The skiko render API in force, or "default" when the platform's own choice stands. */
         val renderApi: String,
+        /** The GPU(s) driving the displays, or "unknown" where the OS will not say. */
+        val gpu: String,
     )
 
     internal fun screenLine(index: Int, width: Int, height: Int, refreshRate: Int, primary: Boolean): String =
@@ -93,6 +95,7 @@ object DeviceInfoReport {
             bibleCount = bibleFiles.size,
             analyticsEnabled = CrashReporter.isEnabled(),
             renderApi = System.getProperty("skiko.renderApi") ?: "default",
+            gpu = try { GpuInfo.summary } catch (_: Exception) { "unknown" },
         )
     }
 
@@ -112,6 +115,9 @@ object DeviceInfoReport {
         appendLine("OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} (${System.getProperty("os.arch", "unknown")})")
         appendLine("Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})")
         appendLine("Renderer: ${facts.renderApi}")
+        // Beside the renderer, because the pair is the question a GPU fault asks: which
+        // backend, on whose driver. Either alone has been a reason a report could not be acted on.
+        appendLine("GPU: ${facts.gpu}")
         val runtime = Runtime.getRuntime()
         appendLine("CPU cores: ${runtime.availableProcessors()}")
         val usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)

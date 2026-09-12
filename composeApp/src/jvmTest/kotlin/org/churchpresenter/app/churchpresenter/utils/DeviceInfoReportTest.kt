@@ -155,6 +155,7 @@ class DeviceInfoReportTest {
         bibleCount: Int = 0,
         analyticsEnabled: Boolean = false,
         renderApi: String = "default",
+        gpu: String = "NVIDIA GeForce GTX 1660 Ti (NVIDIA)",
     ) = DeviceInfoReport.DeviceFacts(
         appVersion = "1.2.3", buildType = "release", installId = "inst-id",
         didCrashLastRun = false, consecutiveCrashes = 0, videoBackgroundsDisabled = false,
@@ -162,7 +163,7 @@ class DeviceInfoReportTest {
         vlcAvailable = vlcAvailable, vlcReason = vlcReason,
         jcefInitialized = jcefInitialized, jcefMacUnsupported = jcefMacUnsupported,
         songFolderCount = songFolderCount, totalSongs = totalSongs, bibleCount = bibleCount,
-        analyticsEnabled = analyticsEnabled, renderApi = renderApi,
+        analyticsEnabled = analyticsEnabled, renderApi = renderApi, gpu = gpu,
     )
 
     private fun render(f: DeviceInfoReport.DeviceFacts) = DeviceInfoReport.render(AppSettings(), f, fixedTime)
@@ -173,6 +174,18 @@ class DeviceInfoReportTest {
         // carried nothing about rendering at all before.
         assertTrue("Renderer: DIRECT3D" in render(facts(renderApi = "DIRECT3D")))
         assertTrue("Renderer: default" in render(facts()), "the platform's own choice is itself a fact")
+    }
+
+    @Test
+    fun `the report says which GPU was driving the displays`() {
+        // The backend alone cannot say whether a driver fault is an NVIDIA, AMD or Intel problem,
+        // which is the axis such a crash has to be grouped by.
+        assertTrue("GPU: AMD Radeon RX 6500 XT (AMD)" in render(facts(gpu = "AMD Radeon RX 6500 XT (AMD)")))
+    }
+
+    @Test
+    fun `an unknown GPU is still reported, rather than the line going missing`() {
+        assertTrue("GPU: unknown" in render(facts(gpu = "unknown")))
     }
 
     @Test
