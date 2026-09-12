@@ -96,6 +96,9 @@ than asking anyone to install one. It is **not committed** — `:composeApp:fetc
 downloads the build pinned in `gradle/ffmpeg-builds.properties`, verifies its SHA-256 and writes the
 single `ffmpeg` program into `composeApp/src/jvmMain/appResources/<os>/`, which is what packaging
 and `run` both read. Packaging and `run` depend on that task, so there is nothing to do by hand.
+On macOS, when a signing identity is configured, `:composeApp:signBundledFfmpeg` then codesigns it
+with the hardened runtime and `desktop/macos/ffmpeg.entitlements` before it goes into the bundle —
+Compose never signs anything under `appResources`, and notarization rejects the DMG otherwise.
 
 A target with no URL configured is not an error: the app then falls back to whatever ffmpeg is
 installed on the machine, and Settings → Projection → Camera Capture says which one it is using.

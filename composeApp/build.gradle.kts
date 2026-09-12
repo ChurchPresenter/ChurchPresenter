@@ -1616,9 +1616,51 @@ fun sha256Of(file: File): String =
         digest.digest().joinToString("") { "%02x".format(it) }
     }
 
+// ── Signing the bundled ffmpeg ────────────────────────────────────────────────
+// Compose signs the launcher, the runtime and the native libraries inside jars, but treats
+// everything under appResources as data and never codesigns it — so the ffmpeg lands in the .app
+// at Contents/app/resources/ffmpeg exactly as the publisher shipped it, and notarization rejects
+// the whole DMG for it: no Developer ID signature, no secure timestamp, no hardened runtime.
+// The signature lives inside the Mach-O file, so signing the fetched copy before
+// prepareAppResources picks it up is enough; Compose does not touch it afterwards.
+val signBundledFfmpeg by tasks.registering {
+    description = "Codesigns the bundled macOS ffmpeg with the Developer ID identity, for notarization."
+    group = "signing"
+    dependsOn(fetchBundledFfmpeg)
+
+    val identity = macSigningProps.getProperty("identityName", "")
+    val keychain = macSigningProps.getProperty("keychain", "")
+    val ffmpeg = layout.projectDirectory.file("src/jvmMain/appResources/macos/ffmpeg").asFile
+    val entitlements = rootProject.file("desktop/macos/ffmpeg.entitlements")
+
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX && identity.isConfigured() && ffmpeg.isFile }
+    // The output is the input, re-signed in place; `--force` makes that idempotent.
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val command = buildList {
+            add("codesign")
+            add("--force")
+            add("--sign"); add(identity)
+            add("--options"); add("runtime")
+            add("--timestamp")
+            add("--entitlements"); add(entitlements.absolutePath)
+            if (keychain.isNotBlank()) { add("--keychain"); add(keychain) }
+            add(ffmpeg.absolutePath)
+        }
+        val process = ProcessBuilder(command).redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        check(process.waitFor() == 0) { "codesign failed for the bundled ffmpeg:\n$output" }
+        logger.lifecycle("Signed bundled ffmpeg with \"$identity\"")
+    }
+}
+
 // prepareAppResources copies the per-OS directory into the bundle, and `run` reads the same one.
 tasks.matching { it.name == "prepareAppResources" || it.name == "run" }.configureEach {
     dependsOn(fetchBundledFfmpeg)
+}
+tasks.matching { it.name == "prepareAppResources" }.configureEach {
+    dependsOn(signBundledFfmpeg)
 }
 
 // ── The runtime jpackage will bundle has to be self-contained ─────────────────
