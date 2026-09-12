@@ -48,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.background_image_file
 import churchpresenter.composeapp.generated.resources.background_opacity_caption
 import churchpresenter.composeapp.generated.resources.background_type_caption
 import churchpresenter.composeapp.generated.resources.background_video_file
+import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
@@ -77,6 +78,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 import kotlin.math.roundToInt
 
 /** The one editor, for whichever surface the rail has open. */
@@ -86,6 +88,7 @@ internal fun BackgroundControlsColumn(
     settings: AppSettings,
     onConfigChange: (BackgroundConfig) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File? = null,
     modifier: Modifier = Modifier
 ) {
     val config = settings.backgroundSettings.configFor(scope)
@@ -104,7 +107,8 @@ internal fun BackgroundControlsColumn(
                 settings = settings,
                 config = config,
                 onConfigChange = onConfigChange,
-                onSettingsChange = onSettingsChange
+                onSettingsChange = onSettingsChange,
+                bibleLowerThirdsDir = bibleLowerThirdsDir,
             )
             if (config.backgroundType in ADJUSTABLE_TYPES) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -218,7 +222,8 @@ private fun BackgroundSourceSection(
     settings: AppSettings,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File?,
 ) {
     val onPexelsKey: (String) -> Unit = { key ->
         onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pexelsApiKey = key)) }
@@ -255,7 +260,37 @@ private fun BackgroundSourceSection(
         }
         Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
+        Constants.BACKGROUND_LOTTIE -> LottieBandSourceSection(settings, config, onConfigChange, bibleLowerThirdsDir)
         else -> Unit
+    }
+}
+
+/** The template picker, and the generator that writes a new template straight into it. */
+@Composable
+private fun LottieBandSourceSection(
+    settings: AppSettings,
+    config: BackgroundConfig,
+    onConfigChange: (BackgroundConfig) -> Unit,
+    bibleLowerThirdsDir: File?,
+) {
+    var showGenerator by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        PanelCaption(stringResource(Res.string.lower_third_animation_file))
+        LottieBandPickerRow(
+            path = config.backgroundLottie,
+            onPathChange = { onConfigChange(config.copy(backgroundLottie = it)) },
+            startDir = bibleLowerThirdsDir,
+            onGenerate = if (bibleLowerThirdsDir != null) ({ showGenerator = true }) else null,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    if (showGenerator && bibleLowerThirdsDir != null) {
+        BibleLottieGeneratorWindow(
+            outputDir = bibleLowerThirdsDir,
+            seed = bibleLottieSeed(settings),
+            onSaved = { file -> onConfigChange(config.copy(backgroundLottie = file.absolutePath)) },
+            onClose = { showGenerator = false },
+        )
     }
 }
 

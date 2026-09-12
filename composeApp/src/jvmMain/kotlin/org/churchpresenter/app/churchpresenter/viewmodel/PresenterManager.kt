@@ -22,6 +22,8 @@ import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
@@ -81,6 +83,13 @@ class PresenterManager {
 
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
+
+    /**
+     * Where the Bible Lottie band is in its entrance / hold / verse change / exit. Driven by
+     * `PresenterTransitionEffects`; every output maps it onto its own template.
+     */
+    private val _bibleBandClock = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    val bibleBandClock: State<BibleBandClock> = _bibleBandClock
 
     // Previous content for crossfade (both old and new visible simultaneously)
     private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
@@ -360,6 +369,10 @@ class PresenterManager {
 
     fun setBibleTransitionAlpha(alpha: Float) {
         _bibleTransitionAlpha.value = alpha
+    }
+
+    fun setBibleBandClock(clock: BibleBandClock) {
+        _bibleBandClock.value = clock
     }
 
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {

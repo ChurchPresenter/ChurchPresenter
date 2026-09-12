@@ -95,7 +95,8 @@ internal fun PresenterModeContent(
                     transitionAlpha = bibleTransitionAlpha,
                     showBackground = showBackgroundOverride ?: (showBg && screenAssignment.showBibleBackground),
                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                    bibleTranslations = screenAssignment.bibleTranslations
+                    bibleTranslations = screenAssignment.bibleTranslations,
+                    bandClock = presenterManager.bibleBandClock.value,
                 )
             }
 

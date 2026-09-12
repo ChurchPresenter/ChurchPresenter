@@ -52,20 +52,25 @@ fun kf(frame: Int, value: JsonElement, easing: JsonObject? = null): JsonObject =
  * Build in+hold+out keyframes for a property.
  * inKFs: array of {pct, value} for animation-in (0-100%).
  * The animation-out is the reverse.
+ *
+ * [startFrame] shifts the whole sequence, so a track can begin after another has finished — the
+ * band templates start their text once the background has landed. Before that frame the property
+ * simply holds its first keyframe's value, which is what Lottie does before any keyframe.
  */
 fun buildKeyframes(
     inKFs: List<KeyframeInput>,
     inFrames: Int,
     holdFrames: Int,
     outFrames: Int,
-    easing: JsonObject = Easing.DEFAULT
+    easing: JsonObject = Easing.DEFAULT,
+    startFrame: Int = 0,
 ): JsonArray {
     val kfs = mutableListOf<JsonObject>()
-    val totalOut = inFrames + holdFrames
+    val totalOut = startFrame + inFrames + holdFrames
 
     // Animation-in keyframes (ALL with easing)
     for (input in inKFs) {
-        kfs.add(kf(pctToFrame(input.pct, inFrames), input.value, easing))
+        kfs.add(kf(startFrame + pctToFrame(input.pct, inFrames), input.value, easing))
     }
 
     // Transition/hold keyframe at end of hold period

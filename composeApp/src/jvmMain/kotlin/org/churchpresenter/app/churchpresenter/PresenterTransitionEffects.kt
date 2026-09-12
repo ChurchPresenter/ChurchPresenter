@@ -1,14 +1,21 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
@@ -33,15 +40,26 @@ internal fun PresenterTransitionEffects(
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
     val announcementText by presenterManager.announcementText
+// The Bible Lottie band, when one is configured: its entrance on Go Live, its text swap on a
+// verse change and its exit on clear are all played from here, so every output — and the live
+// preview — reads one clock and stays in step. Null means the classic band and the code it had.
+val bandPath = bibleLottieBandPath(appSettings)
+val bandTemplate by rememberBibleLottieTemplate(bandPath.orEmpty())
+val presentingMode by presenterManager.presentingMode
+
 val clearRequested by presenterManager.clearDisplayRequested
 LaunchedEffect(clearRequested) {
     if (!clearRequested) return@LaunchedEffect
     val mode = presenterManager.presentingMode.value
     val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
-    val shouldFade = shouldFadeOnClear(
-        mode, modeIsLocked, appSettings.bibleSettings, appSettings.songSettings,
-    )
-    if (shouldFade) {
+    val template = bandTemplate
+    if (mode == Presenting.BIBLE && template != null && !modeIsLocked) {
+        presenterManager.runBandPhase(
+            BibleBandPhase.EXIT,
+            template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT, BibleLottieTemplate.SEGMENT_BG_OUT),
+        )
+        presenterManager.setBibleBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    } else if (shouldFadeOnClear(mode, modeIsLocked, appSettings.bibleSettings, appSettings.songSettings)) {
         val duration = fadeOutDuration(mode, appSettings.bibleSettings, appSettings.songSettings)
         val anim = Animatable(1f)
         anim.animateTo(0f, tween(durationMillis = duration)) {
@@ -55,11 +73,48 @@ LaunchedEffect(clearRequested) {
     presenterManager.setPresentingMode(Presenting.NONE)
 }
 
+LaunchedEffect(presentingMode, bandTemplate) {
+    val template = bandTemplate ?: return@LaunchedEffect
+    if (presentingMode != Presenting.BIBLE) {
+        // A screen locked to the Bible keeps its band up while the rest of the outputs move on.
+        if (!isAnyScreenLockedTo(presenterManager.screenLocks.value, Presenting.BIBLE)) {
+            presenterManager.setBibleBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
+        }
+        return@LaunchedEffect
+    }
+    presenterManager.setDisplayedVerses(presenterManager.selectedVerses.value)
+    presenterManager.setBibleTransitionAlpha(1f)
+    presenterManager.runBandPhase(
+        BibleBandPhase.ENTER,
+        template.segmentMs(BibleLottieTemplate.SEGMENT_BG_IN, BibleLottieTemplate.SEGMENT_TEXT_IN),
+    )
+    presenterManager.setBibleBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
+}
+
 val bibleHold by presenterManager.bibleHold
 LaunchedEffect(selectedVerses, bibleHold) {
     if (bibleHold) return@LaunchedEffect
+    val template = bandTemplate
+    val phase = presenterManager.bibleBandClock.value.phase
+    val animatesChange = template != null &&
+        presenterManager.presentingMode.value == Presenting.BIBLE &&
+        phase != BibleBandPhase.IDLE && phase != BibleBandPhase.EXIT &&
+        presenterManager.displayedVerses.value != selectedVerses
+    if (!animatesChange) {
+        presenterManager.setDisplayedVerses(selectedVerses)
+        presenterManager.setBibleTransitionAlpha(1f)
+        return@LaunchedEffect
+    }
+    // Let the entrance land first. A change that interrupted an earlier change picks up the
+    // old verse's exit where it was rather than snapping it back to fully shown.
+    snapshotFlow { presenterManager.bibleBandClock.value.phase }.first { it != BibleBandPhase.ENTER }
+    val start = presenterManager.bibleBandClock.value
+    val outFrom = if (start.phase == BibleBandPhase.TEXT_OUT) start.progress else 0f
+    val outMs = template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT)
+    presenterManager.runBandPhase(BibleBandPhase.TEXT_OUT, (outMs * (1f - outFrom)).toLong(), outFrom)
     presenterManager.setDisplayedVerses(selectedVerses)
-    presenterManager.setBibleTransitionAlpha(1f)
+    presenterManager.runBandPhase(BibleBandPhase.TEXT_IN, template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_IN))
+    presenterManager.setBibleBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
 }
 
 LaunchedEffect(lyricSection, lyricSectionVersion) {
@@ -218,4 +273,14 @@ LaunchedEffect(announcementText) {
         }
     }
 }
+}
+
+/** Plays one band phase from [from] to 1 over [durationMs], publishing every frame to the clock. */
+private suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long, from: Float = 0f) {
+    setBibleBandClock(BibleBandClock(phase, from))
+    val anim = Animatable(from)
+    anim.animateTo(1f, tween(durationMillis = durationMs.toInt().coerceAtLeast(1), easing = LinearEasing)) {
+        setBibleBandClock(BibleBandClock(phase, this.value))
+    }
+    setBibleBandClock(BibleBandClock(phase, 1f))
 }

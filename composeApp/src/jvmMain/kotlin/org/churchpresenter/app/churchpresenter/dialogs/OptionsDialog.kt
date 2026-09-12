@@ -285,7 +285,8 @@ internal fun OptionsDialogContent(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             2 -> SongSettingsTab(
                                 settings = currentSettings,
@@ -298,7 +299,8 @@ internal fun OptionsDialogContent(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             TAB_PROJECTION -> ProjectionSettingsTab(
                                 settings = currentSettings,

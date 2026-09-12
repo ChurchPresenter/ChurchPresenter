@@ -11,6 +11,8 @@ import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
+import churchpresenter.composeapp.generated.resources.customize_type_lottie
+import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.customize_type_default
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
@@ -125,9 +127,18 @@ private fun BackgroundSurfaceRows(
             )
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
+        Constants.BACKGROUND_LOTTIE -> CustomizeRow(stringResource(Res.string.lower_third_animation_file)) {
+            LottieBandPickerRow(
+                path = config.backgroundLottie,
+                onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
+                startDir = null,
+                onGenerate = null,
+                modifier = Modifier.width(SOURCE_FIELD_WIDTH),
+            )
+        }
         else -> Unit
     }
-    if (config.backgroundType != Constants.BACKGROUND_TRANSPARENT) {
+    if (config.backgroundType != Constants.BACKGROUND_TRANSPARENT && config.backgroundType != Constants.BACKGROUND_LOTTIE) {
         // Sliders, as on the Background tab: these are nudged until the picture reads well behind
         // text, not typed to a number anyone knows in advance.
         val percent = stringResource(Res.string.percent_suffix)
@@ -234,6 +245,9 @@ private fun backgroundTypeOptions(scope: BackgroundScope): List<Pair<String, Str
                 to stringResource(customizeTypeLabel(Constants.BACKGROUND_GRADIENT)),
         )
     }
+    if (scope.offersLottie) {
+        add(Constants.BACKGROUND_LOTTIE to stringResource(customizeTypeLabel(Constants.BACKGROUND_LOTTIE)))
+    }
 }
 
 /**
@@ -248,6 +262,7 @@ private fun customizeTypeLabel(type: String): StringResource = when (type) {
     Constants.BACKGROUND_VIDEO -> Res.string.customize_type_video
     Constants.BACKGROUND_TRANSPARENT -> Res.string.customize_type_transparent
     Constants.BACKGROUND_GRADIENT -> Res.string.customize_type_gradient
+    Constants.BACKGROUND_LOTTIE -> Res.string.customize_type_lottie
     Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
     else -> Res.string.customize_type_default
 }

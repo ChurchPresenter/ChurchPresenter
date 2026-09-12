@@ -176,7 +176,8 @@ internal fun OffscreenOutputContent(
                                     transitionAlpha = presenterManager.bibleTransitionAlpha.value,
                                     showBackground = showBg && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations
+                                    bibleTranslations = screenAssignment.bibleTranslations,
+                                    bandClock = presenterManager.bibleBandClock.value,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,

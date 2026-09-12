@@ -48,6 +48,8 @@ class SettingsManager {
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
+    /** Where the Bible lower-third generator saves its templates, and where the picker starts. */
+    val bibleLowerThirdsDir: File = File(appDataDir, "bible_lower_thirds")
 
     private val jsonFormat = Json {
         ignoreUnknownKeys = true // ignore extra fields in JSON
@@ -63,6 +65,9 @@ class SettingsManager {
         }
         if (!lottiePresetsDir.exists()) {
             lottiePresetsDir.mkdirs()
+        }
+        if (!bibleLowerThirdsDir.exists()) {
+            bibleLowerThirdsDir.mkdirs()
         }
     }
 

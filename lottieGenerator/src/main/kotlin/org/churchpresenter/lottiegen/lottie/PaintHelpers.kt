@@ -65,6 +65,44 @@ fun makeGradientFill(
 }
 
 
+/** A linear gradient from [startColor] at [startPt] to [endColor] at [endPt], fully opaque at both ends. */
+fun makeTwoColorGradientFill(
+    startColor: List<Double>,
+    endColor: List<Double>,
+    opacity: Double = 100.0,
+    startPt: List<Double>,
+    endPt: List<Double>,
+): JsonObject = buildJsonObject {
+    put("ty", JsonPrimitive("gf"))
+    put("o", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", JsonPrimitive(opacity))
+    })
+    put("r", JsonPrimitive(1))
+    put("bm", JsonPrimitive(0))
+    put("t", JsonPrimitive(1))
+    put("s", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", jsonArrayOf(startPt))
+    })
+    put("e", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", jsonArrayOf(endPt))
+    })
+    put("g", buildJsonObject {
+        put("p", JsonPrimitive(2))
+        put("k", buildJsonObject {
+            put("a", JsonPrimitive(0))
+            put("k", buildJsonArray {
+                add(JsonPrimitive(0.0)); startColor.take(3).forEach { add(JsonPrimitive(it)) }
+                add(JsonPrimitive(1.0)); endColor.take(3).forEach { add(JsonPrimitive(it)) }
+                add(JsonPrimitive(0.0)); add(JsonPrimitive(1.0))
+                add(JsonPrimitive(1.0)); add(JsonPrimitive(1.0))
+            })
+        })
+    })
+}
+
 fun makeStroke(color: List<Double>, width: Double, opacity: Double = 100.0, dashPx: Double = 0.0): JsonObject? {
     if (width <= 0) return null
     return buildJsonObject {

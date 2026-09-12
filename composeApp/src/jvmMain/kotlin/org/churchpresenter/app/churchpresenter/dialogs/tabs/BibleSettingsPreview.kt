@@ -23,6 +23,7 @@ import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_long
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_short
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.bible.VerseTarget
@@ -141,7 +142,9 @@ internal fun BiblePreviewPanel(
                     appSettings = settings,
                     isLowerThird = target.isLowerThird,
                     isLowerThirdVertical = target.isLowerThird && vertical,
-                    showBackground = false,
+                    // A Lottie band is the text, so it has to be drawn; a backdrop is not.
+                    showBackground = target.isLowerThird &&
+                        usesBibleLottieBand(settings.backgroundSettings.bibleLowerThirdBackground),
                 )
             }
         }

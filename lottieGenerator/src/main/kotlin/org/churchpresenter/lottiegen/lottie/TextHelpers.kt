@@ -5,7 +5,10 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 
-fun makeTextData(run: TextRun): JsonObject {
+/** A paragraph box: text placed at ([x], [y]) wraps inside [w] × [h] instead of running on. */
+class TextWrapBox(val x: Double, val y: Double, val w: Double, val h: Double)
+
+fun makeTextData(run: TextRun, wrapBox: TextWrapBox? = null): JsonObject {
     val displayText = run.displayText
     val fName = run.fontName
     val fontSizePx = run.fontSizePx
@@ -25,6 +28,10 @@ fun makeTextData(run: TextRun): JsonObject {
                         put("lh", JsonPrimitive(fontSizePx * LINE_HEIGHT_FACTOR))
                         put("ls", JsonPrimitive(0))
                         put("fc", jsonArrayOf(color))
+                        if (wrapBox != null) {
+                            put("sz", jsonArrayOf(wrapBox.w, wrapBox.h))
+                            put("ps", jsonArrayOf(wrapBox.x, wrapBox.y))
+                        }
                     })
                     put("t", JsonPrimitive(0))
                 })

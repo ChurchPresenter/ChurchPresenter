@@ -30,6 +30,8 @@ internal enum class BackgroundScope(
     val lowerThird: Boolean,
     val inheritType: String?,
     val offersGradient: Boolean = false,
+    /** Only the Bible band plays a Lottie template today; a song band will when its presenter can. */
+    val offersLottie: Boolean = false,
 ) {
     DEFAULT(BackgroundScopeGroup.DEFAULTS, lowerThird = false, inheritType = null),
     DEFAULT_LOWER_THIRD(
@@ -43,6 +45,7 @@ internal enum class BackgroundScope(
         lowerThird = true,
         inheritType = Constants.BACKGROUND_DEFAULT,
         offersGradient = true,
+        offersLottie = true,
     ),
     SONG(BackgroundScopeGroup.SONGS, lowerThird = false, inheritType = Constants.BACKGROUND_DEFAULT),
     SONG_LOWER_THIRD(
@@ -76,6 +79,7 @@ internal fun BackgroundScope.typeOptions(): List<String> = buildList {
     add(Constants.BACKGROUND_CAMERA)
     add(Constants.BACKGROUND_TRANSPARENT)
     if (offersGradient) add(Constants.BACKGROUND_GRADIENT)
+    if (offersLottie) add(Constants.BACKGROUND_LOTTIE)
 }
 
 /**

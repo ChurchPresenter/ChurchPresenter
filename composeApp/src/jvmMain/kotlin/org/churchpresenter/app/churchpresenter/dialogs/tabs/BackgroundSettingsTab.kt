@@ -80,6 +80,7 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.background_color_option
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_follow_default_option
+import churchpresenter.composeapp.generated.resources.background_lottie_option
 import churchpresenter.composeapp.generated.resources.background_follows_default
 import churchpresenter.composeapp.generated.resources.background_following_default
 import churchpresenter.composeapp.generated.resources.background_group_defaults
@@ -112,6 +113,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
+import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
@@ -168,7 +170,9 @@ private const val PREVIEW_DEBOUNCE_MS = 800L
 @Composable
 fun BackgroundSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** Where the Bible band generator saves; null hides its button and leaves the picker. */
+    bibleLowerThirdsDir: File? = null,
 ) {
     val viewModel = remember { BackgroundSettingsViewModel() }
     var scope by remember { mutableStateOf(BackgroundScope.DEFAULT) }
@@ -205,6 +209,7 @@ fun BackgroundSettingsTab(
                     settings = settings,
                     onConfigChange = onConfigChange,
                     onSettingsChange = onSettingsChange,
+                    bibleLowerThirdsDir = bibleLowerThirdsDir,
                     modifier = Modifier.width(CONTROLS_WIDTH).fillMaxHeight()
                 )
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -499,7 +504,7 @@ private fun BackgroundStagePreview(
                 modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(TV_SCREEN_RADIUS)),
                 blurRadius = backgroundBlurRadius(config.blur, width)
             )
-            Text(
+            if (config.backgroundType != Constants.BACKGROUND_LOTTIE) Text(
                 text = stringResource(Res.string.song_background_sample_line),
                 // Sized off the output's own default rather than a theme style: a line set in
                 // bodyMedium is the dialog's idea of body text, which on a band a tenth of the
@@ -585,7 +590,13 @@ private fun BackgroundCoverageFill(
                 // overscanned, and without this it spills above the band line.
                 .clipToBounds()
         ) {
-            BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
+            if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
+                // The template carries its own sample text, so it stands in for the fill and the
+                // sample line both.
+                BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
+            } else {
+                BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
+            }
             if (config.dim > 0) {
                 Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.dim / PERCENT)))
             }
@@ -637,6 +648,7 @@ internal fun backgroundTypeLabel(type: String): StringResource = when (type) {
     Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option
     Constants.BACKGROUND_GRADIENT -> Res.string.gradient_enabled
     Constants.BACKGROUND_FOLLOW_DEFAULT -> Res.string.background_follow_default_option
+    Constants.BACKGROUND_LOTTIE -> Res.string.background_lottie_option
     else -> Res.string.background_default
 }
 
