@@ -369,10 +369,14 @@ class ProjectionSettingsTabScreenshotTest {
         waitForIdle()
     }
 
-    /** Songs, which is a language mode rather than a switch. */
+    /** Which of the song's languages this output carries, picked one by one. */
     @Test
-    fun `the song language menu open`() = contentOutputs("content_outputs_songs_menu", rootIndex = 2) {
-        onAllNodesWithText(BOTH)[0].performClick()
+    fun `the song language menu open`() = contentOutputs(
+        "content_outputs_songs_menu",
+        assignment = ScreenAssignment(songTranslations = listOf(0, 2)),
+        rootIndex = 2,
+    ) {
+        onNodeWithTag(TranslationPickerTags.SONG.trigger).performClick()
         waitForIdle()
     }
 
@@ -557,7 +561,6 @@ class ProjectionSettingsTabScreenshotTest {
         const val POSITION_HELP = "Position values represent"
 
         /** The Songs cell's current mode, inside the Content Outputs dialog. */
-        const val BOTH = "Both"
         const val ENABLED_COUNT = "enabled"
 
         const val DEFAULT_RESOLUTION = "1920×1080"

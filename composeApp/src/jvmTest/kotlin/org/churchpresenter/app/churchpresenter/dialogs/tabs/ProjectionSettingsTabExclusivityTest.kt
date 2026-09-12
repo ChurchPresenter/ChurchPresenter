@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -271,7 +272,7 @@ class ProjectionSettingsTabExclusivityTest {
     }
 
     @Test
-    fun `an unrecognised song language mode falls back to the first option`() {
+    fun `an unrecognised song language mode still shows the song's languages`() {
         projectionTab(
             initial = settingsWith {
                 copy(
@@ -284,9 +285,11 @@ class ProjectionSettingsTabExclusivityTest {
         ) { _ ->
             gridButton(Grid.contentOutputs(row = 0)).performScrollTo().performClick()
             waitForIdle()
-            // Songs is the only dropdown left — Bible is a checkbox — and its mode is not one this
-            // build knows, so it falls back to showing the first option.
-            onAllNodesWithText("Off").assertCountAtLeast(1)
+            // Both are checklists now. A stored mode this build does not know is not "off", so the
+            // cell stays on and the languages stay pickable rather than the row going blank.
+            onNodeWithTag(TranslationPickerTags.SONG.trigger).performScrollTo().performClick()
+            waitForIdle()
+            onNodeWithText("Language 1").assertExists("an unknown mode must not empty the picker")
         }
     }
 

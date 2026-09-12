@@ -15,6 +15,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -89,14 +90,14 @@ class PresenterRenderTest {
         title: String = "Amazing Grace",
         number: Int = 42,
         lines: List<String> = listOf("Amazing grace how sweet the sound"),
-        secondaryLines: List<String> = emptyList(),
+        translations: List<SectionTranslation> = emptyList(),
     ) = LyricSection(
         header = header,
         title = title,
         songNumber = number,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
-        secondaryLines = secondaryLines,
+        translations = translations,
     )
 
     // ── Scripture on screen ─────────────────────────────────────────────────────
@@ -445,7 +446,7 @@ class PresenterRenderTest {
                 SongPresenter(
                     lyricSection = lyric(
                         lines = listOf("Amazing grace how sweet the sound"),
-                        secondaryLines = listOf("О благодать, спасён тобой"),
+                        translations = listOf(SectionTranslation(lines = listOf("О благодать, спасён тобой"))),
                     ),
                     appSettings = AppSettings(),
                 )

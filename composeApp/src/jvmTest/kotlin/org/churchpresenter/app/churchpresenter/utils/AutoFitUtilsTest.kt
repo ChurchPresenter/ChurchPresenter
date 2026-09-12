@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -40,7 +41,7 @@ class AutoFitUtilsTest {
         }
 
     private fun section(vararg lines: String, secondary: List<String> = emptyList()) =
-        LyricSection(lines = lines.toList(), secondaryLines = secondary)
+        LyricSection(lines = lines.toList(), translations = listOf(SectionTranslation(lines = secondary)))
 
     // ── calculateAutoFitFontSize ────────────────────────────────────────────────
 

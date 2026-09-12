@@ -62,6 +62,8 @@ internal data class TitleSlideLine(
     val element: SongStyleElement,
     val text: String,
     val number: String? = null,
+    /** Which of the song's languages a title line is in, `0` the primary; the credits have none. */
+    val language: Int = 0,
 ) {
     /** The line as plain text, for the stage monitor and the companion app. */
     val plainText: String get() = listOfNotNull(number, text).joinToString(" \u2013 ")
@@ -77,20 +79,21 @@ internal data class TitleSlideLine(
  *
  * The number shares the title's row, ahead of it, when [SongSettings.titleSlideNumberBeforeTitle]
  * says so, and otherwise has a row of its own above. The title is given in the language(s) the
- * output shows -- [langDisplay] is one of the `SONG_LANG_*` constants -- so a bilingual song opens
- * with both its titles on an output showing both languages; the number joins the first of them.
+ * output shows -- [languages] are positions into the song's languages, `0` the primary, the same
+ * list `SongPresenter` draws the lyrics by -- so a bilingual song opens with both its titles on an
+ * output showing both languages; the number joins the first of them.
  */
 internal fun titleSlideLines(
     section: LyricSection,
     settings: SongSettings,
-    langDisplay: String = Constants.SONG_LANG_PRIMARY,
+    languages: List<Int> = listOf(0),
 ): List<TitleSlideLine> {
     fun shown(element: SongStyleElement) = settings.shownOnTitleSlide(element) == true
     val number = section.songNumber.takeIf { it > 0 && shown(SongStyleElement.NUMBER) }?.toString()
-    val titles = titleSlideTitles(section, langDisplay)
+    val titles = titleSlideTitles(section, languages)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()
-        .map { TitleSlideLine(SongStyleElement.TITLE, it) }
+        .map { (language, title) -> TitleSlideLine(SongStyleElement.TITLE, title, language = language) }
     val heading = when {
         number == null -> titles
         settings.titleSlideNumberBeforeTitle && titles.isNotEmpty() ->
@@ -107,14 +110,19 @@ internal fun titleSlideLines(
     return heading + credits
 }
 
-/** The song's title in whichever language(s) [langDisplay] asks for, the primary first. */
-private fun titleSlideTitles(section: LyricSection, langDisplay: String): List<String> {
-    val secondary = section.secondaryTitle.takeIf { it.isNotBlank() && it != section.title }
-    return when (langDisplay) {
-        Constants.SONG_LANG_SECONDARY -> listOf(secondary ?: section.title)
-        Constants.SONG_LANG_BOTH -> listOfNotNull(section.title, secondary)
-        else -> listOf(section.title)
-    }.filter { it.isNotBlank() }
+/**
+ * The song's title in each of [languages], in that order, once each.
+ *
+ * A language the song has no title in falls back to the primary's -- a second language is often
+ * lyrics with no separate title -- and a title equal to one already listed is not shown twice, so
+ * an output showing every language of such a song still opens with one title, not two copies.
+ */
+private fun titleSlideTitles(section: LyricSection, languages: List<Int>): List<Pair<Int, String>> {
+    val titles = section.allLanguageTitles()
+    return languages
+        .map { it to (titles.getOrNull(it)?.takeIf { title -> title.isNotBlank() } ?: section.title) }
+        .filter { (_, title) -> title.isNotBlank() }
+        .distinctBy { (_, title) -> title }
 }
 
 /** The CCLI number is drawn as the licence line reads on a printed sheet: "CCLI #22025". */
@@ -141,13 +149,13 @@ internal fun SongTitleSlideContent(
     section: LyricSection,
     settings: SongSettings,
     target: SongStyleTarget,
-    langDisplay: String,
+    languages: List<Int>,
     isKey: Boolean,
     scaleFactor: Float,
     contentAlignment: Alignment,
     modifier: Modifier = Modifier,
 ) {
-    val lines = titleSlideLines(section, settings, langDisplay)
+    val lines = titleSlideLines(section, settings, languages)
     // Fills the box it is given -- the whole slide, or the band -- so the vertical alignment the
     // rail configures places the block, exactly as it places the lyrics.
     Box(modifier = modifier.fillMaxSize(), contentAlignment = contentAlignment) {
@@ -162,7 +170,9 @@ internal fun SongTitleSlideContent(
                 val fallbackFont = if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
                 TitleSlideText(
                     line = line,
-                    style = settings.elementStyle(line.element, target),
+                    // A title in a second language takes that language's own title profile, as it
+                    // does above a verse; the number and the credits have one whatever the language.
+                    style = settings.elementStyle(line.element, target, line.language),
                     // The number ahead of the title in the same paragraph, in its own style, so a
                     // long title wraps under it as one line of text would -- laid out as two
                     // boxes side by side, the title centred in what was left beside the number.

@@ -44,6 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.content_bible_translations_all_selected
+import churchpresenter.composeapp.generated.resources.content_bible_translations_enabled
+import churchpresenter.composeapp.generated.resources.content_bible_translations_footer
+import churchpresenter.composeapp.generated.resources.content_bible_translations_header
 import churchpresenter.composeapp.generated.resources.content_outputs_clear_all
 import churchpresenter.composeapp.generated.resources.content_outputs_done
 import churchpresenter.composeapp.generated.resources.content_outputs_enabled_subtitle
@@ -54,6 +58,10 @@ import churchpresenter.composeapp.generated.resources.content_outputs_quick_sele
 import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
 import churchpresenter.composeapp.generated.resources.content_outputs_section_content
 import churchpresenter.composeapp.generated.resources.content_outputs_select_all
+import churchpresenter.composeapp.generated.resources.content_song_languages_all_selected
+import churchpresenter.composeapp.generated.resources.content_song_languages_enabled
+import churchpresenter.composeapp.generated.resources.content_song_languages_footer
+import churchpresenter.composeapp.generated.resources.content_song_languages_header
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
@@ -137,7 +145,7 @@ internal fun ContentOutputsMonitorPreview(
     bibleLabel: String,
     songsLabel: String,
     translationNames: List<String>,
-    songLangModes: List<Pair<String, String>>,
+    songLanguageChoices: List<TranslationChoiceDisplay>,
 ) {
     val bibleListFormat = stringResource(Res.string.content_outputs_preview_translations)
     val chips = buildList {
@@ -151,9 +159,18 @@ internal fun ContentOutputsMonitorPreview(
                 else bibleLabel
             )
         }
-        if (assignment.songMode != Constants.SONG_LANG_OFF) {
-            val mode = songLangModes.find { it.first == assignment.songMode }?.second
-            add(if (mode != null) "$songsLabel · $mode" else songsLabel)
+        if (assignment.showSongs) {
+            // The same rule the Bible chip above uses: an empty selection is every language.
+            val names = songLanguageChoices.map { it.title }
+            val shownNames = assignment.songTranslations
+                .filter { it in names.indices }
+                .map { names[it] }
+                .ifEmpty { if (assignment.songTranslations.isEmpty()) names else emptyList() }
+            add(
+                if (names.size > 1 && shownNames.isNotEmpty())
+                    bibleListFormat.format(songsLabel, shownNames.joinToString(", "))
+                else songsLabel
+            )
         }
         (contentGroup + backgroundGroup).offeredTo(assignment)
             .forEach { if (it.getter(assignment)) add(it.label) }
@@ -286,8 +303,8 @@ internal fun ContentOutputsDialog(
     bibleLabel: String,
     songsLabel: String,
     translationNames: List<String>,
-    translationDisplays: List<BibleTranslationDisplay>,
-    songLangModes: List<Pair<String, String>>,
+    translationDisplays: List<TranslationChoiceDisplay>,
+    songLanguageChoices: List<TranslationChoiceDisplay>,
     webDeckLinkTooltip: String,
     webSnapshotTooltip: String,
     isBrowserSource: Boolean,
@@ -390,6 +407,11 @@ internal fun ContentOutputsDialog(
                     ContentTranslationCell(
                         modifier = Modifier.weight(1f),
                         label = bibleLabel,
+                        tags = TranslationPickerTags.BIBLE,
+                        headerText = stringResource(Res.string.content_bible_translations_header),
+                        enabledFormat = stringResource(Res.string.content_bible_translations_enabled),
+                        footerText = stringResource(Res.string.content_bible_translations_footer),
+                        allSelectedText = stringResource(Res.string.content_bible_translations_all_selected),
                         translations = translationDisplays,
                         showing = assignment.showBible,
                         selected = assignment.bibleTranslations,
@@ -410,18 +432,39 @@ internal fun ContentOutputsDialog(
                             )
                         },
                     )
-                    ContentLangCell(
+                    // The same checklist the Bible gets, for the same reason: a song may now carry
+                    // up to four languages and an output may want any subset of them. The old
+                    // single-choice picker could say "language 2" but never "languages 1 and 3".
+                    ContentTranslationCell(
                         modifier = Modifier.weight(1f),
                         label = songsLabel,
-                        modes = songLangModes,
-                        currentMode = assignment.songMode,
-                        onSelect = { value ->
-                            val updated = if (value == Constants.SONG_LANG_OFF)
-                                assignment.copy(songMode = value, songLookAhead = false)
-                            else
-                                assignment.copy(songMode = value)
-                            onApply(updated)
-                        }
+                        tags = TranslationPickerTags.SONG,
+                        headerText = stringResource(Res.string.content_song_languages_header),
+                        enabledFormat = stringResource(Res.string.content_song_languages_enabled),
+                        footerText = stringResource(Res.string.content_song_languages_footer),
+                        allSelectedText = stringResource(Res.string.content_song_languages_all_selected),
+                        // Four single digits fit where the Bible's "+N more" count goes, so the
+                        // trigger names the languages themselves rather than making the operator
+                        // open the menu to find out which ones are on.
+                        listSelectedCodes = true,
+                        translations = songLanguageChoices,
+                        showing = assignment.showSongs,
+                        selected = assignment.songTranslations,
+                        onShowingChange = { on ->
+                            onApply(
+                                if (on) assignment.copy(songMode = Constants.SONG_LANG_BOTH)
+                                else assignment.copy(songMode = Constants.SONG_LANG_OFF, songLookAhead = false),
+                            )
+                        },
+                        onSelectedChange = { next -> onApply(assignment.copy(songTranslations = next)) },
+                        onShowAndSelect = { next ->
+                            onApply(
+                                assignment.copy(
+                                    songMode = Constants.SONG_LANG_BOTH,
+                                    songTranslations = next,
+                                ),
+                            )
+                        },
                     )
                 }
                 shownContent.chunked(2).forEach { pair ->
@@ -456,7 +499,7 @@ internal fun ContentOutputsDialog(
                 bibleLabel = bibleLabel,
                 songsLabel = songsLabel,
                 translationNames = translationNames,
-                songLangModes = songLangModes,
+                songLanguageChoices = songLanguageChoices,
             )
           }
         },

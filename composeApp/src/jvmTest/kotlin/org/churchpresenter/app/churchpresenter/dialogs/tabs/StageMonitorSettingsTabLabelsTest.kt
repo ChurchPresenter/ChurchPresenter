@@ -39,8 +39,8 @@ class StageMonitorSettingsTabLabelsTest {
         // The zone size card: the diagram\'s instruction, the fields under it and the shortcuts.
         "Drag a divider to trade space between neighbors. Each row shares 100%." to 1,
         "SELECTED" to 1,
-        "WIDTH (%)" to 1,
-        "ROW HEIGHT (%)" to 1,
+        "WIDTH %" to 1,
+        "ROW H %" to 1,
         "Reset" to 1,
         "Even out" to 1,
         "This row" to 1,
@@ -51,9 +51,9 @@ class StageMonitorSettingsTabLabelsTest {
         "67" to 1,
         // Every cell of the diagram labels itself "width × row height". Classic\'s top row splits
         // evenly over a bottom row with a narrower middle cell.
-        "50%\u00D767%" to 2,
-        "36%\u00D733%" to 2,
-        "28%\u00D733%" to 1,
+        "50% \u00D7 67%" to 2,
+        "36% \u00D7 33%" to 2,
+        "28% \u00D7 33%" to 1,
 
         // The layout catalog: one tab per zone count, and the name of the layout in force.
         "2 zones" to 1, "3 zones" to 1, "4 zones" to 1, "5 zones" to 1,

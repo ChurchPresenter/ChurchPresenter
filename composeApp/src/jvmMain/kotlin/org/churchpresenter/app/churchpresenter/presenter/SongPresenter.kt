@@ -48,6 +48,9 @@ import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackgroun
 import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
+import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.utils.Constants
@@ -129,6 +132,14 @@ fun SongPresenter(
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
     languageOverride: String = "",
+    /**
+     * Which of the song's languages this output draws, by position — `0` being the primary.
+     *
+     * Empty defers to [languageOverride], which is what every output holds until someone picks
+     * explicitly, so an installation that never opens the picker presents exactly as it did when a
+     * song could only have two languages.
+     */
+    languageSelection: List<Int> = emptyList(),
     showChords: Boolean = false,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
@@ -141,6 +152,18 @@ fun SongPresenter(
             if (isLowerThird) ss.lowerThirdLanguageDisplay else ss.fullscreenLanguageDisplay
         }
     }
+
+    // How many languages the song carries, and which of them this output draws.
+    //
+    // The whole song *and* the slide in hand: the auto-fit below measures every section, so it has
+    // to divide the frame the way every slide will be laid out -- but `allLyricSections` is only
+    // supplied by outputs that offer look-ahead, and reading it alone left every other caller
+    // believing a bilingual song had one language and drawing only the primary.
+    val availableLanguages = maxOf(
+        lyricSection.translations.size,
+        allLyricSections.maxOfOrNull { it.translations.size } ?: 0,
+    ) + 1
+    val activeLanguages = songLanguageSelection(effectiveLangDisplay, languageSelection, availableLanguages)
 
     // Resolve font families per fullscreen / lower third
     val titleFontFamily = remember(ss.titleFontType, ss.titleLowerThirdFontType, isLowerThird) {
@@ -401,17 +424,19 @@ fun SongPresenter(
         val autoFitFontSize = remember(allLyricSections, isLowerThird, lookAheadEnabled, languageOverride, appSettings.songSettings, appSettings.projectionSettings) {
             if (allLyricSections.isEmpty()) null
             else {
-                val ld = effectiveLangDisplay
-                val hasBilingual = allLyricSections.any { it.secondaryLines.isNotEmpty() }
-                val sideBySide = ld == Constants.SONG_LANG_BOTH &&
-                        ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && hasBilingual
-                val topBottom = ld == Constants.SONG_LANG_BOTH &&
-                        ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM && hasBilingual
+                // How many blocks the frame is actually divided into. One language fills it; more
+                // split it, in whichever direction the layout says.
+                val drawnLanguages = activeLanguages.size.coerceAtLeast(1)
+                val sideBySide = drawnLanguages > 1 &&
+                        ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
+                val topBottom = drawnLanguages > 1 &&
+                        ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM
 
                 val fullWidth = 1920 - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight -
                         appSettings.songSettings.marginLeft - appSettings.songSettings.marginRight
-                // In side-by-side bilingual mode, each column gets half the width
-                val refWidth = if (sideBySide) fullWidth / 2 else fullWidth
+                // Side by side, each language gets a column; the fit has to hold in the narrowest
+                // of them, which with equal weights is every one of them.
+                val refWidth = if (sideBySide) fullWidth / drawnLanguages else fullWidth
                 val fullHeight = if (isLowerThird) {
                     (1080 * appSettings.songSettings.lowerThirdHeightPercent / 100) -
                             appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
@@ -420,8 +445,8 @@ fun SongPresenter(
                     1080 - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 }
-                // In top/bottom bilingual mode, each language gets half the height
-                val refHeight = if (topBottom) fullHeight / 2 else fullHeight
+                // Stacked, each language gets a band of the height on the same reasoning.
+                val refHeight = if (topBottom) fullHeight / drawnLanguages else fullHeight
                 // The same tracking the lines are drawn with. Spacing is stored in pixels against
                 // the profile's own font size and converted to `em`, so the value does not change
                 // as the search tries sizes -- it scales with whichever one it settles on, exactly
@@ -449,16 +474,24 @@ fun SongPresenter(
                 val sectionsForFit = if (lookAheadEnabled && fitIsLineMode) {
                     // Line mode: pair each line with the next line across all sections
                     val allLines = allLyricSections.flatMap { it.lines }
-                    val allSecLines = allLyricSections.flatMap { it.secondaryLines }
+                    // Every language's lines end to end, in the same order, so line `i` of one is
+                    // line `i` of the others. Built per language rather than for the secondary
+                    // alone -- the fit has to measure the longest line of whichever language has
+                    // it, not of the first two.
+                    val allLanguageLines = List(availableLanguages) { language ->
+                        allLyricSections.flatMap { it.allLanguageLines().getOrElse(language) { emptyList() } }
+                    }
                     allLines.indices.map { i ->
                         val nextLine = allLines.getOrElse(i + 1) { allLines[i] }
                         LyricSection(
                             lines = listOf(allLines[i], nextLine),
-                            secondaryLines = if (allSecLines.isNotEmpty()) {
-                                val secLine = allSecLines.getOrElse(i) { "" }
-                                val secNext = allSecLines.getOrElse(i + 1) { secLine }
-                                listOf(secLine, secNext)
-                            } else emptyList()
+                            translations = allLanguageLines.drop(1).map { languageLines ->
+                                if (languageLines.isEmpty()) SectionTranslation()
+                                else {
+                                    val line = languageLines.getOrElse(i) { "" }
+                                    SectionTranslation(lines = listOf(line, languageLines.getOrElse(i + 1) { line }))
+                                }
+                            },
                         )
                     }
                 } else if (lookAheadEnabled) {
@@ -468,8 +501,12 @@ fun SongPresenter(
                         if (next != null) {
                             section.copy(
                                 lines = section.lines + next.lines,
-                                secondaryLines = if (section.secondaryLines.isNotEmpty() || next.secondaryLines.isNotEmpty())
-                                    section.secondaryLines + next.secondaryLines else emptyList()
+                                translations = List(availableLanguages - 1) { language ->
+                                    val own = section.translations.getOrNull(language)
+                                    val following = next.translations.getOrNull(language)
+                                    val joined = own?.lines.orEmpty() + following?.lines.orEmpty()
+                                    SectionTranslation(title = own?.title.orEmpty(), lines = joined)
+                                },
                             )
                         } else section
                     }
@@ -521,8 +558,6 @@ fun SongPresenter(
                 )
             }
         }
-        // Bilingual flags for layout decisions (outside remember, always fresh)
-        val langDisplay = effectiveLangDisplay
         val autoFitEnabled = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSizeAutoFit else ss.lookAheadFontSizeAutoFit
         } else {
@@ -681,7 +716,7 @@ fun SongPresenter(
                         section = section,
                         settings = ss,
                         target = songTarget,
-                        langDisplay = langDisplay,
+                        languages = activeLanguages,
                         isKey = isKey,
                         scaleFactor = scaleFactor,
                         contentAlignment = if (isLowerThird) {
@@ -713,7 +748,6 @@ fun SongPresenter(
                     }
                     // Look-ahead portion uses same display mode as the screen
                     val laDisplayMode = displayMode
-                    val laLangDisplay = effectiveLangDisplay
                     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
                     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
@@ -724,39 +758,21 @@ fun SongPresenter(
                         allLyricSections.getOrNull(displaySectionIndex + 1)?.takeIf { it.lines.isNotEmpty() }
                     } else null
 
-                    // Build main display lines (current section)
-                    val mainLines: List<String>
-                    if (isLineMode && effectiveLineIndex >= 0 && effectiveLineIndex < allDisplayLines.size) {
-                        mainLines = listOf(allDisplayLines[effectiveLineIndex])
-                    } else {
-                        mainLines = allDisplayLines
-                    }
-
-                    // Build look-ahead primary lines
-                    val laLines: List<String> = if (nextSection != null) {
-                        if (laIsLineMode) {
-                            // Look-ahead = 1 line: next line after current position
-                            if (isLineMode && effectiveLineIndex >= 0) {
-                                // Main is line mode: if there's a next line in same section, show it; otherwise first line of next section
-                                if (effectiveLineIndex + 1 < allDisplayLines.size) {
-                                    listOf(allDisplayLines[effectiveLineIndex + 1])
-                                } else {
-                                    listOf(nextSection.lines.first())
-                                }
-                            } else {
-                                // Main is verse mode: first line of next section
-                                listOf(nextSection.lines.first())
-                            }
-                        } else {
-                            // Look-ahead = 1 verse: all lines of next section
-                            nextSection.lines
-                        }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until allDisplayLines.size - 1) {
-                        // No next section but there's a next line in the current section
-                        if (laIsLineMode) listOf(allDisplayLines[effectiveLineIndex + 1]) else emptyList()
-                    } else {
-                        emptyList()
-                    }
+                    // Every language this output draws, sliced the same way: the words now and the
+                    // words next. One call rather than the four parallel `val`s this replaced --
+                    // primary main, primary look-ahead, secondary main, secondary look-ahead --
+                    // which could not grow past two languages without becoming eight.
+                    val languageBlocks = songLanguageBlocks(
+                        section = section,
+                        nextSection = nextSection,
+                        languages = activeLanguages,
+                        modes = SongSlideModes(
+                            lookAheadEnabled = lookAheadEnabled,
+                            isLineMode = isLineMode,
+                            laIsLineMode = laIsLineMode,
+                            lineIndex = effectiveLineIndex,
+                        ),
+                    )
 
                     // Sliced the way the words are: one row in line mode, the section in verse
                     // mode, the look-ahead's own row after it.
@@ -780,94 +796,19 @@ fun SongPresenter(
                         else -> nextSection.chordLines.ifEmpty { nextSection.lines }
                     }
 
-                    // Combine main + look-ahead
+                    // The title row shows the leading drawn language's title, so an output set to
+                    // one language shows that language's title rather than the primary's. Falls
+                    // back to the song's own whenever that language has none, which is the common
+                    // case: a second language is often lyrics with no separate title.
+                    val titles = section.allLanguageTitles()
+                    val effectiveTitle = languageBlocks.firstOrNull()
+                        ?.let { titles.getOrNull(it.index) }
+                        ?.takeIf { it.isNotEmpty() }
+                        ?: section.title
 
-                    // Build main secondary lines (for bilingual)
-                    val mainSecondaryLines: List<String> = if (section.secondaryLines.isNotEmpty()) {
-                        if (isLineMode && effectiveLineIndex >= 0 && effectiveLineIndex < section.secondaryLines.size) {
-                            listOf(section.secondaryLines[effectiveLineIndex])
-                        } else {
-                            section.secondaryLines
-                        }
-                    } else emptyList()
-
-                    // Build look-ahead secondary lines
-                    val laSecondaryLines: List<String> = if (nextSection != null && nextSection.secondaryLines.isNotEmpty()) {
-                        if (laIsLineMode) {
-                            if (isLineMode && effectiveLineIndex >= 0) {
-                                if (effectiveLineIndex + 1 < (section.secondaryLines.size)) {
-                                    listOf(section.secondaryLines[effectiveLineIndex + 1])
-                                } else {
-                                    listOf(nextSection.secondaryLines.first())
-                                }
-                            } else {
-                                listOf(nextSection.secondaryLines.first())
-                            }
-                        } else {
-                            nextSection.secondaryLines
-                        }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until section.secondaryLines.size - 1) {
-                        if (laIsLineMode) listOf(section.secondaryLines[effectiveLineIndex + 1]) else emptyList()
-                    } else {
-                        emptyList()
-                    }
-
-
-                    // Apply language display to main lines
-                    val effectiveDisplayLines: List<String>
-                    val effectiveSecondaryDisplayLines: List<String>
-
-                    when (langDisplay) {
-                        Constants.SONG_LANG_SECONDARY -> {
-                            effectiveDisplayLines = mainSecondaryLines.ifEmpty { mainLines }
-                            effectiveSecondaryDisplayLines = emptyList()
-                        }
-                        Constants.SONG_LANG_BOTH -> {
-                            effectiveDisplayLines = mainLines
-                            effectiveSecondaryDisplayLines = mainSecondaryLines
-                        }
-                        else -> { // PRIMARY
-                            effectiveDisplayLines = mainLines
-                            effectiveSecondaryDisplayLines = emptyList()
-                        }
-                    }
-
-                    // Apply language display to look-ahead lines
-                    val effectiveLaLines: List<String>
-                    val effectiveLaSecondaryLines: List<String>
-
-                    when (laLangDisplay) {
-                        Constants.SONG_LANG_SECONDARY -> {
-                            effectiveLaLines = laSecondaryLines.ifEmpty { laLines }
-                            effectiveLaSecondaryLines = emptyList()
-                        }
-                        Constants.SONG_LANG_BOTH -> {
-                            effectiveLaLines = laLines
-                            effectiveLaSecondaryLines = laSecondaryLines
-                        }
-                        else -> { // PRIMARY
-                            effectiveLaLines = laLines
-                            effectiveLaSecondaryLines = emptyList()
-                        }
-                    }
-
-                    // Combined primary lines with look-ahead start index
-                    val combinedPrimaryLines = effectiveDisplayLines + effectiveLaLines
-                    val primaryLaStart = if (effectiveLaLines.isNotEmpty()) effectiveDisplayLines.size else -1
-
-                    // Combined secondary lines with look-ahead start index
-                    val combinedSecondaryLines = effectiveSecondaryDisplayLines + effectiveLaSecondaryLines
-                    val secondaryLaStart = if (effectiveLaSecondaryLines.isNotEmpty()) effectiveSecondaryDisplayLines.size else -1
-
-                    val effectiveTitle = if (langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()) {
-                        section.secondaryTitle
-                    } else {
-                        section.title
-                    }
-
-                    val hasBilingual = combinedSecondaryLines.isNotEmpty()
+                    val isMultiLanguage = languageBlocks.size > 1
                     // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
-                    // through to the top/bottom bilingual branch below, which already special-cases
+                    // through to the stacked branch below, which already special-cases
                     // isLowerThird (true for vertical too) with a compact stacked layout.
                     val useSideBySide = appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && !isLowerThirdVertical
 
@@ -878,17 +819,7 @@ fun SongPresenter(
                         blurRadius = 12f * scaleFactor * laShadowSizeMul
                     )
                     val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
-                    // Four blocks over the same lines, because two things divide them and each
-                    // division wants its own box. A lyric line and a look-ahead line are drawn by
-                    // one composable but styled by two profiles; and on a bilingual slide each
-                    // language is its own block of text, so the two translations get a box each
-                    // rather than one box drawn around the pair of them. All four containers go on
-                    // the same column below -- each paints only the lines that reported to it, and
-                    // a block nobody reported to draws nothing.
-                    val lyricsBlock = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
-                    val lyricsBlockSecondary = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
-                    val laBlock = rememberTextBlockBackdrop(laStyleProfile.backdrop)
-                    val laBlockSecondary = rememberTextBlockBackdrop(laStyleProfile.backdrop)
+
                     val lookAheadTextStyle = TextStyle(
                         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
                         fontStyle = if (laItalic) FontStyle.Italic else FontStyle.Normal,
@@ -903,49 +834,93 @@ fun SongPresenter(
                     } else laFontSize
                     val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
+                    // How each language draws its lyric lines and its look-ahead lines.
+                    //
+                    // Language 0, and every language that has not asked for a look of its own, get
+                    // the values already resolved above rather than a freshly derived copy of them.
+                    // That is not just an optimisation: those values carry the look-ahead slide's
+                    // own overrides and the key-output white, and rebuilding them from the stored
+                    // profile alone would quietly drop both.
+                    val primaryLyricStyling = SongLineStyling(
+                        profile = lyricsStyleProfile,
+                        color = lyricsColor,
+                        fontFamily = lyricsFontFamily,
+                        fontSize = scaledLyricsFontSize,
+                        textStyle = lyricsTextStyleScaled,
+                    )
+                    val primaryLaStyling = SongLineStyling(
+                        profile = laStyleProfile,
+                        color = laColor,
+                        fontFamily = laFontFamily,
+                        fontSize = scaledLaFontSize,
+                        textStyle = lookAheadTextStyle,
+                    )
+                    val lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+                    val languageLyricStyling = List(MAX_SONG_TRANSLATIONS) { language ->
+                        if (!ss.languageOverridesStyle(language)) primaryLyricStyling
+                        else songLineStyling(
+                            profile = ss.elementStyle(lyricsElement, songTarget, language),
+                            autoFitFontSize = if (autoFitEnabled) autoFitFontSize else null,
+                            scaleFactor = scaleFactor,
+                            isKey = isKey,
+                            shadowOf = ::scaleElementShadow,
+                        )
+                    }
+                    val languageLaStyling = List(MAX_SONG_TRANSLATIONS) { language ->
+                        if (!ss.languageOverridesStyle(language)) primaryLaStyling
+                        else songLineStyling(
+                            profile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget, language),
+                            autoFitFontSize = if (laAutoFitEnabled) autoFitFontSize else null,
+                            scaleFactor = scaleFactor,
+                            isKey = isKey,
+                            shadowOf = ::scaleElementShadow,
+                        )
+                    }
+
+                    // Two blocks per language, because two things divide the lines and each division
+                    // wants its own box. A lyric line and a look-ahead line are drawn by one
+                    // composable but styled by two profiles; and each language is its own block of
+                    // text, so they get a box each rather than one box drawn around all of them.
+                    // Every container goes on the same column below -- each paints only the lines
+                    // that reported to it, and a block nobody reported to draws nothing.
+                    //
+                    // Always [MAX_SONG_TRANSLATIONS] of each, never `languageBlocks.size`: these are
+                    // `remember`ed, and a list whose length changes with the song would shift every
+                    // later block's slot in the composition and hand a language the box that had
+                    // been painting another one's lines.
+                    val lyricsBlocks = List(MAX_SONG_TRANSLATIONS) {
+                        rememberTextBlockBackdrop(languageLyricStyling[it].profile.backdrop)
+                    }
+                    val laBlocks = List(MAX_SONG_TRANSLATIONS) {
+                        rememberTextBlockBackdrop(languageLaStyling[it].profile.backdrop)
+                    }
+
                     /**
-                     * [secondary] says which language this line belongs to, and so which backdrop
-                     * block it reports to. Both languages are drawn by this one composable with the
-                     * same `lineIdx`, so sharing a block would have the second overwrite the first
-                     * line for line -- and would frame the two of them as one block of text, which
-                     * they are not.
+                     * [language] says which language this line belongs to, and so which styling
+                     * draws it and which backdrop block it reports to. Every language is drawn by
+                     * this one composable with the same `lineIdx`, so sharing a block would have
+                     * each overwrite the last line for line -- and would frame all of them as one
+                     * block of text, which they are not.
                      */
                     @Composable
-                    fun LyricLine(lineIdx: Int, line: String, laStart: Int, secondary: Boolean = false) {
+                    fun LyricLine(lineIdx: Int, line: String, laStart: Int, language: Int = 0) {
                         val isLookAheadLine = laStart >= 0 && lineIdx >= laStart
-                        val isTitleLine = isTitleSlide && !isLookAheadLine
-                        val lineProfile = when {
-                            isLookAheadLine -> laStyleProfile
-                            isTitleLine -> titleStyleProfile
-                            else -> lyricsStyleProfile
-                        }
+                        val styling =
+                            if (isLookAheadLine) languageLaStyling[language] else languageLyricStyling[language]
+                        val lineProfile = styling.profile
                         // The next-section lines take their own alignment once one is set; blank
                         // keeps them following the look-ahead's, which is what they always did.
-                        val lineAlign = when {
-                            isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank() ->
-                                getTextAlign(laStyleProfile.horizontalAlignment)
-                            isTitleLine -> titleHorizontalAlignment
-                            else -> lyricsHorizontalAlignment
+                        val lineAlign = if (isLookAheadLine && lineProfile.horizontalAlignment.isNotBlank()) {
+                            getTextAlign(lineProfile.horizontalAlignment)
+                        } else {
+                            lyricsHorizontalAlignment
                         }
-                        val lineBlock = when {
-                            isLookAheadLine && secondary -> laBlockSecondary
-                            isLookAheadLine -> laBlock
-                            secondary -> lyricsBlockSecondary
-                            else -> lyricsBlock
-                        }
+                        val lineBlock = if (isLookAheadLine) laBlocks[language] else lyricsBlocks[language]
                         Text(
                             modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
                             textAlign = lineAlign,
-                            fontFamily = when {
-                                isLookAheadLine -> laFontFamily
-                                isTitleLine -> titleFontFamily
-                                else -> lyricsFontFamily
-                            },
-                            fontSize = when {
-                                isLookAheadLine -> scaledLaFontSize
-                                isTitleLine -> scaledTitleFontSize
-                                else -> scaledLyricsFontSize
-                            },
+                            fontFamily = styling.fontFamily,
+                            fontSize = styling.fontSize,
                             softWrap = appSettings.songSettings.wordWrap,
                             text = styledDisplayText(
                                 line,
@@ -953,16 +928,8 @@ fun SongPresenter(
                                 spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
                                 spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
                             ),
-                            color = when {
-                                isLookAheadLine -> laColor
-                                isTitleLine -> titleColor
-                                else -> lyricsColor
-                            },
-                            style = when {
-                                isLookAheadLine -> lookAheadTextStyle
-                                isTitleLine -> titleTextStyleScaled
-                                else -> lyricsTextStyleScaled
-                            },
+                            color = styling.color,
+                            style = styling.textStyle,
                             onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
                         )
                     }
@@ -990,35 +957,43 @@ fun SongPresenter(
 
                     // Invisible placeholder to reserve space for missing lookahead on last section
                     @Composable
-                    fun LookAheadPlaceholder() {
-                        if (lookAheadEnabled && effectiveLaLines.isEmpty() && effectiveDisplayLines.isNotEmpty()) {
+                    fun LookAheadPlaceholder(block: SongLanguageBlock) {
+                        if (lookAheadEnabled && block.lookAheadLines.isEmpty() && block.lines.isNotEmpty()) {
                             if (!laIsLineMode) {
                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                             }
+                            val placeholderStyling = languageLaStyling[block.index]
                             Column(modifier = Modifier.alpha(0f)) {
-                                effectiveDisplayLines.forEach { line ->
+                                block.lines.forEach { line ->
                                     Text(
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = lyricsHorizontalAlignment,
-                                        fontFamily = laFontFamily,
-                                        fontSize = scaledLaFontSize,
+                                        fontFamily = placeholderStyling.fontFamily,
+                                        fontSize = placeholderStyling.fontSize,
                                         softWrap = appSettings.songSettings.wordWrap,
                                         text = line,
-                                        color = laColor,
-                                        style = lookAheadTextStyle
+                                        color = placeholderStyling.color,
+                                        style = placeholderStyling.textStyle,
                                     )
                                 }
                             }
                         }
                     }
 
-                    /** The chart when this output draws one, the plain lines otherwise. */
+                    /**
+                     * One language's lines — as a chord chart where this output draws one, and as
+                     * plain lines everywhere else.
+                     *
+                     * The chart is the primary's alone: chords are written against the primary's
+                     * words, and a chart drawn over a translation would put them over syllables
+                     * they do not belong to.
+                     */
                     @Composable
-                    fun PrimaryLines() {
-                        if (mainChartRows.isEmpty()) {
-                            combinedPrimaryLines.forEachIndexed { idx, line ->
-                                LookAheadSpacer(idx, primaryLaStart)
-                                LyricLine(idx, line, primaryLaStart)
+                    fun LanguageLines(block: SongLanguageBlock) {
+                        if (block.index != 0 || mainChartRows.isEmpty()) {
+                            block.allLines.forEachIndexed { idx, line ->
+                                LookAheadSpacer(idx, block.lookAheadStart)
+                                LyricLine(idx, line, block.lookAheadStart, block.index)
                             }
                             return
                         }
@@ -1137,15 +1112,13 @@ fun SongPresenter(
                             (numberConfigured && !numberInCorner &&
                                     effectiveSongNumberPosition == Constants.BELOW_VERSE)
 
-                    // Outer column fills the content area; title/number at edges, lyrics centered
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .then(lyricsBlock.containerModifier)
-                            .then(lyricsBlockSecondary.containerModifier)
-                            .then(laBlock.containerModifier)
-                            .then(laBlockSecondary.containerModifier)
-                    ) {
+                    // Outer column fills the content area; title/number at edges, lyrics centered.
+                    // Every language's two containers go on it -- each paints only the lines that
+                    // reported to it, so the ones for languages this slide does not draw cost a
+                    // modifier and nothing else.
+                    val blockContainers = (lyricsBlocks + laBlocks)
+                        .fold(Modifier as Modifier) { acc, block -> acc.then(block.containerModifier) }
+                    Column(modifier = Modifier.fillMaxSize().then(blockContainers)) {
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 
@@ -1158,62 +1131,55 @@ fun SongPresenter(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
-                                if (hasBilingual) {
+                                if (isMultiLanguage) {
                                     if (useSideBySide) {
+                                        // A column each, equally weighted. `SpaceEvenly` and equal
+                                        // weights agree at any count, so three and four languages
+                                        // divide the width the way two always did.
                                         Row(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                                PrimaryLines()
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
-                                            }
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                                combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart, secondary = true)
+                                            languageBlocks.forEach { block ->
+                                                Column(
+                                                    modifier = Modifier.weight(1f),
+                                                    verticalArrangement = Arrangement.Bottom,
+                                                ) {
+                                                    LanguageLines(block)
+                                                    EndOfSongIndicator()
+                                                    LookAheadPlaceholder(block)
                                                 }
+                                            }
+                                        }
+                                    } else if (isLowerThird) {
+                                        // Lower third: compact stack, no height splitting -- a band
+                                        // is too short to give each language a share of it.
+                                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                            languageBlocks.forEachIndexed { position, block ->
+                                                if (position > 0) {
+                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                }
+                                                LanguageLines(block)
                                                 EndOfSongIndicator()
-                                                LookAheadPlaceholder()
+                                                LookAheadPlaceholder(block)
                                             }
                                         }
                                     } else {
-                                        // Top/bottom bilingual layout
-                                        if (isLowerThird) {
-                                            // Lower third: compact layout, no height splitting
-                                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                PrimaryLines()
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
-                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                                combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart, secondary = true)
+                                        // Full screen: a band of the height each, equally weighted.
+                                        val bandAlignment = contentAlignment
+                                        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                                            languageBlocks.forEachIndexed { position, block ->
+                                                if (position > 0) {
+                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                                                 }
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
-                                            }
-                                        } else {
-                                            // Full screen: each language gets its own half
-                                            val halfAlignment = contentAlignment
-                                            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                                    contentAlignment = bandAlignment,
+                                                ) {
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                        PrimaryLines()
+                                                        LanguageLines(block)
                                                         EndOfSongIndicator()
-                                                        LookAheadPlaceholder()
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                                    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                        combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                            LookAheadSpacer(idx, secondaryLaStart)
-                                                            LyricLine(idx, line, secondaryLaStart, secondary = true)
-                                                        }
-                                                        EndOfSongIndicator()
-                                                        LookAheadPlaceholder()
+                                                        LookAheadPlaceholder(block)
                                                     }
                                                 }
                                             }
@@ -1221,13 +1187,16 @@ fun SongPresenter(
                                     }
                                 } else {
                                     // Single language layout
+                                    val onlyBlock = languageBlocks.firstOrNull()
                                     Column(
                                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                         verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                                     ) {
-                                        PrimaryLines()
-                                        EndOfSongIndicator()
-                                        LookAheadPlaceholder()
+                                        if (onlyBlock != null) {
+                                            LanguageLines(onlyBlock)
+                                            EndOfSongIndicator()
+                                            LookAheadPlaceholder(onlyBlock)
+                                        }
                                     }
                                 }
                             }

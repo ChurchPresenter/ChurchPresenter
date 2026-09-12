@@ -28,6 +28,7 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -576,7 +577,7 @@ class PresenterLowerThirdScreenshotTest {
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
-        secondaryLines = secondary,
+        translations = listOf(SectionTranslation(lines = secondary)),
         chordLines = chords,
     )
 

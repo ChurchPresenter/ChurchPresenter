@@ -17,6 +17,7 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.songBackgroundFrom
@@ -438,12 +439,11 @@ class SongsViewModel(
         val song = items[idx]
         return LyricSection(
             title = song.title,
-            secondaryTitle = song.secondaryTitle,
             songNumber = song.number.toIntOrNull() ?: 0,
             // The whole-song slide is the lyrics verbatim, headers and all — but a directive is
             // configuration rather than words, and putting one on screen is never right.
             lines = song.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
-            secondaryLines = song.secondaryLyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+            translations = song.presentableTranslations(),
             type = Constants.SECTION_TYPE_SONG
         ).withBackgroundsOf(song)
     }
@@ -461,25 +461,30 @@ class SongsViewModel(
     fun getLyricSections(song: SongItem): List<LyricSection> {
         // Split primary lyrics into sections
         val primarySections = splitLyricsIntoSections(song.lyrics, song.title, song.number)
-        // Split secondary lyrics into sections (matched by order)
-        val secondarySections = if (song.secondaryLyrics.isNotEmpty()) {
-            splitLyricsIntoSections(song.secondaryLyrics, song.secondaryTitle, song.number)
-        } else {
-            emptyList()
+        // Split each further language into sections (matched by order), keeping a language that has
+        // no lyrics as an empty group rather than dropping it — position is what identifies a
+        // language to an output, so a gap has to stay a gap.
+        val extras = song.extraTranslations()
+        val extraGroups = extras.map { translation ->
+            if (translation.lyrics.isEmpty()) emptyList()
+            else slideGroupsOf(splitLyricsIntoSections(translation.lyrics, translation.title, song.number))
         }
 
-        // Merge primary and secondary by section first and by slide within it, rather than by a
-        // single running index. The two are the same thing until one language uses a manual slide
-        // break the other does not — and then a flat index would slide every later section under
-        // the wrong translation. Pairing per section keeps the damage inside the section that
-        // disagrees: its extra slides come out untranslated, and verse 3 still meets verse 3.
-        val secondaryGroups = slideGroupsOf(secondarySections)
+        // Merge the languages by section first and by slide within it, rather than by a single
+        // running index. They are the same thing until one language uses a manual slide break
+        // another does not — and then a flat index would slide every later section under the wrong
+        // translation. Pairing per section keeps the damage inside the section that disagrees: its
+        // extra slides come out untranslated, and verse 3 still meets verse 3.
         val sections = slideGroupsOf(primarySections).flatMapIndexed { group, slides ->
-            val secondarySlides = secondaryGroups.getOrNull(group)
             slides.mapIndexed { slide, section ->
                 section.copy(
-                    secondaryTitle = song.secondaryTitle,
-                    secondaryLines = secondarySlides?.getOrNull(slide)?.lines ?: emptyList(),
+                    translations = extras.mapIndexed { language, translation ->
+                        SectionTranslation(
+                            title = translation.title,
+                            lines = extraGroups[language].getOrNull(group)?.getOrNull(slide)?.lines
+                                ?: emptyList(),
+                        )
+                    },
                 )
             }
         }
@@ -829,16 +834,16 @@ class SongsViewModel(
         val query = _searchQuery.value.trim()
         if (query.isNotEmpty()) {
             filtered = when (_filterType.value) {
-                Constants.CONTAINS -> filtered.filter {
-                    "${it.number}. ${it.title}".contains(query, ignoreCase = true)
+                Constants.CONTAINS -> filtered.filter { song ->
+                    song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) }
                 }
-                Constants.STARTS_WITH -> filtered.filter {
-                    it.title.startsWith(query, ignoreCase = true) ||
-                    it.number.startsWith(query, ignoreCase = true)
+                Constants.STARTS_WITH -> filtered.filter { song ->
+                    song.number.startsWith(query, ignoreCase = true) ||
+                        song.searchTitles().any { it.startsWith(query, ignoreCase = true) }
                 }
-                Constants.EXACT_MATCH -> filtered.filter {
-                    it.title.trim().equals(query, ignoreCase = true) ||
-                    it.number.trim().equals(query, ignoreCase = true)
+                Constants.EXACT_MATCH -> filtered.filter { song ->
+                    song.number.trim().equals(query, ignoreCase = true) ||
+                        song.searchTitles().any { it.trim().equals(query, ignoreCase = true) }
                 }
                 else -> filtered
             }
@@ -867,6 +872,20 @@ class SongsViewModel(
             }
         }
     }
+
+    /**
+     * Every name this song can be found by: the primary title and each translation's.
+     *
+     * A bilingual song is one song with several names, and the list only ever shows the primary --
+     * so an operator who knows a song by the name half the room sings could not find it by typing
+     * that name. All three filter types match against every one of them; the number is still the
+     * number, which no translation has its own of.
+     *
+     * Blanks are dropped rather than matched: a language that carries lyrics but no title of its
+     * own would otherwise make an empty query-shaped match on the [Constants.EXACT_MATCH] path.
+     */
+    private fun SongItem.searchTitles(): List<String> =
+        (listOf(title) + extraTranslations().map { it.title }).filter { it.isNotBlank() }
 
     /** [items] in the order [column] asks for; the sort itself, without the selection bookkeeping. */
     private fun sortedBy(column: String, items: List<SongItem>): List<SongItem> = when (column) {
