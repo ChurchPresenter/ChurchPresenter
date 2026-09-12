@@ -33,6 +33,8 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_lottie_gen_window_title
 import churchpresenter.composeapp.generated.resources.bible_lottie_unsupported_note
+import churchpresenter.composeapp.generated.resources.song_lottie_unsupported_note
+import churchpresenter.composeapp.generated.resources.image_files_filter
 import churchpresenter.composeapp.generated.resources.lottie_files_filter
 import churchpresenter.composeapp.generated.resources.lower_third_animation
 import churchpresenter.composeapp.generated.resources.lower_third_animation_clear
@@ -46,6 +48,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.lottiegen.band.BandContentKind
 import org.churchpresenter.lottiegen.band.BibleLottieGenApp
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.ReferencePlacement
@@ -130,24 +133,21 @@ internal fun LottieBandPickerRow(
 }
 
 /**
- * The Bible tab's own doorway to the same setting the Background tab's Bible Lower Third surface
- * edits: the switch turns the band's type to Lottie and back, the row picks the file, and the
- * generator writes a new one straight into it.
+ * A content tab's own doorway to the same setting the Background tab's lower-third surface edits:
+ * the switch turns the band's type to Lottie and back, the row picks the file, and the generator
+ * writes a new one straight into it. [scope] says whose band — the Bible's or the songs'.
  */
 @Composable
 internal fun LowerThirdAnimationSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     generatorDir: File?,
+    scope: BackgroundScope = BackgroundScope.BIBLE_LOWER_THIRD,
 ) {
-    val config = settings.backgroundSettings.bibleLowerThirdBackground
+    val config = settings.backgroundSettings.configFor(scope)
     val usesLottie = config.backgroundType == Constants.BACKGROUND_LOTTIE
     fun update(transform: (BackgroundConfig) -> BackgroundConfig) = onSettingsChange { s ->
-        s.copy(
-            backgroundSettings = s.backgroundSettings.copy(
-                bibleLowerThirdBackground = transform(s.backgroundSettings.bibleLowerThirdBackground),
-            ),
-        )
+        s.copy(backgroundSettings = s.backgroundSettings.withConfigFor(scope, transform(s.backgroundSettings.configFor(scope))))
     }
     var showGenerator by remember { mutableStateOf(false) }
     SettingsSection(title = stringResource(Res.string.lower_third_animation)) {
@@ -175,7 +175,10 @@ internal fun LowerThirdAnimationSection(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    stringResource(Res.string.bible_lottie_unsupported_note),
+                    stringResource(
+                        if (scope == BackgroundScope.SONG_LOWER_THIRD) Res.string.song_lottie_unsupported_note
+                        else Res.string.bible_lottie_unsupported_note,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -185,7 +188,7 @@ internal fun LowerThirdAnimationSection(
     if (showGenerator && generatorDir != null) {
         BibleLottieGeneratorWindow(
             outputDir = generatorDir,
-            seed = bibleLottieSeed(settings),
+            seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) }
                 showGenerator = false
@@ -209,40 +212,88 @@ internal fun BibleLottieGeneratorWindow(
         width = GENERATOR_WINDOW_WIDTH,
         height = GENERATOR_WINDOW_HEIGHT,
     )
+    val imageFilter = stringResource(Res.string.image_files_filter)
     DialogWindow(
         onCloseRequest = onClose,
         state = dialogState,
         title = stringResource(Res.string.bible_lottie_gen_window_title),
         resizable = true,
     ) {
-        BibleLottieGenApp(outputDir = outputDir, onFileSaved = onSaved, seed = seed, embedded = true)
+        BibleLottieGenApp(
+            outputDir = outputDir,
+            onFileSaved = onSaved,
+            seed = seed,
+            embedded = true,
+            // The app's native chooser, which shows the pictures themselves, opened on the stock
+            // library so the bundled and downloaded backgrounds are the first thing offered.
+            pickImage = {
+                FileChooser.platformInstance.chooseSingle(
+                    path = stockBackgroundsDir(),
+                    filters = listOf(FileNameExtensionFilter(imageFilter, "jpg", "jpeg", "png", "webp")),
+                    title = "",
+                    selectDirectory = false,
+                )?.toFile()
+            },
+        )
     }
 }
 
 /**
  * What the generator starts from: the band the outputs actually draw — the first output's size at
- * the Bible band's height — and the first translation's lower-third type, so the sample in the
- * preview is set the way the verse will be.
+ * that content's band height — and the content's lower-third typography, so the sample in the
+ * preview is set the way the live text will be.
  */
-internal fun bibleLottieSeed(settings: AppSettings): BibleLottieGenConfig {
+internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): BibleLottieGenConfig {
     val output = previewOutputSize(settings)
-    val bible = settings.bibleSettings
-    val fraction = bible.lowerThirdHeightPercent / PERCENT
-    val canvasH = (output.height * fraction).roundToInt().coerceAtLeast(1)
     val pxPerPoint = output.height / REFERENCE_OUTPUT_HEIGHT
-    val stack = bible.translationList()
-    val t0 = stack.firstOrNull() ?: return BibleLottieGenConfig(canvasW = output.width, canvasH = canvasH)
-    return BibleLottieGenConfig(
-        canvasW = output.width,
-        canvasH = canvasH,
-        layout = if (stack.size >= 2) SlotLayout.SIDE_BY_SIDE else SlotLayout.SINGLE,
-        referencePlacement = if (t0.lowerThirdReferencePosition == Constants.POSITION_ABOVE) ReferencePlacement.ABOVE
-        else ReferencePlacement.BELOW,
-        previewFontFamily = t0.lowerThirdTextFontType,
-        previewTextSizePx = (t0.lowerThirdTextFontSize * pxPerPoint).roundToInt(),
-        previewReferenceSizePx = (t0.lowerThirdReferenceFontSize * pxPerPoint).roundToInt(),
-        previewTextColor = t0.lowerThirdTextColor,
-        previewReferenceColor = t0.lowerThirdReferenceColor,
-        previewBold = t0.lowerThirdTextBold,
-    )
+    return if (scope == BackgroundScope.SONG_LOWER_THIRD) {
+        val song = settings.songSettings
+        val canvasH = (output.height * song.lowerThirdHeightPercent / PERCENT).roundToInt().coerceAtLeast(1)
+        BibleLottieGenConfig(
+            canvasW = output.width,
+            canvasH = canvasH,
+            kind = BandContentKind.SONG,
+            layout = SlotLayout.SINGLE,
+            referencePlacement = if (song.titleLowerThirdPosition == Constants.ABOVE_VERSE) ReferencePlacement.ABOVE
+            else ReferencePlacement.BELOW,
+            previewFontFamily = song.lyricsLowerThirdFontType,
+            previewTextSizePx = (song.lyricsLowerThirdFontSize * pxPerPoint).roundToInt(),
+            previewReferenceSizePx = (song.titleLowerThirdFontSize * pxPerPoint).roundToInt(),
+            previewTextColor = song.lyricsLowerThirdColor,
+            previewReferenceColor = song.titleLowerThirdColor,
+            previewBold = song.lyricsLowerThirdBold,
+            previewText1 = SONG_SAMPLE_LINES,
+            previewReference1 = SONG_SAMPLE_TITLE,
+        )
+    } else {
+        val bible = settings.bibleSettings
+        val canvasH = (output.height * bible.lowerThirdHeightPercent / PERCENT).roundToInt().coerceAtLeast(1)
+        val stack = bible.translationList()
+        val t0 = stack.firstOrNull() ?: return BibleLottieGenConfig(canvasW = output.width, canvasH = canvasH)
+        BibleLottieGenConfig(
+            canvasW = output.width,
+            canvasH = canvasH,
+            layout = if (stack.size >= 2) SlotLayout.SIDE_BY_SIDE else SlotLayout.SINGLE,
+            referencePlacement = if (t0.lowerThirdReferencePosition == Constants.POSITION_ABOVE) ReferencePlacement.ABOVE
+            else ReferencePlacement.BELOW,
+            previewFontFamily = t0.lowerThirdTextFontType,
+            previewTextSizePx = (t0.lowerThirdTextFontSize * pxPerPoint).roundToInt(),
+            previewReferenceSizePx = (t0.lowerThirdReferenceFontSize * pxPerPoint).roundToInt(),
+            previewTextColor = t0.lowerThirdTextColor,
+            previewReferenceColor = t0.lowerThirdReferenceColor,
+            previewBold = t0.lowerThirdTextBold,
+        )
+    }
 }
+
+/** The sample a song band is previewed with: two lines of a public-domain hymn, and its title. */
+private const val SONG_SAMPLE_LINES = "Amazing grace, how sweet the sound\nThat saved a wretch like me"
+private const val SONG_SAMPLE_TITLE = "Amazing Grace"
+
+/** Where the app keeps downloaded and materialised stock backgrounds; the home directory if it has none yet. */
+private fun stockBackgroundsDir(): java.nio.file.Path {
+    val dir = File(System.getProperty("user.home"), STOCK_BACKGROUNDS_DIR)
+    return (if (dir.isDirectory) dir else File(System.getProperty("user.home"))).toPath()
+}
+
+private const val STOCK_BACKGROUNDS_DIR = ".churchpresenter/stock-backgrounds"

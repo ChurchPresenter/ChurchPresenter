@@ -378,13 +378,18 @@ internal fun usesBibleLottieBand(config: BackgroundConfig): Boolean =
     config.backgroundType == Constants.BACKGROUND_LOTTIE && config.backgroundLottie.isNotBlank()
 
 /**
- * The Lottie band template the clear and verse-change choreography is timed against: the global
- * Bible lower third's, or failing that the first per-output override's. Null means no output
- * uses one and the classic fade applies.
+ * The Lottie band template the clear and text-change choreography for [mode] is timed against:
+ * that content's global lower third, or failing that the first per-output override's. Null means
+ * no output uses one and the classic fade applies — and always null for content with no band.
  */
-internal fun bibleLottieBandPath(settings: AppSettings): String? {
-    val candidates = listOf(settings.backgroundSettings.bibleLowerThirdBackground) +
-        settings.projectionSettings.screenAssignments.mapNotNull { it.backgroundOverride?.bibleLowerThirdBackground }
+internal fun lottieBandPath(settings: AppSettings, mode: Presenting): String? {
+    fun BackgroundSettings.bandFor(): BackgroundConfig? = when (mode) {
+        Presenting.BIBLE -> bibleLowerThirdBackground
+        Presenting.LYRICS -> songLowerThirdBackground
+        else -> null
+    }
+    val candidates = listOfNotNull(settings.backgroundSettings.bandFor()) +
+        settings.projectionSettings.screenAssignments.mapNotNull { it.backgroundOverride?.bandFor() }
     return candidates.firstOrNull { usesBibleLottieBand(it) }?.backgroundLottie
 }
 

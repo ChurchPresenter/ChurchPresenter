@@ -30,7 +30,7 @@ internal enum class BackgroundScope(
     val lowerThird: Boolean,
     val inheritType: String?,
     val offersGradient: Boolean = false,
-    /** Only the Bible band plays a Lottie template today; a song band will when its presenter can. */
+    /** Whether this band can play a Lottie template in place of a backdrop: the two content bands can. */
     val offersLottie: Boolean = false,
 ) {
     DEFAULT(BackgroundScopeGroup.DEFAULTS, lowerThird = false, inheritType = null),
@@ -53,6 +53,7 @@ internal enum class BackgroundScope(
         lowerThird = true,
         inheritType = Constants.BACKGROUND_DEFAULT,
         offersGradient = true,
+        offersLottie = true,
     );
 
     /** The surface this one falls through to when its type is [inheritType]. */

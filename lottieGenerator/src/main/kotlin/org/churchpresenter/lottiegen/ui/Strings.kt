@@ -379,8 +379,6 @@ object Strings {
     val bandEntrance: String get() = bundle.getString("band_entrance")
     val bandTextAnimation: String get() = bundle.getString("band_text_animation")
     val bandLayout: String get() = bundle.getString("band_layout")
-    val bandReference: String get() = bundle.getString("band_reference")
-    val bandReferenceHeight: String get() = bundle.getString("band_reference_height")
     val bandColorBackground: String get() = bundle.getString("band_color_background")
     val bandColorAccent: String get() = bundle.getString("band_color_accent")
     val bandColorGradient: String get() = bundle.getString("band_color_gradient")
@@ -402,15 +400,9 @@ object Strings {
     val bandTimeBandOut: String get() = bundle.getString("band_time_band_out")
     val bandTickerSpeed: String get() = bundle.getString("band_ticker_speed")
     val bandPreviewFont: String get() = bundle.getString("band_preview_font")
-    val bandPreviewTextSize: String get() = bundle.getString("band_preview_text_size")
-    val bandPreviewReferenceSize: String get() = bundle.getString("band_preview_reference_size")
     val bandPreviewBold: String get() = bundle.getString("band_preview_bold")
     val bandPreviewTextColor: String get() = bundle.getString("band_preview_text_color")
     val bandPreviewReferenceColor: String get() = bundle.getString("band_preview_reference_color")
-    val bandPreviewText1: String get() = bundle.getString("band_preview_text_1")
-    val bandPreviewReference1: String get() = bundle.getString("band_preview_reference_1")
-    val bandPreviewText2: String get() = bundle.getString("band_preview_text_2")
-    val bandPreviewReference2: String get() = bundle.getString("band_preview_reference_2")
     val bandFileName: String get() = bundle.getString("band_file_name")
     val bandSave: String get() = bundle.getString("band_save")
     val bandSaveHint: String get() = bundle.getString("band_save_hint")
@@ -424,6 +416,12 @@ object Strings {
     /** Labels for the band enums, looked up by `band_<prefix>_<constant>`. */
     fun bandEnumLabel(prefix: String, constant: String): String =
         bundle.getString("band_${prefix}_${constant.lowercase()}")
+
+    /**
+     * A band label that reads differently for scripture and for a song — "Reference" against
+     * "Title", "Verse 1" against "Lyrics 1" — looked up by `band_<key>_<bible|song>`.
+     */
+    fun bandLabel(key: String, kind: String): String = bundle.getString("band_${key}_$kind")
 }
 
 /**

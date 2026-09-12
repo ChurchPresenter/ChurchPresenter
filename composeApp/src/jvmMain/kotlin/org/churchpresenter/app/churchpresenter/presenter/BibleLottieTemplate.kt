@@ -31,6 +31,9 @@ internal data class LottieSlotBox(val x: Float, val y: Float, val w: Float, val 
 /** How the generator asked the player to move a slot's text, if it asked at all. */
 internal enum class BandTextMotion { NONE, TYPEWRITER, TYPEWRITER_WORDS, TICKER }
 
+/** A justification the template pins; null means the Bible settings decide. */
+internal enum class BandTextAlign { LEFT, CENTER, RIGHT }
+
 /**
  * A Bible band template as the player reads it: the JSON, the segments the generator marked, the
  * text slots and their boxes, and the metadata under `cp`. Anything the file lacks gets a
@@ -48,6 +51,8 @@ internal class BibleLottieTemplate(
     val layerNames: Set<String>,
     val textMotion: BandTextMotion,
     val tickerPxPerSecond: Float,
+    val textAlign: BandTextAlign? = null,
+    val referenceAlign: BandTextAlign? = null,
 ) {
     fun segment(name: String): LottieSegment = segments.getValue(name)
 
@@ -139,6 +144,8 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
             textMotion = readTextMotion(meta),
             tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
+            textAlign = readAlign(meta, "textAlign"),
+            referenceAlign = readAlign(meta, "referenceAlign"),
         )
     }
 } catch (_: IllegalArgumentException) {
@@ -184,6 +191,14 @@ private fun firstTextDocument(layer: JsonObject): JsonObject? =
     ((layer["t"] as? JsonObject)?.get("d") as? JsonObject)
         ?.get("k")?.jsonArray?.firstOrNull()?.jsonObject
         ?.get("s") as? JsonObject
+
+private fun readAlign(meta: JsonObject?, key: String): BandTextAlign? =
+    when (meta?.get(key)?.jsonPrimitive?.contentOrNull) {
+        "LEFT" -> BandTextAlign.LEFT
+        "CENTER" -> BandTextAlign.CENTER
+        "RIGHT" -> BandTextAlign.RIGHT
+        else -> null
+    }
 
 private fun readTextMotion(meta: JsonObject?): BandTextMotion =
     when (meta?.get("textAnimation")?.jsonPrimitive?.contentOrNull) {

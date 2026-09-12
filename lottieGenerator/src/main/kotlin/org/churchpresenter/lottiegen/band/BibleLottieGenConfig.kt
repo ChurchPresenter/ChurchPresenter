@@ -103,6 +103,15 @@ enum class SlotLayout { SINGLE, SIDE_BY_SIDE, STACKED }
 
 enum class ReferencePlacement { ABOVE, BELOW }
 
+/**
+ * How a slot's text is justified. `FOLLOW_SETTINGS` leaves it to the Bible settings at play time
+ * (the preview centres it); the other three are pinned by the template and override them.
+ */
+enum class BandTextAlign { FOLLOW_SETTINGS, LEFT, CENTER, RIGHT }
+
+/** What the band is for: the words in the generator change with it, the file does not. */
+enum class BandContentKind { BIBLE, SONG }
+
 /** The four colour slots a style draws from; each can be a colour or a picture. */
 enum class BandColorRole { BACKGROUND, SECOND, ACCENT, TERTIARY }
 
@@ -124,11 +133,14 @@ data class BandImage(val data: String, val width: Int, val height: Int, val name
 data class BibleLottieGenConfig(
     val canvasW: Int = DEFAULT_CANVAS_W,
     val canvasH: Int = DEFAULT_CANVAS_H,
+    val kind: BandContentKind = BandContentKind.BIBLE,
     val bandStyle: BandStyle = BandStyle.SOLID_BAR,
     val entrance: BandEntrance = BandEntrance.SLIDE_UP,
     val textAnimation: TextAnimation = TextAnimation.FADE,
     val layout: SlotLayout = SlotLayout.SINGLE,
     val referencePlacement: ReferencePlacement = ReferencePlacement.BELOW,
+    val textAlign: BandTextAlign = BandTextAlign.FOLLOW_SETTINGS,
+    val referenceAlign: BandTextAlign = BandTextAlign.FOLLOW_SETTINGS,
     val bgColor: String = "#101820",
     val bgAlpha: Int = DEFAULT_BG_ALPHA,
     val accentColor: String = "#D54141",

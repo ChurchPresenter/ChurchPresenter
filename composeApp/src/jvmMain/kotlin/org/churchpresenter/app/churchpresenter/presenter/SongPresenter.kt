@@ -67,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
+import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import java.io.File
@@ -130,6 +131,10 @@ fun SongPresenter(
     crossfadeEnabled: Boolean = false,
     languageOverride: String = "",
     showChords: Boolean = false,
+    /** Only read by the Lottie band; the default is a settled band, which is what previews want. */
+    bandClock: BibleBandClock = BibleBandClock(),
+    /** The line the Lottie band shows — the driver's, which lags [displayLineIndex] while the text swaps. */
+    bandLineIndex: Int = displayLineIndex,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -299,6 +304,36 @@ fun SongPresenter(
     )
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.songLowerThirdBackground
     else appSettings.backgroundSettings.songBackground
+
+    // A Lottie band draws the whole band itself — text included — so it replaces everything
+    // below; a file that is missing or is not a template falls through to the classic band.
+    if (isLowerThird && usesBibleLottieBand(bgConfig)) {
+        val template by rememberBibleLottieTemplate(bgConfig.backgroundLottie)
+        val loaded = template
+        if (loaded != null) {
+            val lowerThirdFraction = ss.lowerThirdHeightPercent / PERCENT
+            Box(modifier.fillMaxSize()) {
+                AboveBandFill(
+                    fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
+                    bandFraction = lowerThirdFraction,
+                )
+                SongLottieBand(
+                    template = loaded,
+                    section = lyricSection,
+                    settings = ss,
+                    languageDisplay = effectiveLangDisplay,
+                    lineIndex = bandLineIndex,
+                    allSections = allLyricSections,
+                    displaySectionIndex = displaySectionIndex,
+                    bandFraction = lowerThirdFraction,
+                    bandClock = bandClock,
+                    isKey = isKey,
+                    showBackground = showBackground,
+                )
+            }
+            return
+        }
+    }
 
     // A song can carry its own background in its .song file; while that song is live it wins over
     // the Background settings tab, and the quick tray's live pick wins over both. A media path that

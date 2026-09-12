@@ -85,11 +85,19 @@ class PresenterManager {
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
 
     /**
-     * Where the Bible Lottie band is in its entrance / hold / verse change / exit. Driven by
-     * `PresenterTransitionEffects`; every output maps it onto its own template.
+     * Where the Lottie lower-third band — Bible or song, whichever is live — is in its entrance /
+     * hold / text change / exit. Driven by `PresenterTransitionEffects`; every output maps it
+     * onto its own template.
      */
-    private val _bibleBandClock = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
-    val bibleBandClock: State<BibleBandClock> = _bibleBandClock
+    private val _lottieBandClock = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    val lottieBandClock: State<BibleBandClock> = _lottieBandClock
+
+    /**
+     * The lyric line the Lottie band shows. Follows [songDisplayLineIndex], but only once the
+     * band has played the old line out, so the text does not change under a running animation.
+     */
+    private val _bandSongLineIndex = mutableStateOf(-1)
+    val bandSongLineIndex: State<Int> = _bandSongLineIndex
 
     // Previous content for crossfade (both old and new visible simultaneously)
     private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
@@ -371,8 +379,12 @@ class PresenterManager {
         _bibleTransitionAlpha.value = alpha
     }
 
-    fun setBibleBandClock(clock: BibleBandClock) {
-        _bibleBandClock.value = clock
+    fun setLottieBandClock(clock: BibleBandClock) {
+        _lottieBandClock.value = clock
+    }
+
+    fun setBandSongLineIndex(index: Int) {
+        _bandSongLineIndex.value = index
     }
 
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {

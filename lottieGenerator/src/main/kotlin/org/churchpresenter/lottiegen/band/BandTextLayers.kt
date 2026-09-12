@@ -24,6 +24,7 @@ internal class TextSlot(
     val sampleText: String,
     val fontSizePx: Double,
     val color: String,
+    val isReference: Boolean = false,
 )
 
 /**
@@ -41,7 +42,13 @@ internal fun LottieBuilder.addTextSlot(slot: TextSlot, cfg: BibleLottieGenConfig
     addFont(cfg.previewFontFamily, weight)
     val fittedSize = previewFittedSize(slot, cfg, weight)
     val wrapBox = previewWrapBox(slot, cfg, weight, fittedSize)
-    val justify = if (cfg.textAnimation == TextAnimation.TICKER) JUSTIFY_LEFT else JUSTIFY_CENTRE
+    val align = if (slot.isReference) cfg.referenceAlign else cfg.textAlign
+    val justify = when {
+        cfg.textAnimation == TextAnimation.TICKER && !slot.isReference -> JUSTIFY_LEFT
+        align == BandTextAlign.LEFT -> JUSTIFY_LEFT
+        align == BandTextAlign.RIGHT -> JUSTIFY_RIGHT
+        else -> JUSTIFY_CENTRE
+    }
 
     fun run(color: String) = TextRun(
         text = slot.sampleText,
@@ -158,21 +165,30 @@ private class TextMotion(cfg: BibleLottieGenConfig, private val box: SlotBox, pr
         val dx = if (shadow) SHADOW_OFFSET_PX else 0.0
         val dy = if (shadow) SHADOW_OFFSET_PX else 0.0
         val rest = at(dx, dy)
+        val still = LottieBuilder.staticPropArray(dx, dy, 0.0)
         return when (anim) {
-            TextAnimation.FADE -> LottieBuilder.defaultTransform(
-                opacity = LottieBuilder.animatedProp(
-                    keyframes(KeyframeInput(0.0, jsonArrayOf(0.0)), KeyframeInput(END_PCT, jsonArrayOf(FULL))),
-                ),
-                position = LottieBuilder.staticPropArray(dx, dy, 0.0),
-            )
+            TextAnimation.FADE -> LottieBuilder.defaultTransform(opacity = fade(0.0), position = still)
+            // A slide fades as it moves: half a box of travel alone leaves the text half in view.
             TextAnimation.SLIDE_UP -> slide(at(dx, dy + box.h * SLIDE_FRACTION), rest)
             TextAnimation.SLIDE_DOWN -> slide(at(dx, dy - box.h * SLIDE_FRACTION), rest)
             TextAnimation.SLIDE_LEFT -> slide(at(dx + box.w * SLIDE_FRACTION, dy), rest)
             TextAnimation.SLIDE_RIGHT -> slide(at(dx - box.w * SLIDE_FRACTION, dy), rest)
-            TextAnimation.WIPE, TextAnimation.TYPEWRITER, TextAnimation.TYPEWRITER_WORDS, TextAnimation.TICKER ->
-                LottieBuilder.defaultTransform(position = LottieBuilder.staticPropArray(dx, dy, 0.0))
+            TextAnimation.WIPE -> LottieBuilder.defaultTransform(position = still)
+            // The player reveals or scrolls these itself; the file still fades them at the very
+            // start and end of their segments so a plain player shows them arriving and leaving.
+            TextAnimation.TYPEWRITER, TextAnimation.TYPEWRITER_WORDS, TextAnimation.TICKER ->
+                LottieBuilder.defaultTransform(opacity = fade(QUICK_FADE_END_PCT), position = still)
         }
     }
+
+    /** Opacity 0 → 100 over the in segment; [fullAtPct] > 0 finishes the ramp early, for a quick fade. */
+    private fun fade(fullAtPct: Double): JsonObject = LottieBuilder.animatedProp(
+        keyframes(
+            KeyframeInput(0.0, jsonArrayOf(0.0)),
+            KeyframeInput(if (fullAtPct > 0.0) fullAtPct else END_PCT, jsonArrayOf(FULL)),
+            KeyframeInput(END_PCT, jsonArrayOf(FULL)),
+        ),
+    )
 
     fun matteTransform(): JsonObject {
         val anchor = LottieBuilder.staticPropArray(box.x, box.centerY, 0.0)
@@ -194,6 +210,7 @@ private class TextMotion(cfg: BibleLottieGenConfig, private val box: SlotBox, pr
     }
 
     private fun slide(from: JsonArray, to: JsonArray): JsonObject = LottieBuilder.defaultTransform(
+        opacity = fade(0.0),
         position = LottieBuilder.animatedProp(keyframes(KeyframeInput(0.0, from), KeyframeInput(END_PCT, to))),
     )
 }
@@ -205,9 +222,11 @@ private const val END_PCT = 100.0
 private const val BOLD_WEIGHT = 700
 private const val REGULAR_WEIGHT = 400
 private const val JUSTIFY_LEFT = 0
+private const val JUSTIFY_RIGHT = 1
 private const val JUSTIFY_CENTRE = 2
 private const val LINE_HEIGHT = 1.2
 private const val SLIDE_FRACTION = 0.5
+private const val QUICK_FADE_END_PCT = 20.0
 private const val SHADOW_OFFSET_PX = 4.0
 private const val MATTE_PAD_PX = 4.0
 private const val MIN_PREVIEW_SIZE = 12.0

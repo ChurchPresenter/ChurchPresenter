@@ -1,16 +1,20 @@
 package org.churchpresenter.lottiegen.band.ui
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BandColorRole
 import org.churchpresenter.lottiegen.band.BandEntrance
 import org.churchpresenter.lottiegen.band.BandStyle
+import org.churchpresenter.lottiegen.band.BandTextAlign
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.band.ReferencePlacement
@@ -48,6 +54,8 @@ import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SliderWithLabel
+import kotlinx.coroutines.launch
+import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -68,7 +76,7 @@ private const val MAX_PREVIEW_SIZE = 200f
 
 /** The band generator's left pane: every knob the template has, top to bottom. */
 @Composable
-internal fun BandControlPanel(viewModel: BibleLottieGenViewModel, panelWidth: Dp) {
+internal fun BandControlPanel(viewModel: BibleLottieGenViewModel, panelWidth: Dp, pickImage: (suspend () -> File?)? = null) {
     val scrollState = rememberScrollState()
     Column(modifier = Modifier.fillMaxHeight().width(panelWidth).background(Tokens.PanelBg)) {
         Row(
@@ -78,25 +86,33 @@ internal fun BandControlPanel(viewModel: BibleLottieGenViewModel, panelWidth: Dp
             Text(Strings.bandAppTitle, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Tokens.TitleText)
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(Tokens.CardBorder))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(start = 13.dp, end = 13.dp, top = 10.dp, bottom = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            BandSection(viewModel)
-            LayoutSection(viewModel)
-            AnimationSection(viewModel)
-            PreviewTextSection(viewModel)
-            SaveSection(viewModel)
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(start = 13.dp, end = 13.dp + SCROLLBAR_GUTTER, top = 10.dp, bottom = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
+            ) {
+                BandSection(viewModel, pickImage)
+                LayoutSection(viewModel)
+                AnimationSection(viewModel)
+                PreviewTextSection(viewModel)
+                SaveSection(viewModel)
+            }
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(end = 2.dp),
+            )
         }
     }
 }
 
+private val SCROLLBAR_GUTTER = 10.dp
+private val MENU_MAX_HEIGHT = 380.dp
+
 @Composable
-private fun BandSection(viewModel: BibleLottieGenViewModel) {
+private fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend () -> File?)?) {
     val cfg = viewModel.config
     SectionCard(Strings.bandSectionBand) {
         EnumDropdown(Strings.bandStyle, "style", cfg.bandStyle, BandStyle.entries) { v ->
@@ -107,28 +123,28 @@ private fun BandSection(viewModel: BibleLottieGenViewModel) {
             onColorChange = { c -> viewModel.updateConfig { it.copy(bgColor = c) } },
             onAlphaChange = { a -> viewModel.updateConfig { it.copy(bgAlpha = a) } },
         )
-        RoleImageRow(viewModel, BandColorRole.BACKGROUND)
+        RoleImageRow(viewModel, BandColorRole.BACKGROUND, pickImage)
         if (cfg.bandStyle.usesSecond) {
             ColorPickerRow(
                 Strings.bandColorGradient, cfg.gradientColor, BibleLottieGenConfig.FULL_ALPHA,
                 onColorChange = { c -> viewModel.updateConfig { it.copy(gradientColor = c) } },
                 onAlphaChange = {},
             )
-            RoleImageRow(viewModel, BandColorRole.SECOND)
+            RoleImageRow(viewModel, BandColorRole.SECOND, pickImage)
         }
         ColorPickerRow(
             Strings.bandColorAccent, cfg.accentColor, cfg.accentAlpha,
             onColorChange = { c -> viewModel.updateConfig { it.copy(accentColor = c) } },
             onAlphaChange = { a -> viewModel.updateConfig { it.copy(accentAlpha = a) } },
         )
-        RoleImageRow(viewModel, BandColorRole.ACCENT)
+        RoleImageRow(viewModel, BandColorRole.ACCENT, pickImage)
         if (cfg.bandStyle.usesTertiary) {
             ColorPickerRow(
                 Strings.bandColorThird, cfg.tertiaryColor, cfg.tertiaryAlpha,
                 onColorChange = { c -> viewModel.updateConfig { it.copy(tertiaryColor = c) } },
                 onAlphaChange = { a -> viewModel.updateConfig { it.copy(tertiaryAlpha = a) } },
             )
-            RoleImageRow(viewModel, BandColorRole.TERTIARY)
+            RoleImageRow(viewModel, BandColorRole.TERTIARY, pickImage)
         }
         PxSlider(Strings.bandBorderThickness, cfg.borderThickness, MAX_BORDER_PX) { v ->
             viewModel.updateConfig { it.copy(borderThickness = v) }
@@ -147,8 +163,9 @@ private fun BandSection(viewModel: BibleLottieGenViewModel) {
 
 /** Under a colour row: the picture standing in for that colour, if any, a chooser, and a way to drop it. */
 @Composable
-private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole) {
+private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole, pickImage: (suspend () -> File?)?) {
     val image = viewModel.config.images[role]
+    val scope = rememberCoroutineScope()
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -163,10 +180,14 @@ private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole
         SubtleButton(
             Strings.bandImageChoose,
             onClick = {
-                SwingUtilities.invokeLater {
-                    val chooser = JFileChooser()
-                    chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
-                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) viewModel.loadBandImage(role, chooser.selectedFile)
+                if (pickImage != null) {
+                    scope.launch { pickImage()?.let { viewModel.loadBandImage(role, it) } }
+                } else {
+                    SwingUtilities.invokeLater {
+                        val chooser = JFileChooser()
+                        chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
+                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) viewModel.loadBandImage(role, chooser.selectedFile)
+                    }
                 }
             },
             compact = true,
@@ -180,15 +201,25 @@ private fun RoleImageRow(viewModel: BibleLottieGenViewModel, role: BandColorRole
 @Composable
 private fun LayoutSection(viewModel: BibleLottieGenViewModel) {
     val cfg = viewModel.config
+    val kind = cfg.kind.name.lowercase()
     SectionCard(Strings.bandSectionLayout) {
         EnumDropdown(Strings.bandLayout, "layout", cfg.layout, SlotLayout.entries) { v ->
             viewModel.updateConfig { it.copy(layout = v) }
         }
-        EnumDropdown(Strings.bandReference, "reference", cfg.referencePlacement, ReferencePlacement.entries) { v ->
+        EnumDropdown(
+            Strings.bandLabel("reference", kind), "reference", cfg.referencePlacement, ReferencePlacement.entries,
+            labelOf = { Strings.bandLabel("reference_${it.name.lowercase()}", kind) },
+        ) { v ->
             viewModel.updateConfig { it.copy(referencePlacement = v) }
         }
+        EnumDropdown(Strings.bandLabel("text_align", kind), "align", cfg.textAlign, BandTextAlign.entries) { v ->
+            viewModel.updateConfig { it.copy(textAlign = v) }
+        }
+        EnumDropdown(Strings.bandLabel("reference_align", kind), "align", cfg.referenceAlign, BandTextAlign.entries) { v ->
+            viewModel.updateConfig { it.copy(referenceAlign = v) }
+        }
         SliderWithLabel(
-            label = Strings.bandReferenceHeight,
+            label = Strings.bandLabel("reference_height", kind),
             value = cfg.referenceHeightFraction,
             onValueChange = { v -> viewModel.updateConfig { it.copy(referenceHeightFraction = v) } },
             valueRange = MIN_REFERENCE_FRACTION..MAX_REFERENCE_FRACTION,
@@ -238,6 +269,7 @@ private fun AnimationSection(viewModel: BibleLottieGenViewModel) {
 @Composable
 private fun PreviewTextSection(viewModel: BibleLottieGenViewModel) {
     val cfg = viewModel.config
+    val kind = cfg.kind.name.lowercase()
     CollapsibleSection(Strings.bandSectionPreviewText, initiallyExpanded = true) {
         LottieTextField(
             value = cfg.previewFontFamily,
@@ -260,37 +292,37 @@ private fun PreviewTextSection(viewModel: BibleLottieGenViewModel) {
             checked = cfg.previewBold,
             onCheckedChange = { v -> viewModel.updateConfig { it.copy(previewBold = v) } },
         )
-        PxSlider(Strings.bandPreviewTextSize, cfg.previewTextSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
+        PxSlider(Strings.bandLabel("preview_text_size", kind), cfg.previewTextSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
             viewModel.updateConfig { it.copy(previewTextSizePx = v) }
         }
-        PxSlider(Strings.bandPreviewReferenceSize, cfg.previewReferenceSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
+        PxSlider(Strings.bandLabel("preview_reference_size", kind), cfg.previewReferenceSizePx, MAX_PREVIEW_SIZE, MIN_PREVIEW_SIZE) { v ->
             viewModel.updateConfig { it.copy(previewReferenceSizePx = v) }
         }
         LottieTextField(
             value = cfg.previewText1,
             onValueChange = { v -> viewModel.updateConfig { it.copy(previewText1 = v) } },
-            label = Strings.bandPreviewText1,
+            label = Strings.bandLabel("preview_text_1", kind),
             fillWidth = true,
             singleLine = false,
         )
         LottieTextField(
             value = cfg.previewReference1,
             onValueChange = { v -> viewModel.updateConfig { it.copy(previewReference1 = v) } },
-            label = Strings.bandPreviewReference1,
+            label = Strings.bandLabel("preview_reference_1", kind),
             fillWidth = true,
         )
         if (cfg.layout != SlotLayout.SINGLE) {
             LottieTextField(
                 value = cfg.previewText2,
                 onValueChange = { v -> viewModel.updateConfig { it.copy(previewText2 = v) } },
-                label = Strings.bandPreviewText2,
+                label = Strings.bandLabel("preview_text_2", kind),
                 fillWidth = true,
                 singleLine = false,
             )
             LottieTextField(
                 value = cfg.previewReference2,
                 onValueChange = { v -> viewModel.updateConfig { it.copy(previewReference2 = v) } },
-                label = Strings.bandPreviewReference2,
+                label = Strings.bandLabel("preview_reference_2", kind),
                 fillWidth = true,
             )
         }
@@ -318,24 +350,36 @@ private fun <T : Enum<T>> EnumDropdown(
     prefix: String,
     value: T,
     entries: List<T>,
+    labelOf: (T) -> String = { Strings.bandEnumLabel(prefix, it.name) },
     onSelect: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = it }, Modifier.fillMaxWidth()) {
         LottieDropdown(
             label = label,
-            value = Strings.bandEnumLabel(prefix, value.name),
+            value = labelOf(value),
             expanded = expanded,
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
         )
         ExposedDropdownMenu(expanded, { expanded = false }) {
-            entries.forEach { entry ->
-                DropdownMenuItem(
-                    text = { Text(Strings.bandEnumLabel(prefix, entry.name)) },
-                    onClick = {
-                        onSelect(entry)
-                        expanded = false
-                    },
+            // The list scrolls inside a capped box of its own, with a scrollbar beside it — the
+            // menu's built-in scroll has no bar, and twenty-odd styles run off the screen without one.
+            val listState = rememberScrollState()
+            Box(modifier = Modifier.heightIn(max = MENU_MAX_HEIGHT)) {
+                Column(modifier = Modifier.verticalScroll(listState).padding(end = SCROLLBAR_GUTTER)) {
+                    entries.forEach { entry ->
+                        DropdownMenuItem(
+                            text = { Text(labelOf(entry)) },
+                            onClick = {
+                                onSelect(entry)
+                                expanded = false
+                            },
+                        )
+                    }
+                }
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(listState),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(end = 2.dp),
                 )
             }
         }

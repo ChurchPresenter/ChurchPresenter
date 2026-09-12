@@ -41,6 +41,8 @@ object BibleLottieGenerator {
                 put(METADATA_VERSION, JsonPrimitive(METADATA_VERSION_1))
                 put(METADATA_TEXT_ANIMATION, JsonPrimitive(cfg.textAnimation.name))
                 put(METADATA_TICKER_SPEED, JsonPrimitive(cfg.tickerPxPerSecond))
+                put(METADATA_TEXT_ALIGN, JsonPrimitive(cfg.textAlign.name))
+                put(METADATA_REFERENCE_ALIGN, JsonPrimitive(cfg.referenceAlign.name))
             },
         )
     }
@@ -52,13 +54,15 @@ object BibleLottieGenerator {
     const val METADATA_VERSION_1 = 1
     const val METADATA_TEXT_ANIMATION = "textAnimation"
     const val METADATA_TICKER_SPEED = "tickerPxPerSecond"
+    const val METADATA_TEXT_ALIGN = "textAlign"
+    const val METADATA_REFERENCE_ALIGN = "referenceAlign"
 
     private fun textSlots(cfg: BibleLottieGenConfig, slots: BandSlots): List<TextSlot> = buildList {
         add(TextSlot(BandLayerNames.TEXT_1, slots.text1, cfg.previewText1, cfg.previewTextSizePx.toDouble(), cfg.previewTextColor))
         add(
             TextSlot(
                 BandLayerNames.REFERENCE_1, slots.reference1, cfg.previewReference1,
-                cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor,
+                cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor, isReference = true,
             ),
         )
         val text2 = slots.text2
@@ -68,7 +72,7 @@ object BibleLottieGenerator {
             add(
                 TextSlot(
                     BandLayerNames.REFERENCE_2, reference2, cfg.previewReference2,
-                    cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor,
+                    cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor, isReference = true,
                 ),
             )
         }

@@ -98,6 +98,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 /** The positions of the switch above the preview: the title slide, or one of the two outputs. */
 private enum class StyleSwitch { TITLE_SLIDE, FULL_SCREEN, LOWER_THIRD }
@@ -142,6 +143,8 @@ fun SongSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     presenterManager: PresenterManager? = null,
+    /** Where the band generator saves; null hides its button and leaves the picker. */
+    bibleLowerThirdsDir: File? = null,
 ) {
     val availableFonts = rememberSystemFonts()
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
@@ -184,6 +187,9 @@ fun SongSettingsTab(
                                     s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent))
                                 }
                             },
+                        )
+                        LowerThirdAnimationSection(
+                            settings, onSettingsChange, bibleLowerThirdsDir, scope = BackgroundScope.SONG_LOWER_THIRD,
                         )
                         SongMarginsSection(settings, onSettingsChange)
                     }

@@ -47,6 +47,11 @@ fun BibleLottieGenApp(
     onFileSaved: ((File) -> Unit)?,
     seed: BibleLottieGenConfig = BibleLottieGenConfig(),
     embedded: Boolean = true,
+    /**
+     * How a picture is chosen. A host passes its own native chooser — the one that shows the
+     * pictures rather than their names; null falls back to a plain Swing dialog.
+     */
+    pickImage: (suspend () -> File?)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember(scope) { BibleLottieGenViewModel(scope, outputDir, onFileSaved, seed) }
@@ -56,7 +61,7 @@ fun BibleLottieGenApp(
             var controlPanelWidth by remember { mutableStateOf(DEFAULT_PANEL_WIDTH) }
             val density = LocalDensity.current
             Row(modifier = Modifier.fillMaxSize()) {
-                BandControlPanel(viewModel, controlPanelWidth.dp)
+                BandControlPanel(viewModel, controlPanelWidth.dp, pickImage)
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()

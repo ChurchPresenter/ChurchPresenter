@@ -73,9 +73,12 @@ internal fun fitLottieSlot(
     charWidthAtBase: (Char) -> Float,
 ): FittedSlot {
     if (text.isEmpty() || baseSize <= 0f) return FittedSlot(baseSize.coerceAtLeast(1f), emptyList(), 0f)
+    // A lyric keeps its own line breaks: each written line wraps on its own, as the player does.
     fun linesAt(scale: Float): List<String> {
         val width = if (singleLine) 0f else box.w
-        return wrapLikeLottie(text, width, trackingAtBase * scale) { charWidthAtBase(it) * scale }
+        return text.split('\n').flatMap { line ->
+            wrapLikeLottie(line, width, trackingAtBase * scale) { charWidthAtBase(it) * scale }.ifEmpty { listOf("") }
+        }
     }
     fun widthAt(scale: Float, line: String): Float =
         line.sumOf { (charWidthAtBase(it) * scale + trackingAtBase * scale).toDouble() }.toFloat()

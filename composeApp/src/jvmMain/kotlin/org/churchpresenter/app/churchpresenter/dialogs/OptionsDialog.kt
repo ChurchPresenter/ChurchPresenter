@@ -293,7 +293,8 @@ internal fun OptionsDialogContent(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             TAB_BACKGROUND -> BackgroundSettingsTab(
                                 settings = currentSettings,

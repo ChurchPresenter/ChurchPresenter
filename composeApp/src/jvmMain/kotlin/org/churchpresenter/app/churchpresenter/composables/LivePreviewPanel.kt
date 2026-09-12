@@ -260,7 +260,8 @@ private fun SingleDisplayPreview(
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
-    val bibleBandClock by presenterManager.bibleBandClock
+    val lottieBandClock by presenterManager.lottieBandClock
+    val bandSongLineIndex by presenterManager.bandSongLineIndex
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
@@ -416,7 +417,7 @@ private fun SingleDisplayPreview(
                                     showBackground = showsBackground && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = outputSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations,
-                                    bandClock = bibleBandClock,
+                                    bandClock = lottieBandClock,
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -433,6 +434,8 @@ private fun SingleDisplayPreview(
                                     showBackground = showsBackground && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
+                                    bandClock = lottieBandClock,
+                                    bandLineIndex = bandSongLineIndex,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(

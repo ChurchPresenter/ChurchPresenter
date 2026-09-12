@@ -104,6 +104,7 @@ internal fun BackgroundControlsColumn(
         ) {
             BackgroundTypeSegments(scope = scope, config = config, onConfigChange = onConfigChange)
             BackgroundSourceSection(
+                scope = scope,
                 settings = settings,
                 config = config,
                 onConfigChange = onConfigChange,
@@ -219,6 +220,7 @@ internal fun BackgroundTypeRow(
 /** Whatever the chosen type needs said about it: a color, a file, or a gradient's two ends. */
 @Composable
 private fun BackgroundSourceSection(
+    scope: BackgroundScope,
     settings: AppSettings,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit,
@@ -260,7 +262,7 @@ private fun BackgroundSourceSection(
         }
         Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
-        Constants.BACKGROUND_LOTTIE -> LottieBandSourceSection(settings, config, onConfigChange, bibleLowerThirdsDir)
+        Constants.BACKGROUND_LOTTIE -> LottieBandSourceSection(scope, settings, config, onConfigChange, bibleLowerThirdsDir)
         else -> Unit
     }
 }
@@ -268,6 +270,7 @@ private fun BackgroundSourceSection(
 /** The template picker, and the generator that writes a new template straight into it. */
 @Composable
 private fun LottieBandSourceSection(
+    scope: BackgroundScope,
     settings: AppSettings,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit,
@@ -287,7 +290,7 @@ private fun LottieBandSourceSection(
     if (showGenerator && bibleLowerThirdsDir != null) {
         BibleLottieGeneratorWindow(
             outputDir = bibleLowerThirdsDir,
-            seed = bibleLottieSeed(settings),
+            seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 onConfigChange(config.copy(backgroundLottie = file.absolutePath))
                 showGenerator = false

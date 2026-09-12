@@ -177,7 +177,7 @@ internal fun OffscreenOutputContent(
                                     showBackground = showBg && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
                                     bibleTranslations = screenAssignment.bibleTranslations,
-                                    bandClock = presenterManager.bibleBandClock.value,
+                                    bandClock = presenterManager.lottieBandClock.value,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,
@@ -193,6 +193,8 @@ internal fun OffscreenOutputContent(
                                     showBackground = showBg && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
+                                    bandClock = presenterManager.lottieBandClock.value,
+                                    bandLineIndex = presenterManager.bandSongLineIndex.value,
                                 )
                                 Presenting.PICTURES -> PicturePresenter(
                                     imagePath = presenterManager.displayedImagePath.value,

@@ -959,7 +959,8 @@
     <string name="lower_third_animation_generate">Generate…</string>
     <string name="lower_third_animation_clear">Clear template</string>
     <string name="lottie_files_filter">Lottie files</string>
-    <string name="bible_lottie_gen_window_title">Bible Lower Third Generator</string>
+    <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
+    <string name="song_lottie_unsupported_note">The template decides the layout and where the title sits. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough, word spacing, look-ahead and chords do not apply.</string>
     <string name="bible_lottie_unsupported_note">The template decides the layout, the reference position and how two languages share the band. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough and word spacing do not apply.</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>

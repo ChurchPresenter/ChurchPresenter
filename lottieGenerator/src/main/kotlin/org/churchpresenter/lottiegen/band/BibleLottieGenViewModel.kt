@@ -30,13 +30,13 @@ class BibleLottieGenViewModel(
     private val onFileSaved: ((File) -> Unit)?,
     initial: BibleLottieGenConfig = BibleLottieGenConfig(),
 ) {
-    var config by mutableStateOf(initial)
+    var config by mutableStateOf(BandConfigStorage.restore(initial))
         private set
     var generatedJson by mutableStateOf<String?>(null)
         private set
     var statusText by mutableStateOf("")
         private set
-    var fileName by mutableStateOf(suggestedFileName(initial))
+    var fileName by mutableStateOf(suggestedFileName(config))
         private set
 
     val timeline: BandTimeline get() = BandTimeline.from(config)
@@ -92,6 +92,7 @@ class BibleLottieGenViewModel(
         return try {
             dir.mkdirs()
             file.writeText(body)
+            BandConfigStorage.save(config)
             statusText = Strings.bandStatusSaved(file.name)
             onFileSaved?.invoke(file)
             file
