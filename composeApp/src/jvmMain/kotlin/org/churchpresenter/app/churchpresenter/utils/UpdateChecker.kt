@@ -128,6 +128,10 @@ object UpdateChecker {
         if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) return null
         val downloadUrl = installerUrl(obj) ?: return null
         val latestVersion = obj["tag_name"]?.jsonPrimitive?.contentOrNull?.removePrefix("v") ?: return null
+        // A tag that is not `YY.MAJOR.MINOR` — the rolling `nightly` pre-release — can never be newer
+        // than anything, and because it is re-created every night it is always the newest entry in
+        // the list. Returning it would stop the walk there and hide every real pre-release behind it.
+        if (latestVersion.split(".").any { it.toIntOrNull() == null }) return null
 
         val isPrerelease = obj["prerelease"]?.jsonPrimitive?.booleanOrNull == true
         if (isPrerelease && !includePrereleases) return null
