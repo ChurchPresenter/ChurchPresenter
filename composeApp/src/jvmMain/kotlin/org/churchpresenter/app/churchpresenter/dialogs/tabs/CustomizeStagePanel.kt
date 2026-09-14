@@ -25,6 +25,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
+import org.churchpresenter.app.churchpresenter.presenter.lottieBandLook
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -188,7 +189,7 @@ private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, l
             Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {
                 if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
                     // The template at rest, sample text and all: it is the band, not a fill.
-                    BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
+                    BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize(), config.lottieBandLook())
                 } else {
                     BackgroundConfigFill(config, Modifier.fillMaxSize())
                 }

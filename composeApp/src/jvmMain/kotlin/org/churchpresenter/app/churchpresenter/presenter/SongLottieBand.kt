@@ -161,6 +161,7 @@ internal fun BoxScope.SongLottieBand(
     bandClock: BibleBandClock,
     isKey: Boolean,
     showBackground: Boolean,
+    look: BandLook? = null,
     modifier: Modifier = Modifier,
 ) {
     val hasSecondSlot = template.hasLayer(BibleLottieTemplate.LAYER_TEXT_2)
@@ -168,7 +169,7 @@ internal fun BoxScope.SongLottieBand(
     val slots = remember(page, settings, languageDisplay, hasSecondSlot, isKey) {
         songBandSlots(page, settings, languageDisplay, hasSecondSlot, isKey)
     }
-    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, modifier)
+    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, look, modifier)
 }
 
 /** Between credits sharing one reference line. */

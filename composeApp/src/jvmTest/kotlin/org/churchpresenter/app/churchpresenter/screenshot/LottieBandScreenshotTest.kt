@@ -132,7 +132,7 @@ class LottieBandScreenshotTest {
         "bible_typewriter",
         listOf(verse()),
         template = BibleLottieGenConfig(textAnimation = TextAnimation.TYPEWRITER),
-        clock = BibleBandClock(BibleBandPhase.TEXT_IN, 0.5f),
+        clock = BibleBandClock(BibleBandPhase.TEXT_SWAP, 0.5f),
     )
 
     @Test

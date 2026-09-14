@@ -468,6 +468,7 @@ fun BiblePresenter(
                     bandClock = LocalLottieBandClock.current,
                     isKey = isKey,
                     showBackground = showBackground,
+                    look = bgConfig.lottieBandLook(),
                 )
             }
             return

@@ -41,7 +41,7 @@ class LottieBandDriverTest {
     /** The phases a band goes through on go live and then one text change. */
     private val enterThenSwap = listOf(
         BibleBandPhase.IDLE, BibleBandPhase.ENTER, BibleBandPhase.HOLD,
-        BibleBandPhase.TEXT_OUT, BibleBandPhase.TEXT_IN, BibleBandPhase.HOLD,
+        BibleBandPhase.TEXT_SWAP, BibleBandPhase.HOLD,
     )
 
     @AfterTest
@@ -80,7 +80,7 @@ class LottieBandDriverTest {
     }
 
     @Test
-    fun `a verse change while the band holds swaps the text out and in`() = runComposeUiTest {
+    fun `a verse change while the band holds crossfades the text`() = runComposeUiTest {
         val manager = PresenterManager()
         effects(manager, settings())
         goLive(manager)

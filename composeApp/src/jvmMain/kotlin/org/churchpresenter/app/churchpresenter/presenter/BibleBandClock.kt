@@ -17,11 +17,11 @@ enum class BibleBandPhase {
     /** Pinned on the first hold frame for as long as the verse is up. */
     HOLD,
 
-    /** The old verse leaving: `text_out`. */
-    TEXT_OUT,
-
-    /** The new verse arriving: `text_in` again, with the text already swapped. */
-    TEXT_IN,
+    /**
+     * A crossfade between two verses: the old text plays `text_out` while the new one, already
+     * swapped in, plays `text_in` on a layer of its own, over the same span.
+     */
+    TEXT_SWAP,
 
     /** Everything leaving: `text_out` then `bg_out`. */
     EXIT,

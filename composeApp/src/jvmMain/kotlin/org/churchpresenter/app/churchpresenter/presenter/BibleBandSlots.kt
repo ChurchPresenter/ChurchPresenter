@@ -52,6 +52,7 @@ internal fun BoxScope.BibleLottieBand(
     bandClock: BibleBandClock,
     isKey: Boolean,
     showBackground: Boolean,
+    look: BandLook? = null,
     modifier: Modifier = Modifier,
 ) {
     val primary = verses.firstOrNull() ?: return
@@ -84,7 +85,7 @@ internal fun BoxScope.BibleLottieBand(
             )
         }
     }
-    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, modifier)
+    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, look, modifier)
 }
 
 /** Between two references sharing one line. */

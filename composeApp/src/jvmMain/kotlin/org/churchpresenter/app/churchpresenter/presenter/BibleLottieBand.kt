@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.TextMeasurer
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.compottie.ExperimentalCompottieApi
+import io.github.alexzhirkevich.compottie.LottieComposition
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.dynamic.LottieDynamicProperties
 import io.github.alexzhirkevich.compottie.dynamic.rememberLottieDynamicProperties
@@ -110,6 +112,13 @@ internal data class BandSlotText(val text: String, val style: BandSlotStyle)
  * change it at run time); the rest — string, size, colour, tracking, alignment, box, motion — is
  * set per frame.
  *
+ * A text swap is a crossfade: the words the band showed before the change are kept and drawn on
+ * a second, background-less layer playing `text_out`, while the new words play `text_in` beneath.
+ *
+ * With a [look], the band the file paints is drawn as a pass of its own, faded, blurred and dimmed
+ * the way the classic backdrop is, and the text goes over it untouched — the overlay sits
+ * between the two.
+ *
  * [bandClock] is shared by every output; this composable only maps it onto its own template.
  */
 @OptIn(ExperimentalCompottieApi::class)
@@ -121,7 +130,103 @@ internal fun BoxScope.LottieBand(
     bandClock: BibleBandClock,
     isKey: Boolean,
     showBackground: Boolean,
+    look: BandLook? = null,
     modifier: Modifier = Modifier,
+) {
+    // The faces go into the file itself, so the composition is rebuilt only when a face changes.
+    // Both layers of a swap share it: the outgoing words are one settings change at most behind.
+    val fontsByLayer = remember(slots, template) {
+        buildMap {
+            BibleLottieTemplate.TEXT_LAYERS.forEach { name ->
+                if (!template.hasLayer(name)) return@forEach
+                val font = slots[name]?.style?.font ?: return@forEach
+                put(name, font)
+                put(name + BibleLottieTemplate.SHADOW_SUFFIX, font)
+            }
+        }
+    }
+    val styledJson = remember(template, fontsByLayer) { rewriteTemplateFonts(template.json, fontsByLayer) }
+    val composition by rememberLottieComposition(styledJson) { LottieCompositionSpec.JsonString(styledJson) }
+
+    // The words on screen before the last change, for the layer that plays them out.
+    val history = remember { SlotHistory() }
+    if (history.current != slots) {
+        history.previous = history.current
+        history.current = slots
+    }
+    val outgoing = history.previous?.takeIf { bandClock.phase == BibleBandPhase.TEXT_SWAP }
+
+    val layerModifier = modifier
+        .fillMaxWidth()
+        .fillMaxHeight(bandFraction)
+        .align(Alignment.BottomCenter)
+    val clockState = rememberUpdatedState(bandClock)
+    val progress = { template.progressAt(clockState.value) }
+    val keyFilter = if (isKey) keyColorFilter else null
+    if (look != null && showBackground) {
+        BandBackdrop(look, layerModifier) { backdropModifier ->
+            BandLayer(
+                template = template,
+                composition = composition,
+                slots = slots,
+                bandFraction = bandFraction,
+                progress = progress,
+                // The key is the band's shape and takes no dim; the fill does.
+                colorFilter = keyFilter ?: look.dimFilter(),
+                showBackground = true,
+                showText = false,
+                modifier = backdropModifier,
+            )
+        }
+    }
+    BandLayer(
+        template = template,
+        composition = composition,
+        slots = slots,
+        bandFraction = bandFraction,
+        progress = progress,
+        colorFilter = keyFilter,
+        showBackground = showBackground && look == null,
+        showText = true,
+        modifier = layerModifier,
+    )
+    if (outgoing != null) {
+        BandLayer(
+            template = template,
+            composition = composition,
+            slots = outgoing,
+            bandFraction = bandFraction,
+            progress = { template.outgoingProgressAt(clockState.value) },
+            colorFilter = keyFilter,
+            showBackground = false,
+            showText = true,
+            modifier = layerModifier,
+        )
+    }
+}
+
+/** The slots the band drew last and the ones before them — plain fields, read and written in composition. */
+private class SlotHistory {
+    var current: Map<String, BandSlotText>? = null
+    var previous: Map<String, BandSlotText>? = null
+}
+
+/**
+ * One pass over the template: its text layers bound to [slots], drawn at [progress]. A pass shows
+ * the band, the text, or both — the overlay splits them, a swap's outgoing layer is text alone.
+ */
+@OptIn(ExperimentalCompottieApi::class)
+@Composable
+private fun BandLayer(
+    template: BibleLottieTemplate,
+    composition: LottieComposition?,
+    slots: Map<String, BandSlotText>,
+    bandFraction: Float,
+    progress: () -> Float,
+    colorFilter: ColorFilter?,
+    showBackground: Boolean,
+    showText: Boolean,
+    modifier: Modifier,
 ) {
     val styles = slots.mapValues { it.value.style }
     // A ticker carries its reference at the head of the scrolling line; the reference slot itself
@@ -142,20 +247,6 @@ internal fun BoxScope.LottieBand(
             }
         }
     }
-
-    // The faces go into the file itself, so the composition is rebuilt only when a face changes.
-    val fontsByLayer = remember(styles, template) {
-        buildMap {
-            BibleLottieTemplate.TEXT_LAYERS.forEach { name ->
-                if (!template.hasLayer(name)) return@forEach
-                val font = styles[name]?.font ?: return@forEach
-                put(name, font)
-                put(name + BibleLottieTemplate.SHADOW_SUFFIX, font)
-            }
-        }
-    }
-    val styledJson = remember(template, fontsByLayer) { rewriteTemplateFonts(template.json, fontsByLayer) }
-    val composition by rememberLottieComposition(styledJson) { LottieCompositionSpec.JsonString(styledJson) }
 
     val pxPerPoint = template.height / (bandFraction * REFERENCE_OUTPUT_HEIGHT)
     val measurer = rememberBandTextMeasurer()
@@ -179,8 +270,8 @@ internal fun BoxScope.LottieBand(
             rememberUpdatedState(render)
         }
 
-    val clockState = rememberUpdatedState(bandClock)
     val showBackgroundState = rememberUpdatedState(showBackground)
+    val showTextState = rememberUpdatedState(showText)
     var tickerSeconds by remember { mutableStateOf(0f) }
     if (template.meta.textMotion == BandTextMotion.TICKER) {
         // Restarted on every text change, so a new verse enters from the right edge rather than
@@ -198,10 +289,10 @@ internal fun BoxScope.LottieBand(
             .filter { it.startsWith(BibleLottieTemplate.BAND_PREFIX) }
             .forEach { name -> layer(name) { hidden { !showBackgroundState.value } } }
         renders.forEach { (name, state) ->
-            textLayer(name) { bindSlot(template, state, tickerState, shadow = false) }
+            textLayer(name) { bindSlot(template, state, tickerState, showTextState, shadow = false) }
             if (template.hasLayer(name + BibleLottieTemplate.SHADOW_SUFFIX)) {
                 textLayer(name + BibleLottieTemplate.SHADOW_SUFFIX) {
-                    bindSlot(template, state, tickerState, shadow = true)
+                    bindSlot(template, state, tickerState, showTextState, shadow = true)
                 }
             }
         }
@@ -209,7 +300,7 @@ internal fun BoxScope.LottieBand(
 
     val painter = rememberLottiePainter(
         composition = composition,
-        progress = { template.progressAt(clockState.value) },
+        progress = progress,
         fontManager = LottieFonts,
         dynamicProperties = dynamic,
     )
@@ -217,11 +308,8 @@ internal fun BoxScope.LottieBand(
         painter = painter,
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
-        colorFilter = if (isKey) keyColorFilter else null,
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight(bandFraction)
-            .align(Alignment.BottomCenter),
+        colorFilter = colorFilter,
+        modifier = modifier,
     )
 }
 
@@ -300,6 +388,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     template: BibleLottieTemplate,
     state: State<SlotRender>,
     ticker: State<Float>,
+    shown: State<Boolean>,
     shadow: Boolean,
 ) {
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
@@ -318,7 +407,8 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     }
     hidden {
         val r = state.value
-        !r.visible || (shadow && !r.shadow) || frame < textIn.startFrame || frame > textOut.endFrame
+        !shown.value || !r.visible || (shadow && !r.shadow) ||
+            frame < textIn.startFrame || frame > textOut.endFrame
     }
 }
 
@@ -361,22 +451,4 @@ private fun revealedText(template: BibleLottieTemplate, text: String, frame: Flo
             words.take(ceil(words.size * fraction).toInt()).joinToString(" ")
         }
     }
-}
-
-/**
- * A template at rest — its hold frame, with the sample text it was generated with — for the
- * Background tab's stage. A file that is missing or is not a template draws nothing.
- */
-@Composable
-internal fun BibleLottieStillFrame(path: String, modifier: Modifier = Modifier) {
-    val template by rememberBibleLottieTemplate(path)
-    val loaded = template ?: return
-    val composition by rememberLottieComposition(loaded.json) { LottieCompositionSpec.JsonString(loaded.json) }
-    // No font manager: the sample is drawn from the glyph outlines the generator embedded, which
-    // is exactly how the generator's own preview draws it, so the two agree.
-    val painter = rememberLottiePainter(
-        composition = composition,
-        progress = { loaded.progressAt(BibleBandClock()) },
-    )
-    Image(painter = painter, contentDescription = null, contentScale = ContentScale.FillBounds, modifier = modifier)
 }

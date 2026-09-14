@@ -303,17 +303,14 @@ private fun PresenterManager.bandIsUp(): Boolean {
 }
 
 /**
- * Plays the old text out, applies [swap], plays the new text in and settles on the hold. Lets the
- * entrance land first; a change that interrupted an earlier change picks up the old text's exit
- * where it was rather than snapping it back to fully shown.
+ * Crossfades to the new text: applies [swap] and, in the same snapshot, starts the phase that
+ * plays the old text out and the new text in together, then settles on the hold. Lets the
+ * entrance land first. The band keeps the words it was showing for the outgoing layer, so a
+ * change that interrupts an earlier change fades out whatever was arriving.
  */
 private suspend fun PresenterManager.swapBandText(template: BibleLottieTemplate, swap: () -> Unit) {
     snapshotFlow { lottieBandClock.value.phase }.first { it != BibleBandPhase.ENTER }
-    val start = lottieBandClock.value
-    val outFrom = if (start.phase == BibleBandPhase.TEXT_OUT) start.progress else 0f
-    val outMs = template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT)
-    runBandPhase(BibleBandPhase.TEXT_OUT, (outMs * (1f - outFrom)).toLong(), outFrom)
     swap()
-    runBandPhase(BibleBandPhase.TEXT_IN, template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_IN))
+    runBandPhase(BibleBandPhase.TEXT_SWAP, template.swapMs())
     setLottieBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
 }

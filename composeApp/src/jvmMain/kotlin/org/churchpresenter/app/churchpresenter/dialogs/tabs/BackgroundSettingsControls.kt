@@ -55,10 +55,13 @@ import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.song_background_blur
+import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay
+import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay_hint
 import churchpresenter.composeapp.generated.resources.song_background_dim
 import churchpresenter.composeapp.generated.resources.song_background_look
 import churchpresenter.composeapp.generated.resources.unit_px
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
@@ -113,6 +116,22 @@ internal fun BackgroundControlsColumn(
             if (config.backgroundType in ADJUSTABLE_TYPES) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 BackgroundLookSliders(config = config, onConfigChange = onConfigChange)
+            }
+            // A Lottie band draws its own look; the overlay puts the same three treatments between
+            // the band the file paints and the text, so they are offered only once it is on.
+            if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                LabeledSwitch(
+                    checked = config.lottieOverlay,
+                    onCheckedChange = { onConfigChange(config.copy(lottieOverlay = it)) },
+                    label = stringResource(Res.string.lower_third_animation_overlay),
+                    supporting = stringResource(Res.string.lower_third_animation_overlay_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    spacing = 8.dp,
+                )
+                if (config.lottieOverlay) {
+                    BackgroundLookSliders(config = config, onConfigChange = onConfigChange)
+                }
             }
             // Every lower-third surface, whatever its band is set to. The wash falls through on
             // its own field rather than on the band's type, so a surface drawing a picture of its

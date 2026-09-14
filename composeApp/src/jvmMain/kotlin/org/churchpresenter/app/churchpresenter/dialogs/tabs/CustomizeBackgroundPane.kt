@@ -17,6 +17,8 @@ import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
 import churchpresenter.composeapp.generated.resources.customize_type_lottie
 import churchpresenter.composeapp.generated.resources.lower_third_animation_file
+import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay
+import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay_hint
 import churchpresenter.composeapp.generated.resources.customize_type_default
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
@@ -132,34 +134,11 @@ private fun BackgroundSurfaceRows(
             )
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
-        Constants.BACKGROUND_LOTTIE -> {
-            var showGenerator by remember { mutableStateOf(false) }
-            val templatesDir = remember { SettingsManager.bibleLowerThirdsDir() }
-            CustomizeRow(stringResource(Res.string.lower_third_animation_file)) {
-                LottieBandPickerRow(
-                    path = config.backgroundLottie,
-                    onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
-                    startDir = templatesDir,
-                    onGenerate = { showGenerator = true },
-                    modifier = Modifier.width(SOURCE_FIELD_WIDTH),
-                )
-            }
-            if (showGenerator) {
-                BibleLottieGeneratorWindow(
-                    outputDir = templatesDir,
-                    seed = lottieBandSeed(settings, scope),
-                    onSaved = { file ->
-                        onConfig(config.copy(backgroundLottie = file.absolutePath))
-                        showGenerator = false
-                    },
-                    onClose = { showGenerator = false },
-                )
-            }
-        }
+        Constants.BACKGROUND_LOTTIE -> LottieRows(scope, settings, config, onConfig)
         else -> Unit
     }
     val hasLook = config.backgroundType != Constants.BACKGROUND_TRANSPARENT &&
-        config.backgroundType != Constants.BACKGROUND_LOTTIE
+        (config.backgroundType != Constants.BACKGROUND_LOTTIE || config.lottieOverlay)
     if (hasLook) {
         // Sliders, as on the Background tab: these are nudged until the picture reads well behind
         // text, not typed to a number anyone knows in advance.
@@ -184,6 +163,49 @@ private fun BackgroundSurfaceRows(
     // field rather than on the band's type, so a surface drawing a picture still has a say above it.
     if (scope.lowerThird) {
         AboveBandRows(scope, config, onConfig)
+    }
+}
+
+/**
+ * The template picker with the generator behind it, and the overlay switch: the band draws its
+ * own look, and the three sliders below appear only once the overlay is on to sit between the
+ * band the file paints and the text.
+ */
+@Composable
+private fun LottieRows(
+    scope: BackgroundScope,
+    settings: AppSettings,
+    config: BackgroundConfig,
+    onConfig: (BackgroundConfig) -> Unit,
+) {
+    var showGenerator by remember { mutableStateOf(false) }
+    val templatesDir = remember { SettingsManager.bibleLowerThirdsDir() }
+    CustomizeRow(stringResource(Res.string.lower_third_animation_file)) {
+        LottieBandPickerRow(
+            path = config.backgroundLottie,
+            onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
+            startDir = templatesDir,
+            onGenerate = { showGenerator = true },
+            modifier = Modifier.width(SOURCE_FIELD_WIDTH),
+        )
+    }
+    if (showGenerator) {
+        BibleLottieGeneratorWindow(
+            outputDir = templatesDir,
+            seed = lottieBandSeed(settings, scope),
+            onSaved = { file ->
+                onConfig(config.copy(backgroundLottie = file.absolutePath))
+                showGenerator = false
+            },
+            onClose = { showGenerator = false },
+        )
+    }
+    CustomizeRow(stringResource(Res.string.lower_third_animation_overlay)) {
+        ToggleControl(
+            label = stringResource(Res.string.lower_third_animation_overlay_hint),
+            checked = config.lottieOverlay,
+            onCheckedChange = { onConfig(config.copy(lottieOverlay = it)) },
+        )
     }
 }
 
