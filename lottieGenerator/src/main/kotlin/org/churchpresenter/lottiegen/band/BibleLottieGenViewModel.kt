@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.lottiegen.ui.PreviewGuide
 import org.churchpresenter.lottiegen.ui.Strings
 import java.io.File
 import java.io.IOException
@@ -36,8 +37,39 @@ class BibleLottieGenViewModel(
         private set
     var statusText by mutableStateOf("")
         private set
+
+    /** Whether the design on screen is the one last written, until the next change to it. */
+    var isSaved by mutableStateOf(false)
+        private set
     var fileName by mutableStateOf(suggestedFileName(config))
         private set
+
+    /** Whether the preview outlines the text slots. A preview aid only: it never reaches the file. */
+    var showSlotGuides by mutableStateOf(true)
+
+    /** Whether one text-area margin slider moves all four. A pane setting, not part of the file. */
+    var linkTextArea by mutableStateOf(false)
+
+    /** All four text-area margins at once, for the linked sliders. */
+    fun setTextArea(px: Int) {
+        updateConfig { it.copy(textAreaLeftPx = px, textAreaRightPx = px, textAreaTopPx = px, textAreaBottomPx = px) }
+    }
+
+    /** The part of the timeline the text is on screen for, as fractions: the outlines show then. */
+    val textWindow: ClosedFloatingPointRange<Float>
+        get() {
+            val t = timeline
+            return t.textStart.toFloat() / t.totalFrames..t.bgOutStart.toFloat() / t.totalFrames
+        }
+
+    /** The text slots as fractions of the canvas, for the preview to outline; empty when hidden. */
+    val slotGuides: List<PreviewGuide>
+        get() {
+            if (!showSlotGuides) return emptyList()
+            val slots = computeSlots(config)
+            return listOfNotNull(slots.text1, slots.reference1, slots.text2, slots.reference2)
+                .map { it.toGuide(config.canvasW, config.canvasH) }
+        }
 
     val timeline: BandTimeline get() = BandTimeline.from(config)
 
@@ -51,6 +83,7 @@ class BibleLottieGenViewModel(
     fun updateConfig(transform: (BibleLottieGenConfig) -> BibleLottieGenConfig) {
         val before = config
         config = transform(config)
+        isSaved = false
         if (fileName == suggestedFileName(before)) fileName = suggestedFileName(config)
         scheduleGenerate()
     }
@@ -79,6 +112,10 @@ class BibleLottieGenViewModel(
         }
     }
 
+    fun updateLook(role: BandColorRole, transform: (BandRoleLook) -> BandRoleLook) {
+        updateConfig { it.copy(looks = it.looks + (role to transform(it.look(role)))) }
+    }
+
     fun clearBandImage(role: BandColorRole) {
         updateConfig { it.copy(images = it.images - role) }
     }
@@ -94,6 +131,7 @@ class BibleLottieGenViewModel(
             file.writeText(body)
             BandConfigStorage.save(config)
             statusText = Strings.bandStatusSaved(file.name)
+            isSaved = true
             onFileSaved?.invoke(file)
             file
         } catch (e: IOException) {
@@ -124,6 +162,13 @@ class BibleLottieGenViewModel(
 
     companion object {
         private const val DEFAULT_FILE_STEM = "bible-band"
+
+        private fun SlotBox.toGuide(canvasW: Int, canvasH: Int) = PreviewGuide(
+            left = (x / canvasW).toFloat(),
+            top = (y / canvasH).toFloat(),
+            width = (w / canvasW).toFloat(),
+            height = (h / canvasH).toFloat(),
+        )
 
         fun suggestedFileName(cfg: BibleLottieGenConfig): String =
             "$DEFAULT_FILE_STEM-${cfg.bandStyle.name.lowercase()}-${cfg.entrance.name.lowercase()}-" +

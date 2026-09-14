@@ -121,6 +121,20 @@ enum class BandContentKind { BIBLE, SONG }
 /** The four colour slots a style draws from; each can be a colour or a picture. */
 enum class BandColorRole { BACKGROUND, SECOND, ACCENT, TERTIARY }
 
+/**
+ * What one colour role is drawn under and over, beyond its colour: a wash of [washColor] at
+ * [washAlpha] laid over every piece the role paints, and a blur of [blurPx] canvas pixels on the
+ * role's picture — a flat colour has nothing to blur. The text above stays crisp either way.
+ */
+@Serializable
+data class BandRoleLook(
+    val washColor: String = "#000000",
+    val washAlpha: Int = 0,
+    val blurPx: Int = 0,
+) {
+    val hasWash: Boolean get() = washAlpha > 0
+}
+
 /** A picture as a data URL with its pixel size, and the file name it came from for the UI. */
 @Serializable
 data class BandImage(val data: String, val width: Int, val height: Int, val name: String) {
@@ -153,6 +167,7 @@ data class BibleLottieGenConfig(
     val accentAlpha: Int = FULL_ALPHA,
     /** The second colour: the gradient's end, a split's other half, a wedge, a deck. */
     val gradientColor: String = "#3A0CA3",
+    val secondAlpha: Int = FULL_ALPHA,
     val tertiaryColor: String = "#F2C94C",
     val tertiaryAlpha: Int = FULL_ALPHA,
     /**
@@ -161,12 +176,24 @@ data class BibleLottieGenConfig(
      * background role's picture sits under everything with the background colour as a tint.
      */
     val images: Map<BandColorRole, BandImage> = emptyMap(),
+    /** Each role's wash and blur; a role that is absent is drawn plain. */
+    val looks: Map<BandColorRole, BandRoleLook> = emptyMap(),
     val borderColor: String = "#FFFFFF",
     val borderAlpha: Int = DEFAULT_BORDER_ALPHA,
     val borderThickness: Int = 0,
     val cornerRadiusPx: Int = 0,
     val insetPx: Int = 0,
     val paddingPx: Int = DEFAULT_PADDING,
+    /**
+     * Room taken off — or, negative, given back to — the text area's four edges, after the
+     * style's blocks and the padding. Positive narrows or lowers the text without moving the
+     * band's own edges; negative reclaims the padding and the style's block on that side, as far
+     * as the band's edge, so a text area can run the band's full width.
+     */
+    val textAreaLeftPx: Int = 0,
+    val textAreaRightPx: Int = 0,
+    val textAreaTopPx: Int = 0,
+    val textAreaBottomPx: Int = 0,
     val referenceHeightFraction: Float = DEFAULT_REFERENCE_FRACTION,
     val bgInSeconds: Float = DEFAULT_BG_IN,
     val textInSeconds: Float = DEFAULT_TEXT_IN,
@@ -187,6 +214,9 @@ data class BibleLottieGenConfig(
 ) {
     /** Whether the background role is a picture, which turns its colour into a tint. */
     val hasBackgroundImage: Boolean get() = images.containsKey(BandColorRole.BACKGROUND)
+
+    /** How [role] is drawn beyond its colour; plain when nothing was set. */
+    fun look(role: BandColorRole): BandRoleLook = looks[role] ?: BandRoleLook()
 
     companion object {
         const val DEFAULT_CANVAS_W = 1920

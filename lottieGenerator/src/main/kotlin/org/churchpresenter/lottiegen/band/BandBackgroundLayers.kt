@@ -58,9 +58,10 @@ import org.churchpresenter.lottiegen.lottie.makeGradientFillStops
  * The band itself, one layer per piece so any piece can be a picture: the style's decorations in
  * paint order (first is topmost), the border, then the fill. A piece whose colour role is set to
  * a picture becomes a matte of its own shape over a cover-scaled image; the background's picture
- * additionally keeps the background colour above it as a tint. For the wipes every piece is also
- * cut by the `BandMatte`. Every layer is named with the `Band` prefix so a player that wants the
- * text without the backdrop can hide them as a set.
+ * additionally keeps the background colour above it as a tint. A role with a wash gets a layer of
+ * it, in the piece's own shape, directly above each piece it paints. For the wipes every piece is
+ * also cut by the `BandMatte`. Every layer is named with the `Band` prefix so a player that wants
+ * the text without the backdrop can hide them as a set.
  */
 internal fun LottieBuilder.addBandBackground(cfg: BibleLottieGenConfig, slots: BandSlots, timeline: BandTimeline) {
     val band = slots.band
@@ -77,6 +78,13 @@ internal fun LottieBuilder.addBandBackground(cfg: BibleLottieGenConfig, slots: B
 private sealed interface BandPiece {
     class Shaped(val role: BandColorRole, val shape: JsonObject) : BandPiece
     class Painted(val group: JsonObject) : BandPiece
+}
+
+/** [shape] filled with [role]'s wash, to sit over a piece of that role; null when the role has none. */
+private fun washGroup(cfg: BibleLottieGenConfig, role: BandColorRole, shape: JsonObject): JsonObject? {
+    val look = cfg.look(role)
+    if (!look.hasWash) return null
+    return makeGroup(listOf(shape, makeFill(hexToLottie(look.washColor), look.washAlpha.toDouble())))
 }
 
 /** The border, when the style or the settings ask for one. */
@@ -116,7 +124,12 @@ private fun fillPieces(cfg: BibleLottieGenConfig, band: SlotBox): List<BandPiece
         else -> null
     }
     return when {
-        gradient != null -> listOf(BandPiece.Painted(makeGroup(listOf(rect, gradient))))
+        // A gradient is paint of its own, so the background's wash goes over it here; a shaped
+        // piece gets its wash from the emitter.
+        gradient != null -> listOfNotNull(
+            washGroup(cfg, BandColorRole.BACKGROUND, rect)?.let { BandPiece.Painted(it) },
+            BandPiece.Painted(makeGroup(listOf(rect, gradient))),
+        )
         // The tint above the picture, then the picture itself through the same rectangle.
         cfg.hasBackgroundImage -> listOf(
             BandPiece.Painted(makeGroup(listOf(rect, makeFill(palette.bg, alpha)))),
@@ -143,6 +156,7 @@ private class BandPieceEmitter(
         when (piece) {
             is BandPiece.Painted -> shapeLayer(name, piece.group)
             is BandPiece.Shaped -> {
+                washGroup(cfg, piece.role, piece.shape)?.let { shapeLayer("$name${BandLayerNames.WASH_SUFFIX}", it) }
                 val image = cfg.images[piece.role]?.takeIf { it.isUsable }
                 if (image == null) {
                     val fill = makeFill(palette.color(piece.role), palette.alpha(piece.role))
@@ -166,10 +180,19 @@ private class BandPieceEmitter(
      * wipe matte, when there is one) over an image scaled to cover the band. Covering means
      * overhanging — a 4:3 photo on a 16:3 band is far taller than it — and the matte is what
      * keeps the overhang from showing while the band is still sliding in.
+     *
+     * The role's blur is baked into the picture's pixels rather than written as a layer effect:
+     * a blur effect blurs a layer's edges in every player and its picture in none of the ones
+     * this file is played by, and a blurred picture is a plain picture everywhere.
      */
     private fun imageLayer(name: String, role: BandColorRole, image: BandImage, shape: JsonObject) {
         val assetId = "band_${role.name.lowercase()}"
-        if (addedAssets.add(role)) builder.addImageAsset(assetId, image.data, image.width, image.height)
+        if (addedAssets.add(role)) {
+            // The blur is set in canvas pixels; the picture is drawn at its cover scale times its own.
+            val cover = maxOf(band.w / image.width, band.h / image.height)
+            val embedded = BandImageBlur.blurred(image, cfg.look(role).blurPx / cover)
+            builder.addImageAsset(assetId, embedded.data, embedded.width, embedded.height)
+        }
         val matte = builder.addShapeLayer(
             "${name}Matte", buildJsonArray { add(makeGroup(listOf(shape, makeFill(WHITE)))) }, motion.transform(),
             td = 1, tt = if (wipeMatte != null) 1 else null, tp = wipeMatte,
@@ -202,7 +225,7 @@ private class BandPalette(private val cfg: BibleLottieGenConfig) {
 
     fun alpha(role: BandColorRole): Double = when (role) {
         BandColorRole.BACKGROUND -> cfg.bgAlpha.toDouble()
-        BandColorRole.SECOND -> FULL
+        BandColorRole.SECOND -> cfg.secondAlpha.toDouble()
         BandColorRole.ACCENT -> cfg.accentAlpha.toDouble()
         BandColorRole.TERTIARY -> cfg.tertiaryAlpha.toDouble()
     }

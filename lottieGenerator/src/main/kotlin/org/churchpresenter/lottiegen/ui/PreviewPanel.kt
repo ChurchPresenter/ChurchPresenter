@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +54,28 @@ import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
+
+/** Dotted outlines over the composition: where the host's text will go, so the margins can be judged. */
+@Composable
+private fun GuideOverlay(guides: List<PreviewGuide>, modifier: Modifier = Modifier) {
+    val color = Tokens.Accent
+    Canvas(modifier = modifier) {
+        val dash = PathEffect.dashPathEffect(floatArrayOf(GUIDE_DASH_PX.dp.toPx(), GUIDE_GAP_PX.dp.toPx()))
+        val stroke = Stroke(width = GUIDE_STROKE_PX.dp.toPx(), pathEffect = dash)
+        guides.forEach { g ->
+            drawRect(
+                color = color,
+                topLeft = Offset(g.left * size.width, g.top * size.height),
+                size = Size(g.width * size.width, g.height * size.height),
+                style = stroke,
+            )
+        }
+    }
+}
+
+private const val GUIDE_DASH_PX = 4f
+private const val GUIDE_GAP_PX = 3f
+private const val GUIDE_STROKE_PX = 1f
 
 /** The transparency checkerboard behind the composition. */
 @Composable
@@ -121,6 +145,10 @@ fun PreviewPanel(
     durationSeconds: Float = 0f,
     /** The canvas card's corner. A full-band template wants 0 so its own corners are what shows. */
     canvasCornerRadius: Dp = PREVIEW_CANVAS_RADIUS,
+    /** Regions to outline over the composition; none by default. */
+    guides: List<PreviewGuide> = emptyList(),
+    /** The stretch of the timeline, as fractions, the outlines are shown for. */
+    guideWindow: ClosedFloatingPointRange<Float> = 0f..1f,
 ) {
     var isPlaying by remember { mutableStateOf(true) }
     var seekValue by remember { mutableStateOf(0f) }
@@ -135,6 +163,8 @@ fun PreviewPanel(
             seekValue = seekValue,
             onProgress = { seekValue = it },
             cornerRadius = canvasCornerRadius,
+            guides = guides,
+            guideWindow = guideWindow,
             modifier = Modifier.fillMaxWidth().weight(1f).padding(26.dp),
         )
         if (statusText.isNotEmpty()) {
@@ -216,6 +246,8 @@ private fun PreviewCanvas(
     onProgress: (Float) -> Unit,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = PREVIEW_CANVAS_RADIUS,
+    guides: List<PreviewGuide> = emptyList(),
+    guideWindow: ClosedFloatingPointRange<Float> = 0f..1f,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Box(
@@ -242,17 +274,21 @@ private fun PreviewCanvas(
             LaunchedEffect(progress) {
                 if (isPlaying) onProgress(progress)
             }
+            val shown = if (isPlaying) progress else seekValue
             composition?.let {
                 Image(
                     painter = rememberLottiePainter(
                         composition = it,
-                        progress = { if (isPlaying) progress else seekValue }
+                        progress = { shown }
                     ),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )
             }
+            // The box is the canvas's own aspect, so a fraction of it is a fraction of the canvas.
+            // The outlines come and go with the text they stand for.
+            if (guides.isNotEmpty() && shown in guideWindow) GuideOverlay(guides, Modifier.fillMaxSize())
         }
     }
 }

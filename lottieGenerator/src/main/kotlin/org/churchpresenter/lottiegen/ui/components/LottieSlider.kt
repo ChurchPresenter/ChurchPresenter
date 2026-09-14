@@ -53,6 +53,8 @@ fun LottieSlider(
     knobSize: Dp = 13.dp,
     trackColor: Color = Tokens.TrackBg,
     enabled: Boolean = true,
+    /** What the filled part of the track is painted with; the accent gradient by default. */
+    fillBrush: Brush? = null,
 ) {
     val density = LocalDensity.current
     var widthPx by remember { mutableStateOf(0) }
@@ -107,7 +109,7 @@ fun LottieSlider(
                     .fillMaxWidth(fraction)
                     .height(trackHeight)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(Brush.horizontalGradient(listOf(Tokens.FillStart, Tokens.FillEnd)))
+                    .background(fillBrush ?: Brush.horizontalGradient(listOf(Tokens.FillStart, Tokens.FillEnd)))
             )
         }
 

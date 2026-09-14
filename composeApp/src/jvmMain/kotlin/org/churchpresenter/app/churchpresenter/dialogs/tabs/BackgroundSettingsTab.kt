@@ -116,7 +116,6 @@ import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WI
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
-import org.churchpresenter.app.churchpresenter.presenter.lottieBandLook
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_SLOTS
@@ -593,8 +592,8 @@ private fun BackgroundCoverageFill(
         ) {
             if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
                 // The template carries its own sample text, so it stands in for the fill and the
-                // sample line both; its overlay, when on, dims it the way the output does.
-                BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize(), config.lottieBandLook())
+                // sample line both.
+                BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
             } else {
                 BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
                 if (config.dim > 0) {

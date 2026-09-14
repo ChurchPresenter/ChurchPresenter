@@ -10,6 +10,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,7 +40,8 @@ private const val CHANNEL_MAX = 255
 
 /**
  * One colour channel: a name, a chip showing the swatch and hex (click to open the picker),
- * an inline opacity slider, and the numeric alpha.
+ * an inline opacity slider, and the numeric alpha. With [showAlpha] off the slider is left out
+ * and [trailing] — a button that opens the fuller controls, say — takes its place.
  *
  * Hex is edited inside [ColorPickerDialog], which carries its own validated hex field — the
  * chip here is a launcher, not an input.
@@ -50,7 +52,9 @@ fun ColorPickerRow(
     color: String,
     alpha: Int,
     onColorChange: (String) -> Unit,
-    onAlphaChange: (Int) -> Unit
+    onAlphaChange: (Int) -> Unit,
+    showAlpha: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
@@ -114,21 +118,26 @@ fun ColorPickerRow(
             )
         }
 
-        LottieSlider(
-            value = alpha.toFloat(),
-            onValueChange = { onAlphaChange(it.toInt()) },
-            valueRange = 0f..100f,
-            modifier = Modifier.weight(1f)
-        )
+        if (showAlpha) {
+            LottieSlider(
+                value = alpha.toFloat(),
+                onValueChange = { onAlphaChange(it.toInt()) },
+                valueRange = 0f..100f,
+                modifier = Modifier.weight(1f)
+            )
 
-        Text(
-            "$alpha",
-            modifier = Modifier.width(26.dp),
-            fontSize = 11.5.sp,
-            color = Tokens.ValueText,
-            textAlign = TextAlign.End,
-            maxLines = 1
-        )
+            Text(
+                "$alpha",
+                modifier = Modifier.width(26.dp),
+                fontSize = 11.5.sp,
+                color = Tokens.ValueText,
+                textAlign = TextAlign.End,
+                maxLines = 1
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        trailing?.invoke()
     }
 }
 

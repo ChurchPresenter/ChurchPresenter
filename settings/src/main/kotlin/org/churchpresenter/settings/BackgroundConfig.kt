@@ -57,11 +57,4 @@ data class BackgroundConfig(
      * the same positional-construction reason as [camera].
      */
     val backgroundLottie: String = "",
-    /**
-     * Whether a [Constants.BACKGROUND_LOTTIE] band gets an overlay between the band the file draws
-     * and the text on it: [backgroundOpacity], [dim] and [blur] applied to the band alone, the way
-     * the classic band's backdrop takes them, with the text left crisp above. Off, the file is
-     * drawn as it was generated. Appended last, as [backgroundLottie] was.
-     */
-    val lottieOverlay: Boolean = false,
 )

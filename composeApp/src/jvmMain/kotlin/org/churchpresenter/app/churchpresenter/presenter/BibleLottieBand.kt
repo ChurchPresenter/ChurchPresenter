@@ -115,10 +115,6 @@ internal data class BandSlotText(val text: String, val style: BandSlotStyle)
  * A text swap is a crossfade: the words the band showed before the change are kept and drawn on
  * a second, background-less layer playing `text_out`, while the new words play `text_in` beneath.
  *
- * With a [look], the band the file paints is drawn as a pass of its own, faded, blurred and dimmed
- * the way the classic backdrop is, and the text goes over it untouched — the overlay sits
- * between the two.
- *
  * [bandClock] is shared by every output; this composable only maps it onto its own template.
  */
 @OptIn(ExperimentalCompottieApi::class)
@@ -130,7 +126,6 @@ internal fun BoxScope.LottieBand(
     bandClock: BibleBandClock,
     isKey: Boolean,
     showBackground: Boolean,
-    look: BandLook? = null,
     modifier: Modifier = Modifier,
 ) {
     // The faces go into the file itself, so the composition is rebuilt only when a face changes.
@@ -163,22 +158,6 @@ internal fun BoxScope.LottieBand(
     val clockState = rememberUpdatedState(bandClock)
     val progress = { template.progressAt(clockState.value) }
     val keyFilter = if (isKey) keyColorFilter else null
-    if (look != null && showBackground) {
-        BandBackdrop(look, layerModifier) { backdropModifier ->
-            BandLayer(
-                template = template,
-                composition = composition,
-                slots = slots,
-                bandFraction = bandFraction,
-                progress = progress,
-                // The key is the band's shape and takes no dim; the fill does.
-                colorFilter = keyFilter ?: look.dimFilter(),
-                showBackground = true,
-                showText = false,
-                modifier = backdropModifier,
-            )
-        }
-    }
     BandLayer(
         template = template,
         composition = composition,
@@ -186,8 +165,7 @@ internal fun BoxScope.LottieBand(
         bandFraction = bandFraction,
         progress = progress,
         colorFilter = keyFilter,
-        showBackground = showBackground && look == null,
-        showText = true,
+        showBackground = showBackground,
         modifier = layerModifier,
     )
     if (outgoing != null) {
@@ -199,7 +177,6 @@ internal fun BoxScope.LottieBand(
             progress = { template.outgoingProgressAt(clockState.value) },
             colorFilter = keyFilter,
             showBackground = false,
-            showText = true,
             modifier = layerModifier,
         )
     }
@@ -213,7 +190,7 @@ private class SlotHistory {
 
 /**
  * One pass over the template: its text layers bound to [slots], drawn at [progress]. A pass shows
- * the band, the text, or both — the overlay splits them, a swap's outgoing layer is text alone.
+ * the band and the text, or the text alone — a swap's outgoing layer.
  */
 @OptIn(ExperimentalCompottieApi::class)
 @Composable
@@ -225,7 +202,6 @@ private fun BandLayer(
     progress: () -> Float,
     colorFilter: ColorFilter?,
     showBackground: Boolean,
-    showText: Boolean,
     modifier: Modifier,
 ) {
     val styles = slots.mapValues { it.value.style }
@@ -271,7 +247,6 @@ private fun BandLayer(
         }
 
     val showBackgroundState = rememberUpdatedState(showBackground)
-    val showTextState = rememberUpdatedState(showText)
     var tickerSeconds by remember { mutableStateOf(0f) }
     if (template.meta.textMotion == BandTextMotion.TICKER) {
         // Restarted on every text change, so a new verse enters from the right edge rather than
@@ -289,10 +264,10 @@ private fun BandLayer(
             .filter { it.startsWith(BibleLottieTemplate.BAND_PREFIX) }
             .forEach { name -> layer(name) { hidden { !showBackgroundState.value } } }
         renders.forEach { (name, state) ->
-            textLayer(name) { bindSlot(template, state, tickerState, showTextState, shadow = false) }
+            textLayer(name) { bindSlot(template, state, tickerState, shadow = false) }
             if (template.hasLayer(name + BibleLottieTemplate.SHADOW_SUFFIX)) {
                 textLayer(name + BibleLottieTemplate.SHADOW_SUFFIX) {
-                    bindSlot(template, state, tickerState, showTextState, shadow = true)
+                    bindSlot(template, state, tickerState, shadow = true)
                 }
             }
         }
@@ -388,7 +363,6 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     template: BibleLottieTemplate,
     state: State<SlotRender>,
     ticker: State<Float>,
-    shown: State<Boolean>,
     shadow: Boolean,
 ) {
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
@@ -407,7 +381,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     }
     hidden {
         val r = state.value
-        !shown.value || !r.visible || (shadow && !r.shadow) ||
+        !r.visible || (shadow && !r.shadow) ||
             frame < textIn.startFrame || frame > textOut.endFrame
     }
 }

@@ -23,10 +23,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.band.ui.BandControlPanel
+import org.churchpresenter.lottiegen.band.ui.BandPreviewPanel
 import org.churchpresenter.lottiegen.ui.DarkPalette
 import org.churchpresenter.lottiegen.ui.LightPalette
 import org.churchpresenter.lottiegen.ui.LottieGenTheme
-import org.churchpresenter.lottiegen.ui.PreviewPanel
 import org.churchpresenter.lottiegen.ui.ProvideLottieGenPalette
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.awt.Cursor
@@ -34,7 +34,7 @@ import java.io.File
 
 private const val MIN_PANEL_WIDTH = 350f
 private const val MAX_PANEL_WIDTH = 800f
-private const val DEFAULT_PANEL_WIDTH = 436f
+private const val DEFAULT_PANEL_WIDTH = 376f
 
 /**
  * The Bible band generator: the same two-pane shape as the main generator, over a config of its
@@ -76,15 +76,7 @@ fun BibleLottieGenApp(
                             }
                         },
                 )
-                PreviewPanel(
-                    jsonString = viewModel.generatedJson,
-                    aspectRatio = viewModel.config.canvasW.toFloat() / viewModel.config.canvasH.toFloat(),
-                    statusText = viewModel.statusText,
-                    canvasW = viewModel.config.canvasW,
-                    canvasH = viewModel.config.canvasH,
-                    durationSeconds = viewModel.timeline.totalSeconds,
-                    canvasCornerRadius = 0.dp,
-                )
+                BandPreviewPanel(viewModel)
             }
         }
     }

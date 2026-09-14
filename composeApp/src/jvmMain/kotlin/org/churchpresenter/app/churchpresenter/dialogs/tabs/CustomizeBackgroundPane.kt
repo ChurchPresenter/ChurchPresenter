@@ -17,8 +17,6 @@ import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
 import churchpresenter.composeapp.generated.resources.customize_type_lottie
 import churchpresenter.composeapp.generated.resources.lower_third_animation_file
-import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay
-import churchpresenter.composeapp.generated.resources.lower_third_animation_overlay_hint
 import churchpresenter.composeapp.generated.resources.customize_type_default
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
@@ -138,7 +136,7 @@ private fun BackgroundSurfaceRows(
         else -> Unit
     }
     val hasLook = config.backgroundType != Constants.BACKGROUND_TRANSPARENT &&
-        (config.backgroundType != Constants.BACKGROUND_LOTTIE || config.lottieOverlay)
+        config.backgroundType != Constants.BACKGROUND_LOTTIE
     if (hasLook) {
         // Sliders, as on the Background tab: these are nudged until the picture reads well behind
         // text, not typed to a number anyone knows in advance.
@@ -166,11 +164,7 @@ private fun BackgroundSurfaceRows(
     }
 }
 
-/**
- * The template picker with the generator behind it, and the overlay switch: the band draws its
- * own look, and the three sliders below appear only once the overlay is on to sit between the
- * band the file paints and the text.
- */
+/** The template picker with the generator behind it. The band draws its own look, so there are no sliders. */
 @Composable
 private fun LottieRows(
     scope: BackgroundScope,
@@ -198,13 +192,6 @@ private fun LottieRows(
                 showGenerator = false
             },
             onClose = { showGenerator = false },
-        )
-    }
-    CustomizeRow(stringResource(Res.string.lower_third_animation_overlay)) {
-        ToggleControl(
-            label = stringResource(Res.string.lower_third_animation_overlay_hint),
-            checked = config.lottieOverlay,
-            onCheckedChange = { onConfig(config.copy(lottieOverlay = it)) },
         )
     }
 }

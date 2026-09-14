@@ -957,8 +957,6 @@
     <string name="lower_third_animation_file">Template</string>
     <string name="lower_third_animation_none">No template selected</string>
     <string name="lower_third_animation_generate">Generate…</string>
-    <string name="lower_third_animation_overlay">Overlay</string>
-    <string name="lower_third_animation_overlay_hint">Fade, dim and blur the band under the text</string>
     <string name="lower_third_animation_clear">Clear template</string>
     <string name="lottie_files_filter">Lottie files</string>
     <string name="bible_lottie_gen_window_title">Lower Third Generator</string>

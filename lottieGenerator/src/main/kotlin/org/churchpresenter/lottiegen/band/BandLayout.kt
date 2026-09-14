@@ -24,6 +24,7 @@ object BandLayerNames {
     const val BAND = "Band"
     const val BAND_ACCENT = "BandAccent"
     const val BAND_MATTE = "BandMatte"
+    const val WASH_SUFFIX = "Wash"
     const val TEXT_1 = "Text1"
     const val TEXT_2 = "Text2"
     const val REFERENCE_1 = "Reference1"
@@ -114,7 +115,7 @@ fun computeSlots(cfg: BibleLottieGenConfig): BandSlots {
         band.w * (1.0 - reserved.left - reserved.right),
         band.h * (1.0 - reserved.top - reserved.bottom),
     )
-    val inner = clear.inset(cfg.paddingPx.toDouble())
+    val inner = clear.inset(cfg.paddingPx.toDouble()).trimmed(cfg, within = band)
     val gap = cfg.paddingPx.toDouble()
     return when (cfg.layout) {
         SlotLayout.SINGLE -> {
@@ -140,6 +141,18 @@ fun computeSlots(cfg: BibleLottieGenConfig): BandSlots {
     }
 }
 
+/**
+ * The text area with its four margins applied — taken off when positive, given back when
+ * negative — never past [within]'s edges, and kept at least a pixel wide and tall.
+ */
+private fun SlotBox.trimmed(cfg: BibleLottieGenConfig, within: SlotBox): SlotBox {
+    val left = (x + cfg.textAreaLeftPx).coerceIn(within.x, within.right - MIN_AREA_PX)
+    val top = (y + cfg.textAreaTopPx).coerceIn(within.y, within.bottom - MIN_AREA_PX)
+    val rightEdge = (right - cfg.textAreaRightPx).coerceIn(left + MIN_AREA_PX, within.right)
+    val bottomEdge = (bottom - cfg.textAreaBottomPx).coerceIn(top + MIN_AREA_PX, within.bottom)
+    return SlotBox(left, top, rightEdge - left, bottomEdge - top)
+}
+
 private fun splitReference(area: SlotBox, cfg: BibleLottieGenConfig): Pair<SlotBox, SlotBox> {
     val refH = area.h * cfg.referenceHeightFraction.toDouble().coerceIn(MIN_REFERENCE_FRACTION, MAX_REFERENCE_FRACTION)
     val textH = area.h - refH
@@ -151,5 +164,6 @@ private fun splitReference(area: SlotBox, cfg: BibleLottieGenConfig): Pair<SlotB
     }
 }
 
+private const val MIN_AREA_PX = 1.0
 private const val MIN_REFERENCE_FRACTION = 0.1
 private const val MAX_REFERENCE_FRACTION = 0.5
