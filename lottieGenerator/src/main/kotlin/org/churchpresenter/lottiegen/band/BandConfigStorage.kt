@@ -42,7 +42,13 @@ internal object BandConfigStorage {
         }
     }
 
-    /** The remembered design, on the canvas the host sized; [seed] alone when nothing is remembered. */
+    /**
+     * The remembered design, on the canvas the host sized and in the host's typography; [seed]
+     * alone when nothing is remembered. The sample's face, sizes, colours and styles always come
+     * from the seed: they are the live settings the output will be drawn with, and a size kept
+     * from an earlier session — a Bible one at 28, say, before a song one set to 60 — shows the
+     * band with the wrong words on it.
+     */
     fun restore(seed: BibleLottieGenConfig): BibleLottieGenConfig {
         val last = load() ?: return seed
         // Opened for the other content, the sample text and layout come from the host again: a
@@ -54,6 +60,14 @@ internal object BandConfigStorage {
             kind = seed.kind,
             layout = if (sameKind) last.layout else seed.layout,
             referencePlacement = if (sameKind) last.referencePlacement else seed.referencePlacement,
+            previewFontFamily = seed.previewFontFamily,
+            previewTextSizePx = seed.previewTextSizePx,
+            previewReferenceSizePx = seed.previewReferenceSizePx,
+            previewTextColor = seed.previewTextColor,
+            previewReferenceColor = seed.previewReferenceColor,
+            previewBold = seed.previewBold,
+            previewItalic = seed.previewItalic,
+            previewShadow = seed.previewShadow,
             previewText1 = if (sameKind) last.previewText1 else seed.previewText1,
             previewReference1 = if (sameKind) last.previewReference1 else seed.previewReference1,
             previewText2 = if (sameKind) last.previewText2 else seed.previewText2,

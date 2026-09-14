@@ -294,6 +294,8 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
             previewTextColor = song.lyricsLowerThirdColor,
             previewReferenceColor = song.titleLowerThirdColor,
             previewBold = song.lyricsLowerThirdBold,
+            previewItalic = song.lyricsLowerThirdItalic,
+            previewShadow = song.lyricsLowerThirdShadow,
             previewText1 = SONG_SAMPLE_LINES,
             previewReference1 = SONG_SAMPLE_TITLE,
             previewText2 = SONG_SAMPLE_LINES_2,
@@ -315,6 +317,8 @@ internal fun lottieBandSeed(settings: AppSettings, scope: BackgroundScope): Bibl
             previewTextColor = t0.lowerThirdTextColor,
             previewReferenceColor = t0.lowerThirdReferenceColor,
             previewBold = t0.lowerThirdTextBold,
+            previewItalic = t0.lowerThirdTextItalic,
+            previewShadow = t0.lowerThirdTextShadow,
         )
     }
 }

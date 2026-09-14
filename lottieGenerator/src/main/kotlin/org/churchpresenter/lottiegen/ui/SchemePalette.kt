@@ -51,8 +51,10 @@ fun paletteFrom(scheme: ColorScheme): LottieGenPalette = LottieGenPalette(
     dimText = scheme.onSurfaceVariant.copy(alpha = DIM_ALPHA),
     placeholder = scheme.onSurfaceVariant.copy(alpha = PLACEHOLDER_ALPHA),
 
-    trackBg = scheme.surfaceContainerHighest,
-    transportTrack = scheme.surfaceContainerHighest,
+    // Tracks sit on the pane and on the popover card alike, so they take the outline tone rather
+    // than a surface one that a card could share.
+    trackBg = scheme.outlineVariant,
+    transportTrack = scheme.outlineVariant,
     fillStart = scheme.primary,
     fillEnd = scheme.primary,
 
