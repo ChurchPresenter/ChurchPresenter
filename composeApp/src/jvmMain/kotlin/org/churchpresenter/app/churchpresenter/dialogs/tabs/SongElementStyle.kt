@@ -1,8 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.SongTextStyle
 
 /**
  * One of the things a song slide draws.
@@ -74,42 +73,24 @@ internal val LYRIC_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
 internal val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_ELEMENTS
 
 /**
- * The appearance of one element on one output, lifted out of [SongSettings].
+ * The appearance of one element on one output.
  *
- * [SongSettings] stores these ten profiles as ten parallel families of flat fields, which is right
- * for a serialized settings file and wrong for a panel that edits whichever one the operator has
- * selected. This is the shape the panel wants: read one out with [elementStyle], hand the edited
+ * The type itself is [SongTextStyle], in `:settings` — it had to move there when languages beyond
+ * the primary began storing whole profiles of their own, which have to serialize. The alias stays
+ * because this is the name every control in this package reads and writes, and because the doc
+ * below is about how the panel uses it rather than about the fields.
+ *
+ * [SongSettings] stores the primary's ten profiles as ten parallel families of flat fields, which is
+ * right for a serialized settings file and wrong for a panel that edits whichever one the operator
+ * has selected. This is the shape the panel wants: read one out with [elementStyle], hand the edited
  * copy back with [withElementStyle], and no control has to know which of the two hundred fields it
  * is actually writing.
  *
- * [position] and [chordColor] are stored only by the profiles that have somewhere to keep them --
+ * `position` and `chordColor` are stored only by the profiles that have somewhere to keep them --
  * see [SongStyleElement.hasPosition] and [SongStyleElement.hasChordColor]. The others read the
  * default and drop it on write, so a control for them is hidden rather than silently ineffective.
  */
-internal data class SongElementStyle(
-    val color: String = "#FFFFFF",
-    /** Blank means "whatever the app falls back to", which is what an unset face has always meant. */
-    val fontType: String = "",
-    val fontSize: Int = 70,
-    val bold: Boolean = false,
-    val italic: Boolean = false,
-    val underline: Boolean = false,
-    val strikethrough: Boolean = false,
-    val shadow: Boolean = false,
-    val shadowColor: String = "#000000",
-    val shadowSize: Int = 100,
-    val shadowOpacity: Int = 90,
-    val horizontalAlignment: String = Constants.CENTER,
-    val position: String = Constants.BELOW_VERSE,
-    val letterSpacing: Int = 0,
-    val wordSpacing: Int = 0,
-    val transform: String = Constants.TEXT_TRANSFORM_NONE,
-    val chordColor: String = "#4FD3E8",
-    /** Only meaningful where [SongStyleElement.hasAutoFit]; the rest read and write nothing. */
-    val autoFit: Boolean = true,
-    /** The line background and the border box, both drawn behind and around this element. */
-    val backdrop: TextBackdrop = TextBackdrop(),
-)
+internal typealias SongElementStyle = SongTextStyle
 
 /** What this song draws [element] with on [target]. */
 internal fun SongSettings.elementStyle(

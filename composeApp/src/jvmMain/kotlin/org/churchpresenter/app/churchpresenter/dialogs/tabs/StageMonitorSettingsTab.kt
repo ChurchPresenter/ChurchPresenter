@@ -252,6 +252,17 @@ private fun StageMonitorPreviewSection(
             onWidthChange = { zone, percent -> update { withZoneWidth(zone, percent) } },
             onHeightChange = { zone, percent -> update { withZoneHeight(zone, percent) } },
         )
+        // Straight under the diagram, as the design has it: these fields describe the zone that
+        // was just clicked in it, and the two off-grid chips below are a different question.
+        ZoneSizeControls(
+            selectedLabel = zoneLabel(selected.toZone()),
+            widthPercent = sm.zoneWidthPercent(selected),
+            heightPercent = sm.zoneHeightPercent(selected),
+            onWidthChange = { percent -> update { withZoneWidth(selected, percent) } },
+            onHeightChange = { percent -> update { withZoneHeight(selected, percent) } },
+            onEvenRow = { update { withEvenRowWidths(selected) } },
+            onEvenAll = { update { withEvenZoneSizes() } },
+        )
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -276,15 +287,6 @@ private fun StageMonitorPreviewSection(
                 modifier = Modifier.padding(top = 6.dp)
             )
         }
-        ZoneSizeControls(
-            selectedLabel = zoneLabel(selected.toZone()),
-            widthPercent = sm.zoneWidthPercent(selected),
-            heightPercent = sm.zoneHeightPercent(selected),
-            onWidthChange = { percent -> update { withZoneWidth(selected, percent) } },
-            onHeightChange = { percent -> update { withZoneHeight(selected, percent) } },
-            onEvenRow = { update { withEvenRowWidths(selected) } },
-            onEvenAll = { update { withEvenZoneSizes() } },
-        )
     }
 }
 

@@ -1054,6 +1054,10 @@
     <string name="content_bible_translations_all">All</string>
     <string name="content_bible_translations_enabled">%1$d of %2$d translations enabled</string>
     <string name="content_bible_translations_footer">Multiple translations show stacked on screen, primary first.</string>
+    <string name="content_song_languages_header">Song Languages</string>
+    <string name="content_song_languages_enabled">%1$d of %2$d languages enabled</string>
+    <string name="content_song_languages_footer">Multiple languages show side by side or stacked, as set in Song settings.</string>
+    <string name="content_song_languages_all_selected">All Songs</string>
     <string name="content_bible_translation_portion_ot_nt">OT+NT</string>
     <string name="content_bible_translation_portion_nt">NT</string>
     <string name="content_bible_translation_portion_ot">OT</string>
@@ -1838,6 +1842,16 @@
     <string name="song_tempo">Tempo</string>
     <string name="song_pane_lyrics">Lyrics</string>
     <string name="song_pane_secondary">Secondary</string>
+    <string name="song_pane_translation">Translation %1$d</string>
+    <string name="song_translation_title">Translation %1$d Title</string>
+    <string name="enter_translation_lyrics_here">Enter translation %1$d lyrics here...</string>
+    <string name="song_add_translation">Add a language</string>
+    <string name="song_remove_translation">Remove this language</string>
+    <string name="song_translation_label">Language name</string>
+    <string name="song_language_all">All</string>
+    <string name="song_translation_own_style">Give this language its own look</string>
+    <string name="song_translation_follows_primary">This language is drawn exactly like Language 1. Switch on its own look to give it a different font, size or color.</string>
+    <string name="song_language_scope_label">Language</string>
     <string name="song_chords">Chords</string>
     <string name="stage_monitor_show_chords">Show Chords</string>
     <string name="song_chords_toggle">Show chords in the preview</string>
@@ -1976,6 +1990,7 @@
     <string name="song_language_primary">Primary</string>
     <string name="song_language_secondary">Secondary</string>
     <string name="screen_lang_off">Off</string>
+    <string name="screen_lang_language_n">Language %1$d</string>
     <string name="screen_lang_language_1">Language 1</string>
     <string name="screen_lang_language_2">Language 2</string>
     <string name="screen_lang_bible_1">Bible 1</string>
@@ -2046,8 +2061,8 @@
     <string name="stage_monitor_zone_count">%1$d zones</string>
     <string name="stage_monitor_layout_stranded">Not shown on this layout: %1$s</string>
     <string name="stage_monitor_size_section">Zone Size</string>
-    <string name="stage_monitor_zone_width">Width (%)</string>
-    <string name="stage_monitor_zone_row_height">Row Height (%)</string>
+    <string name="stage_monitor_zone_width">Width %</string>
+    <string name="stage_monitor_zone_row_height">Row H %</string>
     <string name="stage_monitor_size_selected">Selected</string>
     <string name="stage_monitor_size_reset">Reset</string>
     <string name="stage_monitor_size_hint">Drag a divider to trade space between neighbors. Each row shares 100%.</string>

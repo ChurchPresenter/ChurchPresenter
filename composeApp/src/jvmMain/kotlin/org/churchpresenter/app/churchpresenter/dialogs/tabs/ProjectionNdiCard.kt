@@ -152,8 +152,8 @@ internal fun NdiOutputsCard(
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
     displayModes: List<Pair<String, String>>,
-    songLangModes: List<Pair<String, String>>,
-    translationDisplays: List<BibleTranslationDisplay>,
+    songLanguageChoices: List<TranslationChoiceDisplay>,
+    translationDisplays: List<TranslationChoiceDisplay>,
     translationNames: List<String>,
     onIdentifyNdi: (Int) -> Unit = {},
     /**
@@ -209,7 +209,7 @@ internal fun NdiOutputsCard(
                     contentGroup = contentGroup,
                     backgroundGroup = backgroundGroup,
                     displayModes = displayModes,
-                    songLangModes = songLangModes,
+                    songLanguageChoices = songLanguageChoices,
                     translationDisplays = translationDisplays,
                     translationNames = translationNames,
                 )
@@ -374,8 +374,8 @@ private fun NdiOutputRow(
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
     displayModes: List<Pair<String, String>>,
-    songLangModes: List<Pair<String, String>>,
-    translationDisplays: List<BibleTranslationDisplay>,
+    songLanguageChoices: List<TranslationChoiceDisplay>,
+    translationDisplays: List<TranslationChoiceDisplay>,
     translationNames: List<String>,
 ) {
     val defaultLabel = stringResource(Res.string.ndi_output_numbered, index + 1)
@@ -605,7 +605,7 @@ private fun NdiOutputRow(
                             songsLabel = stringResource(Res.string.content_songs),
                             translationNames = translationNames,
                             translationDisplays = translationDisplays,
-                            songLangModes = songLangModes,
+                            songLanguageChoices = songLanguageChoices,
                             webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
                             webSnapshotTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
                             isBrowserSource = true,
