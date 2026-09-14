@@ -426,6 +426,8 @@ object Strings {
     val bandTimeTextOut: String get() = bundle.getString("band_time_text_out")
     val bandTimeBandOut: String get() = bundle.getString("band_time_band_out")
     val bandTickerSpeed: String get() = bundle.getString("band_ticker_speed")
+    val bandTimeCrossfade: String get() = bundle.getString("band_time_crossfade")
+    val bandTimeCrossfadeHint: String get() = bundle.getString("band_time_crossfade_hint")
     val bandPreviewFont: String get() = bundle.getString("band_preview_font")
     val bandPreviewBold: String get() = bundle.getString("band_preview_bold")
     val bandPreviewTextColor: String get() = bundle.getString("band_preview_text_color")

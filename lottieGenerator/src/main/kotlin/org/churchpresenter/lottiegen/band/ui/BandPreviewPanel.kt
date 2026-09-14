@@ -82,7 +82,7 @@ internal fun BandPreviewPanel(viewModel: BibleLottieGenViewModel) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Tokens.PreviewDivider))
         Box(Modifier.fillMaxWidth().weight(1f).padding(18.dp), contentAlignment = Alignment.Center) {
             Stage(
-                jsonString = viewModel.generatedJson,
+                viewModel = viewModel,
                 aspectRatio = cfg.canvasW.toFloat() / cfg.canvasH.toFloat(),
                 isPlaying = isPlaying,
                 seekValue = seekValue,
@@ -112,7 +112,7 @@ internal fun BandPreviewPanel(viewModel: BibleLottieGenViewModel) {
 /** The composition, drawn to fit the band's aspect, with the slot outlines over it while the text is up. */
 @Composable
 private fun Stage(
-    jsonString: String?,
+    viewModel: BibleLottieGenViewModel,
     aspectRatio: Float,
     isPlaying: Boolean,
     seekValue: Float,
@@ -125,11 +125,14 @@ private fun Stage(
         Modifier.widthIn(max = STAGE_MAX_WIDTH).fillMaxWidth().aspectRatio(aspectRatio).clipToBounds(),
         contentAlignment = Alignment.Center,
     ) {
+        val jsonString = viewModel.generatedJson
         if (jsonString == null) {
             Text(Strings.generating, fontSize = 13.sp, color = Tokens.UnitText)
             return@Box
         }
         val composition by rememberLottieComposition(key = jsonString) { LottieCompositionSpec.JsonString(jsonString) }
+        // The typewriter and the ticker are the player's to drive; the preview drives them the same way.
+        val textMotion = rememberPreviewTextMotion(viewModel.config, viewModel.timeline, jsonString)
         val progress by animateLottieCompositionAsState(
             composition = composition, isPlaying = isPlaying, iterations = Int.MAX_VALUE,
         )
@@ -137,7 +140,7 @@ private fun Stage(
         val shown = if (isPlaying) progress else seekValue
         composition?.let {
             Image(
-                painter = rememberLottiePainter(composition = it, progress = { shown }),
+                painter = rememberLottiePainter(composition = it, progress = { shown }, dynamicProperties = textMotion),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),

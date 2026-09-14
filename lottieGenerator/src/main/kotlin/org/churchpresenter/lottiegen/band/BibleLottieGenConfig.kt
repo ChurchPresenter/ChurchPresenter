@@ -260,6 +260,8 @@ data class BibleLottieGenConfig(
     val holdSeconds: Float = DEFAULT_HOLD,
     val textOutSeconds: Float = DEFAULT_TEXT_OUT,
     val bgOutSeconds: Float = DEFAULT_BG_OUT,
+    /** How long a verse takes to give way to the next: the old text's exit and the new one's entrance, together. */
+    val swapSeconds: Float = DEFAULT_SWAP,
     val tickerPxPerSecond: Int = DEFAULT_TICKER_SPEED,
     val previewFontFamily: String = "Arial",
     val previewTextSizePx: Int = DEFAULT_PREVIEW_TEXT_SIZE,
@@ -291,6 +293,7 @@ data class BibleLottieGenConfig(
         const val DEFAULT_HOLD = 2f
         const val DEFAULT_TEXT_OUT = 0.4f
         const val DEFAULT_BG_OUT = 0.6f
+        const val DEFAULT_SWAP = 0.5f
         const val DEFAULT_TICKER_SPEED = 120
         const val DEFAULT_PREVIEW_TEXT_SIZE = 56
         const val DEFAULT_PREVIEW_REFERENCE_SIZE = 40

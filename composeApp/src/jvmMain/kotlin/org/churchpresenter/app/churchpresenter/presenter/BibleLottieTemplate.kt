@@ -13,6 +13,7 @@ import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import java.io.File
 import java.io.IOException
 
@@ -41,12 +42,17 @@ internal data class LottieTemplateSize(
     val isPlayable: Boolean get() = frameRate > 0f && totalFrames > 0f && width > 0f && height > 0f
 }
 
-/** What the generator wrote under `cp` for the player: the text motions it drives, and pinned alignments. */
+/**
+ * What the generator wrote under `cp` for the player: the text motions it drives, pinned
+ * alignments, and how long a verse takes to give way to the next — null in files from before
+ * that was a setting, which are swapped in the time their text segments take.
+ */
 internal data class BandTemplateMeta(
     val textMotion: BandTextMotion = BandTextMotion.NONE,
     val tickerPxPerSecond: Float = DEFAULT_TICKER_SPEED,
     val textAlign: BandTextAlign? = null,
     val referenceAlign: BandTextAlign? = null,
+    val swapMs: Long? = null,
 )
 
 /**
@@ -99,8 +105,12 @@ internal class BibleLottieTemplate(
     private fun progressOf(frame: Float): Float =
         if (totalFrames <= 0f) 0f else (frame / totalFrames).coerceIn(0f, 1f)
 
-    /** How long a crossfade takes: the longer of `text_out` and `text_in`, so neither is cut short. */
-    fun swapMs(): Long = maxOf(segmentMs(SEGMENT_TEXT_OUT), segmentMs(SEGMENT_TEXT_IN))
+    /**
+     * How long a crossfade takes: what the file says, or else the longer of `text_out` and
+     * `text_in`, so neither is cut short. The two segments are stretched or squeezed to fit.
+     */
+    fun swapMs(): Long =
+        meta.swapMs?.coerceAtLeast(1L) ?: maxOf(segmentMs(SEGMENT_TEXT_OUT), segmentMs(SEGMENT_TEXT_IN))
 
     /** How long the named segments take to play back to back. */
     fun segmentMs(vararg names: String): Long {
@@ -172,6 +182,7 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
                 tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
                 textAlign = readAlign(meta, "textAlign"),
                 referenceAlign = readAlign(meta, "referenceAlign"),
+                swapMs = meta?.get("swapMs")?.jsonPrimitive?.longOrNull,
             ),
         )
     }

@@ -136,6 +136,17 @@ internal fun MotionSection(viewModel: BibleLottieGenViewModel) {
             )
         }
     }
+    Hairline()
+    // Verse to verse: the player's own move, so the preview above never shows it.
+    ThinSlider(
+        label = Strings.bandTimeCrossfade,
+        value = cfg.swapSeconds,
+        onValueChange = { v -> viewModel.updateConfig { it.copy(swapSeconds = v) } },
+        valueRange = MIN_SECONDS..MAX_SECONDS,
+        format = { "%.1f".format(it) },
+        unit = Strings.bandUnitSeconds,
+    )
+    Text(Strings.bandTimeCrossfadeHint, fontSize = 10.5.sp, lineHeight = 15.sp, color = Tokens.HintText)
 }
 
 /** The five phases side by side, each as wide as it is long. */

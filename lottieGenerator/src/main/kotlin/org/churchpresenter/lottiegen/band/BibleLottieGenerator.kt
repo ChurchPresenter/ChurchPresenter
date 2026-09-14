@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
+import kotlin.math.roundToInt
 
 /**
  * Builds a Bible lower-third template: a band, up to two verse slots with their references, and
@@ -46,6 +47,9 @@ object BibleLottieGenerator {
                 put(METADATA_VERSION, JsonPrimitive(METADATA_VERSION_1))
                 put(METADATA_TEXT_ANIMATION, JsonPrimitive(cfg.textAnimation.name))
                 put(METADATA_TICKER_SPEED, JsonPrimitive(cfg.tickerPxPerSecond))
+                // The crossfade is the player's, not the file's: nothing in the timeline plays
+                // two verses at once, so its length has nowhere to go but here.
+                put(METADATA_SWAP_MS, JsonPrimitive((cfg.swapSeconds * MILLIS_PER_SECOND).roundToInt()))
                 put(METADATA_TEXT_ALIGN, JsonPrimitive(cfg.textAlign.name))
                 put(METADATA_REFERENCE_ALIGN, JsonPrimitive(cfg.referenceAlign.name))
                 // The slot boxes themselves. The text documents' `ps` is where the sample's
@@ -75,6 +79,8 @@ object BibleLottieGenerator {
     const val METADATA_VERSION_1 = 1
     const val METADATA_TEXT_ANIMATION = "textAnimation"
     const val METADATA_TICKER_SPEED = "tickerPxPerSecond"
+    const val METADATA_SWAP_MS = "swapMs"
+    private const val MILLIS_PER_SECOND = 1000f
     const val METADATA_TEXT_ALIGN = "textAlign"
     const val METADATA_REFERENCE_ALIGN = "referenceAlign"
     const val METADATA_SLOTS = "slots"

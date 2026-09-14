@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -24,10 +23,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.band.ui.BandControlPanel
 import org.churchpresenter.lottiegen.band.ui.BandPreviewPanel
-import org.churchpresenter.lottiegen.ui.DarkPalette
-import org.churchpresenter.lottiegen.ui.LightPalette
 import org.churchpresenter.lottiegen.ui.LottieGenTheme
 import org.churchpresenter.lottiegen.ui.ProvideLottieGenPalette
+import org.churchpresenter.lottiegen.ui.paletteFrom
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.awt.Cursor
 import java.io.File
@@ -82,11 +80,9 @@ fun BibleLottieGenApp(
     }
 
     if (embedded) {
-        val isLight = MaterialTheme.colorScheme.surface.luminance() > LIGHT_SURFACE_LUMINANCE
-        ProvideLottieGenPalette(if (isLight) LightPalette else DarkPalette) { content() }
+        // The host's own scheme, so the window is in whichever of the app's themes is on.
+        ProvideLottieGenPalette(paletteFrom(MaterialTheme.colorScheme)) { content() }
     } else {
         LottieGenTheme { content() }
     }
 }
-
-private const val LIGHT_SURFACE_LUMINANCE = 0.5f
