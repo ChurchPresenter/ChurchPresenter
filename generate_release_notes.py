@@ -6,8 +6,11 @@ One bullet per pull request, titled the way the PR was titled, plus anything pus
 branch. Not one bullet per commit: a release is read by people deciding whether to upgrade, and the
 steps a branch took to get where it got are not that.
 
-Usage: python3 generate_release_notes.py [from_tag [version [windows macos_arm64 macos_x64 linux]]]
-Platform args are 'true'/'false' strings; omit to include all platforms.
+Usage: python3 generate_release_notes.py [from_tag [version [windows macos_arm64 macos_x64 linux [end_ref]]]]
+Platform args are 'true'/'false' strings; omit to include all platforms. `end_ref` names where the
+notes stop; omit it and they stop at the newest tag reachable from HEAD, or at HEAD when that tag is
+`from_tag`. The nightly passes HEAD explicitly: its base is the last *full* release, so a pre-release
+tagged since then must not cut the notes short.
 """
 
 import subprocess
@@ -45,7 +48,10 @@ def run(cmd):
 def last_release_tag():
     if len(sys.argv) > 1:
         return sys.argv[1]
-    return run(["gh", "release", "list", "--limit", "2", "--json", "tagName", "-q", ".[1].tagName"])
+    # The rolling `nightly` pre-release is re-created every night, so it is always the newest entry
+    # and never the release to write notes from.
+    return run(["gh", "release", "list", "--limit", "3", "--json", "tagName", "-q",
+                '[.[] | select(.tagName != "nightly")][1].tagName'])
 
 def categorize(msg):
     lower = msg.lower()
@@ -115,7 +121,7 @@ def main():
     from_tag = last_release_tag()
     latest_tag = run(["git", "describe", "--tags", "--abbrev=0"])
     # If no new tag exists yet, show commits from last release to HEAD
-    end_ref = "HEAD" if latest_tag == from_tag else latest_tag
+    end_ref = sys.argv[7] if len(sys.argv) > 7 else ("HEAD" if latest_tag == from_tag else latest_tag)
     # Allow version override via second argument (used by CI before the tag is pushed)
     if len(sys.argv) > 2:
         version = sys.argv[2].lstrip("v")

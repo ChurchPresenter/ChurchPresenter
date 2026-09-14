@@ -1,0 +1,156 @@
+name: Nightly Build
+
+# Builds the installers from `main` every night and publishes them as ONE rolling pre-release,
+# tagged `nightly`: the previous night's release and tag are deleted and a fresh pair created at
+# HEAD, so there is never more than one, its download URLs never change, and it is never "Latest"
+# (GitHub excludes pre-releases from that). Its notes are the categorized changelog from the last
+# full release to HEAD — the same generator the release uses, with the base pinned to the newest
+# non-pre-release so a hand-cut pre-release in between neither becomes the base nor cuts it short.
+#
+# The build itself is build.yml called with `release: false`, so the platform jobs, signing and
+# notarization are exactly the release ones and cannot drift from them. It publishes only when all
+# four succeed; a failed platform leaves the previous nightly in place, and the next night retries.
+#
+# A night on which `main` has not moved since the last successful nightly is skipped outright:
+# the four platform jobs cost about an hour of runner time and a notarization round-trip, and
+# would only reproduce the release already there. A manual dispatch always builds.
+#
+# Only the `nightly` release is ever deleted. A pre-release cut by hand from build.yml is a real
+# release with its own version tag and is never touched.
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC daily
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.BUILD }}
+    steps:
+      - name: Skip when main has not moved since the last successful nightly
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual run — building $HEAD_SHA"
+            echo "BUILD=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          LAST_SHA=$(gh run list --workflow nightly.yml --branch "${{ github.ref_name }}" \
+            --status success --limit 1 --json headSha -q '.[0].headSha // empty' 2>/dev/null || echo "")
+          if [ "$LAST_SHA" = "$HEAD_SHA" ]; then
+            echo "No new commits since the last nightly ($HEAD_SHA) — nothing to build"
+            echo "BUILD=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Last nightly: ${LAST_SHA:-none}; building $HEAD_SHA"
+            echo "BUILD=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: changes
+    if: ${{ needs.changes.outputs.build == 'true' }}
+    uses: ./.github/workflows/build.yml
+    # build.yml's `release` job declares `contents: write`, and a called workflow may not declare
+    # more than its caller grants — GitHub rejects the call at startup even though that job is
+    # skipped here. The grant is what lets the call validate; `release: false` is what keeps it
+    # from ever being used.
+    permissions:
+      contents: write
+    secrets: inherit
+    with:
+      windows: true
+      macos_arm64: true
+      macos_x64: true
+      linux: true
+      release: false
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          path: nightly
+          merge-multiple: true
+
+      - name: Fail if no installers
+        run: |
+          find nightly -type f
+          if [ -z "$(find nightly -type f)" ]; then
+            echo "No installers to publish"
+            exit 1
+          fi
+
+      - name: Delete the previous nightly release and tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view nightly >/dev/null 2>&1; then
+            gh release delete nightly --cleanup-tag --yes
+            echo "Previous nightly deleted"
+          else
+            echo "No previous nightly"
+          fi
+          # The checkout fetched the old tag before it was deleted upstream; drop it so
+          # `git describe` in the notes generator cannot see it.
+          git tag -d nightly 2>/dev/null || true
+
+      - name: Generate release notes since the last full release
+        id: body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The same version the installers were built with (composeApp/build.gradle.kts).
+          YEAR=$(date +%y)
+          COMMITS=$(git rev-list --count HEAD)
+          VERSION="${YEAR}.$((COMMITS / 256)).$((COMMITS % 256))"
+          DATE=$(date -u +%Y-%m-%d)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          BASE=$(gh release list --exclude-pre-releases --exclude-drafts --limit 1 \
+            --json tagName -q '.[0].tagName // empty')
+          {
+            echo "Nightly build of \`$SHORT_SHA\` on $DATE — version $VERSION, replaced every night."
+            echo "Not a release: use it to try what has landed since **${BASE:-the last release}**."
+            echo
+            if [ -n "$BASE" ]; then
+              python3 generate_release_notes.py "$BASE" "$VERSION" true true true true HEAD
+            else
+              echo "Download the installer for your platform below."
+            fi
+          } > notes.md
+          echo "DATE=$DATE" >> "$GITHUB_OUTPUT"
+          echo "SHORT_SHA=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          cat notes.md
+
+      - name: Create the nightly pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          target_commitish: ${{ github.sha }}
+          name: ChurchPresenter Nightly ${{ steps.body.outputs.DATE }} (${{ steps.body.outputs.SHORT_SHA }})
+          body_path: notes.md
+          prerelease: true
+          make_latest: false
+          files: nightly/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

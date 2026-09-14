@@ -7,14 +7,17 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import com.sun.jna.Pointer
 import kotlinx.coroutines.yield
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.churchpresenter.diagnostics.CrashReporter
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorInfo
@@ -64,14 +67,21 @@ typealias OnFrame = suspend (argb: IntArray, width: Int, height: Int, elapsedMs:
  * `remember` in it — survives across frames. Restarting the pump is what discards it, which is why
  * callers `remember` an instance keyed on the dimensions and fps that would invalidate it.
  *
- * **This class is still exposed to the `SnapshotStateObserver` ABBA deadlock — issue #498.**
- * `render` advances the global snapshot, and `advanceGlobalSnapshot` fans out to every registered
- * apply observer, this scene's and the on-screen AWT scene's alike; two threads doing that at once
- * take the two observers' locks in opposite orders. `LowerThirdOffscreenRenderer` was fixed by
- * confining its scene to the event queue and explains the cycle at its own `withSession`;
- * `HungTestReporter` records the proved lock owners. This one was left because it drives a *live*
- * feed, so confining it moves a full-size render onto the event thread for the whole of a service —
- * and nothing here measures what that costs.
+ * **Everything that touches the scene runs on the event queue** — building it, rendering it,
+ * closing it — and only the pixels come back to the worker. That is not a style choice: `render`
+ * advances the global snapshot, `advanceGlobalSnapshot` runs *every* registered apply observer,
+ * this scene's and the on-screen AWT scene's alike, and two threads doing that at once take those
+ * two observers' locks in opposite orders. It was a real deadlock, proved with lock ownership on
+ * 2026-08-29 (CI run 33269248282): `AWT-EventQueue-0` inside a desktop scrollbar's derived state
+ * against a worker inside `sendApplyNotifications`, each holding the lock the other wanted.
+ * `HungTestReporter` records the owners; `LowerThirdOffscreenRenderer` explains the cycle at its
+ * own `withSession` and was confined first. Confining the Compose half to one thread removes the
+ * second lock order, and there is no way to opt a scene out of the global observer list.
+ *
+ * This one was left exposed longer than that one because it drives a *live* feed, so the cost lands
+ * during a service rather than on a bounded pre-render. That cost is now measured rather than
+ * guessed at — see the numbers on issue #498 — and `readInto`/`onFrame`, the expensive half, still
+ * run off the event queue.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 class ComposeScenePump(
@@ -80,6 +90,14 @@ class ComposeScenePump(
     fps: Int,
     private val shouldRender: () -> Boolean = { true },
     private val onPark: () -> Unit = {},
+    /**
+     * Where the scene is built, rendered and closed — one thread, for the reason in the class doc.
+     *
+     * A parameter only so a test can see which thread the scene operations actually land on;
+     * nothing in the app passes anything but the default. Same seam, and the same reason for it, as
+     * [LowerThirdOffscreenRenderer]'s.
+     */
+    private val sceneDispatcher: CoroutineDispatcher = Dispatchers.Main,
     private val content: @Composable () -> Unit,
 ) {
     /**
@@ -135,7 +153,11 @@ class ComposeScenePump(
         if (job != null) return
         job = scope.launch(Dispatchers.Default) {
             val scene = try {
-                sceneCreation.withLock { ImageComposeScene(width, height, Density(1f)) { content() } }
+                sceneCreation.withLock {
+                    withContext(sceneDispatcher) {
+                        ImageComposeScene(width, height, Density(1f)) { content() }
+                    }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
@@ -160,7 +182,10 @@ class ComposeScenePump(
             try {
                 runLoop(scene, onFrame)
             } finally {
-                scene.close()
+                // NonCancellable because this `finally` runs on an already-cancelled coroutine —
+                // stopping the pump is the normal way out — and a plain `withContext` would throw
+                // before reaching `close`, leaking the scene for the life of the process.
+                withContext(NonCancellable + sceneDispatcher) { scene.close() }
             }
         }
     }
@@ -193,8 +218,19 @@ class ComposeScenePump(
 
             parked = false
             timeNanos += frameNanos
-            Snapshot.sendApplyNotifications()
-            val img = scene.render(timeNanos)
+            // These two together, in one hop, and not separately: `render` enters the same global
+            // snapshot fan-out three more times per frame on its own (`javap -c` on
+            // `BaseComposeScene`, ui-desktop 1.10.3 — recorded in `HungTestReporter`), so confining
+            // only the explicit `sendApplyNotifications` closes the door the crash dump happened to
+            // record and leaves three open.
+            //
+            // Reading the pixels back and handing them to `onFrame` stay off this thread: they are
+            // the expensive half and they touch no Compose state, so putting them on the event
+            // queue would buy nothing and cost the whole frame.
+            val img = withContext(sceneDispatcher) {
+                Snapshot.sendApplyNotifications()
+                scene.render(timeNanos)
+            }
             val read = try {
                 frame.readInto(img, intBuf)
             } finally {

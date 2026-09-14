@@ -34,6 +34,32 @@ on:
         required: false
         type: boolean
         default: false
+  # The same build, callable from another workflow — nightly.yml runs it on a schedule with
+  # `release: false`, so the installers land as run artifacts and nothing is tagged or released.
+  # workflow_call cannot share the dispatch inputs above, so they are declared twice.
+  workflow_call:
+    inputs:
+      windows:
+        type: boolean
+        default: true
+      macos_arm64:
+        type: boolean
+        default: true
+      macos_x64:
+        type: boolean
+        default: true
+      linux:
+        type: boolean
+        default: true
+      version:
+        type: string
+        default: ''
+      release:
+        type: boolean
+        default: true
+      prerelease:
+        type: boolean
+        default: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -660,7 +686,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ needs.version.outputs.version }}"
-          PREV_TAG=$(gh release list --limit 1 --json tagName -q ".[0].tagName" 2>/dev/null || echo "")
+          # Skip the rolling `nightly` pre-release: it is re-created every night, so it is always
+          # first in the list, and notes written from it would cover one day instead of one release.
+          PREV_TAG=$(gh release list --limit 5 --json tagName \
+            -q '[.[] | select(.tagName != "nightly")][0].tagName // empty' 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
             NOTES=$(python3 generate_release_notes.py "$PREV_TAG" "$VERSION" "${{ inputs.windows && needs.build-windows.result == 'success' }}" "${{ inputs.macos_arm64 && needs.build-macos.result == 'success' }}" "${{ inputs.macos_x64 && needs.build-macos-x64.result == 'success' }}" "${{ inputs.linux && needs.build-linux.result == 'success' }}")
           else
