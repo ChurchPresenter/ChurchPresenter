@@ -14,25 +14,27 @@ private const val THUMB_ALPHA = 0.5f
  * own teal-on-black. The standalone windows keep [DarkPalette] and [LightPalette]; this is the
  * embedded path only.
  *
- * Surfaces step through Material's container tones — fields on the lowest, cards and menus on
- * the higher ones — and every accent is the scheme's primary.
+ * The control pane sits on `surfaceContainer`, which is what the app's settings tabs paint their
+ * panes with (measured against the Background tab); fields take `surfaceVariant` like the app's
+ * dropdowns, menus and cards `surfaceContainerHighest`, and the preview stage `surfaceVariant`,
+ * like that tab's stage area. Every accent is the primary.
  */
 fun paletteFrom(scheme: ColorScheme): LottieGenPalette = LottieGenPalette(
-    appBg = scheme.background,
-    panelBg = scheme.surface,
-    cardBg = scheme.surfaceContainer,
+    appBg = scheme.surfaceContainer,
+    panelBg = scheme.surfaceContainer,
+    cardBg = scheme.surfaceContainerHighest,
     cardBorder = scheme.outlineVariant,
     cardBorderOpen = scheme.outline,
     divider = scheme.outlineVariant,
-    headBgOpen = scheme.surfaceContainerHigh,
-    headBgHover = scheme.surfaceContainerHigh,
+    headBgOpen = scheme.surfaceContainerHighest,
+    headBgHover = scheme.surfaceContainerHighest,
 
     tick = scheme.tertiary,
     titleText = scheme.onSurface,
     hintText = scheme.onSurfaceVariant,
     caret = scheme.onSurfaceVariant,
 
-    fieldBg = scheme.surfaceContainerLowest,
+    fieldBg = scheme.surfaceVariant,
     fieldBorder = scheme.outlineVariant,
     fieldBorderHover = scheme.outline,
     fieldLabel = scheme.onSurfaceVariant,
@@ -64,11 +66,11 @@ fun paletteFrom(scheme: ColorScheme): LottieGenPalette = LottieGenPalette(
     checkOffBorder = scheme.outline,
     segBorder = scheme.outlineVariant,
 
-    previewBg = scheme.surfaceContainerLowest,
+    previewBg = scheme.surfaceVariant,
     previewDivider = scheme.outlineVariant,
-    canvasBg = scheme.surfaceContainerLowest,
-    canvasChecker = scheme.surfaceContainerLow,
-    badgeBg = scheme.surfaceContainer,
+    canvasBg = scheme.surfaceVariant,
+    canvasChecker = scheme.surfaceContainerHigh,
+    badgeBg = scheme.surfaceContainerHigh,
     badgeBorder = scheme.outlineVariant,
     liveDot = scheme.tertiary,
 

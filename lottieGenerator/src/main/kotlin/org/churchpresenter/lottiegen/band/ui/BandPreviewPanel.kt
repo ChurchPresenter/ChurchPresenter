@@ -54,6 +54,8 @@ private val STAGE_MAX_WIDTH = 880.dp
 private const val GUIDE_DASH = 4f
 private const val GUIDE_GAP = 3f
 private const val GUIDE_ALPHA = 0.55f
+private const val PAUSE_DESCRIPTION = "Pause"
+private const val PLAY_DESCRIPTION = "Play"
 
 /**
  * The band generator's right pane: the composition on a plain stage at the band's own aspect,
@@ -190,7 +192,8 @@ private fun Transport(
         ) {
             Icon(
                 imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                contentDescription = null,
+                // The same descriptions the main generator's transport carries; the tests find it by them.
+                contentDescription = if (isPlaying) PAUSE_DESCRIPTION else PLAY_DESCRIPTION,
                 tint = Tokens.OnAccent,
                 modifier = Modifier.size(18.dp),
             )

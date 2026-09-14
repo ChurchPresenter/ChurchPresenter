@@ -154,7 +154,7 @@ import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed

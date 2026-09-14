@@ -16,6 +16,7 @@ import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.DropdownSelector
 
 /**
  * Every output that shows [mode], in the order the live preview panel lists them.

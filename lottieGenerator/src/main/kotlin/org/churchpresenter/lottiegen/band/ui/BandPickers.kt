@@ -27,13 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
@@ -58,39 +55,6 @@ import org.churchpresenter.lottiegen.ui.Tokens
 
 private const val CAPTION_TRACKING = 0.1f
 private const val MENU_OFFSET_PX = 46
-
-/** A captioned field showing a picked value, with the menu that picks it dropping from below. */
-@Composable
-internal fun <T> PickerField(
-    caption: String,
-    value: String,
-    options: List<T>,
-    selected: T,
-    labelOf: (T) -> String,
-    onPick: (T) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var open by remember { mutableStateOf(false) }
-    var anchorWidth by remember { mutableStateOf(0.dp) }
-    val density = LocalDensity.current
-    Box(modifier.onSizeChanged { anchorWidth = with(density) { it.width.toDp() } }) {
-        CaptionedButton(caption, value, open, onClick = { open = !open })
-        if (open) {
-            PopupMenu(
-                onDismiss = { open = false },
-                width = anchorWidth,
-                keys = MenuKeys(options.indexOf(selected), options.size, MENU_ROW_HEIGHT) { onPick(options[it]) },
-            ) {
-                options.forEach { option ->
-                    MenuRow(labelOf(option), option == selected) {
-                        onPick(option)
-                        open = false
-                    }
-                }
-            }
-        }
-    }
-}
 
 /** The caption-over-value button a picker opens from. */
 @Composable
@@ -183,10 +147,14 @@ internal fun PopupMenu(
                 .padding(4.dp),
         ) {
             Column(Modifier.fillMaxWidth().verticalScroll(scroll).padding(end = MENU_SCROLLBAR_GUTTER)) { content() }
-            VerticalScrollbar(
-                adapter = rememberScrollbarAdapter(scroll),
-                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            )
+            // Sized to the list, never the other way round: a bar that filled the height would
+            // pull the box up to its cap, and a four-line menu would open as a 300dp one.
+            Box(Modifier.matchParentSize()) {
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(scroll),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                )
+            }
         }
     }
 }
@@ -258,39 +226,3 @@ internal fun SelectedMark(selected: Boolean) {
 }
 
 private const val SELECTED_ROW_ALPHA = 0.22f
-
-/** One cell of a choice grid: filled with the accent when it is the choice, outlined otherwise. */
-@Composable
-internal fun ChoiceChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .height(29.dp)
-            .clip(FIELD_SHAPE)
-            .background(if (selected) Tokens.Accent else Tokens.FieldBg)
-            .border(1.dp, if (selected) Tokens.Accent else Tokens.FieldBorder, FIELD_SHAPE)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 6.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) Tokens.OnAccent else Tokens.LabelText, maxLines = 1, overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-/** A grid of [ChoiceChip]s, [columns] to a row. */
-@Composable
-internal fun <T> ChoiceGrid(options: List<T>, selected: T, columns: Int, labelOf: (T) -> String, onPick: (T) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        options.chunked(columns).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                row.forEach { option ->
-                    ChoiceChip(labelOf(option), option == selected, { onPick(option) }, Modifier.weight(1f))
-                }
-                repeat(columns - row.size) { Box(Modifier.weight(1f)) }
-            }
-        }
-    }
-}
-

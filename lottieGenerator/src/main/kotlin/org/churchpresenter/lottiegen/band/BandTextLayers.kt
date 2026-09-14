@@ -29,7 +29,7 @@ import org.churchpresenter.lottiegen.lottie.makeTextData
 internal fun LottieBuilder.addTextSlot(slot: TextSlot, cfg: BibleLottieGenConfig, timeline: BandTimeline) {
     val motion = TextMotion(cfg, slot.box, timeline)
     val weight = if (cfg.previewBold) BOLD_WEIGHT else REGULAR_WEIGHT
-    addFont(cfg.previewFontFamily, weight)
+    addFont(cfg.previewFontFamily, weight, cfg.previewItalic)
     val fittedSize = previewFittedSize(slot, cfg, weight)
     val wrapBox = previewWrapBox(slot, cfg, weight, fittedSize)
     val align = if (slot.isReference) cfg.referenceAlign else cfg.textAlign
@@ -48,6 +48,7 @@ internal fun LottieBuilder.addTextSlot(slot: TextSlot, cfg: BibleLottieGenConfig
         color = hexToLottie(color),
         transform = "none",
         justify = justify,
+        italic = cfg.previewItalic,
     )
 
     // A ticker's box is the slot too: the player widens the wrap box to the line it scrolls and
@@ -65,7 +66,7 @@ internal fun LottieBuilder.addTextSlot(slot: TextSlot, cfg: BibleLottieGenConfig
         makeTextData(run(SHADOW_COLOR), wrapBox),
         motion.transform(shadow = true),
         tt = if (shadowMatte != null) 1 else null,
-        hidden = true,
+        hidden = !cfg.previewShadow,
     )
 }
 
@@ -101,7 +102,8 @@ private fun previewFittedSize(slot: TextSlot, cfg: BibleLottieGenConfig, weight:
 
 private fun countWrappedLines(slot: TextSlot, cfg: BibleLottieGenConfig, weight: Int, sizePx: Double): Int {
     fun width(s: String): Double =
-        TextMeasurer.measure(s, cfg.previewFontFamily, sizePx.toFloat(), weight, "none").width.toDouble()
+        TextMeasurer.measure(s, cfg.previewFontFamily, sizePx.toFloat(), weight, "none", cfg.previewItalic)
+            .width.toDouble()
     val space = width("a a") - width("aa")
     var lines = 1
     var lineWidth = 0.0

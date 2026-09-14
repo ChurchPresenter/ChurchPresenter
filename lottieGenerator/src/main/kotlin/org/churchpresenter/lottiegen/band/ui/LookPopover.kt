@@ -91,11 +91,9 @@ internal fun LookPopover(
                 format = { it.toInt().toString() },
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text(Strings.bandLookWash, fontSize = 12.sp, color = Tokens.LabelText, modifier = Modifier.width(42.dp))
                 HexField(
-                    look.washColor,
-                    { c -> viewModel.updateLook(role) { it.copy(washColor = c) } },
-                    Modifier.width(104.dp),
+                    Strings.bandLookWash, look.washColor,
+                    onColorChange = { c -> viewModel.updateLook(role) { it.copy(washColor = c) } },
                 )
                 Box(Modifier.weight(1f)) {
                     InlineSlider(
@@ -182,11 +180,7 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
     val hasImage = cfg.images.containsKey(role)
     Box {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text(
-                roleLabel(cfg, role), fontSize = 11.5.sp, color = Tokens.LabelText, maxLines = 1,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.width(52.dp),
-            )
-            HexField(cfg.colorOf(role), { c -> viewModel.updateConfig { it.withColor(role, c) } }, Modifier.weight(1f))
+            HexField(roleLabel(cfg, role), cfg.colorOf(role), { c -> viewModel.updateConfig { it.withColor(role, c) } })
             Box(
                 modifier = Modifier
                     .size(FIELD_HEIGHT)

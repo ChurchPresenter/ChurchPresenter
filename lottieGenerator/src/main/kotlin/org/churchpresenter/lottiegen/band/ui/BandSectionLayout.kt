@@ -23,6 +23,7 @@ import org.churchpresenter.lottiegen.band.ReferencePlacement
 import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.theme.components.DropdownSelector
 
 private const val PERCENT = 100
 private const val MIN_REFERENCE_FRACTION = 0.1f
@@ -39,35 +40,25 @@ internal fun LayoutSection(viewModel: BibleLottieGenViewModel) {
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PickerField(
-                Strings.bandLayout, Strings.bandEnumLabel("layout", cfg.layout.name), SlotLayout.entries, cfg.layout,
-                labelOf = { Strings.bandEnumLabel("layout", it.name) },
-                onPick = { v -> viewModel.updateConfig { it.copy(layout = v) } },
+            EnumDropdown(
+                Strings.bandLayout, cfg.layout, SlotLayout.entries, { Strings.bandEnumLabel("layout", it.name) },
                 modifier = Modifier.weight(1f),
-            )
-            PickerField(
-                Strings.bandLabel("reference", kind),
-                Strings.bandLabel("reference_${cfg.referencePlacement.name.lowercase()}", kind),
-                ReferencePlacement.entries, cfg.referencePlacement,
-                labelOf = { Strings.bandLabel("reference_${it.name.lowercase()}", kind) },
-                onPick = { v -> viewModel.updateConfig { it.copy(referencePlacement = v) } },
+            ) { v -> viewModel.updateConfig { it.copy(layout = v) } }
+            EnumDropdown(
+                Strings.bandLabel("reference", kind), cfg.referencePlacement, ReferencePlacement.entries,
+                { Strings.bandLabel("reference_${it.name.lowercase()}", kind) },
                 modifier = Modifier.weight(1f),
-            )
+            ) { v -> viewModel.updateConfig { it.copy(referencePlacement = v) } }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PickerField(
-                Strings.bandLabel("text_align", kind), alignLabel(cfg.textAlign), BandTextAlign.entries, cfg.textAlign,
-                labelOf = alignLabel,
-                onPick = { v -> viewModel.updateConfig { it.copy(textAlign = v) } },
+            EnumDropdown(
+                Strings.bandLabel("text_align", kind), cfg.textAlign, BandTextAlign.entries, alignLabel,
                 modifier = Modifier.weight(1f),
-            )
-            PickerField(
-                Strings.bandLabel("reference_align", kind), alignLabel(cfg.referenceAlign), BandTextAlign.entries,
-                cfg.referenceAlign,
-                labelOf = alignLabel,
-                onPick = { v -> viewModel.updateConfig { it.copy(referenceAlign = v) } },
+            ) { v -> viewModel.updateConfig { it.copy(textAlign = v) } }
+            EnumDropdown(
+                Strings.bandLabel("reference_align", kind), cfg.referenceAlign, BandTextAlign.entries, alignLabel,
                 modifier = Modifier.weight(1f),
-            )
+            ) { v -> viewModel.updateConfig { it.copy(referenceAlign = v) } }
         }
     }
     Hairline()
@@ -107,6 +98,25 @@ internal fun LayoutSection(viewModel: BibleLottieGenViewModel) {
         format = { "${(it * PERCENT).toInt()}%" },
     )
     BandCheckbox(Strings.bandShowSlotGuides, viewModel.showSlotGuides) { viewModel.showSlotGuides = it }
+}
+
+/** The app's dropdown over an enum: keyed by constant name, shown by [labelOf]. */
+@Composable
+internal fun <T : Enum<T>> EnumDropdown(
+    label: String,
+    value: T,
+    entries: List<T>,
+    labelOf: (T) -> String,
+    modifier: Modifier = Modifier,
+    onPick: (T) -> Unit,
+) {
+    DropdownSelector(
+        label = label,
+        value = value.name,
+        options = entries.map { it.name to labelOf(it) },
+        onValueChange = { name -> entries.firstOrNull { it.name == name }?.let(onPick) },
+        modifier = modifier,
+    )
 }
 
 /** The small pill that makes one margin slider move all four. */

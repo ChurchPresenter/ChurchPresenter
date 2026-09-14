@@ -88,6 +88,34 @@ class BibleLottieGenViewModel(
         scheduleGenerate()
     }
 
+    /**
+     * One small band per style in the current colours, for the template menu to show what each
+     * style actually is. Built off the UI thread the first time the menu asks, and again only
+     * when a colour changes: the sample text and pictures are left out, so a thumbnail is cheap.
+     */
+    var styleThumbnails by mutableStateOf<Map<BandStyle, String>>(emptyMap())
+        private set
+
+    /** The timeline the thumbnails were built on, so the menu can seek to their hold frame. */
+    val thumbnailTimeline: BandTimeline get() = BandTimeline.from(thumbnailConfig(config))
+
+    private var thumbnailKey: BibleLottieGenConfig? = null
+
+    fun ensureStyleThumbnails() {
+        val key = thumbnailConfig(config)
+        if (key == thumbnailKey) return
+        thumbnailKey = key
+        scope.launch {
+            val built = withContext(Dispatchers.Default) {
+                BandStyle.entries.associateWith { style ->
+                    val lottie = BibleLottieGenerator.generate(key.copy(bandStyle = style))
+                    Json.encodeToString(JsonObject.serializer(), lottie)
+                }
+            }
+            if (thumbnailKey == key) styleThumbnails = built
+        }
+    }
+
     fun updateFileName(name: String) {
         fileName = name
     }
@@ -196,3 +224,9 @@ class BibleLottieGenViewModel(
                 cfg.textAnimation.name.lowercase()
     }
 }
+
+/** The design without its words and pictures: what a thumbnail is made from, and what it is keyed on. */
+private fun thumbnailConfig(cfg: BibleLottieGenConfig): BibleLottieGenConfig = cfg.copy(
+    previewText1 = "", previewReference1 = "", previewText2 = "", previewReference2 = "",
+    images = emptyMap(),
+)

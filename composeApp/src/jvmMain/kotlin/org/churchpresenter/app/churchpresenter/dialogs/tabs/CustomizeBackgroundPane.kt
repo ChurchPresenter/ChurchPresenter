@@ -178,7 +178,7 @@ private fun LottieRows(
         LottieBandPickerRow(
             path = config.backgroundLottie,
             onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
-            startDir = templatesDir,
+            templatesDir = templatesDir,
             onGenerate = { showGenerator = true },
             modifier = Modifier.width(SOURCE_FIELD_WIDTH),
         )

@@ -59,8 +59,8 @@ class LottieBuilder(
         })
     }
 
-    fun addFont(family: String, weight: Int): String {
-        val style = if (weight >= 700) "Bold" else "Regular"
+    fun addFont(family: String, weight: Int, italic: Boolean = false): String {
+        val style = fontStyleName(weight >= BOLD_WEIGHT, italic)
         val fName = "$family-$style"
         if (fonts.none { (it["fName"] as? JsonPrimitive)?.content == fName }) {
             fonts.add(buildJsonObject {
@@ -229,3 +229,5 @@ class LottieBuilder(
         }
     }
 }
+
+private const val BOLD_WEIGHT = 700

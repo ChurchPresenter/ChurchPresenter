@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,12 +16,19 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.theme.components.SettingsTextField
 
 /** The Save pane: the file name, what is about to be written, and the button that writes it. */
 @Composable
 internal fun SaveSection(viewModel: BibleLottieGenViewModel) {
     val cfg = viewModel.config
-    CaptionedInput(Strings.bandFileName, viewModel.fileName, onValueChange = viewModel::updateFileName, mono = true)
+    SettingsTextField(
+        value = viewModel.fileName,
+        onValueChange = viewModel::updateFileName,
+        label = Strings.bandFileName,
+        fillWidth = true,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+    )
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         SummaryRow(
             Strings.bandSummaryTemplate,

@@ -27,7 +27,7 @@ private const val MAX_PADDING_PX = 120f
 @Composable
 internal fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend () -> File?)?) {
     val cfg = viewModel.config
-    TemplatePicker(cfg) { style -> viewModel.updateConfig { it.copy(bandStyle = style) } }
+    TemplatePicker(viewModel) { style -> viewModel.updateConfig { it.copy(bandStyle = style) } }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             Caption(Strings.bandColors, Modifier.weight(1f))

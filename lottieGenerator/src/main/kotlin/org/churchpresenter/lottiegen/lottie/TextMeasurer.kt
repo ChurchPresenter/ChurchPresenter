@@ -16,10 +16,11 @@ object TextMeasurer {
         fontFamily: String,
         fontSizePx: Float,
         fontWeight: Int,
-        transform: String
+        transform: String,
+        italic: Boolean = false,
     ): TextSize {
         val displayText = if (transform == "uppercase") text.uppercase() else text
-        val awtStyle = if (fontWeight >= 700) Font.BOLD else Font.PLAIN
+        val awtStyle = (if (fontWeight >= BOLD_WEIGHT) Font.BOLD else Font.PLAIN) or (if (italic) Font.ITALIC else 0)
         val font = FontRegistry.getFont(fontFamily, awtStyle, fontSizePx)
 
         val metrics = font.getLineMetrics(displayText, frc)
@@ -30,3 +31,5 @@ object TextMeasurer {
         return TextSize(w, h)
     }
 }
+
+private const val BOLD_WEIGHT = 700

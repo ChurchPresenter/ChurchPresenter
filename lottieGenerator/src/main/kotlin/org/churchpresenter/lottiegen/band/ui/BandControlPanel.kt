@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
@@ -59,6 +60,7 @@ internal fun BandControlPanel(
     viewModel: BibleLottieGenViewModel,
     panelWidth: Dp,
     pickImage: (suspend () -> File?)? = null,
+    fontPicker: BandFontPicker? = null,
 ) {
     var pane by remember { mutableStateOf(BandPane.BAND) }
     val scrollState = rememberScrollState()
@@ -79,7 +81,7 @@ internal fun BandControlPanel(
                     BandPane.BAND -> BandSection(viewModel, pickImage)
                     BandPane.LAYOUT -> LayoutSection(viewModel)
                     BandPane.MOTION -> MotionSection(viewModel)
-                    BandPane.TEXT -> TextSection(viewModel)
+                    BandPane.TEXT -> TextSection(viewModel, fontPicker)
                     BandPane.SAVE -> SaveSection(viewModel)
                 }
             }

@@ -1,21 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Animation
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,11 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -36,21 +25,22 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_lottie_gen_window_title
 import churchpresenter.composeapp.generated.resources.bible_lottie_unsupported_note
 import churchpresenter.composeapp.generated.resources.song_lottie_unsupported_note
+import churchpresenter.composeapp.generated.resources.bible_font
 import churchpresenter.composeapp.generated.resources.image_files_filter
-import churchpresenter.composeapp.generated.resources.lottie_files_filter
 import churchpresenter.composeapp.generated.resources.lower_third_animation
-import churchpresenter.composeapp.generated.resources.lower_third_animation_clear
 import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.lower_third_animation_generate
 import churchpresenter.composeapp.generated.resources.lower_third_animation_none
 import churchpresenter.composeapp.generated.resources.lower_third_animation_use_lottie
-import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.lottiegen.band.BandContentKind
 import org.churchpresenter.lottiegen.band.BibleLottieGenApp
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
@@ -59,11 +49,10 @@ import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.theme.components.DropdownSelector
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
 import kotlin.math.roundToInt
 
 private val PICKER_ROW_HEIGHT = 32.dp
@@ -73,66 +62,35 @@ private const val PERCENT = 100f
 private const val REFERENCE_OUTPUT_HEIGHT = 1080f
 
 /**
- * The Lottie template a Bible lower third plays: the file, a way to pick another, a way to drop
- * it, and — where the host has a folder to save into — a way to make a new one. [startDir] is
- * where the chooser opens when nothing is picked yet.
+ * The Lottie template a Bible lower third plays, picked from the templates in [templatesDir] by
+ * name — with "no template" at the top — and, where the host has a folder to save into, a way to
+ * make a new one. A file set from elsewhere is still listed, so nothing already chosen is lost.
  */
 @Composable
 internal fun LottieBandPickerRow(
     path: String,
     onPathChange: (String) -> Unit,
-    startDir: File?,
+    templatesDir: File?,
     onGenerate: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    val scope = rememberCoroutineScope()
-    val filterLabel = stringResource(Res.string.lottie_files_filter)
+    val none = stringResource(Res.string.lower_third_animation_none)
+    // Listed afresh whenever the choice changes, which is also when the generator has just
+    // written a new file into the folder.
+    val options = remember(templatesDir, path, none) { templateOptions(templatesDir, path, none) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .height(PICKER_ROW_HEIGHT)
-                .clickable {
-                    scope.launch {
-                        val start = when {
-                            path.isNotBlank() -> Path(path)
-                            else -> startDir?.toPath() ?: Path(System.getProperty("user.home"))
-                        }
-                        val file = FileChooser.platformInstance.chooseSingle(
-                            path = start,
-                            filters = listOf(FileNameExtensionFilter(filterLabel, "json")),
-                            title = "",
-                            selectDirectory = false,
-                        )
-                        if (file != null) onPathChange(file.absolutePathString())
-                    }
-                }
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = if (path.isBlank()) stringResource(Res.string.lower_third_animation_none) else File(path).name,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (path.isBlank()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(Icons.Default.Animation, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
-        if (path.isNotBlank()) {
-            IconButton(onClick = { onPathChange("") }) {
-                Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.lower_third_animation_clear))
-            }
-        }
+        DropdownSelector(
+            label = "",
+            value = path,
+            options = options,
+            onValueChange = onPathChange,
+            modifier = Modifier.weight(1f),
+            compact = true,
+        )
         if (onGenerate != null) {
             // Shaped like the app's other settings buttons — the Browse button beside a folder —
             // not Material's default pill.
@@ -195,7 +153,7 @@ internal fun LowerThirdAnimationSection(
                 LottieBandPickerRow(
                     path = config.backgroundLottie,
                     onPathChange = { path -> update { it.copy(backgroundLottie = path) } },
-                    startDir = generatorDir,
+                    templatesDir = generatorDir,
                     onGenerate = if (generatorDir != null) ({ showGenerator = true }) else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -238,7 +196,7 @@ internal fun LottieBandSourceSection(
         LottieBandPickerRow(
             path = config.backgroundLottie,
             onPathChange = { onConfigChange(config.copy(backgroundLottie = it)) },
-            startDir = bibleLowerThirdsDir,
+            templatesDir = bibleLowerThirdsDir,
             onGenerate = if (bibleLowerThirdsDir != null) ({ showGenerator = true }) else null,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -271,6 +229,8 @@ internal fun BibleLottieGeneratorWindow(
         height = GENERATOR_WINDOW_HEIGHT,
     )
     val imageFilter = stringResource(Res.string.image_files_filter)
+    val fonts = rememberSystemFonts()
+    val fontLabel = stringResource(Res.string.bible_font)
     DialogWindow(
         onCloseRequest = onClose,
         state = dialogState,
@@ -291,6 +251,21 @@ internal fun BibleLottieGeneratorWindow(
                     title = "",
                     selectDirectory = false,
                 )?.toFile()
+            },
+            // The app's colour field: a click anywhere on it opens the app's Choose Color dialog.
+            colorField = { label, color, onColorChange, modifier ->
+                ColorPickerField(color = color, onColorChange = onColorChange, modifier = modifier, label = label)
+            },
+            // The app's font picker — the machine's fonts, each shown in its own face.
+            fontPicker = { value, onValueChange, modifier ->
+                FontSettingsDropdown(
+                    modifier = modifier,
+                    label = fontLabel,
+                    value = value,
+                    fonts = fonts,
+                    fillWidth = true,
+                    onValueChange = onValueChange,
+                )
             },
         )
     }
@@ -360,3 +335,17 @@ private fun stockBackgroundsDir(): java.nio.file.Path {
 }
 
 private const val STOCK_BACKGROUNDS_DIR = ".churchpresenter/stock-backgrounds"
+
+/** The template files in [dir] by name, after the no-template entry; [current] is kept even from outside it. */
+internal fun templateOptions(dir: File?, current: String, noneLabel: String): List<Pair<String, String>> {
+    val files = dir?.listFiles { f -> f.isFile && f.extension.equals(TEMPLATE_EXTENSION, ignoreCase = true) }
+        .orEmpty()
+        .sortedBy { it.nameWithoutExtension.lowercase() }
+        .map { it.absolutePath to it.nameWithoutExtension }
+    val listed = files.any { it.first == current }
+    val extra =
+        if (current.isNotBlank() && !listed) listOf(current to File(current).nameWithoutExtension) else emptyList()
+    return listOf("" to noneLabel) + extra + files
+}
+
+private const val TEMPLATE_EXTENSION = "json"

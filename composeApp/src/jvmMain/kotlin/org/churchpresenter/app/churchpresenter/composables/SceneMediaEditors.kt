@@ -83,6 +83,7 @@ import org.jetbrains.compose.resources.painterResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.theme.components.DropdownSelector
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f

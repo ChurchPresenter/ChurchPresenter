@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,7 +34,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.lottiegen.band.LocalBandColorField
 import org.churchpresenter.lottiegen.ui.components.ColorPickerDialog
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
 
 /*
@@ -149,12 +148,19 @@ internal fun InlineSlider(
     }
 }
 
+/** A colour control: the host's own field when the generator is inside the app, [OwnColorField] otherwise. */
+@Composable
+internal fun HexField(label: String, color: String, onColorChange: (String) -> Unit, modifier: Modifier = Modifier) {
+    LocalBandColorField.current(label, color, onColorChange, modifier.width(HEX_FIELD_WIDTH))
+}
+
 /**
- * A colour as a swatch and its hex, typed in place. The swatch opens the picker; the text is
- * handed on only once it is six hex digits, so a half-typed value never reaches the file.
+ * The generator's own colour field, for the standalone window: the caption, the hex typed in
+ * place and its swatch on the right, which opens the tool's picker. The text is handed on only
+ * once it is six hex digits, so a half-typed value never reaches the file.
  */
 @Composable
-internal fun HexField(color: String, onColorChange: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun OwnColorField(label: String, color: String, onColorChange: (String) -> Unit, modifier: Modifier) {
     var text by remember(color) { mutableStateOf(color) }
     var showPicker by remember { mutableStateOf(false) }
     if (showPicker) {
@@ -164,37 +170,30 @@ internal fun HexField(color: String, onColorChange: (String) -> Unit, modifier: 
             onColorSelected = { onColorChange(it) },
         )
     }
-    Row(
-        modifier = modifier
-            .height(FIELD_HEIGHT)
-            .clip(FIELD_SHAPE)
-            .background(Tokens.FieldBg)
-            .border(1.dp, Tokens.FieldBorder, FIELD_SHAPE)
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Box(
-            Modifier
-                .size(14.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(parseBandHex(color) ?: Color.Transparent)
-                .border(1.dp, Tokens.BorderHover, RoundedCornerShape(3.dp))
-                .clickable { showPicker = true },
-        )
-        BasicTextField(
-            value = text,
-            onValueChange = { typed ->
-                text = typed
-                normalizeHex(typed)?.let(onColorChange)
-            },
-            singleLine = true,
-            textStyle = TextStyle(fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = Tokens.HexText),
-            cursorBrush = SolidColor(Tokens.Accent),
-            modifier = Modifier.weight(1f),
-        )
-    }
+    SettingsTextField(
+        value = text,
+        onValueChange = { typed ->
+            text = typed
+            normalizeHex(typed)?.let(onColorChange)
+        },
+        label = label,
+        modifier = modifier,
+        fillWidth = true,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        trailingIcon = {
+            Box(
+                Modifier
+                    .size(14.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(parseBandHex(color) ?: Color.Transparent)
+                    .border(1.dp, Tokens.BorderHover, RoundedCornerShape(3.dp))
+                    .clickable { showPicker = true },
+            )
+        },
+    )
 }
+
+internal val HEX_FIELD_WIDTH = 128.dp
 
 /** `#RRGGBB`, upper-cased, from anything six hex digits long with or without its hash; else null. */
 internal fun normalizeHex(typed: String): String? {
@@ -232,45 +231,6 @@ internal fun BandCheckbox(label: String, checked: Boolean, onCheckedChange: (Boo
             }
         }
         Text(label, fontSize = 12.sp, color = Tokens.OutlineText)
-    }
-}
-
-/** A captioned box a line of text is typed into. */
-@Composable
-internal fun CaptionedInput(
-    caption: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    minLines: Int = 1,
-    mono: Boolean = false,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(CARD_SHAPE)
-            .background(Tokens.FieldBg)
-            .border(1.dp, Tokens.FieldBorder, CARD_SHAPE)
-            .padding(horizontal = 9.dp, vertical = 7.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        Text(
-            caption.uppercase(), fontSize = 8.5.sp, lineHeight = 10.sp, fontWeight = FontWeight.ExtraBold,
-            letterSpacing = (8.5f * CAPTION_TRACKING).sp, color = Tokens.HintText, maxLines = 1,
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = minLines == 1,
-            minLines = minLines,
-            textStyle = TextStyle(
-                fontSize = 12.sp,
-                lineHeight = 18.sp,
-                color = Tokens.InputText,
-                fontFamily = if (mono) FontFamily.Monospace else FontFamily.Default,
-            ),
-            cursorBrush = SolidColor(Tokens.Accent),
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 

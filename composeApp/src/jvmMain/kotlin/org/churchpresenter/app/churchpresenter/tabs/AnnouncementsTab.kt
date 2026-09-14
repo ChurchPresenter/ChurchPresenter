@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton

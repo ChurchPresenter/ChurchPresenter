@@ -31,9 +31,10 @@ private const val MAX_SECONDS = 4f
 private const val MAX_HOLD_SECONDS = 10f
 private const val MIN_TICKER_SPEED = 30f
 private const val MAX_TICKER_SPEED = 600f
-private const val ENTRANCE_COLUMNS = 3
-private const val TEXT_COLUMNS = 4
 private const val MIN_PHASE_WEIGHT = 0.05f
+
+/** The crossfade's colour on its slider: not a phase of the file, so not on the bar. */
+private val CROSSFADE_COLOR = Color(0xFFE06C9F)
 
 /** The five phases of a band, each in the colour it keeps across the timing bar, the sliders and the scrubber. */
 internal enum class BandPhase(val color: Color) {
@@ -89,18 +90,15 @@ internal enum class BandPhase(val color: Color) {
 @Composable
 internal fun MotionSection(viewModel: BibleLottieGenViewModel) {
     val cfg = viewModel.config
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        Caption(Strings.bandEntrance)
-        ChoiceGrid(
-            BandEntrance.entries, cfg.entrance, ENTRANCE_COLUMNS,
-            labelOf = { Strings.bandEnumLabel("entrance", it.name) },
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        EnumDropdown(
+            Strings.bandEntrance, cfg.entrance, BandEntrance.entries, { Strings.bandEnumLabel("entrance", it.name) },
+            modifier = Modifier.weight(1f),
         ) { v -> viewModel.updateConfig { it.copy(entrance = v) } }
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        Caption(Strings.bandTextAnimation)
-        ChoiceGrid(
-            TextAnimation.entries, cfg.textAnimation, TEXT_COLUMNS,
-            labelOf = { Strings.bandEnumLabel("text", it.name) },
+        EnumDropdown(
+            Strings.bandTextAnimation, cfg.textAnimation, TextAnimation.entries,
+            { Strings.bandEnumLabel("text", it.name) },
+            modifier = Modifier.weight(1f),
         ) { v -> viewModel.updateConfig { it.copy(textAnimation = v) } }
     }
     if (cfg.textAnimation == TextAnimation.TICKER) {
@@ -135,18 +133,19 @@ internal fun MotionSection(viewModel: BibleLottieGenViewModel) {
                 swatch = phase.color,
             )
         }
+        // Verse to verse: the player's own move, so it is not on the bar above and the preview
+        // never shows it, but it is timed here with the rest.
+        InlineSlider(
+            label = Strings.bandTimeCrossfade,
+            value = cfg.swapSeconds,
+            onValueChange = { v -> viewModel.updateConfig { it.copy(swapSeconds = v) } },
+            valueRange = MIN_SECONDS..MAX_SECONDS,
+            format = { "%.1f".format(it) },
+            unit = Strings.bandUnitSeconds,
+            labelWidth = 74.dp,
+            swatch = CROSSFADE_COLOR,
+        )
     }
-    Hairline()
-    // Verse to verse: the player's own move, so the preview above never shows it.
-    ThinSlider(
-        label = Strings.bandTimeCrossfade,
-        value = cfg.swapSeconds,
-        onValueChange = { v -> viewModel.updateConfig { it.copy(swapSeconds = v) } },
-        valueRange = MIN_SECONDS..MAX_SECONDS,
-        format = { "%.1f".format(it) },
-        unit = Strings.bandUnitSeconds,
-    )
-    Text(Strings.bandTimeCrossfadeHint, fontSize = 10.5.sp, lineHeight = 15.sp, color = Tokens.HintText)
 }
 
 /** The five phases side by side, each as wide as it is long. */

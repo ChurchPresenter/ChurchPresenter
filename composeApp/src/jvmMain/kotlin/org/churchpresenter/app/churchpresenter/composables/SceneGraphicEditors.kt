@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.timer_reset
 import churchpresenter.composeapp.generated.resources.pause
 import org.churchpresenter.core.models.scene.SceneSource
 import androidx.compose.foundation.layout.PaddingValues
+import org.churchpresenter.theme.components.DropdownSelector
 
 private const val MAX_STROKE_WIDTH = 20f
 private const val MAX_ANGLE_DEGREES = 360f

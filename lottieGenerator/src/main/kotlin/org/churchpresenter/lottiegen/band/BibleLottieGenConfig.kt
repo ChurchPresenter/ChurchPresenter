@@ -269,6 +269,9 @@ data class BibleLottieGenConfig(
     val previewTextColor: String = "#FFFFFF",
     val previewReferenceColor: String = "#FFFFFF",
     val previewBold: Boolean = false,
+    val previewItalic: Boolean = false,
+    /** Whether the sample shows its shadow twin, which the file ships hidden for the player to raise. */
+    val previewShadow: Boolean = false,
     val previewText1: String = DEFAULT_PREVIEW_TEXT,
     val previewReference1: String = "John 3:16 (KJV)",
     val previewText2: String = DEFAULT_PREVIEW_TEXT_2,

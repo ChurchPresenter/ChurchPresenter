@@ -77,7 +77,7 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField

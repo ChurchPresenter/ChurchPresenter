@@ -66,12 +66,13 @@ object FontRegistry {
             return baseFont.deriveFont(size)
         }
 
-        // Try plain style as fallback for families that don't have bold
-        if (awtStyle == Font.BOLD) {
+        // A cut the family lacks — bold, italic or both — is derived from its plain face; AWT
+        // emboldens and slants it itself.
+        if (awtStyle != Font.PLAIN) {
             val plainKey = "$family-${Font.PLAIN}"
             val plainFont = loadedFonts[plainKey]
             if (plainFont != null) {
-                return plainFont.deriveFont(Font.BOLD, size)
+                return plainFont.deriveFont(awtStyle, size)
             }
         }
 
