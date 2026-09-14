@@ -74,6 +74,62 @@ internal object BandGeometry {
     const val WAVE_AMPLITUDE = 0.07
     const val WAVE_CREST = 0.05
     const val WAVE_SWELL = 0.11
+    const val UNDERLINE_H = 0.09
+    const val UNDERLINE_RULE_H = 0.03
+    const val UNDERLINE_GAP = 0.02
+    const val DOUBLE_RULE_H = 0.05
+    const val SIDE_TAB_W = 0.05
+    const val BOOKMARK_X = 0.05
+    const val BOOKMARK_W = 0.09
+    const val BOOKMARK_NOTCH = 0.15
+    const val BOOKMARK_STRIPE = 0.025
+    const val STEP_W = 0.10
+    const val STEP_2_W = 0.04
+    const val STEP_3_W = 0.02
+    const val STEP_DROP = 0.33
+    const val STRIPE_1 = 0.86
+    const val STRIPE_W = 0.03
+    const val STRIPE_GAP = 0.02
+    const val STRIPE_THIN = 0.015
+    const val BRACKET_ARM_H = 0.3
+    const val BRACKET_ARM_W = 0.04
+    const val CHECKER_ROWS = 4
+    const val CHECKER_LEFT = 0.1
+    const val ARCH_QUARTER_W = 0.36
+    const val ARCH_QUARTER_H = 2.2
+    const val TWIN_X = 0.02
+    const val TWIN_W = 0.008
+    const val TWIN_GAP = 0.015
+    const val PANEL_INSET_X = 0.02
+    const val PANEL_INSET_Y = 0.12
+    const val ZIGZAG_TEETH = 12
+    const val ZIGZAG_H = 0.18
+    const val ZIGZAG_VALLEY = 0.03
+    const val PENNANT_W = 0.2
+    const val PENNANT_INNER_W = 0.1
+    const val PENNANT_INNER_Y = 0.25
+    const val SLASH_1 = 0.10
+    const val SLASH_W = 0.025
+    const val SLASH_GAP = 0.02
+    const val TAB_X = 0.03
+    const val TAB_W = 0.12
+    const val TAB_STEP = 0.03
+    const val TAB_H = 0.12
+    const val TAB_Y = 0.18
+    const val TAB_GAP = 0.14
+    const val BLOCK_W = 0.2
+    const val BLOCK_EDGE = 0.012
+    const val TOP_TAB_W = 0.28
+    const val TOP_TAB_H = 0.22
+    const val TOP_TAB_RULE = 0.03
+    const val BOTTOM_BAND_H = 0.3
+    const val BOTTOM_BAND_RULE = 0.02
+    const val CHAMFER_CUT = 0.35
+    const val CHAMFER_STRIPE = 0.02
+    const val LEFT_BLOCK = 0.18
+    const val LEFT_BLOCK_WIDE = 0.22
+    const val EDGE_RULES = 0.06
+    const val BOTTOM_STRIP = 0.12
 }
 
 /** Fractions of the band's width and height a style paints solid colour over, edge by edge. */
@@ -100,6 +156,23 @@ internal fun BandStyle.textInsets(): StyleInsets = with(BandGeometry) {
         BandStyle.DIAGONAL_SPLIT -> StyleInsets(right = 1.0 - SPLIT_BOTTOM)
         BandStyle.RIBBON_FOLD -> StyleInsets(left = FOLD_W + FOLD_TAIL)
         BandStyle.WAVE_DECK -> StyleInsets(bottom = WAVE_TOP + WAVE_AMPLITUDE + WAVE_SWELL)
+        BandStyle.UNDERLINE_BAR -> StyleInsets(bottom = BOTTOM_STRIP)
+        BandStyle.DOUBLE_RULE -> StyleInsets(top = DOUBLE_RULE_H, bottom = DOUBLE_RULE_H)
+        BandStyle.SIDE_TABS -> StyleInsets(left = SIDE_TAB_W, right = SIDE_TAB_W)
+        BandStyle.BOOKMARK -> StyleInsets(left = BOOKMARK_X + BOOKMARK_W + SLASH_GAP)
+        BandStyle.STEPPED_LEFT, BandStyle.QUARTER_ARCH, BandStyle.SLASHES, BandStyle.STACKED_TABS ->
+            StyleInsets(left = LEFT_BLOCK)
+        BandStyle.LEFT_BLOCK, BandStyle.CHAMFER_BLOCK -> StyleInsets(left = BLOCK_W + SLASH_GAP)
+        BandStyle.TOP_TAB -> StyleInsets(top = TOP_TAB_H + TOP_TAB_RULE)
+        BandStyle.BOTTOM_BAND -> StyleInsets(bottom = BOTTOM_BAND_H)
+        BandStyle.DIAGONAL_STRIPES -> StyleInsets(right = 1.0 - (STRIPE_1 - SLANT))
+        BandStyle.CHECKER_EDGE -> StyleInsets(left = CHECKER_LEFT)
+        BandStyle.TWIN_RULES -> StyleInsets(left = EDGE_RULES)
+        BandStyle.INNER_PANEL -> StyleInsets(
+            left = PANEL_INSET_X, right = PANEL_INSET_X, top = PANEL_INSET_Y, bottom = PANEL_INSET_Y,
+        )
+        BandStyle.ZIGZAG_EDGE -> StyleInsets(bottom = ZIGZAG_H + ZIGZAG_VALLEY)
+        BandStyle.PENNANT -> StyleInsets(left = LEFT_BLOCK_WIDE)
         else -> StyleInsets()
     }
 }

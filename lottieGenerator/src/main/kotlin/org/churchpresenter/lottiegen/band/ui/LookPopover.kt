@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,14 +34,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.swing.Swing
+import kotlinx.coroutines.withContext
 import org.churchpresenter.lottiegen.band.BandColorRole
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.io.File
 import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
 
 private const val MAX_ALPHA = 100f
@@ -66,11 +66,11 @@ internal fun LookPopover(
     val cfg = viewModel.config
     val look = cfg.look(role)
     val image = cfg.images[role]
-    val scope = rememberCoroutineScope()
     Popup(
         alignment = Alignment.TopEnd,
         offset = IntOffset(0, POPOVER_OFFSET_PX),
-        onDismissRequest = onDismiss,
+        // A native chooser takes the focus; the popover waits for it rather than closing under it.
+        onDismissRequest = { if (!viewModel.choosingImage) onDismiss() },
         properties = PopupProperties(focusable = true),
     ) {
         Column(
@@ -109,15 +109,7 @@ internal fun LookPopover(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PictureButton(
-                    onClick = {
-                        if (pickImage != null) {
-                            scope.launch { pickImage()?.let { viewModel.loadBandImage(role, it) } }
-                        } else {
-                            chooseWithSwing { viewModel.loadBandImage(role, it) }
-                        }
-                    },
-                )
+                PictureButton(onClick = { viewModel.chooseBandImage(role, pickImage ?: ::chooseWithSwing) })
                 Text(
                     image?.name ?: Strings.bandImageNone, fontSize = 10.5.sp,
                     color = if (image != null) Tokens.OutlineText else Tokens.HintText,
@@ -175,12 +167,11 @@ private fun PictureButton(onClick: () -> Unit) {
     }
 }
 
-private fun chooseWithSwing(onPicked: (File) -> Unit) {
-    SwingUtilities.invokeLater {
-        val chooser = JFileChooser()
-        chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) onPicked(chooser.selectedFile)
-    }
+/** Swing's chooser, on the event thread, for the standalone window that has no host to lend one. */
+private suspend fun chooseWithSwing(): File? = withContext(Dispatchers.Swing) {
+    val chooser = JFileChooser()
+    chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
+    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
 }
 
 /** A colour role: its name, its hex, the pencil to its look, and a mark when a picture stands in. */

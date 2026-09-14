@@ -23,8 +23,8 @@ enum class BandStyle(
     /** A gradient running corner to corner, background colour to second. */
     GRADIENT_ANGLED(usesSecond = true),
 
-    /** A three-stop gradient left to right: background, accent, second. */
-    GRADIENT_TRIO(usesSecond = true),
+    /** A three-stop gradient left to right: background, second, third. */
+    GRADIENT_TRIO(usesSecond = true, usesTertiary = true),
 
     /** Top half in the background colour, bottom half in the second. */
     SPLIT_SHUTTER(usesSecond = true),
@@ -70,6 +70,66 @@ enum class BandStyle(
      * third-colour swell behind it.
      */
     WAVE_DECK(usesSecond = true, usesTertiary = true),
+
+    /** A thick accent rule along the bottom edge, a thin third-colour rule above it. */
+    UNDERLINE_BAR(usesTertiary = true),
+
+    /** An accent rule along the top edge and another along the bottom. */
+    DOUBLE_RULE,
+
+    /** A second-colour tab down the left edge, an accent tab down the right. */
+    SIDE_TABS(usesSecond = true),
+
+    /** A ribbon hanging from the top on the left, notched at its foot, with an accent stripe. */
+    BOOKMARK(usesSecond = true),
+
+    /** Three steps down the left: second, third, accent, each shorter than the last. */
+    STEPPED_LEFT(usesSecond = true, usesTertiary = true),
+
+    /** Three thin slanted stripes on the right: second, accent, third. */
+    DIAGONAL_STRIPES(usesSecond = true, usesTertiary = true),
+
+    /** Accent brackets in the four corners. */
+    CORNER_BRACKETS,
+
+    /** A solid second-colour block on the left with an accent edge down its right side. */
+    LEFT_BLOCK(usesSecond = true),
+
+    /** A second-colour tab across the top-left corner, an accent rule under it across the band. */
+    TOP_TAB(usesSecond = true),
+
+    /** A checkerboard of second and third colour, two columns wide, down the left edge. */
+    CHECKER_EDGE(usesSecond = true, usesTertiary = true),
+
+    /** The right half in the second colour: one language on each. */
+    SPLIT_VERTICAL(usesSecond = true),
+
+    /** A quarter arch in the second colour rising from the bottom-left corner. */
+    QUARTER_ARCH(usesSecond = true),
+
+    /** Two thin vertical rules at the left edge, second then third. */
+    TWIN_RULES(usesSecond = true, usesTertiary = true),
+
+    /** A second-colour panel inset from the band's edges, framed by an accent line. */
+    INNER_PANEL(usesSecond = true),
+
+    /** A zigzag of the second colour along the bottom edge. */
+    ZIGZAG_EDGE(usesSecond = true),
+
+    /** A second-colour pennant pointing in from the left with a smaller accent one in front. */
+    PENNANT(usesSecond = true),
+
+    /** Two slanted slashes on the left: accent, then third. */
+    SLASHES(usesTertiary = true),
+
+    /** Three short bars stacked on the left: second, accent, third, each shorter. */
+    STACKED_TABS(usesSecond = true, usesTertiary = true),
+
+    /** A second-colour band across the bottom with an accent hairline along its top. */
+    BOTTOM_BAND(usesSecond = true),
+
+    /** A second-colour block on the left, its top-right corner cut away, with a third-colour stripe. */
+    CHAMFER_BLOCK(usesSecond = true, usesTertiary = true),
 }
 
 /**

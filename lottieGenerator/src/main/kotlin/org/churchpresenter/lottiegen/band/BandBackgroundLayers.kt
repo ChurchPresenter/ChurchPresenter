@@ -4,9 +4,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.band.BandGeometry.ARCH_BASE_H
-import org.churchpresenter.lottiegen.band.BandGeometry.ARCH_H
 import org.churchpresenter.lottiegen.band.BandGeometry.ARCH_RING
-import org.churchpresenter.lottiegen.band.BandGeometry.ARCH_W
 import org.churchpresenter.lottiegen.band.BandGeometry.BLADE_BOTTOM
 import org.churchpresenter.lottiegen.band.BandGeometry.BLADE_TOP
 import org.churchpresenter.lottiegen.band.BandGeometry.CHEVRON_ECHO
@@ -31,10 +29,8 @@ import org.churchpresenter.lottiegen.band.BandGeometry.THIRD_LEFT
 import org.churchpresenter.lottiegen.band.BandGeometry.THIRD_RIGHT
 import org.churchpresenter.lottiegen.band.BandGeometry.TRI_1
 import org.churchpresenter.lottiegen.band.BandGeometry.TRI_2
-import org.churchpresenter.lottiegen.band.BandGeometry.WAVE_AMPLITUDE
 import org.churchpresenter.lottiegen.band.BandGeometry.WAVE_CREST
 import org.churchpresenter.lottiegen.band.BandGeometry.WAVE_SWELL
-import org.churchpresenter.lottiegen.band.BandGeometry.WAVE_TOP
 import org.churchpresenter.lottiegen.band.BandGeometry.WEDGE_TIP
 import org.churchpresenter.lottiegen.band.BandGeometry.WEDGE_TIP_H
 import org.churchpresenter.lottiegen.band.BandGeometry.WEDGE_W
@@ -46,10 +42,7 @@ import org.churchpresenter.lottiegen.lottie.hexToLottie
 import org.churchpresenter.lottiegen.lottie.jsonArrayOf
 import org.churchpresenter.lottiegen.lottie.makeFill
 import org.churchpresenter.lottiegen.lottie.makeGradientFill
-import org.churchpresenter.lottiegen.lottie.makeCurvedPath
-import org.churchpresenter.lottiegen.lottie.makeEllipse
 import org.churchpresenter.lottiegen.lottie.makeGroup
-import org.churchpresenter.lottiegen.lottie.makePath
 import org.churchpresenter.lottiegen.lottie.makeRect
 import org.churchpresenter.lottiegen.lottie.makeStroke
 import org.churchpresenter.lottiegen.lottie.makeGradientFillStops
@@ -72,12 +65,6 @@ internal fun LottieBuilder.addBandBackground(cfg: BibleLottieGenConfig, slots: B
     BandDecorations(cfg, band).pieces().forEach(emitter::emit)
     borderPiece(cfg, band)?.let(emitter::emit)
     fillPieces(cfg, band).forEach(emitter::emit)
-}
-
-/** One thing the band paints: a shape in a colour role, or a group already carrying its own paint. */
-private sealed interface BandPiece {
-    class Shaped(val role: BandColorRole, val shape: JsonObject) : BandPiece
-    class Painted(val group: JsonObject) : BandPiece
 }
 
 /** [shape] filled with [role]'s wash, to sit over a piece of that role; null when the role has none. */
@@ -118,7 +105,7 @@ private fun fillPieces(cfg: BibleLottieGenConfig, band: SlotBox): List<BandPiece
             listOf(palette.bg, palette.second), alpha, listOf(band.x, band.y), listOf(band.right, band.bottom),
         )
         BandStyle.GRADIENT_TRIO -> makeGradientFillStops(
-            listOf(palette.bg, palette.accent, palette.second), alpha,
+            listOf(palette.bg, palette.second, palette.tertiary), alpha,
             listOf(band.x, band.centerY), listOf(band.right, band.centerY),
         )
         else -> null
@@ -215,12 +202,13 @@ private class BandPalette(private val cfg: BibleLottieGenConfig) {
     val bg = hexToLottie(cfg.bgColor)
     val second = hexToLottie(cfg.gradientColor)
     val accent = hexToLottie(cfg.accentColor)
+    val tertiary = hexToLottie(cfg.tertiaryColor)
 
     fun color(role: BandColorRole): List<Double> = when (role) {
         BandColorRole.BACKGROUND -> bg
         BandColorRole.SECOND -> second
         BandColorRole.ACCENT -> accent
-        BandColorRole.TERTIARY -> hexToLottie(cfg.tertiaryColor)
+        BandColorRole.TERTIARY -> tertiary
     }
 
     fun alpha(role: BandColorRole): Double = when (role) {
@@ -229,63 +217,6 @@ private class BandPalette(private val cfg: BibleLottieGenConfig) {
         BandColorRole.ACCENT -> cfg.accentAlpha.toDouble()
         BandColorRole.TERTIARY -> cfg.tertiaryAlpha.toDouble()
     }
-}
-
-/** The primitive shapes the styles are built from, each placed on the band rectangle [b]. */
-private open class BandShapes(protected val b: SlotBox) {
-    protected val x = b.x
-    protected val y = b.y
-    protected val w = b.w
-    protected val h = b.h
-    protected val right = b.right
-    protected val bottom = b.bottom
-
-    protected fun rect(role: BandColorRole, x: Double, y: Double, w: Double, h: Double): BandPiece =
-        BandPiece.Shaped(role, makeRect(w, h, 0.0, listOf(x + w / 2, y + h / 2)))
-
-    protected fun poly(role: BandColorRole, vararg points: Pair<Double, Double>): BandPiece =
-        BandPiece.Shaped(role, makePath(points.map { listOf(it.first, it.second) }))
-
-    protected fun accent(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.ACCENT, x, y, w, h)
-    protected fun second(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.SECOND, x, y, w, h)
-    protected fun tertiary(x: Double, y: Double, w: Double, h: Double) = rect(BandColorRole.TERTIARY, x, y, w, h)
-
-    /** Where the band's width fraction [f] lands, in canvas pixels. */
-    protected fun fx(f: Double): Double = x + w * f
-
-    /** A slanted stripe [from]..[to] of the band's width at the top, leaning back by [SLANT] at the bottom. */
-    protected fun slant(role: BandColorRole, from: Double, to: Double): BandPiece =
-        poly(role, fx(from) to y, fx(to) to y, fx(to - SLANT) to bottom, fx(from - SLANT) to bottom)
-
-    /**
-     * A wave across the band, its crest [lift] of the height above the base line, filled down to
-     * the bottom edge. [flip] mirrors the wave so two of them cross rather than stack.
-     */
-    protected fun wave(role: BandColorRole, lift: Double, flip: Boolean = false): BandPiece {
-        val baseY = bottom - h * (WAVE_TOP + lift)
-        val amp = h * WAVE_AMPLITUDE * (if (flip) -1.0 else 1.0)
-        val quarter = w / 4
-        val handle = listOf(quarter / 2, 0.0)
-        val negHandle = listOf(-quarter / 2, 0.0)
-        val none = listOf(0.0, 0.0)
-        val vertices = listOf(
-            listOf(x, baseY),
-            listOf(x + quarter, baseY - amp),
-            listOf(x + 2 * quarter, baseY),
-            listOf(x + 3 * quarter, baseY + amp),
-            listOf(right, baseY),
-            listOf(right, bottom),
-            listOf(x, bottom),
-        )
-        val inTangents = listOf(none, negHandle, negHandle, negHandle, negHandle, none, none)
-        val outTangents = listOf(handle, handle, handle, handle, none, none, none)
-        return BandPiece.Shaped(role, makeCurvedPath(vertices, inTangents, outTangents, closed = true))
-    }
-
-    /** An ellipse centred on the bottom edge, so its upper half stands as an arch; [grow] widens it for a ring. */
-    protected fun arch(role: BandColorRole, grow: Double): BandPiece = BandPiece.Shaped(
-        role, makeEllipse(w * (ARCH_W + grow * 2), h * (ARCH_H + grow) * 2, listOf(b.centerX, bottom)),
-    )
 }
 
 /**
@@ -331,6 +262,8 @@ private class BandDecorations(private val cfg: BibleLottieGenConfig, b: SlotBox)
             wave(BandColorRole.ACCENT, WAVE_CREST),
             wave(BandColorRole.TERTIARY, WAVE_SWELL, flip = true),
         )
+        // The second score of styles, in their own file.
+        else -> BandDecorationsMore(cfg, b).pieces()
     }
 
     private fun tricolorDiagonal(): List<BandPiece> = listOf(

@@ -24,7 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +35,7 @@ import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 
 private val CHIP_SIZE = 44.dp to 26.dp
+private val TEMPLATE_ROW_HEIGHT = 38.dp
 
 /** The style, chosen from a list that shows each one as a small swatch of its shapes. */
 @Composable
@@ -54,7 +54,13 @@ internal fun TemplatePicker(cfg: BibleLottieGenConfig, onPick: (BandStyle) -> Un
             trailing = { CountBadge(Strings.bandTemplateColors(count)) },
         )
         if (open) {
-            PopupMenu(onDismiss = { open = false }, width = anchorWidth) {
+            PopupMenu(
+                onDismiss = { open = false },
+                width = anchorWidth,
+                keys = MenuKeys(BandStyle.entries.indexOf(cfg.bandStyle), BandStyle.entries.size, TEMPLATE_ROW_HEIGHT) {
+                    onPick(BandStyle.entries[it])
+                },
+            ) {
                 BandStyle.entries.forEach { style ->
                     TemplateRow(style, cfg, selected = style == cfg.bandStyle) {
                         onPick(style)
@@ -72,8 +78,9 @@ private fun TemplateRow(style: BandStyle, cfg: BibleLottieGenConfig, selected: B
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(TEMPLATE_ROW_HEIGHT)
             .clip(FIELD_SHAPE)
-            .background(if (selected) Tokens.HeadBgOpen else Color.Transparent)
+            .background(menuRowBackground(selected))
             .clickable(onClick = onClick)
             .padding(horizontal = 7.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -89,6 +96,7 @@ private fun TemplateRow(style: BandStyle, cfg: BibleLottieGenConfig, selected: B
             Strings.bandTemplateColors(count), fontSize = 9.5.sp, fontWeight = FontWeight.Bold,
             color = Tokens.LabelText,
         )
+        SelectedMark(selected)
     }
 }
 
@@ -137,7 +145,7 @@ private val CHIP_MARKS: Map<BandStyle, ChipMark> = mapOf(
     BandStyle.GRADIENT_BAR to box(ChipInk.SECOND, 0.5f, 0f, 0.5f, 1f),
     BandStyle.GRADIENT_HORIZONTAL to box(ChipInk.SECOND, 0.5f, 0f, 0.5f, 1f),
     BandStyle.GRADIENT_ANGLED to mark(ChipInk.SECOND, 1f to 0f, 1f to 1f, 0f to 1f),
-    BandStyle.GRADIENT_TRIO to box(ChipInk.ACCENT, 0.33f, 0f, 0.34f, 1f),
+    BandStyle.GRADIENT_TRIO to box(ChipInk.SECOND, 0.33f, 0f, 0.34f, 1f),
     BandStyle.ACCENT_EDGE_BAR to box(ChipInk.ACCENT, 0f, 0f, 0.09f, 1f),
     BandStyle.GLASS_PANEL to box(ChipInk.ACCENT, 0f, 0.85f, 1f, 0.15f),
     BandStyle.RIBBON to box(ChipInk.ACCENT, 0f, 0f, 1f, 0.16f),
@@ -156,6 +164,33 @@ private val CHIP_MARKS: Map<BandStyle, ChipMark> = mapOf(
     BandStyle.WAVE_DECK to mark(
         ChipInk.SECOND, 0f to 0.7f, 0.25f to 0.55f, 0.5f to 0.7f, 0.75f to 0.85f, 1f to 0.7f, 1f to 1f, 0f to 1f,
     ),
+    BandStyle.UNDERLINE_BAR to box(ChipInk.ACCENT, 0f, 0.88f, 1f, 0.12f),
+    BandStyle.DOUBLE_RULE to box(ChipInk.ACCENT, 0f, 0f, 1f, 0.08f),
+    BandStyle.SIDE_TABS to box(ChipInk.SECOND, 0f, 0f, 0.06f, 1f),
+    BandStyle.BOOKMARK to mark(ChipInk.SECOND, 0.05f to 0f, 0.14f to 0f, 0.14f to 1f, 0.095f to 0.85f, 0.05f to 1f),
+    BandStyle.STEPPED_LEFT to mark(
+        ChipInk.SECOND, 0f to 0f, 0.1f to 0f, 0.1f to 0.33f, 0.14f to 0.33f, 0.14f to 1f, 0f to 1f,
+    ),
+    BandStyle.DIAGONAL_STRIPES to mark(ChipInk.SECOND, 0.86f to 0f, 0.9f to 0f, 0.82f to 1f, 0.78f to 1f),
+    BandStyle.CORNER_BRACKETS to mark(
+        ChipInk.ACCENT, 0f to 0f, 0.12f to 0f, 0.12f to 0.15f, 0.04f to 0.15f, 0.04f to 0.5f, 0f to 0.5f,
+    ),
+    BandStyle.LEFT_BLOCK to box(ChipInk.SECOND, 0f, 0f, 0.2f, 1f),
+    BandStyle.TOP_TAB to box(ChipInk.SECOND, 0f, 0f, 0.28f, 0.25f),
+    BandStyle.CHECKER_EDGE to box(ChipInk.SECOND, 0f, 0f, 0.08f, 0.5f),
+    BandStyle.SPLIT_VERTICAL to box(ChipInk.SECOND, 0.5f, 0f, 0.5f, 1f),
+    BandStyle.QUARTER_ARCH to mark(ChipInk.SECOND, 0f to 0f, 0.1f to 0.15f, 0.17f to 0.5f, 0.18f to 1f, 0f to 1f),
+    BandStyle.TWIN_RULES to box(ChipInk.SECOND, 0.03f, 0f, 0.02f, 1f),
+    BandStyle.INNER_PANEL to box(ChipInk.SECOND, 0.05f, 0.15f, 0.9f, 0.7f),
+    BandStyle.ZIGZAG_EDGE to mark(
+        ChipInk.SECOND, 0f to 1f, 0f to 0.75f, 0.125f to 0.9f, 0.25f to 0.75f, 0.375f to 0.9f, 0.5f to 0.75f,
+        0.625f to 0.9f, 0.75f to 0.75f, 0.875f to 0.9f, 1f to 0.75f, 1f to 1f,
+    ),
+    BandStyle.PENNANT to mark(ChipInk.SECOND, 0f to 0f, 0.2f to 0.5f, 0f to 1f),
+    BandStyle.SLASHES to mark(ChipInk.ACCENT, 0.1f to 0f, 0.13f to 0f, 0.05f to 1f, 0.02f to 1f),
+    BandStyle.STACKED_TABS to box(ChipInk.SECOND, 0.03f, 0.2f, 0.12f, 0.15f),
+    BandStyle.BOTTOM_BAND to box(ChipInk.SECOND, 0f, 0.7f, 1f, 0.3f),
+    BandStyle.CHAMFER_BLOCK to mark(ChipInk.SECOND, 0f to 0f, 0.14f to 0f, 0.2f to 0.35f, 0.2f to 1f, 0f to 1f),
 )
 
 private fun chipShape(style: BandStyle, s: Size): Pair<Path, ChipInk>? {

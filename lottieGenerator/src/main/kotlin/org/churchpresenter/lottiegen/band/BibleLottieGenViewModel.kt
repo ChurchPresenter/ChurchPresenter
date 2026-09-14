@@ -116,6 +116,27 @@ class BibleLottieGenViewModel(
         updateConfig { it.copy(looks = it.looks + (role to transform(it.look(role)))) }
     }
 
+    /** Whether a picture chooser is up: the popover that opened it keeps still until it closes. */
+    var choosingImage by mutableStateOf(false)
+        private set
+
+    /**
+     * Opens [chooser] for [role]'s picture on this scope rather than the caller's: the popover
+     * that asks loses focus to the native dialog and can leave composition while it is up, and a
+     * pick cancelled half-way is what left a stray picture behind.
+     */
+    fun chooseBandImage(role: BandColorRole, chooser: suspend () -> File?) {
+        if (choosingImage) return
+        choosingImage = true
+        scope.launch {
+            try {
+                chooser()?.let { loadBandImage(role, it) }
+            } finally {
+                choosingImage = false
+            }
+        }
+    }
+
     fun clearBandImage(role: BandColorRole) {
         updateConfig { it.copy(images = it.images - role) }
     }

@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
@@ -119,8 +120,9 @@ private fun Stage(
     guides: List<PreviewGuide>,
     guideWindow: ClosedFloatingPointRange<Float>,
 ) {
+    // Clipped: a band sliding in from off-canvas is drawn past the stage otherwise, over the panel.
     Box(
-        Modifier.widthIn(max = STAGE_MAX_WIDTH).fillMaxWidth().aspectRatio(aspectRatio),
+        Modifier.widthIn(max = STAGE_MAX_WIDTH).fillMaxWidth().aspectRatio(aspectRatio).clipToBounds(),
         contentAlignment = Alignment.Center,
     ) {
         if (jsonString == null) {

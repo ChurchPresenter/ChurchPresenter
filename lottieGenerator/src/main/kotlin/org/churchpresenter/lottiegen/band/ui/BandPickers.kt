@@ -20,10 +20,12 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -69,7 +76,11 @@ internal fun <T> PickerField(
     Box(modifier.onSizeChanged { anchorWidth = with(density) { it.width.toDp() } }) {
         CaptionedButton(caption, value, open, onClick = { open = !open })
         if (open) {
-            PopupMenu(onDismiss = { open = false }, width = anchorWidth) {
+            PopupMenu(
+                onDismiss = { open = false },
+                width = anchorWidth,
+                keys = MenuKeys(options.indexOf(selected), options.size, MENU_ROW_HEIGHT) { onPick(options[it]) },
+            ) {
                 options.forEach { option ->
                     MenuRow(labelOf(option), option == selected) {
                         onPick(option)
@@ -123,22 +134,45 @@ internal fun CaptionedButton(
 }
 
 /**
+ * How a menu answers the keyboard: ↑ and ↓ move [selected] through [count] rows and apply the
+ * row at once through [onSelect], so the preview follows the arrows; [rowHeight] is what the
+ * list scrolls by to keep that row in view.
+ */
+internal class MenuKeys(val selected: Int, val count: Int, val rowHeight: Dp, val onSelect: (Int) -> Unit)
+
+/**
  * The floating list under a picker, as wide as the field it drops from: dismissed by a click
- * anywhere else, and past [maxHeight] it scrolls, with a bar to say so.
+ * anywhere else, Escape or Enter, and past [maxHeight] it scrolls, with a bar to say so. With
+ * [keys] the arrows walk the rows.
  */
 @Composable
 internal fun PopupMenu(
     onDismiss: () -> Unit,
     width: Dp,
     maxHeight: Dp = MENU_MAX_HEIGHT,
+    keys: MenuKeys? = null,
     content: @Composable () -> Unit,
 ) {
+    val scroll = rememberScrollState()
+    val density = LocalDensity.current
+    // The chosen row is kept on screen as the arrows move it; the first show lands on it too.
+    if (keys != null) {
+        LaunchedEffect(keys.selected) {
+            val rowPx = with(density) { keys.rowHeight.roundToPx() }
+            val top = keys.selected * rowPx
+            val viewport = scroll.viewportSize
+            when {
+                top < scroll.value -> scroll.animateScrollTo(top)
+                top + rowPx > scroll.value + viewport -> scroll.animateScrollTo(top + rowPx - viewport)
+            }
+        }
+    }
     Popup(
         offset = IntOffset(0, MENU_OFFSET_PX),
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
+        onKeyEvent = { event -> keys?.let { handleMenuKey(event, it, onDismiss) } ?: false },
     ) {
-        val scroll = rememberScrollState()
         Box(
             modifier = Modifier
                 .width(width)
@@ -157,26 +191,73 @@ internal fun PopupMenu(
     }
 }
 
+/** The arrows step the choice, Enter and Escape close; anything else is left alone. */
+private fun handleMenuKey(event: KeyEvent, keys: MenuKeys, onDismiss: () -> Unit): Boolean {
+    if (event.type != KeyEventType.KeyDown) return false
+    return when (event.key) {
+        Key.DirectionDown -> {
+            if (keys.selected < keys.count - 1) keys.onSelect(keys.selected + 1)
+            true
+        }
+        Key.DirectionUp -> {
+            if (keys.selected > 0) keys.onSelect(keys.selected - 1)
+            true
+        }
+        Key.Enter, Key.NumPadEnter, Key.Escape -> {
+            onDismiss()
+            true
+        }
+        else -> false
+    }
+}
+
 private val MENU_MAX_HEIGHT = 300.dp
 private val MENU_SCROLLBAR_GUTTER = 8.dp
+internal val MENU_ROW_HEIGHT = 32.dp
 
-/** One line of a [PopupMenu]. */
+/** One line of a [PopupMenu]; the chosen one sits on an accent tint and carries a check. */
 @Composable
 internal fun MenuRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    Text(
-        label,
-        fontSize = 12.sp,
-        color = if (selected) Tokens.Accent else Tokens.OutlineText,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
-            .background(if (selected) Tokens.HeadBgOpen else Color.Transparent)
+            .height(MENU_ROW_HEIGHT)
+            .background(menuRowBackground(selected))
             .clickable(onClick = onClick)
-            .padding(horizontal = 9.dp, vertical = 7.dp),
-    )
+            .padding(horizontal = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            label,
+            fontSize = 12.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) Tokens.Accent else Tokens.OutlineText,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        SelectedMark(selected)
+    }
 }
+
+/** The fill under a menu's chosen row: the accent, thinned to a tint the text still reads on. */
+@Composable
+internal fun menuRowBackground(selected: Boolean): Color =
+    if (selected) Tokens.Accent.copy(alpha = SELECTED_ROW_ALPHA) else Color.Transparent
+
+/** The check at the end of a chosen row; the same width left empty otherwise, so labels line up. */
+@Composable
+internal fun SelectedMark(selected: Boolean) {
+    Box(Modifier.size(14.dp)) {
+        if (selected) {
+            Icon(Icons.Default.Check, contentDescription = null, tint = Tokens.Accent, modifier = Modifier.size(14.dp))
+        }
+    }
+}
+
+private const val SELECTED_ROW_ALPHA = 0.22f
 
 /** One cell of a choice grid: filled with the accent when it is the choice, outlined otherwise. */
 @Composable
