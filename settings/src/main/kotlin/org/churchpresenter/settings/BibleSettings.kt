@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -124,6 +125,12 @@ data class BibleTranslationSettings(
     val lowerThirdTextBackdrop: TextBackdrop = TextBackdrop(),
     val referenceBackdrop: TextBackdrop = TextBackdrop(),
     val lowerThirdReferenceBackdrop: TextBackdrop = TextBackdrop(),
+
+    // The stroke around each profile's glyphs, nested for the same reason the backdrops are.
+    val textOutline: TextOutline = TextOutline(),
+    val lowerThirdTextOutline: TextOutline = TextOutline(),
+    val referenceOutline: TextOutline = TextOutline(),
+    val lowerThirdReferenceOutline: TextOutline = TextOutline(),
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the

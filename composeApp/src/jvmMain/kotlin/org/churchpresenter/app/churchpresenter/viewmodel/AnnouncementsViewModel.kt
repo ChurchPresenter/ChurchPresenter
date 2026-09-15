@@ -9,6 +9,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -48,6 +49,8 @@ class AnnouncementsViewModel {
 
     private val _backdrop = mutableStateOf(TextBackdrop())
     val backdrop: TextBackdrop get() = _backdrop.value
+    private val _outline = mutableStateOf(TextOutline())
+    val outline: TextOutline get() = _outline.value
 
     private val _shadowColor = mutableStateOf("#000000")
     private val _shadowSize = mutableStateOf(100)
@@ -138,6 +141,7 @@ class AnnouncementsViewModel {
         _underline.value = settings.underline
         _shadow.value = settings.shadow
         _backdrop.value = settings.backdrop
+        _outline.value = settings.outline
         _shadowColor.value = settings.shadowColor
         _shadowSize.value = settings.shadowSize
         _shadowOpacity.value = settings.shadowOpacity
@@ -173,6 +177,7 @@ class AnnouncementsViewModel {
     fun setUnderline(value: Boolean) { _underline.value = value }
     fun setShadow(value: Boolean) { _shadow.value = value }
     fun setBackdrop(value: TextBackdrop) { _backdrop.value = value }
+    fun setOutline(value: TextOutline) { _outline.value = value }
     fun setHorizontalAlignment(value: String) { _horizontalAlignment.value = value }
     fun setPosition(value: String) { _position.value = value }
     fun setAnimationType(value: String) { _animationType.value = value }
@@ -470,6 +475,7 @@ class AnnouncementsViewModel {
         underline = _underline.value,
         shadow = _shadow.value,
         backdrop = _backdrop.value,
+        outline = _outline.value,
         shadowColor = _shadowColor.value,
         shadowSize = _shadowSize.value,
         shadowOpacity = _shadowOpacity.value,

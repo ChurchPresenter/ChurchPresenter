@@ -39,10 +39,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -162,6 +165,7 @@ fun STTPresenter(
                                 maxLines = maxLines,
                                 modifier = Modifier.weight(1f),
                                 backdrop = sttSettings.backdrop,
+                                outline = sttSettings.outline,
                             )
                             BottomAlignedText(
                                 text = second,
@@ -169,6 +173,7 @@ fun STTPresenter(
                                 maxLines = maxLines,
                                 modifier = Modifier.weight(1f),
                                 backdrop = sttSettings.backdrop,
+                                outline = sttSettings.outline,
                             )
                         }
                     } else {
@@ -180,6 +185,7 @@ fun STTPresenter(
                                     maxLines = maxLines,
                                     modifier = Modifier.fillMaxWidth(),
                                     backdrop = sttSettings.backdrop,
+                                    outline = sttSettings.outline,
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
@@ -190,6 +196,7 @@ fun STTPresenter(
                                     maxLines = maxLines,
                                     modifier = Modifier.fillMaxWidth(),
                                     backdrop = sttSettings.backdrop,
+                                    outline = sttSettings.outline,
                                 )
                             }
                         }
@@ -212,6 +219,7 @@ fun STTPresenter(
                         maxLines = maxLines,
                         modifier = Modifier.fillMaxWidth(),
                         backdrop = sttSettings.backdrop,
+                        outline = sttSettings.outline,
                     )
                 }
             }
@@ -231,14 +239,19 @@ private fun BottomAlignedText(
     maxLines: Int,
     modifier: Modifier = Modifier,
     backdrop: TextBackdrop = TextBackdrop(),
+    outline: TextOutline = TextOutline(),
 ) {
     // The painter goes on the content text in both branches, never on the invisible reference
     // below: that one exists to measure a fixed number of lines, and banding it would paint a
     // block of empty lines behind the captions.
     val painter = rememberTextBackdropPainter(backdrop)
     if (maxLines <= 0) {
-        Text(
+        OutlinedText(
             text = text,
+            outline = outline,
+            scaleFactor = 1f,
+            color = Color.Unspecified,
+            fontSize = TextUnit.Unspecified,
             style = style,
             modifier = modifier.fillMaxWidth().then(painter.modifier),
             onTextLayout = painter::onTextLayout,
@@ -258,9 +271,14 @@ private fun BottomAlignedText(
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = maxLines
             )
-            // Actual content: measured unconstrained
-            Text(
+            // Actual content: measured unconstrained. One measurable either way -- an outlined
+            // draw is a box holding both passes, and the layout below indexes by position.
+            OutlinedText(
                 text = text,
+                outline = outline,
+                scaleFactor = 1f,
+                color = Color.Unspecified,
+                fontSize = TextUnit.Unspecified,
                 style = style,
                 modifier = Modifier.fillMaxWidth().then(painter.modifier),
                 onTextLayout = painter::onTextLayout,

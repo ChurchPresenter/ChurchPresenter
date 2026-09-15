@@ -144,6 +144,8 @@ private fun TitleSlideElementGroup(
                 onStrikethroughChange = { v -> edit { it.copy(strikethrough = v) } },
                 backdrop = style.backdrop,
                 onBackdropChange = { v -> edit { it.copy(backdrop = v) } },
+                outline = style.outline,
+                onOutlineChange = { v -> edit { it.copy(outline = v) } },
             )
         }
         CustomizeRow(stringResource(Res.string.horizontal_alignment)) {

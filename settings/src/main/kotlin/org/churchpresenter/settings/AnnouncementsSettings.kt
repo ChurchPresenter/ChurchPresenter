@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 
@@ -21,6 +22,8 @@ data class AnnouncementsSettings(
     val shadowOpacity: Int = 78,
     /** The band behind each line and the box around the block. */
     val backdrop: TextBackdrop = TextBackdrop(),
+    /** The stroke drawn around the glyphs, under the fill. */
+    val outline: TextOutline = TextOutline(),
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
     val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,

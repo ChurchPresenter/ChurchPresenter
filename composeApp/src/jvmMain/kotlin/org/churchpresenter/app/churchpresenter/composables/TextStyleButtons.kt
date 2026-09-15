@@ -42,15 +42,20 @@ import churchpresenter.composeapp.generated.resources.text_style_backdrop
 import churchpresenter.composeapp.generated.resources.text_style_bold
 import churchpresenter.composeapp.generated.resources.text_style_italic
 import churchpresenter.composeapp.generated.resources.text_style_shadow
+import churchpresenter.composeapp.generated.resources.text_style_outline
 import churchpresenter.composeapp.generated.resources.text_style_strikethrough
 import churchpresenter.composeapp.generated.resources.text_style_underline
 import churchpresenter.composeapp.generated.resources.tooltip_backdrop_options
 import churchpresenter.composeapp.generated.resources.tooltip_bold
 import churchpresenter.composeapp.generated.resources.tooltip_italic
+import churchpresenter.composeapp.generated.resources.tooltip_outline
+import churchpresenter.composeapp.generated.resources.tooltip_outline_options
 import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
 import churchpresenter.composeapp.generated.resources.tooltip_underline
+import androidx.compose.material3.Text
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.theme.components.TextStyleToggleButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -68,6 +73,11 @@ import org.jetbrains.compose.resources.stringResource
  * button, not two toggles. Its left half turns the last look on and off the way Bold does, and its
  * caret opens [TextBackdropDialog], where the fill behind the lines and the box around the block
  * are picked together.
+ *
+ * [outline] and [onOutlineChange] add the glyph outline the same way, ahead of the backdrop: the
+ * left half switches the stroke on and off, the caret opens [TextOutlineDialog] for its colour and
+ * width. Only the surfaces that store an outline pass it, so it is absent rather than ineffective
+ * everywhere else.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -87,6 +97,8 @@ fun TextStyleButtons(
     showShadow: Boolean = true,
     backdrop: TextBackdrop? = null,
     onBackdropChange: ((TextBackdrop) -> Unit)? = null,
+    outline: TextOutline? = null,
+    onOutlineChange: ((TextOutline) -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
@@ -136,6 +148,13 @@ fun TextStyleButtons(
                 onClick = { onShadowChange(!shadow) }
             )
         }
+        if (outline != null && onOutlineChange != null) {
+            TextOutlineButton(
+                outline = outline,
+                onOutlineChange = onOutlineChange,
+                buttonSize = buttonSize,
+            )
+        }
         if (backdrop != null && onBackdropChange != null) {
             TextBackdropButton(
                 backdrop = backdrop,
@@ -143,6 +162,62 @@ fun TextStyleButtons(
                 buttonSize = buttonSize,
             )
         }
+    }
+}
+
+/**
+ * The outline control: a toggle that switches the stroke on, and a caret onto its two settings.
+ *
+ * Shaped like the backdrop button beside it rather than like a plain toggle, because an outline is
+ * never just on -- a black stroke on black lyrics is off as far as anyone watching is concerned --
+ * so its colour has to be one click away from the button that turns it on.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TextOutlineButton(
+    outline: TextOutline,
+    onOutlineChange: (TextOutline) -> Unit,
+    buttonSize: Dp,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val isActive = outline.enabled
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        StyleSegment(
+            tooltip = stringResource(Res.string.tooltip_outline),
+            isActive = isActive,
+            shape = segmentShape(index = 0, count = 2),
+            modifier = Modifier.width(buttonSize).height(buttonSize),
+            onClick = { onOutlineChange(outline.copy(enabled = !isActive)) },
+        ) { content ->
+            Text(
+                text = stringResource(Res.string.text_style_outline),
+                fontSize = (buttonSize.value * OUTLINE_LABEL_SCALE).sp,
+                fontWeight = FontWeight.Bold,
+                color = content,
+                maxLines = 1,
+            )
+        }
+        StyleSegment(
+            tooltip = stringResource(Res.string.tooltip_outline_options),
+            isActive = isActive,
+            shape = segmentShape(index = 1, count = 2),
+            modifier = Modifier.width(CARET_SEGMENT_WIDTH).height(buttonSize),
+            onClick = { showDialog = true },
+        ) { content ->
+            Icon(
+                painter = painterResource(Res.drawable.arrow_down),
+                contentDescription = null,
+                tint = content,
+                modifier = Modifier.size(CARET_SIZE),
+            )
+        }
+    }
+    if (showDialog) {
+        TextOutlineDialog(
+            outline = outline,
+            onChange = onOutlineChange,
+            onDismiss = { showDialog = false },
+        )
     }
 }
 
@@ -174,7 +249,7 @@ private fun TextBackdropButton(
     val isActive = mode != TextBackdropMode.OFF
     val title = stringResource(Res.string.backdrop_title)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        BackdropSegment(
+        StyleSegment(
             tooltip = title,
             isActive = isActive,
             shape = segmentShape(index = 0, count = 2),
@@ -192,7 +267,7 @@ private fun TextBackdropButton(
                 fontSize = (buttonSize.value * CHIP_LABEL_SCALE).sp,
             )
         }
-        BackdropSegment(
+        StyleSegment(
             tooltip = stringResource(Res.string.tooltip_backdrop_options),
             isActive = isActive,
             shape = segmentShape(index = 1, count = 2),
@@ -216,10 +291,10 @@ private fun TextBackdropButton(
     }
 }
 
-/** One half of the split button, coloured exactly as the toggles beside it. */
+/** One half of a split style button, coloured exactly as the toggles beside it. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun BackdropSegment(
+private fun StyleSegment(
     tooltip: String,
     isActive: Boolean,
     shape: RoundedCornerShape,
@@ -270,3 +345,6 @@ private val CHIP_HEIGHT = 15.dp
 private val CARET_SEGMENT_WIDTH = 16.dp
 private val CARET_SIZE = 10.dp
 private const val CHIP_LABEL_SCALE = 0.32f
+
+/** The letter on the outline toggle, at the size the plain toggles draw theirs. */
+private const val OUTLINE_LABEL_SCALE = 0.36f

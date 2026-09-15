@@ -4,6 +4,7 @@ import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import kotlin.reflect.full.memberProperties
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,6 +42,7 @@ class MainDesktopAnnouncementSettingsTest {
         targetSecond = 30,
         liveClockFormat = "hh:mm a",
         backdrop = TextBackdrop(lineBackground = true, lineBackgroundColor = "#123456"),
+        outline = TextOutline(enabled = true, color = "#123457", width = 6),
     )
 
     @Test
@@ -88,6 +90,7 @@ class MainDesktopAnnouncementSettingsTest {
             timerTextColor = "#000004", timerExpiredText = "stale", timerMode = "duration",
             targetHour = 15, targetMinute = 16, targetSecond = 17, liveClockFormat = "stale",
             backdrop = TextBackdrop(border = true, borderColor = "#000005"),
+            outline = TextOutline(enabled = true, color = "#000006", width = 19),
         )
 
         val after = withAnnouncementFrom(

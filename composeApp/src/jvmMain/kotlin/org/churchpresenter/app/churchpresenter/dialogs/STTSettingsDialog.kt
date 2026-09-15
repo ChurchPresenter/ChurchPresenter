@@ -354,6 +354,10 @@ internal fun STTSettingsDialogContent(
                             onBackdropChange = { updated ->
                                 onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backdrop = updated)) }
                             },
+                            outline = sttSettings.outline,
+                            onOutlineChange = { updated ->
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(outline = updated)) }
+                            },
                         )
                         AnimatedVisibility(visible = sttSettings.shadow) {
                             ShadowDetailRow(

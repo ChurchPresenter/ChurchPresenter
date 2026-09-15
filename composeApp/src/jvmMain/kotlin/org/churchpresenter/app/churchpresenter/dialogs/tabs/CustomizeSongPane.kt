@@ -14,6 +14,7 @@ import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.show_number
+import churchpresenter.composeapp.generated.resources.song_secondary_language
 import churchpresenter.composeapp.generated.resources.song_element_title
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_number_corner
@@ -148,6 +149,41 @@ private fun SongLyricsGroup(
                     update {
                         if (lowerThird) it.copy(lyricsLowerThirdBackdrop = v)
                         else it.copy(lyricsBackdrop = v)
+                    }
+                },
+                outline = if (lowerThird) ss.outlines.lyricsLowerThird else ss.outlines.lyrics,
+                onOutlineChange = { v ->
+                    update {
+                        it.copy(
+                            outlines = if (lowerThird) it.outlines.copy(lyricsLowerThird = v)
+                            else it.outlines.copy(lyrics = v),
+                        )
+                    }
+                },
+            )
+        }
+        // A bilingual song's second language, in its own colour on this screen. The whole profile
+        // is the Songs tab's -- this pane is a screen's overrides, and a colour is what an operator
+        // varies from one screen to the next; ticking it here seeds the rest from the first
+        // language exactly as that tab does.
+        CustomizeRow(stringResource(Res.string.song_secondary_language)) {
+            val secondary = ss.secondaryLanguage.styleFor(lowerThird)
+            SecondaryColorControl(
+                label = stringResource(Res.string.song_secondary_language),
+                primary = if (lowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor,
+                secondary = if (ss.secondaryLanguage.enabled) secondary.color else "",
+                onSecondaryChange = { v ->
+                    update {
+                        if (v.isBlank()) {
+                            it.copy(secondaryLanguage = it.secondaryLanguage.copy(enabled = false))
+                        } else {
+                            it.copy(
+                                secondaryLanguage = it.secondaryLanguage.withStyle(
+                                    lowerThird,
+                                    it.effectiveSecondaryLyricStyle(lowerThird).copy(color = v),
+                                ),
+                            )
+                        }
                     }
                 },
             )
@@ -414,6 +450,15 @@ private fun SongLookAheadNextGroup(
                         else it.copy(lookAheadNextBackdrop = v)
                     }
                 },
+                outline = if (lowerThird) ss.outlines.nextSectionLowerThird else ss.outlines.nextSection,
+                onOutlineChange = { v ->
+                    update {
+                        it.copy(
+                            outlines = if (lowerThird) it.outlines.copy(nextSectionLowerThird = v)
+                            else it.outlines.copy(nextSection = v),
+                        )
+                    }
+                },
             )
         }
     }
@@ -461,6 +506,15 @@ private fun SongLookAheadStyleRow(
                     update {
                         if (lowerThird) it.copy(lowerThirdLookAheadBackdrop = v)
                         else it.copy(lookAheadBackdrop = v)
+                    }
+                },
+                outline = if (lowerThird) ss.outlines.lookAheadLowerThird else ss.outlines.lookAhead,
+                onOutlineChange = { v ->
+                    update {
+                        it.copy(
+                            outlines = if (lowerThird) it.outlines.copy(lookAheadLowerThird = v)
+                            else it.outlines.copy(lookAhead = v),
+                        )
                     }
                 },
             )
