@@ -21,5 +21,15 @@ data class ScheduleActions(
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
     val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
     val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { },
-    val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
+    val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
+    /**
+     * The two structural rows, added for the Calendar Manager.
+     *
+     * A planned run of show carries its section headings as [ScheduleItem.LabelItem]s, so loading a
+     * service without these would silently drop every heading. They are deliberately *not* reached
+     * by the remote paths — see `addScheduleItem`'s `wholePlan`.
+     */
+    val addLabel: (text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _ -> },
+    val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit =
+        { _, _, _, _ -> },
 )

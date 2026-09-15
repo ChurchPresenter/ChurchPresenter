@@ -76,6 +76,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.converter.ui.ConverterTab
+import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
@@ -118,6 +119,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewM
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -146,6 +150,7 @@ import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
+import javax.swing.filechooser.FileNameExtensionFilter
 import java.io.File
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -811,6 +816,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by remember { mutableStateOf(ConverterTab.BIBLES) }
     var showSongLibraryWindow by remember { mutableStateOf(false) }
+    var showCalendarWindow by remember { mutableStateOf(false) }
+    // What the Schedule tab holds right now, mirrored here from the same callback that feeds the
+    // Companion server. The Calendar Manager reads it to decide whether "load" would discard
+    // anything, and to copy a live-built service back onto a date.
+    var currentScheduleItems by remember { mutableStateOf<List<ScheduleItem>>(emptyList()) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
     var showMemoryMonitorWindow by remember { mutableStateOf(false) }
@@ -1293,6 +1303,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     showConverterWindow = true
                                 },
                                 onSongLibrary = { showSongLibraryWindow = true },
+                                onCalendar = { showCalendarWindow = true },
                                 onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
                                 onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
                                 onCheckForUpdates = {
@@ -1501,7 +1512,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         )
                                     )
                                 },
-                                onScheduleChanged = { items -> companionServer.updateSchedule(items) },
+                                onScheduleChanged = { items ->
+                                    currentScheduleItems = items
+                                    companionServer.updateSchedule(items)
+                                },
                                 onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
                                     companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
                                 },
@@ -1724,6 +1738,60 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     // already watches -- so the list behind this window reloads on
                                     // its own rather than on close.
                                     onClose = { showSongLibraryWindow = false }
+                                )
+                            }
+                            if (showCalendarWindow) {
+                                CalendarWindow(
+                                    theme = theme,
+                                    appDataDirectory = AppDataDir.resolve(),
+                                    songStorageDirectory = appSettings.songSettings.storageDirectory,
+                                    host = CalendarHost(
+                                        // The run-of-show PDF embeds this. OpenSans covers Cyrillic,
+                                        // which PDFBox's built-in Helvetica does not — and this app's
+                                        // song libraries routinely are Cyrillic.
+                                        pdfFont = { bold ->
+                                            val name = if (bold) "OpenSans-Bold" else "OpenSans-Regular"
+                                            object {}.javaClass
+                                                .getResourceAsStream("/fonts/$name.ttf")
+                                                ?.use { it.readBytes() }
+                                        },
+                                        // Flattened from the loaded primary Bible, so the picker's
+                                        // book / chapter / verse grids offer exactly what this
+                                        // translation actually has.
+                                        bibleBooks = {
+                                            primaryBibleForInstanceLink?.let { bible ->
+                                                (0 until bible.getBookCount()).map { index ->
+                                                    CalendarBibleBook(
+                                                        bookId = bible.getBookId(index),
+                                                        name = bible.getBooks().getOrElse(index) { "" },
+                                                        verseCounts = (1..bible.getChapterCount(index)).map { chapter ->
+                                                            bible.getVerseCountForChapter(index, chapter)
+                                                        },
+                                                    )
+                                                }
+                                            }.orEmpty()
+                                        },
+                                        chooseExportFile = { suggested ->
+                                            FileChooser.platformInstance.save(
+                                                location = null,
+                                                suggestedName = suggested,
+                                                filters = listOf(
+                                                    FileNameExtensionFilter("PDF Document (*.pdf)", "pdf")
+                                                ),
+                                                title = "Export Run of Show"
+                                            )?.toFile()
+                                        },
+                                        loadIntoSchedule = { items, replace ->
+                                            if (replace) currentScheduleActions.clearSchedule()
+                                            // wholePlan = true so section headings, lower thirds
+                                            // and scenes survive the trip; a plan is loaded whole.
+                                            items.forEach { item ->
+                                                addScheduleItem(item, currentScheduleActions, wholePlan = true)
+                                            }
+                                        },
+                                        currentSchedule = { currentScheduleItems },
+                                    ),
+                                    onClose = { showCalendarWindow = false }
                                 )
                             }
                             if (showLottieGenWindow) {

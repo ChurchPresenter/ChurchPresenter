@@ -576,15 +576,41 @@ internal fun executeProjectItem(
  * announcement items onto the presenter *without* adding them to the schedule, so routing it
  * through here would start adding a row every time one is projected.
  *
- * @return true when a schedule action fired; false for the types that are not schedule content
- *         (label, lower third — and scene, which has an `addScene` action no remote path uses).
+ * @return true when a schedule action fired; false for the types a plain remote add does not
+ *         carry (label, lower third, scene) unless [wholePlan] asks for them.
  */
 internal fun addScheduleItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
+    /**
+     * Whether the row types no remote path sends — a section heading, a lower third, a scene — are
+     * added too.
+     *
+     * False for every remote path, which is exactly what it has always done: those arrive one item
+     * at a time from a phone, and a heading is not something a remote client adds. The Calendar
+     * Manager passes true, because a planned run of show is loaded **whole** — its headings are
+     * part of the plan, and a scene that was copied out of the Schedule tab has to survive the
+     * trip back into it.
+     */
+    wholePlan: Boolean = false,
     onSongAdded: (ScheduleItem.SongItem) -> Unit = {}
 ): Boolean {
+    // One guard rather than three inside the branches below, which would put this function over
+    // detekt's ReturnCount limit.
+    if (!wholePlan && item.isPlanOnly()) return false
     when (item) {
+        is ScheduleItem.LabelItem ->
+            scheduleActions.addLabel(item.text, item.textColor, item.backgroundColor)
+
+        is ScheduleItem.LowerThirdItem -> scheduleActions.addLowerThird(
+            item.presetId,
+            item.presetLabel,
+            item.pauseAtFrame,
+            item.pauseDurationMs,
+        )
+
+        is ScheduleItem.SceneItem -> scheduleActions.addScene(item.sceneId, item.sceneName)
+
         is ScheduleItem.SongItem -> {
             scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
             onSongAdded(item)
@@ -634,6 +660,18 @@ internal fun addScheduleItem(
     return true
 }
 
+
+/**
+ * The row types only a whole plan carries — never sent one at a time by a remote client.
+ *
+ * A heading and a scene are structure a phone does not add, and a lower third is triggered from the
+ * Lower Third tab rather than queued remotely. [addScheduleItem] skips all three unless it is being
+ * asked to load a plan.
+ */
+private fun ScheduleItem.isPlanOnly(): Boolean =
+    this is ScheduleItem.LabelItem ||
+        this is ScheduleItem.LowerThirdItem ||
+        this is ScheduleItem.SceneItem
 
 /** The BIBLE half of [applyRemoteLiveState]: either this instance's own wording, or the primary's. */
 private fun applyRemoteBible(

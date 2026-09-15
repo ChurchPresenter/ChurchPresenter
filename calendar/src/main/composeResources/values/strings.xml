@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  English only, and deliberately so: AGENT.md forbids touching any other locale file, and month and
+  weekday names are absent on purpose — java.time supplies those already localized. See
+  CalendarTime.monthName.
+-->
+<resources>
+    <string name="calendar_window_title">Calendar Manager</string>
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_close">Close</string>
+
+    <string name="calendar_recovered_title">Recovered from a backup</string>
+    <string name="calendar_recovered_body">calendar.json could not be read, so the most recent backup was opened instead. The unreadable file has been kept beside it.</string>
+    <string name="calendar_lost_title">The calendar could not be read</string>
+    <string name="calendar_lost_body">Neither calendar.json nor any of its backups could be read. They have been kept on disk beside this new, empty calendar.</string>
+    <string name="calendar_dismiss">Dismiss</string>
+
+    <string name="calendar_month_previous">Previous month</string>
+    <string name="calendar_month_next">Next month</string>
+    <string name="calendar_service_types">Service types</string>
+    <string name="calendar_kind_sunday">Sunday service</string>
+    <string name="calendar_kind_midweek">Midweek prayer</string>
+    <string name="calendar_kind_special">Special event</string>
+
+    <string name="calendar_add_service">Add service</string>
+    <string name="calendar_new_service">New service</string>
+    <string name="calendar_edit_service">Edit service</string>
+    <string name="calendar_service_name">Name</string>
+    <string name="calendar_service_start">Start time</string>
+    <string name="calendar_service_type">Type</string>
+    <string name="calendar_service_name_hint">Sunday Morning</string>
+    <string name="calendar_invalid_time">Use a 24-hour time, such as 10:00</string>
+    <string name="calendar_save">Save</string>
+    <string name="calendar_cancel">Cancel</string>
+    <string name="calendar_delete">Delete</string>
+
+    <string name="calendar_run_of_show">Run of show</string>
+    <string name="calendar_nothing_planned">Nothing planned for this day</string>
+    <string name="calendar_no_service_hint">Add a service to start planning.</string>
+    <string name="calendar_run_empty">This service has no items yet.</string>
+    <string name="calendar_items_count_one">%1$d item</string>
+    <string name="calendar_items_count">%1$d items</string>
+    <string name="calendar_planned_total">%1$s planned</string>
+    <string name="calendar_duration">Duration</string>
+    <string name="calendar_duration_hint">4:30</string>
+    <string name="calendar_move_up">Move up</string>
+    <string name="calendar_move_down">Move down</string>
+    <string name="calendar_remove_row">Remove from the run of show</string>
+
+    <string name="calendar_add_item">Add song, verse or section</string>
+    <string name="calendar_pick_songs">Songs</string>
+    <string name="calendar_pick_bible">Bible</string>
+    <string name="calendar_pick_section">Section</string>
+    <string name="calendar_pick_schedule">Schedule tab</string>
+    <string name="calendar_search_songs_hint">Search songs by title or number</string>
+    <string name="calendar_bible_hint">Type a reference, such as John 3:16-17</string>
+    <string name="calendar_section_hint">Section name, such as Worship</string>
+    <string name="calendar_add">Add</string>
+    <string name="calendar_no_results">Nothing matches that</string>
+    <string name="calendar_songs_loading">Reading the song library…</string>
+    <string name="calendar_schedule_empty">The Schedule tab is empty.</string>
+    <string name="calendar_capture_schedule">Add every item from the Schedule tab</string>
+
+    <string name="calendar_load_into_schedule">Load into Schedule</string>
+    <string name="calendar_load_title">Replace the schedule?</string>
+    <string name="calendar_load_body">The Schedule tab already has %1$d items. Replacing discards them.</string>
+    <string name="calendar_load_replace">Replace and load</string>
+    <string name="calendar_load_append">Add to the end</string>
+    <string name="calendar_header_sub_one">%1$d service planned · %2$s</string>
+    <string name="calendar_header_sub_other">%1$d services planned · %2$s</string>
+    <string name="calendar_all_saved">All changes saved</string>
+    <string name="calendar_day_services_one">%1$d service</string>
+    <string name="calendar_day_services_other">%1$d services</string>
+    <string name="calendar_day_no_services">No services</string>
+    <string name="calendar_nothing_planned_for">Nothing planned for %1$s</string>
+    <string name="calendar_empty_hint">Add a service, or copy last week's.</string>
+    <string name="calendar_copy_last">Copy last %1$s</string>
+    <string name="calendar_start_from">Start from</string>
+    <string name="calendar_template_blank">Blank service</string>
+    <string name="calendar_template_blank_sub">Empty run of show</string>
+    <string name="calendar_template_copy_sub">%1$s · %2$d items</string>
+    <string name="calendar_add_service_save">Add service</string>
+    <string name="calendar_new_service_on">New service · %1$s</string>
+    <string name="calendar_kind_sunday_short">Sunday</string>
+    <string name="calendar_kind_midweek_short">Midweek</string>
+    <string name="calendar_kind_special_short">Special</string>
+    <string name="calendar_close_sheet">Close</string>
+    <string name="calendar_settings">Calendar settings</string>
+    <string name="calendar_settings_sub">Applies to every service, not just today</string>
+    <string name="calendar_settings_automation">Automation</string>
+    <string name="calendar_settings_sections">Sections</string>
+    <string name="calendar_settings_templates">Templates</string>
+    <string name="calendar_settings_defaults">Defaults</string>
+    <string name="calendar_settings_done">Done</string>
+    <string name="calendar_sections_note">Sections defined here are available in every run of show, matched by name.</string>
+    <string name="calendar_section_add">Add a section name</string>
+    <string name="calendar_section_remove">Remove section</string>
+    <string name="calendar_default_start">Default start time</string>
+    <string name="calendar_default_start_sub">The time a newly added service is created with</string>
+    <string name="calendar_arm_default">Arm automation by default</string>
+    <string name="calendar_arm_default_sub">New services start with their cues ready to fire</string>
+    <string name="calendar_automation_empty">No cues yet</string>
+    <string name="calendar_automation_empty_sub">Timed cues — a countdown, a pre-service loop, a lower third — arrive with the automation engine. Each service already carries the field they are stored in.</string>
+    <string name="calendar_templates_empty">No saved templates</string>
+    <string name="calendar_templates_empty_sub">For now a new service can start from a copy of any earlier one, chosen under Start from when you add it.</string>
+    <string name="calendar_export_pdf">Export PDF</string>
+    <string name="calendar_settings_open">Calendar settings</string>
+    <string name="calendar_export_failed">The run of show could not be exported.</string>
+    <string name="calendar_section_new">New section</string>
+    <string name="calendar_section_insert">Insert</string>
+    <string name="calendar_cues">Cues</string>
+    <string name="calendar_default_sermon">Default sermon length</string>
+    <string name="calendar_default_sermon_sub">Offered when a presentation has no length of its own</string>
+    <string name="calendar_default_item">Default item length</string>
+    <string name="calendar_default_item_sub">Offered when a song has no measured length yet</string>
+    <string name="calendar_pick_search">Search songs, or type a reference</string>
+    <string name="calendar_pick_adds_to">Adds to %1$s</string>
+    <string name="calendar_pick_duration">Duration</string>
+    <string name="calendar_pick_all_books">All song books</string>
+    <string name="calendar_pick_reference">Reference</string>
+    <string name="calendar_pick_all_bible_books">All books</string>
+    <string name="calendar_pick_chapters">%1$d chapters</string>
+    <string name="calendar_pick_choose_chapter">Choose a chapter</string>
+    <string name="calendar_pick_whole_chapter">Whole chapter</string>
+    <string name="calendar_pick_no_bible">No Bible is loaded — type a reference instead.</string>
+    <string name="calendar_pick_empty_hint">Try a different word, or a number.</string>
+    <string name="calendar_bible_hint_short">Filter books, or type a reference</string>
+    <string name="calendar_pick_add_range">Add %1$s</string>
+    <string name="calendar_pick_verse_hint">Tap a verse, then tap another for a range</string>
+    <string name="calendar_pick_clear">Clear</string>
+</resources>

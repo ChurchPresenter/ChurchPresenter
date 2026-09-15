@@ -1318,7 +1318,9 @@ fun MainDesktop(
                                             item.backdrop
                                         )
                                     },
-                                    addWebsite = actions.addWebsite
+                                    addWebsite = actions.addWebsite,
+                                    addLabel = actions.addLabel,
+                                    addLowerThird = actions.addLowerThird,
                                 )
                             )
                         },
