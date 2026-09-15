@@ -60,6 +60,7 @@ import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.theme.components.DropdownSelector
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f

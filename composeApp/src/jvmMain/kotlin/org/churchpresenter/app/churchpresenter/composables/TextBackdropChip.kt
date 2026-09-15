@@ -4,11 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.theme.components.ControlTooltip
 
 /** A stored `#RRGGBB` at a stored 0-100 opacity, as the renderers read the same pair. */
 internal fun String.backdropColor(opacity: Int): Color =
@@ -139,20 +137,7 @@ private val CHIP_BAR_HEIGHT = 2.5.dp
 
 /** The tooltip surface the style buttons and the preset swatches share. */
 @Composable
-internal fun BackdropTooltip(text: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.inverseSurface,
-        shape = MaterialTheme.shapes.extraSmall,
-        tonalElevation = 4.dp,
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
-    }
-}
+internal fun BackdropTooltip(text: String) = ControlTooltip(text)
 
 /** Square where it meets its neighbour, rounded where it does not, so a strip reads as one shape. */
 internal fun segmentShape(index: Int, count: Int): RoundedCornerShape {

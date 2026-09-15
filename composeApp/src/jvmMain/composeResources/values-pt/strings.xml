@@ -2669,4 +2669,16 @@
     <string name="setup_summary_bible">Traduções da Bíblia</string>
     <string name="setup_summary_bible_value">%1$d instaladas</string>
     <string name="setup_summary_songs_value">%1$d hinários · %2$d músicas</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animação do terço inferior</string>
+    <string name="lower_third_animation_use_lottie">Animar a faixa com um modelo Lottie</string>
+    <string name="lower_third_animation_file">Modelo</string>
+    <string name="lower_third_animation_none">Nenhum modelo selecionado</string>
+    <string name="lower_third_animation_generate">Gerar…</string>
+    <string name="lower_third_animation_clear">Remover modelo</string>
+    <string name="lottie_files_filter">Arquivos Lottie</string>
+    <string name="bible_lottie_gen_window_title">Gerador de terços inferiores</string>
+    <string name="song_lottie_unsupported_note">O modelo decide o layout e onde fica o título. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado, espaçamento entre palavras, prévia da próxima parte e acordes não se aplicam.</string>
+    <string name="bible_lottie_unsupported_note">O modelo decide o layout, a posição da referência e como dois idiomas dividem a faixa. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado e espaçamento entre palavras não se aplicam.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

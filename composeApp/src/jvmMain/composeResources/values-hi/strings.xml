@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">बाइबल अनुवाद</string>
     <string name="setup_summary_bible_value">%1$d स्थापित</string>
     <string name="setup_summary_songs_value">%1$d पुस्तकें · %2$d गीत</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">निचले तिहाई का एनिमेशन</string>
+    <string name="lower_third_animation_use_lottie">बैंड को Lottie टेम्पलेट से एनिमेट करें</string>
+    <string name="lower_third_animation_file">टेम्पलेट</string>
+    <string name="lower_third_animation_none">कोई टेम्पलेट चुना नहीं गया</string>
+    <string name="lower_third_animation_generate">बनाएँ…</string>
+    <string name="lower_third_animation_clear">टेम्पलेट हटाएँ</string>
+    <string name="lottie_files_filter">Lottie फ़ाइलें</string>
+    <string name="bible_lottie_gen_window_title">निचला तिहाई जनरेटर</string>
+    <string name="song_lottie_unsupported_note">टेम्पलेट लेआउट और शीर्षक की जगह तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू, शब्द अंतर, अगले का पूर्वावलोकन और कॉर्ड लागू नहीं होते।</string>
+    <string name="bible_lottie_unsupported_note">टेम्पलेट लेआउट, संदर्भ की जगह और दो भाषाओं के बैंड साझा करने का तरीका तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू और शब्द अंतर लागू नहीं होते।</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

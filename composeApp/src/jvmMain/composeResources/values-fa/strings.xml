@@ -2649,4 +2649,16 @@
     <string name="setup_summary_bible">ترجمه‌های کتاب‌مقدس</string>
     <string name="setup_summary_bible_value">%1$d نصب‌شده</string>
     <string name="setup_summary_songs_value">%1$d کتاب · %2$d سرود</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">پویانمایی یک‌سوم پایین</string>
+    <string name="lower_third_animation_use_lottie">پویانمایی نوار با یک الگوی Lottie</string>
+    <string name="lower_third_animation_file">الگو</string>
+    <string name="lower_third_animation_none">الگویی انتخاب نشده است</string>
+    <string name="lower_third_animation_generate">ساختن…</string>
+    <string name="lower_third_animation_clear">حذف الگو</string>
+    <string name="lottie_files_filter">پرونده‌های Lottie</string>
+    <string name="bible_lottie_gen_window_title">سازندهٔ یک‌سوم پایین</string>
+    <string name="song_lottie_unsupported_note">الگو چیدمان و جای عنوان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده، فاصلهٔ واژه‌ها، پیش‌نمایش بعدی و آکوردها اعمال نمی‌شوند.</string>
+    <string name="bible_lottie_unsupported_note">الگو چیدمان، جای مرجع و نحوهٔ اشتراک نوار میان دو زبان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده و فاصلهٔ واژه‌ها اعمال نمی‌شوند.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

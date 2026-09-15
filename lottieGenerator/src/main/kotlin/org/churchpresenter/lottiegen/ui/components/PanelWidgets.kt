@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -181,11 +183,23 @@ fun SubtleButton(
 /** The small ✕ used to remove a saved preset or colour theme. */
 @Composable
 fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete") {
+    SmallIconButton(Icons.Default.Close, onClick, contentDescription)
+}
+
+/** The small pencil that opens a row's fuller controls. */
+@Composable
+fun EditIconButton(onClick: () -> Unit, contentDescription: String = "Edit") {
+    SmallIconButton(Icons.Default.Edit, onClick, contentDescription)
+}
+
+/** A 24dp bordered chip around one icon, the shape the ✕ and the pencil share. */
+@Composable
+private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val border by animateColorAsState(
         if (hovered) Tokens.BorderHover else Tokens.SubtleBorder,
-        label = "deleteBtnBorder"
+        label = "smallIconBtnBorder"
     )
 
     Box(
@@ -199,7 +213,7 @@ fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete")
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            Icons.Default.Close,
+            icon,
             contentDescription = contentDescription,
             tint = Tokens.SmallBtnText,
             modifier = Modifier.size(13.dp)

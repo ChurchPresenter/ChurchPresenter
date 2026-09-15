@@ -2640,4 +2640,16 @@
     <string name="setup_summary_bible">Przekłady Biblii</string>
     <string name="setup_summary_bible_value">zainstalowano: %1$d</string>
     <string name="setup_summary_songs_value">%1$d śpiewników · %2$d pieśni</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animacja dolnego paska</string>
+    <string name="lower_third_animation_use_lottie">Animuj pasek szablonem Lottie</string>
+    <string name="lower_third_animation_file">Szablon</string>
+    <string name="lower_third_animation_none">Nie wybrano szablonu</string>
+    <string name="lower_third_animation_generate">Generuj…</string>
+    <string name="lower_third_animation_clear">Usuń szablon</string>
+    <string name="lottie_files_filter">Pliki Lottie</string>
+    <string name="bible_lottie_gen_window_title">Generator dolnych pasków</string>
+    <string name="song_lottie_unsupported_note">Szablon decyduje o układzie i miejscu tytułu. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie, odstępy między wyrazami, podgląd następnej części i akordy nie mają zastosowania.</string>
+    <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

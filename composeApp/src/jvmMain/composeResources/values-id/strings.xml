@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Terjemahan Alkitab</string>
     <string name="setup_summary_bible_value">%1$d terpasang</string>
     <string name="setup_summary_songs_value">%1$d buku · %2$d lagu</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animasi sepertiga bawah</string>
+    <string name="lower_third_animation_use_lottie">Animasikan pita dengan templat Lottie</string>
+    <string name="lower_third_animation_file">Templat</string>
+    <string name="lower_third_animation_none">Belum ada templat dipilih</string>
+    <string name="lower_third_animation_generate">Buat…</string>
+    <string name="lower_third_animation_clear">Hapus templat</string>
+    <string name="lottie_files_filter">Berkas Lottie</string>
+    <string name="bible_lottie_gen_window_title">Pembuat Sepertiga Bawah</string>
+    <string name="song_lottie_unsupported_note">Templat menentukan tata letak dan posisi judul. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, jarak kata, pratinjau bagian berikutnya, dan kunci gitar tidak berlaku.</string>
+    <string name="bible_lottie_unsupported_note">Templat menentukan tata letak, posisi referensi, dan cara dua bahasa berbagi pita. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, dan jarak kata tidak berlaku.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

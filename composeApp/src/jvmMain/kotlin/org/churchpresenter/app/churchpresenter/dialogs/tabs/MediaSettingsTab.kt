@@ -39,7 +39,7 @@ import churchpresenter.composeapp.generated.resources.seconds_suffix
 import churchpresenter.composeapp.generated.resources.slideshow_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.transition_settings
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType

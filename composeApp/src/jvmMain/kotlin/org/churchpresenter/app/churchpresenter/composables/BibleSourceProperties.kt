@@ -58,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
+import org.churchpresenter.theme.components.DropdownSelector
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 /** The font name needs the room; its size is three digits. */

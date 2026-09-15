@@ -2668,4 +2668,16 @@
     <string name="setup_summary_bible">Bijbelvertalingen</string>
     <string name="setup_summary_bible_value">%1$d geïnstalleerd</string>
     <string name="setup_summary_songs_value">%1$d bundels · %2$d liederen</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animatie van het onderste derde</string>
+    <string name="lower_third_animation_use_lottie">De band animeren met een Lottie-sjabloon</string>
+    <string name="lower_third_animation_file">Sjabloon</string>
+    <string name="lower_third_animation_none">Geen sjabloon geselecteerd</string>
+    <string name="lower_third_animation_generate">Genereren…</string>
+    <string name="lower_third_animation_clear">Sjabloon wissen</string>
+    <string name="lottie_files_filter">Lottie-bestanden</string>
+    <string name="bible_lottie_gen_window_title">Generator voor onderste derden</string>
+    <string name="song_lottie_unsupported_note">Het sjabloon bepaalt de indeling en waar de titel staat. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen, woordafstand, vooruitblik en akkoorden gelden niet.</string>
+    <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

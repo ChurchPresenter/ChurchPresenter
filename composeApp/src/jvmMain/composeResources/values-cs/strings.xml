@@ -2650,4 +2650,16 @@
     <string name="setup_summary_bible">Překlady Bible</string>
     <string name="setup_summary_bible_value">nainstalováno: %1$d</string>
     <string name="setup_summary_songs_value">%1$d zpěvníků · %2$d písní</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animace spodní třetiny</string>
+    <string name="lower_third_animation_use_lottie">Animovat pruh šablonou Lottie</string>
+    <string name="lower_third_animation_file">Šablona</string>
+    <string name="lower_third_animation_none">Není vybrána žádná šablona</string>
+    <string name="lower_third_animation_generate">Vytvořit…</string>
+    <string name="lower_third_animation_clear">Odebrat šablonu</string>
+    <string name="lottie_files_filter">Soubory Lottie</string>
+    <string name="bible_lottie_gen_window_title">Generátor spodních třetin</string>
+    <string name="song_lottie_unsupported_note">Šablona určuje rozvržení a umístění názvu. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí, mezery mezi slovy, náhled další části a akordy se nepoužijí.</string>
+    <string name="bible_lottie_unsupported_note">Šablona určuje rozvržení, umístění odkazu a to, jak si dva jazyky pruh rozdělí. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí a mezery mezi slovy se nepoužijí.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

@@ -22,6 +22,8 @@ import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
@@ -81,6 +83,21 @@ class PresenterManager {
 
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
+
+    /**
+     * Where the Lottie lower-third band — Bible or song, whichever is live — is in its entrance /
+     * hold / text change / exit. Driven by `PresenterTransitionEffects`; every output maps it
+     * onto its own template.
+     */
+    private val _lottieBandClock = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    val lottieBandClock: State<BibleBandClock> = _lottieBandClock
+
+    /**
+     * The lyric line the Lottie band shows. Follows [songDisplayLineIndex], but only once the
+     * band has played the old line out, so the text does not change under a running animation.
+     */
+    private val _bandSongLineIndex = mutableStateOf(-1)
+    val bandSongLineIndex: State<Int> = _bandSongLineIndex
 
     // Previous content for crossfade (both old and new visible simultaneously)
     private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
@@ -360,6 +377,14 @@ class PresenterManager {
 
     fun setBibleTransitionAlpha(alpha: Float) {
         _bibleTransitionAlpha.value = alpha
+    }
+
+    fun setLottieBandClock(clock: BibleBandClock) {
+        _lottieBandClock.value = clock
+    }
+
+    fun setBandSongLineIndex(index: Int) {
+        _bandSongLineIndex.value = index
     }
 
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {

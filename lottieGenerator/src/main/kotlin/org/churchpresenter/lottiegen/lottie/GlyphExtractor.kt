@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import java.awt.Font
 import java.awt.font.FontRenderContext
 import kotlin.math.roundToInt
 
@@ -74,8 +73,7 @@ object GlyphExtractor {
     }
 
     private fun charEntry(family: String, style: String, ch: Char): JsonObject {
-        val awtStyle = if (style == "Bold") Font.BOLD else Font.PLAIN
-        val font = FontRegistry.getFont(family, awtStyle, GLYPH_SIZE)
+        val font = FontRegistry.getFont(family, awtStyleOf(style), GLYPH_SIZE)
         val frc = FontRenderContext(null, true, true)
         val glyphVector = font.createGlyphVector(frc, ch.toString())
         val advance = glyphVector.getGlyphPosition(glyphVector.numGlyphs).x

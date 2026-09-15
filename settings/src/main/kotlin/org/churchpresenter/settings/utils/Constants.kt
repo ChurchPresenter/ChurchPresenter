@@ -77,6 +77,7 @@ object Constants {
     const val BACKGROUND_TRANSPARENT = "Transparent"
     const val BACKGROUND_GRADIENT = "Gradient"
     const val BACKGROUND_FOLLOW_DEFAULT = "FollowDefault" // Lower third follows the default background
+    const val BACKGROUND_LOTTIE = "Lottie" // Animated Lottie band that carries the text itself
 
     // Position Options
     const val POSITION_ABOVE = "Above"

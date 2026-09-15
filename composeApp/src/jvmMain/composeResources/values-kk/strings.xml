@@ -2641,4 +2641,16 @@
     <string name="setup_summary_bible">Киелі кітап аудармалары</string>
     <string name="setup_summary_bible_value">%1$d орнатылған</string>
     <string name="setup_summary_songs_value">%1$d жинақ · %2$d ән</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Төменгі үштік анимациясы</string>
+    <string name="lower_third_animation_use_lottie">Жолақты Lottie үлгісімен анимациялау</string>
+    <string name="lower_third_animation_file">Үлгі</string>
+    <string name="lower_third_animation_none">Үлгі таңдалмаған</string>
+    <string name="lower_third_animation_generate">Жасау…</string>
+    <string name="lower_third_animation_clear">Үлгіні алып тастау</string>
+    <string name="lottie_files_filter">Lottie файлдары</string>
+    <string name="bible_lottie_gen_window_title">Төменгі титр генераторы</string>
+    <string name="song_lottie_unsupported_note">Үлгі орналасуды және атаудың орнын анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау, сөз аралығы, келесіні алдын ала қарау және аккордтар қолданылмайды.</string>
+    <string name="bible_lottie_unsupported_note">Үлгі орналасуды, сілтеменің орнын және екі тілдің жолақты қалай бөлісетінін анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау және сөз аралығы қолданылмайды.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

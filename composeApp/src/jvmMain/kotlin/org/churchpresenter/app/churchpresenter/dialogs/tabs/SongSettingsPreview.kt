@@ -19,6 +19,7 @@ import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
@@ -75,7 +76,9 @@ internal fun SongPreviewPanel(
                 lookAheadEnabled = showLookAhead,
                 allLyricSections = sections,
                 displaySectionIndex = 0,
-                showBackground = false,
+                // A Lottie band is the text, so it has to be drawn; a backdrop is not.
+                showBackground = target.isLowerThird &&
+                    usesBibleLottieBand(settings.backgroundSettings.songLowerThirdBackground),
                 showChords = showChords,
                 // The one thing every other caller of SongPresenter passes and this did not. The
                 // output's own song mode overrides the song-level language setting wherever it is

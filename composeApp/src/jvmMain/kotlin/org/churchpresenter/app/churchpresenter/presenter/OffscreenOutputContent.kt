@@ -166,6 +166,10 @@ internal fun OffscreenOutputContent(
                     ) { mode ->
                         val showsContent = showsContentFor(mode, screenAssignment)
                         if (mode != Presenting.NONE && showsContent) {
+                            CompositionLocalProvider(
+                                LocalLottieBandClock provides presenterManager.lottieBandClock.value,
+                                LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
+                            ) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(
                                     selectedVerses = presenterManager.displayedVerses.value,
@@ -176,7 +180,7 @@ internal fun OffscreenOutputContent(
                                     transitionAlpha = presenterManager.bibleTransitionAlpha.value,
                                     showBackground = showBg && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations
+                                    bibleTranslations = screenAssignment.bibleTranslations,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,
@@ -288,6 +292,7 @@ internal fun OffscreenOutputContent(
                                     transitionAlpha = 1f
                                 )
                                 Presenting.NONE -> {}
+                            }
                             }
                         }
                     }

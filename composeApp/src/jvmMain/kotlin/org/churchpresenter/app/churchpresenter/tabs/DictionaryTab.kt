@@ -111,7 +111,7 @@ import java.awt.Cursor
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.InterlinearWord

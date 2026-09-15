@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Mga salin ng Bibliya</string>
     <string name="setup_summary_bible_value">%1$d naka-install</string>
     <string name="setup_summary_songs_value">%1$d aklat · %2$d awit</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animasyon ng lower third</string>
+    <string name="lower_third_animation_use_lottie">I-animate ang banda gamit ang Lottie template</string>
+    <string name="lower_third_animation_file">Template</string>
+    <string name="lower_third_animation_none">Walang napiling template</string>
+    <string name="lower_third_animation_generate">Bumuo…</string>
+    <string name="lower_third_animation_clear">Alisin ang template</string>
+    <string name="lottie_files_filter">Mga Lottie file</string>
+    <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
+    <string name="song_lottie_unsupported_note">Ang template ang nagpapasya sa layout at kung saan ilalagay ang pamagat. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough, pagitan ng mga salita, look-ahead at mga chord.</string>
+    <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

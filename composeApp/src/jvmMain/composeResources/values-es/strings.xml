@@ -2668,4 +2668,16 @@
     <string name="setup_summary_bible">Traducciones de la Biblia</string>
     <string name="setup_summary_bible_value">%1$d instaladas</string>
     <string name="setup_summary_songs_value">%1$d cancioneros · %2$d canciones</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animación del tercio inferior</string>
+    <string name="lower_third_animation_use_lottie">Animar la banda con una plantilla Lottie</string>
+    <string name="lower_third_animation_file">Plantilla</string>
+    <string name="lower_third_animation_none">No hay plantilla seleccionada</string>
+    <string name="lower_third_animation_generate">Generar…</string>
+    <string name="lower_third_animation_clear">Quitar plantilla</string>
+    <string name="lottie_files_filter">Archivos Lottie</string>
+    <string name="bible_lottie_gen_window_title">Generador de tercios inferiores</string>
+    <string name="song_lottie_unsupported_note">La plantilla decide la disposición y dónde va el título. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado, el espaciado entre palabras, la vista previa de la siguiente sección y los acordes no se aplican.</string>
+    <string name="bible_lottie_unsupported_note">La plantilla decide la disposición, la posición de la referencia y cómo dos idiomas comparten la banda. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado y el espaciado entre palabras no se aplican.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

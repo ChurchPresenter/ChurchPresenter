@@ -49,7 +49,7 @@ import churchpresenter.composeapp.generated.resources.song_background_inherit
 import churchpresenter.composeapp.generated.resources.song_background_lower_third
 import churchpresenter.composeapp.generated.resources.song_background_own
 import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.StringResource

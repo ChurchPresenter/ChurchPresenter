@@ -2653,4 +2653,16 @@
     <string name="setup_summary_bible">பைபிள் மொழிபெயர்ப்புகள்</string>
     <string name="setup_summary_bible_value">%1$d நிறுவப்பட்டது</string>
     <string name="setup_summary_songs_value">%1$d புத்தகங்கள் · %2$d பாடல்கள்</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">கீழ் மூன்றில் ஒரு பகுதி அனிமேஷன்</string>
+    <string name="lower_third_animation_use_lottie">Lottie வார்ப்புருவால் பட்டையை அனிமேட் செய்</string>
+    <string name="lower_third_animation_file">வார்ப்புரு</string>
+    <string name="lower_third_animation_none">வார்ப்புரு தேர்ந்தெடுக்கப்படவில்லை</string>
+    <string name="lower_third_animation_generate">உருவாக்கு…</string>
+    <string name="lower_third_animation_clear">வார்ப்புருவை நீக்கு</string>
+    <string name="lottie_files_filter">Lottie கோப்புகள்</string>
+    <string name="bible_lottie_gen_window_title">கீழ் மூன்றில் ஒரு பகுதி உருவாக்கி</string>
+    <string name="song_lottie_unsupported_note">வார்ப்புரு தளவமைப்பையும் தலைப்பின் இடத்தையும் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல், சொல் இடைவெளி, அடுத்ததின் முன்னோட்டம் மற்றும் கார்டுகள் பொருந்தாது.</string>
+    <string name="bible_lottie_unsupported_note">வார்ப்புரு தளவமைப்பு, குறிப்பின் இடம் மற்றும் இரு மொழிகள் பட்டையை எப்படிப் பகிர்வது என்பதைத் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல் மற்றும் சொல் இடைவெளி பொருந்தாது.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

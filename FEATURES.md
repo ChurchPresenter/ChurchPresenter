@@ -98,6 +98,7 @@
 - **Drop in a folder, ready to send** — point the app at a folder of Lottie files and every one of them is listed, ready to go live, trigger from Companion or upload to an ATEM media pool.
 - **Built-in generator** — design your own animated lower thirds with the included Lottie generator — no After Effects needed.
 - **Fine timing control** — pause on a frame, hold, and play through with smooth fade in/out.
+- **Animated Bible lower third** — opt in to a Lottie band for scripture: the band slides, wipes, unrolls or fades in on Go Live, each verse types, scrolls like a ticker, fades or slides in as you step through a passage, and everything animates out on Escape. Design it in the built-in Bible band generator, with your Bible fonts, sizes and colors filled in live, for one or two languages.
 
 **Source locations:**
 - `tabs/LowerThird.kt` — main UI
@@ -105,6 +106,9 @@
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `server/LowerThirdSequencer.kt`
 - `dialogs/tabs/LowerThirdSettingsTab.kt`
+- `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
+- `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
+- `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
 
 ## Announcements & Timers
 - **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping.

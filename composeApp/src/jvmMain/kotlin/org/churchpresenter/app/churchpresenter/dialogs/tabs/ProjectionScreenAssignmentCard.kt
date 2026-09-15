@@ -71,7 +71,7 @@ import churchpresenter.composeapp.generated.resources.screen_col_label
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.app.churchpresenter.utils.outputSizeOf

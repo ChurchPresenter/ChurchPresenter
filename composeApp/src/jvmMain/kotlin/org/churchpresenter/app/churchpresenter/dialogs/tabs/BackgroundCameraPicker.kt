@@ -41,7 +41,7 @@ import org.churchpresenter.app.churchpresenter.composables.CameraFailure
 import org.churchpresenter.app.churchpresenter.composables.CameraFormat
 import org.churchpresenter.app.churchpresenter.composables.CameraPrivacyHint
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
 import org.churchpresenter.app.churchpresenter.composables.isScreenCaptureDevice
 import org.churchpresenter.app.churchpresenter.composables.listCameraFormats

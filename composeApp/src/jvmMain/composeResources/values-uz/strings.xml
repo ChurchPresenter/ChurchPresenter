@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Muqaddas Kitob tarjimalari</string>
     <string name="setup_summary_bible_value">%1$d o'rnatilgan</string>
     <string name="setup_summary_songs_value">%1$d to'plam · %2$d qo'shiq</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Pastki uchdan bir animatsiyasi</string>
+    <string name="lower_third_animation_use_lottie">Tasmani Lottie shabloni bilan jonlantirish</string>
+    <string name="lower_third_animation_file">Shablon</string>
+    <string name="lower_third_animation_none">Shablon tanlanmagan</string>
+    <string name="lower_third_animation_generate">Yaratish…</string>
+    <string name="lower_third_animation_clear">Shablonni olib tashlash</string>
+    <string name="lottie_files_filter">Lottie fayllari</string>
+    <string name="bible_lottie_gen_window_title">Pastki titr generatori</string>
+    <string name="song_lottie_unsupported_note">Shablon joylashuvni va sarlavha o‘rnini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish, so‘zlar oralig‘i, keyingisini oldindan ko‘rish va akkordlar qo‘llanilmaydi.</string>
+    <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

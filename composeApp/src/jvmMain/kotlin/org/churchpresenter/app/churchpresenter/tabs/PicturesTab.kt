@@ -131,7 +131,7 @@ import churchpresenter.composeapp.generated.resources.unit_s
 import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.pictures_arrow_key_hint
 import churchpresenter.composeapp.generated.resources.pictures_reorder_hint
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem

@@ -1,5 +1,6 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.theme.components
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,12 +11,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -31,11 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun DropdownSelector(
@@ -55,7 +61,9 @@ fun DropdownSelector(
         modifier = sizeModifier
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                expanded = true
+            }
             .padding(
                 start = 11.dp,
                 end = 11.dp,
@@ -100,7 +108,7 @@ fun DropdownSelector(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                imageVector = DropdownArrow,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -111,21 +119,43 @@ fun DropdownSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            options.forEachIndexed { index, (key, display) ->
-                DropdownMenuItem(
-                    text = { Text(display, style = MaterialTheme.typography.bodyMedium) },
-                    onClick = {
-                        onValueChange(key)
-                        expanded = false
-                    },
-                    trailingIcon = itemTrailingContent?.let { content ->
-                        { Row { content(key, index) } }
-                    },
-                )
+            val items: @Composable () -> Unit = {
+                options.forEachIndexed { index, (key, display) ->
+                    DropdownMenuItem(
+                        text = { Text(display, style = MaterialTheme.typography.bodyMedium) },
+                        onClick = {
+                            onValueChange(key)
+                            expanded = false
+                        },
+                        trailingIcon = itemTrailingContent?.let { content ->
+                            { Row { content(key, index) } }
+                        },
+                    )
+                }
+            }
+            if (MENU_ITEM_HEIGHT * options.size <= MENU_MAX_HEIGHT) {
+                items()
+            } else {
+                // A long list — a folder of templates, say — scrolls inside a capped box with a
+                // bar beside it; the menu's own scroll has none. The height is explicit rather
+                // than a cap because a scrollbar in an uncapped box reports an infinite height.
+                val listState = rememberScrollState()
+                Box(Modifier.height(MENU_MAX_HEIGHT)) {
+                    Column(Modifier.verticalScroll(listState).padding(end = MENU_SCROLLBAR_GUTTER)) { items() }
+                    VerticalScrollbar(
+                        adapter = rememberScrollbarAdapter(listState),
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(end = 2.dp),
+                    )
+                }
             }
         }
     }
 }
+
+/** Material's menu item height; the list is sized from it so short menus stay short. */
+private val MENU_ITEM_HEIGHT = 48.dp
+private val MENU_MAX_HEIGHT = 380.dp
+private val MENU_SCROLLBAR_GUTTER = 10.dp
 
 @Composable
 fun DropdownSelector(
@@ -143,7 +173,9 @@ fun DropdownSelector(
                 .heightIn(min = 42.dp)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                    expanded.value = true
+                }
                 .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -174,7 +206,7 @@ fun DropdownSelector(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                imageVector = DropdownArrow,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -197,3 +229,28 @@ fun DropdownSelector(
         }
     }
 }
+
+private const val ARROW_VIEWPORT = 24f
+
+/**
+ * The chevron on every dropdown: Material's `keyboard_arrow_down`, drawn here so this module
+ * needs no icon dependency — the same path the app's `ic_arrow_down` drawable carries.
+ */
+private val DropdownArrow: ImageVector = ImageVector.Builder(
+    name = "DropdownArrow",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = ARROW_VIEWPORT,
+    viewportHeight = ARROW_VIEWPORT,
+).apply {
+    path(fill = SolidColor(Color.Black)) {
+        moveTo(7.41f, 8.59f)
+        lineTo(12f, 13.17f)
+        lineToRelative(4.59f, -4.58f)
+        lineTo(18f, 10f)
+        lineToRelative(-6f, 6f)
+        lineToRelative(-6f, -6f)
+        lineToRelative(1.41f, -1.41f)
+        close()
+    }
+}.build()

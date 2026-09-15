@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +51,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
 import churchpresenter.composeapp.generated.resources.tooltip_underline
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.theme.components.TextStyleToggleButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -258,65 +258,6 @@ private fun BackdropSegment(
         ) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 content(contentColor)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun TextStyleToggleButton(
-    label: String,
-    tooltip: String,
-    isActive: Boolean,
-    fontWeight: FontWeight = FontWeight.Normal,
-    fontStyle: FontStyle = FontStyle.Normal,
-    textDecoration: TextDecoration? = null,
-    buttonSize: Dp = 28.dp,
-    onClick: () -> Unit
-) {
-    val activeBackground = MaterialTheme.colorScheme.primary
-    val inactiveBackground = MaterialTheme.colorScheme.surfaceVariant
-    val activeContent = MaterialTheme.colorScheme.onPrimary
-    val inactiveContent = MaterialTheme.colorScheme.onSurfaceVariant
-
-    TooltipArea(
-        tooltip = { BackdropTooltip(tooltip) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
-        Surface(
-            modifier = Modifier
-                .size(buttonSize)
-                .clip(RoundedCornerShape(8.dp))
-                .border(
-                    width = 1.dp,
-                    color = if (isActive) {
-                        activeBackground
-                    } else {
-                        MaterialTheme.colorScheme.outline.copy(alpha = OUTLINE_ALPHA)
-                    },
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .clickable { onClick() },
-            color = if (isActive) activeBackground else inactiveBackground,
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = label,
-                    fontSize = (buttonSize.value * 0.36f).sp,
-                    fontWeight = fontWeight,
-                    fontStyle = fontStyle,
-                    textDecoration = textDecoration,
-                    color = if (isActive) activeContent else inactiveContent,
-                    maxLines = 1,
-                )
             }
         }
     }

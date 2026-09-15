@@ -2641,4 +2641,16 @@
     <string name="setup_summary_bible">Bibelübersetzungen</string>
     <string name="setup_summary_bible_value">%1$d installiert</string>
     <string name="setup_summary_songs_value">%1$d Bücher · %2$d Lieder</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animation des unteren Drittels</string>
+    <string name="lower_third_animation_use_lottie">Band mit einer Lottie-Vorlage animieren</string>
+    <string name="lower_third_animation_file">Vorlage</string>
+    <string name="lower_third_animation_none">Keine Vorlage ausgewählt</string>
+    <string name="lower_third_animation_generate">Erzeugen…</string>
+    <string name="lower_third_animation_clear">Vorlage entfernen</string>
+    <string name="lottie_files_filter">Lottie-Dateien</string>
+    <string name="bible_lottie_gen_window_title">Generator für untere Drittel</string>
+    <string name="song_lottie_unsupported_note">Die Vorlage bestimmt das Layout und die Position des Titels. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung, Wortabstand, Vorschau und Akkorde gelten nicht.</string>
+    <string name="bible_lottie_unsupported_note">Die Vorlage bestimmt das Layout, die Position der Bibelstelle und wie zwei Sprachen das Band teilen. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung und Wortabstand gelten nicht.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

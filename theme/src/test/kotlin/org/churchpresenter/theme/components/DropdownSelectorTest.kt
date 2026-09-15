@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.theme.components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -9,6 +9,11 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -225,5 +230,57 @@ class DropdownSelectorTest {
 
         assertEquals("Georgia", current, "choosing Georgia must report it via onSelectedChange")
         onAllNodesWithText("Georgia").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a long list opens inside a scrolling box and still picks`() = runComposeUiTest {
+        var current = "k0"
+        val options = (0 until 20).map { "k$it" to "Option $it" }
+        setContent {
+            MaterialTheme {
+                DropdownSelector(label = "Many", value = current, options = options, onValueChange = { current = it })
+            }
+        }
+        onAllNodesWithText("Option 0").onLast().performClick()
+        onAllNodesWithText("Option 1").onLast().assertExists("the first rows of a long list are in view")
+        onAllNodesWithText("Option 1").onLast().performClick()
+        assertEquals("k1", current)
+    }
+
+    @Test
+    fun `the compact form is shorter and can trail each row with content of its own`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                DropdownSelector(
+                    label = "Fruit",
+                    value = "a",
+                    options = listOf("a" to "Apple", "b" to "Banana"),
+                    onValueChange = { },
+                    compact = true,
+                    modifier = Modifier.testTag("compact"),
+                    itemTrailingContent = { key, index -> Text("$key#$index") },
+                )
+            }
+        }
+        onNodeWithTag("compact").assertHeightIsEqualTo(34.dp)
+        onAllNodesWithText("Apple").onLast().performClick()
+        onNodeWithText("b#1").assertExists("the trailing slot is given the key and the index")
+    }
+
+    @Test
+    fun `the plain-list overload shows the selected item and picks by name`() = runComposeUiTest {
+        var selected = "Pear"
+        setContent {
+            MaterialTheme {
+                DropdownSelector(
+                    label = "Fruit", items = listOf("Pear", "Plum"), selected = selected,
+                    onSelectedChange = { selected = it },
+                )
+            }
+        }
+        onNodeWithText("Pear").assertExists()
+        onNodeWithText("Pear").performClick()
+        onAllNodesWithText("Plum").onLast().performClick()
+        assertEquals("Plum", selected)
     }
 }

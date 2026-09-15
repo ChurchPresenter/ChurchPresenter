@@ -2668,4 +2668,16 @@
     <string name="setup_summary_bible">Traductions de la Bible</string>
     <string name="setup_summary_bible_value">%1$d installée(s)</string>
     <string name="setup_summary_songs_value">%1$d recueils · %2$d chants</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animation du tiers inférieur</string>
+    <string name="lower_third_animation_use_lottie">Animer le bandeau avec un modèle Lottie</string>
+    <string name="lower_third_animation_file">Modèle</string>
+    <string name="lower_third_animation_none">Aucun modèle sélectionné</string>
+    <string name="lower_third_animation_generate">Générer…</string>
+    <string name="lower_third_animation_clear">Retirer le modèle</string>
+    <string name="lottie_files_filter">Fichiers Lottie</string>
+    <string name="bible_lottie_gen_window_title">Générateur de tiers inférieurs</string>
+    <string name="song_lottie_unsupported_note">Le modèle décide de la mise en page et de la place du titre. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré, l'espacement des mots, l'aperçu de la suite et les accords ne s'appliquent pas.</string>
+    <string name="bible_lottie_unsupported_note">Le modèle décide de la mise en page, de la position de la référence et de la façon dont deux langues se partagent le bandeau. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré et l'espacement des mots ne s'appliquent pas.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>

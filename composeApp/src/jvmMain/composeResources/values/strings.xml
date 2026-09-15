@@ -591,6 +591,7 @@
     <string name="background_camera_option">Camera</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Follow Default</string>
+    <string name="background_lottie_option">Lottie</string>
     <string name="background_video">Background Video:</string>
 
     <!-- Projection Settings -->
@@ -951,6 +952,16 @@
     <string name="display_lower_third">Lower Third</string>
     <string name="lower_third_height">Band height %</string>
     <string name="lower_third_band">Lower Third Band</string>
+    <string name="lower_third_animation">Lower Third Animation</string>
+    <string name="lower_third_animation_use_lottie">Animate the band with a Lottie template</string>
+    <string name="lower_third_animation_file">Template</string>
+    <string name="lower_third_animation_none">No template selected</string>
+    <string name="lower_third_animation_generate">Generate…</string>
+    <string name="lower_third_animation_clear">Clear template</string>
+    <string name="lottie_files_filter">Lottie files</string>
+    <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
+    <string name="song_lottie_unsupported_note">The template decides the layout and where the title sits. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough, word spacing, look-ahead and chords do not apply.</string>
+    <string name="bible_lottie_unsupported_note">The template decides the layout, the reference position and how two languages share the band. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough and word spacing do not apply.</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
@@ -1027,6 +1038,7 @@
     <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
+    <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
     <string name="customize_style">Style</string>
     <string name="customize_letter_spacing">Letter spacing</string>

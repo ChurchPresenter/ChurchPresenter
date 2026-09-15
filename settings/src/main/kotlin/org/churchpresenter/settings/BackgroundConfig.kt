@@ -49,4 +49,12 @@ data class BackgroundConfig(
     val aboveBandType: String = Constants.BACKGROUND_DEFAULT,
     val aboveBandColor: String = "#000000",
     val aboveBandOpacity: Float = 1.0f,
+    /**
+     * The Lottie template a [Constants.BACKGROUND_LOTTIE] lower third plays. Unlike every other
+     * type this is not a backdrop under the text: the file carries the text layers and the
+     * presenter fills them in, so the band's whole look — motion included — comes from here.
+     * Empty, or a file that no longer exists, falls back to the classic band. Appended last for
+     * the same positional-construction reason as [camera].
+     */
+    val backgroundLottie: String = "",
 )

@@ -2648,4 +2648,16 @@
     <string name="setup_summary_bible">Bibeloversettelser</string>
     <string name="setup_summary_bible_value">%1$d installert</string>
     <string name="setup_summary_songs_value">%1$d bøker · %2$d sanger</string>
+    <string name="background_lottie_option">Lottie</string>
+    <string name="lower_third_animation">Animasjon av nedre tredjedel</string>
+    <string name="lower_third_animation_use_lottie">Animer båndet med en Lottie-mal</string>
+    <string name="lower_third_animation_file">Mal</string>
+    <string name="lower_third_animation_none">Ingen mal valgt</string>
+    <string name="lower_third_animation_generate">Lag…</string>
+    <string name="lower_third_animation_clear">Fjern mal</string>
+    <string name="lottie_files_filter">Lottie-filer</string>
+    <string name="bible_lottie_gen_window_title">Generator for nedre tredjedeler</string>
+    <string name="song_lottie_unsupported_note">Malen bestemmer oppsettet og hvor tittelen står. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking, ordavstand, forhåndsvisning av neste og akkorder gjelder ikke.</string>
+    <string name="bible_lottie_unsupported_note">Malen bestemmer oppsettet, plasseringen av referansen og hvordan to språk deler båndet. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking og ordavstand gjelder ikke.</string>
+    <string name="customize_type_lottie">Lottie</string>
 </resources>
