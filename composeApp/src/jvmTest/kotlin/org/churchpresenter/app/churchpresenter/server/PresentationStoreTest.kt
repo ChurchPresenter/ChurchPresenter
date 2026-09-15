@@ -14,6 +14,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.settings.utils.Constants
 
+/**
+ * `renderSlidesForServer`'s `FileNotFoundException` catch (Sentry CHURCH-PRESENTER-DESKTOP-6J) is
+ * not exercised here: reaching it needs a second [org.churchpresenter.presentationengine.cache.SlideDiskCache]
+ * writer to supersede the render mid-slide, in the single-statement gap between `writer.putSlide`
+ * returning a `File` and the very next line reading it — a window with no seam to inject a race
+ * without adding a test-only hook to the private render loop itself. The write-side of the same
+ * race (`SlideCacheSupersededException`) is deterministically tested in
+ * `SlideDiskCacheTest` (`presentation-engine`), which is what the fix here is modeled on.
+ */
 class PresentationStoreTest {
 
     @get:Rule

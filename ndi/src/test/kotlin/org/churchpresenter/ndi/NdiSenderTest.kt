@@ -1,5 +1,8 @@
 package org.churchpresenter.ndi
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -219,5 +222,42 @@ class NdiSenderTest {
         assertTrue(lib.sent.isEmpty())
         assertTrue(s.open())
         assertEquals(2, lib.created.size)
+    }
+
+    /**
+     * close() is documented to run from a shutdown hook or dispose, on a different thread than the
+     * one pump thread that ever calls send() — so the two genuinely can race. Left unguarded, close()
+     * destroying the sender while send() is still inside the native call is a use-after-free that
+     * surfaces as "Invalid memory access" (Sentry CHURCH-PRESENTER-DESKTOP-6H). The latch pattern
+     * mirrors [FakeNdiLibrary.duringFindSources]'s use in `NdiSourceDirectoryTest`: it turns "was the
+     * sender destroyed under a live send" into an ordering assertion with no timing in it, rather than
+     * something that only reproduces under load.
+     */
+    @Test
+    fun `close never destroys the sender while a send is still in flight`() {
+        val lib = FakeNdiLibrary()
+        val s = sender(lib)
+        s.open()
+
+        val sendEntered = CountDownLatch(1)
+        val releaseSend = CountDownLatch(1)
+        lib.duringSendVideo = {
+            sendEntered.countDown()
+            assertTrue(releaseSend.await(2, TimeUnit.SECONDS), "the test never released the send")
+        }
+
+        val sendThread = thread { s.send(onePixel(-1), 1, 1) }
+        assertTrue(sendEntered.await(2, TimeUnit.SECONDS), "the send never reached the runtime")
+
+        val closeThread = thread { s.close() }
+        releaseSend.countDown()
+
+        sendThread.join(2_000)
+        closeThread.join(2_000)
+        assertFalse(sendThread.isAlive, "the send never came back")
+        assertFalse(closeThread.isAlive, "the close never came back")
+
+        assertFalse(lib.destroyedDuringSend, "close must never destroy the sender while a send is in flight")
+        assertEquals(1, lib.destroyed.size, "close still destroys it once the send has finished")
     }
 }

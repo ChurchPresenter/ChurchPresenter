@@ -79,10 +79,15 @@ object AutoStartManager {
 
     fun isEnabled(): Boolean = isEnabledFor(currentPlatform)
 
+    // Throwable, not Exception: a missing/broken JNA native dispatch library (jnidispatch.dll
+    // failing to extract, or a prior failed Native.<clinit> leaving NoClassDefFoundError on every
+    // later call) throws UnsatisfiedLinkError/NoClassDefFoundError, both Errors — an unreachable
+    // registry is "autostart unavailable", not a reason to bring the whole app down (Sentry
+    // CHURCH-PRESENTER-DESKTOP-6D, -6E).
     internal fun isEnabledFor(platform: Platform, runKey: WindowsRunKey = realRunKey): Boolean = try {
         val file = autostartFile(platform)
         if (file != null) file.exists() else runKey.exists()
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
         false
     }
 
@@ -99,7 +104,7 @@ object AutoStartManager {
     ): Boolean = try {
         if (enabled) register(exe, platform, runKey) else unregister(platform, runKey)
         true
-    } catch (e: Exception) {
+    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
         CrashReporter.reportException(e, context = "AutoStartManager.setEnabled($enabled)")
         false
     }
@@ -120,7 +125,7 @@ object AutoStartManager {
             // expected race, not a crash — just re-register.
             if (readRegistration(platform, runKey) == registrationContent(exe, platform)) return
             register(exe, platform, runKey)
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
             CrashReporter.reportException(e, context = "AutoStartManager.syncRegistration")
         }
     }
@@ -130,7 +135,7 @@ object AutoStartManager {
         val file = autostartFile(platform)
         return try {
             if (file != null) file.readText() else runKey.read()
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }

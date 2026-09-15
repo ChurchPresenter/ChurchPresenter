@@ -585,6 +585,47 @@ class AutoStartManagerTest {
         AutoStartManager.syncRegistrationFor("C:\\new\\CP.exe", win, key)
         assertEquals(AutoStartManager.windowsRunValue("C:\\new\\CP.exe"), key.value, "stale value re-registered")
     }
+
+    // ── a broken JNA native library is "unavailable", not fatal (CHURCH-PRESENTER-DESKTOP-6D/-6E) ─
+
+    /** A run key whose [exists] fails the way a broken JNA native dispatch library does. */
+    private class ThrowingRunKey(private val failure: Throwable) : AutoStartManager.WindowsRunKey {
+        override fun exists(): Boolean = throw failure
+        override fun read(): String? = throw failure
+        override fun write(value: String) = throw failure
+        override fun delete() = throw failure
+    }
+
+    @Test
+    fun `isEnabledFor swallows an UnsatisfiedLinkError from a broken native library, same as an Exception`() {
+        val key = ThrowingRunKey(UnsatisfiedLinkError("Failed to create temporary file for jnidispatch.dll"))
+        assertFalse(AutoStartManager.isEnabledFor(AutoStartManager.Platform.WINDOWS, key))
+    }
+
+    @Test
+    fun `isEnabledFor swallows a NoClassDefFoundError once JNA has already failed to init`() {
+        val key = ThrowingRunKey(NoClassDefFoundError("Could not initialize class com.sun.jna.Native"))
+        assertFalse(AutoStartManager.isEnabledFor(AutoStartManager.Platform.WINDOWS, key))
+    }
+
+    @Test
+    fun `setEnabledFor reports failure instead of crashing when the native library is broken`() {
+        val key = ThrowingRunKey(UnsatisfiedLinkError("jnidispatch.dll missing"))
+        assertFalse(AutoStartManager.setEnabledFor(
+            "C:\\CP.exe",
+            AutoStartManager.Platform.WINDOWS,
+            enabled = true,
+            runKey = key,
+        ))
+    }
+
+    @Test
+    fun `syncRegistrationFor does not propagate a broken native library`() {
+        val key = ThrowingRunKey(NoClassDefFoundError("Could not initialize class com.sun.jna.Native"))
+        // Must return normally rather than throw — this runs on a background thread at startup
+        // whose uncaught exception would otherwise take the whole app down.
+        AutoStartManager.syncRegistrationFor("C:\\CP.exe", AutoStartManager.Platform.WINDOWS, key)
+    }
 }
 
 /**
