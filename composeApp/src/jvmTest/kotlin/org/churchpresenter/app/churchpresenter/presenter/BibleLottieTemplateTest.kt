@@ -62,6 +62,21 @@ class BibleLottieTemplateTest {
     }
 
     @Test
+    fun `a crossfade the file names is used, and a file without one is swapped in its text segments' time`() {
+        val named =
+            assertNotNull(parseBibleLottieTemplate(LottieBandTestSupport.templateJson(cfg.copy(swapSeconds = 1.2f))))
+        assertEquals(1200L, named.meta.swapMs)
+        assertEquals(1200L, named.swapMs())
+        val stripped = Json.parseToJsonElement(LottieBandTestSupport.templateJson(cfg)).jsonObject.let { doc ->
+            val meta = doc["cp"]!!.jsonObject.filterKeys { it != "swapMs" }
+            JsonObject(doc.toMutableMap().apply { put("cp", JsonObject(meta)) })
+        }
+        val older = assertNotNull(parseBibleLottieTemplate(stripped.toString()))
+        assertNull(older.meta.swapMs)
+        assertEquals(500L, older.swapMs(), "the longer of text_out and text_in, as before")
+    }
+
+    @Test
     fun `a plain Lottie with no markers is played in fifths and its documents give the boxes`() {
         val plain = """{"fr":30,"ip":0,"op":100,"w":200,"h":50,"layers":[
             {"ty":5,"nm":"Text1","t":{"d":{"k":[{"s":{"sz":[100,20],"ps":[5,7]}}]}}},

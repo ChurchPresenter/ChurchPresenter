@@ -15,6 +15,9 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -48,6 +51,7 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenerator
 import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.lottiegen.band.TextAnimation
+import org.churchpresenter.lottiegen.band.ui.STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
@@ -168,10 +172,38 @@ class LottieBandScreenshotTest {
     fun `the generator for songs`() =
         generator("generator_song", lottieBandSeed(AppSettings(), BackgroundScope.SONG_LOWER_THIRD))
 
-    /** The style list, which is long enough to scroll and carries its own bar. */
+    /** The style list, which is long enough to scroll and carries its own bar, each row a thumbnail. */
     @Test
     fun `the style menu`() = generator("generator_style_menu", rootIndex = 1) {
         onNodeWithText(Strings.bandEnumLabel("style", BandStyle.SOLID_BAR.name)).performClick()
+        waitForIdle()
+        // The rows' thumbnails are the same compositions as the field's, already parsed by then.
+        waitUntil("the menu's thumbnails", RENDER_TIMEOUT_MS) {
+            onAllNodesWithTag(STYLE_THUMBNAIL_TAG, useUnmergedTree = true).fetchSemanticsNodes().size > 1
+        }
+    }
+
+    /** The look popover: a role's opacity, wash and picture, dropped under its row. */
+    @Test
+    fun `the look popover`() = generator("generator_look", rootIndex = 1) {
+        onAllNodesWithContentDescription(Strings.bandLookTooltip).onFirst().performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `the layout pane`() = generator("generator_layout") { openPane(Strings.bandSectionLayout) }
+
+    @Test
+    fun `the motion pane`() = generator("generator_motion") { openPane(Strings.bandTabMotion) }
+
+    @Test
+    fun `the text pane`() = generator("generator_text") { openPane(Strings.bandTabText) }
+
+    @Test
+    fun `the save pane`() = generator("generator_save") { openPane(Strings.bandSectionSave) }
+
+    private fun ComposeUiTest.openPane(tab: String) {
+        onNodeWithText(tab).performClick()
         waitForIdle()
     }
 
@@ -258,6 +290,12 @@ class LottieBandScreenshotTest {
                 // preview is waited for by its pixels: the sample text is white, and nothing else
                 // above the transport is — the checkerboard is grey in both themes.
                 waitUntil("the preview rendered", RENDER_TIMEOUT_MS) { previewWhitePixels() >= PREVIEW_TEXT_PIXELS }
+                // The template field's thumbnail is parsed on the view model's scope, off the
+                // test clock; it is tagged once it draws. Unmerged: the field is a clickable row,
+                // which folds its children's semantics into its own.
+                waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
+                    onAllNodesWithTag(STYLE_THUMBNAIL_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+                }
                 drive()
                 captureTo(file, rootIndex)
             }

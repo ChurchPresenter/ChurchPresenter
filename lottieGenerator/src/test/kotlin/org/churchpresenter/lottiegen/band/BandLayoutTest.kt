@@ -73,6 +73,34 @@ class BandLayoutTest {
     }
 
     @Test
+    fun `the text-area margins take room off, give it back when negative, and stop at the band's edge`() {
+        val base = computeSlots(cfg)
+        val narrowed = computeSlots(
+            cfg.copy(textAreaLeftPx = 100, textAreaRightPx = 200, textAreaTopPx = 5, textAreaBottomPx = 10),
+        )
+        assertEquals(base.text1.x + 100, narrowed.text1.x)
+        assertEquals(base.text1.w - 300, narrowed.text1.w)
+        assertEquals(base.text1.y + 5, narrowed.text1.y)
+        val chevron = cfg.copy(bandStyle = BandStyle.CHEVRON_TAG, insetPx = 10)
+        val full = computeSlots(chevron.copy(textAreaLeftPx = -5000, textAreaRightPx = -5000))
+        assertEquals(computeSlots(chevron).band.x, full.text1.x, "a negative margin reaches the band's edge")
+        assertEquals(computeSlots(chevron).band.w, full.text1.w)
+        val squeezed = computeSlots(cfg.copy(textAreaLeftPx = 5000, textAreaRightPx = 5000))
+        assertTrue(squeezed.text1.w >= 1.0, "the slot never vanishes")
+    }
+
+    @Test
+    fun `the second score of styles reserves room beside its shapes`() {
+        assertTrue(BandStyle.LEFT_BLOCK.textInsets().left > BandGeometry.BLOCK_W)
+        assertTrue(BandStyle.TOP_TAB.textInsets().top > BandGeometry.TOP_TAB_H)
+        assertEquals(BandGeometry.BOTTOM_BAND_H, BandStyle.BOTTOM_BAND.textInsets().bottom)
+        assertEquals(BandGeometry.ZIGZAG_H + BandGeometry.ZIGZAG_VALLEY, BandStyle.ZIGZAG_EDGE.textInsets().bottom)
+        assertTrue(BandStyle.DIAGONAL_STRIPES.textInsets().right > 0.0)
+        assertEquals(StyleInsets(), BandStyle.CORNER_BRACKETS.textInsets(), "brackets live in the padding")
+        assertEquals(StyleInsets(), BandStyle.SPLIT_VERTICAL.textInsets(), "one language on each half")
+    }
+
+    @Test
     fun `slot box helpers`() {
         val box = SlotBox(10.0, 20.0, 100.0, 50.0)
         assertEquals(110.0, box.right)

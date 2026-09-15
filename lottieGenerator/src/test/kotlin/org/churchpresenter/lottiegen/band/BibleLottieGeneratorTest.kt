@@ -2,6 +2,7 @@ package org.churchpresenter.lottiegen.band
 
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.lottiegen.band.BandJson.intField
 import org.churchpresenter.lottiegen.band.BandJson.name
@@ -143,6 +144,81 @@ class BibleLottieGeneratorTest {
         assertTrue("gf" in BandJson.shapeTypes(gradient))
         val solid = BandJson.layers(generate(BibleLottieGenConfig(bandStyle = BandStyle.SOLID_BAR))).last()
         assertEquals(listOf("rc", "fl", "tr"), BandJson.shapeTypes(solid))
+    }
+
+    @Test
+    fun `a role's wash is laid in its piece's shape directly above it, and over a gradient fill`() {
+        val washed = BibleLottieGenConfig(
+            bandStyle = BandStyle.HORIZONTAL_BANDS,
+            looks = mapOf(
+                BandColorRole.ACCENT to BandRoleLook(washColor = "#FF0000", washAlpha = 30),
+                BandColorRole.BACKGROUND to BandRoleLook(washAlpha = 50),
+            ),
+        )
+        val names = BandJson.layerNames(generate(washed)).filter { it.startsWith("Band") }
+        assertEquals(listOf("Band0Wash", "Band0", "Band1", "Band2Wash", "Band2"), names)
+        val wash = BandJson.layer(generate(washed), "Band0Wash")
+        assertEquals(listOf("rc", "fl", "tr"), BandJson.shapeTypes(wash), "the wash is the accent's own rectangle")
+        assertTrue(BandJson.layerNames(generate()).none { it.endsWith("Wash") }, "no wash by default")
+        val gradient = generate(
+            BibleLottieGenConfig(
+                bandStyle = BandStyle.GRADIENT_BAR,
+                looks = mapOf(BandColorRole.BACKGROUND to BandRoleLook(washAlpha = 20)),
+            ),
+        )
+        val bandLayers = BandJson.layers(gradient).filter { it.name.startsWith("Band") }
+        assertTrue("fl" in BandJson.shapeTypes(bandLayers[bandLayers.size - 2]), "the wash sits above the gradient")
+        assertTrue("gf" in BandJson.shapeTypes(bandLayers.last()))
+    }
+
+    @Test
+    fun `the trio sweeps background, second and third, and the crossfade is written for the player`() {
+        val doc = generate(
+            BibleLottieGenConfig(
+                bandStyle = BandStyle.GRADIENT_TRIO, bgColor = "#000000", gradientColor = "#FF0000",
+                tertiaryColor = "#0000FF", accentColor = "#00FF00", swapSeconds = 0.75f,
+            ),
+        )
+        val fill = BandJson.layers(doc).last()["shapes"]!!.jsonArray.first().jsonObject["it"]!!.jsonArray
+            .map { it.jsonObject }.first { it["ty"]!!.jsonPrimitive.content == "gf" }
+        val stops = fill["g"]!!.jsonObject["k"]!!.jsonObject["k"]!!.jsonArray
+            .map { it.jsonPrimitive.content.toDouble() }
+        assertEquals(listOf(0.0, 0.0, 0.0, 0.0), stops.subList(0, 4), "background at the start")
+        assertEquals(listOf(0.5, 1.0, 0.0, 0.0), stops.subList(4, 8), "second in the middle")
+        assertEquals(listOf(1.0, 0.0, 0.0, 1.0), stops.subList(8, 12), "third at the end, never the accent")
+        assertEquals(750, BandJson.meta(doc).intField(BibleLottieGenerator.METADATA_SWAP_MS))
+        assertTrue(BandStyle.GRADIENT_TRIO.usesTertiary)
+    }
+
+    @Test
+    fun `the sample's italic and shadow reach the file, the shadow twin otherwise ships hidden`() {
+        val plain = generate()
+        assertEquals(true, BandJson.layer(plain, "Text1Shadow")["hd"]?.jsonPrimitive?.content?.toBoolean())
+        val styled = generate(BibleLottieGenConfig(previewBold = true, previewItalic = true, previewShadow = true))
+        assertNull(BandJson.layer(styled, "Text1Shadow")["hd"], "a shadow the sample shows is not hidden")
+        val fonts = styled["fonts"]!!.jsonObject["list"]!!.jsonArray.map { it.jsonObject }
+        assertEquals("Bold Italic", fonts.single().stringField("fStyle"))
+        assertEquals("Arial-Bold Italic", BandJson.textDocument(BandJson.layer(styled, "Text1")).stringField("f"))
+        val italicOnly = generate(BibleLottieGenConfig(previewItalic = true))
+        assertEquals("Arial-Italic", BandJson.textDocument(BandJson.layer(italicOnly, "Text1")).stringField("f"))
+    }
+
+    @Test
+    fun `the second score of styles paints its shapes in the roles it declares`() {
+        val second = listOf(BandStyle.LEFT_BLOCK, BandStyle.SPLIT_VERTICAL, BandStyle.PENNANT, BandStyle.ZIGZAG_EDGE)
+        for (style in second) {
+            val doc =
+                generate(BibleLottieGenConfig(bandStyle = style, images = mapOf(BandColorRole.SECOND to picture())))
+            assertTrue(BandJson.layerNames(doc).any { it.endsWith("Image") }, "$style draws the second colour")
+        }
+        val brackets = BandJson.layerNames(generate(BibleLottieGenConfig(bandStyle = BandStyle.CORNER_BRACKETS)))
+        assertEquals(8 + 1, brackets.count { it.startsWith("Band") }, "eight bracket arms over the fill")
+        val checker = BandJson.layerNames(generate(BibleLottieGenConfig(bandStyle = BandStyle.CHECKER_EDGE)))
+        assertEquals(8 + 1, checker.count { it.startsWith("Band") }, "two columns of four cells over the fill")
+        val panel = generate(BibleLottieGenConfig(bandStyle = BandStyle.INNER_PANEL, cornerRadiusPx = 12))
+        val panelLayers = BandJson.layers(panel).filter { it.name.startsWith("Band") }
+        assertTrue("st" in BandJson.shapeTypes(panelLayers[0]), "the frame is above the panel")
+        assertEquals(listOf("rc", "fl", "tr"), BandJson.shapeTypes(panelLayers[1]))
     }
 
     @Test

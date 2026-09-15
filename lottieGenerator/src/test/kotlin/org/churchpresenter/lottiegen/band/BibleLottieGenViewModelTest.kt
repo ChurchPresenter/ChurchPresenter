@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class BibleLottieGenViewModelTest {
@@ -133,6 +134,80 @@ class BibleLottieGenViewModelTest {
         vm.loadBandImage(BandColorRole.SECOND, File(temp, "nope.png"))
         assertEquals(Strings.bandStatusPictureUnreadable("nope.png"), vm.statusText)
         assertTrue(vm.config.images.isEmpty())
+    }
+
+    @Test
+    fun `a role's look is edited on its own and the text-area margins can move together`() {
+        val vm = viewModel()
+        vm.updateLook(BandColorRole.ACCENT) { it.copy(washColor = "#112233", washAlpha = 40) }
+        vm.updateLook(BandColorRole.ACCENT) { it.copy(blurPx = 9) }
+        assertEquals(BandRoleLook("#112233", 40, 9), vm.config.look(BandColorRole.ACCENT))
+        assertEquals(BandRoleLook(), vm.config.look(BandColorRole.SECOND), "another role is untouched")
+        vm.setTextArea(-30)
+        val c = vm.config
+        val margins = listOf(c.textAreaLeftPx, c.textAreaRightPx, c.textAreaTopPx, c.textAreaBottomPx)
+        assertEquals(listOf(-30, -30, -30, -30), margins)
+        assertTrue(vm.showSlotGuides && !vm.linkTextArea, "the pane defaults")
+    }
+
+    @Test
+    fun `saved is true until the design changes again`() {
+        val out = File(temp, "out")
+        val vm = viewModel(out)
+        assertTrue(!vm.isSaved)
+        assertNotNull(vm.save())
+        assertTrue(vm.isSaved)
+        vm.updateConfig { it.copy(paddingPx = 12) }
+        assertTrue(!vm.isSaved)
+    }
+
+    @Test
+    fun `the text window and slot guides follow the timeline and the layout`() {
+        val vm = viewModel()
+        val t = vm.timeline
+        assertEquals(t.textStart.toFloat() / t.totalFrames, vm.textWindow.start)
+        assertEquals(t.bgOutStart.toFloat() / t.totalFrames, vm.textWindow.endInclusive)
+        assertEquals(2, vm.slotGuides.size, "one language: a verse and a reference")
+        vm.updateConfig { it.copy(layout = SlotLayout.SIDE_BY_SIDE) }
+        assertEquals(4, vm.slotGuides.size)
+        val guide = vm.slotGuides.first()
+        assertTrue(guide.left in 0f..1f && guide.width in 0f..1f && guide.top in 0f..1f && guide.height in 0f..1f)
+        vm.showSlotGuides = false
+        assertTrue(vm.slotGuides.isEmpty())
+    }
+
+    @Test
+    fun `style thumbnails are built once per palette, one small band per style, without the words`() {
+        val vm = viewModel()
+        vm.ensureStyleThumbnails()
+        waitFor("the thumbnails") { vm.styleThumbnails.size == BandStyle.entries.size }
+        val built = vm.styleThumbnails
+        assertEquals(640f, built.getValue(BandStyle.WAVE_DECK).width, "parsed and ready to draw, at the band's size")
+        assertEquals(120f, built.getValue(BandStyle.SOLID_BAR).height)
+        vm.ensureStyleThumbnails()
+        assertSame(built, vm.styleThumbnails, "the same palette is not built twice")
+        vm.updateConfig { it.copy(previewText1 = "other words" ) }
+        vm.ensureStyleThumbnails()
+        assertSame(built, vm.styleThumbnails, "words are not part of a thumbnail")
+        vm.updateConfig { it.copy(accentColor = "#00FF00") }
+        vm.ensureStyleThumbnails()
+        waitFor("a rebuild in the new colour") {
+            vm.styleThumbnails !== built && vm.styleThumbnails.size == BandStyle.entries.size
+        }
+        assertEquals(BandTimeline.from(vm.config), vm.thumbnailTimeline)
+    }
+
+    @Test
+    fun `a picture chooser runs on the view model's own scope and only a confirmed file is loaded`() {
+        val vm = viewModel()
+        val png = File(temp, "p.png").also { ImageIO.write(BufferedImage(4, 2, BufferedImage.TYPE_INT_RGB), "png", it) }
+        vm.chooseBandImage(BandColorRole.SECOND) { null }
+        waitFor("the cancelled chooser to finish") { !vm.choosingImage }
+        assertNull(vm.config.images[BandColorRole.SECOND], "cancel loads nothing")
+        vm.chooseBandImage(BandColorRole.SECOND) { png }
+        waitFor("the picked file") { vm.config.images[BandColorRole.SECOND] != null }
+        assertEquals("p.png", vm.config.images.getValue(BandColorRole.SECOND).name)
+        waitFor("the chooser to finish") { !vm.choosingImage }
     }
 
     @Test

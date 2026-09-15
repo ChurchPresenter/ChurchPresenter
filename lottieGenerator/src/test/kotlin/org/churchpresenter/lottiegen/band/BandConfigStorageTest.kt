@@ -7,6 +7,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class BandConfigStorageTest {
 
@@ -61,6 +62,27 @@ class BandConfigStorageTest {
         assertEquals("lyric", restored.previewText1)
         val same = BandConfigStorage.restore(BibleLottieGenConfig(kind = BandContentKind.BIBLE, previewText1 = "other"))
         assertEquals("verse", same.previewText1, "same kind keeps what was remembered")
+    }
+
+    @Test
+    fun `the sample's typography always comes from the seed, the design from what was remembered`() {
+        BandConfigStorage.save(
+            BibleLottieGenConfig(
+                bandStyle = BandStyle.RIBBON, previewTextSizePx = 28, previewReferenceSizePx = 24,
+                previewFontFamily = "Georgia", previewBold = false, previewShadow = false,
+            ),
+        )
+        val seed = BibleLottieGenConfig(
+            previewTextSizePx = 60, previewReferenceSizePx = 70, previewFontFamily = "Arial",
+            previewBold = true, previewItalic = true, previewShadow = true, previewTextColor = "#ABCDEF",
+        )
+        val restored = BandConfigStorage.restore(seed)
+        assertEquals(BandStyle.RIBBON, restored.bandStyle)
+        assertEquals(60, restored.previewTextSizePx)
+        assertEquals(70, restored.previewReferenceSizePx)
+        assertEquals("Arial", restored.previewFontFamily)
+        assertEquals("#ABCDEF", restored.previewTextColor)
+        assertTrue(restored.previewBold && restored.previewItalic && restored.previewShadow)
     }
 
     @Test

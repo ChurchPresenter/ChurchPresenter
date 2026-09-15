@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import kotlinx.coroutines.flow.first
 import org.churchpresenter.lottiegen.ui.Tokens
 
 /*
@@ -124,7 +126,9 @@ internal fun PopupMenu(
         LaunchedEffect(keys.selected) {
             val rowPx = with(density) { keys.rowHeight.roundToPx() }
             val top = keys.selected * rowPx
-            val viewport = scroll.viewportSize
+            // Not before the list is laid out: on its first frame the viewport is still zero, and
+            // the arithmetic below would scroll the first row out of sight to "fit" it.
+            val viewport = snapshotFlow { scroll.viewportSize }.first { it > 0 }
             when {
                 top < scroll.value -> scroll.animateScrollTo(top)
                 top + rowPx > scroll.value + viewport -> scroll.animateScrollTo(top + rowPx - viewport)

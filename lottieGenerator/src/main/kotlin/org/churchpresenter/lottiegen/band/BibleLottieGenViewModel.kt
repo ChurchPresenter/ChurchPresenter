@@ -11,6 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import io.github.alexzhirkevich.compottie.LottieComposition
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.lottiegen.ui.PreviewGuide
 import org.churchpresenter.lottiegen.ui.Strings
@@ -90,10 +92,11 @@ class BibleLottieGenViewModel(
 
     /**
      * One small band per style in the current colours, for the template menu to show what each
-     * style actually is. Built off the UI thread the first time the menu asks, and again only
-     * when a colour changes: the sample text and pictures are left out, so a thumbnail is cheap.
+     * style actually is. Generated and parsed off the UI thread the first time the menu asks, and
+     * again only when a colour changes: the sample text and pictures are left out, so a thumbnail
+     * is cheap — and parsed here rather than in the menu, so it draws on the frame it arrives.
      */
-    var styleThumbnails by mutableStateOf<Map<BandStyle, String>>(emptyMap())
+    var styleThumbnails by mutableStateOf<Map<BandStyle, LottieComposition>>(emptyMap())
         private set
 
     /** The timeline the thumbnails were built on, so the menu can seek to their hold frame. */
@@ -109,7 +112,7 @@ class BibleLottieGenViewModel(
             val built = withContext(Dispatchers.Default) {
                 BandStyle.entries.associateWith { style ->
                     val lottie = BibleLottieGenerator.generate(key.copy(bandStyle = style))
-                    Json.encodeToString(JsonObject.serializer(), lottie)
+                    LottieCompositionSpec.JsonString(Json.encodeToString(JsonObject.serializer(), lottie)).load()
                 }
             }
             if (thumbnailKey == key) styleThumbnails = built

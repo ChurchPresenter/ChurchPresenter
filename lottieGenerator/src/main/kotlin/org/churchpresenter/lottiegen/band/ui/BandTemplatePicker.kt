@@ -26,13 +26,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.band.BandStyle
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
@@ -136,7 +135,7 @@ private fun CountBadge(text: String) {
 /** The band a style makes, in the current colours, at its hold frame; a blank chip until it is built. */
 @Composable
 private fun StyleThumbnail(viewModel: BibleLottieGenViewModel, style: BandStyle, height: Dp) {
-    val json = viewModel.styleThumbnails[style]
+    val composition = viewModel.styleThumbnails[style]
     Box(
         Modifier
             .size(THUMB_WIDTH, height)
@@ -144,16 +143,19 @@ private fun StyleThumbnail(viewModel: BibleLottieGenViewModel, style: BandStyle,
             .background(Tokens.CanvasBg)
             .border(1.dp, Tokens.FieldBorder, THUMB_SHAPE),
     ) {
-        if (json != null) {
-            val composition by rememberLottieComposition(json) { LottieCompositionSpec.JsonString(json) }
+        if (composition != null) {
             val timeline = viewModel.thumbnailTimeline
             val hold = timeline.holdStart.toFloat() / timeline.totalFrames
             Image(
                 painter = rememberLottiePainter(composition = composition, progress = { hold }),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier.fillMaxSize(),
+                // Tagged once it draws, so a test can wait for the chip rather than guess.
+                modifier = Modifier.fillMaxSize().testTag(STYLE_THUMBNAIL_TAG),
             )
         }
     }
 }
+
+/** On every drawn style thumbnail; the screenshot suite waits for it. */
+const val STYLE_THUMBNAIL_TAG = "bandStyleThumbnail"
