@@ -17,6 +17,15 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 private const val NANOS_PER_SECOND = 1_000_000_000f
 
 /**
+ * Where a loop that started on [holdProgress] is after [elapsedNanos] of a file [durationNanos]
+ * long: it runs on past the end and wraps to the start. A file with no duration stays put.
+ */
+internal fun loopedProgress(holdProgress: Float, elapsedNanos: Long, durationNanos: Float): Float {
+    if (durationNanos <= 0f) return holdProgress
+    return (holdProgress + (elapsedNanos / durationNanos)).mod(1f)
+}
+
+/**
  * A template playing on a loop, with the sample text it was generated with, for the Background
  * tab's stage. It starts on its hold frame — the band up and the words on it — and runs from
  * there through the exit, the entrance and back, so the first frame is the look and the rest is
@@ -34,11 +43,10 @@ internal fun BibleLottieStillFrame(path: String, modifier: Modifier = Modifier) 
     var progress by remember(loaded) { mutableStateOf(holdProgress) }
     LaunchedEffect(loaded) {
         val durationNanos = loaded.totalFrames / loaded.frameRate * NANOS_PER_SECOND
-        if (durationNanos <= 0f) return@LaunchedEffect
         val start = withInfiniteAnimationFrameNanos { it }
         while (true) {
             withInfiniteAnimationFrameNanos { now ->
-                progress = (holdProgress + ((now - start) / durationNanos).toFloat()).mod(1f)
+                progress = loopedProgress(holdProgress, now - start, durationNanos)
             }
         }
     }

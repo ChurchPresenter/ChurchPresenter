@@ -10,6 +10,11 @@ import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.SettingsManager
+import java.io.File
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -221,6 +226,26 @@ class ProjectionCustomizeSurfaceControlsTest {
         projectionTab(backgroundOutput()) {
             openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE)
             onAllNodesWithText("Lottie").assertCountEquals(0)
+        }
+    }
+
+    /** The pane lists the templates in the app's lower-thirds folder, which lives under `user.home`. */
+    @Test
+    fun `a Lottie surface picks its template from the lower-thirds folder`() {
+        val folder = SettingsManager.bibleLowerThirdsDir().apply { mkdirs() }
+        val template = File(folder, "customize-pick.json").apply { writeText(lottieJson()) }
+        try {
+            projectionTab(backgroundOutput(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) { get ->
+                openCustomizePane(CustomizePane.BACKGROUND, CustomizeElement.BACKGROUND_BIBLE)
+                chooseSegment("Lottie")
+                onNodeWithText("No template selected").performClick()
+                onAllNodesWithText("customize-pick").onLast().performClick()
+                val stored = get().storedBackground().configFor(BackgroundScope.BIBLE_LOWER_THIRD)
+                assertEquals(template.absolutePath, stored.backgroundLottie)
+                onNodeWithText("customize-pick").assertExists("the field names the pick")
+            }
+        } finally {
+            template.delete()
         }
     }
 }

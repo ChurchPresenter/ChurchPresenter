@@ -41,7 +41,9 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.lottiegen.band.BandColorField
 import org.churchpresenter.lottiegen.band.BandContentKind
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.band.BibleLottieGenApp
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.ReferencePlacement
@@ -252,23 +254,27 @@ internal fun BibleLottieGeneratorWindow(
                     selectDirectory = false,
                 )?.toFile()
             },
-            // The app's colour field: a click anywhere on it opens the app's Choose Color dialog.
-            colorField = { label, color, onColorChange, modifier ->
-                ColorPickerField(color = color, onColorChange = onColorChange, modifier = modifier, label = label)
-            },
-            // The app's font picker — the machine's fonts, each shown in its own face.
-            fontPicker = { value, onValueChange, modifier ->
-                FontSettingsDropdown(
-                    modifier = modifier,
-                    label = fontLabel,
-                    value = value,
-                    fonts = fonts,
-                    fillWidth = true,
-                    onValueChange = onValueChange,
-                )
-            },
+            colorField = hostColorField,
+            fontPicker = hostFontPicker(fonts, fontLabel),
         )
     }
+}
+
+/** The app's colour field, lent to the generator: a click anywhere on it opens the app's Choose Color dialog. */
+internal val hostColorField: BandColorField = { label, color, onColorChange, modifier ->
+    ColorPickerField(color = color, onColorChange = onColorChange, modifier = modifier, label = label)
+}
+
+/** The app's font picker, lent to the generator: the machine's [fonts], each shown in its own face. */
+internal fun hostFontPicker(fonts: List<String>, label: String): BandFontPicker = { value, onValueChange, modifier ->
+    FontSettingsDropdown(
+        modifier = modifier,
+        label = label,
+        value = value,
+        fonts = fonts,
+        fillWidth = true,
+        onValueChange = onValueChange,
+    )
 }
 
 /**
