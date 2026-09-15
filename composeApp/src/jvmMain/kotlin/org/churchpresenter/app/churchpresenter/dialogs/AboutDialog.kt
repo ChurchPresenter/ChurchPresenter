@@ -402,6 +402,21 @@ fun CalendarWindow(
                         onColorSelected = request.onPicked,
                     )
                 },
+                // The app's own Edit Song dialog, exactly as the Song Library Manager takes it —
+                // one editor for a song, whether it is reached from the Songs tab, that window, or
+                // a run of show being planned here. What it writes lands in the songs folder, which
+                // SongsViewModel already watches.
+                songEditor = { editing ->
+                    EditSongDialog(
+                        isVisible = true,
+                        song = editing.song,
+                        songbooks = editing.songbooks,
+                        existingSongs = editing.allSongs,
+                        theme = theme,
+                        onDismiss = editing.onDismiss,
+                        onSave = { edited, _ -> editing.onSave(edited) },
+                    )
+                },
                 onClose = onClose,
             )
         }

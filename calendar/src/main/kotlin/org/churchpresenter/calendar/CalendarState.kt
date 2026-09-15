@@ -209,6 +209,27 @@ class CalendarState(
         next.addAll(index, items)
         commit(document.withService(service.copy(items = next)))
     }
+    /**
+     * Swaps the row [itemId] for [items], keeping its place in the order.
+     *
+     * The planned length is deliberately **not** carried over: the replacement is a different
+     * thing, and an estimate measured for the song that was there says nothing about the one that
+     * now is. It is dropped rather than silently inherited.
+     */
+    fun replaceItem(serviceId: String, itemId: String, items: List<ScheduleItem>) {
+        val service = document.serviceById(serviceId) ?: return
+        val index = service.items.indexOfFirst { it.id == itemId }
+        if (index < 0) return
+        val next = service.items.toMutableList()
+        next.removeAt(index)
+        next.addAll(index, items)
+        commit(
+            document.withService(
+                service.copy(items = next, plannedSeconds = service.plannedSeconds - itemId)
+            )
+        )
+    }
+
     fun removeItem(serviceId: String, itemId: String) {
         val service = document.serviceById(serviceId) ?: return
         commit(
@@ -240,6 +261,30 @@ class CalendarState(
         }
         commit(document.withService(service.copy(plannedSeconds = next)))
     }
+    // ── The song library ──────────────────────────────────────────────────────
+
+    /** Every songbook the loaded library holds, for an editor that offers a list of them. */
+    fun songbooks(): List<String> = songs.map { it.songbook }
+        .filter { it.isNotBlank() }
+        .distinct()
+        .sortedBy { it.lowercase() }
+
+    /**
+     * Writes an edited song back to the library folder and refreshes the list behind the picker.
+     *
+     * The folder is the app's real song folder — what is written here is what the Songs tab reads
+     * on its next scan, which is the same contract the Song Library Manager works under.
+     */
+    suspend fun saveSong(original: SongItem, edited: SongItem, io: CoroutineDispatcher = Dispatchers.IO) {
+        val folder = songFolder ?: return
+        withContext(io) {
+            runCatching { SongLibrary(folder).save(mapOf(original.sourceFile to original), listOf(edited)) }
+        }
+        // Re-read rather than patching the in-memory list: saving can move the file (a renumber or
+        // a songbook change is a move), so the row's identity may not be what it was.
+        songs = withContext(io) { runCatching { SongLibrary(folder).load() }.getOrDefault(songs) }
+    }
+
     // ── Preferences ───────────────────────────────────────────────────────────
 
     fun updatePreferences(preferences: CalendarPreferences) {

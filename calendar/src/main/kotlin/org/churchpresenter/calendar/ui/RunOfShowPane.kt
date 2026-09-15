@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -81,6 +82,7 @@ private const val BADGE_ALPHA = 0.18f
 private const val DIM_ALPHA = 0.45f
 private const val HINT_ALPHA = 0.6f
 private val ROW_GAP = 3.dp
+private val COPY_LABEL_MAX = 200.dp
 private val GRIP_DOT = 2.dp
 private val GRIP_WIDTH = 8.dp
 private val GRIP_HEIGHT = 14.dp
@@ -103,6 +105,7 @@ private const val GRIP_ALPHA = 0.5f
 fun RunOfShowPane(
     service: PlannedService,
     onAddItem: () -> Unit,
+    onChangeItem: (ScheduleItem) -> Unit,
     onRemove: (itemId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     onPlannedSecondsChange: (itemId: String, seconds: Int?) -> Unit,
@@ -129,6 +132,7 @@ fun RunOfShowPane(
                     isFirst = index == 0,
                     isLast = index == service.items.lastIndex,
                     reorder = reorder,
+                    onChange = { onChangeItem(item) },
                     onMoveUp = { onMove(index, index - 1) },
                     onMoveDown = { onMove(index, index + 1) },
                     onRemove = { onRemove(item.id) },
@@ -189,6 +193,7 @@ private fun RunRow(
     isFirst: Boolean,
     isLast: Boolean,
     reorder: ReorderState,
+    onChange: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
@@ -238,7 +243,16 @@ private fun RunRow(
         ) {
             Icon(look.icon, contentDescription = null, tint = look.color, modifier = Modifier.size(12.dp))
         }
-        Column(Modifier.weight(1f)) {
+        // The row's body opens the picker on this item, so a wrong song is changed in place rather
+        // than removed and re-added. The grip and the actions keep their own gestures; only this
+        // column is clickable.
+        Column(
+            Modifier
+                .weight(1f)
+                .clip(CalendarMetrics.smallRadius)
+                .clickable(onClick = onChange)
+                .padding(vertical = 1.dp),
+        ) {
             Text(
                 text = item.displayText,
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
@@ -566,6 +580,12 @@ fun NoServicesPane(
                         style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
                         fontWeight = FontWeight.Bold,
                         color = scheme.onSurfaceVariant,
+                        // The label carries a service name somebody typed, so it has no natural
+                        // length limit — cap it rather than let one long name stretch the button
+                        // past the pane.
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = COPY_LABEL_MAX),
                     )
                 }
             }

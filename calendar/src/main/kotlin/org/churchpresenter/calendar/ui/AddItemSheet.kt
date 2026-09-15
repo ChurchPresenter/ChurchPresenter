@@ -24,6 +24,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import org.churchpresenter.calendar.generated.resources.calendar_edit_song
+import org.churchpresenter.calendar.generated.resources.calendar_replace_row
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -119,9 +124,16 @@ fun AddItemSheet(
     sections: List<SectionStyle>,
     bibleBooks: List<CalendarBibleBook>,
     serviceName: String,
+    /** The row being replaced, or null when the picker is appending. */
+    replacing: ScheduleItem?,
+    songbooks: List<String>,
+    songEditor: (@Composable (SongEditRequest) -> Unit)?,
+    onSaveSong: suspend (original: SongItem, edited: SongItem) -> Unit,
     onAdd: (items: List<ScheduleItem>, plannedSeconds: Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+    var editingSong by remember { mutableStateOf<SongItem?>(null) }
     var kind by remember { mutableStateOf(PickKind.SONGS) }
     var query by remember { mutableStateOf("") }
     var songBook by remember { mutableStateOf<String?>(null) }
@@ -137,7 +149,11 @@ fun AddItemSheet(
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
-            title = stringResource(Res.string.calendar_add_item),
+            title = if (replacing == null) {
+                stringResource(Res.string.calendar_add_item)
+            } else {
+                stringResource(Res.string.calendar_replace_row, replacing.displayText)
+            },
             icon = Icons.Filled.Add,
             width = SHEET_WIDTH,
             onDismiss = onDismiss,
@@ -236,7 +252,18 @@ fun AddItemSheet(
 
             Box(Modifier.heightIn(min = BODY_HEIGHT, max = BODY_HEIGHT).padding(horizontal = 14.dp)) {
                 when (kind) {
-                    PickKind.SONGS -> SongResults(songs, songsLoaded, songBook, query, add)
+                    PickKind.SONGS -> SongResults(
+                        songs = songs,
+                        songsLoaded = songsLoaded,
+                        songBook = songBook,
+                        query = query,
+                        onAdd = add,
+                        onEditSong = if (songEditor != null) {
+                            { editingSong = it }
+                        } else {
+                            null
+                        },
+                    )
                     PickKind.BIBLE -> BibleResults(
                         books = bibleBooks,
                         query = query,
@@ -262,6 +289,41 @@ fun AddItemSheet(
             }
         }
     }
+
+    val editing = editingSong
+    SongEditorHost(
+        editing = editing,
+        songs = songs,
+        songbooks = songbooks,
+        songEditor = songEditor,
+        onSave = { edited ->
+            if (editing != null) scope.launch { onSaveSong(editing, edited) }
+            editingSong = null
+        },
+        onDismiss = { editingSong = null },
+    )
+}
+
+/** The app's Edit Song dialog, opened from a result row's pencil. */
+@Composable
+private fun SongEditorHost(
+    editing: SongItem?,
+    songs: List<SongItem>,
+    songbooks: List<String>,
+    songEditor: (@Composable (SongEditRequest) -> Unit)?,
+    onSave: (SongItem) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    if (editing == null || songEditor == null) return
+    songEditor(
+        SongEditRequest(
+            song = editing,
+            songbooks = songbooks,
+            allSongs = songs,
+            onSave = onSave,
+            onDismiss = onDismiss,
+        )
+    )
 }
 
 @Composable
@@ -399,6 +461,7 @@ private fun SongResults(
     songBook: String?,
     query: String,
     onAdd: (List<ScheduleItem>) -> Unit,
+    onEditSong: ((SongItem) -> Unit)?,
 ) {
     val scoped = remember(songs, songBook) { songs.filter { songBook == null || it.songbook == songBook } }
     val matches by remember(scoped, query) { derivedStateOf { matchSongs(scoped, query) } }
@@ -434,6 +497,11 @@ private fun SongResults(
                     title = if (song.number.isNotBlank()) "${song.number} - ${song.title}" else song.title,
                     subtitle = song.songbook,
                     onClick = { onAdd(listOf(song.toScheduleItem())) },
+                    onEdit = if (onEditSong != null) {
+                        { onEditSong(song) }
+                    } else {
+                        null
+                    },
                 )
             }
         }
@@ -523,6 +591,7 @@ private fun ResultRow(
     onClick: () -> Unit,
     badge: String? = null,
     color: Color? = null,
+    onEdit: (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
     val tint = color ?: scheme.onSurfaceVariant
@@ -581,6 +650,14 @@ private fun ResultRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+        if (onEdit != null) {
+            SmallIconButton(
+                icon = Icons.Filled.Edit,
+                description = stringResource(Res.string.calendar_edit_song),
+                onClick = onEdit,
+                size = ADD_BADGE,
+            )
         }
         Box(
             Modifier.size(ADD_BADGE).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.16f)),

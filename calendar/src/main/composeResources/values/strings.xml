@@ -129,4 +129,7 @@
     <string name="calendar_pick_add_range">Add %1$s</string>
     <string name="calendar_pick_verse_hint">Tap a verse, then tap another for a range</string>
     <string name="calendar_pick_clear">Clear</string>
+    <string name="calendar_edit_song">Edit this song</string>
+    <string name="calendar_replace_row">Replacing %1$s</string>
+    <string name="calendar_change_row">Change this item</string>
 </resources>

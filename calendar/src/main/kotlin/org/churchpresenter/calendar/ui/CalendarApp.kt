@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
@@ -74,6 +78,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_pdf
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.sectionItem
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.monthHeading
@@ -111,6 +116,14 @@ fun CalendarApp(
      * color in the app is chosen with. Absent, the settings dialog falls back to its swatch row.
      */
     colorPicker: (@Composable (ColorPickerRequest) -> Unit)? = null,
+    /**
+     * The song editor a result row's pencil opens, supplied by whoever hosts this window.
+     *
+     * Inside ChurchPresenter that is the app's own Edit Song dialog — the same one the Songs tab
+     * and the Song Library Manager open — so a song is edited in one place wherever it is reached
+     * from. Absent, the pencil is not drawn.
+     */
+    songEditor: (@Composable (SongEditRequest) -> Unit)? = null,
     onClose: (() -> Unit)? = null,
     today: LocalDate = LocalDate.now(),
     io: CoroutineDispatcher = Dispatchers.IO,
@@ -125,6 +138,8 @@ fun CalendarApp(
     var editingService by remember { mutableStateOf<PlannedService?>(null) }
     var creatingService by remember { mutableStateOf(false) }
     var addingItem by remember { mutableStateOf(false) }
+    // The run-of-show row the picker is about to replace, or null when it is appending.
+    var replacing by remember { mutableStateOf<ScheduleItem?>(null) }
     var loadConfirmFor by remember { mutableStateOf<PlannedService?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
 
@@ -186,7 +201,8 @@ fun CalendarApp(
                     } else {
                         RunOfShowPane(
                             service = service,
-                            onAddItem = { addingItem = true },
+                            onAddItem = { replacing = null; addingItem = true },
+                            onChangeItem = { replacing = it; addingItem = true },
                             onRemove = { state.removeItem(service.id, it) },
                             onMove = { from, to -> state.moveItem(service.id, from, to) },
                             onPlannedSecondsChange = { itemId, seconds ->
@@ -234,12 +250,14 @@ fun CalendarApp(
     CalendarDialogs(
         state = state,
         host = host,
+        songEditor = songEditor,
+        replacing = replacing,
         creatingService = creatingService,
         editingService = editingService,
         addingItem = addingItem,
         loadConfirmFor = loadConfirmFor,
         onServiceSheetClosed = { creatingService = false; editingService = null },
-        onAddingItemClosed = { addingItem = false },
+        onAddingItemClosed = { addingItem = false; replacing = null },
         onLoadConfirmClosed = { loadConfirmFor = null },
     )
 }
@@ -254,6 +272,8 @@ fun CalendarApp(
 private fun CalendarDialogs(
     state: CalendarState,
     host: CalendarHost,
+    songEditor: (@Composable (SongEditRequest) -> Unit)?,
+    replacing: ScheduleItem?,
     creatingService: Boolean,
     editingService: PlannedService?,
     addingItem: Boolean,
@@ -297,8 +317,16 @@ private fun CalendarDialogs(
             sections = state.document.preferences.sections,
             bibleBooks = state.bibleBooks,
             serviceName = addTarget.name,
+            replacing = replacing,
+            songbooks = state.songbooks(),
+            songEditor = songEditor,
+            onSaveSong = { original, edited -> state.saveSong(original, edited) },
             onAdd = { items, plannedSeconds ->
-                state.addItems(addTarget.id, items)
+                if (replacing != null) {
+                    state.replaceItem(addTarget.id, replacing.id, items)
+                } else {
+                    state.addItems(addTarget.id, items)
+                }
                 // The duration typed in the picker's footer applies to what was just added.
                 if (plannedSeconds != null) {
                     items.forEach { state.setPlannedSeconds(addTarget.id, it.id, plannedSeconds) }
@@ -373,6 +401,14 @@ private suspend fun exportRunOfShow(
     withContext(io) { runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont) } }
 }
 
+/**
+ * The window's header.
+ *
+ * Ordered as the design has it: the badge, the title and its subtitle, a rule, then **Today** —
+ * all on the left, directly over the month pane it acts on — and only then the spacer that pushes
+ * the saved note, Export, Settings and Close to the right. Today sitting out on the right, next to
+ * Close, reads as a window-level action rather than as calendar navigation, which is what it is.
+ */
 @Composable
 private fun Header(
     monthLabel: String,
@@ -388,13 +424,28 @@ private fun Header(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .height(HEADER_HEIGHT)
             .background(scheme.surface)
-            .padding(horizontal = 14.dp, vertical = 9.dp),
+            .padding(horizontal = 14.dp),
     ) {
-        Column(Modifier.weight(1f)) {
+        Box(
+            Modifier
+                .size(HEADER_BADGE)
+                .clip(RoundedCornerShape(9.dp))
+                .background(scheme.primary.copy(alpha = BADGE_TINT)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.CalendarMonth,
+                contentDescription = null,
+                tint = scheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        Column {
             Text(
                 text = stringResource(Res.string.calendar_title),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.5.sp),
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
             )
@@ -410,7 +461,20 @@ private fun Header(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        Box(Modifier.width(1.dp).height(24.dp).background(scheme.outlineVariant))
         HeaderButton(label = stringResource(Res.string.calendar_today), onClick = onToday)
+
+        Spacer(Modifier.weight(1f))
+
+        // Every change is written as it is made — see CalendarState.commit — so this is a statement
+        // of fact rather than a save button.
+        Text(
+            text = stringResource(Res.string.calendar_all_saved),
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.5.sp),
+            color = scheme.onSurfaceVariant.copy(alpha = 0.7f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         if (onExport != null) {
             HeaderButton(
                 label = stringResource(Res.string.calendar_export_pdf),
@@ -422,54 +486,43 @@ private fun Header(
             label = stringResource(Res.string.calendar_settings_open),
             icon = Icons.Filled.Settings,
             onClick = onSettings,
-            labelled = false,
-        )
-        // Every change is written as it is made — see CalendarState.commit — so this is a statement
-        // of fact rather than a save button.
-        Text(
-            text = stringResource(Res.string.calendar_all_saved),
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-            color = scheme.onSurfaceVariant.copy(alpha = 0.6f),
-            maxLines = 1,
         )
         if (onClose != null) {
-            TextButton(onClick = onClose) { Text(stringResource(Res.string.calendar_close)) }
+            PrimaryButton(stringResource(Res.string.calendar_close), onClose)
         }
     }
 }
 
-/** One of the header's quiet bordered controls. [labelled] false makes it a square icon button. */
+/** One of the header's quiet bordered controls, at the design's 28dp. */
 @Composable
 private fun HeaderButton(
     label: String,
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    labelled: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
         modifier = Modifier
-            .height(26.dp)
-            .then(if (labelled) Modifier else Modifier.width(26.dp))
+            .height(HEADER_BUTTON)
             .clip(CalendarMetrics.buttonRadius)
-            .background(scheme.surfaceVariant.copy(alpha = 0.55f))
+            .background(scheme.surfaceVariant.copy(alpha = 0.5f))
             .border(1.dp, scheme.outlineVariant, CalendarMetrics.buttonRadius)
             .clickable(onClick = onClick)
-            .then(if (labelled) Modifier.padding(horizontal = 11.dp) else Modifier),
+            .padding(horizontal = 12.dp),
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = label, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
+            Icon(icon, contentDescription = null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
         }
-        if (labelled) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
-                fontWeight = FontWeight.Bold,
-                color = scheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
+            fontWeight = FontWeight.SemiBold,
+            color = scheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+        )
     }
 }
 
@@ -576,3 +629,8 @@ private fun LoadServiceConfirm(
         },
     )
 }
+
+private val HEADER_HEIGHT = 52.dp
+private val HEADER_BADGE = 30.dp
+private val HEADER_BUTTON = 28.dp
+private const val BADGE_TINT = 0.16f
