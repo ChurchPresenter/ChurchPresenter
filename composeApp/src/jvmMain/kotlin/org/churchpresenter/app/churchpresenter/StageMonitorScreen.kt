@@ -644,6 +644,7 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
         text = text,
         outline = style.outline,
         scaleFactor = 1f,
+        fillWidth = false,
         color = Color.Unspecified,
         fontSize = TextUnit.Unspecified,
         style = buildTextStyle(
