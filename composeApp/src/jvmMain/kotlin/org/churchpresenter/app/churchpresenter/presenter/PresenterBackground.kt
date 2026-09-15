@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,8 +32,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
@@ -297,16 +304,42 @@ internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float) {
     )
 }
 
-/** [background]'s picture, decoded once per path. Null unless it is an image that still exists. */
+/**
+ * [background]'s picture, decoded once per path. Null unless it is an image that still exists, and
+ * briefly null again right after the path changes, while the new one is still decoding.
+ *
+ * The decode runs on [Dispatchers.IO], not inline in `remember` — a stock/Pexels background is
+ * already a small, web-sized download, but an operator's own photo has no such cap, and decoding
+ * one at full native resolution synchronously on the composition thread is what turned "add a
+ * background" into a multi-second freeze of every output sharing it (#549). The result is also
+ * scaled to the output's own pixel size ([PictureDecoder.decodeScaled]) — no point holding, or
+ * re-uploading to the GPU, more pixels than this surface will ever show.
+ */
 @Composable
-internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThird: Boolean): ImageBitmap? =
-    remember(background.type, background.imagePath, isLowerThird) {
-        if (background.type == Constants.BACKGROUND_IMAGE && background.imagePath.isNotEmpty()) {
+internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThird: Boolean): ImageBitmap? {
+    val containerSize = LocalWindowInfo.current.containerSize
+    val maxWidth = containerSize.width.takeIf { it > 0 } ?: BACKGROUND_REFERENCE_WIDTH.toInt()
+    val maxHeight = containerSize.height.takeIf { it > 0 } ?: REFERENCE_HEIGHT.toInt()
+    var bitmap by remember(background.type, background.imagePath, isLowerThird) {
+        mutableStateOf<ImageBitmap?>(null)
+    }
+    LaunchedEffect(background.type, background.imagePath, isLowerThird, maxWidth, maxHeight) {
+        bitmap = if (background.type == Constants.BACKGROUND_IMAGE && background.imagePath.isNotEmpty()) {
             // PictureDecoder, not Skia directly — see PresenterScreen for why.
             val file = File(background.imagePath)
-            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-        } else null
+            if (file.exists()) {
+                withContext(Dispatchers.IO) {
+                    PictureDecoder.decodeScaledOrNull(file, maxWidth, maxHeight)?.toComposeImageBitmap()
+                }
+            } else {
+                null
+            }
+        } else {
+            null
+        }
     }
+    return bitmap
+}
 
 /** The modifier that paints [background] — the colour, the gradient or the picture itself. */
 internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBitmap?): Modifier = when {
