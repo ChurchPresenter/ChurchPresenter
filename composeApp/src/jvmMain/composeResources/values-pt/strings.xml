@@ -2688,4 +2688,5 @@
     <string name="text_outline_width">Espessura</string>
     <string name="outline_show">Mostrar contorno</string>
     <string name="song_secondary_language">2.º idioma</string>
+    <string name="song_primary_language">1.º idioma</string>
 </resources>

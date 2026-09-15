@@ -2689,4 +2689,5 @@
     <string name="text_outline_width">Lățime</string>
     <string name="outline_show">Afișează conturul</string>
     <string name="song_secondary_language">Limba a 2-a</string>
+    <string name="song_primary_language">Limba 1</string>
 </resources>

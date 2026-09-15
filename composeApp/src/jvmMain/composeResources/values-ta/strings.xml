@@ -2672,4 +2672,5 @@
     <string name="text_outline_width">அகலம்</string>
     <string name="outline_show">வெளிக்கோட்டைக் காட்டு</string>
     <string name="song_secondary_language">2வது மொழி</string>
+    <string name="song_primary_language">1வது மொழி</string>
 </resources>

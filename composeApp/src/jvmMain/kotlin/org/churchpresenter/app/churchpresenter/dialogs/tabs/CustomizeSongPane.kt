@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.auto_fit
@@ -124,70 +125,8 @@ private fun SongLyricsGroup(
                 },
             )
         }
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) ss.lyricsLowerThirdBold else ss.lyricsBold,
-                italic = if (lowerThird) ss.lyricsLowerThirdItalic else ss.lyricsItalic,
-                underline = if (lowerThird) ss.lyricsLowerThirdUnderline else ss.lyricsUnderline,
-                shadow = if (lowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow,
-                onBoldChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdBold = v) else it.copy(lyricsBold = v) }
-                },
-                onItalicChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdItalic = v) else it.copy(lyricsItalic = v) }
-                },
-                onUnderlineChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdUnderline = v) else it.copy(lyricsUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdShadow = v) else it.copy(lyricsShadow = v) }
-                },
-                backdrop = if (lowerThird) ss.lyricsLowerThirdBackdrop else ss.lyricsBackdrop,
-                onBackdropChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdBackdrop = v)
-                        else it.copy(lyricsBackdrop = v)
-                    }
-                },
-                outline = if (lowerThird) ss.outlines.lyricsLowerThird else ss.outlines.lyrics,
-                onOutlineChange = { v ->
-                    update {
-                        it.copy(
-                            outlines = if (lowerThird) it.outlines.copy(lyricsLowerThird = v)
-                            else it.outlines.copy(lyrics = v),
-                        )
-                    }
-                },
-            )
-        }
-        // A bilingual song's second language, in its own colour on this screen. The whole profile
-        // is the Songs tab's -- this pane is a screen's overrides, and a colour is what an operator
-        // varies from one screen to the next; ticking it here seeds the rest from the first
-        // language exactly as that tab does.
-        CustomizeRow(stringResource(Res.string.song_secondary_language)) {
-            val secondary = ss.secondaryLanguage.styleFor(lowerThird)
-            SecondaryColorControl(
-                label = stringResource(Res.string.song_secondary_language),
-                primary = if (lowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor,
-                secondary = if (ss.secondaryLanguage.enabled) secondary.color else "",
-                onSecondaryChange = { v ->
-                    update {
-                        if (v.isBlank()) {
-                            it.copy(secondaryLanguage = it.secondaryLanguage.copy(enabled = false))
-                        } else {
-                            it.copy(
-                                secondaryLanguage = it.secondaryLanguage.withStyle(
-                                    lowerThird,
-                                    it.effectiveSecondaryLyricStyle(lowerThird).copy(color = v),
-                                ),
-                            )
-                        }
-                    }
-                },
-            )
-        }
+        SongLyricsStyleRow(ss, lowerThird, update)
+        SongSecondaryColorRow(ss, lowerThird, update)
         CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
             HorizontalAlignControl(
                 selected = if (lowerThird) ss.lyricsLowerThirdHorizontalAlignment
@@ -205,6 +144,90 @@ private fun SongLyricsGroup(
                 update { it.copy(lyricsAlignment = v) }
             }
         }
+    }
+}
+
+/** The lyrics' face buttons, backdrop and outline -- lifted out of the group for its length. */
+@Composable
+private fun FlowRowScope.SongLyricsStyleRow(
+    ss: SongSettings,
+    lowerThird: Boolean,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+) {
+    CustomizeRow(stringResource(Res.string.customize_style)) {
+        StyleControl(
+            bold = if (lowerThird) ss.lyricsLowerThirdBold else ss.lyricsBold,
+            italic = if (lowerThird) ss.lyricsLowerThirdItalic else ss.lyricsItalic,
+            underline = if (lowerThird) ss.lyricsLowerThirdUnderline else ss.lyricsUnderline,
+            shadow = if (lowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow,
+            onBoldChange = { v ->
+                update { if (lowerThird) it.copy(lyricsLowerThirdBold = v) else it.copy(lyricsBold = v) }
+            },
+            onItalicChange = { v ->
+                update { if (lowerThird) it.copy(lyricsLowerThirdItalic = v) else it.copy(lyricsItalic = v) }
+            },
+            onUnderlineChange = { v ->
+                update {
+                    if (lowerThird) it.copy(lyricsLowerThirdUnderline = v) else it.copy(lyricsUnderline = v)
+                }
+            },
+            onShadowChange = { v ->
+                update { if (lowerThird) it.copy(lyricsLowerThirdShadow = v) else it.copy(lyricsShadow = v) }
+            },
+            backdrop = if (lowerThird) ss.lyricsLowerThirdBackdrop else ss.lyricsBackdrop,
+            onBackdropChange = { v ->
+                update {
+                    if (lowerThird) it.copy(lyricsLowerThirdBackdrop = v)
+                    else it.copy(lyricsBackdrop = v)
+                }
+            },
+            outline = if (lowerThird) ss.outlines.lyricsLowerThird else ss.outlines.lyrics,
+            onOutlineChange = { v ->
+                update {
+                    it.copy(
+                        outlines = if (lowerThird) it.outlines.copy(lyricsLowerThird = v)
+                        else it.outlines.copy(lyrics = v),
+                    )
+                }
+            },
+        )
+    }
+}
+
+/**
+ * A bilingual song's second language, in its own colour on this screen.
+ *
+ * The colour alone: the whole profile is the Songs tab's, and this pane is a screen's overrides,
+ * where a colour is what an operator varies from one screen to the next. Ticking it seeds the rest
+ * from the first language exactly as that tab does; clearing it puts the second language back to
+ * being drawn like the first.
+ */
+@Composable
+private fun FlowRowScope.SongSecondaryColorRow(
+    ss: SongSettings,
+    lowerThird: Boolean,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+) {
+    CustomizeRow(stringResource(Res.string.song_secondary_language)) {
+        SecondaryColorControl(
+            label = stringResource(Res.string.song_secondary_language),
+            primary = if (lowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor,
+            secondary = if (ss.secondaryLanguage.enabled) ss.secondaryLanguage.styleFor(lowerThird).color else "",
+            onSecondaryChange = { v ->
+                update {
+                    if (v.isBlank()) {
+                        it.copy(secondaryLanguage = it.secondaryLanguage.copy(enabled = false))
+                    } else {
+                        it.copy(
+                            secondaryLanguage = it.secondaryLanguage.withStyle(
+                                lowerThird,
+                                it.effectiveSecondaryLyricStyle(lowerThird).copy(color = v),
+                            ),
+                        )
+                    }
+                }
+            },
+        )
     }
 }
 

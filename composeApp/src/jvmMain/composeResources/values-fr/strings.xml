@@ -2687,4 +2687,5 @@
     <string name="text_outline_width">Épaisseur</string>
     <string name="outline_show">Afficher le contour</string>
     <string name="song_secondary_language">2ᵉ langue</string>
+    <string name="song_primary_language">1ʳᵉ langue</string>
 </resources>

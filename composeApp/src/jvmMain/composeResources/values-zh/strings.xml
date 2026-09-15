@@ -2668,4 +2668,5 @@
     <string name="text_outline_width">宽度</string>
     <string name="outline_show">显示描边</string>
     <string name="song_secondary_language">第二语言</string>
+    <string name="song_primary_language">第一语言</string>
 </resources>

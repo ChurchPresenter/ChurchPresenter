@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">चौड़ाई</string>
     <string name="outline_show">आउटलाइन दिखाएँ</string>
     <string name="song_secondary_language">दूसरी भाषा</string>
+    <string name="song_primary_language">पहली भाषा</string>
 </resources>

@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Qalinligi</string>
     <string name="outline_show">Konturni koʻrsatish</string>
     <string name="song_secondary_language">2-til</string>
+    <string name="song_primary_language">1-til</string>
 </resources>

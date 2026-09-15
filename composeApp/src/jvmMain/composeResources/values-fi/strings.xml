@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Leveys</string>
     <string name="outline_show">Näytä ääriviiva</string>
     <string name="song_secondary_language">2. kieli</string>
+    <string name="song_primary_language">1. kieli</string>
 </resources>

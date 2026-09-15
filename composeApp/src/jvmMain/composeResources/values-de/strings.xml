@@ -2660,4 +2660,5 @@
     <string name="text_outline_width">Breite</string>
     <string name="outline_show">Kontur anzeigen</string>
     <string name="song_secondary_language">2. Sprache</string>
+    <string name="song_primary_language">1. Sprache</string>
 </resources>

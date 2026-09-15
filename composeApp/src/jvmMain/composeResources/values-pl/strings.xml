@@ -2659,4 +2659,5 @@
     <string name="text_outline_width">Szerokość</string>
     <string name="outline_show">Pokaż obrys</string>
     <string name="song_secondary_language">2. język</string>
+    <string name="song_primary_language">1. język</string>
 </resources>

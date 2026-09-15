@@ -2692,4 +2692,5 @@
     <string name="text_outline_width">Laius</string>
     <string name="outline_show">Näita kontuuri</string>
     <string name="song_secondary_language">2. keel</string>
+    <string name="song_primary_language">1. keel</string>
 </resources>

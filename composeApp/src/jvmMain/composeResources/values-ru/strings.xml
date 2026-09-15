@@ -2662,4 +2662,5 @@
     <string name="text_outline_width">Толщина</string>
     <string name="outline_show">Показывать контур</string>
     <string name="song_secondary_language">2-й язык</string>
+    <string name="song_primary_language">1-й язык</string>
 </resources>

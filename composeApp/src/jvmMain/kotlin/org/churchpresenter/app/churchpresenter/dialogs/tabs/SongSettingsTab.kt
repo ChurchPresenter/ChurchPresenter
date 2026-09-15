@@ -64,8 +64,8 @@ import churchpresenter.composeapp.generated.resources.song_show_on_title_slide
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import churchpresenter.composeapp.generated.resources.song_language_bilingual
 import churchpresenter.composeapp.generated.resources.song_language_scope
-import churchpresenter.composeapp.generated.resources.song_language_primary
-import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.song_primary_language
+import churchpresenter.composeapp.generated.resources.song_secondary_language
 import churchpresenter.composeapp.generated.resources.song_language_single
 import churchpresenter.composeapp.generated.resources.song_languages
 import churchpresenter.composeapp.generated.resources.song_lyrics_layout
@@ -707,16 +707,21 @@ private fun SongTargetSwitchRow(
         // for the same reason: a second profile needs somewhere to be selected before it can be
         // edited. Only with two languages on screen -- with one, there is no second profile to
         // reach, and a title slide draws one title whatever the lyrics do.
+        //
+        // "1st / 2nd" rather than "Primary / Secondary", which is what the Lang row below the
+        // element tabs already says. That row picks the languages the *output shows*; this one picks
+        // whose *look* is being edited, and sharing a word left the tab with two controls reading
+        // "Secondary" that answer different questions.
         if (bilingual && !titleSlideView) {
             SegmentedButton(
                 items = listOf(
                     SegmentedButtonItem(
                         SongStyleLanguage.PRIMARY,
-                        stringResource(Res.string.song_language_primary),
+                        stringResource(Res.string.song_primary_language),
                     ),
                     SegmentedButtonItem(
                         SongStyleLanguage.SECONDARY,
-                        stringResource(Res.string.song_language_secondary),
+                        stringResource(Res.string.song_secondary_language),
                     ),
                 ),
                 selectedValue = language,

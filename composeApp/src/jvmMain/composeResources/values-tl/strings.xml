@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Lapad</string>
     <string name="outline_show">Ipakita ang balangkas</string>
     <string name="song_secondary_language">Ika-2 wika</string>
+    <string name="song_primary_language">Ika-1 wika</string>
 </resources>

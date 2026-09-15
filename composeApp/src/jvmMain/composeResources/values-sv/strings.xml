@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Bredd</string>
     <string name="outline_show">Visa kontur</string>
     <string name="song_secondary_language">2:a språket</string>
+    <string name="song_primary_language">1:a språket</string>
 </resources>

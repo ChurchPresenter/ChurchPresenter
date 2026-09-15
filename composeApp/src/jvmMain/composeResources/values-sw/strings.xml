@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Upana</string>
     <string name="outline_show">Onyesha mstari wa nje</string>
     <string name="song_secondary_language">Lugha ya 2</string>
+    <string name="song_primary_language">Lugha ya 1</string>
 </resources>

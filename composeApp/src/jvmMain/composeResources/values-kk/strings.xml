@@ -2660,4 +2660,5 @@
     <string name="text_outline_width">Қалыңдығы</string>
     <string name="outline_show">Контурды көрсету</string>
     <string name="song_secondary_language">2-ші тіл</string>
+    <string name="song_primary_language">1-ші тіл</string>
 </resources>

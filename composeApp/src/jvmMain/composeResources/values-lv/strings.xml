@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Platums</string>
     <string name="outline_show">Rādīt kontūru</string>
     <string name="song_secondary_language">2. valoda</string>
+    <string name="song_primary_language">1. valoda</string>
 </resources>

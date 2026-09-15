@@ -2687,4 +2687,5 @@
     <string name="text_outline_width">Breedte</string>
     <string name="outline_show">Omtrek tonen</string>
     <string name="song_secondary_language">2e taal</string>
+    <string name="song_primary_language">1e taal</string>
 </resources>

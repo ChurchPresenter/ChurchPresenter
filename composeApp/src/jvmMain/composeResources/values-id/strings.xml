@@ -2667,4 +2667,5 @@
     <string name="text_outline_width">Lebar</string>
     <string name="outline_show">Tampilkan garis luar</string>
     <string name="song_secondary_language">Bahasa ke-2</string>
+    <string name="song_primary_language">Bahasa ke-1</string>
 </resources>

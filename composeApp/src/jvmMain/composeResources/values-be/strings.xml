@@ -2659,4 +2659,5 @@
     <string name="text_outline_width">Таўшчыня</string>
     <string name="outline_show">Паказваць контур</string>
     <string name="song_secondary_language">2-я мова</string>
+    <string name="song_primary_language">1-я мова</string>
 </resources>

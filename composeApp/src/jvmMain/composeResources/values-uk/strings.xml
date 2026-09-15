@@ -2659,4 +2659,5 @@
     <string name="text_outline_width">Товщина</string>
     <string name="outline_show">Показувати контур</string>
     <string name="song_secondary_language">2-га мова</string>
+    <string name="song_primary_language">1-ша мова</string>
 </resources>

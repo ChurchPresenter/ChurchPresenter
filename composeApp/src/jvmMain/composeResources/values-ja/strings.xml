@@ -2668,4 +2668,5 @@
     <string name="text_outline_width">太さ</string>
     <string name="outline_show">縁取りを表示</string>
     <string name="song_secondary_language">第2言語</string>
+    <string name="song_primary_language">第1言語</string>
 </resources>

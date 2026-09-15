@@ -2689,4 +2689,5 @@
     <string name="text_outline_width">Šírka</string>
     <string name="outline_show">Zobraziť obrys</string>
     <string name="song_secondary_language">2. jazyk</string>
+    <string name="song_primary_language">1. jazyk</string>
 </resources>
