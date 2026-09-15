@@ -87,11 +87,34 @@ class FakeNdiLibrary(
         return handle
     }
 
+    /**
+     * Runs inside sendVideo, before the frame is recorded — the seam a test uses to hold a send in
+     * flight while it drives a concurrent close() from another thread, matching [duringFindSources].
+     */
+    @Volatile
+    var duringSendVideo: (Long) -> Unit = {}
+
+    /** Set for the duration of a sendVideo call, so [sendDestroy] can prove it never overlapped one. */
+    @Volatile
+    var sendVideoInProgress: Boolean = false
+        private set
+
+    /** True if [sendDestroy] was ever called while a sendVideo call was still in progress. */
+    @Volatile
+    var destroyedDuringSend: Boolean = false
+        private set
+
     override fun sendVideo(sender: Long, frame: NdiVideoFrame) {
-        sent += SentFrame(
-            sender, frame.bgra.copyOf(), frame.width, frame.height,
-            frame.format, frame.frameRateN, frame.frameRateD,
-        )
+        sendVideoInProgress = true
+        try {
+            duringSendVideo(sender)
+            sent += SentFrame(
+                sender, frame.bgra.copyOf(), frame.width, frame.height,
+                frame.format, frame.frameRateN, frame.frameRateD,
+            )
+        } finally {
+            sendVideoInProgress = false
+        }
     }
 
     override fun connectionCount(sender: Long, timeoutMs: Int): Int {
@@ -100,6 +123,7 @@ class FakeNdiLibrary(
     }
 
     override fun sendDestroy(sender: Long) {
+        if (sendVideoInProgress) destroyedDuringSend = true
         destroyed += sender
     }
 

@@ -50,6 +50,9 @@ import javax.net.ssl.SSLException
 import kotlin.random.Random
 
 private const val FAILURE_LOG_INTERVAL = 10
+private const val DECADE = 10
+private const val REPORT_INTERVAL_WIDEN_AT_100 = 100
+private const val REPORT_INTERVAL_WIDEN_AT_1000 = 1000
 
 /** The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke". */
 private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout")
@@ -261,10 +264,28 @@ class InstanceLinkClient(
      * The kinds that suggest a regression rather than an ordering — a timeout, a certificate, or
      * something unrecognised — still report on the first failure, because those are worth seeing
      * once even if they never recur.
+     *
+     * The interval itself widens with the length of the run ([reportIntervalFor]) so a peer that is
+     * *permanently* unreachable — wrong IP, powered off, a blocked port — does not cost one warning
+     * every [FAILURE_LOG_INTERVAL] attempts forever. CHURCH-PRESENTER-DESKTOP-68 reached 780
+     * consecutive connect-timeout failures and 78 Sentry warnings from a single dead peer, still
+     * climbing, before this backoff existed.
      */
     internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
-        val atInterval = consecutiveFailures % FAILURE_LOG_INTERVAL == 0
+        val atInterval = consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
         return if (kind in BENIGN_CONNECT_FAILURES) atInterval else consecutiveFailures == 1 || atInterval
+    }
+
+    /**
+     * The reporting cadence for [shouldReportConnectFailure]: every 10th failure through the first
+     * 99, every 100th through the first 999, every 1000th beyond that — applied to how often a
+     * still-failing streak is worth telling Sentry about, separate from [MAX_RECONNECT_DELAY_MS]'s
+     * own backoff on how often a reconnect is actually retried.
+     */
+    internal fun reportIntervalFor(consecutiveFailures: Int): Int = when {
+        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_100 -> FAILURE_LOG_INTERVAL
+        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_1000 -> FAILURE_LOG_INTERVAL * DECADE
+        else -> FAILURE_LOG_INTERVAL * DECADE * DECADE
     }
 
     /**
