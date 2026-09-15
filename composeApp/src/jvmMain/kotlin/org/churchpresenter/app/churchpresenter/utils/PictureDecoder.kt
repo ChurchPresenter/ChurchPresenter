@@ -1,6 +1,10 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import org.jetbrains.skia.Image
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.Surface
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -105,6 +109,44 @@ object PictureDecoder {
     /** Decodes [file], or returns null if none of the decoders could read it. */
     fun decodeOrNull(file: File): Image? = try {
         decode(file)
+    } catch (_: Exception) {
+        null
+    }
+
+    /**
+     * Decodes [file] and scales the result down to fit within [maxWidth]×[maxHeight], never
+     * upscaling — an operator's own photo has no size cap the way a stock/Pexels download does, and
+     * decoding one at its native resolution (often 4000px+, tens of megabytes) once per place it is
+     * drawn is what turned "add a background" into a multi-second freeze (#549). The caller decides
+     * what "fits" means: a presenter output passes its own pixel size, a grid thumbnail passes its
+     * tile size.
+     *
+     * The downscale itself is cheap relative to [decode] — decoding the full file already paid the
+     * real cost — so this exists to bound what gets *held*, not to speed up the read.
+     */
+    fun decodeScaled(file: File, maxWidth: Int, maxHeight: Int): Image {
+        val original = decode(file)
+        val scale = minOf(
+            maxWidth.toFloat() / original.width,
+            maxHeight.toFloat() / original.height,
+            1f,
+        )
+        if (scale >= 1f) return original
+
+        val newWidth = (original.width * scale).toInt()
+        val newHeight = (original.height * scale).toInt()
+        val surface = Surface.makeRasterN32Premul(newWidth, newHeight)
+        val srcRect = Rect.makeWH(original.width.toFloat(), original.height.toFloat())
+        val dstRect = Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
+        // Mitchell over the default (nearest-neighbour) sampling — a straight downscale without it
+        // aliases badly enough to be visible on a full-frame background.
+        surface.canvas.drawImageRect(original, srcRect, dstRect, SamplingMode.MITCHELL, Paint(), true)
+        return surface.makeImageSnapshot()
+    }
+
+    /** [decodeScaled], or null if [file] could not be decoded at all. */
+    fun decodeScaledOrNull(file: File, maxWidth: Int, maxHeight: Int): Image? = try {
+        decodeScaled(file, maxWidth, maxHeight)
     } catch (_: Exception) {
         null
     }

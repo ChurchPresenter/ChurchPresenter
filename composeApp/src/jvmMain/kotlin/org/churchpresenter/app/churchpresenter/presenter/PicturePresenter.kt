@@ -155,44 +155,11 @@ private fun ImageContent(currentImagePath: String?) {
 }
 
 internal fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHeight: Int = 1080): ImageBitmap? {
+    val file = File(imagePath)
+    if (!file.exists()) return null
+
     return try {
-        val file = File(imagePath)
-        if (!file.exists()) return null
-
-        val originalImage = PictureDecoder.decodeOrNull(file) ?: return null
-
-        // Cap at actual screen resolution — no point storing more pixels than the display can show
-        val widthScale = maxWidth.toFloat() / originalImage.width
-        val heightScale = maxHeight.toFloat() / originalImage.height
-        val scale = minOf(widthScale, heightScale, 1.0f) // never upscale
-
-        if (scale < 1.0f) {
-            val newWidth = (originalImage.width * scale).toInt()
-            val newHeight = (originalImage.height * scale).toInt()
-
-            val surface = org.jetbrains.skia.Surface.makeRasterN32Premul(newWidth, newHeight)
-            val canvas = surface.canvas
-
-            // High-quality downscale using Mitchell filter via SamplingMode
-            val paint = org.jetbrains.skia.Paint()
-            val srcRect = org.jetbrains.skia.Rect.makeWH(
-                originalImage.width.toFloat(),
-                originalImage.height.toFloat()
-            )
-            val dstRect = org.jetbrains.skia.Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
-            canvas.drawImageRect(
-                originalImage,
-                srcRect,
-                dstRect,
-                org.jetbrains.skia.SamplingMode.MITCHELL,
-                paint,
-                true
-            )
-
-            surface.makeImageSnapshot().toComposeImageBitmap()
-        } else {
-            originalImage.toComposeImageBitmap()
-        }
+        PictureDecoder.decodeScaled(file, maxWidth, maxHeight).toComposeImageBitmap()
     } catch (e: Exception) {
         CrashReporter.reportException(e, "Decoding picture for presenter")
         null
