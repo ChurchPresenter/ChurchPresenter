@@ -1,31 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.auto_fit
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.look_ahead_next_lower_third
-import churchpresenter.composeapp.generated.resources.look_ahead_next_fullscreen
-import churchpresenter.composeapp.generated.resources.look_ahead_lower_third
-import churchpresenter.composeapp.generated.resources.look_ahead_fullscreen
-import churchpresenter.composeapp.generated.resources.customize_group_lyrics
-import churchpresenter.composeapp.generated.resources.customize_style
-import churchpresenter.composeapp.generated.resources.font_size
-import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.show_number
-import churchpresenter.composeapp.generated.resources.song_secondary_language
-import churchpresenter.composeapp.generated.resources.song_element_title
-import churchpresenter.composeapp.generated.resources.song_element_number
-import churchpresenter.composeapp.generated.resources.song_number_corner
-import churchpresenter.composeapp.generated.resources.show_title
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
-import org.churchpresenter.settings.SongSettings
-import churchpresenter.composeapp.generated.resources.vertical_alignment
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,10 +33,6 @@ internal fun SongCustomizePane(
     val song = settings.songSettings
 
     PaneScaffold {
-        if (element == CustomizeElement.SONG_SLIDE) {
-            SongSlideOptions(settings, onSettingsChange, target)
-            return@PaneScaffold
-        }
         val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
         // The title slide draws six things and the chips above have one seat for all of them, so it
         // keeps a selector of its own. The lyric slides' elements each have a chip already.

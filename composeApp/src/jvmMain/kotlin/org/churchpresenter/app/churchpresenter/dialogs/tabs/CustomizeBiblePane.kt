@@ -1,23 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.customize_group_reference
-import churchpresenter.composeapp.generated.resources.customize_group_verse_text
-import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
-import churchpresenter.composeapp.generated.resources.customize_style
-import churchpresenter.composeapp.generated.resources.font_size
-import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.position
-import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The Bible pane, showing one element of one translation -- the chips above it pick both.

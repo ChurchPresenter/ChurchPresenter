@@ -71,6 +71,8 @@ import churchpresenter.composeapp.generated.resources.customize_tooltip_separato
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.settings.backgroundOverrideOf
 import org.churchpresenter.settings.bibleOverrideOf
 import org.churchpresenter.settings.dictionaryOverrideOf
@@ -274,6 +276,12 @@ internal fun OutputCustomizeDialog(
         text = {
             CompositionLocalProvider(
                 LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
+                // The accent fill on the selected segment, the same one the global Bible and Song
+                // tabs provide over themselves. Without it the dialog drew every segmented control
+                // it borrows from those tabs -- the element selector, the text transform, the title
+                // slide's own selector -- in the neutral tone, so the same control read one colour
+                // on the tab and another here.
+                LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT,
             ) {
                 Row(modifier = Modifier.fillMaxWidth().height(BODY_HEIGHT)) {
                     CustomizeRail(

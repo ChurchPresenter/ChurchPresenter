@@ -7,19 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,9 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_hint_off
@@ -40,11 +32,14 @@ import churchpresenter.composeapp.generated.resources.customize_hint_on
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
 import churchpresenter.composeapp.generated.resources.preview
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.ceil
 
 /**
  * The Customize dialog's two right-hand columns: the element controls, and the picture they change.
@@ -170,7 +165,6 @@ private fun CustomizePreviewColumn(
  * opens no `.spb` -- so a translation that has never been given a custom abbreviation falls back to
  * the one derived from its file name, which is what the presenter draws for it anyway.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CustomizeTranslationChips(
     translations: List<BibleTranslationSettings>,
@@ -178,49 +172,24 @@ private fun CustomizeTranslationChips(
     onSelect: (Int) -> Unit,
 ) {
     if (translations.size < 2) return
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(start = 10.dp, end = 10.dp, top = 6.dp)
-            .testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        translations.forEachIndexed { index, translation ->
+    CustomizeSelectorRow(
+        items = translations.mapIndexed { index, translation ->
             val abbreviation = translation.customAbbreviation.ifBlank {
                 defaultTranslationAbbreviation(title = "", fileName = translation.fileName)
             }
-            FilterChip(
-                selected = index == selected,
-                onClick = { onSelect(index) },
-                label = {
-                    Text(
-                        text = "${index + 1} · $abbreviation",
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                shape = RoundedCornerShape(7.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = index == selected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
-                    selectedBorderColor = Color.Transparent,
-                ),
-                modifier = Modifier.height(26.dp).testTag(translationChipTag(index)),
+            SegmentedButtonItem(
+                value = index,
+                label = "${index + 1} · $abbreviation",
+                testTag = translationChipTag(index),
             )
-        }
-    }
+        },
+        selected = selected,
+        onSelect = onSelect,
+        modifier = Modifier.testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
+    )
 }
 
-/** The chips above the control column — which element of this category is being styled. */
-@OptIn(ExperimentalLayoutApi::class)
+/** The selector above the control column — which element of this category is being styled. */
 @Composable
 private fun CustomizeElementChips(
     elements: List<CustomizeElement>,
@@ -228,43 +197,78 @@ private fun CustomizeElementChips(
     onSelect: (CustomizeElement) -> Unit,
 ) {
     if (elements.isEmpty()) return
-    FlowRow(
-        modifier = Modifier
+    CustomizeSelectorRow(
+        items = elements.map {
+            SegmentedButtonItem(value = it, label = it.label(), testTag = elementChipTag(it.name))
+        },
+        selected = selected ?: elements.first(),
+        onSelect = onSelect,
+        modifier = Modifier.testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
+    )
+}
+
+/**
+ * One segmented control spanning the column, folded onto as many rows as it takes.
+ *
+ * A segmented control rather than the row of filter chips this replaced: these are one choice from
+ * a closed list, which is what a segmented control says and what a row of independent chips does
+ * not -- and the same control the panes below already use for every other such list, so the
+ * selector and the settings under it now read as one form.
+ *
+ * The width is shared evenly so the control ends flush with the column, and the list is broken into
+ * rows of equal length rather than filling one row and leaving a stub: seven song elements across
+ * this column go four and three, not four and three ragged against a full row's width.
+ */
+@Composable
+private fun <T> CustomizeSelectorRow(
+    items: List<SegmentedButtonItem<T>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
-            .testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
-        elements.forEach { entry ->
-            FilterChip(
-                selected = entry == selected,
-                onClick = { onSelect(entry) },
-                label = {
-                    Text(
-                        text = entry.label(),
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+        BoxWithConstraints {
+            val available = maxWidth
+            val perRow = (available / SELECTOR_MIN_SEGMENT).toInt().coerceIn(1, items.size)
+            val rows = ceil(items.size / perRow.toDouble()).toInt().coerceAtLeast(1)
+            val columns = ceil(items.size / rows.toDouble()).toInt().coerceAtLeast(1)
+            // One control per row, each sized to the row it is in, rather than one control at a
+            // single width: a last row holding fewer than the rest was otherwise left short of the
+            // column, so the selector ended ragged where every other control ends flush.
+            Column(verticalArrangement = Arrangement.spacedBy(SELECTOR_ROW_GAP)) {
+                items.chunked(columns).forEach { row ->
+                    SegmentedButton(
+                        items = row,
+                        selectedValue = selected,
+                        onValueChange = onSelect,
+                        buttonWidth = available / row.size,
+                        buttonHeight = SELECTOR_HEIGHT,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        // Two lines, because one of these labels is a sentence: "Reference &
+                        // Transliteration" is 27 characters and was cut off mid-word at any width
+                        // this column can give a third of itself.
+                        maxLines = SELECTOR_MAX_LINES,
                     )
-                },
-                shape = RoundedCornerShape(7.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = entry == selected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
-                    selectedBorderColor = Color.Transparent,
-                ),
-                modifier = Modifier.height(26.dp).testTag(elementChipTag(entry.name)),
-            )
+                }
+            }
         }
     }
 }
+
+/** Narrower than this and a label such as "Next Section" has nowhere to go but off the end. */
+private val SELECTOR_MIN_SEGMENT = 92.dp
+
+/** Tall enough for the two lines below, so a selector does not change height with its longest label. */
+private val SELECTOR_HEIGHT = 36.dp
+
+private val SELECTOR_ROW_GAP = 4.dp
+
+private const val SELECTOR_MAX_LINES = 2
 
 /**
  * [content], dimmed and swallowing input while this category is following the global settings.

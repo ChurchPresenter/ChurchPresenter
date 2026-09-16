@@ -70,7 +70,7 @@ private val FONT_FIELD_WIDTH = 190.dp
 private val COLOR_SWATCH_WIDTH = 104.dp
 private val FACE_BUTTON_SIZE = 26.dp
 
-/** The two spacing sliders share the second row evenly, whatever the reference position leaves. */
+/** The two spacing sliders have a row to themselves and halve it. */
 private const val SPACING_WEIGHT = 1f
 
 private val TRANSFORM_BUTTON_WIDTH = 96.dp
@@ -144,6 +144,16 @@ internal fun BibleTypographyPanel(
             if (element == BibleStyleElement.REFERENCE) {
                 PositionControl(style, onStyleChange)
             }
+        }
+        // The two sliders take a row of their own rather than the tail of the one above. They are
+        // the only controls here that stretch, so in a narrow column -- the per-output Customize
+        // dialog's is 430dp -- everything fixed beside them was measured first and the pair was
+        // left sharing whatever was over, which on the reference element was about 90dp each.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            verticalAlignment = Alignment.Top,
+        ) {
             // Explicitly keyed, because the control above them comes and goes with the element. A
             // composable's identity is its call-site *position*, so without a key of their own the
             // two sliders shift a slot as the reference position appears, and each one inherits the
@@ -168,17 +178,11 @@ internal fun BibleTypographyPanel(
                 )
             }
         }
-        // Bottom-aligned, not top: the transform cell carries a caption above its buttons and the
-        // shadow controls do not, so aligning the tops left the shadow checkbox floating level with
-        // that caption instead of with the buttons it sits beside.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            TransformControl(style, onStyleChange)
-            ShadowControl(style, onStyleChange, Modifier.weight(1f))
-        }
+        TransformControl(style, onStyleChange)
+        // A row of its own. The transform's four segments are 96dp each, so beside them the shadow
+        // cell had nothing left in a narrow column and its three fields were crushed to their
+        // padding the moment the box was ticked.
+        ShadowControl(style, onStyleChange, Modifier.fillMaxWidth())
     }
 }
 
@@ -365,10 +369,10 @@ private fun ShadowControl(
         // at their height whether they are showing or not -- see [ShadowDetailRowHeight].
         modifier = modifier.heightIn(min = ShadowDetailRowHeight),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        // Bottom, not centre. The controls this row sits beside are bottom-aligned, and the row is
-        // held taller than the checkbox by the reservation above -- so centring it left the box
-        // floating nine pixels above the buttons next to it whenever the details were folded away.
-        verticalAlignment = Alignment.Bottom,
+        // Centred. It was bottom-aligned while it shared a row with the text transform, to sit level
+        // with those buttons; on a row of its own that left it hanging below the fields beside it,
+        // which are the full height the reservation holds.
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         LabeledCheckbox(
             checked = style.shadow,

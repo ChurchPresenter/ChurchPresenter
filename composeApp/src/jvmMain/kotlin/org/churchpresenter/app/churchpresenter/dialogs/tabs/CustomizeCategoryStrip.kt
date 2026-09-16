@@ -23,6 +23,12 @@ import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bilingual_left_right
 import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.customize_show
+import churchpresenter.composeapp.generated.resources.end_of_song_spacing
+import churchpresenter.composeapp.generated.resources.middle
+import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
+import churchpresenter.composeapp.generated.resources.song_end_of_song_marker
+import churchpresenter.composeapp.generated.resources.word_wrap
 import churchpresenter.composeapp.generated.resources.customize_group_margins
 import churchpresenter.composeapp.generated.resources.customize_bilingual
 import churchpresenter.composeapp.generated.resources.customize_layout
@@ -199,13 +205,53 @@ private fun SongStrip(
         onCrossfade = { v -> update { it.copy(crossfade = v) } },
         onDuration = { v -> update { it.copy(transitionDuration = v) } },
     )
-    if (lowerThird) {
-        StripRow(stringResource(Res.string.customize_layout)) {
+    // The slide itself: how the lyrics are laid out on it and how it ends. These were a chip of
+    // their own until they joined the strip -- and that chip's other three sections were the
+    // margins, the fades and the band height, all three of which are already on this strip, so it
+    // was showing the operator the same settings twice under two different headings.
+    StripRow(stringResource(Res.string.customize_layout)) {
+        if (lowerThird) {
             NumberControl(
                 label = stringResource(Res.string.lower_third_size),
                 value = ss.lowerThirdHeightPercent,
                 onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
                 range = BAND_RANGE,
+            )
+        }
+        ToggleControl(
+            label = stringResource(Res.string.word_wrap),
+            checked = ss.wordWrap,
+            onCheckedChange = { v -> update { it.copy(wordWrap = v) } },
+        )
+        ToggleControl(
+            label = stringResource(Res.string.song_auto_repeat_chorus),
+            checked = ss.autoRepeatChorus,
+            onCheckedChange = { v -> update { it.copy(autoRepeatChorus = v) } },
+        )
+        ChoiceControl(
+            options = listOf(
+                Constants.TOP to stringResource(Res.string.top),
+                Constants.MIDDLE to stringResource(Res.string.middle),
+                Constants.BOTTOM to stringResource(Res.string.bottom),
+            ),
+            selected = ss.lyricsAlignment,
+            onSelect = { v -> update { it.copy(lyricsAlignment = v) } },
+        )
+    }
+    // The marker after the last line, and how far below it sits. Off means the spacing changes
+    // nothing, so the field follows the switch rather than standing beside it doing nothing.
+    StripRow(stringResource(Res.string.song_end_of_song_marker)) {
+        ToggleControl(
+            label = stringResource(Res.string.customize_show),
+            checked = ss.showEndOfSongIndicator,
+            onCheckedChange = { v -> update { it.copy(showEndOfSongIndicator = v) } },
+        )
+        if (ss.showEndOfSongIndicator) {
+            NumberControl(
+                label = stringResource(Res.string.end_of_song_spacing).removeSuffix(":"),
+                value = ss.endOfSongIndicatorSpacing,
+                onValueChange = { v -> update { it.copy(endOfSongIndicatorSpacing = v) } },
+                range = END_OF_SONG_SPACING_RANGE,
             )
         }
     }

@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_element_slide
 import churchpresenter.composeapp.generated.resources.customize_group_card
 import churchpresenter.composeapp.generated.resources.customize_group_definition
 import churchpresenter.composeapp.generated.resources.customize_group_reference
@@ -33,7 +32,6 @@ import org.jetbrains.compose.resources.stringResource
 internal enum class CustomizeElement {
     BIBLE_TEXT,
     BIBLE_REFERENCE,
-    SONG_SLIDE,
     SONG_LYRICS,
     SONG_TITLE,
     SONG_NUMBER,
@@ -59,8 +57,11 @@ internal enum class CustomizeElement {
 internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = when (pane) {
     CustomizePane.STAGE_MONITOR -> emptyList()
     CustomizePane.BIBLE -> listOf(CustomizeElement.BIBLE_TEXT, CustomizeElement.BIBLE_REFERENCE)
+    // No "Slide" entry: everything that belonged to the slide rather than to one thing drawn on it
+    // -- the margins, the fades, the band height, the word wrap, the vertical alignment, the
+    // end-of-song marker -- now sits on the strip beneath the preview, where the picture it moves is
+    // in the same glance. The chip drew four sections, three of which the strip already carried.
     CustomizePane.SONGS -> listOf(
-        CustomizeElement.SONG_SLIDE,
         CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_LYRICS,
         CustomizeElement.SONG_TITLE,
@@ -86,7 +87,6 @@ internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = wh
 internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.BIBLE_TEXT -> stringResource(Res.string.customize_group_verse_text)
     CustomizeElement.BIBLE_REFERENCE -> stringResource(Res.string.customize_group_reference)
-    CustomizeElement.SONG_SLIDE -> stringResource(Res.string.customize_element_slide)
     CustomizeElement.SONG_LYRICS -> stringResource(Res.string.song_element_lyrics)
     CustomizeElement.SONG_TITLE -> stringResource(Res.string.song_element_title)
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
