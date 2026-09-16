@@ -98,7 +98,7 @@ class StageMonitorSettingsTabLabelsTest {
         "Shadow" to 6,
         "SIZE (%)" to 6,
         "INTENSITY (%)" to 6,
-        "B" to 6, "I" to 6, "U" to 6, "S" to 6,
+        "B" to 6, "I" to 6, "U" to 6, "S" to 6, "O" to 6,
         // The backdrop split button: a chip drawing "A", and a caret beside it.
         "A" to 6,
 
@@ -187,7 +187,7 @@ class StageMonitorSettingsTabLabelsTest {
         assertEquals(
             listOf(
                 "Align Bottom", "Align Middle", "Align Top", "Decrement", "Increment",
-                "Text backing", "Text backing options",
+                "Outline", "Outline options", "Text backing", "Text backing options",
             ),
             described.sorted(),
             "the tab publishes a content description the inventory does not list",

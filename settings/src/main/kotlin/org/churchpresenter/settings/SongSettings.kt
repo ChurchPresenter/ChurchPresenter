@@ -424,6 +424,15 @@ data class SongSettings(
     val lowerThirdLookAheadBackdrop: TextBackdrop = TextBackdrop(),
     val lookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
     val lowerThirdLookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
+
+    /** The outline around each profile's glyphs — see [SongOutlines], which says why it is nested. */
+    val outlines: SongOutlines = SongOutlines(),
+
+    /**
+     * How the second language of a bilingual song is drawn, or -- while it is off, which is the
+     * default -- that it is drawn exactly like the first. See [SongSecondaryLanguage].
+     */
+    val secondaryLanguage: SongSecondaryLanguage = SongSecondaryLanguage(),
 )
 
 /**

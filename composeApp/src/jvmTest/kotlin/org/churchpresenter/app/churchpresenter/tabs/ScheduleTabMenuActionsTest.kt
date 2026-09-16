@@ -9,6 +9,7 @@ import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import java.io.File
 import java.nio.file.Files
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -266,6 +267,7 @@ class ScheduleTabMenuActionsTest {
                 "left", "top", "FADE", 750, 3,
                 true, 1, 2, 3, "#00FF00", "We're starting!", "clock",
                 18, 30, 15, "hh:mm a", TextBackdrop(border = true, borderColor = "#ABCDEF"),
+                TextOutline(enabled = true, color = "#FEDCBA", width = 7),
             )
             waitForIdle()
 
@@ -278,6 +280,7 @@ class ScheduleTabMenuActionsTest {
             assertTrue(item.bold && item.italic && item.underline && item.shadow)
             assertEquals("#001122", item.shadowColor)
             assertEquals(TextBackdrop(border = true, borderColor = "#ABCDEF"), item.backdrop)
+            assertEquals(TextOutline(enabled = true, color = "#FEDCBA", width = 7), item.outline)
             assertEquals(120, item.shadowSize)
             assertEquals(55, item.shadowOpacity)
             assertEquals("left", item.horizontalAlignment)

@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 
 /** The shadow's default size and opacity, in the whole percentages every element's shadow stores. */
@@ -42,4 +43,5 @@ data class SongCreditStyle(
     val wordSpacing: Int = 0,
     val transform: String = Constants.TEXT_TRANSFORM_NONE,
     val backdrop: TextBackdrop = TextBackdrop(),
+    val outline: TextOutline = TextOutline(),
 )

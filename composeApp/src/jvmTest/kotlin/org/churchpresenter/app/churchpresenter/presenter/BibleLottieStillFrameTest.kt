@@ -16,6 +16,9 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/** Generous: the wait ends on the frame appearing, and only a stuck read ever spends this. */
+private const val LOAD_TIMEOUT_MS = 5_000L
+
 /**
  * The Background tab's stage: a template looping from its hold frame. The loop itself waits on
  * infinite-animation frames, which a test clock never delivers, so the arithmetic is pinned on
@@ -42,7 +45,9 @@ class BibleLottieStillFrameTest {
         val dir = Files.createTempDirectory("still-frame").toFile()
         val template = LottieBandTestSupport.writeTemplate(dir)
         val plain = File(dir, "plain.json")
-        plain.writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":10,"h":10,"layers":[]}""")
+        // Valid JSON with none of the frame rate, duration or canvas a Lottie is played from, so
+        // the parse rejects it and the state it feeds stays null however long the read takes.
+        plain.writeText("""{"note":"not a lottie"}""")
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -54,7 +59,9 @@ class BibleLottieStillFrameTest {
                     }
                 }
             }
-            waitForIdle()
+            waitUntil("the template is loaded and drawn", LOAD_TIMEOUT_MS) {
+                onNodeWithTag("template").fetchSemanticsNode().children.size == 1
+            }
             onNodeWithTag("template").assertHeightIsEqualTo(100.dp)
             assertEquals(0, onNodeWithTag("plain").fetchSemanticsNode().children.size, "no image for a non-template")
         }

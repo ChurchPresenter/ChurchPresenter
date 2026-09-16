@@ -2682,4 +2682,12 @@
     <string name="song_lottie_unsupported_note">Șablonul decide aspectul și locul titlului. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea, spațierea cuvintelor, previzualizarea următoarei părți și acordurile nu se aplică.</string>
     <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contur</string>
+    <string name="tooltip_outline_options">Opțiuni contur</string>
+    <string name="text_outline">Contur</string>
+    <string name="text_outline_width">Lățime</string>
+    <string name="outline_show">Afișează conturul</string>
+    <string name="song_secondary_language">Limba a 2-a</string>
+    <string name="song_primary_language">Limba 1</string>
 </resources>

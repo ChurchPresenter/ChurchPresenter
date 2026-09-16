@@ -2661,4 +2661,12 @@
     <string name="song_lottie_unsupported_note">يحدد القالب التخطيط وموضع العنوان. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات ومعاينة التالي والأوتار.</string>
     <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">حد خارجي</string>
+    <string name="tooltip_outline_options">خيارات الحد الخارجي</string>
+    <string name="text_outline">حد خارجي</string>
+    <string name="text_outline_width">العرض</string>
+    <string name="outline_show">إظهار الحد الخارجي</string>
+    <string name="song_secondary_language">اللغة الثانية</string>
+    <string name="song_primary_language">اللغة الأولى</string>
 </resources>

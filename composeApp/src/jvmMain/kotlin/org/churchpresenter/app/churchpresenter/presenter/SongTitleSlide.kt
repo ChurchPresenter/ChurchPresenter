@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -38,6 +39,7 @@ import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -194,9 +196,14 @@ private fun TitleSlideText(
 ) {
     val painter = rememberTextBackdropPainter(style.backdrop)
     val font = if (line.element == SongStyleElement.NUMBER) style.fontType.ifBlank { fallbackFont } else style.fontType
-    val text = buildAnnotatedString {
+    // A line can carry the number's span as well as its own, and a span is where a colour lives --
+    // so the stroke pass takes its own copy with every span painted the outline's colour. Building
+    // it twice rather than restyling one: `AnnotatedString` spans are not editable in place.
+    fun buildText(outlineColor: Color?, dropShadow: Boolean = false) = buildAnnotatedString {
         leading?.let { (number, numberStyle) ->
-            withStyle(spanStyleOf(numberStyle, numberStyle.fontType.ifBlank { fallbackFont }, isKey, scaleFactor)) {
+            val numberSpan = spanStyleOf(numberStyle, numberStyle.fontType.ifBlank { fallbackFont }, isKey, scaleFactor)
+                .let { if (dropShadow) it.copy(shadow = null) else it }
+            withStyle(outlineColor?.let { numberSpan.copy(color = it) } ?: numberSpan) {
                 append(styledDisplayText(
                     number,
                     numberStyle.transform,
@@ -213,27 +220,62 @@ private fun TitleSlideText(
             spacingEm(style.wordSpacing, style.fontSize),
         ))
     }
-    Text(
-        modifier = Modifier.fillMaxWidth().then(painter.modifier),
-        onTextLayout = painter::onTextLayout,
-        textAlign = when (style.horizontalAlignment) {
-            Constants.LEFT -> TextAlign.Start
-            Constants.RIGHT -> TextAlign.End
-            else -> TextAlign.Center
-        },
-        fontFamily = systemFontFamilyOrDefault(font),
-        fontSize = (style.fontSize * scaleFactor).sp,
-        text = text,
-        color = if (isKey) Color.White else parseHexColor(style.color),
-        style = TextStyle(
-            fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (style.italic) FontStyle.Italic else FontStyle.Normal,
-            textDecoration = combinedTextDecoration(style.underline, style.strikethrough),
-            letterSpacing = spacingEm(style.letterSpacing, style.fontSize).em,
-            shadow = shadowOf(style, scaleFactor),
-        ),
+    // The number's outline where it shares this line: the two elements are drawn as one paragraph,
+    // and `drawStyle` is a property of the whole text rather than of a span, so they cannot be
+    // stroked at two different widths. The line's own element wins.
+    val outline = titleSlideOutline(style, isKey)
+    val textStyle = TextStyle(
+        fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (style.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(style.underline, style.strikethrough),
+        letterSpacing = spacingEm(style.letterSpacing, style.fontSize).em,
+        shadow = shadowOf(style, scaleFactor),
     )
+    val textAlign = when (style.horizontalAlignment) {
+        Constants.LEFT -> TextAlign.Start
+        Constants.RIGHT -> TextAlign.End
+        else -> TextAlign.Center
+    }
+    if (!outline.isVisible) {
+        Text(
+            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            onTextLayout = painter::onTextLayout,
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(null),
+            color = if (isKey) Color.White else parseHexColor(style.color),
+            style = textStyle,
+        )
+        return
+    }
+    val strokeColor = parseHexColor(outline.color)
+    Box(modifier = Modifier.fillMaxWidth().then(painter.modifier)) {
+        Text(
+            modifier = Modifier.matchParentSize(),
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(strokeColor),
+            color = strokeColor,
+            style = textStyle.copy(drawStyle = Stroke(width = outline.width * scaleFactor)),
+        )
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            onTextLayout = painter::onTextLayout,
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(null, dropShadow = true),
+            color = if (isKey) Color.White else parseHexColor(style.color),
+            style = textStyle.copy(shadow = null),
+        )
+    }
 }
+
+/** The element's outline, painted white on a key output so the matte keeps the outlined shape. */
+private fun titleSlideOutline(style: SongElementStyle, isKey: Boolean): TextOutline =
+    if (isKey && style.outline.isVisible) style.outline.copy(color = "#FFFFFF") else style.outline
 
 /** The number's look as a span inside the title's paragraph. */
 private fun spanStyleOf(style: SongElementStyle, font: String, isKey: Boolean, scaleFactor: Float) = SpanStyle(

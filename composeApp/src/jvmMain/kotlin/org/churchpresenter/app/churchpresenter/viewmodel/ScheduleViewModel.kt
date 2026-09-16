@@ -14,6 +14,7 @@ import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
@@ -499,7 +500,8 @@ class ScheduleViewModel(
         targetMinute: Int = 0,
         targetSecond: Int = 0,
         liveClockFormat: String = "HH:mm:ss",
-        backdrop: TextBackdrop = TextBackdrop()
+        backdrop: TextBackdrop = TextBackdrop(),
+        outline: TextOutline = TextOutline(),
     ) {
         addOrPush(
             ScheduleItem.AnnouncementItem(
@@ -532,7 +534,8 @@ class ScheduleViewModel(
                 targetMinute = targetMinute,
                 targetSecond = targetSecond,
                 liveClockFormat = liveClockFormat,
-                backdrop = backdrop
+                backdrop = backdrop,
+                outline = outline,
             )
         )
     }

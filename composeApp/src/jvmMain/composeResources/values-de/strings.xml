@@ -2653,4 +2653,12 @@
     <string name="song_lottie_unsupported_note">Die Vorlage bestimmt das Layout und die Position des Titels. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung, Wortabstand, Vorschau und Akkorde gelten nicht.</string>
     <string name="bible_lottie_unsupported_note">Die Vorlage bestimmt das Layout, die Position der Bibelstelle und wie zwei Sprachen das Band teilen. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung und Wortabstand gelten nicht.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontur</string>
+    <string name="tooltip_outline_options">Konturoptionen</string>
+    <string name="text_outline">Kontur</string>
+    <string name="text_outline_width">Breite</string>
+    <string name="outline_show">Kontur anzeigen</string>
+    <string name="song_secondary_language">2. Sprache</string>
+    <string name="song_primary_language">1. Sprache</string>
 </resources>

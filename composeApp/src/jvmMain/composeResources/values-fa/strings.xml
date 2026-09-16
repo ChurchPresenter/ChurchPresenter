@@ -2661,4 +2661,12 @@
     <string name="song_lottie_unsupported_note">الگو چیدمان و جای عنوان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده، فاصلهٔ واژه‌ها، پیش‌نمایش بعدی و آکوردها اعمال نمی‌شوند.</string>
     <string name="bible_lottie_unsupported_note">الگو چیدمان، جای مرجع و نحوهٔ اشتراک نوار میان دو زبان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده و فاصلهٔ واژه‌ها اعمال نمی‌شوند.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">خط دور</string>
+    <string name="tooltip_outline_options">تنظیمات خط دور</string>
+    <string name="text_outline">خط دور</string>
+    <string name="text_outline_width">ضخامت</string>
+    <string name="outline_show">نمایش خط دور</string>
+    <string name="song_secondary_language">زبان دوم</string>
+    <string name="song_primary_language">زبان اول</string>
 </resources>

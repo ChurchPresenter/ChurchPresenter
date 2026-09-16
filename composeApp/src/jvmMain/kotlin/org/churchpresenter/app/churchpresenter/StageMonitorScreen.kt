@@ -47,11 +47,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
@@ -570,8 +572,12 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
         horizontalAlignment = resolveColumnHorizontalAlignment(style.horizontalAlignment)
     ) {
         val painter = rememberTextBackdropPainter(style.backdrop)
-        Text(
+        OutlinedText(
             text = text,
+            outline = style.outline,
+            scaleFactor = 1f,
+            color = Color.Unspecified,
+            fontSize = TextUnit.Unspecified,
             style = buildTextStyle(
                 fontType = style.fontType,
                 fontSize = style.fontSize,
@@ -594,8 +600,12 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
 @Composable
 private fun ScrollingTextContent(style: StageMonitorZoneStyle, text: String) {
     val scrollState = rememberScrollState()
-    Text(
+    OutlinedText(
         text = text,
+        outline = style.outline,
+        scaleFactor = 1f,
+        color = Color.Unspecified,
+        fontSize = TextUnit.Unspecified,
         style = buildTextStyle(
             fontType = style.fontType,
             fontSize = style.fontSize,
@@ -630,8 +640,13 @@ private fun SlideContent(bitmap: ImageBitmap?) {
 @Composable
 private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
     val painter = rememberTextBackdropPainter(style.backdrop)
-    Text(
+    OutlinedText(
         text = text,
+        outline = style.outline,
+        scaleFactor = 1f,
+        fillWidth = false,
+        color = Color.Unspecified,
+        fontSize = TextUnit.Unspecified,
         style = buildTextStyle(
             fontType = style.fontType,
             fontSize = style.fontSize,

@@ -424,6 +424,11 @@ fun AnnouncementsTab(
                     viewModel.setBackdrop(updated)
                     viewModel.saveToSettings(onSettingsChange)
                 },
+                outline = viewModel.outline,
+                onOutlineChange = { updated ->
+                    viewModel.setOutline(updated)
+                    viewModel.saveToSettings(onSettingsChange)
+                },
             )
             HorizontalAlignmentButtons(
                 selectedAlignment = viewModel.horizontalAlignment,

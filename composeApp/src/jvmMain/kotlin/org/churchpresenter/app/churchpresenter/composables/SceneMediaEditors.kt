@@ -276,6 +276,8 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
         strikethrough = source.strikethrough,
         onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
         showShadow = false,
+        outline = source.outline,
+        onOutlineChange = { onUpdate(source.copy(outline = it)) },
     )
     Row(
         verticalAlignment = Alignment.CenterVertically,

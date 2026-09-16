@@ -901,6 +901,14 @@
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>
+    <string name="song_primary_language">1st Language</string>
+    <string name="song_secondary_language">2nd Language</string>
+    <string name="text_outline">Outline</string>
+    <string name="text_outline_width">Width</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Outline</string>
+    <string name="tooltip_outline_options">Outline options</string>
+    <string name="outline_show">Show outline</string>
     <string name="bible_translation_spacing">Space between translations</string>
     <string name="bible_translation_divider">Show divider between translations</string>
     <string name="pixels_short">px</string>

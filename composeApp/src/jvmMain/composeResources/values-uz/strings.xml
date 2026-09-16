@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Shablon joylashuvni va sarlavha o‘rnini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish, so‘zlar oralig‘i, keyingisini oldindan ko‘rish va akkordlar qo‘llanilmaydi.</string>
     <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontur</string>
+    <string name="tooltip_outline_options">Kontur sozlamalari</string>
+    <string name="text_outline">Kontur</string>
+    <string name="text_outline_width">Qalinligi</string>
+    <string name="outline_show">Konturni koʻrsatish</string>
+    <string name="song_secondary_language">2-til</string>
+    <string name="song_primary_language">1-til</string>
 </resources>

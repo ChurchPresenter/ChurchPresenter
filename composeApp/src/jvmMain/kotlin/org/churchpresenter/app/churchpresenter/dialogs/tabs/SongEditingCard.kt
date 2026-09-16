@@ -34,10 +34,17 @@ internal fun SongEditingCard(
     target: SongStyleTarget,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
+    /** Which language of a bilingual song these controls write. Only the lyrics have a second. */
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     /** Editing the title slide's elements rather than the lyric slides' -- see [SongElementRow]. */
     titleSlideView: Boolean = false,
 ) {
-    val style = settings.songSettings.elementStyle(element, target)
+    val secondary = language.isSecondary
+    val style = if (secondary) {
+        settings.songSettings.secondaryLyricsStyle(target)
+    } else {
+        settings.songSettings.elementStyle(element, target)
+    }
     val editingScroll = rememberScrollState()
     Box(modifier = modifier) {
         Column(
@@ -53,28 +60,44 @@ internal fun SongEditingCard(
                     element = element,
                     onElementChange = onElementChange,
                     target = target,
+                    language = language,
                     titleSlideView = titleSlideView,
                 )
                 // Keyed on what the panel is pointed at: the controls below are one set standing for
-                // ten stored profiles, and without this Compose keeps the subtree across a switch and
-                // hands each control the state of whichever control held its slot before.
-                key(element, target, titleSlideView) {
+                // eleven stored profiles, and without this Compose keeps the subtree across a switch
+                // and hands each control the state of whichever control held its slot before.
+                key(element, target, language, titleSlideView) {
                     SongTypographyPanel(
                         element = element,
                         style = style,
                         onStyleChange = { edited ->
                             onSettingsChange { s ->
-                                s.copy(songSettings = s.songSettings.withElementStyle(element, target, edited))
+                                val song = s.songSettings
+                                s.copy(
+                                    songSettings = if (secondary) {
+                                        song.withSecondaryLyricsStyle(target, edited)
+                                    } else {
+                                        song.withElementStyle(element, target, edited)
+                                    },
+                                )
                             }
                         },
+                        // Reset means something different for the second language: not "back to the
+                        // factory look" but "back to being drawn like the first", which is the state
+                        // it is in until anything here is touched and the only way back to it.
                         onReset = {
                             onSettingsChange { s ->
+                                val song = s.songSettings
                                 s.copy(
-                                    songSettings = s.songSettings.withElementStyle(
-                                        element,
-                                        target,
-                                        defaultSongElementStyle(element, target),
-                                    ),
+                                    songSettings = if (secondary) {
+                                        song.withSecondaryLyricsFollowingPrimary()
+                                    } else {
+                                        song.withElementStyle(
+                                            element,
+                                            target,
+                                            defaultSongElementStyle(element, target),
+                                        )
+                                    },
                                 )
                             }
                         },

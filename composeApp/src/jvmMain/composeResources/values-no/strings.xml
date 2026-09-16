@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Malen bestemmer oppsettet og hvor tittelen står. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking, ordavstand, forhåndsvisning av neste og akkorder gjelder ikke.</string>
     <string name="bible_lottie_unsupported_note">Malen bestemmer oppsettet, plasseringen av referansen og hvordan to språk deler båndet. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking og ordavstand gjelder ikke.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontur</string>
+    <string name="tooltip_outline_options">Konturalternativer</string>
+    <string name="text_outline">Kontur</string>
+    <string name="text_outline_width">Bredde</string>
+    <string name="outline_show">Vis kontur</string>
+    <string name="song_secondary_language">2. språk</string>
+    <string name="song_primary_language">1. språk</string>
 </resources>
