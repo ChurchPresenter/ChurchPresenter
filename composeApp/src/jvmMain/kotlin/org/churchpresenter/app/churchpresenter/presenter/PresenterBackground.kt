@@ -67,6 +67,14 @@ internal const val BACKGROUND_BLUR_OVERSCAN = 1.08f
  */
 internal const val BLUR_EDGE_BLEED = 3f
 
+/**
+ * How far past the band's own top edge [AboveBandFill] is grown when [BackgroundConfig
+ * .aboveBandFillsBehindBand] is off, as a fraction of the output's full height — a few pixels on
+ * any realistic output, hidden under the band drawn after it. Guards against the two
+ * independently-rounded complementary fractions leaving a real gap.
+ */
+internal const val ABOVE_BAND_OVERLAP_FRACTION = 0.006f
+
 /** A percentage as a fraction. */
 internal const val PERCENT = 100f
 
@@ -282,26 +290,52 @@ internal fun aboveBandFill(settings: BackgroundSettings, config: BackgroundConfi
     return parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f))
 }
 
+/** Whether [aboveBandFill] is painted behind the band too — see [BackgroundConfig.aboveBandFillsBehindBand]. */
+internal fun aboveBandFillsBehindBand(settings: BackgroundSettings, config: BackgroundConfig): Boolean {
+    val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
+    return if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand
+}
+
 /**
- * [fill] painted over everything above a lower-third band [bandFraction] of the output tall.
+ * [fill] painted over the part of a lower-third output above the band, and — when
+ * [fillsBehindBand] is set — behind the band too.
  *
- * Sized as the band's complement — `fillMaxHeight(1f - bandFraction)` against the same constraint
- * the band's own `fillMaxHeight(bandFraction)` reads — so the two either meet exactly or overlap by
- * a single pixel the band then draws over. Measuring a height in Dp instead can round the other
- * way and leave a hairline of whatever is behind, which on an alpha output is a transparent line.
+ * [fillsBehindBand] is the default. A one-pixel gap at the exact `1f - bandFraction` boundary was
+ * the first theory here (two `fillMaxHeight` calls rounding independently and not always summing
+ * back to the parent's exact height), and that alone was worth closing, but it was not the actual
+ * defect: a band whose own fill fades toward transparent at its edge — any gradient stop that
+ * starts at less than full alpha, which is the *default* shape for the gradient styles, not an
+ * edge case — showed several pixels of raw black there, not a hairline, because nothing behind the
+ * band down to the true background was ever anything but the window's own clear colour.
+ * `bandFraction` said nothing about it either way; the band was simply never backed by this fill
+ * in the first place. With [fillsBehindBand] on, [fill] covers the full frame and the band —
+ * drawn afterward, in front — paints over it wherever the band itself is opaque, exactly as
+ * before; where the band fades toward transparent, this fill shows through instead of black, on
+ * this opaque preview window and on a real alpha output alike (a fade to transparent still keys
+ * to nothing, it just no longer keys through a black fringe first — #561).
  *
- * Draws nothing at all when [fill] is null; see [aboveBandFill] for why that is not black at 0%.
+ * [fillsBehindBand] off restores the original split, for a surface that wants the wash to stop
+ * exactly at the band: sized as the band's complement plus a small guaranteed overlap — grown past
+ * the exact boundary and hidden under the band, drawn after it — rather than the bare
+ * `fillMaxHeight(1f - bandFraction)` this once was, which could round to a real gap the same way.
+ * This is the setting to turn off for a band that must key clean on its own — a `Transparent` band
+ * with a wash configured above it — where any colour bleeding through a translucent part of the
+ * band would be wrong for that specific setup.
  */
 @Composable
-internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float) {
+internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float, fillsBehindBand: Boolean) {
     if (fill == null) return
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(1f - bandFraction)
-            .align(Alignment.TopCenter)
-            .background(fill)
-    )
+    if (fillsBehindBand) {
+        Box(modifier = Modifier.fillMaxSize().background(fill))
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight((1f - bandFraction + ABOVE_BAND_OVERLAP_FRACTION).coerceAtMost(1f))
+                .align(Alignment.TopCenter)
+                .background(fill)
+        )
+    }
 }
 
 /**
