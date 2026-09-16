@@ -898,6 +898,7 @@
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>
     <string name="song_language_scope">Lang</string>
+    <string name="song_style_language">Styling</string>
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>

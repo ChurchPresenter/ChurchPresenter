@@ -1,17 +1,26 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.song_style_language
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * The Song pane, showing whichever element the chips above it have selected.
@@ -25,6 +34,13 @@ internal fun SongCustomizePane(
     element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /**
+     * This screen's own song language, which lives on its [ScreenAssignment] rather than in
+     * `SongSettings` -- so it is read and written past [onSettingsChange], whose edits this dialog
+     * stores as a `SongSettings` difference and nothing else.
+     */
+    songMode: String,
+    onSongModeChange: (String) -> Unit,
 ) {
     val scope = LocalOutputStyleScope.current
     val target =
@@ -34,10 +50,19 @@ internal fun SongCustomizePane(
 
     PaneScaffold {
         val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
+        // Which of the two languages the controls below write. A song carries its lyrics and its
+        // title twice, and each half has a profile of its own, so this screen can be told to draw
+        // the second language differently from the first -- the same choice the global Song tab
+        // offers, for this one output.
+        var language by remember { mutableStateOf(SongStyleLanguage.PRIMARY) }
         // The title slide draws six things and the chips above have one seat for all of them, so it
         // keeps a selector of its own. The lyric slides' elements each have a chip already.
         var slideElement by remember { mutableStateOf(SongStyleElement.TITLE) }
         val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
+        // Only where there is a second language on this screen and an element that has a second
+        // profile for it. Everywhere else the switch would offer a choice with one answer.
+        val hasSecondLanguage = songMode == Constants.SONG_LANG_BOTH && styleElement in SECOND_LANGUAGE_ELEMENTS
+        val editingLanguage = if (hasSecondLanguage) language else SongStyleLanguage.PRIMARY
 
         if (titleSlideView) {
             SongTitleSlideEnabledRow(settings, onSettingsChange)
@@ -58,31 +83,57 @@ internal fun SongCustomizePane(
             element = styleElement,
             target = target,
             titleSlideView = titleSlideView,
+            outputMode = songMode,
+            onOutputModeChange = onSongModeChange,
         )
         // The same panel the Song settings tab draws, reading and writing the same profile. Two
         // surfaces over one definition: a control added to the tab is in the dialog the same day.
-        SongTypographyPanel(
-            element = styleElement,
-            style = song.elementStyle(styleElement, target),
-            onStyleChange = { edited ->
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.withElementStyle(styleElement, target, edited))
-                }
-            },
-            onReset = {
-                onSettingsChange { s ->
-                    s.copy(
-                        songSettings = s.songSettings.withElementStyle(
-                            styleElement,
-                            target,
-                            defaultSongElementStyle(styleElement, target),
+        if (hasSecondLanguage) {
+            LabeledControl(stringResource(Res.string.song_style_language)) {
+                SegmentedButton(
+                    items = listOf(
+                        SegmentedButtonItem(
+                            SongStyleLanguage.PRIMARY,
+                            stringResource(Res.string.song_language_primary),
                         ),
-                    )
-                }
-            },
-            availableFonts = fonts,
-            onTitleSlide = titleSlideView,
-        )
+                        SegmentedButtonItem(
+                            SongStyleLanguage.SECONDARY,
+                            stringResource(Res.string.song_language_secondary),
+                        ),
+                    ),
+                    selectedValue = editingLanguage,
+                    onValueChange = { language = it },
+                    buttonWidth = STYLE_LANGUAGE_BUTTON_WIDTH,
+                    buttonHeight = 30.dp,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                )
+            }
+        }
+        // Keyed on the language too: one set of controls stands for two stored profiles, and
+        // without this Compose keeps the subtree across the switch and hands each control the state
+        // -- and the write-back lambda -- of the profile that held its slot before.
+        key(editingLanguage) {
+            SongTypographyPanel(
+                element = styleElement,
+                style = song.elementStyle(styleElement, target, editingLanguage),
+                onStyleChange = { edited ->
+                    onSettingsChange { s ->
+                        s.copy(
+                            songSettings = s.songSettings
+                                .withElementStyle(styleElement, target, editingLanguage, edited),
+                        )
+                    }
+                },
+                onReset = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.withElementReset(styleElement, target, editingLanguage))
+                    }
+                },
+                availableFonts = fonts,
+                onTitleSlide = titleSlideView,
+                numberInCorner = song.numberCorner(target.isLowerThird) != Constants.NONE,
+            )
+        }
     }
 }
 
@@ -108,5 +159,8 @@ private val TITLE_SLIDE_CHIP_WIDTH = 86.dp
 
 /** Six chips are wider than this column, so past three they fold onto another row. */
 private const val TITLE_SLIDE_CHIP_COLUMNS = 3
+
+/** Wide enough for "Secondary" without an ellipsis. */
+private val STYLE_LANGUAGE_BUTTON_WIDTH = 82.dp
 
 

@@ -108,6 +108,17 @@ internal fun SongTypographyPanel(
      * changes nothing in the picture.
      */
     onTitleSlide: Boolean = false,
+    /**
+     * This output pins the song number to a corner.
+     *
+     * A corner is an alternative to the row the number otherwise shares with the title, not an
+     * extra setting layered on it: the presenter draws a cornered number over the slide and never
+     * consults its above/below-verse position. `SongNumberCorner` has said so since it was written;
+     * the control was offered anyway, and it was on by default -- the corner defaults to bottom
+     * right -- so the first thing an operator met on the Number element was a control that did
+     * nothing.
+     */
+    numberInCorner: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Two rows, for the reason the Bible panel's twin is: the colour and the faces, then the
@@ -134,7 +145,9 @@ internal fun SongTypographyPanel(
             // Alignment sits here rather than beside Size: with the Auto box in that row as well,
             // the four cells came to more than the pane and it was clipped off the end.
             SongAlignmentControl(style, onStyleChange)
-            if (element.hasPosition && !onTitleSlide) {
+            // A cornered number is drawn over the slide and never in the row this control places.
+            val cornered = element == SongStyleElement.NUMBER && numberInCorner
+            if (element.hasPosition && !onTitleSlide && !cornered) {
                 ControlColumn(stringResource(Res.string.position)) {
                     PositionButtons(
                         selectedPosition = style.position,

@@ -87,6 +87,8 @@ internal fun CustomizeBody(
     onTranslationChange: (Int) -> Unit,
     onElementChange: (CustomizeElement) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** A change to the screen itself rather than to its styling -- see [SongCustomizePane]. */
+    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     if (pane == CustomizePane.STAGE_MONITOR) {
         DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
@@ -108,7 +110,15 @@ internal fun CustomizeBody(
             CustomizeElementChips(elements, element, onElementChange)
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-                CustomizePaneContent(pane, element, translationIndex, draft, onSettingsChange)
+                CustomizePaneContent(
+                    pane = pane,
+                    element = element,
+                    translationIndex = translationIndex,
+                    draft = draft,
+                    assignment = assignment,
+                    onSettingsChange = onSettingsChange,
+                    onAssignmentChange = onAssignmentChange,
+                )
             }
         }
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -353,7 +363,9 @@ private fun CustomizePaneContent(
     element: CustomizeElement?,
     translationIndex: Int,
     draft: AppSettings,
+    assignment: ScreenAssignment,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     val shown = element ?: return
     // Keyed on what the column is pointed at. One set of controls stands for many stored profiles,
@@ -364,7 +376,13 @@ private fun CustomizePaneContent(
     key(pane, shown, translationIndex) {
         when (pane) {
             CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
-            CustomizePane.SONGS -> SongCustomizePane(shown, draft, onSettingsChange)
+            CustomizePane.SONGS -> SongCustomizePane(
+                element = shown,
+                settings = draft,
+                onSettingsChange = onSettingsChange,
+                songMode = assignment.songMode,
+                onSongModeChange = { onAssignmentChange(assignment.copy(songMode = it)) },
+            )
             CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
             CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
             // Handled by CustomizeBody, which gives it the whole width instead of this column.

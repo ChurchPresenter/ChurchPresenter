@@ -70,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryLyricsStyle
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryTitleStyle
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
@@ -324,6 +325,26 @@ fun SongPresenter(
     val secondaryFontFamily = systemFontFamilyOrDefault(secondaryStyleProfile.fontType)
     val secondaryColor = if (isKey) Color.White else parseHexColor(secondaryStyleProfile.color)
     val secondaryHorizontalAlignment = getTextAlign(secondaryStyleProfile.horizontalAlignment)
+
+    /**
+     * The profile the song's *second* title is drawn from, on a slide that shows it.
+     *
+     * [SongSettings.secondaryTitleLanguage] while it is on, and the first title's otherwise -- which
+     * is what both titles were drawn in before the second could be styled at all.
+     */
+    val secondaryTitleProfile = ss.secondaryTitleStyle(songTarget)
+    val secondaryTitleTextStyle = TextStyle(
+        fontWeight = if (secondaryTitleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (secondaryTitleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(
+            secondaryTitleProfile.underline,
+            secondaryTitleProfile.strikethrough,
+        ),
+        letterSpacing = spacingEm(secondaryTitleProfile.letterSpacing, secondaryTitleProfile.fontSize).em,
+    )
+    val secondaryTitleFontFamily = systemFontFamilyOrDefault(secondaryTitleProfile.fontType)
+    val secondaryTitleColor = if (isKey) Color.White else parseHexColor(secondaryTitleProfile.color)
+    val secondaryTitleHorizontalAlignment = getTextAlign(secondaryTitleProfile.horizontalAlignment)
     val chartHorizontalAlignment = when (
         if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
     ) {
@@ -474,6 +495,18 @@ fun SongPresenter(
             )) else lyricsTextStyle
         val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
         val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
+        val secondaryTitleTextStyleScaled = if (secondaryTitleProfile.shadow) {
+            secondaryTitleTextStyle.copy(
+                shadow = scaleElementShadow(
+                    secondaryTitleProfile.shadowColor,
+                    secondaryTitleProfile.shadowSize,
+                    secondaryTitleProfile.shadowOpacity,
+                ),
+            )
+        } else {
+            secondaryTitleTextStyle
+        }
+        val scaledSecondaryTitleFontSize = (secondaryTitleProfile.fontSize * scaleFactor).sp
         val settingsLyricsFontSize = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize
         } else if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
@@ -1024,11 +1057,22 @@ fun SongPresenter(
                     val combinedSecondaryLines = effectiveSecondaryDisplayLines + effectiveLaSecondaryLines
                     val secondaryLaStart = if (effectiveLaSecondaryLines.isNotEmpty()) effectiveSecondaryDisplayLines.size else -1
 
-                    val effectiveTitle = if (langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()) {
-                        section.secondaryTitle
-                    } else {
-                        section.title
-                    }
+                    val titleIsSecondary =
+                        langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()
+                    val effectiveTitle = if (titleIsSecondary) section.secondaryTitle else section.title
+                    // The title row draws one of the song's two titles, and each has its own
+                    // profile. Picked here rather than hoisted because which one it is depends on
+                    // the section: a song with no second title shows the first under any language,
+                    // and that title keeps the first title's look.
+                    val titleProfileHere = if (titleIsSecondary) secondaryTitleProfile else titleStyleProfile
+                    val titleFontFamilyHere = if (titleIsSecondary) secondaryTitleFontFamily else titleFontFamily
+                    val titleColorHere = if (titleIsSecondary) secondaryTitleColor else titleColor
+                    val titleFontSizeHere =
+                        if (titleIsSecondary) scaledSecondaryTitleFontSize else scaledTitleFontSize
+                    val titleTextStyleHere =
+                        if (titleIsSecondary) secondaryTitleTextStyleScaled else titleTextStyleScaled
+                    val titleAlignHere =
+                        if (titleIsSecondary) secondaryTitleHorizontalAlignment else titleHorizontalAlignment
 
                     val hasBilingual = combinedSecondaryLines.isNotEmpty()
                     // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
@@ -1273,24 +1317,24 @@ fun SongPresenter(
                         /** False beside the number in a row, where the two share the width. */
                         fillWidth: Boolean = true,
                     ) {
-                        val titlePainter = rememberTextBackdropPainter(titleStyleProfile.backdrop)
+                        val titlePainter = rememberTextBackdropPainter(titleProfileHere.backdrop)
                         OutlinedText(
                             modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
-                            outline = keyedOutline(titleStyleProfile.outline),
+                            outline = keyedOutline(titleProfileHere.outline),
                             scaleFactor = scaleFactor,
                             fillWidth = fillWidth,
                             onTextLayout = titlePainter::onTextLayout,
-                            textAlign = titleHorizontalAlignment,
-                            fontFamily = titleFontFamily,
-                            fontSize = scaledTitleFontSize,
+                            textAlign = titleAlignHere,
+                            fontFamily = titleFontFamilyHere,
+                            fontSize = titleFontSizeHere,
                             text = styledDisplayText(
                                 effectiveTitle,
-                                titleStyleProfile.transform,
-                                spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize),
-                                spacingEm(titleStyleProfile.wordSpacing, titleStyleProfile.fontSize),
+                                titleProfileHere.transform,
+                                spacingEm(titleProfileHere.letterSpacing, titleProfileHere.fontSize),
+                                spacingEm(titleProfileHere.wordSpacing, titleProfileHere.fontSize),
                             ),
-                            color = titleColor,
-                            style = titleTextStyleScaled
+                            color = titleColorHere,
+                            style = titleTextStyleHere
                         )
                     }
 

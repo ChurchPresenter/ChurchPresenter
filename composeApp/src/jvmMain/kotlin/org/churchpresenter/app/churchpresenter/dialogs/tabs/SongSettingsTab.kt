@@ -164,10 +164,11 @@ fun SongSettingsTab(
     // slide at all, so switching it off in the rail drops the tab back onto the lyric slides.
     var titleSlideView by remember { mutableStateOf(false) }
     val onTitleSlide = titleSlideView && settings.songSettings.titleSlideEnabled
-    // A song with one language on screen has no second profile to style, and a title slide draws one
-    // title rather than two -- so either drops the switch, and the panel back onto the first.
+    // A song with one language on screen has no second profile to style, so that drops the switch
+    // and the panel back onto the first. The title slide keeps it: it draws *both* titles when the
+    // output shows both languages, and each has a profile of its own.
     val bilingual = settings.songIsBilingual
-    val editingLanguage = if (bilingual && !onTitleSlide) language else SongStyleLanguage.PRIMARY
+    val editingLanguage = if (bilingual) language else SongStyleLanguage.PRIMARY
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
@@ -222,9 +223,19 @@ fun SongSettingsTab(
                     language = editingLanguage,
                     onLanguageChange = { picked ->
                         language = picked
-                        // The second language is the lyrics and nothing else; landing on it while
-                        // the Number tab was selected would show a strip with nowhere to be.
-                        if (picked == SongStyleLanguage.SECONDARY) element = SongStyleElement.LYRICS
+                        // The second language is the lyrics and the title and nothing else; landing
+                        // on it while the Number tab was selected would show a strip with nowhere to
+                        // be. The title slide has no lyrics, so there it is the title.
+                        if (picked == SongStyleLanguage.SECONDARY) {
+                            // The title slide has no lyrics, so there the second language is the
+                            // title alone.
+                            val offered = if (onTitleSlide) {
+                                listOf(SongStyleElement.TITLE)
+                            } else {
+                                SECOND_LANGUAGE_ELEMENTS
+                            }
+                            if (element !in offered) element = offered.first()
+                        }
                     },
                     bilingual = bilingual,
                     titleSlideView = onTitleSlide,
@@ -778,11 +789,13 @@ internal fun SongElementRow(
     titleSlideView: Boolean = false,
 ) {
     val song = settings.songSettings
-    // Only the lyrics are drawn twice on a bilingual slide, so the second language's strip is one
-    // tab. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
+    // The lyrics and the title are the two things a bilingual song carries twice, so those are the
+    // tabs the second language offers -- and on the title slide, which has no lyrics, just the
+    // title. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
     // strip that vanished on one switch and came back on the other reads as a glitch.
     val elements = when {
-        language.isSecondary -> listOf(SongStyleElement.LYRICS)
+        language.isSecondary && titleSlideView -> listOf(SongStyleElement.TITLE)
+        language.isSecondary -> SECOND_LANGUAGE_ELEMENTS
         titleSlideView -> TITLE_SLIDE_ELEMENTS
         else -> LYRIC_SLIDE_ELEMENTS
     }
@@ -822,10 +835,13 @@ internal fun SongElementOptions(
     target: SongStyleTarget,
     language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     titleSlideView: Boolean = false,
+    /** See [SongLanguageScopeButtons]: set by the per-output dialog, absent on the global tab. */
+    outputMode: String? = null,
+    onOutputModeChange: ((String) -> Unit)? = null,
 ) {
     val song = settings.songSettings
     if (titleSlideView) {
-        SongTitleSlideOptions(settings, onSettingsChange, element, target)
+        SongTitleSlideOptions(settings, onSettingsChange, element, target, outputMode, onOutputModeChange)
         return
     }
     // The chunk and the language scope belong to the output rather than to a language, and the
@@ -864,7 +880,7 @@ internal fun SongElementOptions(
         )
         }
         LabeledControl(stringResource(Res.string.song_language_scope)) {
-            SongLanguageScopeButtons(settings, onSettingsChange, target)
+            SongLanguageScopeButtons(settings, onSettingsChange, target, outputMode, onOutputModeChange)
         }
     }
     SongAppearanceRow(settings, onSettingsChange, element, target)
@@ -878,6 +894,8 @@ private fun SongTitleSlideOptions(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     element: SongStyleElement,
     target: SongStyleTarget,
+    outputMode: String? = null,
+    onOutputModeChange: ((String) -> Unit)? = null,
 ) {
     val song = settings.songSettings
         FlowRow(
@@ -915,7 +933,7 @@ private fun SongTitleSlideOptions(
             // Nothing else on the slide has a translation.
             if (element == SongStyleElement.TITLE) {
                 LabeledControl(stringResource(Res.string.song_language_scope)) {
-                    SongLanguageScopeButtons(settings, onSettingsChange, target)
+                    SongLanguageScopeButtons(settings, onSettingsChange, target, outputMode, onOutputModeChange)
                 }
             }
         }
