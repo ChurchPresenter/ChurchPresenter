@@ -74,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import kotlinx.coroutines.channels.Channel
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f
@@ -363,12 +364,15 @@ fun SongPresenter(
                     fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
                     bandFraction = lowerThirdFraction,
                 )
+                val outgoing = LocalBandOutgoing.current
                 SongLottieBand(
                     template = loaded,
                     section = lyricSection,
                     settings = ss,
                     languageDisplay = effectiveLangDisplay,
                     lineIndex = LocalBandSongLineIndex.current.takeIf { it >= 0 } ?: displayLineIndex,
+                    outgoingSection = outgoing.lyricSection,
+                    outgoingLineIndex = outgoing.lyricLineIndex,
                     allSections = allLyricSections,
                     displaySectionIndex = displaySectionIndex,
                     bandFraction = lowerThirdFraction,
@@ -797,7 +801,7 @@ fun SongPresenter(
 
             // Only animate the text content — background is never inside this block
             @Composable
-            fun TextContent(section: LyricSection) {
+            fun TextContent(section: LyricSection, lineIndex: Int) {
                 val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
                 val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
                 // The title slide's lines are the song's title and credit, so they take the Title
@@ -865,7 +869,7 @@ fun SongPresenter(
                     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
                     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
-                    val effectiveLineIndex = if (isLineMode && displayLineIndex < 0) 0 else displayLineIndex
+                    val effectiveLineIndex = if (isLineMode && lineIndex < 0) 0 else lineIndex
 
                     // Get next section for look-ahead
                     val nextSection: LyricSection? = if (lookAheadEnabled && displaySectionIndex >= 0) {
@@ -1464,27 +1468,37 @@ fun SongPresenter(
             if (crossfadeEnabled || ss.fadeIn || ss.fadeOut) {
                 val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
-                var displayedCurrent by remember { mutableStateOf(lyricSection) }
-                var displayedPrevious by remember { mutableStateOf(LyricSection()) }
+                // Each layer carries the line it draws, not just its section. Sharing one live line
+                // index made the outgoing layer redraw its old section at the incoming line for as
+                // long as the crossfade ran, which is a flash of a line that was never on that page.
+                var displayedCurrent by remember {
+                    mutableStateOf(SongCrossfadePage(lyricSection, displayLineIndex))
+                }
+                var displayedPrevious by remember { mutableStateOf(SongCrossfadePage(LyricSection(), -1)) }
                 var currentAlpha by remember { mutableStateOf(1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
-                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+                val pendingQueue = remember { Channel<SongCrossfadePage>(Channel.CONFLATED) }
 
                 // Queue section changes
-                LaunchedEffect(lyricSection) {
-                    if (displayedCurrent != lyricSection) {
-                        pendingQueue.send(lyricSection)
+                LaunchedEffect(lyricSection, displayLineIndex) {
+                    val target = SongCrossfadePage(lyricSection, displayLineIndex)
+                    when {
+                        displayedCurrent == target -> Unit
+                        // Stepping a line inside the section already up has never crossfaded, and
+                        // queueing it would fade the section out against itself.
+                        displayedCurrent.section == target.section -> displayedCurrent = target
+                        else -> pendingQueue.send(target)
                     }
                 }
 
                 // Process section switches (crossfade between sections)
                 LaunchedEffect(Unit) {
-                    for (nextSection in pendingQueue) {
-                        if (displayedCurrent == nextSection) continue
+                    for (nextPage in pendingQueue) {
+                        if (displayedCurrent == nextPage) continue
 
                         if (isCrossfade) {
                             displayedPrevious = displayedCurrent
-                            displayedCurrent = nextSection
+                            displayedCurrent = nextPage
                             previousAlpha = 1f
                             currentAlpha = 0f
                             val anim = Animatable(0f)
@@ -1493,27 +1507,27 @@ fun SongPresenter(
                                 previousAlpha = 1f - this.value
                             }
                         } else {
-                            displayedCurrent = nextSection
+                            displayedCurrent = nextPage
                         }
                         currentAlpha = 1f
                         previousAlpha = 0f
-                        displayedPrevious = LyricSection()
+                        displayedPrevious = SongCrossfadePage(LyricSection(), -1)
                     }
                 }
 
                 Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
-                    if (displayedPrevious.lines.isNotEmpty() && previousAlpha > 0f) {
+                    if (displayedPrevious.section.lines.isNotEmpty() && previousAlpha > 0f) {
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
-                            TextContent(displayedPrevious)
+                            TextContent(displayedPrevious.section, displayedPrevious.lineIndex)
                         }
                     }
                     Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
-                        TextContent(displayedCurrent)
+                        TextContent(displayedCurrent.section, displayedCurrent.lineIndex)
                     }
                 }
             } else {
                 Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
-                    TextContent(lyricSection)
+                    TextContent(lyricSection, displayLineIndex)
                 }
             }
         }
@@ -1636,3 +1650,6 @@ private fun getTextAlign(alignment: String): TextAlign {
         else -> TextAlign.Center
     }
 }
+
+/** One crossfade layer's page: the section it draws and the line within it, kept together. */
+private data class SongCrossfadePage(val section: LyricSection, val lineIndex: Int)

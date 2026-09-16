@@ -27,7 +27,7 @@ import org.churchpresenter.lottiegen.lottie.makeTextData
  * and the whole slot before the band it is read against.
  */
 internal fun LottieBuilder.addTextSlot(slot: TextSlot, cfg: BibleLottieGenConfig, timeline: BandTimeline) {
-    val motion = TextMotion(cfg, slot.box, timeline)
+    val motion = TextMotion(cfg, slot.box, timeline, textAlphaFor(slot, cfg))
     val weight = if (cfg.previewBold) BOLD_WEIGHT else REGULAR_WEIGHT
     addFont(cfg.previewFontFamily, weight, cfg.previewItalic)
     val fittedSize = previewFittedSize(slot, cfg, weight)
@@ -137,7 +137,17 @@ private fun LottieBuilder.addTextMatte(slot: TextSlot, motion: TextMotion, shado
 }
 
 /** The text's own keyframes; a wipe animates the matte and leaves the text still. */
-private class TextMotion(cfg: BibleLottieGenConfig, private val box: SlotBox, private val timeline: BandTimeline) {
+/** How opaque this slot's words are, as the template was authored. */
+private fun textAlphaFor(slot: TextSlot, cfg: BibleLottieGenConfig): Double =
+    (if (slot.isReference) cfg.referenceAlpha else cfg.textAlpha).toDouble().coerceIn(0.0, FULL)
+
+private class TextMotion(
+    cfg: BibleLottieGenConfig,
+    private val box: SlotBox,
+    private val timeline: BandTimeline,
+    /** What the fade ramps up to: the slot's own opacity, not necessarily fully opaque. */
+    private val fullOpacity: Double = FULL,
+) {
     private val anim = cfg.textAnimation
 
     val usesMatte: Boolean get() = anim == TextAnimation.WIPE || anim == TextAnimation.TICKER
@@ -165,7 +175,10 @@ private class TextMotion(cfg: BibleLottieGenConfig, private val box: SlotBox, pr
             TextAnimation.SLIDE_DOWN -> slide(at(dx, dy - box.h * SLIDE_FRACTION), rest)
             TextAnimation.SLIDE_LEFT -> slide(at(dx + box.w * SLIDE_FRACTION, dy), rest)
             TextAnimation.SLIDE_RIGHT -> slide(at(dx - box.w * SLIDE_FRACTION, dy), rest)
-            TextAnimation.WIPE -> LottieBuilder.defaultTransform(position = still)
+            // A wipe reveals the words with a matte rather than by fading, so its opacity is held
+            // at the slot's own rather than ramped — without this it would ignore the setting.
+            TextAnimation.WIPE ->
+                LottieBuilder.defaultTransform(opacity = LottieBuilder.staticProp(fullOpacity), position = still)
             // The player reveals or scrolls these itself; the file still fades them at the very
             // start and end of their segments so a plain player shows them arriving and leaving.
             TextAnimation.TYPEWRITER, TextAnimation.TYPEWRITER_WORDS, TextAnimation.TICKER ->
@@ -173,12 +186,17 @@ private class TextMotion(cfg: BibleLottieGenConfig, private val box: SlotBox, pr
         }
     }
 
-    /** Opacity 0 → 100 over the in segment; [fullAtPct] > 0 finishes the ramp early, for a quick fade. */
+    /**
+     * Opacity 0 → the slot's own opacity over the in segment; [fullAtPct] > 0 finishes the ramp
+     * early, for a quick fade. Translucent text is this ramp peaking below 100 rather than a
+     * colour with an alpha channel: the player replaces a text fill's alpha when it draws, so the
+     * layer's own opacity is the only part of it that survives.
+     */
     private fun fade(fullAtPct: Double): JsonObject = LottieBuilder.animatedProp(
         keyframes(
             KeyframeInput(0.0, jsonArrayOf(0.0)),
-            KeyframeInput(if (fullAtPct > 0.0) fullAtPct else END_PCT, jsonArrayOf(FULL)),
-            KeyframeInput(END_PCT, jsonArrayOf(FULL)),
+            KeyframeInput(if (fullAtPct > 0.0) fullAtPct else END_PCT, jsonArrayOf(fullOpacity)),
+            KeyframeInput(END_PCT, jsonArrayOf(fullOpacity)),
         ),
     )
 

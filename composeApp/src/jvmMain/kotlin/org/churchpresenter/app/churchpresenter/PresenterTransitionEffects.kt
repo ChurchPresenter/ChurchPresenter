@@ -10,7 +10,11 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.core.models.presentation.AnimationType
+import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
@@ -31,9 +35,6 @@ internal fun PresenterTransitionEffects(
     presenterManager: PresenterManager,
     appSettings: AppSettings,
 ) {
-    val selectedVerses by presenterManager.selectedVerses
-    val lyricSection by presenterManager.lyricSection
-    val lyricSectionVersion by presenterManager.lyricSectionVersion
     val selectedImagePath by presenterManager.selectedImagePath
     val selectedSlide by presenterManager.selectedSlide
     val animationType by presenterManager.animationType
@@ -46,7 +47,11 @@ internal fun PresenterTransitionEffects(
 val bibleTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.BIBLE).orEmpty())
 val songTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.LYRICS).orEmpty())
 val presentingMode by presenterManager.presentingMode
-val songDisplayLineIndex by presenterManager.songDisplayLineIndex
+// Whether the selected line is part of what the song band shows. Outside line mode the band draws
+// the whole section, so picking a different line changes nothing on the output — and a swap driven
+// by it crossfades the section to an identical copy of itself.
+val songBandLineMode =
+    appSettings.songSettings.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 fun templateFor(mode: Presenting): BibleLottieTemplate? = when (mode) {
     Presenting.BIBLE -> bibleTemplate
     Presenting.LYRICS -> songTemplate
@@ -96,7 +101,7 @@ LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
         }
         Presenting.LYRICS -> {
             presenterManager.setDisplayedLyricSection(presenterManager.lyricSection.value)
-            presenterManager.setBandSongLineIndex(presenterManager.songDisplayLineIndex.value)
+            presenterManager.setBandSongLineIndex(presenterManager.bandLineIndex(songBandLineMode))
             presenterManager.setSongTransitionAlpha(1f)
         }
         else -> Unit
@@ -108,40 +113,31 @@ LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
     presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
 }
 
-val bibleHold by presenterManager.bibleHold
-LaunchedEffect(selectedVerses, bibleHold) {
-    if (bibleHold) return@LaunchedEffect
-    val template = bibleTemplate
-    val animatesChange = template != null &&
-        presenterManager.presentingMode.value == Presenting.BIBLE &&
-        presenterManager.bandIsUp() &&
-        presenterManager.displayedVerses.value != selectedVerses
-    if (!animatesChange) {
-        presenterManager.setDisplayedVerses(selectedVerses)
-        presenterManager.setBibleTransitionAlpha(1f)
-        return@LaunchedEffect
-    }
-    presenterManager.swapBandText(template) { presenterManager.setDisplayedVerses(selectedVerses) }
+// Both bands are driven by a collector rather than by a content-keyed LaunchedEffect: a swap owns
+// the shared band clock for as long as it runs, and an effect restarting on one of its keys would
+// cancel it mid-animation and replay it from the first frame. Reading the inputs inside snapshotFlow
+// also means the several writes one operator action makes — a section and its line index — arrive
+// as ONE target rather than as one restart each.
+//
+// collect, not collectLatest: a change arriving mid-swap waits. The fade in flight runs to its end
+// and the band settles before the next one starts, because cutting a fade off part-way reads as the
+// words jumping rather than changing. snapshotFlow conflates while the collector is busy and re-reads
+// when it resumes, so a pile-up of changes lands on one crossfade to the newest — the band never
+// walks through every verse an operator skimmed past.
+LaunchedEffect(presenterManager, bibleTemplate) {
+    snapshotFlow {
+        BibleBandTarget(presenterManager.selectedVerses.value, presenterManager.bibleHold.value)
+    }.collect { target -> presenterManager.applyBibleTarget(target, bibleTemplate) }
 }
 
-LaunchedEffect(lyricSection, lyricSectionVersion, songDisplayLineIndex) {
-    val template = songTemplate
-    val sameSection = lyricSection == presenterManager.displayedLyricSection.value
-    val sameLine = songDisplayLineIndex == presenterManager.bandSongLineIndex.value
-    val animatesChange = template != null &&
-        presenterManager.presentingMode.value == Presenting.LYRICS &&
-        presenterManager.bandIsUp() &&
-        !(sameSection && sameLine)
-    if (!animatesChange) {
-        presenterManager.setDisplayedLyricSection(lyricSection)
-        presenterManager.setBandSongLineIndex(songDisplayLineIndex)
-        presenterManager.setSongTransitionAlpha(1f)
-        return@LaunchedEffect
-    }
-    presenterManager.swapBandText(template) {
-        presenterManager.setDisplayedLyricSection(lyricSection)
-        presenterManager.setBandSongLineIndex(songDisplayLineIndex)
-    }
+LaunchedEffect(presenterManager, songTemplate, songBandLineMode) {
+    snapshotFlow {
+        SongBandTarget(
+            presenterManager.lyricSection.value,
+            presenterManager.lyricSectionVersion.value,
+            presenterManager.bandLineIndex(songBandLineMode),
+        )
+    }.collect { target -> presenterManager.applySongTarget(target, songTemplate) }
 }
 
 LaunchedEffect(selectedImagePath) {
@@ -287,9 +283,9 @@ LaunchedEffect(announcementText) {
 }
 
 /** Plays one band phase from [from] to 1 over [durationMs], publishing every frame to the clock. */
-private suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long, from: Float = 0f) {
-    setLottieBandClock(BibleBandClock(phase, from))
-    val anim = Animatable(from)
+private suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long) {
+    setLottieBandClock(BibleBandClock(phase, 0f))
+    val anim = Animatable(0f)
     anim.animateTo(1f, tween(durationMillis = durationMs.toInt().coerceAtLeast(1), easing = LinearEasing)) {
         setLottieBandClock(BibleBandClock(phase, this.value))
     }
@@ -303,14 +299,72 @@ private fun PresenterManager.bandIsUp(): Boolean {
 }
 
 /**
- * Crossfades to the new text: applies [swap] and, in the same snapshot, starts the phase that
- * plays the old text out and the new text in together, then settles on the hold. Lets the
- * entrance land first. The band keeps the words it was showing for the outgoing layer, so a
- * change that interrupts an earlier change fades out whatever was arriving.
+ * Crossfades to the new text: publishes [outgoing] as the words to play out, applies [swap] and
+ * starts the phase that plays the two together, then settles on the hold. The three writes are
+ * contiguous, so one recomposition sees all of them and no output ever draws the new text at the
+ * settled frame for a frame before the swap begins.
+ *
+ * The entrance is allowed to land first: both drivers write the one band clock, and a swap
+ * starting under a running `ENTER` would fight it for every frame.
  */
-private suspend fun PresenterManager.swapBandText(template: BibleLottieTemplate, swap: () -> Unit) {
+private suspend fun PresenterManager.swapBandText(
+    template: BibleLottieTemplate,
+    outgoing: BandOutgoing,
+    swap: () -> Unit,
+) {
     snapshotFlow { lottieBandClock.value.phase }.first { it != BibleBandPhase.ENTER }
+    setBandOutgoing(outgoing)
     swap()
     runBandPhase(BibleBandPhase.TEXT_SWAP, template.swapMs())
     setLottieBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
+    setBandOutgoing(BandOutgoing())
+}
+
+/** What the Bible band should be showing, and whether hold is staging the selection instead. */
+private data class BibleBandTarget(val verses: List<SelectedVerse>, val hold: Boolean)
+
+/** What the song band should be showing. The version makes re-picking the same section a change. */
+private data class SongBandTarget(val section: LyricSection, val version: Int, val lineIndex: Int)
+
+/** The line the band is on, or [WHOLE_SECTION] when it is not showing one line at a time. */
+private fun PresenterManager.bandLineIndex(lineMode: Boolean): Int =
+    if (lineMode) songDisplayLineIndex.value else WHOLE_SECTION
+
+/** No single line: the band is drawing the section entire, so the selected line does not reach it. */
+private const val WHOLE_SECTION = -1
+
+/** Moves the Bible band — and the classic band's displayed verses — onto [target]. */
+private suspend fun PresenterManager.applyBibleTarget(target: BibleBandTarget, template: BibleLottieTemplate?) {
+    if (target.hold) return
+    val animating = template?.takeIf {
+        presentingMode.value == Presenting.BIBLE && bandIsUp() && displayedVerses.value != target.verses
+    }
+    if (animating == null) {
+        setDisplayedVerses(target.verses)
+        setBibleTransitionAlpha(1f)
+        return
+    }
+    swapBandText(animating, BandOutgoing(verses = displayedVerses.value)) { setDisplayedVerses(target.verses) }
+}
+
+/** Moves the song band — and the classic band's displayed section — onto [target]. */
+private suspend fun PresenterManager.applySongTarget(target: SongBandTarget, template: BibleLottieTemplate?) {
+    val animating = template?.takeIf {
+        val settled = target.section == displayedLyricSection.value && target.lineIndex == bandSongLineIndex.value
+        presentingMode.value == Presenting.LYRICS && bandIsUp() && !settled
+    }
+    if (animating == null) {
+        setDisplayedLyricSection(target.section)
+        setBandSongLineIndex(target.lineIndex)
+        setSongTransitionAlpha(1f)
+        return
+    }
+    val outgoing = BandOutgoing(
+        lyricSection = displayedLyricSection.value,
+        lyricLineIndex = bandSongLineIndex.value,
+    )
+    swapBandText(animating, outgoing) {
+        setDisplayedLyricSection(target.section)
+        setBandSongLineIndex(target.lineIndex)
+    }
 }

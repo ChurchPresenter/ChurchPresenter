@@ -138,4 +138,96 @@ class SettingsAccessorRoundTripTest {
     fun `every stock photo setting is readable and unchanged after a reload`() {
         assertEveryAccessorSurvives(StockPhotoSettings.serializer(), StockPhotoSettings(), expectedAtLeast = 2)
     }
+
+    // The records the settings above nest. `accessorsOf` reads the declared methods of the class it
+    // is handed and no deeper, so a record reached only through its owner is never exercised by the
+    // owner's own entry -- and nesting is now the rule rather than the exception, because
+    // `SongSettings` is at the JVM's 255-slot constructor ceiling and a new song setting has to go
+    // into a record to exist at all.
+
+    @Test
+    fun `every per-translation bible setting is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(
+            BibleTranslationSettings.serializer(),
+            BibleTranslationSettings(),
+            expectedAtLeast = 60,
+        )
+    }
+
+    @Test
+    fun `every screen assignment field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(ScreenAssignment.serializer(), ScreenAssignment(), expectedAtLeast = 30)
+    }
+
+    @Test
+    fun `every background field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(BackgroundConfig.serializer(), BackgroundConfig(), expectedAtLeast = 15)
+    }
+
+    @Test
+    fun `every companion satellite setting is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(
+            CompanionSatelliteSettings.serializer(),
+            CompanionSatelliteSettings(),
+            expectedAtLeast = 15,
+        )
+    }
+
+    @Test
+    fun `every lyric style field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(SongLyricStyle.serializer(), SongLyricStyle(), expectedAtLeast = 15)
+    }
+
+    @Test
+    fun `every secondary language field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(SongSecondaryLanguage.serializer(), SongSecondaryLanguage(), expectedAtLeast = 3)
+    }
+
+    @Test
+    fun `every song outline is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(SongOutlines.serializer(), SongOutlines(), expectedAtLeast = 10)
+    }
+
+    @Test
+    fun `every credit style field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(SongCreditStyle.serializer(), SongCreditStyle(), expectedAtLeast = 15)
+    }
+
+    @Test
+    fun `every stage monitor zone style field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(StageMonitorZoneStyle.serializer(), StageMonitorZoneStyle(), expectedAtLeast = 14)
+    }
+
+    @Test
+    fun `every quick background field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(QuickBackground.serializer(), QuickBackground(), expectedAtLeast = 4)
+    }
+
+    @Test
+    fun `every web bookmark field is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(WebBookmark.serializer(), WebBookmark(), expectedAtLeast = 2)
+    }
+
+    @Test
+    fun `every presentation remote setting is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(
+            PresentationRemoteSettings.serializer(),
+            PresentationRemoteSettings(),
+            expectedAtLeast = 1,
+        )
+    }
+
+    @Test
+    fun `every keyboard shortcut override is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(
+            KeyboardShortcutSettings.serializer(),
+            KeyboardShortcutSettings(),
+            expectedAtLeast = 1,
+        )
+    }
+
+    @Test
+    fun `every stage monitor zone size is readable and unchanged after a reload`() {
+        assertEveryAccessorSurvives(StageMonitorZoneSizes.serializer(), StageMonitorZoneSizes(), expectedAtLeast = 2)
+    }
 }

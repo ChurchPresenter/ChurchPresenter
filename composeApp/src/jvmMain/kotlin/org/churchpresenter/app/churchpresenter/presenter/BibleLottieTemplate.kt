@@ -1,8 +1,10 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -228,12 +230,33 @@ private fun readTextMotion(meta: JsonObject?): BandTextMotion =
         else -> BandTextMotion.NONE
     }
 
+/**
+ * Bumped when a template has been written, so everything showing one reads it again.
+ *
+ * The band generator saves over the same path it loaded from, so the path alone cannot tell a new
+ * template from the old one: without this, editing a band and saving it did nothing until the app
+ * was restarted, and the generator's own controls looked broken.
+ */
+private val templateGeneration = mutableStateOf(0)
+
+/** Re-reads every band template from disk. Call after one has been written. */
+internal fun invalidateBibleLottieTemplates() {
+    templateGeneration.value++
+}
+
 /** Reads and parses [path] off the UI thread; null while loading and for a file that is not a template. */
 @Composable
-internal fun rememberBibleLottieTemplate(path: String): State<BibleLottieTemplate?> =
-    produceState<BibleLottieTemplate?>(initialValue = null, path) {
-        value = withContext(Dispatchers.IO) { loadBibleLottieTemplate(path) }
+internal fun rememberBibleLottieTemplate(path: String): State<BibleLottieTemplate?> {
+    val generation = templateGeneration.value
+    // Held across a reload rather than reset to null the way produceState would: a null template
+    // drops the presenter through to the classic band, so re-reading the file would flash the whole
+    // lower third. Only a change of path starts blank, which is a different band anyway.
+    val state = remember(path) { mutableStateOf<BibleLottieTemplate?>(null) }
+    LaunchedEffect(path, generation) {
+        state.value = withContext(Dispatchers.IO) { loadBibleLottieTemplate(path) }
     }
+    return state
+}
 
 internal fun loadBibleLottieTemplate(path: String): BibleLottieTemplate? {
     if (path.isBlank()) return null
