@@ -65,7 +65,7 @@ class LottieFontsTest {
         val resources = LottieFonts.bundledFontResources()
         val regulars = resources.filter { it.endsWith("-Regular.ttf") }
         val bolds = resources.filter { it.endsWith("-Bold.ttf") }
-        assertEquals(11, regulars.size, "one regular cut per declared family")
+        assertEquals(17, regulars.size, "one regular cut per declared family")
         // Bold is optional per family, but a bold must never appear without its regular.
         for (bold in bolds) {
             val regular = bold.removeSuffix("-Bold.ttf") + "-Regular.ttf"
