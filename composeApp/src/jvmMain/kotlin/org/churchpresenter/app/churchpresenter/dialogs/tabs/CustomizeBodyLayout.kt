@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +36,7 @@ import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
 import churchpresenter.composeapp.generated.resources.preview
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -47,7 +50,21 @@ import kotlin.math.ceil
  * Split out of `ProjectionCustomizeDialog.kt` alongside `CustomizeRail.kt`; see that file's note.
  */
 
-private val CONTROLS_WIDTH = 430.dp
+/**
+ * The preview column is what gets a fixed width; the controls take everything left over.
+ *
+ * It was the other way round -- controls pinned at 430dp, preview flexible -- and 430dp is not
+ * enough for a row of this form's controls. Every cell here is a fixed-size field or button group,
+ * so the ones that stretch (the spacing sliders, the shadow fields) were left with whatever the
+ * fixed ones did not take, which on several elements was about 90dp each. The picture, meanwhile,
+ * is drawn to an aspect ratio and gains nothing from the extra width: past a point it is simply a
+ * larger copy of the same frame. So the picture is bounded and the form is given the remainder --
+ * about 636dp of a 1240dp dialog.
+ */
+private val PREVIEW_WIDTH = 426.dp
+
+/** How tall the picture may grow, leaving the rest of the column to the settings beneath it. */
+private val STAGE_MAX_HEIGHT = 230.dp
 
 private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
 
@@ -78,7 +95,7 @@ internal fun CustomizeBody(
         return
     }
     Row(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.width(CONTROLS_WIDTH).fillMaxHeight()) {
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             // Bible only, and only with a stack worth choosing from: every other category has one
             // set of settings, so a selector above it would name a choice that does not exist.
             if (pane == CustomizePane.BIBLE) {
@@ -111,8 +128,15 @@ private fun CustomizePreviewColumn(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .width(PREVIEW_WIDTH)
+            .fillMaxHeight()
+            // `surface`, not `surfaceVariant`. Every boxed field in the app -- the number fields,
+            // the colour swatches, the dropdowns -- fills itself with `surfaceVariant`, so a column
+            // painted that colour is the exact tone of the controls standing on it and they read as
+            // holes in it rather than as fields. `surface` puts a step between the two and keeps
+            // the three layers the dialog is built from distinct: the card the rail and the
+            // controls sit on, the page beneath this column, and the fields on top of it.
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
@@ -129,14 +153,13 @@ private fun CustomizePreviewColumn(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         // Never dimmed with the controls: this is what the screen shows, which is just as true when
         // the category is following the global settings as when it has its own.
+        // The picture takes the height its own aspect ratio asks for and no more, so the settings
+        // below it start directly under it rather than after a band of empty column.
         BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth().weight(1f).padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            // Width only, capped so the stage's own aspect ratio cannot make it taller than the
-            // space between the caption and the strip -- the same shape the settings tabs give
-            // their previews, with a height cap added because this column, unlike theirs, does not
-            // scroll.
+            // Width only: the stage's own `aspectRatio` sets the height from it.
             val output = previewOutputSize(draft)
             CustomizeStagePanel(
                 pane = pane,
@@ -144,12 +167,29 @@ private fun CustomizePreviewColumn(
                 settings = draft,
                 assignment = assignment,
                 slot = PreviewSampleSlot.MEDIUM,
-                modifier = Modifier.width(minOf(maxWidth, maxHeight * output.aspectRatio)),
+                modifier = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio)),
             )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        DimmedWhenFollowing(live, Modifier.fillMaxWidth()) {
-            CustomizeCategoryStrip(pane, draft, assignment, onSettingsChange)
+        // Scrolls, and takes what the picture left. These rows come and go with the category and
+        // the chip -- Songs on a lyric slide draws five of them, the dictionary one -- so the block
+        // has no height it can be given in advance, and the ones past the fold were simply cut off.
+        //
+        // With the bar every other scrolling surface in the app draws: without it nothing says the
+        // rows continue below the fold, and an operator has no reason to look for them.
+        val stripScroll = rememberScrollState()
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
+                CustomizeCategoryStrip(
+                    pane = pane,
+                    element = element,
+                    settings = draft,
+                    assignment = assignment,
+                    onSettingsChange = onSettingsChange,
+                    modifier = Modifier.verticalScroll(stripScroll),
+                )
+            }
+            SettingsScrollbar(stripScroll)
         }
     }
 }

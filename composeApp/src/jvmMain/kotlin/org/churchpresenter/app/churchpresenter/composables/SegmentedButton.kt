@@ -157,7 +157,16 @@ private fun <T> SegmentedButtonGrid(
                                         text = item.label,
                                         fontSize = fontSize,
                                         fontWeight = FontWeight.Bold,
-                                        lineHeight = fontSize * LINE_HEIGHT_RATIO,
+                                        // Only tightened where a label may actually take two
+                                        // lines. Setting it on a single-line label shrinks the line
+                                        // box around the glyphs, which the button then centres by
+                                        // the box rather than by the type -- so the word sits off
+                                        // centre in a control whose whole job is to line up.
+                                        lineHeight = if (maxLines > 1) {
+                                            fontSize * LINE_HEIGHT_RATIO
+                                        } else {
+                                            TextUnit.Unspecified
+                                        },
                                         textAlign = TextAlign.Center,
                                         // Ellipsized rather than clipped. A segment too narrow for
                                         // its label used to cut it mid-glyph, which reads as a

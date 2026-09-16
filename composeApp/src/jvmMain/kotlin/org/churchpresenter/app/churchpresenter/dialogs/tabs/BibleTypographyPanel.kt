@@ -116,6 +116,12 @@ internal fun BibleTypographyPanel(
             onTranslationChange = onTranslationChange,
             onReset = onReset,
         )
+        // The colour and the four face buttons, then the font and its size: two rows rather than
+        // one flowing across three cells. All three together come to more than the pane, so the
+        // single row wrapped wherever it happened to run out -- which put the size box on a line of
+        // its own, away from the font it sizes. Splitting them deliberately keeps the pair that
+        // belong together together at any width.
+        ColorControl(style, onStyleChange)
         // Flowing, not a hard row. Every cell holds fixed-size controls, so a `Row` that runs out
         // of width clips the last one instead of shrinking it -- and a clipped control is still
         // *there*, so it keeps its semantics and a click aimed at it silently lands on nothing.
@@ -127,7 +133,6 @@ internal fun BibleTypographyPanel(
             verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
             itemVerticalAlignment = Alignment.Top,
         ) {
-            ColorControl(style, onStyleChange)
             FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
         }

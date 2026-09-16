@@ -159,17 +159,24 @@ internal fun NumberControl(
     autoLabel: String? = null,
     auto: Boolean = false,
     onAutoChange: (Boolean) -> Unit = {},
+    /**
+     * A width of the caller's own, for a row that has to hold several of these at once.
+     *
+     * The derived width below is generous by design -- it is sized so a long caption is never
+     * clipped -- which is right for a lone field and wrong for four of them side by side.
+     */
+    width: Dp? = null,
 ) {
     // Widened to fit its own caption when the caption is long — the label is drawn inside the box,
     // so a fixed width clipped "Intensity (%)" to "Intensit…".
-    val width = (label.length * NUMBER_CHAR_WIDTH + NUMBER_PADDING)
+    val fieldWidth = width ?: (label.length * NUMBER_CHAR_WIDTH + NUMBER_PADDING)
         .coerceAtLeast(NUMBER_FIELD_WIDTH.value).dp
     NumberSettingsTextField(
         label = label,
         initialText = value,
         onValueChange = onValueChange,
         range = range,
-        modifier = Modifier.width(width),
+        modifier = Modifier.width(fieldWidth),
     )
     if (autoLabel != null) {
         // The Song tab's Auto-fit box, not a drawn square of this dialog's own.

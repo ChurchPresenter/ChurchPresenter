@@ -94,33 +94,6 @@ private fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this
     CustomizeElement.SONG_NEXT_SECTION -> SongStyleElement.NEXT_SECTION
     else -> SongStyleElement.LYRICS
 }
-
-/**
- * What belongs to the slide rather than to any one element: how the lyrics sit, how many languages
- * they are in, how a slide arrives and leaves, the band's depth and the margins it sits inside.
- *
- * The Song settings tab keeps these in a rail beside the element controls. The dialog has no rail,
- * so they get a chip of their own -- the same sections, drawn from the same definitions.
- */
-@Composable
-private fun SongSlideOptions(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    target: SongStyleTarget,
-) {
-    SongLyricsLayoutSection(settings, onSettingsChange)
-    SongTransitionSection(settings, onSettingsChange)
-    if (target.isLowerThird) {
-        LowerThirdHeightSection(
-            percent = settings.songSettings.lowerThirdHeightPercent,
-            onPercentChange = { percent ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent)) }
-            },
-        )
-    }
-    SongMarginsSection(settings, onSettingsChange)
-}
-
 /** Whether this screen opens a song with a title slide, and where that slide's block sits. */
 @Composable
 private fun SongTitleSlideEnabledRow(

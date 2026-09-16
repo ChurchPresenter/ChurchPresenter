@@ -110,6 +110,10 @@ internal fun SongTypographyPanel(
     onTitleSlide: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        // Two rows, for the reason the Bible panel's twin is: the colour and the faces, then the
+        // font and its size. All three cells on one flowing row came to more than the pane, so it
+        // wrapped wherever it ran out and stranded the size box away from the font it sizes.
+        SongColorControl(style, onStyleChange)
         // Flowing rather than a hard row, for the reason the Bible panel's twin is: these cells are
         // fixed-size, so a row too narrow for them clips the last one instead of shrinking it -- and
         // a clipped control keeps its semantics, so a click aimed at it lands on nothing at all.
@@ -119,7 +123,6 @@ internal fun SongTypographyPanel(
             verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
             itemVerticalAlignment = Alignment.Top,
         ) {
-            SongColorControl(style, onStyleChange)
             SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SongSizeControl(element, style, onStyleChange)
         }

@@ -23,15 +23,15 @@ import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bilingual_left_right
 import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.customize_show
 import churchpresenter.composeapp.generated.resources.end_of_song_spacing
 import churchpresenter.composeapp.generated.resources.middle
+import churchpresenter.composeapp.generated.resources.show
 import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
-import churchpresenter.composeapp.generated.resources.song_end_of_song_marker
 import churchpresenter.composeapp.generated.resources.word_wrap
 import churchpresenter.composeapp.generated.resources.customize_group_margins
 import churchpresenter.composeapp.generated.resources.customize_bilingual
 import churchpresenter.composeapp.generated.resources.customize_layout
+import churchpresenter.composeapp.generated.resources.customize_marker
 import churchpresenter.composeapp.generated.resources.customize_motion
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
@@ -40,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.DictionarySettings
@@ -63,6 +64,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun CustomizeCategoryStrip(
     pane: CustomizePane,
+    /** Which chip is selected, so a row that cannot move *this* picture is not offered under it. */
+    element: CustomizeElement?,
     settings: AppSettings,
     assignment: ScreenAssignment,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -73,7 +76,9 @@ internal fun CustomizeCategoryStrip(
     // per-element, and the stage monitor's zones carry their own geometry.
     if (pane == CustomizePane.BACKGROUND || pane == CustomizePane.STAGE_MONITOR) return
     Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = SettingsScrollbarGutter, top = 10.dp, bottom = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         when (pane) {
@@ -91,6 +96,11 @@ internal fun CustomizeCategoryStrip(
             CustomizePane.SONGS -> SongStrip(
                 ss = settings.songSettings,
                 lowerThird = lowerThird,
+                // The title slide is a heading and its credits. It does not wrap lyrics, does not
+                // repeat a chorus, takes its vertical alignment from its own control in the pane
+                // rather than from the lyrics', and carries no end-of-song marker -- so under that
+                // chip those rows would sit beside a picture none of them can change.
+                lyricSlide = element != CustomizeElement.SONG_TITLE_SLIDE,
                 // This output's own language mode, which is what decides whether two languages
                 // actually land on it -- the global tab asks the same question of the whole
                 // install. A single-language screen has nothing to arrange.
@@ -178,11 +188,15 @@ private fun BibleStrip(
     }
 }
 
+/** Lines between the last line of a song and the marker after it; the global tab's own cap. */
+private val END_OF_SONG_SPACING_RANGE = 0..20
+
 @Composable
 private fun SongStrip(
     ss: SongSettings,
     lowerThird: Boolean,
     bilingual: Boolean,
+    lyricSlide: Boolean,
     update: ((SongSettings) -> SongSettings) -> Unit,
 ) {
     MarginsStripRow(
@@ -209,50 +223,60 @@ private fun SongStrip(
     // their own until they joined the strip -- and that chip's other three sections were the
     // margins, the fades and the band height, all three of which are already on this strip, so it
     // was showing the operator the same settings twice under two different headings.
-    StripRow(stringResource(Res.string.customize_layout)) {
-        if (lowerThird) {
-            NumberControl(
-                label = stringResource(Res.string.lower_third_size),
-                value = ss.lowerThirdHeightPercent,
-                onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
-                range = BAND_RANGE,
-            )
+    if (lowerThird || lyricSlide) {
+        StripRow(stringResource(Res.string.customize_layout)) {
+            if (lowerThird) {
+                NumberControl(
+                    label = stringResource(Res.string.lower_third_size),
+                    value = ss.lowerThirdHeightPercent,
+                    onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
+                    range = BAND_RANGE,
+                )
+            }
+            if (lyricSlide) {
+                ToggleControl(
+                    label = stringResource(Res.string.word_wrap),
+                    checked = ss.wordWrap,
+                    onCheckedChange = { v -> update { it.copy(wordWrap = v) } },
+                )
+                ToggleControl(
+                    label = stringResource(Res.string.song_auto_repeat_chorus),
+                    checked = ss.autoRepeatChorus,
+                    onCheckedChange = { v -> update { it.copy(autoRepeatChorus = v) } },
+                )
+                // The lyric slides' own vertical alignment. The title slide keeps a separate one,
+                // which is why this row is absent rather than disabled under that chip: two
+                // controls both reading "Top / Middle / Bottom" on one screen, one of them inert,
+                // is worse than one control in the place that owns it.
+                ChoiceControl(
+                    options = listOf(
+                        Constants.TOP to stringResource(Res.string.top),
+                        Constants.MIDDLE to stringResource(Res.string.middle),
+                        Constants.BOTTOM to stringResource(Res.string.bottom),
+                    ),
+                    selected = ss.lyricsAlignment,
+                    onSelect = { v -> update { it.copy(lyricsAlignment = v) } },
+                )
+            }
         }
-        ToggleControl(
-            label = stringResource(Res.string.word_wrap),
-            checked = ss.wordWrap,
-            onCheckedChange = { v -> update { it.copy(wordWrap = v) } },
-        )
-        ToggleControl(
-            label = stringResource(Res.string.song_auto_repeat_chorus),
-            checked = ss.autoRepeatChorus,
-            onCheckedChange = { v -> update { it.copy(autoRepeatChorus = v) } },
-        )
-        ChoiceControl(
-            options = listOf(
-                Constants.TOP to stringResource(Res.string.top),
-                Constants.MIDDLE to stringResource(Res.string.middle),
-                Constants.BOTTOM to stringResource(Res.string.bottom),
-            ),
-            selected = ss.lyricsAlignment,
-            onSelect = { v -> update { it.copy(lyricsAlignment = v) } },
-        )
     }
     // The marker after the last line, and how far below it sits. Off means the spacing changes
     // nothing, so the field follows the switch rather than standing beside it doing nothing.
-    StripRow(stringResource(Res.string.song_end_of_song_marker)) {
+    if (lyricSlide) {
+        StripRow(stringResource(Res.string.customize_marker)) {
         ToggleControl(
-            label = stringResource(Res.string.customize_show),
+            label = stringResource(Res.string.show),
             checked = ss.showEndOfSongIndicator,
             onCheckedChange = { v -> update { it.copy(showEndOfSongIndicator = v) } },
         )
         if (ss.showEndOfSongIndicator) {
             NumberControl(
-                label = stringResource(Res.string.end_of_song_spacing).removeSuffix(":"),
-                value = ss.endOfSongIndicatorSpacing,
-                onValueChange = { v -> update { it.copy(endOfSongIndicatorSpacing = v) } },
-                range = END_OF_SONG_SPACING_RANGE,
-            )
+                    label = stringResource(Res.string.end_of_song_spacing).removeSuffix(":"),
+                    value = ss.endOfSongIndicatorSpacing,
+                    onValueChange = { v -> update { it.copy(endOfSongIndicatorSpacing = v) } },
+                    range = END_OF_SONG_SPACING_RANGE,
+                )
+            }
         }
     }
     // How the two languages sit against each other -- the one control the global Song tab has at
@@ -301,11 +325,14 @@ private fun MarginsStripRow(
     onLeft: (Int) -> Unit,
     onRight: (Int) -> Unit,
 ) {
+    // All four on one line, which is the only way they read as a set -- so they are given a width
+    // rather than taking the generous one `NumberControl` derives from its caption. Four of those
+    // came to more than this column and the last one wrapped underneath the other three.
     StripRow(stringResource(Res.string.customize_group_margins)) {
-        NumberControl(stringResource(Res.string.top), top, onTop, MARGIN_RANGE)
-        NumberControl(stringResource(Res.string.bottom), bottom, onBottom, MARGIN_RANGE)
-        NumberControl(stringResource(Res.string.left), left, onLeft, MARGIN_RANGE)
-        NumberControl(stringResource(Res.string.right), right, onRight, MARGIN_RANGE)
+        NumberControl(stringResource(Res.string.top), top, onTop, MARGIN_RANGE, width = MARGIN_FIELD_WIDTH)
+        NumberControl(stringResource(Res.string.bottom), bottom, onBottom, MARGIN_RANGE, width = MARGIN_FIELD_WIDTH)
+        NumberControl(stringResource(Res.string.left), left, onLeft, MARGIN_RANGE, width = MARGIN_FIELD_WIDTH)
+        NumberControl(stringResource(Res.string.right), right, onRight, MARGIN_RANGE, width = MARGIN_FIELD_WIDTH)
     }
 }
 
@@ -374,6 +401,17 @@ private fun StripRow(label: String, content: @Composable () -> Unit) {
     }
 }
 
-private val STRIP_CAPTION_WIDTH = 68.dp
+/** Four of these and their gaps are exactly what this column has room for beside the caption. */
+private val MARGIN_FIELD_WIDTH = 74.dp
+
+/**
+ * Wide enough for the longest caption on one line.
+ *
+ * "BILINGUAL" is nine bold uppercase characters with tracking, which comes to about 65dp -- so at
+ * 58 it wrapped, and a two-line caption pushes its whole row taller than every other row on the
+ * strip. The budget is what the margins row needs: four 74dp fields and three 8dp gaps is 320, and
+ * the column has 402 inside its padding, so anything up to 82 here still keeps them on one line.
+ */
+private val STRIP_CAPTION_WIDTH = 72.dp
 private val STRIP_CAPTION_SIZE = 10.sp
 private val STRIP_CAPTION_TRACKING = 0.9.sp
