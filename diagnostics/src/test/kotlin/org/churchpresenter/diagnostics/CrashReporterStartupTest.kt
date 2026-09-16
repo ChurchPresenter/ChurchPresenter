@@ -134,6 +134,22 @@ class CrashReporterStartupTest {
     }
 
     @Test
+    fun `re-enabling video backgrounds clears the guard on disk as well as in memory`() {
+        secondCrashPending(kind = null)
+        startUp(analyticsReportingEnabled = false)
+        assertTrue(CrashReporter.videoBackgroundsDisabled, "the fixture has to have tripped the guard")
+
+        CrashReporter.reEnableVideoBackgrounds()
+
+        assertFalse(CrashReporter.videoBackgroundsDisabled, "the override takes effect in this session")
+        assertEquals(
+            "0",
+            crashCountFile.readText().trim(),
+            "the count is what re-arms the guard next launch, so the override has to reset it too",
+        )
+    }
+
+    @Test
     fun `the recorded kind is consumed, so a later crash that records nothing is not judged by it`() {
         secondCrashPending(CrashKind.RENDERER)
         startUp(analyticsReportingEnabled = false)
