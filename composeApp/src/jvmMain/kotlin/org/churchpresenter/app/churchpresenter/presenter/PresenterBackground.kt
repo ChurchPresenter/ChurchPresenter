@@ -265,7 +265,14 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
     )
 
 /**
- * What to wash over the part of a lower-third output the band does not cover, or null for nothing.
+ * The wash's colour (or null for nothing) and whether it is painted behind the band too — see
+ * [resolveAboveBand].
+ */
+internal data class AboveBand(val fill: Color?, val fillsBehindBand: Boolean)
+
+/**
+ * What to wash over the part of a lower-third output the band does not cover, or null for nothing,
+ * and whether that wash is also painted behind the band itself.
  *
  * The band and the area above it are two different decisions, so this does not go through
  * [resolveBackground]: a quick-tray pick or a song's own background replaces the *band*, and
@@ -278,22 +285,20 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
  * surface can carry a picture of its own while still taking the shared wash above it. Reading the
  * band's type instead would have made "has its own picture" silently mean "loses the wash".
  *
- * `Transparent` at the end of the chain returns null rather than [Color.Transparent]: nothing is
- * drawn there at all, which is what a Browser Source or NDI alpha output needs in order to key.
+ * `Transparent` at the end of the chain returns a null fill rather than [Color.Transparent]:
+ * nothing is drawn there at all, which is what a Browser Source or NDI alpha output needs in order
+ * to key. [AboveBand.fillsBehindBand] follows the same defer chain independently of the colour, so
+ * a surface can inherit the Default's wash colour while overriding just the behind-band choice.
  */
-internal fun aboveBandFill(settings: BackgroundSettings, config: BackgroundConfig): Color? {
+internal fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundConfig): AboveBand {
     val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
+    val fillsBehindBand =
+        if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand
     val type = if (defers) settings.defaultLowerThirdAboveBandType else config.aboveBandType
-    if (type != Constants.BACKGROUND_COLOR) return null
+    if (type != Constants.BACKGROUND_COLOR) return AboveBand(null, fillsBehindBand)
     val hex = if (defers) settings.defaultLowerThirdAboveBandColor else config.aboveBandColor
     val opacity = if (defers) settings.defaultLowerThirdAboveBandOpacity else config.aboveBandOpacity
-    return parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f))
-}
-
-/** Whether [aboveBandFill] is painted behind the band too — see [BackgroundConfig.aboveBandFillsBehindBand]. */
-internal fun aboveBandFillsBehindBand(settings: BackgroundSettings, config: BackgroundConfig): Boolean {
-    val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
-    return if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand
+    return AboveBand(parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f)), fillsBehindBand)
 }
 
 /**
