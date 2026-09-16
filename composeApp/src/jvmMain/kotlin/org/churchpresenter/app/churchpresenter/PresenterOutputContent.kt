@@ -73,7 +73,12 @@ internal fun PresenterOutputContent(
     // screen, in which case its own Stage Monitor / Bible / Song appearance replaces the global
     // one. Resolved here rather than at the caller so no output path can forget to do it, and
     // identical to [appSettings] for an output that has never been customized.
-    val outputSettings = appSettings.resolvedFor(screenAssignment)
+    // Remembered: an override is a sparse tree merged into the document and decoded, which is
+    // real work to repeat on every recomposition. Keyed on both sides, so it is redone exactly
+    // when one of them changes and not otherwise.
+    val outputSettings = remember(appSettings, screenAssignment) {
+        appSettings.resolvedFor(screenAssignment)
+    }
     val modeCrossfadeDuration = modeCrossfadeDuration(outputSettings.bibleSettings, outputSettings.songSettings)
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses

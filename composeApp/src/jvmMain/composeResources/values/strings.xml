@@ -901,6 +901,7 @@
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>
+    <string name="customize_element_slide">Slide</string>
     <string name="song_primary_language">1st Language</string>
     <string name="song_secondary_language">2nd Language</string>
     <string name="text_outline">Outline</string>

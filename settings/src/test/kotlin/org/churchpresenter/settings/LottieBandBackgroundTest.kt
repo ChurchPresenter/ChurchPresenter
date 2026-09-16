@@ -47,7 +47,9 @@ class LottieBandBackgroundTest {
         val override = BackgroundSettings(
             songLowerThirdBackground = BackgroundConfig(Constants.BACKGROUND_LOTTIE, backgroundLottie = "/mine.json"),
         )
-        val assignment = ScreenAssignment(backgroundOverride = override)
+        val assignment = ScreenAssignment(
+            backgroundOverride = backgroundOverrideOf(BackgroundSettings(), override),
+        )
         val resolved = AppSettings().resolvedFor(assignment)
         assertEquals("/mine.json", resolved.backgroundSettings.songLowerThirdBackground.backgroundLottie)
         val plain = AppSettings().resolvedFor(ScreenAssignment()).backgroundSettings

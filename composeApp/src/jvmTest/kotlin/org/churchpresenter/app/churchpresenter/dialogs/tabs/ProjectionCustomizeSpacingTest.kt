@@ -13,6 +13,8 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.churchpresenter.app.churchpresenter.songSettingsOn
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * The letter- and word-spacing sliders shared by the Song and Bible panes. Both run a -20..100
@@ -52,10 +54,10 @@ class ProjectionCustomizeSpacingTest {
     )
 
     private fun AppSettings.storedSong(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
 
     private fun AppSettings.storedTranslation(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
             .translationList()[0]
 
     private val letter = "Letter spacing"

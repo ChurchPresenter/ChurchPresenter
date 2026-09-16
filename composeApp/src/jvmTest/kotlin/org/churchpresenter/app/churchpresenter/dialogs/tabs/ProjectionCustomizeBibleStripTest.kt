@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * The strip under the Bible preview: the four margins, the fades, and the two rows that only mean
@@ -39,7 +40,7 @@ class ProjectionCustomizeBibleStripTest {
     )
 
     private fun AppSettings.stored(): BibleSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
 
     // ── The margins ───────────────────────────────────────────────────────────
 

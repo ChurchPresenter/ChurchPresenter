@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * Driving the Bible pane's controls, and reading back what each one stored.
@@ -59,11 +60,11 @@ class ProjectionCustomizeBibleControlsTest {
     )
 
     private fun AppSettings.storedTranslation(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
             .translationList()[0]
 
     private fun AppSettings.storedBible(): BibleSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
 
     // ── The verse text ──────────────────────────────────────────────────────────────────────────
 

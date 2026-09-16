@@ -18,6 +18,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * Which row the Background pane draws for each type it can be set to, and what picking a type
@@ -41,7 +42,7 @@ class ProjectionCustomizeBackgroundTypesTest {
     )
 
     private fun AppSettings.stored(): BackgroundConfig = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundOverride,
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(),
         "the output must have its own Backgrounds",
     ).songBackground
 

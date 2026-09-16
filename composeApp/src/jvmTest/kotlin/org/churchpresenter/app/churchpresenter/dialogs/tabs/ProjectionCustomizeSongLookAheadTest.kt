@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The Song pane's look-ahead elements on both stored profiles: the face buttons, the next section's
@@ -46,7 +47,7 @@ class ProjectionCustomizeSongLookAheadTest {
     private val band = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
 
     // ── The look-ahead line's face buttons ──────────────────────────────────────────────────────
 

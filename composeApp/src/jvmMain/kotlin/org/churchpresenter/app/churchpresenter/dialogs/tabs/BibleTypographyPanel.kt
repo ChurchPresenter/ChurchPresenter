@@ -99,9 +99,16 @@ internal fun BibleTypographyPanel(
     autoFit: (() -> Unit)?,
     autoFitEnabled: Boolean,
     modifier: Modifier = Modifier,
+    /**
+     * The row of element chips, translation name and Reset above the controls.
+     *
+     * Off for the per-output Customize dialog, which selects the element and the translation with
+     * chips of its own above the pane and would otherwise draw both twice.
+     */
+    showHeader: Boolean = true,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ElementHeaderRow(
+        if (showHeader) ElementHeaderRow(
             translation = translation,
             moduleTitle = moduleTitle,
             element = element,

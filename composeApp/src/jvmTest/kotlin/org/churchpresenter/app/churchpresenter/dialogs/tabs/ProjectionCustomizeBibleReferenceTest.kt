@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * The Bible pane's reference element: where the reference sits relative to the verse, and whether
@@ -44,7 +45,7 @@ class ProjectionCustomizeBibleReferenceTest {
     )
 
     private fun AppSettings.stored(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
             .translationList()[0]
 
     private fun open(test: androidx.compose.ui.test.ComposeUiTest, override: Boolean = true) =

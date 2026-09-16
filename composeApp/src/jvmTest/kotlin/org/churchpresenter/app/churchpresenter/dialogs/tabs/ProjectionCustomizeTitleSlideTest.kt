@@ -23,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The Title Slide chip of the Customize dialog's Song pane: this output's own title slide, with
@@ -40,7 +41,7 @@ class ProjectionCustomizeTitleSlideTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
 
     @Test
     fun `the title slide is the first chip of the Song pane`() {

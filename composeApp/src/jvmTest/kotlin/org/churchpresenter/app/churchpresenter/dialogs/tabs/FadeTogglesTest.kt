@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The three fade boxes, on the Song tab and on the Customize dialog's strip. Fade Out was the one
@@ -29,7 +30,7 @@ class FadeTogglesTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
 
     // ── The Song tab ──────────────────────────────────────────────────────────
 

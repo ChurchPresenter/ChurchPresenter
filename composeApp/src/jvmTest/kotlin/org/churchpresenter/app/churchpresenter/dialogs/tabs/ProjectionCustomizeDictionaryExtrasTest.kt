@@ -13,6 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.dictionarySettingsOn
 
 /**
  * The Dictionary pane's reference element: its Show switch, its font picker and its shadow rows.
@@ -36,7 +37,7 @@ class ProjectionCustomizeDictionaryExtrasTest {
     )
 
     private fun AppSettings.stored(): DictionarySettings = assertNotNull(
-        projectionSettings.screenAssignments[0].dictionaryOverride,
+        projectionSettings.screenAssignments[0].dictionarySettingsOn(),
         "the output must have its own Dictionary",
     )
 

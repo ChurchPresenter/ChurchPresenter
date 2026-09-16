@@ -14,6 +14,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The Song pane's title and number: when each appears, how big the title is, and which corner the
@@ -40,7 +41,7 @@ class ProjectionCustomizeSongTitleNumberTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
 
     private fun ComposeUiTest.openTitle(override: Boolean = true) =
         openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE, override = override)

@@ -15,6 +15,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * The row of translation chips above the Bible pane's controls. It is the only pane with one — every
@@ -34,7 +35,7 @@ class ProjectionCustomizeTranslationChipsTest {
     )
 
     private fun AppSettings.stored(index: Int): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
             .translationList()[index]
 
     private val stack = arrayOf(

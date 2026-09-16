@@ -14,6 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * The Background pane's gradient, which only the two lower-third surfaces offer.
@@ -47,7 +48,7 @@ class ProjectionCustomizeBackgroundGradientTest {
 
     private fun AppSettings.storedBand(): BackgroundConfig =
         assertNotNull(
-            projectionSettings.screenAssignments[0].backgroundOverride,
+            projectionSettings.screenAssignments[0].backgroundSettingsOn(),
             "the output must have its own Backgrounds",
         ).bibleLowerThirdBackground
 

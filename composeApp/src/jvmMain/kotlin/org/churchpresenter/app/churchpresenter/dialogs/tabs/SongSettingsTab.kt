@@ -245,7 +245,7 @@ fun SongSettingsTab(
 
 /** Whether a song opens with a slide naming it, and where on the screen that slide's text sits. */
 @Composable
-private fun SongTitleSlideSection(
+internal fun SongTitleSlideSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -296,7 +296,7 @@ private fun SongTitleSlideSection(
 
 /** How the lyrics sit on the slide, and how many languages they are shown in. */
 @Composable
-private fun SongLyricsLayoutSection(
+internal fun SongLyricsLayoutSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -395,7 +395,7 @@ private fun SongLyricsLayoutSection(
 /** How a slide arrives and leaves, and how far the end-of-song marker sits from the last line. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SongTransitionSection(
+internal fun SongTransitionSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -487,7 +487,7 @@ private fun SongTransitionSection(
 
 /** The four margins, as a plain grid; the preview above shows what they do to the text. */
 @Composable
-private fun SongMarginsSection(
+internal fun SongMarginsSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
@@ -802,11 +802,84 @@ internal fun SongElementRow(
         )
         Spacer(Modifier.weight(1f))
     }
+    SongElementOptions(settings, onSettingsChange, element, target, language, titleSlideView)
+}
+
+/**
+ * Everything under the element chips that belongs to the selected element -- what a slide holds,
+ * which languages it shows, when the number and the title appear and where the number sits.
+ *
+ * Split from [SongElementRow] so the per-output Customize dialog can draw the same controls without
+ * the chip strip, which it has one of its own. Two surfaces, one definition: a control added here
+ * appears in both, which is the only way they stay in step.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun SongElementOptions(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
+    titleSlideView: Boolean = false,
+) {
+    val song = settings.songSettings
+    if (titleSlideView) {
+        SongTitleSlideOptions(settings, onSettingsChange, element, target)
+        return
+    }
     // The chunk and the language scope belong to the output rather than to a language, and the
     // first language's panel already carries them -- a second copy here would be the same control
     // twice. So would the show/position row, which is the number's and the title's alone.
     if (language.isSecondary) return
-    if (titleSlideView) {
+    // How much of the song a slide holds, and which languages it shows. Both belong to the output
+    // rather than to an element, so they sit under the tabs rather than in the grid -- and on a row
+    // of their own, because five element tabs plus both of these is wider than the pane and left
+    // them crushed to a column of single letters.
+    //
+    // Flowing rather than a hard row: the two labelled groups are wider than a narrow pane, and a
+    // `Row` clips rather than wraps, so the last option lost its right-hand half ("Secondary" drawn
+    // as "Seco") with nothing to say the control continued past the edge. Each label is wrapped
+    // with its own control so the pair moves as one -- flowing them separately puts a lone "Lang"
+    // at the end of the first line and its buttons at the start of the next.
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        LabeledControl(stringResource(Res.string.song_chunk)) {
+        SegmentedButton(
+            items = listOf(
+                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_VERSE, stringResource(Res.string.song_chunk_verse)),
+                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_LINE, stringResource(Res.string.song_chunk_line)),
+            ),
+            selectedValue = song.chunkFor(element, target),
+            onValueChange = { mode ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.withChunk(element, target, mode)) }
+            },
+            buttonWidth = SCOPE_BUTTON_WIDTH,
+            buttonHeight = 30.dp,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+        )
+        }
+        LabeledControl(stringResource(Res.string.song_language_scope)) {
+            SongLanguageScopeButtons(settings, onSettingsChange, target)
+        }
+    }
+    SongAppearanceRow(settings, onSettingsChange, element, target)
+}
+
+/** What the title slide draws, for the element selected -- its own view of [SongElementOptions]. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SongTitleSlideOptions(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+) {
+    val song = settings.songSettings
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
@@ -846,44 +919,6 @@ internal fun SongElementRow(
                 }
             }
         }
-        return
-    }
-    // How much of the song a slide holds, and which languages it shows. Both belong to the output
-    // rather than to an element, so they sit under the tabs rather than in the grid -- and on a row
-    // of their own, because five element tabs plus both of these is wider than the pane and left
-    // them crushed to a column of single letters.
-    //
-    // Flowing rather than a hard row: the two labelled groups are wider than a narrow pane, and a
-    // `Row` clips rather than wraps, so the last option lost its right-hand half ("Secondary" drawn
-    // as "Seco") with nothing to say the control continued past the edge. Each label is wrapped
-    // with its own control so the pair moves as one -- flowing them separately puts a lone "Lang"
-    // at the end of the first line and its buttons at the start of the next.
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        itemVerticalAlignment = Alignment.CenterVertically,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        LabeledControl(stringResource(Res.string.song_chunk)) {
-        SegmentedButton(
-            items = listOf(
-                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_VERSE, stringResource(Res.string.song_chunk_verse)),
-                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_LINE, stringResource(Res.string.song_chunk_line)),
-            ),
-            selectedValue = song.chunkFor(element, target),
-            onValueChange = { mode ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.withChunk(element, target, mode)) }
-            },
-            buttonWidth = SCOPE_BUTTON_WIDTH,
-            buttonHeight = 30.dp,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-        )
-        }
-        LabeledControl(stringResource(Res.string.song_language_scope)) {
-            SongLanguageScopeButtons(settings, onSettingsChange, target)
-        }
-    }
-    SongAppearanceRow(settings, onSettingsChange, element, target)
 }
 
 /**

@@ -63,194 +63,30 @@ internal fun BibleCustomizePane(
         onSettingsChange { s -> s.copy(bibleSettings = transform(s.bibleSettings)) }
     }
 
+    val target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN
+    val styleElement =
+        if (element == CustomizeElement.BIBLE_REFERENCE) BibleStyleElement.REFERENCE else BibleStyleElement.TEXT
+
     PaneScaffold {
-        if (element == CustomizeElement.BIBLE_REFERENCE) {
-            BibleReferenceGroup(t, lowerThird, ::updateEntry)
-        } else {
-            BibleVerseTextGroup(bs, t, lowerThird, fonts, ::updateEntry, ::updateBible)
-            BibleTypographyGroup(t, lowerThird, ::updateEntry)
-        }
+        // The same panel the Bible settings tab draws, over the same profile. Its header is off:
+        // the element and the translation are chosen by the chips above this pane, and the tab's
+        // header would draw both a second time.
+        BibleTypographyPanel(
+            translation = t,
+            moduleTitle = "",
+            element = styleElement,
+            onElementChange = {},
+            style = t.elementStyle(styleElement, target),
+            onStyleChange = { edited -> updateEntry { it.withElementStyle(styleElement, target, edited) } },
+            onTranslationChange = { transform -> updateEntry(transform) },
+            onReset = {
+                updateEntry { it.withElementStyle(styleElement, target, defaultElementStyle(styleElement, target)) }
+            },
+            availableFonts = fonts,
+            // Auto-fit measures the verse that is live, which this dialog does not have in hand.
+            autoFit = null,
+            autoFitEnabled = false,
+            showHeader = false,
+        )
     }
 }
-
-
-@Composable
-private fun BibleVerseTextGroup(
-    bs: BibleSettings,
-    t: BibleTranslationSettings,
-    lowerThird: Boolean,
-    fonts: List<String>,
-    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
-    updateBible: ((BibleSettings) -> BibleSettings) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.customize_group_verse_text)) {
-        CustomizeRow(stringResource(Res.string.font_type), labelInsideControl = true) {
-            FontControl(
-                label = stringResource(Res.string.font_type),
-                value = if (lowerThird) t.lowerThirdTextFontType else t.textFontType,
-                fonts = fonts,
-                onValueChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextFontType = v) else it.copy(textFontType = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) t.lowerThirdTextFontSize else t.textFontSize,
-                onValueChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextFontSize = v) else it.copy(textFontSize = v) }
-                },
-                range = FONT_SIZE_RANGE,
-            )
-        }
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) t.lowerThirdTextColor else t.textColor,
-                onColorChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextColor = v) else it.copy(textColor = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) t.lowerThirdTextBold else t.textBold,
-                italic = if (lowerThird) t.lowerThirdTextItalic else t.textItalic,
-                underline = if (lowerThird) t.lowerThirdTextUnderline else t.textUnderline,
-                shadow = if (lowerThird) t.lowerThirdTextShadow else t.textShadow,
-                onBoldChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextBold = v) else it.copy(textBold = v) }
-                },
-                onItalicChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextItalic = v) else it.copy(textItalic = v) }
-                },
-                onUnderlineChange = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdTextUnderline = v) else it.copy(textUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextShadow = v) else it.copy(textShadow = v) }
-                },
-                backdrop = if (lowerThird) t.lowerThirdTextBackdrop else t.textBackdrop,
-                onBackdropChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextBackdrop = v) else it.copy(textBackdrop = v) }
-                },
-                outline = if (lowerThird) t.lowerThirdTextOutline else t.textOutline,
-                onOutlineChange = { v ->
-                    updateEntry { if (lowerThird) it.copy(lowerThirdTextOutline = v) else it.copy(textOutline = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
-            HorizontalAlignControl(
-                selected = if (lowerThird) t.lowerThirdTextHorizontalAlignment else t.textHorizontalAlignment,
-                onSelect = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdTextHorizontalAlignment = v)
-                        else it.copy(textHorizontalAlignment = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.vertical_alignment)) {
-            VerticalAlignControl(bs.verticalAlignment) { v ->
-                updateBible { it.copy(verticalAlignment = v) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BibleTypographyGroup(
-    t: BibleTranslationSettings,
-    lowerThird: Boolean,
-    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
-) {
-
-    TypographyGroup(
-        letterSpacing = if (lowerThird) t.lowerThirdTextLetterSpacing else t.textLetterSpacing,
-        wordSpacing = if (lowerThird) t.lowerThirdTextWordSpacing else t.textWordSpacing,
-        transform = if (lowerThird) t.lowerThirdTextTransform else t.textTransform,
-        onLetterSpacing = { v ->
-            updateEntry {
-                if (lowerThird) it.copy(lowerThirdTextLetterSpacing = v) else it.copy(textLetterSpacing = v)
-            }
-        },
-        onWordSpacing = { v ->
-            updateEntry { if (lowerThird) it.copy(lowerThirdTextWordSpacing = v) else it.copy(textWordSpacing = v) }
-        },
-        onTransform = { v ->
-            updateEntry { if (lowerThird) it.copy(lowerThirdTextTransform = v) else it.copy(textTransform = v) }
-        },
-    )
-}
-
-@Composable
-private fun BibleReferenceGroup(
-    t: BibleTranslationSettings,
-    lowerThird: Boolean,
-    updateEntry: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
-) {
-
-    CustomizeGroup(stringResource(Res.string.customize_group_reference)) {
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) t.lowerThirdReferenceFontSize else t.referenceFontSize,
-                onValueChange = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdReferenceFontSize = v)
-                        else it.copy(referenceFontSize = v)
-                    }
-                },
-                range = FONT_SIZE_RANGE,
-            )
-        }
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) t.lowerThirdReferenceColor else t.referenceColor,
-                onColorChange = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdReferenceColor = v) else it.copy(referenceColor = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
-            HorizontalAlignControl(
-                selected = if (lowerThird) t.lowerThirdReferenceHorizontalAlignment
-                else t.referenceHorizontalAlignment,
-                onSelect = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdReferenceHorizontalAlignment = v)
-                        else it.copy(referenceHorizontalAlignment = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.position)) {
-            PositionControl(
-                selected = if (lowerThird) t.lowerThirdReferencePosition else t.referencePosition,
-                aboveValue = REFERENCE_ABOVE,
-                belowValue = REFERENCE_BELOW,
-                onSelect = { v ->
-                    updateEntry {
-                        if (lowerThird) it.copy(lowerThirdReferencePosition = v)
-                        else it.copy(referencePosition = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.customize_show_abbreviation), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.customize_show_abbreviation), t.showAbbreviation) { v ->
-                updateEntry { it.copy(showAbbreviation = v) }
-            }
-        }
-    }
-}
-
-
-
