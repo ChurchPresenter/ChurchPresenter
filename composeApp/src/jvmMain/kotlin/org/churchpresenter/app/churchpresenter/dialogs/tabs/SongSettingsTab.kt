@@ -64,6 +64,8 @@ import churchpresenter.composeapp.generated.resources.song_show_on_title_slide
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import churchpresenter.composeapp.generated.resources.song_language_bilingual
 import churchpresenter.composeapp.generated.resources.song_language_scope
+import churchpresenter.composeapp.generated.resources.song_primary_language
+import churchpresenter.composeapp.generated.resources.song_secondary_language
 import churchpresenter.composeapp.generated.resources.song_language_single
 import churchpresenter.composeapp.generated.resources.song_languages
 import churchpresenter.composeapp.generated.resources.song_lyrics_layout
@@ -114,6 +116,9 @@ private const val TRANSITION_MAX_MS = 2000f
 private const val TRANSITION_STEP_MS = 50f
 
 private val TARGET_BUTTON_WIDTH = 110.dp
+
+/** Narrower than the output switch: two words, and the row already carries three controls. */
+private val LANGUAGE_BUTTON_WIDTH = 92.dp
 /** How a row reads while the title slide is off: present, but plainly not in charge of anything. */
 private const val DISABLED_ALPHA = 0.38f
 private val ELEMENT_TAB_WIDTH = 104.dp
@@ -149,6 +154,9 @@ fun SongSettingsTab(
     val availableFonts = rememberSystemFonts()
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
+    // Which language of a bilingual song is being styled. Only the lyrics have two, so picking the
+    // second narrows the element strip to them -- see `SongElementRow`.
+    var language by remember { mutableStateOf(SongStyleLanguage.PRIMARY) }
     var showLookAhead by remember { mutableStateOf(false) }
     // Styling the title slide rather than the lyric slides -- for whichever output `target` names.
     // A view over the same two outputs, not a third one: the title slide is drawn on the band as
@@ -156,6 +164,10 @@ fun SongSettingsTab(
     // slide at all, so switching it off in the rail drops the tab back onto the lyric slides.
     var titleSlideView by remember { mutableStateOf(false) }
     val onTitleSlide = titleSlideView && settings.songSettings.titleSlideEnabled
+    // A song with one language on screen has no second profile to style, and a title slide draws one
+    // title rather than two -- so either drops the switch, and the panel back onto the first.
+    val bilingual = settings.songIsBilingual
+    val editingLanguage = if (bilingual && !onTitleSlide) language else SongStyleLanguage.PRIMARY
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
@@ -207,6 +219,14 @@ fun SongSettingsTab(
                     },
                     element = element,
                     onElementChange = { element = it },
+                    language = editingLanguage,
+                    onLanguageChange = { picked ->
+                        language = picked
+                        // The second language is the lyrics and nothing else; landing on it while
+                        // the Number tab was selected would show a strip with nowhere to be.
+                        if (picked == SongStyleLanguage.SECONDARY) element = SongStyleElement.LYRICS
+                    },
+                    bilingual = bilingual,
                     titleSlideView = onTitleSlide,
                     onTitleSlideView = {
                         titleSlideView = true
@@ -515,6 +535,9 @@ private fun SongStylePane(
     onTargetChange: (SongStyleTarget) -> Unit,
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
+    bilingual: Boolean,
     titleSlideView: Boolean,
     onTitleSlideView: () -> Unit,
     showLookAhead: Boolean,
@@ -581,6 +604,9 @@ private fun SongStylePane(
             settings = settings,
             target = target,
             onTargetChange = onTargetChange,
+            language = language,
+            onLanguageChange = onLanguageChange,
+            bilingual = bilingual,
             titleSlideView = titleSlideView,
             onTitleSlideView = onTitleSlideView,
             showLookAhead = previewLookAhead,
@@ -616,6 +642,7 @@ private fun SongStylePane(
             element = element,
             onElementChange = onElementChange,
             target = target,
+            language = language,
             availableFonts = availableFonts,
             modifier = Modifier.weight(1f).fillMaxWidth(),
             titleSlideView = titleSlideView,
@@ -629,6 +656,9 @@ private fun SongTargetSwitchRow(
     settings: AppSettings,
     target: SongStyleTarget,
     onTargetChange: (SongStyleTarget) -> Unit,
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
+    bilingual: Boolean,
     titleSlideView: Boolean,
     onTitleSlideView: () -> Unit,
     showLookAhead: Boolean,
@@ -673,6 +703,35 @@ private fun SongTargetSwitchRow(
             fontSize = MaterialTheme.typography.labelLarge.fontSize,
             modifier = Modifier.testTag("song_style_switch"),
         )
+        // Which language is being styled, in the place the Bible tab puts its translation chips and
+        // for the same reason: a second profile needs somewhere to be selected before it can be
+        // edited. Only with two languages on screen -- with one, there is no second profile to
+        // reach, and a title slide draws one title whatever the lyrics do.
+        //
+        // "1st / 2nd" rather than "Primary / Secondary", which is what the Lang row below the
+        // element tabs already says. That row picks the languages the *output shows*; this one picks
+        // whose *look* is being edited, and sharing a word left the tab with two controls reading
+        // "Secondary" that answer different questions.
+        if (bilingual && !titleSlideView) {
+            SegmentedButton(
+                items = listOf(
+                    SegmentedButtonItem(
+                        SongStyleLanguage.PRIMARY,
+                        stringResource(Res.string.song_primary_language),
+                    ),
+                    SegmentedButtonItem(
+                        SongStyleLanguage.SECONDARY,
+                        stringResource(Res.string.song_secondary_language),
+                    ),
+                ),
+                selectedValue = language,
+                onValueChange = onLanguageChange,
+                buttonWidth = LANGUAGE_BUTTON_WIDTH,
+                buttonHeight = 34.dp,
+                fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                modifier = Modifier.testTag("song_language_switch"),
+            )
+        }
         // For the picture only. Not stored: it decides what this preview draws, not what the output
         // shows, which is settled per slide by the song and the schedule. A title slide has no
         // look-ahead, so the switch goes with it.
@@ -709,6 +768,8 @@ internal fun SongElementRow(
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
     target: SongStyleTarget,
+    /** Which language is being styled; the second is the lyrics and nothing else. */
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     /**
      * The title slide's elements rather than the lyric slides'. What sits under the tabs changes
      * with it: the title slide has no chunk, no language scope and no first-page/every-page
@@ -717,7 +778,14 @@ internal fun SongElementRow(
     titleSlideView: Boolean = false,
 ) {
     val song = settings.songSettings
-    val elements = if (titleSlideView) TITLE_SLIDE_ELEMENTS else LYRIC_SLIDE_ELEMENTS
+    // Only the lyrics are drawn twice on a bilingual slide, so the second language's strip is one
+    // tab. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
+    // strip that vanished on one switch and came back on the other reads as a glitch.
+    val elements = when {
+        language.isSecondary -> listOf(SongStyleElement.LYRICS)
+        titleSlideView -> TITLE_SLIDE_ELEMENTS
+        else -> LYRIC_SLIDE_ELEMENTS
+    }
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -734,6 +802,10 @@ internal fun SongElementRow(
         )
         Spacer(Modifier.weight(1f))
     }
+    // The chunk and the language scope belong to the output rather than to a language, and the
+    // first language's panel already carries them -- a second copy here would be the same control
+    // twice. So would the show/position row, which is the number's and the title's alone.
+    if (language.isSecondary) return
     if (titleSlideView) {
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),

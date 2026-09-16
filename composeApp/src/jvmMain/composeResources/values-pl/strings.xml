@@ -2652,4 +2652,12 @@
     <string name="song_lottie_unsupported_note">Szablon decyduje o układzie i miejscu tytułu. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie, odstępy między wyrazami, podgląd następnej części i akordy nie mają zastosowania.</string>
     <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Obrys</string>
+    <string name="tooltip_outline_options">Opcje obrysu</string>
+    <string name="text_outline">Obrys</string>
+    <string name="text_outline_width">Szerokość</string>
+    <string name="outline_show">Pokaż obrys</string>
+    <string name="song_secondary_language">2. język</string>
+    <string name="song_primary_language">1. język</string>
 </resources>

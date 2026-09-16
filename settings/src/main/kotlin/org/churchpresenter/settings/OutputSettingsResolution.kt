@@ -46,7 +46,17 @@ fun BibleSettings.withAppearanceOf(override: BibleSettings): BibleSettings {
     )
 }
 
-/** [override]'s appearance on top of this document's library and song-list column state. */
+/**
+ * [override]'s appearance on top of this document's library and song-list column state.
+ *
+ * **An override is a whole [SongSettings], so a field it never carried still wins.** It is a
+ * snapshot taken when the screen was first customized, and every property the operator has not
+ * touched sits at whatever value it had then -- which, for a property that did not exist then, is
+ * the class default. That default silently beats the document, and the global setting appears to do
+ * nothing on that one screen with nothing anywhere to say why. [secondaryLanguage] is the first
+ * property to hit it and is handled below; anything nested added later has to answer the same
+ * question before it ships.
+ */
 fun SongSettings.withAppearanceOf(override: SongSettings): SongSettings = override.copy(
     storageDirectory = storageDirectory,
     songFiles = songFiles,
@@ -59,6 +69,17 @@ fun SongSettings.withAppearanceOf(override: SongSettings): SongSettings = overri
     colWidthComposer = colWidthComposer,
     lyricsPanelWidthDp = lyricsPanelWidthDp,
     editorShowChords = editorShowChords,
+    // `enabled = false` is the *absence* of a second-language styling rather than a choice of one,
+    // so a screen that has never stated its own follows the document -- which is what an operator
+    // who set the second language's colour once, globally, expects every screen to do. A screen
+    // that does want to say something states it by ticking its own box, and then it wins: the tick
+    // seeds that screen's profile from the first language, so "drawn like the first language here,
+    // blue everywhere else" is still expressible.
+    secondaryLanguage = if (override.secondaryLanguage.enabled) {
+        override.secondaryLanguage
+    } else {
+        secondaryLanguage
+    },
 )
 
 /**

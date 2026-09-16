@@ -2665,4 +2665,12 @@
     <string name="song_lottie_unsupported_note">வார்ப்புரு தளவமைப்பையும் தலைப்பின் இடத்தையும் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல், சொல் இடைவெளி, அடுத்ததின் முன்னோட்டம் மற்றும் கார்டுகள் பொருந்தாது.</string>
     <string name="bible_lottie_unsupported_note">வார்ப்புரு தளவமைப்பு, குறிப்பின் இடம் மற்றும் இரு மொழிகள் பட்டையை எப்படிப் பகிர்வது என்பதைத் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல் மற்றும் சொல் இடைவெளி பொருந்தாது.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">வெளிக்கோடு</string>
+    <string name="tooltip_outline_options">வெளிக்கோடு விருப்பங்கள்</string>
+    <string name="text_outline">வெளிக்கோடு</string>
+    <string name="text_outline_width">அகலம்</string>
+    <string name="outline_show">வெளிக்கோட்டைக் காட்டு</string>
+    <string name="song_secondary_language">2வது மொழி</string>
+    <string name="song_primary_language">1வது மொழி</string>
 </resources>

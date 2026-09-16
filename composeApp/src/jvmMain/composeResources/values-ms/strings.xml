@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Templat menentukan susun atur dan kedudukan tajuk. Gaya sepertiga bawah menetapkan fon, saiz, warna, jajaran, jarak huruf, huruf besar/kecil dan bayang; latar teks, garis bawah, garis lorek, jarak perkataan, pratonton seterusnya dan kord tidak terpakai.</string>
     <string name="bible_lottie_unsupported_note">Templat menentukan susun atur, kedudukan rujukan dan cara dua bahasa berkongsi jalur. Gaya sepertiga bawah menetapkan fon, saiz, warna, jajaran, jarak huruf, huruf besar/kecil dan bayang; latar teks, garis bawah, garis lorek dan jarak perkataan tidak terpakai.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Garis luar</string>
+    <string name="tooltip_outline_options">Pilihan garis luar</string>
+    <string name="text_outline">Garis luar</string>
+    <string name="text_outline_width">Lebar</string>
+    <string name="outline_show">Tunjukkan garis luar</string>
+    <string name="song_secondary_language">Bahasa ke-2</string>
+    <string name="song_primary_language">Bahasa ke-1</string>
 </resources>

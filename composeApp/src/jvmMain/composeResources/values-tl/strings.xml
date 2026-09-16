@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Ang template ang nagpapasya sa layout at kung saan ilalagay ang pamagat. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough, pagitan ng mga salita, look-ahead at mga chord.</string>
     <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Balangkas</string>
+    <string name="tooltip_outline_options">Mga opsyon sa balangkas</string>
+    <string name="text_outline">Balangkas</string>
+    <string name="text_outline_width">Lapad</string>
+    <string name="outline_show">Ipakita ang balangkas</string>
+    <string name="song_secondary_language">Ika-2 wika</string>
+    <string name="song_primary_language">Ika-1 wika</string>
 </resources>

@@ -438,6 +438,8 @@ private fun ZoneStyleSection(
                 onShadowChange = { v -> onStyleChange { copy(shadow = v) } },
                 backdrop = style.backdrop,
                 onBackdropChange = { v -> onStyleChange { copy(backdrop = v) } },
+                outline = style.outline,
+                onOutlineChange = { v -> onStyleChange { copy(outline = v) } },
             )
             VerticalAlignmentButtons(
                 selectedAlignment = style.verticalAlignment,

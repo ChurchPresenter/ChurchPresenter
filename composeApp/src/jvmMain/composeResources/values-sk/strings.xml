@@ -2682,4 +2682,12 @@
     <string name="song_lottie_unsupported_note">Šablóna určuje rozloženie a umiestnenie názvu. Štýl spodnej tretiny nastavuje písmo, veľkosť, farbu, zarovnanie, medzery medzi písmenami, veľkosť písmen a tieň; podklad, podčiarknutie, prečiarknutie, medzery medzi slovami, náhľad ďalšej časti a akordy sa nepoužijú.</string>
     <string name="bible_lottie_unsupported_note">Šablóna určuje rozloženie, umiestnenie odkazu a to, ako si dva jazyky pruh rozdelia. Štýl spodnej tretiny nastavuje písmo, veľkosť, farbu, zarovnanie, medzery medzi písmenami, veľkosť písmen a tieň; podklad, podčiarknutie, prečiarknutie a medzery medzi slovami sa nepoužijú.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Obrys</string>
+    <string name="tooltip_outline_options">Možnosti obrysu</string>
+    <string name="text_outline">Obrys</string>
+    <string name="text_outline_width">Šírka</string>
+    <string name="outline_show">Zobraziť obrys</string>
+    <string name="song_secondary_language">2. jazyk</string>
+    <string name="song_primary_language">1. jazyk</string>
 </resources>

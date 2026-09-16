@@ -123,7 +123,8 @@ internal fun withAnnouncementFrom(settings: AppSettings, item: ScheduleItem.Anno
             targetMinute        = item.targetMinute,
             targetSecond        = item.targetSecond,
             liveClockFormat     = item.liveClockFormat,
-            backdrop            = item.backdrop
+            backdrop            = item.backdrop,
+            outline             = item.outline,
         )
     )
 

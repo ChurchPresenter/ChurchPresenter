@@ -137,6 +137,10 @@ private fun BibleVerseTextGroup(
                 onBackdropChange = { v ->
                     updateEntry { if (lowerThird) it.copy(lowerThirdTextBackdrop = v) else it.copy(textBackdrop = v) }
                 },
+                outline = if (lowerThird) t.lowerThirdTextOutline else t.textOutline,
+                onOutlineChange = { v ->
+                    updateEntry { if (lowerThird) it.copy(lowerThirdTextOutline = v) else it.copy(textOutline = v) }
+                },
             )
         }
         CustomizeRow(stringResource(Res.string.horizontal_alignment)) {

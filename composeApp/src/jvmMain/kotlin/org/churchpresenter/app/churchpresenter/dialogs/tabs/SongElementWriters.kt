@@ -27,6 +27,7 @@ internal fun SongSettings.withNumber(s: SongElementStyle) = copy(
     songNumberTransform = s.transform,
     songNumberPosition = s.position,
     songNumberBackdrop = s.backdrop,
+    outlines = outlines.copy(songNumber = s.outline),
 )
 
 internal fun SongSettings.withNumberLowerThird(s: SongElementStyle) = copy(
@@ -47,6 +48,7 @@ internal fun SongSettings.withNumberLowerThird(s: SongElementStyle) = copy(
     songNumberLowerThirdTransform = s.transform,
     songNumberLowerThirdPosition = s.position,
     songNumberLowerThirdBackdrop = s.backdrop,
+    outlines = outlines.copy(songNumberLowerThird = s.outline),
 )
 
 internal fun SongSettings.withTitle(s: SongElementStyle) = copy(
@@ -67,6 +69,7 @@ internal fun SongSettings.withTitle(s: SongElementStyle) = copy(
     titleTransform = s.transform,
     titlePosition = s.position,
     titleBackdrop = s.backdrop,
+    outlines = outlines.copy(title = s.outline),
 )
 
 internal fun SongSettings.withTitleLowerThird(s: SongElementStyle) = copy(
@@ -87,6 +90,7 @@ internal fun SongSettings.withTitleLowerThird(s: SongElementStyle) = copy(
     titleLowerThirdTransform = s.transform,
     titleLowerThirdPosition = s.position,
     titleLowerThirdBackdrop = s.backdrop,
+    outlines = outlines.copy(titleLowerThird = s.outline),
 )
 
 internal fun SongSettings.withLyrics(s: SongElementStyle) = copy(
@@ -108,6 +112,7 @@ internal fun SongSettings.withLyrics(s: SongElementStyle) = copy(
     lyricsChordColor = s.chordColor,
     lyricsFontSizeAutoFit = s.autoFit,
     lyricsBackdrop = s.backdrop,
+    outlines = outlines.copy(lyrics = s.outline),
 )
 
 internal fun SongSettings.withLyricsLowerThird(s: SongElementStyle) = copy(
@@ -129,6 +134,7 @@ internal fun SongSettings.withLyricsLowerThird(s: SongElementStyle) = copy(
     lyricsLowerThirdChordColor = s.chordColor,
     lyricsLowerThirdFontSizeAutoFit = s.autoFit,
     lyricsLowerThirdBackdrop = s.backdrop,
+    outlines = outlines.copy(lyricsLowerThird = s.outline),
 )
 
 internal fun SongSettings.withLookAhead(s: SongElementStyle) = copy(
@@ -149,6 +155,7 @@ internal fun SongSettings.withLookAhead(s: SongElementStyle) = copy(
     lookAheadTransform = s.transform,
     lookAheadFontSizeAutoFit = s.autoFit,
     lookAheadBackdrop = s.backdrop,
+    outlines = outlines.copy(lookAhead = s.outline),
 )
 
 internal fun SongSettings.withLookAheadLowerThird(s: SongElementStyle) = copy(
@@ -169,6 +176,7 @@ internal fun SongSettings.withLookAheadLowerThird(s: SongElementStyle) = copy(
     lowerThirdLookAheadTransform = s.transform,
     lowerThirdLookAheadFontSizeAutoFit = s.autoFit,
     lowerThirdLookAheadBackdrop = s.backdrop,
+    outlines = outlines.copy(lookAheadLowerThird = s.outline),
 )
 
 internal fun SongSettings.withNextSection(s: SongElementStyle) = copy(
@@ -189,6 +197,7 @@ internal fun SongSettings.withNextSection(s: SongElementStyle) = copy(
     lookAheadNextTransform = s.transform,
     lookAheadNextFontSizeAutoFit = s.autoFit,
     lookAheadNextBackdrop = s.backdrop,
+    outlines = outlines.copy(nextSection = s.outline),
 )
 
 internal fun SongSettings.withNextSectionLowerThird(s: SongElementStyle) = copy(
@@ -209,4 +218,5 @@ internal fun SongSettings.withNextSectionLowerThird(s: SongElementStyle) = copy(
     lowerThirdLookAheadNextTransform = s.transform,
     lowerThirdLookAheadNextFontSizeAutoFit = s.autoFit,
     lowerThirdLookAheadNextBackdrop = s.backdrop,
+    outlines = outlines.copy(nextSectionLowerThird = s.outline),
 )

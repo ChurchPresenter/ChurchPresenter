@@ -2681,4 +2681,12 @@
     <string name="song_lottie_unsupported_note">O modelo decide o layout e onde fica o título. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado, espaçamento entre palavras, prévia da próxima parte e acordes não se aplicam.</string>
     <string name="bible_lottie_unsupported_note">O modelo decide o layout, a posição da referência e como dois idiomas dividem a faixa. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado e espaçamento entre palavras não se aplicam.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contorno</string>
+    <string name="tooltip_outline_options">Opções de contorno</string>
+    <string name="text_outline">Contorno</string>
+    <string name="text_outline_width">Espessura</string>
+    <string name="outline_show">Mostrar contorno</string>
+    <string name="song_secondary_language">2.º idioma</string>
+    <string name="song_primary_language">1.º idioma</string>
 </resources>

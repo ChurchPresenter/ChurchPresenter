@@ -3,9 +3,10 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -91,6 +92,7 @@ private val SIZE_FIELD_WIDTH = 76.dp
  * No chord colour here. Chords are for the stage monitor, not for what the congregation reads, so
  * neither of the outputs this panel styles ever draws one.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SongTypographyPanel(
     element: SongStyleElement,
@@ -107,15 +109,18 @@ internal fun SongTypographyPanel(
     onTitleSlide: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
+        // Flowing rather than a hard row, for the reason the Bible panel's twin is: these cells are
+        // fixed-size, so a row too narrow for them clips the last one instead of shrinking it -- and
+        // a clipped control keeps its semantics, so a click aimed at it lands on nothing at all.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Top,
         ) {
             SongColorControl(style, onStyleChange)
             SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SongSizeControl(element, style, onStyleChange)
-            Spacer(Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -211,6 +216,8 @@ private fun SongColorControl(
             strikethrough = style.strikethrough,
             onStrikethroughChange = { onStyleChange(style.copy(strikethrough = it)) },
             showShadow = false,
+            outline = style.outline,
+            onOutlineChange = { onStyleChange(style.copy(outline = it)) },
             backdrop = style.backdrop,
             onBackdropChange = { onStyleChange(style.copy(backdrop = it)) },
             buttonSize = FACE_BUTTON_SIZE,

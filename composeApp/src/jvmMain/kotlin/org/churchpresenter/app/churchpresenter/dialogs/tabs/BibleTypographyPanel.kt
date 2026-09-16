@@ -4,8 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
@@ -83,6 +84,7 @@ private val TRANSFORM_BUTTON_WIDTH = 96.dp
  * pointed at; [style] is that profile, read through [elementStyle], and [onStyleChange] writes the
  * edited copy back through [withElementStyle].
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BibleTypographyPanel(
     translation: BibleTranslationSettings,
@@ -107,21 +109,20 @@ internal fun BibleTypographyPanel(
             onTranslationChange = onTranslationChange,
             onReset = onReset,
         )
-        Row(
+        // Flowing, not a hard row. Every cell holds fixed-size controls, so a `Row` that runs out
+        // of width clips the last one instead of shrinking it -- and a clipped control is still
+        // *there*, so it keeps its semantics and a click aimed at it silently lands on nothing.
+        // That is what the outline button cost when it joined the strip: Auto went off the end and
+        // the fit it triggers stopped happening, with the panel looking perfectly normal.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Top,
         ) {
-            // Every cell but the font dropdown holds fixed-size controls, so they take their own
-            // width and the dropdown absorbs whatever is left. Sharing the row out by weight
-            // instead gave the colour cell less than its swatch and four buttons needed, and
-            // clipped the underline and strikethrough buttons clean off.
             ColorControl(style, onStyleChange)
             FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
-            // The slack goes here rather than into the font field, which at a weight grew to half
-            // the panel to show a name no longer than "Times New Roman".
-            Spacer(Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -203,6 +204,8 @@ private fun ColorControl(
             showShadow = false,
             backdrop = style.backdrop,
             onBackdropChange = { onStyleChange(style.copy(backdrop = it)) },
+            outline = style.outline,
+            onOutlineChange = { onStyleChange(style.copy(outline = it)) },
             buttonSize = FACE_BUTTON_SIZE,
         )
     }

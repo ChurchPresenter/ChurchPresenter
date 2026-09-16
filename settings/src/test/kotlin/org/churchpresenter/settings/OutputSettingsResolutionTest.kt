@@ -116,6 +116,72 @@ class OutputSettingsResolutionTest {
         assertFalse(resolved.editorShowChords, "nor does an editor preference")
     }
 
+    // ── The second language: an override snapshot must not pin a later field to its default ────
+
+    @Test
+    fun `a screen that never styled the second language follows the document`() {
+        val global = SongSettings(
+            secondaryLanguage = SongSecondaryLanguage(
+                enabled = true,
+                fullScreen = SongLyricStyle(color = "#2B14CC"),
+            ),
+        )
+        // What a screen customized before the second language existed carries: the class default.
+        val override = SongSettings(lyricsColor = "#00FF00")
+        val resolved = global.withAppearanceOf(override)
+
+        assertEquals("#00FF00", resolved.lyricsColor, "the override still supplies the appearance it has")
+        assertTrue(resolved.secondaryLanguage.enabled)
+        assertEquals(
+            "#2B14CC",
+            resolved.secondaryLanguage.fullScreen.color,
+            "an override that says nothing about the second language must not silently pin it off",
+        )
+    }
+
+    @Test
+    fun `a screen that did style the second language keeps its own`() {
+        val global = SongSettings(
+            secondaryLanguage = SongSecondaryLanguage(
+                enabled = true,
+                fullScreen = SongLyricStyle(color = "#2B14CC"),
+            ),
+        )
+        val override = SongSettings(
+            secondaryLanguage = SongSecondaryLanguage(
+                enabled = true,
+                fullScreen = SongLyricStyle(color = "#FF0000"),
+            ),
+        )
+        assertEquals(
+            "#FF0000",
+            global.withAppearanceOf(override).secondaryLanguage.fullScreen.color,
+        )
+    }
+
+    @Test
+    fun `a screen can still say the two languages look alike here`() {
+        val global = SongSettings(
+            lyricsColor = "#FFFFFF",
+            secondaryLanguage = SongSecondaryLanguage(
+                enabled = true,
+                fullScreen = SongLyricStyle(color = "#2B14CC"),
+            ),
+        )
+        // Ticking the box on this screen seeds the profile from its own first language.
+        val override = SongSettings(
+            secondaryLanguage = SongSecondaryLanguage(
+                enabled = true,
+                fullScreen = SongLyricStyle(color = "#FFFFFF"),
+            ),
+        )
+        assertEquals(
+            "#FFFFFF",
+            global.withAppearanceOf(override).secondaryLanguage.fullScreen.color,
+            "blue everywhere else, white here, is expressible -- enabled is the screen speaking",
+        )
+    }
+
     // ── Bible: the global stack decides which translations, the override how they look ──────────
 
     @Test

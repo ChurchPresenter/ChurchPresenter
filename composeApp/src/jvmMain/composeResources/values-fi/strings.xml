@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Malli päättää asettelun ja otsikon paikan. Alakolmanneksen tyyli määrää fontin, koon, värin, tasauksen, kirjainvälin, kirjainkoon ja varjon; tekstin tausta, alleviivaus, yliviivaus, sanaväli, seuraavan esikatselu ja soinnut eivät vaikuta.</string>
     <string name="bible_lottie_unsupported_note">Malli päättää asettelun, viitteen paikan ja sen, miten kaksi kieltä jakavat palkin. Alakolmanneksen tyyli määrää fontin, koon, värin, tasauksen, kirjainvälin, kirjainkoon ja varjon; tekstin tausta, alleviivaus, yliviivaus ja sanaväli eivät vaikuta.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Ääriviiva</string>
+    <string name="tooltip_outline_options">Ääriviivan asetukset</string>
+    <string name="text_outline">Ääriviiva</string>
+    <string name="text_outline_width">Leveys</string>
+    <string name="outline_show">Näytä ääriviiva</string>
+    <string name="song_secondary_language">2. kieli</string>
+    <string name="song_primary_language">1. kieli</string>
 </resources>

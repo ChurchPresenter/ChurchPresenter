@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Text
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -54,8 +53,10 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
@@ -132,6 +133,13 @@ internal fun BibleTranslationSettings.textBackdropFor(lowerThird: Boolean): Text
 /** The same for the reference line. */
 internal fun BibleTranslationSettings.referenceBackdropFor(lowerThird: Boolean): TextBackdrop =
     if (lowerThird) lowerThirdReferenceBackdrop else referenceBackdrop
+
+/** The stroke around the verse's glyphs, per output; [referenceOutlineFor] is its reference twin. */
+internal fun BibleTranslationSettings.textOutlineFor(lowerThird: Boolean): TextOutline =
+    if (lowerThird) lowerThirdTextOutline else textOutline
+
+internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): TextOutline =
+    if (lowerThird) lowerThirdReferenceOutline else referenceOutline
 
 internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
     val label = if (translation.showAbbreviation) {
@@ -871,9 +879,11 @@ fun BiblePresenter(
                                     rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
                                 Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                     if (refPosition == Constants.POSITION_ABOVE) {
-                                        Text(
-                                            itemRefText(item, buildRefText(verse, item)),
-                                            Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                        OutlinedText(
+                                            text = itemRefText(item, buildRefText(verse, item)),
+                                            modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                            outline = item.referenceOutlineFor(isLowerThird),
+                                            scaleFactor = scaleFactor,
                                             color = refColor,
                                             fontFamily = refFont,
                                             fontSize = refSize,
@@ -882,9 +892,11 @@ fun BiblePresenter(
                                             onTextLayout = itemRefPainter::onTextLayout,
                                         )
                                     }
-                                    Text(
-                                        itemText(item, verse.verseText),
-                                        Modifier.fillMaxWidth().then(itemTextPainter.modifier),
+                                    OutlinedText(
+                                        text = itemText(item, verse.verseText),
+                                        modifier = Modifier.fillMaxWidth().then(itemTextPainter.modifier),
+                                        outline = item.textOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         color = textColor,
                                         fontFamily = textFont,
                                         fontSize = textSize,
@@ -893,9 +905,11 @@ fun BiblePresenter(
                                         onTextLayout = itemTextPainter::onTextLayout,
                                     )
                                     if (refPosition == Constants.POSITION_BELOW) {
-                                        Text(
-                                            itemRefText(item, buildRefText(verse, item)),
-                                            Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                        OutlinedText(
+                                            text = itemRefText(item, buildRefText(verse, item)),
+                                            modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                            outline = item.referenceOutlineFor(isLowerThird),
+                                            scaleFactor = scaleFactor,
                                             color = refColor,
                                             fontFamily = refFont,
                                             fontSize = refSize,
@@ -1066,8 +1080,10 @@ fun BiblePresenter(
                             // Left half: primary bible
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                        outline = t0.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
                                         fontFamily = primaryBibleReferenceFontStyle,
                                         fontSize = scaledPrimaryRefSize,
@@ -1077,8 +1093,10 @@ fun BiblePresenter(
                                         onTextLayout = pRefPainter::onTextLayout,
                                     )
                                 }
-                                Text(
+                                OutlinedText(
                                     modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
+                                    outline = t0.textOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
                                     textAlign = primaryBibleHorizontalAlignment,
                                     fontFamily = primaryBibleFontStyle,
                                     fontSize = matchedBibleSize,
@@ -1088,8 +1106,10 @@ fun BiblePresenter(
                                     onTextLayout = pTextPainter::onTextLayout,
                                 )
                                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                        outline = t0.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
                                         fontFamily = primaryBibleReferenceFontStyle,
                                         fontSize = scaledPrimaryRefSize,
@@ -1103,8 +1123,10 @@ fun BiblePresenter(
                             // Right half: secondary bible
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        outline = t1.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = scaledSecondaryRefSize,
@@ -1114,8 +1136,10 @@ fun BiblePresenter(
                                         onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
-                                Text(
+                                OutlinedText(
                                     modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
+                                    outline = t1.textOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
                                     textAlign = secondaryBibleHorizontalAlignment,
                                     fontFamily = secondaryBibleFontStyle,
                                     fontSize = matchedBibleSize,
@@ -1125,8 +1149,10 @@ fun BiblePresenter(
                                     onTextLayout = sTextPainter::onTextLayout,
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        outline = t1.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = scaledSecondaryRefSize,
@@ -1214,8 +1240,10 @@ fun BiblePresenter(
                             verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                         ) {
                             if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                Text(
+                                OutlinedText(
                                     modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                    outline = t0.referenceOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
@@ -1225,8 +1253,10 @@ fun BiblePresenter(
                                     onTextLayout = pRefPainter::onTextLayout,
                                 )
                             }
-                            Text(
+                            OutlinedText(
                                 modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
+                                outline = t0.textOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
                                 textAlign = primaryBibleHorizontalAlignment,
                                 fontFamily = primaryBibleFontStyle,
                                 fontSize = matchedFittedSize,
@@ -1236,8 +1266,10 @@ fun BiblePresenter(
                                 onTextLayout = pTextPainter::onTextLayout,
                             )
                             if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                Text(
+                                OutlinedText(
                                     modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                    outline = t0.referenceOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
                                     fontFamily = primaryBibleReferenceFontStyle,
                                     fontSize = fittedPrimaryRefSize,
@@ -1249,8 +1281,10 @@ fun BiblePresenter(
                             }
                             if (showSecondary) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        outline = t1.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
@@ -1260,8 +1294,10 @@ fun BiblePresenter(
                                         onTextLayout = sRefPainter::onTextLayout,
                                     )
                                 }
-                                Text(
+                                OutlinedText(
                                     modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
+                                    outline = t1.textOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
                                     textAlign = secondaryBibleHorizontalAlignment,
                                     fontFamily = secondaryBibleFontStyle,
                                     fontSize = matchedFittedSize,
@@ -1271,8 +1307,10 @@ fun BiblePresenter(
                                     onTextLayout = sTextPainter::onTextLayout,
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(
+                                    OutlinedText(
                                         modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        outline = t1.referenceOutlineFor(isLowerThird),
+                                        scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,

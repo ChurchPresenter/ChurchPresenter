@@ -2652,4 +2652,12 @@
     <string name="song_lottie_unsupported_note">Шаблон вызначае макет і месца назвы. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне, міжслоўны інтэрвал, папярэдні прагляд наступнага і акорды не ўжываюцца.</string>
     <string name="bible_lottie_unsupported_note">Шаблон вызначае макет, месца спасылкі і тое, як дзве мовы дзеляць паласу. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне і міжслоўны інтэрвал не ўжываюцца.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Контур</string>
+    <string name="tooltip_outline_options">Параметры контуру</string>
+    <string name="text_outline">Контур</string>
+    <string name="text_outline_width">Таўшчыня</string>
+    <string name="outline_show">Паказваць контур</string>
+    <string name="song_secondary_language">2-я мова</string>
+    <string name="song_primary_language">1-я мова</string>
 </resources>

@@ -65,6 +65,8 @@ class LottieBandBackgroundTest {
             val manager = SettingsManager()
             assertEquals("bible_lower_thirds", manager.bibleLowerThirdsDir.name)
             assertTrue(manager.bibleLowerThirdsDir.isDirectory, "created on construction, like the presets folder")
+            assertEquals("lottie_presets", manager.lottiePresetsDir.name)
+            assertTrue(manager.lottiePresetsDir.isDirectory, "the presets folder the comment above appeals to")
         } finally {
             System.setProperty("user.home", saved)
             home.deleteRecursively()

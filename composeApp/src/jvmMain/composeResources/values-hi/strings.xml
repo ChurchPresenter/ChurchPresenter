@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">टेम्पलेट लेआउट और शीर्षक की जगह तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू, शब्द अंतर, अगले का पूर्वावलोकन और कॉर्ड लागू नहीं होते।</string>
     <string name="bible_lottie_unsupported_note">टेम्पलेट लेआउट, संदर्भ की जगह और दो भाषाओं के बैंड साझा करने का तरीका तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू और शब्द अंतर लागू नहीं होते।</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">आउटलाइन</string>
+    <string name="tooltip_outline_options">आउटलाइन विकल्प</string>
+    <string name="text_outline">आउटलाइन</string>
+    <string name="text_outline_width">चौड़ाई</string>
+    <string name="outline_show">आउटलाइन दिखाएँ</string>
+    <string name="song_secondary_language">दूसरी भाषा</string>
+    <string name="song_primary_language">पहली भाषा</string>
 </resources>

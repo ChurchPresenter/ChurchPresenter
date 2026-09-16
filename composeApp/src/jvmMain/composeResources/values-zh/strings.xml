@@ -2661,4 +2661,12 @@
     <string name="song_lottie_unsupported_note">模板决定版式和标题的位置。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线、词间距、下一段预览和和弦不适用。</string>
     <string name="bible_lottie_unsupported_note">模板决定版式、经文出处的位置以及两种语言如何共用字幕条。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线和词间距不适用。</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">描边</string>
+    <string name="tooltip_outline_options">描边选项</string>
+    <string name="text_outline">描边</string>
+    <string name="text_outline_width">宽度</string>
+    <string name="outline_show">显示描边</string>
+    <string name="song_secondary_language">第二语言</string>
+    <string name="song_primary_language">第一语言</string>
 </resources>

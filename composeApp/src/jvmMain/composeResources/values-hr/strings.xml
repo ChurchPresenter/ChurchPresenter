@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Predložak određuje raspored i mjesto naslova. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje, razmak riječi, pregled sljedećeg i akordi se ne primjenjuju.</string>
     <string name="bible_lottie_unsupported_note">Predložak određuje raspored, mjesto reference i kako dva jezika dijele traku. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje i razmak riječi se ne primjenjuju.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Obrub</string>
+    <string name="tooltip_outline_options">Opcije obruba</string>
+    <string name="text_outline">Obrub</string>
+    <string name="text_outline_width">Širina</string>
+    <string name="outline_show">Prikaži obrub</string>
+    <string name="song_secondary_language">2. jezik</string>
+    <string name="song_primary_language">1. jezik</string>
 </resources>

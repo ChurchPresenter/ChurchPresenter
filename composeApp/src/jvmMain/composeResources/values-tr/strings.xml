@@ -2660,4 +2660,12 @@
     <string name="song_lottie_unsupported_note">Şablon, yerleşimi ve başlığın yerini belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili, kelime aralığı, sonrakini önizleme ve akorlar uygulanmaz.</string>
     <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Dış çizgi</string>
+    <string name="tooltip_outline_options">Dış çizgi seçenekleri</string>
+    <string name="text_outline">Dış çizgi</string>
+    <string name="text_outline_width">Kalınlık</string>
+    <string name="outline_show">Dış çizgiyi göster</string>
+    <string name="song_secondary_language">2. dil</string>
+    <string name="song_primary_language">1. dil</string>
 </resources>
