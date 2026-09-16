@@ -22,7 +22,25 @@ object FontRegistry {
         "Cookie" to listOf("Cookie-Regular.ttf" to Font.PLAIN),
         "Oleo Script" to listOf("OleoScript-Regular.ttf" to Font.PLAIN, "OleoScript-Bold.ttf" to Font.BOLD),
         "Kalam" to listOf("Kalam-Regular.ttf" to Font.PLAIN, "Kalam-Bold.ttf" to Font.BOLD),
-        "Fredoka One" to listOf("FredokaOne-Regular.ttf" to Font.PLAIN)
+        "Fredoka One" to listOf("FredokaOne-Regular.ttf" to Font.PLAIN),
+        "Noto Sans" to listOf("NotoSans-Regular.ttf" to Font.PLAIN, "NotoSans-Bold.ttf" to Font.BOLD),
+        "Noto Sans Arabic" to listOf(
+            "NotoSansArabic-Regular.ttf" to Font.PLAIN,
+            "NotoSansArabic-Bold.ttf" to Font.BOLD
+        ),
+        "Noto Sans Devanagari" to listOf(
+            "NotoSansDevanagari-Regular.ttf" to Font.PLAIN,
+            "NotoSansDevanagari-Bold.ttf" to Font.BOLD
+        ),
+        "Noto Sans Thai" to listOf(
+            "NotoSansThai-Regular.ttf" to Font.PLAIN,
+            "NotoSansThai-Bold.ttf" to Font.BOLD
+        ),
+        "Noto Sans Lao" to listOf("NotoSansLao-Regular.ttf" to Font.PLAIN, "NotoSansLao-Bold.ttf" to Font.BOLD),
+        "Noto Sans Tamil" to listOf(
+            "NotoSansTamil-Regular.ttf" to Font.PLAIN,
+            "NotoSansTamil-Bold.ttf" to Font.BOLD
+        )
     )
 
     fun initialize() {

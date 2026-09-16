@@ -37,7 +37,13 @@ object LottieFonts : LottieFontManager {
         "Cookie" to ("Cookie-Regular.ttf" to null),
         "Oleo Script" to ("OleoScript-Regular.ttf" to "OleoScript-Bold.ttf"),
         "Kalam" to ("Kalam-Regular.ttf" to "Kalam-Bold.ttf"),
-        "Fredoka One" to ("FredokaOne-Regular.ttf" to null)
+        "Fredoka One" to ("FredokaOne-Regular.ttf" to null),
+        "Noto Sans" to ("NotoSans-Regular.ttf" to "NotoSans-Bold.ttf"),
+        "Noto Sans Arabic" to ("NotoSansArabic-Regular.ttf" to "NotoSansArabic-Bold.ttf"),
+        "Noto Sans Devanagari" to ("NotoSansDevanagari-Regular.ttf" to "NotoSansDevanagari-Bold.ttf"),
+        "Noto Sans Thai" to ("NotoSansThai-Regular.ttf" to "NotoSansThai-Bold.ttf"),
+        "Noto Sans Lao" to ("NotoSansLao-Regular.ttf" to "NotoSansLao-Bold.ttf"),
+        "Noto Sans Tamil" to ("NotoSansTamil-Regular.ttf" to "NotoSansTamil-Bold.ttf")
     )
 
     private val cache = mutableMapOf<String, Font?>()

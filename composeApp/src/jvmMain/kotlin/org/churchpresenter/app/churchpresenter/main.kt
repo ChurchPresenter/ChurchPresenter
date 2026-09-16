@@ -77,7 +77,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
+import churchpresenter.composeapp.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
+import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
@@ -1726,6 +1729,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             }
                             if (showLottieGenWindow) {
                                 val screenBounds = presenterScreenBounds()
+                                val lottieGenFonts = rememberSystemFonts()
+                                val lottieGenFontLabel = stringResource(Res.string.bible_font)
                                 LottieGenWindow(
                                     theme = theme,
                                     outputDir = lottieGenOutputDir,
@@ -1735,7 +1740,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         lottieGenOnFileSaved?.invoke()
                                     },
                                     canvasWidth = screenBounds.width,
-                                    canvasHeight = screenBounds.height
+                                    canvasHeight = screenBounds.height,
+                                    fontPicker = hostFontPicker(lottieGenFonts, lottieGenFontLabel),
                                 )
                             }
                             MemoryMonitorWindow(
