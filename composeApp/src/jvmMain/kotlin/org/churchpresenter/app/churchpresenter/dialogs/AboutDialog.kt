@@ -68,6 +68,7 @@ import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
 import org.churchpresenter.lottiegen.App as LottieGenApp
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.editor.StyleEditorApp
 import java.awt.Desktop
 import java.awt.Window as AwtWindow
@@ -360,7 +361,15 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
 }
 
 @Composable
-fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
+fun LottieGenWindow(
+    theme: ThemeMode,
+    outputDir: File?,
+    onClose: () -> Unit,
+    onFileSaved: (() -> Unit)? = null,
+    canvasWidth: Int? = null,
+    canvasHeight: Int? = null,
+    fontPicker: BandFontPicker? = null,
+) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),
@@ -375,7 +384,8 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
                 onFileSaved = onFileSaved,
                 canvasWidth = canvasWidth,
                 canvasHeight = canvasHeight,
-                embedded = true
+                embedded = true,
+                fontPicker = fontPicker,
             )
         }
     }

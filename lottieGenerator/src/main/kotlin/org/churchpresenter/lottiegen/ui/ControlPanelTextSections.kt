@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.LottieGenState
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
@@ -55,10 +56,10 @@ internal fun TextSection(viewModel: LottieGenState) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TextStyleSection(viewModel: LottieGenState) {
+internal fun TextStyleSection(viewModel: LottieGenState, fontPicker: BandFontPicker? = null) {
     val cfg = viewModel.config
     CollapsibleSection(Strings.sectionTextStyle, hint = cfg.fontFamily) {
-        FontAndSizeRows(viewModel)
+        FontAndSizeRows(viewModel, fontPicker)
         WeightRow(viewModel)
         CaseRow(viewModel)
     }
@@ -68,40 +69,49 @@ internal fun TextStyleSection(viewModel: LottieGenState) {
 /** The family, the base size, and the two line sizes. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FontAndSizeRows(viewModel: LottieGenState) {
+private fun FontAndSizeRows(viewModel: LottieGenState, fontPicker: BandFontPicker?) {
     val cfg = viewModel.config
-    val bundledFontNames = remember { LottieFont.entries.map { it.familyName }.toSet() }
-    val systemFontNames = rememberSystemFonts().filterNot { it in bundledFontNames }
     FieldRow {
-        var fontExpanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(fontExpanded, { fontExpanded = it }, Modifier.weight(1f)) {
-            LottieDropdown(
-                label = Strings.font,
-                value = cfg.fontFamily,
-                expanded = fontExpanded,
-                modifier = Modifier.fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+        if (fontPicker != null) {
+            // The host's own picker: searchable, grouped, each family shown in its own face.
+            fontPicker(
+                cfg.fontFamily,
+                { viewModel.updateConfig { c -> c.copy(fontFamily = it) } },
+                Modifier.weight(1f),
             )
-            ExposedDropdownMenu(fontExpanded, { fontExpanded = false }) {
-                LottieFont.entries.forEach { font ->
-                    DropdownMenuItem(
-                        text = { Text(font.familyName) },
-                        onClick = {
-                            viewModel.updateConfig { it.copy(fontFamily = font.familyName) }
-                            fontExpanded = false
-                        }
-                    )
-                }
-                if (systemFontNames.isNotEmpty()) {
-                    HorizontalDivider()
-                    systemFontNames.forEach { name ->
+        } else {
+            val bundledFontNames = remember { LottieFont.entries.map { it.familyName }.toSet() }
+            val systemFontNames = rememberSystemFonts().filterNot { it in bundledFontNames }
+            var fontExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(fontExpanded, { fontExpanded = it }, Modifier.weight(1f)) {
+                LottieDropdown(
+                    label = Strings.font,
+                    value = cfg.fontFamily,
+                    expanded = fontExpanded,
+                    modifier = Modifier.fillMaxWidth()
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                )
+                ExposedDropdownMenu(fontExpanded, { fontExpanded = false }) {
+                    LottieFont.entries.forEach { font ->
                         DropdownMenuItem(
-                            text = { Text(name) },
+                            text = { Text(font.familyName) },
                             onClick = {
-                                viewModel.updateConfig { it.copy(fontFamily = name) }
+                                viewModel.updateConfig { it.copy(fontFamily = font.familyName) }
                                 fontExpanded = false
                             }
                         )
+                    }
+                    if (systemFontNames.isNotEmpty()) {
+                        HorizontalDivider()
+                        systemFontNames.forEach { name ->
+                            DropdownMenuItem(
+                                text = { Text(name) },
+                                onClick = {
+                                    viewModel.updateConfig { it.copy(fontFamily = name) }
+                                    fontExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }

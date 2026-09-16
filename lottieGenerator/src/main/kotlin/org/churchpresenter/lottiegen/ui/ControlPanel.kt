@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.LottieGenState
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.ui.components.AccentButton
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
@@ -111,7 +112,7 @@ private fun PanelHeader() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
+fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp, fontPicker: BandFontPicker? = null) {
     val scrollState = rememberScrollState()
     var showBatchImport by remember { mutableStateOf(false) }
     var batchImportText by remember { mutableStateOf("") }
@@ -137,7 +138,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
             CanvasSection(viewModel)
             StyleLayoutSection(viewModel)
             TextSection(viewModel)
-            TextStyleSection(viewModel)
+            TextStyleSection(viewModel, fontPicker)
             ColorsSection(viewModel)
             ShapeSection(viewModel)
             LogoSection(viewModel)
