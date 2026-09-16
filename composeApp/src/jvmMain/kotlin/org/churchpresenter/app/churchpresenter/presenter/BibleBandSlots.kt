@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,45 +47,61 @@ internal fun BibleTranslationSettings.referenceSlotStyle(isKey: Boolean) = BandS
 internal fun BoxScope.BibleLottieBand(
     template: BibleLottieTemplate,
     verses: List<SelectedVerse>,
+    outgoingVerses: List<SelectedVerse>,
     t0: BibleTranslationSettings,
     t1: BibleTranslationSettings,
     bandFraction: Float,
-    bandClock: BibleBandClock,
+    bandClock: State<BibleBandClock>,
     isKey: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val primary = verses.firstOrNull() ?: return
-    val secondary = verses.getOrNull(1)
+    if (verses.isEmpty()) return
     val hasSecondSlot = template.hasLayer(BibleLottieTemplate.LAYER_TEXT_2)
-    val slots = remember(primary, secondary, t0, t1, isKey, hasSecondSlot) {
-        val text1 = t0.textSlotStyle(isKey)
-        val ref1 = t0.referenceSlotStyle(isKey)
-        val text2 = t1.textSlotStyle(isKey)
-        val ref2 = t1.referenceSlotStyle(isKey)
-        val primaryText = applyTextTransform(primary.verseText, text1.transform)
-        val primaryRef = applyTextTransform(buildRefText(primary, t0), ref1.transform)
-        val secondaryText = secondary?.let { applyTextTransform(it.verseText, text2.transform) }.orEmpty()
-        val secondaryRef = secondary?.let { applyTextTransform(buildRefText(it, t1), ref2.transform) }.orEmpty()
-        if (hasSecondSlot || secondary == null) {
-            mapOf(
-                BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText(primaryText, text1),
-                BibleLottieTemplate.LAYER_REFERENCE_1 to BandSlotText(primaryRef, ref1),
-                BibleLottieTemplate.LAYER_TEXT_2 to BandSlotText(secondaryText, text2),
-                BibleLottieTemplate.LAYER_REFERENCE_2 to BandSlotText(secondaryRef, ref2),
-            )
-        } else {
-            mapOf(
-                BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText("$primaryText\n$secondaryText", text1),
-                BibleLottieTemplate.LAYER_REFERENCE_1 to
-                    BandSlotText(
-                        listOf(primaryRef, secondaryRef).filter { it.isNotBlank() }.joinToString(REFERENCE_SEPARATOR),
-                        ref1,
-                    ),
-            )
-        }
+    val slots = remember(verses, t0, t1, isKey, hasSecondSlot) {
+        bibleBandSlots(verses, t0, t1, isKey, hasSecondSlot)
     }
-    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, modifier)
+    val outgoingSlots = remember(outgoingVerses, t0, t1, isKey, hasSecondSlot) {
+        if (outgoingVerses.isEmpty()) null else bibleBandSlots(outgoingVerses, t0, t1, isKey, hasSecondSlot)
+    }
+    LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier)
+}
+
+/** [verses] laid across the template's slots — the same mapping for the incoming and outgoing text. */
+internal fun bibleBandSlots(
+    verses: List<SelectedVerse>,
+    t0: BibleTranslationSettings,
+    t1: BibleTranslationSettings,
+    isKey: Boolean,
+    hasSecondSlot: Boolean,
+): Map<String, BandSlotText> {
+    val primary = verses.first()
+    val secondary = verses.getOrNull(1)
+    val text1 = t0.textSlotStyle(isKey)
+    val ref1 = t0.referenceSlotStyle(isKey)
+    val text2 = t1.textSlotStyle(isKey)
+    val ref2 = t1.referenceSlotStyle(isKey)
+    val primaryText = applyTextTransform(primary.verseText, text1.transform)
+    val primaryRef = applyTextTransform(buildRefText(primary, t0), ref1.transform)
+    val secondaryText = secondary?.let { applyTextTransform(it.verseText, text2.transform) }.orEmpty()
+    val secondaryRef = secondary?.let { applyTextTransform(buildRefText(it, t1), ref2.transform) }.orEmpty()
+    return if (hasSecondSlot || secondary == null) {
+        mapOf(
+            BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText(primaryText, text1),
+            BibleLottieTemplate.LAYER_REFERENCE_1 to BandSlotText(primaryRef, ref1),
+            BibleLottieTemplate.LAYER_TEXT_2 to BandSlotText(secondaryText, text2),
+            BibleLottieTemplate.LAYER_REFERENCE_2 to BandSlotText(secondaryRef, ref2),
+        )
+    } else {
+        mapOf(
+            BibleLottieTemplate.LAYER_TEXT_1 to BandSlotText("$primaryText\n$secondaryText", text1),
+            BibleLottieTemplate.LAYER_REFERENCE_1 to
+                BandSlotText(
+                    listOf(primaryRef, secondaryRef).filter { it.isNotBlank() }.joinToString(REFERENCE_SEPARATOR),
+                    ref1,
+                ),
+        )
+    }
 }
 
 /** Between two references sharing one line. */

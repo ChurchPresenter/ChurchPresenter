@@ -90,6 +90,7 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -262,8 +263,9 @@ private fun SingleDisplayPreview(
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
-    val lottieBandClock by presenterManager.lottieBandClock
+    // The clock stays wrapped: unwrapping it here would recompose this panel on every band frame.
     val bandSongLineIndex by presenterManager.bandSongLineIndex
+    val bandOutgoing by presenterManager.bandOutgoing
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
@@ -408,8 +410,9 @@ private fun SingleDisplayPreview(
                         ).coerceAtLeast(100)
                         Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
                         CompositionLocalProvider(
-                            LocalLottieBandClock provides lottieBandClock,
+                            LocalLottieBandClock provides presenterManager.lottieBandClock,
                             LocalBandSongLineIndex provides bandSongLineIndex,
+                            LocalBandOutgoing provides bandOutgoing,
                         ) {
                         when (mode) {
                             Presenting.BIBLE ->

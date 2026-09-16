@@ -390,6 +390,8 @@ object Strings {
     val bandImageClear: String get() = bundle.getString("band_image_clear")
     val bandColorBorder: String get() = bundle.getString("band_color_border")
     val bandBorderThickness: String get() = bundle.getString("band_border_thickness")
+    val bandBorderColor: String get() = bundle.getString("band_border_color")
+    val bandGradientPosition: String get() = bundle.getString("band_gradient_position")
     val bandCornerRadius: String get() = bundle.getString("band_corner_radius")
     val bandInset: String get() = bundle.getString("band_inset")
     val bandPadding: String get() = bundle.getString("band_padding")
@@ -441,6 +443,7 @@ object Strings {
     val bandSaveHint: String get() = bundle.getString("band_save_hint")
     val bandUnitSeconds: String get() = bundle.getString("band_unit_seconds")
     val bandUnitPx: String get() = bundle.getString("band_unit_px")
+    val bandUnitPercent: String get() = bundle.getString("band_unit_percent")
     fun bandStatusSaved(name: String): String = MessageFormat.format(bundle.getString("band_status_saved"), name)
     fun bandStatusError(message: String): String = MessageFormat.format(bundle.getString("band_status_error"), message)
     fun bandStatusPictureUnreadable(name: String): String =
