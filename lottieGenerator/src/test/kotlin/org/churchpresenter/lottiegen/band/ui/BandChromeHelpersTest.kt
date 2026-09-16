@@ -2,7 +2,6 @@ package org.churchpresenter.lottiegen.band.ui
 
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.lottiegen.band.BandColorRole
-import org.churchpresenter.lottiegen.band.BandImage
 import org.churchpresenter.lottiegen.band.BandStyle
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.ui.Strings
@@ -34,13 +33,10 @@ class BandChromeHelpersTest {
             listOf(BandColorRole.BACKGROUND, BandColorRole.SECOND, BandColorRole.ACCENT, BandColorRole.TERTIARY),
             cfg.copy(bandStyle = BandStyle.WAVE_DECK).roles(),
         )
-        assertEquals(Strings.bandColorBackground, roleLabel(cfg, BandColorRole.BACKGROUND))
-        val picture = BandImage("data:image/png;base64,", 1, 1, "p")
-        val pictured = cfg.copy(images = mapOf(BandColorRole.BACKGROUND to picture))
-        assertEquals(Strings.bandColorTint, roleLabel(pictured, BandColorRole.BACKGROUND), "a picture makes it a tint")
-        assertEquals(Strings.bandColorGradient, roleLabel(cfg, BandColorRole.SECOND))
-        assertEquals(Strings.bandColorAccent, roleLabel(cfg, BandColorRole.ACCENT))
-        assertEquals(Strings.bandColorThird, roleLabel(cfg, BandColorRole.TERTIARY))
+        assertEquals(Strings.bandColorBackground, roleLabel(BandColorRole.BACKGROUND))
+        assertEquals(Strings.bandColorGradient, roleLabel(BandColorRole.SECOND))
+        assertEquals(Strings.bandColorAccent, roleLabel(BandColorRole.ACCENT))
+        assertEquals(Strings.bandColorThird, roleLabel(BandColorRole.TERTIARY))
     }
 
     @Test

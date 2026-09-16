@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.ui.LottieGenTheme
 import org.churchpresenter.lottiegen.ui.ProvideLottieGenPalette
 import org.churchpresenter.lottiegen.ui.paletteFrom
@@ -50,7 +51,9 @@ fun App(
     onFileSaved: (() -> Unit)? = null,
     canvasWidth: Int? = null,
     canvasHeight: Int? = null,
-    embedded: Boolean = outputDir != null
+    embedded: Boolean = outputDir != null,
+    /** The host's own font picker, lent to the generator the same way `BibleLottieGenApp` takes one. */
+    fontPicker: BandFontPicker? = null,
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember(scope) {
@@ -65,7 +68,7 @@ fun App(
             val density = LocalDensity.current
 
             Row(modifier = Modifier.fillMaxSize()) {
-                ControlPanel(viewModel, controlPanelWidth.dp)
+                ControlPanel(viewModel, controlPanelWidth.dp, fontPicker)
 
                 // Draggable divider
                 Box(

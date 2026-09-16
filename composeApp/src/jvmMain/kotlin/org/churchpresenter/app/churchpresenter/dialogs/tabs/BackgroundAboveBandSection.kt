@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_above_band_caption
 import churchpresenter.composeapp.generated.resources.background_above_band_fill
+import churchpresenter.composeapp.generated.resources.background_above_band_fills_behind_band
 import churchpresenter.composeapp.generated.resources.background_above_band_opacity
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
@@ -60,6 +61,11 @@ internal fun AboveBandSection(
                 readout = percentReadout(config.aboveBandOpacity),
                 value = config.aboveBandOpacity,
                 onValueChange = { onConfigChange(config.copy(aboveBandOpacity = it)) }
+            )
+            ToggleControl(
+                label = stringResource(Res.string.background_above_band_fills_behind_band),
+                checked = config.aboveBandFillsBehindBand,
+                onCheckedChange = { onConfigChange(config.copy(aboveBandFillsBehindBand = it)) },
             )
         }
     }

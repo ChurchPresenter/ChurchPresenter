@@ -197,9 +197,24 @@ data class BandRoleLook(
     val hasWash: Boolean get() = washAlpha > 0
 }
 
-/** A picture as a data URL with its pixel size, and the file name it came from for the UI. */
+/**
+ * A picture as a data URL with its pixel size, and the file name it came from for the UI. The
+ * transform fields sit on top of the cover-fit baseline every role scales its picture to:
+ * [offsetXPercent]/[offsetYPercent] move it as a fraction of the band's width/height (positive is
+ * right/down), [scalePercent] shrinks or zooms past the cover fit, and [rotationDegrees] spins it
+ * about its own centre.
+ */
 @Serializable
-data class BandImage(val data: String, val width: Int, val height: Int, val name: String) {
+data class BandImage(
+    val data: String,
+    val width: Int,
+    val height: Int,
+    val name: String,
+    val offsetXPercent: Int = 0,
+    val offsetYPercent: Int = 0,
+    val scalePercent: Int = 100,
+    val rotationDegrees: Int = 0,
+) {
     val isUsable: Boolean get() = width > 0 && height > 0
 }
 
@@ -240,8 +255,9 @@ data class BibleLottieGenConfig(
     val gradientPosition: Int = FULL_ALPHA,
     /**
      * Pictures standing in for colours: any role can be a photo instead of a flat colour. Each is
-     * scaled to cover the band and shows through exactly the shapes that role paints; the
-     * background role's picture sits under everything with the background colour as a tint.
+     * scaled to cover the band and shows through exactly the shapes that role paints — the
+     * background role is drawn the same way as the other three, no tint layered over it. A colour
+     * cast over a picture is available through that role's wash, in [looks].
      */
     val images: Map<BandColorRole, BandImage> = emptyMap(),
     /** Each role's wash and blur; a role that is absent is drawn plain. */
@@ -294,7 +310,7 @@ data class BibleLottieGenConfig(
     val previewText2: String = DEFAULT_PREVIEW_TEXT_2,
     val previewReference2: String = "Juan 3:16 (RVR)",
 ) {
-    /** Whether the background role is a picture, which turns its colour into a tint. */
+    /** Whether the background role is a picture, which then replaces any gradient style's fill. */
     val hasBackgroundImage: Boolean get() = images.containsKey(BandColorRole.BACKGROUND)
 
     /** How [role] is drawn beyond its colour; plain when nothing was set. */

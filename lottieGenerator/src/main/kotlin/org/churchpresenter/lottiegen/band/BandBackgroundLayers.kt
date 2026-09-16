@@ -50,11 +50,12 @@ import org.churchpresenter.lottiegen.lottie.makeGradientFillStops
 /**
  * The band itself, one layer per piece so any piece can be a picture: the style's decorations in
  * paint order (first is topmost), the border, then the fill. A piece whose colour role is set to
- * a picture becomes a matte of its own shape over a cover-scaled image; the background's picture
- * additionally keeps the background colour above it as a tint. A role with a wash gets a layer of
- * it, in the piece's own shape, directly above each piece it paints. For the wipes every piece is
- * also cut by the `BandMatte`. Every layer is named with the `Band` prefix so a player that wants
- * the text without the backdrop can hide them as a set.
+ * a picture becomes a matte of its own shape over a cover-scaled image, exactly like any other
+ * role — the background is no longer special-cased. A role with a wash gets a layer of it, in the
+ * piece's own shape, directly above each piece it paints, picture or not, so a colour cast over a
+ * background photo is still reachable through the wash rather than an always-on tint. For the
+ * wipes every piece is also cut by the `BandMatte`. Every layer is named with the `Band` prefix so
+ * a player that wants the text without the backdrop can hide them as a set.
  */
 internal fun LottieBuilder.addBandBackground(cfg: BibleLottieGenConfig, slots: BandSlots, timeline: BandTimeline) {
     val band = slots.band
@@ -119,15 +120,11 @@ private fun fillPieces(cfg: BibleLottieGenConfig, band: SlotBox): List<BandPiece
     }
     return when {
         // A gradient is paint of its own, so the background's wash goes over it here; a shaped
-        // piece gets its wash from the emitter.
-        gradient != null -> listOfNotNull(
+        // piece gets its wash from the emitter. An image beats the gradient outright, same as it
+        // beats a flat colour, rather than being silently dropped.
+        gradient != null && !cfg.hasBackgroundImage -> listOfNotNull(
             washGroup(cfg, BandColorRole.BACKGROUND, rect)?.let { BandPiece.Painted(it) },
             BandPiece.Painted(makeGroup(listOf(rect, gradient))),
-        )
-        // The tint above the picture, then the picture itself through the same rectangle.
-        cfg.hasBackgroundImage -> listOf(
-            BandPiece.Painted(makeGroup(listOf(rect, makeFill(palette.bg, cfg.bgAlpha.toDouble())))),
-            BandPiece.Shaped(BandColorRole.BACKGROUND, rect),
         )
         else -> listOf(BandPiece.Shaped(BandColorRole.BACKGROUND, rect))
     }
@@ -181,9 +178,9 @@ private class BandPieceEmitter(
      */
     private fun imageLayer(name: String, role: BandColorRole, image: BandImage, shape: JsonObject) {
         val assetId = "band_${role.name.lowercase()}"
+        // The blur is set in canvas pixels; the picture is drawn at its cover scale times its own.
+        val cover = maxOf(band.w / image.width, band.h / image.height)
         if (addedAssets.add(role)) {
-            // The blur is set in canvas pixels; the picture is drawn at its cover scale times its own.
-            val cover = maxOf(band.w / image.width, band.h / image.height)
             val embedded = BandImageBlur.blurred(image, cfg.look(role).blurPx / cover)
             builder.addImageAsset(assetId, embedded.data, embedded.width, embedded.height)
         }
@@ -191,13 +188,16 @@ private class BandPieceEmitter(
             "${name}Matte", buildJsonArray { add(makeGroup(listOf(shape, makeFill(WHITE)))) }, motion.transform(),
             td = 1, tt = if (wipeMatte != null) 1 else null, tp = wipeMatte,
         )
-        val scale = maxOf(band.w / image.width, band.h / image.height) * FULL
+        val scale = cover * FULL * (image.scalePercent / FULL)
+        val offsetX = band.w * (image.offsetXPercent / FULL)
+        val offsetY = band.h * (image.offsetYPercent / FULL)
         builder.addImageLayer(
             "${name}Image", assetId,
             motion.transform(
                 anchorOverride = listOf(image.width / 2.0, image.height / 2.0),
-                positionOverride = listOf(band.centerX, band.centerY),
+                positionOverride = listOf(band.centerX + offsetX, band.centerY + offsetY),
                 scalePercent = scale,
+                rotationDegrees = image.rotationDegrees.toDouble(),
             ),
             tt = 1, tp = matte,
         )
@@ -445,6 +445,7 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
         anchorOverride: List<Double>? = null,
         positionOverride: List<Double>? = null,
         scalePercent: Double = FULL,
+        rotationDegrees: Double = 0.0,
     ): JsonObject {
         val ax = anchorOverride?.get(0) ?: anchor[0]
         val ay = anchorOverride?.get(1) ?: anchor[1]
@@ -453,24 +454,28 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
         val anchorProp = LottieBuilder.staticPropArray(ax, ay, 0.0)
         val restPos = LottieBuilder.staticPropArray(px, py, 0.0)
         val restScale = LottieBuilder.staticPropArray(scalePercent, scalePercent, FULL)
+        val rotationProp = LottieBuilder.staticProp(rotationDegrees)
         val rest = at(px, py)
         return when (entrance) {
             BandEntrance.FADE -> LottieBuilder.defaultTransform(
                 opacity = LottieBuilder.animatedProp(
                     keyframes(KeyframeInput(0.0, jsonArrayOf(0.0)), KeyframeInput(END_PCT, jsonArrayOf(FULL))),
                 ),
+                rotation = rotationProp,
                 anchor = anchorProp,
                 position = restPos,
                 scale = restScale,
             )
-            BandEntrance.SLIDE_UP -> slide(anchorProp, at(px, py + canvasH), rest, restScale)
-            BandEntrance.SLIDE_DOWN -> slide(anchorProp, at(px, py - canvasH), rest, restScale)
-            BandEntrance.SLIDE_LEFT -> slide(anchorProp, at(px + canvasW, py), rest, restScale)
-            BandEntrance.SLIDE_RIGHT -> slide(anchorProp, at(px - canvasW, py), rest, restScale)
+            BandEntrance.SLIDE_UP -> slide(anchorProp, at(px, py + canvasH), rest, restScale, rotationProp)
+            BandEntrance.SLIDE_DOWN -> slide(anchorProp, at(px, py - canvasH), rest, restScale, rotationProp)
+            BandEntrance.SLIDE_LEFT -> slide(anchorProp, at(px + canvasW, py), rest, restScale, rotationProp)
+            BandEntrance.SLIDE_RIGHT -> slide(anchorProp, at(px - canvasW, py), rest, restScale, rotationProp)
             BandEntrance.UNROLL, BandEntrance.SCROLL_OPEN ->
-                scaled(anchorProp, restPos, scale(scalePercent, 0.0), scale(scalePercent, scalePercent))
-            BandEntrance.GROW -> scaled(anchorProp, restPos, scale(0.0, 0.0), scale(scalePercent, scalePercent))
+                scaled(anchorProp, restPos, scale(scalePercent, 0.0), scale(scalePercent, scalePercent), rotationProp)
+            BandEntrance.GROW ->
+                scaled(anchorProp, restPos, scale(0.0, 0.0), scale(scalePercent, scalePercent), rotationProp)
             BandEntrance.WIPE_LEFT, BandEntrance.WIPE_RIGHT, BandEntrance.SWIPE -> LottieBuilder.defaultTransform(
+                rotation = rotationProp,
                 anchor = anchorProp,
                 position = restPos,
                 scale = restScale,
@@ -495,19 +500,31 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
         )
     }
 
-    private fun slide(anchorProp: JsonObject, from: JsonArray, to: JsonArray, restScale: JsonObject): JsonObject =
-        LottieBuilder.defaultTransform(
-            anchor = anchorProp,
-            position = LottieBuilder.animatedProp(keyframes(KeyframeInput(0.0, from), KeyframeInput(END_PCT, to))),
-            scale = restScale,
-        )
+    private fun slide(
+        anchorProp: JsonObject,
+        from: JsonArray,
+        to: JsonArray,
+        restScale: JsonObject,
+        rotation: JsonObject,
+    ): JsonObject = LottieBuilder.defaultTransform(
+        rotation = rotation,
+        anchor = anchorProp,
+        position = LottieBuilder.animatedProp(keyframes(KeyframeInput(0.0, from), KeyframeInput(END_PCT, to))),
+        scale = restScale,
+    )
 
-    private fun scaled(anchorProp: JsonObject, restPos: JsonObject, from: JsonArray, to: JsonArray): JsonObject =
-        LottieBuilder.defaultTransform(
-            anchor = anchorProp,
-            position = restPos,
-            scale = LottieBuilder.animatedProp(keyframes(KeyframeInput(0.0, from), KeyframeInput(END_PCT, to))),
-        )
+    private fun scaled(
+        anchorProp: JsonObject,
+        restPos: JsonObject,
+        from: JsonArray,
+        to: JsonArray,
+        rotation: JsonObject,
+    ): JsonObject = LottieBuilder.defaultTransform(
+        rotation = rotation,
+        anchor = anchorProp,
+        position = restPos,
+        scale = LottieBuilder.animatedProp(keyframes(KeyframeInput(0.0, from), KeyframeInput(END_PCT, to))),
+    )
 }
 
 private val WHITE = listOf(1.0, 1.0, 1.0)

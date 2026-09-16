@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.band.SlotLayout
+import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
@@ -47,7 +48,9 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
             // The host's own picker, listing the machine's fonts each in its own face.
             fontPicker(cfg.previewFontFamily, onFont, Modifier.weight(1f))
         } else {
-            val fonts = LottieFont.entries.map { it.familyName }
+            val bundledFontNames = LottieFont.entries.map { it.familyName }
+            val systemFontNames = rememberSystemFonts().filterNot { it in bundledFontNames }
+            val fonts = bundledFontNames + systemFontNames
             DropdownSelector(
                 label = Strings.bandPreviewFont,
                 value = cfg.previewFontFamily,
