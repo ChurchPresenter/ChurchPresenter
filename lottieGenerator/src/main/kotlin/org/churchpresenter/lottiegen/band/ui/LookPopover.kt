@@ -83,13 +83,6 @@ internal fun LookPopover(
             verticalArrangement = Arrangement.spacedBy(11.dp),
         ) {
             Text(roleLabel(cfg, role), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Tokens.TitleText)
-            ThinSlider(
-                label = Strings.bandLookAlpha,
-                value = cfg.alphaOf(role).toFloat(),
-                onValueChange = { a -> viewModel.updateConfig { it.withAlpha(role, a.toInt()) } },
-                valueRange = 0f..MAX_ALPHA,
-                format = { it.toInt().toString() },
-            )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                 HexField(
                     Strings.bandLookWash, look.washColor,
@@ -181,6 +174,18 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
     Box {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             HexField(roleLabel(cfg, role), cfg.colorOf(role), { c -> viewModel.updateConfig { it.withColor(role, c) } })
+            // On the row rather than inside the popover below: a colour's opacity is the first
+            // thing reached for on a band meant to sit over video, and behind the pencil nothing
+            // on screen said it existed at all.
+            Box(Modifier.weight(1f)) {
+                InlineSlider(
+                    label = Strings.bandLookAlpha,
+                    value = cfg.alphaOf(role).toFloat(),
+                    onValueChange = { a -> viewModel.updateConfig { it.withAlpha(role, a.toInt()) } },
+                    valueRange = 0f..MAX_ALPHA,
+                    format = { it.toInt().toString() },
+                )
+            }
             Box(
                 modifier = Modifier
                     .size(FIELD_HEIGHT)

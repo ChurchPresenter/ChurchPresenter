@@ -50,6 +50,7 @@ import org.churchpresenter.lottiegen.band.ReferencePlacement
 import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.app.churchpresenter.presenter.invalidateBibleLottieTemplates
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.components.DropdownSelector
 import org.jetbrains.compose.resources.stringResource
@@ -176,6 +177,9 @@ internal fun LowerThirdAnimationSection(
             seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) }
+                // The generator saves over the path it loaded from, so nothing below this
+                // would notice the file changed on its own.
+                invalidateBibleLottieTemplates()
                 showGenerator = false
             },
             onClose = { showGenerator = false },
@@ -209,6 +213,9 @@ internal fun LottieBandSourceSection(
             seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 onConfigChange(config.copy(backgroundLottie = file.absolutePath))
+                // The generator saves over the path it loaded from, so nothing below this
+                // would notice the file changed on its own.
+                invalidateBibleLottieTemplates()
                 showGenerator = false
             },
             onClose = { showGenerator = false },

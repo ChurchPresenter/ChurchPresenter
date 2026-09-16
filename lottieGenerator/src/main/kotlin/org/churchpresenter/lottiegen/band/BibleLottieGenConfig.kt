@@ -10,21 +10,23 @@ import kotlinx.serialization.Serializable
 enum class BandStyle(
     val usesSecond: Boolean = false,
     val usesTertiary: Boolean = false,
+    /** Whether the style blends its colours, so the gradient's own controls apply to it. */
+    val usesGradient: Boolean = false,
 ) {
     SOLID_BAR,
-    GRADIENT_BAR(usesSecond = true),
+    GRADIENT_BAR(usesSecond = true, usesGradient = true),
     ACCENT_EDGE_BAR,
     GLASS_PANEL,
     RIBBON,
 
     /** A gradient running left to right, background colour to second. */
-    GRADIENT_HORIZONTAL(usesSecond = true),
+    GRADIENT_HORIZONTAL(usesSecond = true, usesGradient = true),
 
     /** A gradient running corner to corner, background colour to second. */
-    GRADIENT_ANGLED(usesSecond = true),
+    GRADIENT_ANGLED(usesSecond = true, usesGradient = true),
 
     /** A three-stop gradient left to right: background, second, third. */
-    GRADIENT_TRIO(usesSecond = true, usesTertiary = true),
+    GRADIENT_TRIO(usesSecond = true, usesTertiary = true, usesGradient = true),
 
     /** Top half in the background colour, bottom half in the second. */
     SPLIT_SHUTTER(usesSecond = true),
@@ -231,6 +233,12 @@ data class BibleLottieGenConfig(
     val tertiaryColor: String = "#F2C94C",
     val tertiaryAlpha: Int = FULL_ALPHA,
     /**
+     * Where along the band the gradient finishes, as a percentage, after which the last
+     * colour is flat. 100 spreads the blend over the whole band, which is what it did before
+     * this was a setting; lower values pull the transition towards the start.
+     */
+    val gradientPosition: Int = FULL_ALPHA,
+    /**
      * Pictures standing in for colours: any role can be a photo instead of a flat colour. Each is
      * scaled to cover the band and shows through exactly the shapes that role paints; the
      * background role's picture sits under everything with the background colour as a tint.
@@ -268,6 +276,15 @@ data class BibleLottieGenConfig(
     val previewReferenceSizePx: Int = DEFAULT_PREVIEW_REFERENCE_SIZE,
     val previewTextColor: String = "#FFFFFF",
     val previewReferenceColor: String = "#FFFFFF",
+    /**
+     * How opaque the words are, 0..100, baked into the text layers' own opacity.
+     *
+     * Not part of the colour: the band's text colour comes from the app's Bible and song settings
+     * at run time, and the file only carries a placeholder for it. Opacity is a separate layer
+     * property, so it is the one part of the text's look the template can own.
+     */
+    val textAlpha: Int = FULL_ALPHA,
+    val referenceAlpha: Int = FULL_ALPHA,
     val previewBold: Boolean = false,
     val previewItalic: Boolean = false,
     /** Whether the sample shows its shadow twin, which the file ships hidden for the player to raise. */

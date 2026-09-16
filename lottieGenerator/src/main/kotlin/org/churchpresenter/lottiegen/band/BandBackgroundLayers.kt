@@ -92,21 +92,28 @@ private fun borderPiece(cfg: BibleLottieGenConfig, band: SlotBox): BandPiece? {
 /** The fill: a gradient carries its own paint; a plain fill is the background role, colour or picture. */
 private fun fillPieces(cfg: BibleLottieGenConfig, band: SlotBox): List<BandPiece> {
     val palette = BandPalette(cfg)
-    val alpha = cfg.bgAlpha.toDouble()
     val rect = makeRect(band.w, band.h, cfg.cornerRadiusPx.toDouble(), listOf(band.centerX, band.centerY))
+    // Each stop carries its own role's opacity, so a gradient can fade out rather than only darken.
+    // The fill's overall opacity is left wide open and the stops carry it all; before this the
+    // whole gradient took the background's alpha and the second and third roles' alphas were
+    // silently ignored, so a "fade to transparent" was not expressible at all.
+    val pair = listOf(palette.bg, palette.second)
+    val pairAlphas = listOf(stopAlpha(cfg.bgAlpha), stopAlpha(cfg.secondAlpha))
+    val rampEnd = stopAlpha(cfg.gradientPosition)
     val gradient = when (cfg.bandStyle) {
         BandStyle.GRADIENT_BAR -> makeGradientFillStops(
-            listOf(palette.bg, palette.second), alpha, listOf(band.centerX, band.y), listOf(band.centerX, band.bottom),
+            pair, FULL, listOf(band.centerX, band.y), listOf(band.centerX, band.bottom), pairAlphas, rampEnd,
         )
         BandStyle.GRADIENT_HORIZONTAL -> makeGradientFillStops(
-            listOf(palette.bg, palette.second), alpha, listOf(band.x, band.centerY), listOf(band.right, band.centerY),
+            pair, FULL, listOf(band.x, band.centerY), listOf(band.right, band.centerY), pairAlphas, rampEnd,
         )
         BandStyle.GRADIENT_ANGLED -> makeGradientFillStops(
-            listOf(palette.bg, palette.second), alpha, listOf(band.x, band.y), listOf(band.right, band.bottom),
+            pair, FULL, listOf(band.x, band.y), listOf(band.right, band.bottom), pairAlphas, rampEnd,
         )
         BandStyle.GRADIENT_TRIO -> makeGradientFillStops(
-            listOf(palette.bg, palette.second, palette.tertiary), alpha,
+            listOf(palette.bg, palette.second, palette.tertiary), FULL,
             listOf(band.x, band.centerY), listOf(band.right, band.centerY),
+            pairAlphas + stopAlpha(cfg.tertiaryAlpha), rampEnd,
         )
         else -> null
     }
@@ -119,7 +126,7 @@ private fun fillPieces(cfg: BibleLottieGenConfig, band: SlotBox): List<BandPiece
         )
         // The tint above the picture, then the picture itself through the same rectangle.
         cfg.hasBackgroundImage -> listOf(
-            BandPiece.Painted(makeGroup(listOf(rect, makeFill(palette.bg, alpha)))),
+            BandPiece.Painted(makeGroup(listOf(rect, makeFill(palette.bg, cfg.bgAlpha.toDouble())))),
             BandPiece.Shaped(BandColorRole.BACKGROUND, rect),
         )
         else -> listOf(BandPiece.Shaped(BandColorRole.BACKGROUND, rect))
@@ -505,6 +512,9 @@ private class BandMotion(cfg: BibleLottieGenConfig, private val band: SlotBox, p
 
 private val WHITE = listOf(1.0, 1.0, 1.0)
 private const val FULL = 100.0
+
+/** A role's 0..100 opacity as a Lottie gradient stop's 0..1 alpha. */
+private fun stopAlpha(percent: Int): Double = (percent / FULL).coerceIn(0.0, 1.0)
 private const val RULE_PX = 4.0
 private const val SPOT_EDGE_PX = 10.0
 private const val END_PCT = 100.0

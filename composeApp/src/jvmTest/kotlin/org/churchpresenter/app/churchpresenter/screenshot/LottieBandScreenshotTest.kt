@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -250,7 +251,9 @@ class LottieBandScreenshotTest {
         runSkikoComposeUiTest(size = frame, density = Density(1f)) {
         setContent {
             MaterialTheme {
-                CompositionLocalProvider(LocalLottieBandClock provides clock) { Box(screen) { content() } }
+                CompositionLocalProvider(LocalLottieBandClock provides mutableStateOf(clock)) {
+                    Box(screen) { content() }
+                }
             }
         }
         waitForIdle()

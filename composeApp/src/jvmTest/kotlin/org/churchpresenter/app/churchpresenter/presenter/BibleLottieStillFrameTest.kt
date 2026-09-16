@@ -44,10 +44,14 @@ class BibleLottieStillFrameTest {
         TestSingletons.latchSkikoHostOs()
         val dir = Files.createTempDirectory("still-frame").toFile()
         val template = LottieBandTestSupport.writeTemplate(dir)
+        // Not a Lottie at all. It used to be a well-formed one with no band in it, which the
+        // parser accepts on purpose — a hand-made file is played with the segments guessed — so
+        // the still frame drew it and this assertion only held while the load was still in
+        // flight. waitForIdle does not wait for the read, so the test was racing it.
         val plain = File(dir, "plain.json")
         // Valid JSON with none of the frame rate, duration or canvas a Lottie is played from, so
         // the parse rejects it and the state it feeds stays null however long the read takes.
-        plain.writeText("""{"note":"not a lottie"}""")
+        plain.writeText("""{"nothing":"to play"}""")
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -59,8 +63,10 @@ class BibleLottieStillFrameTest {
                     }
                 }
             }
+            // Wait on the template appearing rather than on idleness: both files are read off
+            // the main thread, and this is the positive signal that the reads have happened.
             waitUntil("the template is loaded and drawn", LOAD_TIMEOUT_MS) {
-                onNodeWithTag("template").fetchSemanticsNode().children.size == 1
+                onNodeWithTag("template").fetchSemanticsNode().children.isNotEmpty()
             }
             onNodeWithTag("template").assertHeightIsEqualTo(100.dp)
             assertEquals(0, onNodeWithTag("plain").fetchSemanticsNode().children.size, "no image for a non-template")

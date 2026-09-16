@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.TextMeasurer
@@ -122,8 +123,9 @@ internal data class BandSlotText(val text: String, val style: BandSlotStyle)
 internal fun BoxScope.LottieBand(
     template: BibleLottieTemplate,
     slots: Map<String, BandSlotText>,
+    outgoingSlots: Map<String, BandSlotText>?,
     bandFraction: Float,
-    bandClock: BibleBandClock,
+    bandClock: State<BibleBandClock>,
     isKey: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier,
@@ -143,19 +145,27 @@ internal fun BoxScope.LottieBand(
     val styledJson = remember(template, fontsByLayer) { rewriteTemplateFonts(template.json, fontsByLayer) }
     val composition by rememberLottieComposition(styledJson) { LottieCompositionSpec.JsonString(styledJson) }
 
-    // The words on screen before the last change, for the layer that plays them out.
-    val history = remember { SlotHistory() }
-    if (history.current != slots) {
-        history.previous = history.current
-        history.current = slots
-    }
-    val outgoing = history.previous?.takeIf { bandClock.phase == BibleBandPhase.TEXT_SWAP }
+    // The words on screen before the last change, for the layer that plays them out. Handed down
+    // from the driver rather than worked out from watching [slots] change, so an output composed
+    // in the middle of a swap crossfades the same two texts as one that was there when it started.
+    //
+    // Both layers are composed at all times, even though only a swap has two texts to show. A layer
+    // added at the moment it is first needed does not draw on its first frame, and the first frame
+    // of a swap is exactly when the incoming text is still fully transparent — so the band went
+    // blank for one frame on every single text change. Keeping it resident and hiding it costs a
+    // draw; creating it on demand costs a black frame on every change.
+    //
+    // It is shown only when there is something to play out AND a swap is running. A swap with no
+    // outgoing words — which is what a preview pinned mid-swap is — would otherwise set the same
+    // text twice, once per layer.
+    val outgoing = outgoingSlots ?: slots
+    val hasOutgoing = rememberUpdatedState(outgoingSlots != null)
 
     val layerModifier = modifier
         .fillMaxWidth()
         .fillMaxHeight(bandFraction)
         .align(Alignment.BottomCenter)
-    val clockState = rememberUpdatedState(bandClock)
+    val clockState = bandClock
     val progress = { template.progressAt(clockState.value) }
     val keyFilter = if (isKey) keyColorFilter else null
     BandLayer(
@@ -168,25 +178,30 @@ internal fun BoxScope.LottieBand(
         showBackground = showBackground,
         modifier = layerModifier,
     )
-    if (outgoing != null) {
-        BandLayer(
-            template = template,
-            composition = composition,
-            slots = outgoing,
-            bandFraction = bandFraction,
-            progress = { template.outgoingProgressAt(clockState.value) },
-            colorFilter = keyFilter,
-            showBackground = false,
-            modifier = layerModifier,
-        )
-    }
+    BandLayer(
+        template = template,
+        composition = composition,
+        slots = outgoing,
+        bandFraction = bandFraction,
+        progress = {
+            val clock = clockState.value
+            template.outgoingProgressAt(if (clock.phase == BibleBandPhase.TEXT_SWAP) clock else FADED_OUT)
+        },
+        colorFilter = keyFilter,
+        showBackground = false,
+        // Not drawn at all when it has nothing to play out, rather than drawn at zero alpha: an
+        // invisible layer still rasterises a whole Lottie frame, which doubled the band's per-frame
+        // cost and cost it frames. Skipping `drawContent` leaves the composable, its composition and
+        // its painter alive, so the layer is still warm when a swap starts.
+        modifier = layerModifier.drawWithContent {
+            val swapping = clockState.value.phase == BibleBandPhase.TEXT_SWAP
+            if (swapping && hasOutgoing.value) drawContent()
+        },
+    )
 }
 
-/** The slots the band drew last and the ones before them — plain fields, read and written in composition. */
-private class SlotHistory {
-    var current: Map<String, BandSlotText>? = null
-    var previous: Map<String, BandSlotText>? = null
-}
+/** The end of `text_out` — where the layer that is not playing anything out parks, unseen. */
+private val FADED_OUT = BibleBandClock(BibleBandPhase.TEXT_SWAP, 1f)
 
 /**
  * One pass over the template: its text layers bound to [slots], drawn at [progress]. A pass shows
