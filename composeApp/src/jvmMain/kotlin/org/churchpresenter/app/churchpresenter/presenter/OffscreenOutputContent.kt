@@ -167,8 +167,9 @@ internal fun OffscreenOutputContent(
                         val showsContent = showsContentFor(mode, screenAssignment)
                         if (mode != Presenting.NONE && showsContent) {
                             CompositionLocalProvider(
-                                LocalLottieBandClock provides presenterManager.lottieBandClock.value,
+                                LocalLottieBandClock provides presenterManager.lottieBandClock,
                                 LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
+                                LocalBandOutgoing provides presenterManager.bandOutgoing.value,
                             ) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(

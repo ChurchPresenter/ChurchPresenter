@@ -177,16 +177,17 @@ fun BiblePresenter(
     // one it was assigned, and does it silently: a critical-text module that stops at Mark 16:8
     // would flip that screen to the next language for exactly those verses.
     val assignedFileNames = bibleTranslations.mapNotNull { translationStack.getOrNull(it)?.fileName }.toSet()
-    val effectiveVerses = when {
-        bibleTranslations.isEmpty() -> selectedVerses
+    fun versesForOutput(verses: List<SelectedVerse>): List<SelectedVerse> = when {
+        bibleTranslations.isEmpty() -> verses
         // Verses relayed from a linked instance or the companion server carry no translation
         // identity, so position is all there is to match on for those.
-        selectedVerses.none { it.translationFileName.isNotBlank() } ->
-            selectedVerses.filterIndexed { index, _ -> index in bibleTranslations }
-                .ifEmpty { selectedVerses.take(1) }
-        else -> selectedVerses.filter { it.translationFileName in assignedFileNames }
-            .ifEmpty { selectedVerses.take(1) }
+        verses.none { it.translationFileName.isNotBlank() } ->
+            verses.filterIndexed { index, _ -> index in bibleTranslations }
+                .ifEmpty { verses.take(1) }
+        else -> verses.filter { it.translationFileName in assignedFileNames }
+            .ifEmpty { verses.take(1) }
     }
+    val effectiveVerses = versesForOutput(selectedVerses)
 
     /**
      * The styling for whatever ends up in slot [slot] of what this output draws.
@@ -462,6 +463,9 @@ fun BiblePresenter(
                 BibleLottieBand(
                     template = loaded,
                     verses = effectiveVerses,
+                    // The outgoing verses go through the same per-output translation filter, so a
+                    // screen assigned one translation plays out the verse it was actually showing.
+                    outgoingVerses = versesForOutput(LocalBandOutgoing.current.verses),
                     t0 = t0,
                     t1 = t1,
                     bandFraction = lowerThirdFraction,

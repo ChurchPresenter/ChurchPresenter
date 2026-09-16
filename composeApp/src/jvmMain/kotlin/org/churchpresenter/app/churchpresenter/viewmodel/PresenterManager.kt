@@ -22,6 +22,7 @@ import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -98,6 +99,13 @@ class PresenterManager {
      */
     private val _bandSongLineIndex = mutableStateOf(-1)
     val bandSongLineIndex: State<Int> = _bandSongLineIndex
+
+    /**
+     * What the Lottie band is crossfading away from while [lottieBandClock] is on a text swap:
+     * the verse or the lyric line it showed before the change. Empty at every other phase.
+     */
+    private val _bandOutgoing = mutableStateOf(BandOutgoing())
+    val bandOutgoing: State<BandOutgoing> = _bandOutgoing
 
     // Previous content for crossfade (both old and new visible simultaneously)
     private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
@@ -385,6 +393,10 @@ class PresenterManager {
 
     fun setBandSongLineIndex(index: Int) {
         _bandSongLineIndex.value = index
+    }
+
+    fun setBandOutgoing(outgoing: BandOutgoing) {
+        _bandOutgoing.value = outgoing
     }
 
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {
