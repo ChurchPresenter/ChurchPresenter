@@ -8,6 +8,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.LottieGenState
+import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
 import org.churchpresenter.lottiegen.ui.components.ColorPickerRow
@@ -68,6 +70,8 @@ internal fun TextStyleSection(viewModel: LottieGenState) {
 @Composable
 private fun FontAndSizeRows(viewModel: LottieGenState) {
     val cfg = viewModel.config
+    val bundledFontNames = remember { LottieFont.entries.map { it.familyName }.toSet() }
+    val systemFontNames = rememberSystemFonts().filterNot { it in bundledFontNames }
     FieldRow {
         var fontExpanded by remember { mutableStateOf(false) }
         ExposedDropdownMenuBox(fontExpanded, { fontExpanded = it }, Modifier.weight(1f)) {
@@ -87,6 +91,18 @@ private fun FontAndSizeRows(viewModel: LottieGenState) {
                             fontExpanded = false
                         }
                     )
+                }
+                if (systemFontNames.isNotEmpty()) {
+                    HorizontalDivider()
+                    systemFontNames.forEach { name ->
+                        DropdownMenuItem(
+                            text = { Text(name) },
+                            onClick = {
+                                viewModel.updateConfig { it.copy(fontFamily = name) }
+                                fontExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
