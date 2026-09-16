@@ -127,6 +127,7 @@ internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundCon
         aboveBandType = defaultLowerThirdAboveBandType,
         aboveBandColor = defaultLowerThirdAboveBandColor,
         aboveBandOpacity = defaultLowerThirdAboveBandOpacity,
+        aboveBandFillsBehindBand = defaultLowerThirdAboveBandFillsBehindBand,
     )
     BackgroundScope.BIBLE -> bibleBackground
     BackgroundScope.BIBLE_LOWER_THIRD -> bibleLowerThirdBackground
@@ -161,6 +162,7 @@ internal fun BackgroundSettings.withConfigFor(
         defaultLowerThirdAboveBandType = config.aboveBandType,
         defaultLowerThirdAboveBandColor = config.aboveBandColor,
         defaultLowerThirdAboveBandOpacity = config.aboveBandOpacity,
+        defaultLowerThirdAboveBandFillsBehindBand = config.aboveBandFillsBehindBand,
     )
     BackgroundScope.BIBLE -> copy(bibleBackground = config)
     BackgroundScope.BIBLE_LOWER_THIRD -> copy(bibleLowerThirdBackground = config)

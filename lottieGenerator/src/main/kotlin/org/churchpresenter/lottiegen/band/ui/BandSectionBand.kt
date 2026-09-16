@@ -33,7 +33,7 @@ internal fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             Caption(Strings.bandColors, Modifier.weight(1f))
             Text(
-                cfg.roles().joinToString(" · ") { roleLabel(cfg, it) },
+                cfg.roles().joinToString(" · ") { roleLabel(it) },
                 fontSize = 9.5.sp, color = Tokens.HintText, maxLines = 1,
             )
         }
@@ -103,8 +103,8 @@ internal fun BibleLottieGenConfig.roles(): List<BandColorRole> = buildList {
     if (bandStyle.usesTertiary) add(BandColorRole.TERTIARY)
 }
 
-internal fun roleLabel(cfg: BibleLottieGenConfig, role: BandColorRole): String = when (role) {
-    BandColorRole.BACKGROUND -> if (cfg.hasBackgroundImage) Strings.bandColorTint else Strings.bandColorBackground
+internal fun roleLabel(role: BandColorRole): String = when (role) {
+    BandColorRole.BACKGROUND -> Strings.bandColorBackground
     BandColorRole.SECOND -> Strings.bandColorGradient
     BandColorRole.ACCENT -> Strings.bandColorAccent
     BandColorRole.TERTIARY -> Strings.bandColorThird

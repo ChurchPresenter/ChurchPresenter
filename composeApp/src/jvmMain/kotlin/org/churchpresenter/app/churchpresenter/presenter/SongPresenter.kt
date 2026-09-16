@@ -359,10 +359,12 @@ fun SongPresenter(
         val loaded = template
         if (loaded != null) {
             val lowerThirdFraction = ss.lowerThirdHeightPercent / PERCENT
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             Box(modifier.fillMaxSize()) {
                 AboveBandFill(
-                    fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
+                    fill = if (showBackground) above.fill else null,
                     bandFraction = lowerThirdFraction,
+                    fillsBehindBand = above.fillsBehindBand,
                 )
                 val outgoing = LocalBandOutgoing.current
                 SongLottieBand(
@@ -704,14 +706,12 @@ fun SongPresenter(
             // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
             // than scaled: the picture is cropped from a slightly larger rectangle instead of
             // being stretched, which a band is wide enough to show.
-            // The wash over the two thirds the band does not cover. Drawn before the band, and
-            // sized as the band's complement so the two are computed from the same constraint —
-            // deriving a height in Dp instead can land a device pixel short and leave a hairline.
+            // The wash behind the whole lower third, band included — see AboveBandFill.
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             AboveBandFill(
-                fill = if (showBackground) {
-                    aboveBandFill(appSettings.backgroundSettings, bgConfig)
-                } else null,
+                fill = if (showBackground) above.fill else null,
                 bandFraction = lowerThirdFraction,
+                fillsBehindBand = above.fillsBehindBand,
             )
             val bandBleed = if (blurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.

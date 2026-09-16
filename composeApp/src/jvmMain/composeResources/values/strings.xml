@@ -1172,6 +1172,7 @@
     <string name="background_above_band_caption">Above The Band</string>
     <string name="background_above_band_fill">Fill Color</string>
     <string name="background_above_band_opacity">Fill Opacity</string>
+    <string name="background_above_band_fills_behind_band">Fill behind the band too</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>

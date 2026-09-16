@@ -463,10 +463,12 @@ fun BiblePresenter(
         val loaded = template
         if (loaded != null) {
             val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / PERCENT
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             Box(modifier.fillMaxSize()) {
                 AboveBandFill(
-                    fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
+                    fill = if (showBackground) above.fill else null,
                     bandFraction = lowerThirdFraction,
+                    fillsBehindBand = above.fillsBehindBand,
                 )
                 BibleLottieBand(
                     template = loaded,
@@ -593,12 +595,12 @@ fun BiblePresenter(
             // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
             // than scaled: the picture is cropped from a slightly larger rectangle instead of
             // being stretched, which a band is wide enough to show.
-            // The wash over the two thirds the band does not cover — see AboveBandFill.
+            // The wash behind the whole lower third, band included — see AboveBandFill.
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             AboveBandFill(
-                fill = if (showBackground) {
-                    aboveBandFill(appSettings.backgroundSettings, bgConfig)
-                } else null,
+                fill = if (showBackground) above.fill else null,
                 bandFraction = lowerThirdFraction,
+                fillsBehindBand = above.fillsBehindBand,
             )
             val bandBleed = if (resolvedBg.isBlurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
