@@ -2461,6 +2461,7 @@
     <string name="song_element_look_ahead">Попередній перегляд</string>
     <string name="song_chunk">Фрагмент</string>
     <string name="song_language_scope">Мова</string>
+    <string name="song_style_language">Оформлення</string>
     <string name="song_preview_look_ahead">Попередній перегляд</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Фон</string>
@@ -2556,6 +2557,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Рух</string>
     <string name="customize_layout">Макет</string>
+    <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Дві мови</string>
     <string name="customize_no_preview">Для цього розділу немає попереднього перегляду</string>
     <string name="customize_bible">Біблія</string>

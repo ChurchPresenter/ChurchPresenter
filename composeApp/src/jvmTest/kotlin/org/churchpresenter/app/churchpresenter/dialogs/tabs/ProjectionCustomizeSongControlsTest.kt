@@ -247,7 +247,9 @@ class ProjectionCustomizeSongControlsTest {
         projectionTab(bilingualBand) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(29, 40)
-            chooseSegment("Top / Bottom", scroll = false)
+            // The strip scrolls now, and Bilingual is its last row -- past the fold on a band, whose
+            // strip carries the band height as well.
+            chooseSegment("Top / Bottom")
 
             val stored = get().stored()
             assertEquals(40, stored.lowerThirdHeightPercent)

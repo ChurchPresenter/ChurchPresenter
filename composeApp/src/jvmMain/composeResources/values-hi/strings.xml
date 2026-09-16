@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">आगे की झलक</string>
     <string name="song_chunk">खंड</string>
     <string name="song_language_scope">भाषा</string>
+    <string name="song_style_language">शैली</string>
     <string name="song_preview_look_ahead">आगे की झलक</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">बैकग्राउंड</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">गति</string>
     <string name="customize_layout">लेआउट</string>
+    <string name="customize_marker">चिह्न</string>
     <string name="customize_bilingual">द्विभाषी</string>
     <string name="customize_no_preview">इस अनुभाग के लिए कोई पूर्वावलोकन नहीं</string>
     <string name="customize_bible">बाइबल</string>

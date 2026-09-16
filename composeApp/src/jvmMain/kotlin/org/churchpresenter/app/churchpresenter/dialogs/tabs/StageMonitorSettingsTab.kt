@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,6 +102,10 @@ private const val TRANSITION_STEP_MS = 50f
 private const val TRANSITION_MIN_MS = 100f
 private const val TRANSITION_MAX_MS = 2000f
 internal const val ZONE_LINE_HEIGHT = 1.2f
+
+
+/** Wide enough for "BACKGROUND COLOR", the longest caption these fields draw inside themselves. */
+private val COLOR_FIELD_MIN_WIDTH = 132.dp
 
 @Composable
 fun StageMonitorSettingsTab(
@@ -455,6 +461,7 @@ private fun ZoneStyleSection(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuadrantFontSettings(
     fontType: String, fontSize: Int,
@@ -472,10 +479,16 @@ private fun QuadrantFontSettings(
     onShadowSizeChange: (Int) -> Unit,
     onShadowOpacityChange: (Int) -> Unit
 ) {
-    Row(
+    // Flowing, not a hard row. Every cell here is a fixed-size field, and a `Row` that runs out of
+    // width clips the last one rather than shrinking it -- which put the background colour half off
+    // the edge, its caption cut mid-word, on any pane narrower than the five cells together. A
+    // clipped field is still *there*, so it keeps its semantics and a click aimed at it lands on
+    // whatever is drawn over it.
+    FlowRow(
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
     ) {
         FontSettingsDropdown(
             label = stringResource(Res.string.font_type).removeSuffix(":"),
@@ -493,21 +506,21 @@ private fun QuadrantFontSettings(
             color = color,
             onColorChange = onColorChange,
             label = stringResource(Res.string.stage_monitor_text_color).removeSuffix(":"),
-            modifier = Modifier.widthIn(max = 150.dp)
+            modifier = Modifier.widthIn(min = COLOR_FIELD_MIN_WIDTH, max = 150.dp)
         )
         if (chordColor != null) {
             ColorPickerField(
                 color = chordColor,
                 onColorChange = onChordColorChange,
                 label = stringResource(Res.string.song_chord_color),
-                modifier = Modifier.widthIn(max = 150.dp)
+                modifier = Modifier.widthIn(min = COLOR_FIELD_MIN_WIDTH, max = 150.dp)
             )
         }
         ColorPickerField(
             color = bgColor,
             onColorChange = onBgColorChange,
             label = stringResource(Res.string.background_color).removeSuffix(":"),
-            modifier = Modifier.widthIn(max = 150.dp)
+            modifier = Modifier.widthIn(min = COLOR_FIELD_MIN_WIDTH, max = 150.dp)
         )
     }
     SettingRow(stringResource(Res.string.shadow_settings)) {

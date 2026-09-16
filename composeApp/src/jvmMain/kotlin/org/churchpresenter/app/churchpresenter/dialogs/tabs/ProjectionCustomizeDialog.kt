@@ -240,19 +240,6 @@ internal fun OutputCustomizeDialog(
         val edited = transform(draft)
         draft = edited
         val next = pane.applied(assignment, globalSettings, edited)
-        // TEMPORARY -- tracing the bilingual layout reverting to its class default on an unrelated
-        // edit. Remove once that is fixed. Grep the app's stderr for "[CP-bilingual]".
-        System.err.println(
-            "[CP-bilingual] pane=$pane" +
-                " draftBefore=${draft.songSettings.bilingualLayout}/${draft.bibleSettings.bilingualLayout}" +
-                " edited=${edited.songSettings.bilingualLayout}/${edited.bibleSettings.bilingualLayout}" +
-                " globalSong=${globalSettings.songSettings.bilingualLayout}" +
-                " globalBible=${globalSettings.bibleSettings.bilingualLayout}" +
-                " storedSong=${next.songOverride?.get("bilingualLayout")}" +
-                " storedBible=${next.bibleOverride?.get("bilingualLayout")}" +
-                " reresolved=${globalSettings.resolvedFor(next).songSettings.bilingualLayout}" +
-                "/${globalSettings.resolvedFor(next).bibleSettings.bilingualLayout}",
-        )
         // An edit switches the category on if it was not already: the operator has just said what
         // this screen should look like, and storing that is the whole point of having typed it.
         onApply(next)

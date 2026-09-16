@@ -2471,6 +2471,7 @@
     <string name="song_element_look_ahead">Náhled dalšího</string>
     <string name="song_chunk">Úsek</string>
     <string name="song_language_scope">Jazyk</string>
+    <string name="song_style_language">Vzhled</string>
     <string name="song_preview_look_ahead">Náhled dalšího</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Pozadí</string>
@@ -2566,6 +2567,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Pohyb</string>
     <string name="customize_layout">Rozložení</string>
+    <string name="customize_marker">Značka</string>
     <string name="customize_bilingual">Dvojjazyčně</string>
     <string name="customize_no_preview">Pro tuto sekci není náhled</string>
     <string name="customize_bible">Bible</string>

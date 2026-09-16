@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">预览下一段</string>
     <string name="song_chunk">分段</string>
     <string name="song_language_scope">语言</string>
+    <string name="song_style_language">样式</string>
     <string name="song_preview_look_ahead">预览下一段</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">背景</string>
@@ -2565,6 +2566,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">动效</string>
     <string name="customize_layout">版式</string>
+    <string name="customize_marker">标记</string>
     <string name="customize_bilingual">双语</string>
     <string name="customize_no_preview">此部分没有预览</string>
     <string name="customize_bible">圣经</string>

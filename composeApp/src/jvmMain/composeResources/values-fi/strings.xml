@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Ennakko</string>
     <string name="song_chunk">Osa</string>
     <string name="song_language_scope">Kieli</string>
+    <string name="song_style_language">Tyyli</string>
     <string name="song_preview_look_ahead">Ennakko</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Tausta</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Liike</string>
     <string name="customize_layout">Asettelu</string>
+    <string name="customize_marker">Merkki</string>
     <string name="customize_bilingual">Kaksikielinen</string>
     <string name="customize_no_preview">Tälle osiolle ei ole esikatselua</string>
     <string name="customize_bible">Raamattu</string>

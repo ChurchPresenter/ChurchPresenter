@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">ເບິ່ງລ່ວງໜ້າ</string>
     <string name="song_chunk">ທ່ອນ</string>
     <string name="song_language_scope">ພາສາ</string>
+    <string name="song_style_language">ຮູບແບບ</string>
     <string name="song_preview_look_ahead">ເບິ່ງລ່ວງໜ້າ</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">ພື້ນຫຼັງ</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">ການເຄື່ອນໄຫວ</string>
     <string name="customize_layout">ຮູບແບບການຈັດວາງ</string>
+    <string name="customize_marker">ເຄື່ອງໝາຍ</string>
     <string name="customize_bilingual">ສອງພາສາ</string>
     <string name="customize_no_preview">ບໍ່ມີການສະແດງຕົວຢ່າງສຳລັບພາກນີ້</string>
     <string name="customize_bible">ພຣະຄຳພີ</string>

@@ -401,8 +401,14 @@ private fun StripRow(label: String, content: @Composable () -> Unit) {
     }
 }
 
-/** Four of these and their gaps are exactly what this column has room for beside the caption. */
-private val MARGIN_FIELD_WIDTH = 74.dp
+/**
+ * Four of these and their gaps are what this column has room for beside the caption, and no less
+ * than "BOTTOM" needs: the caption is drawn inside the field, so at 74 it came out as "BOTT…".
+ *
+ * The budget is 72 for the caption gutter plus four of these plus three 8dp gaps, against the 402
+ * the column has inside its padding -- which leaves exactly 76 each.
+ */
+private val MARGIN_FIELD_WIDTH = 76.dp
 
 /**
  * Wide enough for the longest caption on one line.

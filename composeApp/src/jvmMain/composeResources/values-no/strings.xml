@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Forhåndsvisning</string>
     <string name="song_chunk">Avsnitt</string>
     <string name="song_language_scope">Språk</string>
+    <string name="song_style_language">Stil</string>
     <string name="song_preview_look_ahead">Forhåndsvisning</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Bakgrunn</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Bevegelse</string>
     <string name="customize_layout">Oppsett</string>
+    <string name="customize_marker">Markør</string>
     <string name="customize_bilingual">Tospråklig</string>
     <string name="customize_no_preview">Ingen forhåndsvisning for denne delen</string>
     <string name="customize_bible">Bibel</string>

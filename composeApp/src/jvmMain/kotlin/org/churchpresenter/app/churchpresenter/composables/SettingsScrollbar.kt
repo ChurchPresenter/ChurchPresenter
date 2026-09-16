@@ -2,9 +2,16 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,4 +39,32 @@ fun BoxScope.SettingsScrollbar(scrollState: ScrollState) {
         modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
         adapter = rememberScrollbarAdapter(scrollState)
     )
+}
+
+/**
+ * A settings column that scrolls, with [SettingsScrollbar] down its edge and the gutter kept clear
+ * for it.
+ *
+ * The shape every scrolling pane in the settings dialog was writing out by hand — a Box, a Column
+ * carrying `verticalScroll` and the end padding, and the bar beside it. Written once so a pane that
+ * grows a row gains the affordance without anyone remembering to add it.
+ */
+@Composable
+fun SettingsScrollColumn(
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(scrollState)
+                .padding(end = SettingsScrollbarGutter),
+            verticalArrangement = verticalArrangement,
+            content = content,
+        )
+        SettingsScrollbar(scrollState)
+    }
 }

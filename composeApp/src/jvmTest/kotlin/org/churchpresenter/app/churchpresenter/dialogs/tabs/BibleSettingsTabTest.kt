@@ -662,7 +662,9 @@ class BibleSettingsTabTest {
         pointAt(target)
         assertEquals(false, target.shadow(harness.current.bibleSettings), "shadow starts off")
 
-        onNodeWithText("Shadow").performClick()
+        // Scrolled to: shadow and the text transform each took a row of their own when the panel
+        // stopped crushing them into one, which puts them below the fold of a short pane.
+        onNodeWithText("Shadow").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, target.shadow(harness.current.bibleSettings), "shadow on ${target.name}")
@@ -742,7 +744,7 @@ class BibleSettingsTabTest {
         val harness = showTab()
         pointAt(targets[2])
 
-        onNodeWithText("UPPERCASE").performClick()
+        onNodeWithText("UPPERCASE").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, t(harness.current.bibleSettings).referenceTransform)
@@ -763,7 +765,7 @@ class BibleSettingsTabTest {
             "lowercase" to Constants.TEXT_TRANSFORM_LOWERCASE,
             "Capitalize" to Constants.TEXT_TRANSFORM_CAPITALIZE,
         ).forEach { (label, expected) ->
-            onNodeWithText(label).performClick()
+            onNodeWithText(label).performScrollTo().performClick()
             waitForIdle()
             assertEquals(expected, t(harness.current.bibleSettings).textTransform, label)
         }

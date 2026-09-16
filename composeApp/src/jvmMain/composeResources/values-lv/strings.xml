@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Priekšskats</string>
     <string name="song_chunk">Fragments</string>
     <string name="song_language_scope">Valoda</string>
+    <string name="song_style_language">Stils</string>
     <string name="song_preview_look_ahead">Priekšskats</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Fons</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Kustība</string>
     <string name="customize_layout">Izkārtojums</string>
+    <string name="customize_marker">Marķieris</string>
     <string name="customize_bilingual">Divvalodu</string>
     <string name="customize_no_preview">Šai sadaļai nav priekšskatījuma</string>
     <string name="customize_bible">Bībele</string>

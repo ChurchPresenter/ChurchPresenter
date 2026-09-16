@@ -2462,6 +2462,7 @@
     <string name="song_element_look_ahead">Алдыңғы қарау</string>
     <string name="song_chunk">Бөлік</string>
     <string name="song_language_scope">Тіл</string>
+    <string name="song_style_language">Мәнер</string>
     <string name="song_preview_look_ahead">Алдыңғы қарау</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Фон</string>
@@ -2557,6 +2558,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Қозғалыс</string>
     <string name="customize_layout">Орналасу</string>
+    <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Екі тілде</string>
     <string name="customize_no_preview">Бұл бөлім үшін алдын ала қарау жоқ</string>
     <string name="customize_bible">Киелі Кітап</string>

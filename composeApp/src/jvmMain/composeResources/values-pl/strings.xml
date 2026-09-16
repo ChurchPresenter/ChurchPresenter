@@ -2461,6 +2461,7 @@
     <string name="song_element_look_ahead">Zapowiedź</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Język</string>
+    <string name="song_style_language">Styl</string>
     <string name="song_preview_look_ahead">Zapowiedź</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Tło</string>
@@ -2556,6 +2557,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Ruch</string>
     <string name="customize_layout">Układ</string>
+    <string name="customize_marker">Znacznik</string>
     <string name="customize_bilingual">Dwujęzycznie</string>
     <string name="customize_no_preview">Brak podglądu dla tej sekcji</string>
     <string name="customize_bible">Biblia</string>

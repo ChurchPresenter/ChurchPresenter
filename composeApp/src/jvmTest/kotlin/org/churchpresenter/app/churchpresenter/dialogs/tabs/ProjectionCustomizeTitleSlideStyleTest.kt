@@ -9,6 +9,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,8 +42,17 @@ class ProjectionCustomizeTitleSlideStyleTest {
         projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode))),
     )
 
-    private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+    /**
+     * What this output actually draws songs with.
+     *
+     * An override stopped being a whole `SongSettings` snapshot and became a sparse tree of what the
+     * screen changed, so it is resolved against the document rather than read as settings.
+     */
+    private fun AppSettings.stored(): SongSettings {
+        val assignment = projectionSettings.screenAssignments[0]
+        assertNotNull(assignment.songOverride, "the output must have its own Songs")
+        return resolvedFor(assignment).songSettings
+    }
 
     /** The profile the pane edits: the title, on a full screen. The picker opens on it. */
     private fun AppSettings.storedTitle(): SongElementStyle =
