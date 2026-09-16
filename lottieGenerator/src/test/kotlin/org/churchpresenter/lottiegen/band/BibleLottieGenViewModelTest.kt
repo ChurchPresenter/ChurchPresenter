@@ -110,17 +110,15 @@ class BibleLottieGenViewModelTest {
     }
 
     @Test
-    fun `a picture is loaded into its role and a first background picture lowers the fill to a tint`() {
+    fun `a picture is loaded into its role without touching the fill`() {
         val vm = viewModel()
         val png = File(temp, "p.png").also { ImageIO.write(BufferedImage(4, 2, BufferedImage.TYPE_INT_RGB), "png", it) }
+        vm.updateConfig { it.copy(bgAlpha = 75) }
         vm.loadBandImage(BandColorRole.BACKGROUND, png)
         val image = assertNotNull(vm.config.images[BandColorRole.BACKGROUND])
         assertEquals("p.png", image.name)
         assertEquals(4 to 2, image.width to image.height)
-        assertEquals(40, vm.config.bgAlpha)
-        vm.updateConfig { it.copy(bgAlpha = 75) }
-        vm.loadBandImage(BandColorRole.BACKGROUND, png)
-        assertEquals(75, vm.config.bgAlpha, "an alpha the user set stays")
+        assertEquals(75, vm.config.bgAlpha, "attaching a picture no longer touches the fill alpha")
         vm.loadBandImage(BandColorRole.ACCENT, png)
         assertEquals(75, vm.config.bgAlpha, "another role's picture does not touch the fill")
         vm.clearBandImage(BandColorRole.BACKGROUND)

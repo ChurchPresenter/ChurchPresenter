@@ -20,7 +20,6 @@ import java.io.File
 import java.io.IOException
 
 private const val SETTLE_DEBOUNCE_MS = 300L
-private const val PICTURE_TINT_ALPHA = 40
 
 /**
  * The Bible band generator's state: the config being edited, the JSON it currently produces, and
@@ -132,14 +131,7 @@ class BibleLottieGenViewModel(
         }
         updateConfig {
             val image = BandImage(data.dataUrl, data.width, data.height, file.name)
-            it.copy(
-                images = it.images + (role to image),
-                // A background picture wants to be seen: the first pick drops the fill to a tint
-                // unless the alpha was already lowered.
-                bgAlpha = if (role == BandColorRole.BACKGROUND && !it.hasBackgroundImage &&
-                    it.bgAlpha >= BibleLottieGenConfig.DEFAULT_BG_ALPHA
-                ) PICTURE_TINT_ALPHA else it.bgAlpha,
-            )
+            it.copy(images = it.images + (role to image))
         }
     }
 
