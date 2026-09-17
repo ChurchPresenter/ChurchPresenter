@@ -66,6 +66,10 @@ class ProjectionCustomizeTitleSlideTest {
     fun `the slide-wide switches write this output's override`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            // On the Number sub-chip: it is the number's own switch, and the slide's six parts
+            // share one seat in the chips above. `nth = 1` skips the Songs element chip of the
+            // same name in the row over the pane.
+            chooseSegment("Number", scroll = false, nth = 1)
             toggleCheckbox("Show song number before title")
             onAllNodesWithContentDescription("Align Top").onFirst().performClick()
             waitForIdle()

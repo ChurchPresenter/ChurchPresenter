@@ -5,4 +5,7 @@ internal object HAlign {
     const val RIGHT = 0
     const val CENTER = 1
     const val LEFT = 2
+
+    /** Right, centre and left: how many buttons one group contributes. */
+    const val GROUP_SIZE = 3
 }

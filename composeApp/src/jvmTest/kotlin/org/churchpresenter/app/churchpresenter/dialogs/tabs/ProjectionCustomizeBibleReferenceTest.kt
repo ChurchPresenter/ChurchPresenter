@@ -60,9 +60,9 @@ class ProjectionCustomizeBibleReferenceTest {
     fun `the reference offers a position and an abbreviation switch`() {
         projectionTab(output()) { _ ->
             open(this, override = false)
-            onNodeWithText("Position").assertExists()
+            onNodeWithText("Reference position").assertExists()
             onNodeWithText("Abbreviation").assertExists()
-            onNodeWithText("Horizontal alignment:").assertExists()
+            onNodeWithText("Alignment").assertExists()
         }
     }
 
@@ -70,17 +70,20 @@ class ProjectionCustomizeBibleReferenceTest {
     fun `the verse text offers neither`() {
         projectionTab(output()) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT, override = false)
-            onNodeWithText("Position").assertDoesNotExist()
+            onNodeWithText("Reference position").assertDoesNotExist()
             onNodeWithText("Abbreviation").assertDoesNotExist()
         }
     }
 
     @Test
-    fun `the reference has no style quartet of its own`() {
+    fun `the reference carries the same faces every other element does`() {
+        // It used to carry none: the dialog drew a reduced set of controls of its own. It is built
+        // from the same typography panel as the global tab now, and the reference's profile has
+        // always had these flags -- the pane simply never offered them.
         projectionTab(output()) { _ ->
             open(this, override = false)
-            onNodeWithText("B").assertDoesNotExist()
-            onNodeWithText("I").assertDoesNotExist()
+            onNodeWithText("B").assertExists()
+            onNodeWithText("I").assertExists()
         }
     }
 

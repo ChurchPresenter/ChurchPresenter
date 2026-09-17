@@ -65,7 +65,7 @@ internal fun SongCustomizePane(
         val editingLanguage = if (hasSecondLanguage) language else SongStyleLanguage.PRIMARY
 
         if (titleSlideView) {
-            SongTitleSlideEnabledRow(settings, onSettingsChange)
+            SongTitleSlideEnabledRow(settings, onSettingsChange, showVerticalAlignment = !target.isLowerThird)
             SegmentedButton(
                 items = TITLE_SLIDE_ELEMENTS.map { SegmentedButtonItem(it, it.label()) },
                 selectedValue = slideElement,
@@ -134,6 +134,18 @@ internal fun SongCustomizePane(
                 numberInCorner = song.numberCorner(target.isLowerThird) != Constants.NONE,
             )
         }
+        // Where the lyric block sits on the slide -- one value for the song rather than one per
+        // element, so it is written straight onto `SongSettings` rather than into a profile. Only
+        // the lyrics carry it: the look-ahead and the next section sit under the line they follow,
+        // and the title slide has its own control above.
+        if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
+            BlockVerticalAlignmentRow(
+                selected = song.lyricsAlignment,
+                onSelect = { v ->
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v)) }
+                },
+            )
+        }
     }
 }
 
@@ -150,8 +162,9 @@ private fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this
 private fun SongTitleSlideEnabledRow(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    showVerticalAlignment: Boolean,
 ) {
-    SongTitleSlideSection(settings, onSettingsChange)
+    SongTitleSlideSection(settings, onSettingsChange, showVerticalAlignment)
 }
 
 /** Wide enough for "Composer", the longest of the six. */

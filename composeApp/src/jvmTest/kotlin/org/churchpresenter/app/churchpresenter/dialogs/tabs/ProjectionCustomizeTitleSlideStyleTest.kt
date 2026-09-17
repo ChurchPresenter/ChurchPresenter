@@ -171,12 +171,12 @@ class ProjectionCustomizeTitleSlideStyleTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
             tapSliderTrack("Letter spacing", "3px", fraction = 0.5f)
-            assertEquals(40, get().storedTitle().letterSpacing, "halfway along a -20..100 track")
+            assertEquals(10, get().storedTitle().letterSpacing, "halfway along a -10..30 track")
             assertEquals(7, get().storedTitle().wordSpacing, "the slider below it must not move")
 
             tapSliderTrack("Word spacing", "7px", fraction = 0.5f)
-            assertEquals(40, get().storedTitle().wordSpacing)
-            assertEquals(40, get().storedTitle().letterSpacing, "nor the one above it, afterwards")
+            assertEquals(20, get().storedTitle().wordSpacing, "and halfway along a 0..40 one")
+            assertEquals(10, get().storedTitle().letterSpacing, "nor the one above it, afterwards")
         }
     }
 }

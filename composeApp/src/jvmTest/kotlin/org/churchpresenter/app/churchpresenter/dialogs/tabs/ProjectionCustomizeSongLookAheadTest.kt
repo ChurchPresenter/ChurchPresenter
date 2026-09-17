@@ -11,6 +11,8 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.assertCountEquals
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -190,14 +192,17 @@ class ProjectionCustomizeSongLookAheadTest {
     }
 
     @Test
-    fun `the next section has no alignment of its own`() {
+    fun `the next section has a horizontal alignment of its own`() {
+        // One group of three, and no vertical alignment beside it: where the block sits on the
+        // slide belongs to the lyrics, and the next section sits under the line it follows.
         projectionTab(output()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             assertEquals(
-                0,
+                HAlign.GROUP_SIZE,
                 horizontalAlignButtons().fetchSemanticsNodes().size,
-                "the next section follows the look-ahead line it sits under",
+                "its own left/centre/right and nothing more",
             )
+            onAllNodesWithContentDescription("Align Top").assertCountEquals(0)
         }
     }
 

@@ -6,6 +6,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * The Bible pane, showing one element of one translation -- the chips above it pick both.
@@ -76,5 +79,26 @@ internal fun BibleCustomizePane(
             autoFitEnabled = false,
             showHeader = false,
         )
+        // Where the verse block sits on the slide. Not part of the panel above: that edits one
+        // element of one translation, while this places the whole block and is one value for the
+        // Bible -- which is why it is written with `updateBible` rather than `updateEntry`. The
+        // reference has [PositionControl] instead, since all it chooses is which side of the verse
+        // it sits on.
+        if (styleElement == BibleStyleElement.TEXT) {
+            BlockVerticalAlignmentRow(
+                selected = bs.verticalAlignment,
+                onSelect = { v -> updateBible { it.copy(verticalAlignment = v) } },
+            )
+        }
+        // Whether the reference names its translation by abbreviation. One flag, not a pair: the
+        // reference names a translation, and a translation is abbreviated the same way whichever
+        // shape of output is drawing it. Absent on the verse text, which has no label to abbreviate.
+        if (styleElement == BibleStyleElement.REFERENCE) {
+            ToggleControl(
+                label = stringResource(Res.string.customize_show_abbreviation),
+                checked = t.showAbbreviation,
+                onCheckedChange = { v -> updateEntry { it.copy(showAbbreviation = v) } },
+            )
+        }
     }
 }

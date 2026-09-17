@@ -71,6 +71,14 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SongTitleSlideSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /**
+     * Off for an output that draws a band, which keeps the block at its own bottom whatever this
+     * says -- so the row would be a control that does nothing.
+     *
+     * Only the per-output Customize dialog ever passes false: the global tab styles both shapes at
+     * once and cannot know which one a given screen is.
+     */
+    showVerticalAlignment: Boolean = true,
 ) {
     SettingsSection(title = stringResource(Res.string.song_title_slide)) {
         LabeledCheckbox(
@@ -84,8 +92,8 @@ internal fun SongTitleSlideSection(
             style = MaterialTheme.typography.bodyMedium,
         )
         // The whole block -- number, title and credits -- moves as one; the lower third keeps it
-        // at the bottom of the band regardless.
-        Row(
+        // at the bottom of the band regardless, which is what [showVerticalAlignment] is for.
+        if (showVerticalAlignment) Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (settings.songSettings.titleSlideEnabled) 1f else DISABLED_ALPHA),

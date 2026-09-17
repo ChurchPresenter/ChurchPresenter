@@ -21,7 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.components.DropdownSelector
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.vertical_alignment
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import androidx.compose.foundation.layout.FlowRow
@@ -211,6 +215,22 @@ internal fun VerticalAlignControl(selected: String, onSelect: (String) -> Unit) 
         middleValue = Constants.MIDDLE,
         bottomValue = Constants.BOTTOM,
     )
+}
+
+/**
+ * Where the block of text sits on the slide, top to bottom.
+ *
+ * One value for the whole category rather than one per element, which is why it sits beside the
+ * typography panel instead of inside it: that panel edits one element's profile, and the lyrics,
+ * the verse and its reference move down the slide together as one block. Only the element that
+ * *is* the block carries it -- a look-ahead line cannot be placed independently of the lyrics it
+ * sits under, and the title slide has a control of its own.
+ */
+@Composable
+internal fun BlockVerticalAlignmentRow(selected: String, onSelect: (String) -> Unit) {
+    LabeledControl(stringResource(Res.string.vertical_alignment).removeSuffix(":")) {
+        VerticalAlignControl(selected = selected, onSelect = onSelect)
+    }
 }
 
 /** Above / below, for the things that sit either side of the text they belong to. */

@@ -92,11 +92,13 @@ class ProjectionCustomizeSongTitleNumberTest {
     }
 
     @Test
-    fun `neither carries a color or a style row`() {
+    fun `both carry a color and a style row`() {
+        // Neither did while the dialog drew controls of its own; both do now that it is built from
+        // the Song tab's typography panel, whose profiles have always held these flags.
         for (element in listOf(CustomizeElement.SONG_TITLE, CustomizeElement.SONG_NUMBER)) {
             projectionTab(output()) { _ ->
                 openCustomizePane(CustomizePane.SONGS, element, override = false)
-                onNodeWithText("B").assertDoesNotExist()
+                onNodeWithText("B").assertExists()
             }
         }
     }
