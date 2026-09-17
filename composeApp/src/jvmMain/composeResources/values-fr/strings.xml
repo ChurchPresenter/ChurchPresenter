@@ -2489,6 +2489,7 @@
     <string name="song_element_look_ahead">Aperçu suivant</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Langue</string>
+    <string name="song_style_language">Style</string>
     <string name="song_preview_look_ahead">Aperçu suivant</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Arrière-plan</string>
@@ -2584,6 +2585,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Mouvement</string>
     <string name="customize_layout">Disposition</string>
+    <string name="customize_marker">Repère</string>
     <string name="customize_bilingual">Bilingue</string>
     <string name="customize_no_preview">Aucun aperçu pour cette section</string>
     <string name="customize_bible">Bible</string>
@@ -2680,4 +2682,12 @@
     <string name="song_lottie_unsupported_note">Le modèle décide de la mise en page et de la place du titre. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré, l'espacement des mots, l'aperçu de la suite et les accords ne s'appliquent pas.</string>
     <string name="bible_lottie_unsupported_note">Le modèle décide de la mise en page, de la position de la référence et de la façon dont deux langues se partagent le bandeau. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré et l'espacement des mots ne s'appliquent pas.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contour</string>
+    <string name="tooltip_outline_options">Options de contour</string>
+    <string name="text_outline">Contour</string>
+    <string name="text_outline_width">Épaisseur</string>
+    <string name="outline_show">Afficher le contour</string>
+    <string name="song_secondary_language">2ᵉ langue</string>
+    <string name="song_primary_language">1ʳᵉ langue</string>
 </resources>

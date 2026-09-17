@@ -280,8 +280,29 @@ object BibleInstallSupport {
      */
     fun scratchIn(targetDir: File): File = File(targetDir, ".cp-install")
 
-    fun usableDirectory(targetDir: File): Boolean =
-        (targetDir.exists() || targetDir.mkdirs()) && targetDir.isDirectory
+    /**
+     * Whether a Bible install can actually write into [targetDir].
+     *
+     * `exists()`/`isDirectory` alone accept plenty of directories a download will still fail
+     * inside — a Start Menu shortcuts folder under `C:\ProgramData\...` was reported as
+     * `bibleSettings.storageDirectory` on one machine, was a real, existing directory, and still
+     * failed three calls deep with a raw `FileNotFoundException` from [copyChannel]'s
+     * `FileOutputStream` open (Sentry CHURCH-PRESENTER-DESKTOP-6K). `canWrite()` alone is not
+     * enough either — it can lie on Windows for a directory an admin process can write to but this
+     * one cannot — so this proves it by actually creating and removing a probe file, the same way
+     * the eventual scratch file will be created.
+     */
+    fun usableDirectory(targetDir: File): Boolean {
+        if (!(targetDir.exists() || targetDir.mkdirs()) || !targetDir.isDirectory) return false
+        val probe = File(targetDir, ".cp-install-write-test-${System.nanoTime()}")
+        return try {
+            val created = probe.createNewFile()
+            probe.delete()
+            created
+        } catch (_: IOException) {
+            false
+        }
+    }
 
     /**
      * Streams [url] to [destination], reporting 0..[DOWNLOAD_END]. Returns the HTTP status.

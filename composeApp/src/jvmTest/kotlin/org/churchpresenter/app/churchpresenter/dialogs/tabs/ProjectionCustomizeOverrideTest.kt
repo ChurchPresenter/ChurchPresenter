@@ -19,6 +19,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import org.churchpresenter.app.churchpresenter.songSettingsOn
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
+import org.churchpresenter.app.churchpresenter.dictionarySettingsOn
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * The switch that gives an output appearance of its own, and the Reset that takes it away again.
@@ -50,10 +54,10 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             val assignment = get().assignment()
-            assertNull(assignment.songOverride)
-            assertNull(assignment.bibleOverride)
-            assertNull(assignment.backgroundOverride)
-            assertNull(assignment.dictionaryOverride)
+            assertNull(assignment.songSettingsOn())
+            assertNull(assignment.bibleSettingsOn())
+            assertNull(assignment.backgroundSettingsOn())
+            assertNull(assignment.dictionarySettingsOn())
         }
     }
 
@@ -79,13 +83,13 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
-            assertEquals(90, assertNotNull(get().assignment().songOverride).lyricsFontSize)
+            assertEquals(90, assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize)
 
             onNodeWithText("Reset to global").performClick()
             waitForIdle()
 
             assertNull(
-                get().assignment().songOverride,
+                get().assignment().songSettingsOn(get().songSettings),
                 "Reset gives the category up entirely rather than restoring values into it",
             )
         }
@@ -98,7 +102,7 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
-            assertNotNull(get().assignment().songOverride)
+            assertNotNull(get().assignment().songSettingsOn(get().songSettings))
         }
     }
 
@@ -109,7 +113,7 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
             assertEquals(
                 61,
-                assertNotNull(get().assignment().songOverride).lyricsFontSize,
+                assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize,
                 "an output starts where the global settings are, not at the defaults",
             )
         }
@@ -149,9 +153,9 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
 
             val assignment = get().assignment()
-            assertNotNull(assignment.songOverride)
-            assertNull(assignment.bibleOverride, "the Bible must still follow the global settings")
-            assertNull(assignment.backgroundOverride)
+            assertNotNull(assignment.songSettingsOn())
+            assertNull(assignment.bibleSettingsOn(), "the Bible must still follow the global settings")
+            assertNull(assignment.backgroundSettingsOn())
         }
     }
 
@@ -163,7 +167,7 @@ class ProjectionCustomizeOverrideTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             flipOverride()
-            assertNull(get().assignment().songOverride)
+            assertNull(get().assignment().songSettingsOn(get().songSettings))
         }
     }
 
@@ -172,10 +176,13 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
-            assertEquals(90, assertNotNull(get().assignment().songOverride).lyricsFontSize)
+            assertEquals(90, assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize)
 
             flipOverride()
-            assertNull(get().assignment().songOverride, "following the global settings again means storing nothing")
+            assertNull(
+                get().assignment().songSettingsOn(get().songSettings),
+                "following the global settings again means storing nothing",
+            )
         }
     }
 
@@ -199,8 +206,8 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
 
             val assignment = get().assignment()
-            assertNotNull(assignment.bibleOverride)
-            assertNull(assignment.songOverride)
+            assertNotNull(assignment.bibleSettingsOn())
+            assertNull(assignment.songSettingsOn())
         }
     }
 
@@ -211,8 +218,8 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
 
             val assignment = get().assignment()
-            assertNotNull(assignment.backgroundOverride)
-            assertNull(assignment.songOverride)
+            assertNotNull(assignment.backgroundSettingsOn())
+            assertNull(assignment.songSettingsOn())
         }
     }
 
@@ -223,8 +230,8 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
 
             val assignment = get().assignment()
-            assertNotNull(assignment.dictionaryOverride)
-            assertNull(assignment.bibleOverride)
+            assertNotNull(assignment.dictionarySettingsOn())
+            assertNull(assignment.bibleSettingsOn())
         }
     }
 
@@ -238,8 +245,8 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
 
             val assignment = get().assignment()
-            assertNotNull(assignment.songOverride)
-            assertNotNull(assignment.bibleOverride)
+            assertNotNull(assignment.songSettingsOn())
+            assertNotNull(assignment.bibleSettingsOn())
             onNodeWithText("2 of 4 customized").assertExists()
         }
     }
@@ -252,7 +259,8 @@ class ProjectionCustomizeOverrideTest {
 
             assertEquals(
                 55,
-                assertNotNull(get().assignment().bibleOverride).translationList()[0].textFontSize,
+                assertNotNull(get().assignment().bibleSettingsOn(get().bibleSettings))
+                    .translationList()[0].textFontSize,
                 "the output starts where the global Bible settings are",
             )
         }

@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -29,6 +30,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongElementStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryTitleStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isCredit
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isLowerThird
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.shownOnTitleSlide
@@ -38,6 +40,7 @@ import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -62,6 +65,13 @@ internal data class TitleSlideLine(
     val element: SongStyleElement,
     val text: String,
     val number: String? = null,
+    /**
+     * The song's *second* title, on a slide showing both -- drawn in the second title's own profile.
+     *
+     * Both titles used to go through the first's, so a church wanting its two languages told apart
+     * had no way to say so: the only control was the Title element, and it moved both lines at once.
+     */
+    val secondaryLanguage: Boolean = false,
 ) {
     /** The line as plain text, for the stage monitor and the companion app. */
     val plainText: String get() = listOfNotNull(number, text).joinToString(" \u2013 ")
@@ -90,7 +100,7 @@ internal fun titleSlideLines(
     val titles = titleSlideTitles(section, langDisplay)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()
-        .map { TitleSlideLine(SongStyleElement.TITLE, it) }
+        .map { TitleSlideLine(SongStyleElement.TITLE, it.text, secondaryLanguage = it.secondary) }
     val heading = when {
         number == null -> titles
         settings.titleSlideNumberBeforeTitle && titles.isNotEmpty() ->
@@ -107,14 +117,23 @@ internal fun titleSlideLines(
     return heading + credits
 }
 
+/** One title of the song, and whether it is the second language's -- which decides its profile. */
+private data class SlideTitle(val text: String, val secondary: Boolean)
+
 /** The song's title in whichever language(s) [langDisplay] asks for, the primary first. */
-private fun titleSlideTitles(section: LyricSection, langDisplay: String): List<String> {
+private fun titleSlideTitles(section: LyricSection, langDisplay: String): List<SlideTitle> {
     val secondary = section.secondaryTitle.takeIf { it.isNotBlank() && it != section.title }
     return when (langDisplay) {
-        Constants.SONG_LANG_SECONDARY -> listOf(secondary ?: section.title)
-        Constants.SONG_LANG_BOTH -> listOfNotNull(section.title, secondary)
-        else -> listOf(section.title)
-    }.filter { it.isNotBlank() }
+        // The second title where the song has one, and the first as a stand-in where it does not --
+        // which is the first title, so it keeps the first title's look.
+        Constants.SONG_LANG_SECONDARY ->
+            secondary?.let { listOf(SlideTitle(it, secondary = true)) } ?: listOf(SlideTitle(section.title, false))
+        Constants.SONG_LANG_BOTH -> listOfNotNull(
+            SlideTitle(section.title, secondary = false),
+            secondary?.let { SlideTitle(it, secondary = true) },
+        )
+        else -> listOf(SlideTitle(section.title, secondary = false))
+    }.filter { it.text.isNotBlank() }
 }
 
 /** The CCLI number is drawn as the licence line reads on a printed sheet: "CCLI #22025". */
@@ -162,7 +181,11 @@ internal fun SongTitleSlideContent(
                 val fallbackFont = if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
                 TitleSlideText(
                     line = line,
-                    style = settings.elementStyle(line.element, target),
+                    style = if (line.secondaryLanguage) {
+                        settings.secondaryTitleStyle(target)
+                    } else {
+                        settings.elementStyle(line.element, target)
+                    },
                     // The number ahead of the title in the same paragraph, in its own style, so a
                     // long title wraps under it as one line of text would -- laid out as two
                     // boxes side by side, the title centred in what was left beside the number.
@@ -194,9 +217,14 @@ private fun TitleSlideText(
 ) {
     val painter = rememberTextBackdropPainter(style.backdrop)
     val font = if (line.element == SongStyleElement.NUMBER) style.fontType.ifBlank { fallbackFont } else style.fontType
-    val text = buildAnnotatedString {
+    // A line can carry the number's span as well as its own, and a span is where a colour lives --
+    // so the stroke pass takes its own copy with every span painted the outline's colour. Building
+    // it twice rather than restyling one: `AnnotatedString` spans are not editable in place.
+    fun buildText(outlineColor: Color?, dropShadow: Boolean = false) = buildAnnotatedString {
         leading?.let { (number, numberStyle) ->
-            withStyle(spanStyleOf(numberStyle, numberStyle.fontType.ifBlank { fallbackFont }, isKey, scaleFactor)) {
+            val numberSpan = spanStyleOf(numberStyle, numberStyle.fontType.ifBlank { fallbackFont }, isKey, scaleFactor)
+                .let { if (dropShadow) it.copy(shadow = null) else it }
+            withStyle(outlineColor?.let { numberSpan.copy(color = it) } ?: numberSpan) {
                 append(styledDisplayText(
                     number,
                     numberStyle.transform,
@@ -213,27 +241,62 @@ private fun TitleSlideText(
             spacingEm(style.wordSpacing, style.fontSize),
         ))
     }
-    Text(
-        modifier = Modifier.fillMaxWidth().then(painter.modifier),
-        onTextLayout = painter::onTextLayout,
-        textAlign = when (style.horizontalAlignment) {
-            Constants.LEFT -> TextAlign.Start
-            Constants.RIGHT -> TextAlign.End
-            else -> TextAlign.Center
-        },
-        fontFamily = systemFontFamilyOrDefault(font),
-        fontSize = (style.fontSize * scaleFactor).sp,
-        text = text,
-        color = if (isKey) Color.White else parseHexColor(style.color),
-        style = TextStyle(
-            fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (style.italic) FontStyle.Italic else FontStyle.Normal,
-            textDecoration = combinedTextDecoration(style.underline, style.strikethrough),
-            letterSpacing = spacingEm(style.letterSpacing, style.fontSize).em,
-            shadow = shadowOf(style, scaleFactor),
-        ),
+    // The number's outline where it shares this line: the two elements are drawn as one paragraph,
+    // and `drawStyle` is a property of the whole text rather than of a span, so they cannot be
+    // stroked at two different widths. The line's own element wins.
+    val outline = titleSlideOutline(style, isKey)
+    val textStyle = TextStyle(
+        fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (style.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(style.underline, style.strikethrough),
+        letterSpacing = spacingEm(style.letterSpacing, style.fontSize).em,
+        shadow = shadowOf(style, scaleFactor),
     )
+    val textAlign = when (style.horizontalAlignment) {
+        Constants.LEFT -> TextAlign.Start
+        Constants.RIGHT -> TextAlign.End
+        else -> TextAlign.Center
+    }
+    if (!outline.isVisible) {
+        Text(
+            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            onTextLayout = painter::onTextLayout,
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(null),
+            color = if (isKey) Color.White else parseHexColor(style.color),
+            style = textStyle,
+        )
+        return
+    }
+    val strokeColor = parseHexColor(outline.color)
+    Box(modifier = Modifier.fillMaxWidth().then(painter.modifier)) {
+        Text(
+            modifier = Modifier.matchParentSize(),
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(strokeColor),
+            color = strokeColor,
+            style = textStyle.copy(drawStyle = Stroke(width = outline.width * scaleFactor)),
+        )
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            onTextLayout = painter::onTextLayout,
+            textAlign = textAlign,
+            fontFamily = systemFontFamilyOrDefault(font),
+            fontSize = (style.fontSize * scaleFactor).sp,
+            text = buildText(null, dropShadow = true),
+            color = if (isKey) Color.White else parseHexColor(style.color),
+            style = textStyle.copy(shadow = null),
+        )
+    }
 }
+
+/** The element's outline, painted white on a key output so the matte keeps the outlined shape. */
+private fun titleSlideOutline(style: SongElementStyle, isKey: Boolean): TextOutline =
+    if (isKey && style.outline.isVisible) style.outline.copy(color = "#FFFFFF") else style.outline
 
 /** The number's look as a span inside the title's paragraph. */
 private fun spanStyleOf(style: SongElementStyle, font: String, isKey: Boolean, scaleFactor: Float) = SpanStyle(

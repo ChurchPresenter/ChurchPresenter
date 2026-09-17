@@ -3,11 +3,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollTo
 
 /**
  * Taps a `SlimSlider` that has a caption above it and a readout beside it.
@@ -18,10 +20,8 @@ import androidx.compose.ui.test.performMouseInput
  * roots at the same origin and the dialog is the last one.
  */
 internal fun ComposeUiTest.tapSliderTrack(caption: String, readout: String, fraction: Float) {
-    val captionBounds = onAllNodesWithText(caption).fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .firstOrNull()?.boundsInRoot ?: error("no slider captioned \"$caption\" is on screen")
-    val readoutBounds = onAllNodesWithText(readout).fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .firstOrNull()?.boundsInRoot ?: error("no slider readout reading \"$readout\" is on screen")
+    val captionBounds = laidOutBounds(caption, "slider captioned")
+    val readoutBounds = laidOutBounds(readout, "slider readout reading")
 
     // The track starts where the caption starts and ends a gap short of the readout beside it;
     // `SlimSlider` lays the two out in one `Row` spaced by that gap, vertically centred, so the
@@ -41,3 +41,26 @@ internal fun ComposeUiTest.tapSliderTrack(caption: String, readout: String, frac
 
 /** `SlimSlider`'s own `Arrangement.spacedBy(10.dp)`, at the tests' density of 1. */
 private const val SLIDER_ROW_GAP = 10f
+
+/**
+ * The bounds of the first node showing [text], scrolled into view if it is not laid out yet.
+ *
+ * A node that has scrolled off the end of a column is still in the tree and still answers lookups —
+ * it simply reports empty bounds. Measuring a track from two of those gives a negative x, and the
+ * click then lands outside the root and fails with a message about mouse positions that says
+ * nothing about which control was missed. So the bounds are brought into existence here, and the
+ * one case that cannot be — a control that is genuinely not composed — is named.
+ */
+private fun ComposeUiTest.laidOutBounds(text: String, what: String): Rect {
+    fun boundsOrNull() = onAllNodesWithText(text)
+        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        .firstOrNull()
+        ?.boundsInRoot
+    val first = boundsOrNull() ?: error("no $what \"$text\" is on screen")
+    if (!first.isEmpty) return first
+    onAllNodesWithText(text)[0].performScrollTo()
+    waitForIdle()
+    val scrolled = boundsOrNull() ?: error("no $what \"$text\" is on screen")
+    check(!scrolled.isEmpty) { "the $what \"$text\" is in the tree but has no bounds, even scrolled to" }
+    return scrolled
+}

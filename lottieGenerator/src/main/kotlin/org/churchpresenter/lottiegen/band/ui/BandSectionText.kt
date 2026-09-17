@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.band.SlotLayout
+import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
@@ -32,6 +33,7 @@ import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.theme.components.TextStyleToggleButton
 
+private const val MAX_ALPHA_PCT = 100f
 private const val MIN_PREVIEW_SIZE = 12f
 private const val MAX_PREVIEW_SIZE = 200f
 
@@ -46,7 +48,9 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
             // The host's own picker, listing the machine's fonts each in its own face.
             fontPicker(cfg.previewFontFamily, onFont, Modifier.weight(1f))
         } else {
-            val fonts = LottieFont.entries.map { it.familyName }
+            val bundledFontNames = LottieFont.entries.map { it.familyName }
+            val systemFontNames = rememberSystemFonts().filterNot { it in bundledFontNames }
+            val fonts = bundledFontNames + systemFontNames
             DropdownSelector(
                 label = Strings.bandPreviewFont,
                 value = cfg.previewFontFamily,
@@ -91,6 +95,7 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
         size = cfg.previewReferenceSizePx,
         onSize = { v -> viewModel.updateConfig { it.copy(previewReferenceSizePx = v) } },
     )
+    TextOpacityRow(viewModel, kind)
     Hairline()
     var lang by remember { mutableStateOf(0) }
     val twoLanguages = cfg.layout != SlotLayout.SINGLE
@@ -126,6 +131,29 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
         label = Strings.bandLabel("reference", kind),
         fillWidth = true,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
+    )
+}
+
+/**
+ * How opaque the two text slots are.
+ *
+ * Opacity rather than a colour with an alpha channel: the band's text colour comes from the app's
+ * own settings at run time, and only the layer's opacity is the template's to set.
+ */
+@Composable
+private fun TextOpacityRow(viewModel: BibleLottieGenViewModel, kind: String) {
+    val cfg = viewModel.config
+    SliderGrid(
+        listOf(
+            GridSlider(
+                Strings.bandLabel("text_opacity", kind), cfg.textAlpha, MAX_ALPHA_PCT,
+                unit = Strings.bandUnitPercent,
+            ) { v -> viewModel.updateConfig { it.copy(textAlpha = v) } },
+            GridSlider(
+                Strings.bandLabel("reference_opacity", kind), cfg.referenceAlpha, MAX_ALPHA_PCT,
+                unit = Strings.bandUnitPercent,
+            ) { v -> viewModel.updateConfig { it.copy(referenceAlpha = v) } },
+        ),
     )
 }
 

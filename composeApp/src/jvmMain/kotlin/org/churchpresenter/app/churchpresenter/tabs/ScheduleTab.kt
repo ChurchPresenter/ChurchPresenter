@@ -67,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialo
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DragItemGeometry
@@ -125,8 +126,8 @@ data class ScheduleTabActions(
         animationType: String, animationDuration: Int, loopCount: Int, isTimer: Boolean,
         timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String,
         timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int,
-        targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop,
-    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+        targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop, outline: TextOutline,
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
@@ -248,7 +249,7 @@ fun ScheduleTab(
                     shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position,
                     animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes,
                     timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour,
-                    targetMinute, targetSecond, liveClockFormat, backdrop,
+                    targetMinute, targetSecond, liveClockFormat, backdrop, outline,
                     ->
                     viewModel.addAnnouncement(
                         text, textColor, backgroundColor, fontSize, fontType, bold, italic,
@@ -256,7 +257,7 @@ fun ScheduleTab(
                         horizontalAlignment, position, animationType, animationDuration, loopCount,
                         isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor,
                         timerExpiredText, timerMode, targetHour, targetMinute, targetSecond,
-                        liveClockFormat, backdrop,
+                        liveClockFormat, backdrop, outline,
                     )
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },

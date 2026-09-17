@@ -28,6 +28,7 @@ import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import kotlinx.serialization.json.JsonObject
 
 /**
  * The per-screen Customize dialog (Display Settings), on its Songs pane's Title Slide chip.
@@ -77,7 +78,10 @@ class OutputCustomizeDialogScreenshotTest {
                                     screenLabel = "Screen 1",
                                     assignment = ScreenAssignment(
                                         displayMode = mode,
-                                        songOverride = if (overridden) titleSlideSong() else null,
+                                        // The screen agrees with the document on everything so
+                                        // far -- an empty tree, which is what the dialog stores
+                                        // the moment the switch goes on.
+                                        songOverride = if (overridden) JsonObject(emptyMap()) else null,
                                     ),
                                     globalSettings = AppSettings(songSettings = titleSlideSong()),
                                     onApply = {},

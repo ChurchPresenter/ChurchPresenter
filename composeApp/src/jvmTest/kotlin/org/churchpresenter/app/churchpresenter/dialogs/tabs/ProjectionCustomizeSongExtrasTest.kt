@@ -14,11 +14,13 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import androidx.compose.ui.test.onAllNodesWithText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The number's corner dropdown and the text-backing button — the two Song-pane controls that go
@@ -39,7 +41,10 @@ class ProjectionCustomizeSongExtrasTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     /** Opens the corner dropdown showing [showing] and picks [option] from its menu. */
     private fun androidx.compose.ui.test.ComposeUiTest.chooseCorner(showing: String, option: String) {
@@ -162,7 +167,9 @@ class ProjectionCustomizeSongExtrasTest {
             // The lyrics start with no backing, so the dialog opens on Off — which shows its Style
             // row and its hint, and no presets at all.
             onNodeWithText("STYLE").assertExists()
-            onNodeWithText("Both").assertExists()
+            // The song-language row behind the dialog is captioned "Both" too, so this is the one
+            // in the dialog that has just opened -- the later of the two roots, as elsewhere.
+            onAllNodesWithText("Both")[1].assertExists()
             onNodeWithText("PRESETS").assertDoesNotExist()
         }
     }

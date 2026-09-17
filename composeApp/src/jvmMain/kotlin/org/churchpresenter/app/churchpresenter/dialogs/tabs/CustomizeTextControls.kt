@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
@@ -44,8 +45,8 @@ internal fun ColorControl(label: String, color: String, onColorChange: (String) 
  * canvas editors draw, so the buttons match wherever text is styled.
  *
  * Pass [backdrop] and [onBackdropChange] to add the border and line-background buttons, each of
- * which opens its own dialog. Both are optional so a caller with nowhere to store them keeps the
- * four buttons it always had.
+ * which opens its own dialog, and [outline]/[onOutlineChange] to add the glyph outline. All are
+ * optional so a caller with nowhere to store them keeps the four buttons it always had.
  */
 @Suppress("LongParameterList")
 @Composable
@@ -60,6 +61,8 @@ internal fun StyleControl(
     onShadowChange: (Boolean) -> Unit,
     backdrop: TextBackdrop? = null,
     onBackdropChange: ((TextBackdrop) -> Unit)? = null,
+    outline: TextOutline? = null,
+    onOutlineChange: ((TextOutline) -> Unit)? = null,
     /** Likewise optional: the strikethrough button appears only for a caller that can store it. */
     strikethrough: Boolean = false,
     onStrikethroughChange: ((Boolean) -> Unit)? = null,
@@ -77,8 +80,40 @@ internal fun StyleControl(
         onStrikethroughChange = onStrikethroughChange,
         backdrop = backdrop,
         onBackdropChange = onBackdropChange,
+        outline = outline,
+        onOutlineChange = onOutlineChange,
         buttonSize = CHOICE_HEIGHT,
     )
+}
+
+/**
+ * A colour that may be left unset, drawn as a checkbox and -- once it is set -- a picker.
+ *
+ * Blank is the stored "follow [primary]", so the checkbox is the presence of a colour rather than a
+ * flag of its own: ticking it starts at the colour the text is already drawn in, which changes
+ * nothing on screen until a colour is actually picked.
+ */
+@Composable
+internal fun SecondaryColorControl(
+    label: String,
+    primary: String,
+    secondary: String,
+    onSecondaryChange: (String) -> Unit,
+) {
+    LabeledCheckbox(
+        checked = secondary.isNotBlank(),
+        onCheckedChange = { on -> onSecondaryChange(if (on) primary else "") },
+        label = label,
+        style = MaterialTheme.typography.bodySmall,
+    )
+    if (secondary.isNotBlank()) {
+        ColorPickerField(
+            label = label,
+            color = secondary,
+            onColorChange = onSecondaryChange,
+            modifier = Modifier.width(COLOR_FIELD_WIDTH),
+        )
+    }
 }
 
 /** An on/off setting, drawn as the [LabeledCheckbox] every settings tab uses for a boolean. */

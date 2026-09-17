@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Oldindan ko'rish</string>
     <string name="song_chunk">Bo'lak</string>
     <string name="song_language_scope">Til</string>
+    <string name="song_style_language">Uslub</string>
     <string name="song_preview_look_ahead">Oldindan ko'rish</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Fon</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Harakat</string>
     <string name="customize_layout">Joylashuv</string>
+    <string name="customize_marker">Belgi</string>
     <string name="customize_bilingual">Ikki tilli</string>
     <string name="customize_no_preview">Bu boʻlim uchun oldindan koʻrish yoʻq</string>
     <string name="customize_bible">Muqaddas Kitob</string>
@@ -2660,4 +2662,12 @@
     <string name="song_lottie_unsupported_note">Shablon joylashuvni va sarlavha o‘rnini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish, so‘zlar oralig‘i, keyingisini oldindan ko‘rish va akkordlar qo‘llanilmaydi.</string>
     <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontur</string>
+    <string name="tooltip_outline_options">Kontur sozlamalari</string>
+    <string name="text_outline">Kontur</string>
+    <string name="text_outline_width">Qalinligi</string>
+    <string name="outline_show">Konturni koʻrsatish</string>
+    <string name="song_secondary_language">2-til</string>
+    <string name="song_primary_language">1-til</string>
 </resources>

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -109,6 +110,8 @@ internal data class SongElementStyle(
     val autoFit: Boolean = true,
     /** The line background and the border box, both drawn behind and around this element. */
     val backdrop: TextBackdrop = TextBackdrop(),
+    /** The stroke drawn around this element's glyphs, under the fill. */
+    val outline: TextOutline = TextOutline(),
 )
 
 /** What this song draws [element] with on [target]. */
@@ -182,6 +185,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             transform = songNumberLowerThirdTransform,
             position = songNumberLowerThirdPosition,
             backdrop = songNumberLowerThirdBackdrop,
+            outline = outlines.songNumberLowerThird,
         )
     } else {
         SongElementStyle(
@@ -202,6 +206,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             transform = songNumberTransform,
             position = songNumberPosition,
             backdrop = songNumberBackdrop,
+            outline = outlines.songNumber,
         )
     }
 
@@ -225,6 +230,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             transform = titleLowerThirdTransform,
             position = titleLowerThirdPosition,
             backdrop = titleLowerThirdBackdrop,
+            outline = outlines.titleLowerThird,
         )
     } else {
         SongElementStyle(
@@ -245,6 +251,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             transform = titleTransform,
             position = titlePosition,
             backdrop = titleBackdrop,
+            outline = outlines.title,
         )
     }
 
@@ -267,8 +274,9 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = lyricsLowerThirdWordSpacing,
             transform = lyricsLowerThirdTransform,
             chordColor = lyricsLowerThirdChordColor,
-        autoFit = lyricsLowerThirdFontSizeAutoFit,
+            autoFit = lyricsLowerThirdFontSizeAutoFit,
             backdrop = lyricsLowerThirdBackdrop,
+            outline = outlines.lyricsLowerThird,
         )
     } else {
         SongElementStyle(
@@ -288,8 +296,9 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = lyricsWordSpacing,
             transform = lyricsTransform,
             chordColor = lyricsChordColor,
-        autoFit = lyricsFontSizeAutoFit,
+            autoFit = lyricsFontSizeAutoFit,
             backdrop = lyricsBackdrop,
+            outline = outlines.lyrics,
         )
     }
 
@@ -313,6 +322,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             transform = lowerThirdLookAheadTransform,
             autoFit = lowerThirdLookAheadFontSizeAutoFit,
             backdrop = lowerThirdLookAheadBackdrop,
+            outline = outlines.lookAheadLowerThird,
         )
     } else {
         SongElementStyle(
@@ -333,6 +343,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             transform = lookAheadTransform,
             autoFit = lookAheadFontSizeAutoFit,
             backdrop = lookAheadBackdrop,
+            outline = outlines.lookAhead,
         )
     }
 
@@ -356,6 +367,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             transform = lowerThirdLookAheadNextTransform,
             autoFit = lowerThirdLookAheadNextFontSizeAutoFit,
             backdrop = lowerThirdLookAheadNextBackdrop,
+            outline = outlines.nextSectionLowerThird,
         )
     } else {
         SongElementStyle(
@@ -376,6 +388,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             transform = lookAheadNextTransform,
             autoFit = lookAheadNextFontSizeAutoFit,
             backdrop = lookAheadNextBackdrop,
+            outline = outlines.nextSection,
         )
     }
 

@@ -246,12 +246,11 @@ class BibleLottieGeneratorTest {
     }
 
     @Test
-    fun `a background picture keeps the background colour above it as a tint`() {
+    fun `a background picture is drawn plainly, with no added tint layer over it`() {
         val cfg = BibleLottieGenConfig(bgAlpha = 40, images = mapOf(BandColorRole.BACKGROUND to picture()))
         val layers = BandJson.layers(generate(cfg)).filter { it.name.startsWith("Band") }
+        assertEquals(2, layers.size, "just the matte and the picture, same as any other role's picture")
         assertEquals(2, layers.last().type, "the picture is the bottom-most layer")
-        val tint = BandJson.shapeTypes(layers[layers.size - 3])
-        assertEquals(listOf("rc", "fl", "tr"), tint, "the tint rectangle sits above it")
         assertTrue(cfg.hasBackgroundImage)
         assertTrue(!BibleLottieGenConfig().hasBackgroundImage)
         assertTrue(!BandImage("data:", 0, 0, "x").isUsable)

@@ -81,7 +81,10 @@ internal fun OffscreenOutputContent(
             // What THIS output renders with: the same per-output override resolution the presenter
             // windows do in PresenterOutputContent. An output with no override of its own gets the
             // global instance straight back, so nothing recomposes that did not before.
-            val appSettings = globalSettings.resolvedFor(screenAssignment)
+            // Remembered for the reason the presenter windows remember theirs: the merge decodes.
+            val appSettings = remember(globalSettings, screenAssignment) {
+                globalSettings.resolvedFor(screenAssignment)
+            }
             val effectiveMode by effectiveModeState
             val isIdentifying = when (context.kind) {
                 OffscreenOutputKind.BROWSER_SOURCE ->
@@ -167,8 +170,9 @@ internal fun OffscreenOutputContent(
                         val showsContent = showsContentFor(mode, screenAssignment)
                         if (mode != Presenting.NONE && showsContent) {
                             CompositionLocalProvider(
-                                LocalLottieBandClock provides presenterManager.lottieBandClock.value,
+                                LocalLottieBandClock provides presenterManager.lottieBandClock,
                                 LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
+                                LocalBandOutgoing provides presenterManager.bandOutgoing.value,
                             ) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(

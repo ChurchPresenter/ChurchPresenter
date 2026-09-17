@@ -20,6 +20,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.dictionarySettingsOn
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * Driving the Dictionary and Background panes, and reading back what each control stored.
@@ -64,12 +66,12 @@ class ProjectionCustomizeSurfaceControlsTest {
     )
 
     private fun AppSettings.storedDictionary(): DictionarySettings = assertNotNull(
-        projectionSettings.screenAssignments[0].dictionaryOverride,
+        projectionSettings.screenAssignments[0].dictionarySettingsOn(dictionarySettings),
         "the output must have its own dictionary",
     )
 
     private fun AppSettings.storedBackground(): BackgroundSettings = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundOverride,
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
         "the output must have its own background",
     )
 

@@ -2462,6 +2462,7 @@
     <string name="song_element_look_ahead">Vorschau</string>
     <string name="song_chunk">Abschnitt</string>
     <string name="song_language_scope">Sprache</string>
+    <string name="song_style_language">Gestaltung</string>
     <string name="song_preview_look_ahead">Vorschau</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Hintergrund</string>
@@ -2557,6 +2558,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Bewegung</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_marker">Markierung</string>
     <string name="customize_bilingual">Zweisprachig</string>
     <string name="customize_no_preview">Keine Vorschau für diesen Bereich</string>
     <string name="customize_bible">Bibel</string>
@@ -2653,4 +2655,12 @@
     <string name="song_lottie_unsupported_note">Die Vorlage bestimmt das Layout und die Position des Titels. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung, Wortabstand, Vorschau und Akkorde gelten nicht.</string>
     <string name="bible_lottie_unsupported_note">Die Vorlage bestimmt das Layout, die Position der Bibelstelle und wie zwei Sprachen das Band teilen. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung und Wortabstand gelten nicht.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontur</string>
+    <string name="tooltip_outline_options">Konturoptionen</string>
+    <string name="text_outline">Kontur</string>
+    <string name="text_outline_width">Breite</string>
+    <string name="outline_show">Kontur anzeigen</string>
+    <string name="song_secondary_language">2. Sprache</string>
+    <string name="song_primary_language">1. Sprache</string>
 </resources>

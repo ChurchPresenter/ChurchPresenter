@@ -899,9 +899,19 @@
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>
     <string name="song_language_scope">Lang</string>
+    <string name="song_style_language">Styling</string>
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>
+    <string name="customize_element_slide">Slide</string>
+    <string name="song_primary_language">1st Language</string>
+    <string name="song_secondary_language">2nd Language</string>
+    <string name="text_outline">Outline</string>
+    <string name="text_outline_width">Width</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Outline</string>
+    <string name="tooltip_outline_options">Outline options</string>
+    <string name="outline_show">Show outline</string>
     <string name="bible_translation_spacing">Space between translations</string>
     <string name="bible_translation_divider">Show divider between translations</string>
     <string name="pixels_short">px</string>
@@ -1013,6 +1023,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Motion</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_marker">Marker</string>
     <string name="customize_bilingual">Bilingual</string>
     <string name="customize_no_preview">No preview for this section</string>
     <string name="customize_bible">Bible</string>
@@ -1165,6 +1176,7 @@
     <string name="background_above_band_caption">Above The Band</string>
     <string name="background_above_band_fill">Fill Color</string>
     <string name="background_above_band_opacity">Fill Opacity</string>
+    <string name="background_above_band_fills_behind_band">Fill behind the band too</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>

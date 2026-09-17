@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
@@ -161,13 +161,20 @@ fun AnnouncementsPresenter(
                     .padding(horizontal = TEXT_PADDING_HORIZONTAL, vertical = TEXT_PADDING_VERTICAL),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                OutlinedText(
                     modifier = painter.modifier,
                     onTextLayout = painter::onTextLayout,
-                    text     = text,
-                    style    = textStyle,
+                    text = text,
+                    outline = settings.outline,
+                    // The stroke is stored against the *configured* size, and auto-fit changes the
+                    // size actually drawn -- so it tracks that ratio and keeps its weight relative
+                    // to the letters instead of thinning out as the text grows.
+                    scaleFactor = effectiveFontSize.toFloat() / settings.fontSize.coerceAtLeast(1),
+                    color = Color.Unspecified,
+                    style = textStyle,
                     fontSize = effectiveFontSize.sp,
                     softWrap = wrap,
+                    fillWidth = false,
                 )
             }
         }

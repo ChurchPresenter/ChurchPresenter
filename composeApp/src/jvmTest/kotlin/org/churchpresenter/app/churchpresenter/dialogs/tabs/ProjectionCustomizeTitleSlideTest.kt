@@ -23,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The Title Slide chip of the Customize dialog's Song pane: this output's own title slide, with
@@ -40,7 +41,10 @@ class ProjectionCustomizeTitleSlideTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     @Test
     fun `the title slide is the first chip of the Song pane`() {
@@ -62,6 +66,10 @@ class ProjectionCustomizeTitleSlideTest {
     fun `the slide-wide switches write this output's override`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            // On the Number sub-chip: it is the number's own switch, and the slide's six parts
+            // share one seat in the chips above. `nth = 1` skips the Songs element chip of the
+            // same name in the row over the pane.
+            chooseSegment("Number", scroll = false, nth = 1)
             toggleCheckbox("Show song number before title")
             onAllNodesWithContentDescription("Align Top").onFirst().performClick()
             waitForIdle()

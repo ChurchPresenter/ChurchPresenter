@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
@@ -38,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.withContext
 import org.churchpresenter.lottiegen.band.BandColorRole
+import org.churchpresenter.lottiegen.band.BandImage
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
@@ -47,6 +49,11 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 private const val MAX_ALPHA = 100f
 private const val MAX_BLUR_PX = 60f
+private const val MAX_OFFSET_PERCENT = 100f
+private const val MIN_SCALE_PERCENT = 0f
+private const val MAX_SCALE_PERCENT = 400f
+private const val MAX_ROTATION_DEGREES = 180f
+private const val DEFAULT_SCALE_PERCENT = 100
 private val POPOVER_WIDTH = 296.dp
 private val POPOVER_SHAPE = RoundedCornerShape(11.dp)
 private const val POPOVER_OFFSET_PX = 34
@@ -82,14 +89,7 @@ internal fun LookPopover(
                 .padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(11.dp),
         ) {
-            Text(roleLabel(cfg, role), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Tokens.TitleText)
-            ThinSlider(
-                label = Strings.bandLookAlpha,
-                value = cfg.alphaOf(role).toFloat(),
-                onValueChange = { a -> viewModel.updateConfig { it.withAlpha(role, a.toInt()) } },
-                valueRange = 0f..MAX_ALPHA,
-                format = { it.toInt().toString() },
-            )
+            Text(roleLabel(role), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Tokens.TitleText)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                 HexField(
                     Strings.bandLookWash, look.washColor,
@@ -130,6 +130,7 @@ internal fun LookPopover(
                     format = { it.toInt().toString() },
                     unit = Strings.bandUnitPx,
                 )
+                PictureTransformSliders(viewModel, role, image)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Box(
@@ -146,6 +147,68 @@ internal fun LookPopover(
             }
         }
     }
+}
+
+/** The picture's own offset, scale and rotation, on top of its cover-fit baseline. */
+@Composable
+private fun PictureTransformSliders(viewModel: BibleLottieGenViewModel, role: BandColorRole, image: BandImage) {
+    fun update(transform: (BandImage) -> BandImage) {
+        // Reads the picture from the config passed into this lambda, not the composable's `image`
+        // parameter: a fast drag can fire several onValueChange calls before recomposition catches
+        // up, and basing each one on the same stale snapshot would drop whatever the others changed.
+        viewModel.updateConfig { cfg -> cfg.copy(images = cfg.images + (role to transform(cfg.images[role] ?: image))) }
+    }
+    val isDefault = image.offsetXPercent == 0 && image.offsetYPercent == 0 &&
+        image.scalePercent == DEFAULT_SCALE_PERCENT && image.rotationDegrees == 0
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+        Caption(Strings.bandLookPosition, Modifier.weight(1f))
+        Icon(
+            Icons.Default.RestartAlt, contentDescription = Strings.bandLookReset,
+            tint = if (isDefault) Tokens.HintText else Tokens.LabelText,
+            modifier = Modifier.size(18.dp).clip(RoundedCornerShape(6.dp))
+                .clickable(enabled = !isDefault) {
+                    update {
+                        it.copy(
+                            offsetXPercent = 0, offsetYPercent = 0,
+                            scalePercent = DEFAULT_SCALE_PERCENT, rotationDegrees = 0,
+                        )
+                    }
+                }
+                .padding(2.dp),
+        )
+    }
+    InlineSlider(
+        label = Strings.bandLookOffsetX,
+        value = image.offsetXPercent.toFloat(),
+        onValueChange = { v -> update { it.copy(offsetXPercent = v.toInt()) } },
+        valueRange = -MAX_OFFSET_PERCENT..MAX_OFFSET_PERCENT,
+        format = { it.toInt().toString() },
+        unit = Strings.bandUnitPercent,
+    )
+    InlineSlider(
+        label = Strings.bandLookOffsetY,
+        value = image.offsetYPercent.toFloat(),
+        onValueChange = { v -> update { it.copy(offsetYPercent = v.toInt()) } },
+        valueRange = -MAX_OFFSET_PERCENT..MAX_OFFSET_PERCENT,
+        format = { it.toInt().toString() },
+        unit = Strings.bandUnitPercent,
+    )
+    InlineSlider(
+        label = Strings.bandLookScale,
+        value = image.scalePercent.toFloat(),
+        onValueChange = { v -> update { it.copy(scalePercent = v.toInt()) } },
+        valueRange = MIN_SCALE_PERCENT..MAX_SCALE_PERCENT,
+        format = { it.toInt().toString() },
+        unit = Strings.bandUnitPercent,
+    )
+    InlineSlider(
+        label = Strings.bandLookRotation,
+        value = image.rotationDegrees.toFloat(),
+        onValueChange = { v -> update { it.copy(rotationDegrees = v.toInt()) } },
+        valueRange = -MAX_ROTATION_DEGREES..MAX_ROTATION_DEGREES,
+        format = { it.toInt().toString() },
+        unit = Strings.bandUnitDegrees,
+    )
 }
 
 /** The button that opens the picture chooser — the host's when it lends one, Swing's otherwise. */
@@ -180,7 +243,19 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
     val hasImage = cfg.images.containsKey(role)
     Box {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            HexField(roleLabel(cfg, role), cfg.colorOf(role), { c -> viewModel.updateConfig { it.withColor(role, c) } })
+            HexField(roleLabel(role), cfg.colorOf(role), { c -> viewModel.updateConfig { it.withColor(role, c) } })
+            // On the row rather than inside the popover below: a colour's opacity is the first
+            // thing reached for on a band meant to sit over video, and behind the pencil nothing
+            // on screen said it existed at all.
+            Box(Modifier.weight(1f)) {
+                InlineSlider(
+                    label = Strings.bandLookAlpha,
+                    value = cfg.alphaOf(role).toFloat(),
+                    onValueChange = { a -> viewModel.updateConfig { it.withAlpha(role, a.toInt()) } },
+                    valueRange = 0f..MAX_ALPHA,
+                    format = { it.toInt().toString() },
+                )
+            }
             Box(
                 modifier = Modifier
                     .size(FIELD_HEIGHT)

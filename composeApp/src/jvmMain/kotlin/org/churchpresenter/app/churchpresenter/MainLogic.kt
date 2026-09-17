@@ -4,6 +4,7 @@ import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.QuickBackground
@@ -388,8 +389,12 @@ internal fun lottieBandPath(settings: AppSettings, mode: Presenting): String? {
         Presenting.LYRICS -> songLowerThirdBackground
         else -> null
     }
+    // Resolved rather than read straight off the assignment: an override is a sparse tree of what
+    // that screen changed, so the band it actually draws is the document's with that tree over it.
     val candidates = listOfNotNull(settings.backgroundSettings.bandFor()) +
-        settings.projectionSettings.screenAssignments.mapNotNull { it.backgroundOverride?.bandFor() }
+        settings.projectionSettings.screenAssignments
+            .filter { it.backgroundOverride != null }
+            .mapNotNull { settings.resolvedFor(it).backgroundSettings.bandFor() }
     return candidates.firstOrNull { usesBibleLottieBand(it) }?.backgroundLottie
 }
 

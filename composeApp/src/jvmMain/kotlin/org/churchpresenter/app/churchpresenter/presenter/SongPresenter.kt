@@ -48,6 +48,7 @@ import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackgroun
 import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.utils.Constants
@@ -58,6 +59,8 @@ import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.cameraResolves
+import androidx.compose.ui.text.AnnotatedString
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.ui.unit.em
@@ -66,16 +69,29 @@ import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBack
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryLyricsStyle
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryTitleStyle
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import kotlinx.coroutines.channels.Channel
 import java.io.File
 
 private const val SHADOW_OFFSET_PX = 6f
 private const val INDICATOR_REPEAT_COUNT = 3
 
 /** The app's own background-type name for one of [SongBackgroundType]'s. */
+/**
+ * The auto-fitted size for each language, in settings units before the output's scale.
+ *
+ * Two, because the second language can be set in a face and at a size of its own: fitting both to
+ * one number is right only while they are drawn the same way, and wrong the moment they are not.
+ * [secondary] is null when the second language has no profile of its own, which is the signal to
+ * draw it at [primary].
+ */
+private data class LyricAutoFit(val primary: Int? = null, val secondary: Int? = null)
+
 internal fun songBackgroundTypeConstant(type: String): String = when (type) {
     SongBackgroundType.IMAGE -> Constants.BACKGROUND_IMAGE
     SongBackgroundType.VIDEO -> Constants.BACKGROUND_VIDEO
@@ -170,6 +186,15 @@ fun SongPresenter(
             parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
         }
     }
+    /**
+     * The element's outline as this output draws it.
+     *
+     * A key output carries the shape of the fill as a white matte, and the outline is part of that
+     * shape -- so it is kept and painted white rather than dropped, which would key out a hole the
+     * width of the stroke around every letter.
+     */
+    fun keyedOutline(outline: TextOutline): TextOutline =
+        if (isKey && outline.isVisible) outline.copy(color = "#FFFFFF") else outline
     val chordColor = remember(ss.lyricsChordColor, ss.lyricsLowerThirdChordColor, isLowerThird, isKey) {
         if (isKey) Color.White
         else parseHexColor(if (isLowerThird) ss.lyricsLowerThirdChordColor else ss.lyricsChordColor)
@@ -273,6 +298,53 @@ fun SongPresenter(
         letterSpacing = spacingEm(lyricsStyleProfile.letterSpacing, lyricsStyleProfile.fontSize).em,
         shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
+    /**
+     * The profile the *second* language's lyrics are drawn from.
+     *
+     * [SongSettings.secondaryLanguage] while it is on, and the first language's profile otherwise --
+     * which is what every install had before the second language could be styled at all, and what
+     * `secondaryLyricsStyle` falls back to so the settings tab shows what is on the slide.
+     *
+     * A look-ahead slide styles its lines from the look-ahead and next-section profiles, neither of
+     * which has a second language, so there the two languages stay identical.
+     */
+    val secondaryStyleProfile = if (lookAheadEnabled) lyricsStyleProfile else ss.secondaryLyricsStyle(songTarget)
+    val secondaryHasOwnStyle = !lookAheadEnabled && ss.secondaryLanguage.enabled
+    val secondaryTextStyle = TextStyle(
+        fontWeight = if (secondaryStyleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (secondaryStyleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(
+            secondaryStyleProfile.underline,
+            secondaryStyleProfile.strikethrough,
+        ),
+        letterSpacing = spacingEm(
+            secondaryStyleProfile.letterSpacing,
+            secondaryStyleProfile.fontSize,
+        ).em,
+    )
+    val secondaryFontFamily = systemFontFamilyOrDefault(secondaryStyleProfile.fontType)
+    val secondaryColor = if (isKey) Color.White else parseHexColor(secondaryStyleProfile.color)
+    val secondaryHorizontalAlignment = getTextAlign(secondaryStyleProfile.horizontalAlignment)
+
+    /**
+     * The profile the song's *second* title is drawn from, on a slide that shows it.
+     *
+     * [SongSettings.secondaryTitleLanguage] while it is on, and the first title's otherwise -- which
+     * is what both titles were drawn in before the second could be styled at all.
+     */
+    val secondaryTitleProfile = ss.secondaryTitleStyle(songTarget)
+    val secondaryTitleTextStyle = TextStyle(
+        fontWeight = if (secondaryTitleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (secondaryTitleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = combinedTextDecoration(
+            secondaryTitleProfile.underline,
+            secondaryTitleProfile.strikethrough,
+        ),
+        letterSpacing = spacingEm(secondaryTitleProfile.letterSpacing, secondaryTitleProfile.fontSize).em,
+    )
+    val secondaryTitleFontFamily = systemFontFamilyOrDefault(secondaryTitleProfile.fontType)
+    val secondaryTitleColor = if (isKey) Color.White else parseHexColor(secondaryTitleProfile.color)
+    val secondaryTitleHorizontalAlignment = getTextAlign(secondaryTitleProfile.horizontalAlignment)
     val chartHorizontalAlignment = when (
         if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
     ) {
@@ -308,17 +380,22 @@ fun SongPresenter(
         val loaded = template
         if (loaded != null) {
             val lowerThirdFraction = ss.lowerThirdHeightPercent / PERCENT
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             Box(modifier.fillMaxSize()) {
                 AboveBandFill(
-                    fill = if (showBackground) aboveBandFill(appSettings.backgroundSettings, bgConfig) else null,
+                    fill = if (showBackground) above.fill else null,
                     bandFraction = lowerThirdFraction,
+                    fillsBehindBand = above.fillsBehindBand,
                 )
+                val outgoing = LocalBandOutgoing.current
                 SongLottieBand(
                     template = loaded,
                     section = lyricSection,
                     settings = ss,
                     languageDisplay = effectiveLangDisplay,
                     lineIndex = LocalBandSongLineIndex.current.takeIf { it >= 0 } ?: displayLineIndex,
+                    outgoingSection = outgoing.lyricSection,
+                    outgoingLineIndex = outgoing.lyricLineIndex,
                     allSections = allLyricSections,
                     displaySectionIndex = displaySectionIndex,
                     bandFraction = lowerThirdFraction,
@@ -420,6 +497,18 @@ fun SongPresenter(
             )) else lyricsTextStyle
         val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
         val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
+        val secondaryTitleTextStyleScaled = if (secondaryTitleProfile.shadow) {
+            secondaryTitleTextStyle.copy(
+                shadow = scaleElementShadow(
+                    secondaryTitleProfile.shadowColor,
+                    secondaryTitleProfile.shadowSize,
+                    secondaryTitleProfile.shadowOpacity,
+                ),
+            )
+        } else {
+            secondaryTitleTextStyle
+        }
+        val scaledSecondaryTitleFontSize = (secondaryTitleProfile.fontSize * scaleFactor).sp
         val settingsLyricsFontSize = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize
         } else if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
@@ -429,8 +518,15 @@ fun SongPresenter(
         // Auto-fit: compute the largest font size that fits ALL sections without line wrapping.
         // Uses the reference 1920×1080 coordinate space (margins subtracted).
         val autoFitTextMeasurer = rememberTextMeasurer()
-        val autoFitFontSize = remember(allLyricSections, isLowerThird, lookAheadEnabled, languageOverride, appSettings.songSettings, appSettings.projectionSettings) {
-            if (allLyricSections.isEmpty()) null
+        val lyricAutoFit = remember(
+            allLyricSections,
+            isLowerThird,
+            lookAheadEnabled,
+            languageOverride,
+            appSettings.songSettings,
+            appSettings.projectionSettings,
+        ) {
+            if (allLyricSections.isEmpty()) LyricAutoFit()
             else {
                 val ld = effectiveLangDisplay
                 val hasBilingual = allLyricSections.any { it.secondaryLines.isNotEmpty() }
@@ -537,9 +633,17 @@ fun SongPresenter(
                     }
                 }
 
-                calculateAutoFitForAllSections(
+                // One fit per language once the second has a profile of its own: a single size can
+                // only serve both while both are drawn in the same face at the same size, and the
+                // two halves the bilingual layouts give them are measured here already.
+                val primarySections = if (secondaryHasOwnStyle) {
+                    sectionsForFit.map { it.copy(secondaryLines = emptyList()) }
+                } else {
+                    sectionsForFit
+                }
+                val primaryFit = calculateAutoFitForAllSections(
                     textMeasurer = autoFitTextMeasurer,
-                    sections = sectionsForFit,
+                    sections = primarySections,
                     baseStyle = baseStyle,
                     availableWidth = refWidth,
                     availableHeight = refHeight,
@@ -550,8 +654,37 @@ fun SongPresenter(
                     // include them chose a size whose lines then ran off the side of the output.
                     styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
                 )
+                val secondaryFit = if (!secondaryHasOwnStyle) {
+                    null
+                } else {
+                    val secLetterEm = spacingEm(secondaryStyleProfile.letterSpacing, secondaryStyleProfile.fontSize)
+                    val secWordEm = spacingEm(secondaryStyleProfile.wordSpacing, secondaryStyleProfile.fontSize)
+                    calculateAutoFitForAllSections(
+                        textMeasurer = autoFitTextMeasurer,
+                        // The second language's lines, measured as a section's own: the helper
+                        // fits `lines` and `secondaryLines` to one size, which is the thing this
+                        // branch exists not to do.
+                        sections = sectionsForFit.mapNotNull { section ->
+                            section.secondaryLines.takeIf { it.isNotEmpty() }
+                                ?.let { section.copy(lines = it, secondaryLines = emptyList()) }
+                        },
+                        baseStyle = TextStyle(
+                            fontWeight = if (secondaryStyleProfile.bold) FontWeight.Bold else FontWeight.Normal,
+                            fontStyle = if (secondaryStyleProfile.italic) FontStyle.Italic else FontStyle.Normal,
+                            letterSpacing = secLetterEm.em,
+                            fontFamily = secondaryFontFamily,
+                        ),
+                        availableWidth = refWidth,
+                        availableHeight = refHeight,
+                        reservedHeight = reserved,
+                        includeEndIndicator = true,
+                        styleText = { styledDisplayText(it, secondaryStyleProfile.transform, secLetterEm, secWordEm) },
+                    )
+                }
+                LyricAutoFit(primary = primaryFit, secondary = secondaryFit)
             }
         }
+        val autoFitFontSize = lyricAutoFit.primary
         // Bilingual flags for layout decisions (outside remember, always fresh)
         val langDisplay = effectiveLangDisplay
         val autoFitEnabled = if (lookAheadEnabled) {
@@ -565,6 +698,29 @@ fun SongPresenter(
 
         val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
+
+        // The second language's size and shadow. With no profile of its own every one of these
+        // resolves to the first language's -- `secondaryStyleProfile` *is* the first's profile then
+        // -- so the drawing code below can read them unconditionally.
+        val effectiveSecondaryFontSize = when {
+            !secondaryHasOwnStyle -> effectiveLyricsFontSize
+            secondaryStyleProfile.autoFit ->
+                (lyricAutoFit.secondary ?: secondaryStyleProfile.fontSize)
+                    .coerceAtMost(secondaryStyleProfile.fontSize)
+            else -> secondaryStyleProfile.fontSize
+        }
+        val scaledSecondaryFontSize = (effectiveSecondaryFontSize * scaleFactor).sp
+        val secondaryTextStyleScaled = if (secondaryStyleProfile.shadow) {
+            secondaryTextStyle.copy(
+                shadow = scaleElementShadow(
+                    secondaryStyleProfile.shadowColor,
+                    secondaryStyleProfile.shadowSize,
+                    secondaryStyleProfile.shadowOpacity,
+                ),
+            )
+        } else {
+            secondaryTextStyle
+        }
 
         val leftOffSet = ((appSettings.projectionSettings.windowLeft + appSettings.songSettings.marginLeft) * scaleFactor).dp
         val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.songSettings.marginRight) * scaleFactor).dp
@@ -583,14 +739,12 @@ fun SongPresenter(
             // `Modifier.blur` leaves around a layer's own edge falls out of sight. Grown rather
             // than scaled: the picture is cropped from a slightly larger rectangle instead of
             // being stretched, which a band is wide enough to show.
-            // The wash over the two thirds the band does not cover. Drawn before the band, and
-            // sized as the band's complement so the two are computed from the same constraint —
-            // deriving a height in Dp instead can land a device pixel short and leave a hairline.
+            // The wash behind the whole lower third, band included — see AboveBandFill.
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             AboveBandFill(
-                fill = if (showBackground) {
-                    aboveBandFill(appSettings.backgroundSettings, bgConfig)
-                } else null,
+                fill = if (showBackground) above.fill else null,
                 bandFraction = lowerThirdFraction,
+                fillsBehindBand = above.fillsBehindBand,
             )
             val bandBleed = if (blurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
@@ -680,7 +834,7 @@ fun SongPresenter(
 
             // Only animate the text content — background is never inside this block
             @Composable
-            fun TextContent(section: LyricSection) {
+            fun TextContent(section: LyricSection, lineIndex: Int) {
                 val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
                 val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
                 // The title slide's lines are the song's title and credit, so they take the Title
@@ -748,7 +902,7 @@ fun SongPresenter(
                     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
                     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
-                    val effectiveLineIndex = if (isLineMode && displayLineIndex < 0) 0 else displayLineIndex
+                    val effectiveLineIndex = if (isLineMode && lineIndex < 0) 0 else lineIndex
 
                     // Get next section for look-ahead
                     val nextSection: LyricSection? = if (lookAheadEnabled && displaySectionIndex >= 0) {
@@ -862,6 +1016,19 @@ fun SongPresenter(
                             effectiveSecondaryDisplayLines = emptyList()
                         }
                     }
+                    /**
+                     * True when the one column this output draws holds the *second* language.
+                     *
+                     * An output set to "secondary" shows that language alone, and it reaches the
+                     * slide through the same lines the first language normally would -- so without
+                     * this it was drawn from the first language's profile, and everything the
+                     * second language's own profile said was ignored on exactly the outputs set up
+                     * to show it. Per section rather than per output because the mode falls back to
+                     * the first language for a song that has no second, and then the column really
+                     * is the first.
+                     */
+                    val primaryColumnIsSecondary = langDisplay == Constants.SONG_LANG_SECONDARY &&
+                        mainSecondaryLines.isNotEmpty()
 
                     // Apply language display to look-ahead lines
                     val effectiveLaLines: List<String>
@@ -890,11 +1057,22 @@ fun SongPresenter(
                     val combinedSecondaryLines = effectiveSecondaryDisplayLines + effectiveLaSecondaryLines
                     val secondaryLaStart = if (effectiveLaSecondaryLines.isNotEmpty()) effectiveSecondaryDisplayLines.size else -1
 
-                    val effectiveTitle = if (langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()) {
-                        section.secondaryTitle
-                    } else {
-                        section.title
-                    }
+                    val titleIsSecondary =
+                        langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()
+                    val effectiveTitle = if (titleIsSecondary) section.secondaryTitle else section.title
+                    // The title row draws one of the song's two titles, and each has its own
+                    // profile. Picked here rather than hoisted because which one it is depends on
+                    // the section: a song with no second title shows the first under any language,
+                    // and that title keeps the first title's look.
+                    val titleProfileHere = if (titleIsSecondary) secondaryTitleProfile else titleStyleProfile
+                    val titleFontFamilyHere = if (titleIsSecondary) secondaryTitleFontFamily else titleFontFamily
+                    val titleColorHere = if (titleIsSecondary) secondaryTitleColor else titleColor
+                    val titleFontSizeHere =
+                        if (titleIsSecondary) scaledSecondaryTitleFontSize else scaledTitleFontSize
+                    val titleTextStyleHere =
+                        if (titleIsSecondary) secondaryTitleTextStyleScaled else titleTextStyleScaled
+                    val titleAlignHere =
+                        if (titleIsSecondary) secondaryTitleHorizontalAlignment else titleHorizontalAlignment
 
                     val hasBilingual = combinedSecondaryLines.isNotEmpty()
                     // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
@@ -917,7 +1095,7 @@ fun SongPresenter(
                     // the same column below -- each paints only the lines that reported to it, and
                     // a block nobody reported to draws nothing.
                     val lyricsBlock = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
-                    val lyricsBlockSecondary = rememberTextBlockBackdrop(lyricsStyleProfile.backdrop)
+                    val lyricsBlockSecondary = rememberTextBlockBackdrop(secondaryStyleProfile.backdrop)
                     val laBlock = rememberTextBlockBackdrop(laStyleProfile.backdrop)
                     val laBlockSecondary = rememberTextBlockBackdrop(laStyleProfile.backdrop)
                     val lookAheadTextStyle = TextStyle(
@@ -948,6 +1126,7 @@ fun SongPresenter(
                         val lineProfile = when {
                             isLookAheadLine -> laStyleProfile
                             isTitleLine -> titleStyleProfile
+                            secondary -> secondaryStyleProfile
                             else -> lyricsStyleProfile
                         }
                         // The next-section lines take their own alignment once one is set; blank
@@ -956,6 +1135,7 @@ fun SongPresenter(
                             isLookAheadLine && laStyleProfile.horizontalAlignment.isNotBlank() ->
                                 getTextAlign(laStyleProfile.horizontalAlignment)
                             isTitleLine -> titleHorizontalAlignment
+                            secondary -> secondaryHorizontalAlignment
                             else -> lyricsHorizontalAlignment
                         }
                         val lineBlock = when {
@@ -964,17 +1144,21 @@ fun SongPresenter(
                             secondary -> lyricsBlockSecondary
                             else -> lyricsBlock
                         }
-                        Text(
+                        OutlinedText(
                             modifier = Modifier.fillMaxWidth().then(lineBlock.lineModifier(lineIdx)),
+                            outline = keyedOutline(lineProfile.outline),
+                            scaleFactor = scaleFactor,
                             textAlign = lineAlign,
                             fontFamily = when {
                                 isLookAheadLine -> laFontFamily
                                 isTitleLine -> titleFontFamily
+                                secondary -> secondaryFontFamily
                                 else -> lyricsFontFamily
                             },
                             fontSize = when {
                                 isLookAheadLine -> scaledLaFontSize
                                 isTitleLine -> scaledTitleFontSize
+                                secondary -> scaledSecondaryFontSize
                                 else -> scaledLyricsFontSize
                             },
                             softWrap = appSettings.songSettings.wordWrap,
@@ -987,11 +1171,13 @@ fun SongPresenter(
                             color = when {
                                 isLookAheadLine -> laColor
                                 isTitleLine -> titleColor
+                                secondary -> secondaryColor
                                 else -> lyricsColor
                             },
                             style = when {
                                 isLookAheadLine -> lookAheadTextStyle
                                 isTitleLine -> titleTextStyleScaled
+                                secondary -> secondaryTextStyleScaled
                                 else -> lyricsTextStyleScaled
                             },
                             onTextLayout = { lineBlock.onTextLayout(lineIdx, it) },
@@ -1006,7 +1192,7 @@ fun SongPresenter(
                     }
 
                     @Composable
-                    fun EndOfSongIndicator() {
+                    fun EndOfSongIndicator(secondary: Boolean = false) {
                         if (!ss.showEndOfSongIndicator) return
                         // Always reserve space so lyrics don't shift when the indicator appears on the last section
                         val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
@@ -1015,7 +1201,19 @@ fun SongPresenter(
                         val indicatorPad = " ".repeat(ss.endOfSongIndicatorSpacing)
                         val indicatorText = "$indicatorPad*$indicatorPad"
                         Row(modifier = Modifier.fillMaxWidth().alpha(indicatorAlpha), horizontalArrangement = Arrangement.Center) {
-                            repeat(INDICATOR_REPEAT_COUNT) { Text(text = indicatorText, fontSize = scaledLyricsFontSize, color = lyricsColor, style = lyricsTextStyleScaled) }
+                            repeat(INDICATOR_REPEAT_COUNT) {
+                                OutlinedText(
+                                    text = AnnotatedString(indicatorText),
+                                    outline = keyedOutline(
+                                        if (secondary) secondaryStyleProfile.outline else lyricsStyleProfile.outline,
+                                    ),
+                                    scaleFactor = scaleFactor,
+                                    fillWidth = false,
+                                    fontSize = if (secondary) scaledSecondaryFontSize else scaledLyricsFontSize,
+                                    color = if (secondary) secondaryColor else lyricsColor,
+                                    style = if (secondary) secondaryTextStyleScaled else lyricsTextStyleScaled,
+                                )
+                            }
                         }
                     }
 
@@ -1049,13 +1247,13 @@ fun SongPresenter(
                         if (mainChartRows.isEmpty()) {
                             combinedPrimaryLines.forEachIndexed { idx, line ->
                                 LookAheadSpacer(idx, primaryLaStart)
-                                LyricLine(idx, line, primaryLaStart)
+                                LyricLine(idx, line, primaryLaStart, secondary = primaryColumnIsSecondary)
                             }
                             return
                         }
                         SectionChordChart(
                             lines = mainChartRows,
-                            color = lyricsColor,
+                            color = if (primaryColumnIsSecondary) secondaryColor else lyricsColor,
                             chordColor = chordColor,
                             horizontalAlignment = chartHorizontalAlignment,
                             maxFontSize = effectiveLyricsFontSize,
@@ -1085,10 +1283,18 @@ fun SongPresenter(
                     val numberBeforeTitle = ss.songNumberBeforeTitle
 
                     @Composable
-                    fun NumberPart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
+                    fun NumberPart(
+                        modifier: Modifier = Modifier,
+                        visibilityAlpha: Float = 1f,
+                        /** False in a corner, where filling the width would drag the number out of it. */
+                        fillWidth: Boolean = true,
+                    ) {
                         val numberPainter = rememberTextBackdropPainter(numberStyleProfile.backdrop)
-                        Text(
+                        OutlinedText(
                             modifier = modifier.alpha(visibilityAlpha).then(numberPainter.modifier),
+                            outline = keyedOutline(numberStyleProfile.outline),
+                            scaleFactor = scaleFactor,
+                            fillWidth = fillWidth,
                             onTextLayout = numberPainter::onTextLayout,
                             textAlign = songNumberHorizontalAlignment,
                             fontFamily = songNumberFontFamily,
@@ -1105,22 +1311,30 @@ fun SongPresenter(
                     }
 
                     @Composable
-                    fun TitlePart(modifier: Modifier = Modifier, visibilityAlpha: Float = 1f) {
-                        val titlePainter = rememberTextBackdropPainter(titleStyleProfile.backdrop)
-                        Text(
+                    fun TitlePart(
+                        modifier: Modifier = Modifier,
+                        visibilityAlpha: Float = 1f,
+                        /** False beside the number in a row, where the two share the width. */
+                        fillWidth: Boolean = true,
+                    ) {
+                        val titlePainter = rememberTextBackdropPainter(titleProfileHere.backdrop)
+                        OutlinedText(
                             modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
+                            outline = keyedOutline(titleProfileHere.outline),
+                            scaleFactor = scaleFactor,
+                            fillWidth = fillWidth,
                             onTextLayout = titlePainter::onTextLayout,
-                            textAlign = titleHorizontalAlignment,
-                            fontFamily = titleFontFamily,
-                            fontSize = scaledTitleFontSize,
+                            textAlign = titleAlignHere,
+                            fontFamily = titleFontFamilyHere,
+                            fontSize = titleFontSizeHere,
                             text = styledDisplayText(
                                 effectiveTitle,
-                                titleStyleProfile.transform,
-                                spacingEm(titleStyleProfile.letterSpacing, titleStyleProfile.fontSize),
-                                spacingEm(titleStyleProfile.wordSpacing, titleStyleProfile.fontSize),
+                                titleProfileHere.transform,
+                                spacingEm(titleProfileHere.letterSpacing, titleProfileHere.fontSize),
+                                spacingEm(titleProfileHere.wordSpacing, titleProfileHere.fontSize),
                             ),
-                            color = titleColor,
-                            style = titleTextStyleScaled
+                            color = titleColorHere,
+                            style = titleTextStyleHere
                         )
                     }
 
@@ -1147,9 +1361,13 @@ fun SongPresenter(
                                 }
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = arrangement) {
                                     if (numberBeforeTitle) {
-                                        NumberPart(visibilityAlpha = numberAlpha); Spacer(modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)); TitlePart(visibilityAlpha = titleAlpha)
+                                        NumberPart(visibilityAlpha = numberAlpha, fillWidth = false)
+                                        Spacer(Modifier.padding(horizontal = (4 * scaleFactor).dp))
+                                        TitlePart(visibilityAlpha = titleAlpha, fillWidth = false)
                                     } else {
-                                        TitlePart(visibilityAlpha = titleAlpha); Spacer(modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)); NumberPart(visibilityAlpha = numberAlpha)
+                                        TitlePart(visibilityAlpha = titleAlpha, fillWidth = false)
+                                        Spacer(Modifier.padding(horizontal = (4 * scaleFactor).dp))
+                                        NumberPart(visibilityAlpha = numberAlpha, fillWidth = false)
                                     }
                                 }
                             } else {
@@ -1197,7 +1415,7 @@ fun SongPresenter(
                                         ) {
                                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
                                                 PrimaryLines()
-                                                EndOfSongIndicator()
+                                                EndOfSongIndicator(primaryColumnIsSecondary)
                                                 LookAheadPlaceholder()
                                             }
                                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
@@ -1205,7 +1423,7 @@ fun SongPresenter(
                                                     LookAheadSpacer(idx, secondaryLaStart)
                                                     LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                 }
-                                                EndOfSongIndicator()
+                                                EndOfSongIndicator(secondary = true)
                                                 LookAheadPlaceholder()
                                             }
                                         }
@@ -1215,14 +1433,14 @@ fun SongPresenter(
                                             // Lower third: compact layout, no height splitting
                                             Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                 PrimaryLines()
-                                                EndOfSongIndicator()
+                                                EndOfSongIndicator(primaryColumnIsSecondary)
                                                 LookAheadPlaceholder()
                                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                                                 combinedSecondaryLines.forEachIndexed { idx, line ->
                                                     LookAheadSpacer(idx, secondaryLaStart)
                                                     LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                 }
-                                                EndOfSongIndicator()
+                                                EndOfSongIndicator(secondary = true)
                                                 LookAheadPlaceholder()
                                             }
                                         } else {
@@ -1232,7 +1450,7 @@ fun SongPresenter(
                                                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                         PrimaryLines()
-                                                        EndOfSongIndicator()
+                                                        EndOfSongIndicator(primaryColumnIsSecondary)
                                                         LookAheadPlaceholder()
                                                     }
                                                 }
@@ -1243,7 +1461,7 @@ fun SongPresenter(
                                                             LookAheadSpacer(idx, secondaryLaStart)
                                                             LyricLine(idx, line, secondaryLaStart, secondary = true)
                                                         }
-                                                        EndOfSongIndicator()
+                                                        EndOfSongIndicator(secondary = true)
                                                         LookAheadPlaceholder()
                                                     }
                                                 }
@@ -1257,7 +1475,7 @@ fun SongPresenter(
                                         verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                                     ) {
                                         PrimaryLines()
-                                        EndOfSongIndicator()
+                                        EndOfSongIndicator(primaryColumnIsSecondary)
                                         LookAheadPlaceholder()
                                     }
                                 }
@@ -1285,6 +1503,7 @@ fun SongPresenter(
                                     else -> Alignment.BottomEnd
                                 },
                             ),
+                            fillWidth = false,
                         )
                     }
                 }
@@ -1293,27 +1512,37 @@ fun SongPresenter(
             if (crossfadeEnabled || ss.fadeIn || ss.fadeOut) {
                 val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
-                var displayedCurrent by remember { mutableStateOf(lyricSection) }
-                var displayedPrevious by remember { mutableStateOf(LyricSection()) }
+                // Each layer carries the line it draws, not just its section. Sharing one live line
+                // index made the outgoing layer redraw its old section at the incoming line for as
+                // long as the crossfade ran, which is a flash of a line that was never on that page.
+                var displayedCurrent by remember {
+                    mutableStateOf(SongCrossfadePage(lyricSection, displayLineIndex))
+                }
+                var displayedPrevious by remember { mutableStateOf(SongCrossfadePage(LyricSection(), -1)) }
                 var currentAlpha by remember { mutableStateOf(1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
-                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+                val pendingQueue = remember { Channel<SongCrossfadePage>(Channel.CONFLATED) }
 
                 // Queue section changes
-                LaunchedEffect(lyricSection) {
-                    if (displayedCurrent != lyricSection) {
-                        pendingQueue.send(lyricSection)
+                LaunchedEffect(lyricSection, displayLineIndex) {
+                    val target = SongCrossfadePage(lyricSection, displayLineIndex)
+                    when {
+                        displayedCurrent == target -> Unit
+                        // Stepping a line inside the section already up has never crossfaded, and
+                        // queueing it would fade the section out against itself.
+                        displayedCurrent.section == target.section -> displayedCurrent = target
+                        else -> pendingQueue.send(target)
                     }
                 }
 
                 // Process section switches (crossfade between sections)
                 LaunchedEffect(Unit) {
-                    for (nextSection in pendingQueue) {
-                        if (displayedCurrent == nextSection) continue
+                    for (nextPage in pendingQueue) {
+                        if (displayedCurrent == nextPage) continue
 
                         if (isCrossfade) {
                             displayedPrevious = displayedCurrent
-                            displayedCurrent = nextSection
+                            displayedCurrent = nextPage
                             previousAlpha = 1f
                             currentAlpha = 0f
                             val anim = Animatable(0f)
@@ -1322,27 +1551,27 @@ fun SongPresenter(
                                 previousAlpha = 1f - this.value
                             }
                         } else {
-                            displayedCurrent = nextSection
+                            displayedCurrent = nextPage
                         }
                         currentAlpha = 1f
                         previousAlpha = 0f
-                        displayedPrevious = LyricSection()
+                        displayedPrevious = SongCrossfadePage(LyricSection(), -1)
                     }
                 }
 
                 Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
-                    if (displayedPrevious.lines.isNotEmpty() && previousAlpha > 0f) {
+                    if (displayedPrevious.section.lines.isNotEmpty() && previousAlpha > 0f) {
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
-                            TextContent(displayedPrevious)
+                            TextContent(displayedPrevious.section, displayedPrevious.lineIndex)
                         }
                     }
                     Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
-                        TextContent(displayedCurrent)
+                        TextContent(displayedCurrent.section, displayedCurrent.lineIndex)
                     }
                 }
             } else {
                 Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
-                    TextContent(lyricSection)
+                    TextContent(lyricSection, displayLineIndex)
                 }
             }
         }
@@ -1465,3 +1694,6 @@ private fun getTextAlign(alignment: String): TextAlign {
         else -> TextAlign.Center
     }
 }
+
+/** One crossfade layer's page: the section it draws and the line within it, kept together. */
+private data class SongCrossfadePage(val section: LyricSection, val lineIndex: Int)

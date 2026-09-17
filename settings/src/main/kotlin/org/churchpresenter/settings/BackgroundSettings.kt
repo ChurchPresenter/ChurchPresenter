@@ -48,6 +48,8 @@ data class BackgroundSettings(
     val defaultLowerThirdAboveBandType: String = Constants.BACKGROUND_TRANSPARENT,
     val defaultLowerThirdAboveBandColor: String = "#000000",
     val defaultLowerThirdAboveBandOpacity: Float = 1.0f,
+    /** See [BackgroundConfig.aboveBandFillsBehindBand] — the same choice, for the Default wash. */
+    val defaultLowerThirdAboveBandFillsBehindBand: Boolean = true,
     /**
      * The quick tray's live pick, standing in front of every background above it — and in front of
      * a song's own, since an operator reaching for the tray mid-service is overriding what is on

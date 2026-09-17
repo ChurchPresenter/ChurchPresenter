@@ -114,7 +114,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
+import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
@@ -224,7 +224,7 @@ fun BackgroundSettingsTab(
                         // Resolved separately: `resolvedConfigFor` walks the *band's* chain, and
                         // the wash has one of its own — a surface with a picture of its own is not
                         // inheriting a band, but its wash may still be coming from the Default.
-                        aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
+                        aboveBand = resolveAboveBand(backgrounds, backgrounds.configFor(scope)).fill,
                         coverage = scope.coverage,
                         bandFraction = bandFraction,
                         stageAspect = outputAspect,
@@ -323,7 +323,7 @@ private fun BackgroundScopeRow(
         ) {
             BackgroundCoverageFill(
                 config = backgrounds.resolvedConfigFor(scope),
-                aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
+                aboveBand = resolveAboveBand(backgrounds, backgrounds.configFor(scope)).fill,
                 coverage = scope.coverage,
                 bandFraction = bandFraction,
                 modifier = Modifier.fillMaxSize()

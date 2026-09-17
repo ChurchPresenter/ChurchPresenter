@@ -78,7 +78,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
+import churchpresenter.composeapp.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
+import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
@@ -126,7 +129,6 @@ import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
@@ -1468,12 +1470,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     } else null
                                 },
                                 onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
-                                onSongItemSelected = { section ->
-                                    presenterManager.setLyricSection(section)
-                                    if (isSongLineMode(appSettings.songSettings)) {
-                                        presenterManager.setDisplayedLyricSection(section)
-                                    }
-                                },
+                                // Line mode used to push the section straight to the outputs from
+                                // here. That put the words on screen behind the transition driver's
+                                // back, so the Lottie band animated a swap for text that had
+                                // already changed. Every mode now goes through the driver.
+                                onSongItemSelected = { section -> presenterManager.setLyricSection(section) },
                                 onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
                                 onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
                                 onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
@@ -1796,6 +1797,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             }
                             if (showLottieGenWindow) {
                                 val screenBounds = presenterScreenBounds()
+                                val lottieGenFonts = rememberSystemFonts()
+                                val lottieGenFontLabel = stringResource(Res.string.bible_font)
                                 LottieGenWindow(
                                     theme = theme,
                                     outputDir = lottieGenOutputDir,
@@ -1805,7 +1808,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         lottieGenOnFileSaved?.invoke()
                                     },
                                     canvasWidth = screenBounds.width,
-                                    canvasHeight = screenBounds.height
+                                    canvasHeight = screenBounds.height,
+                                    fontPicker = hostFontPicker(lottieGenFonts, lottieGenFontLabel),
                                 )
                             }
                             MemoryMonitorWindow(

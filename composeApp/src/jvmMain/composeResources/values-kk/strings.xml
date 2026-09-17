@@ -2462,6 +2462,7 @@
     <string name="song_element_look_ahead">Алдыңғы қарау</string>
     <string name="song_chunk">Бөлік</string>
     <string name="song_language_scope">Тіл</string>
+    <string name="song_style_language">Мәнер</string>
     <string name="song_preview_look_ahead">Алдыңғы қарау</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Фон</string>
@@ -2557,6 +2558,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Қозғалыс</string>
     <string name="customize_layout">Орналасу</string>
+    <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Екі тілде</string>
     <string name="customize_no_preview">Бұл бөлім үшін алдын ала қарау жоқ</string>
     <string name="customize_bible">Киелі Кітап</string>
@@ -2653,4 +2655,12 @@
     <string name="song_lottie_unsupported_note">Үлгі орналасуды және атаудың орнын анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау, сөз аралығы, келесіні алдын ала қарау және аккордтар қолданылмайды.</string>
     <string name="bible_lottie_unsupported_note">Үлгі орналасуды, сілтеменің орнын және екі тілдің жолақты қалай бөлісетінін анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау және сөз аралығы қолданылмайды.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Контур</string>
+    <string name="tooltip_outline_options">Контур параметрлері</string>
+    <string name="text_outline">Контур</string>
+    <string name="text_outline_width">Қалыңдығы</string>
+    <string name="outline_show">Контурды көрсету</string>
+    <string name="song_secondary_language">2-ші тіл</string>
+    <string name="song_primary_language">1-ші тіл</string>
 </resources>

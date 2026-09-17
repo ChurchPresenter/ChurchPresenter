@@ -229,6 +229,8 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
         strikethrough = source.strikethrough,
         onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
         showShadow = false,
+        outline = source.outline,
+        onOutlineChange = { onUpdate(source.copy(outline = it)) },
     )
     PropertySliderWithInput(
         stringResource(Res.string.canvas_letter_spacing),

@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 
 @Serializable
 data class DictionarySettings(
@@ -29,6 +30,11 @@ data class DictionarySettings(
     val wordBackdrop: TextBackdrop = TextBackdrop(),
     val referenceBackdrop: TextBackdrop = TextBackdrop(),
     val definitionBackdrop: TextBackdrop = TextBackdrop(),
+
+    // The stroke around each element's glyphs, one record per element beside its backdrop.
+    val wordOutline: TextOutline = TextOutline(),
+    val referenceOutline: TextOutline = TextOutline(),
+    val definitionOutline: TextOutline = TextOutline(),
 
     // Definition
     val definitionColor: String = "#DDDDDD",

@@ -18,6 +18,7 @@ import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.io.File
 
+private const val MAX_ALPHA_PCT = 100f
 private const val MAX_BORDER_PX = 20f
 private const val MAX_CORNER_PX = 60f
 private const val MAX_INSET_PX = 80f
@@ -32,28 +33,65 @@ internal fun BandSection(viewModel: BibleLottieGenViewModel, pickImage: (suspend
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             Caption(Strings.bandColors, Modifier.weight(1f))
             Text(
-                cfg.roles().joinToString(" · ") { roleLabel(cfg, it) },
+                cfg.roles().joinToString(" · ") { roleLabel(it) },
                 fontSize = 9.5.sp, color = Tokens.HintText, maxLines = 1,
             )
         }
         cfg.roles().forEach { role -> ColorRoleRow(viewModel, role, pickImage) }
     }
+    // The border's colour and opacity, shown only once there is a border to paint — they were in
+    // the config and reached the file, but had no control at all.
+    if (cfg.borderThickness > 0) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            HexField(
+                Strings.bandBorderColor, cfg.borderColor,
+                onColorChange = { c -> viewModel.updateConfig { it.copy(borderColor = c) } },
+            )
+            Box(Modifier.weight(1f)) {
+                InlineSlider(
+                    label = Strings.bandLookAlpha,
+                    value = cfg.borderAlpha.toFloat(),
+                    onValueChange = { a -> viewModel.updateConfig { it.copy(borderAlpha = a.toInt()) } },
+                    valueRange = 0f..MAX_ALPHA_PCT,
+                    format = { it.toInt().toString() },
+                )
+            }
+        }
+    }
     Hairline()
     SliderGrid(
-        listOf(
-            GridSlider(Strings.bandBorderThickness, cfg.borderThickness, MAX_BORDER_PX) { v ->
-                viewModel.updateConfig { it.copy(borderThickness = v) }
-            },
-            GridSlider(Strings.bandCornerRadius, cfg.cornerRadiusPx, MAX_CORNER_PX) { v ->
-                viewModel.updateConfig { it.copy(cornerRadiusPx = v) }
-            },
-            GridSlider(Strings.bandInset, cfg.insetPx, MAX_INSET_PX) { v ->
-                viewModel.updateConfig { it.copy(insetPx = v) }
-            },
-            GridSlider(Strings.bandPadding, cfg.paddingPx, MAX_PADDING_PX) { v ->
-                viewModel.updateConfig { it.copy(paddingPx = v) }
-            },
-        ),
+        buildList {
+            // Where the blend finishes; past it the last colour is flat. Only the styles that
+            // actually blend have anything to move.
+            if (cfg.bandStyle.usesGradient) {
+                add(
+                    GridSlider(
+                        Strings.bandGradientPosition, cfg.gradientPosition, MAX_ALPHA_PCT,
+                        unit = Strings.bandUnitPercent,
+                    ) { v -> viewModel.updateConfig { it.copy(gradientPosition = v) } },
+                )
+            }
+            add(
+                GridSlider(Strings.bandBorderThickness, cfg.borderThickness, MAX_BORDER_PX) { v ->
+                    viewModel.updateConfig { it.copy(borderThickness = v) }
+                },
+            )
+            add(
+                GridSlider(Strings.bandCornerRadius, cfg.cornerRadiusPx, MAX_CORNER_PX) { v ->
+                    viewModel.updateConfig { it.copy(cornerRadiusPx = v) }
+                },
+            )
+            add(
+                GridSlider(Strings.bandInset, cfg.insetPx, MAX_INSET_PX) { v ->
+                    viewModel.updateConfig { it.copy(insetPx = v) }
+                },
+            )
+            add(
+                GridSlider(Strings.bandPadding, cfg.paddingPx, MAX_PADDING_PX) { v ->
+                    viewModel.updateConfig { it.copy(paddingPx = v) }
+                },
+            )
+        },
     )
 }
 
@@ -65,8 +103,8 @@ internal fun BibleLottieGenConfig.roles(): List<BandColorRole> = buildList {
     if (bandStyle.usesTertiary) add(BandColorRole.TERTIARY)
 }
 
-internal fun roleLabel(cfg: BibleLottieGenConfig, role: BandColorRole): String = when (role) {
-    BandColorRole.BACKGROUND -> if (cfg.hasBackgroundImage) Strings.bandColorTint else Strings.bandColorBackground
+internal fun roleLabel(role: BandColorRole): String = when (role) {
+    BandColorRole.BACKGROUND -> Strings.bandColorBackground
     BandColorRole.SECOND -> Strings.bandColorGradient
     BandColorRole.ACCENT -> Strings.bandColorAccent
     BandColorRole.TERTIARY -> Strings.bandColorThird
@@ -78,6 +116,8 @@ internal class GridSlider(
     val value: Int,
     val max: Float,
     val min: Float = 0f,
+    /** Most of these measure the band in pixels; the opacities and the gradient's position do not. */
+    val unit: String = Strings.bandUnitPx,
     val onChange: (Int) -> Unit,
 )
 
@@ -94,7 +134,7 @@ internal fun SliderGrid(sliders: List<GridSlider>) {
                         onValueChange = { s.onChange(it.toInt()) },
                         valueRange = s.min..s.max,
                         format = { it.toInt().toString() },
-                        unit = Strings.bandUnitPx,
+                        unit = s.unit,
                         modifier = Modifier.weight(1f),
                     )
                 }

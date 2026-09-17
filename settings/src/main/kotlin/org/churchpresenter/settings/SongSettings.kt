@@ -424,6 +424,29 @@ data class SongSettings(
     val lowerThirdLookAheadBackdrop: TextBackdrop = TextBackdrop(),
     val lookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
     val lowerThirdLookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
+
+    /** The outline around each profile's glyphs — see [SongOutlines], which says why it is nested. */
+    val outlines: SongOutlines = SongOutlines(),
+
+    /**
+     * How the second language of a bilingual song is drawn, or -- while it is off, which is the
+     * default -- that it is drawn exactly like the first. See [SongSecondaryLanguage].
+     */
+    val secondaryLanguage: SongSecondaryLanguage = SongSecondaryLanguage(),
+
+    /**
+     * The same, for the song's second **title**.
+     *
+     * A bilingual song has two titles, and a title slide set to show both languages draws both of
+     * them; the lyric slides draw whichever one the output's language asks for. Until this record
+     * is switched on all of those are drawn in the first title's profile, which is what they have
+     * always been drawn in.
+     *
+     * Its own record rather than a flag on [secondaryLanguage]: the two are separate decisions --
+     * a church wanting its Russian lyrics smaller than its English does not thereby want its
+     * Russian title smaller -- and one flag covering both would make them one.
+     */
+    val secondaryTitleLanguage: SongSecondaryLanguage = SongSecondaryLanguage(),
 )
 
 /**

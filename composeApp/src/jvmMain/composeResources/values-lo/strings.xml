@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">ເບິ່ງລ່ວງໜ້າ</string>
     <string name="song_chunk">ທ່ອນ</string>
     <string name="song_language_scope">ພາສາ</string>
+    <string name="song_style_language">ຮູບແບບ</string>
     <string name="song_preview_look_ahead">ເບິ່ງລ່ວງໜ້າ</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">ພື້ນຫຼັງ</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">ການເຄື່ອນໄຫວ</string>
     <string name="customize_layout">ຮູບແບບການຈັດວາງ</string>
+    <string name="customize_marker">ເຄື່ອງໝາຍ</string>
     <string name="customize_bilingual">ສອງພາສາ</string>
     <string name="customize_no_preview">ບໍ່ມີການສະແດງຕົວຢ່າງສຳລັບພາກນີ້</string>
     <string name="customize_bible">ພຣະຄຳພີ</string>
@@ -2660,4 +2662,12 @@
     <string name="song_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ ແລະ ຕຳແໜ່ງຂອງຊື່ເພງ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ, ໄລຍະຫ່າງຄຳ, ການເບິ່ງທ່ອນຖັດໄປ ແລະ ຄອດບໍ່ມີຜົນ.</string>
     <string name="bible_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ, ຕຳແໜ່ງຂອງຂໍ້ອ້າງອີງ ແລະ ວິທີທີ່ສອງພາສາແບ່ງແຖບ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ ແລະ ໄລຍະຫ່າງຄຳບໍ່ມີຜົນ.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">ເສັ້ນຂອບ</string>
+    <string name="tooltip_outline_options">ຕົວເລືອກເສັ້ນຂອບ</string>
+    <string name="text_outline">ເສັ້ນຂອບ</string>
+    <string name="text_outline_width">ຄວາມກວ້າງ</string>
+    <string name="outline_show">ສະແດງເສັ້ນຂອບ</string>
+    <string name="song_secondary_language">ພາສາທີ 2</string>
+    <string name="song_primary_language">ພາສາທີ 1</string>
 </resources>

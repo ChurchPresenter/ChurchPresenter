@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">معاينة التالي</string>
     <string name="song_chunk">مقطع</string>
     <string name="song_language_scope">اللغة</string>
+    <string name="song_style_language">التنسيق</string>
     <string name="song_preview_look_ahead">معاينة التالي</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">الخلفية</string>
@@ -2565,6 +2566,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">الحركة</string>
     <string name="customize_layout">التخطيط</string>
+    <string name="customize_marker">علامة</string>
     <string name="customize_bilingual">لغتان</string>
     <string name="customize_no_preview">لا توجد معاينة لهذا القسم</string>
     <string name="customize_bible">الكتاب المقدس</string>
@@ -2661,4 +2663,12 @@
     <string name="song_lottie_unsupported_note">يحدد القالب التخطيط وموضع العنوان. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات ومعاينة التالي والأوتار.</string>
     <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">حد خارجي</string>
+    <string name="tooltip_outline_options">خيارات الحد الخارجي</string>
+    <string name="text_outline">حد خارجي</string>
+    <string name="text_outline_width">العرض</string>
+    <string name="outline_show">إظهار الحد الخارجي</string>
+    <string name="song_secondary_language">اللغة الثانية</string>
+    <string name="song_primary_language">اللغة الأولى</string>
 </resources>

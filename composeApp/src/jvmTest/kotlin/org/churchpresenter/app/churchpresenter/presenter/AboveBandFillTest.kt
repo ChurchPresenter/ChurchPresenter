@@ -34,23 +34,26 @@ class AboveBandFillTest {
         aboveBandOpacity = opacity,
     )
 
+    private fun fill(settings: BackgroundSettings, config: BackgroundConfig) =
+        resolveAboveBand(settings, config).fill
+
     @Test
     fun `settings that have never been given a wash paint nothing`() {
         assertNull(
-            aboveBandFill(BackgroundSettings(), BackgroundConfig()),
+            fill(BackgroundSettings(), BackgroundConfig()),
             "an untouched install must draw the band and leave everything above it alone",
         )
     }
 
     @Test
     fun `a surface on Color paints its own color`() {
-        val fill = aboveBandFill(defaults(), surface(Constants.BACKGROUND_COLOR, "#112233"))
+        val fill = fill(defaults(), surface(Constants.BACKGROUND_COLOR, "#112233"))
         assertEquals(Color(0x11, 0x22, 0x33), fill)
     }
 
     @Test
     fun `a surface on Transparent paints nothing even where the default has a wash`() {
-        val fill = aboveBandFill(
+        val fill = fill(
             defaults(Constants.BACKGROUND_COLOR, "#AABBCC"),
             surface(Constants.BACKGROUND_TRANSPARENT),
         )
@@ -59,7 +62,7 @@ class AboveBandFillTest {
 
     @Test
     fun `a surface on Default takes the default lower third's wash`() {
-        val fill = aboveBandFill(
+        val fill = fill(
             defaults(Constants.BACKGROUND_COLOR, "#AABBCC", opacity = 0.5f),
             surface(Constants.BACKGROUND_DEFAULT, color = "#FF0000", opacity = 1f),
         )
@@ -73,14 +76,14 @@ class AboveBandFillTest {
 
     @Test
     fun `a surface on Default paints nothing where the default lower third is transparent`() {
-        assertNull(aboveBandFill(defaults(Constants.BACKGROUND_TRANSPARENT), surface()))
+        assertNull(fill(defaults(Constants.BACKGROUND_TRANSPARENT), surface()))
     }
 
     @Test
     fun `the wash follows its own type, not the band's`() {
         // The band carries a picture of its own — which is exactly when reading `backgroundType`
         // to decide the wash would have silently dropped the default's.
-        val fill = aboveBandFill(
+        val fill = fill(
             defaults(Constants.BACKGROUND_COLOR, "#AABBCC"),
             surface(Constants.BACKGROUND_DEFAULT, bandType = Constants.BACKGROUND_IMAGE),
         )
@@ -89,7 +92,7 @@ class AboveBandFillTest {
 
     @Test
     fun `opacity is applied`() {
-        val fill = aboveBandFill(defaults(), surface(Constants.BACKGROUND_COLOR, "#FFFFFF", 0.25f))
+        val fill = fill(defaults(), surface(Constants.BACKGROUND_COLOR, "#FFFFFF", 0.25f))
         // Color packs alpha into eight bits, so 0.25 comes back as the nearest of 255 steps.
         assertEquals(0.25f, assertNotNull(fill).alpha, 1f / 255f)
     }
@@ -97,7 +100,7 @@ class AboveBandFillTest {
     @Test
     fun `an out-of-range opacity is clamped rather than thrown away`() {
         fun alphaAt(opacity: Float) =
-            assertNotNull(aboveBandFill(defaults(), surface(Constants.BACKGROUND_COLOR, opacity = opacity))).alpha
+            assertNotNull(fill(defaults(), surface(Constants.BACKGROUND_COLOR, opacity = opacity))).alpha
         assertEquals(1f, alphaAt(4f))
         assertEquals(0f, alphaAt(-1f))
     }
@@ -107,6 +110,23 @@ class AboveBandFillTest {
         // What `configFor(DEFAULT_LOWER_THIRD)` hands back: the flat fields, as a config.
         val settings = defaults(Constants.BACKGROUND_COLOR, "#334455")
         val asConfig = surface(Constants.BACKGROUND_COLOR, "#334455")
-        assertEquals(Color(0x33, 0x44, 0x55), aboveBandFill(settings, asConfig))
+        assertEquals(Color(0x33, 0x44, 0x55), fill(settings, asConfig))
+    }
+
+    @Test
+    fun `fillsBehindBand defaults on and follows the same defer chain as the colour`() {
+        assertEquals(true, resolveAboveBand(BackgroundSettings(), BackgroundConfig()).fillsBehindBand)
+        val settings = BackgroundSettings(defaultLowerThirdAboveBandFillsBehindBand = false)
+        assertEquals(
+            false,
+            resolveAboveBand(settings, surface(Constants.BACKGROUND_DEFAULT)).fillsBehindBand,
+            "a surface on Default follows the Default Lower Third's choice",
+        )
+        val ownType = BackgroundConfig(aboveBandType = Constants.BACKGROUND_COLOR, aboveBandFillsBehindBand = true)
+        assertEquals(
+            true,
+            resolveAboveBand(settings, ownType).fillsBehindBand,
+            "a surface with its own type does not defer, even to a Default that disagrees",
+        )
     }
 }

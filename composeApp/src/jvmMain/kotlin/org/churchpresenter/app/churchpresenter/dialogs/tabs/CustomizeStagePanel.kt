@@ -24,7 +24,7 @@ import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
+import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -175,7 +175,7 @@ private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, l
             return@StageFrame
         }
         val band = settings.bandFractionFor(scope)
-        val above = aboveBandFill(settings.backgroundSettings, config)
+        val above = resolveAboveBand(settings.backgroundSettings, config).fill
         Column(Modifier.fillMaxSize()) {
             Box(
                 Modifier

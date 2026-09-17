@@ -55,6 +55,7 @@ internal fun SongCreditStyle.toElementStyle(titleFont: String) = SongElementStyl
     wordSpacing = wordSpacing,
     transform = transform,
     backdrop = backdrop,
+    outline = outline,
 )
 
 internal fun SongElementStyle.toCreditStyle() = SongCreditStyle(
@@ -74,4 +75,5 @@ internal fun SongElementStyle.toCreditStyle() = SongCreditStyle(
     wordSpacing = wordSpacing,
     transform = transform,
     backdrop = backdrop,
+    outline = outline,
 )

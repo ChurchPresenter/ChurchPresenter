@@ -2494,6 +2494,7 @@
     <string name="song_element_look_ahead">Ettevaade</string>
     <string name="song_chunk">Osa</string>
     <string name="song_language_scope">Keel</string>
+    <string name="song_style_language">Kujundus</string>
     <string name="song_preview_look_ahead">Ettevaade</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Taust</string>
@@ -2589,6 +2590,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Liikumine</string>
     <string name="customize_layout">Paigutus</string>
+    <string name="customize_marker">Märgis</string>
     <string name="customize_bilingual">Kakskeelne</string>
     <string name="customize_no_preview">Selle jaotise jaoks eelvaadet pole</string>
     <string name="customize_bible">Piibel</string>
@@ -2685,4 +2687,12 @@
     <string name="song_lottie_unsupported_note">Mall määrab paigutuse ja pealkirja koha. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus, sõnavahe, järgmise eelvaade ja akordid ei kehti.</string>
     <string name="bible_lottie_unsupported_note">Mall määrab paigutuse, viite koha ja selle, kuidas kaks keelt riba jagavad. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus ja sõnavahe ei kehti.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Kontuur</string>
+    <string name="tooltip_outline_options">Kontuuri suvandid</string>
+    <string name="text_outline">Kontuur</string>
+    <string name="text_outline_width">Laius</string>
+    <string name="outline_show">Näita kontuuri</string>
+    <string name="song_secondary_language">2. keel</string>
+    <string name="song_primary_language">1. keel</string>
 </resources>

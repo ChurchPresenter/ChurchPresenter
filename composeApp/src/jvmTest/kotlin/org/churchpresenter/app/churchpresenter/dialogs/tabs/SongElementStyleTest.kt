@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
@@ -39,6 +40,7 @@ class SongElementStyleTest {
         wordSpacing = 5 + seed,
         transform = Constants.TEXT_TRANSFORM_UPPERCASE,
         chordColor = "#0011F$seed",
+        outline = TextOutline(enabled = true, color = "#4433F$seed", width = 5 + seed),
     )
 
     @Test

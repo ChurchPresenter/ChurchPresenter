@@ -106,6 +106,12 @@ fun DictionarySettingsTab(
                                 s.copy(dictionarySettings = s.dictionarySettings.copy(wordBackdrop = updated))
                             }
                         },
+                        outline = ds.wordOutline,
+                        onOutlineChange = { updated ->
+                            onSettingsChange { s ->
+                                s.copy(dictionarySettings = s.dictionarySettings.copy(wordOutline = updated))
+                            }
+                        },
                     )
                 }
                 AnimatedVisibility(visible = ds.wordShadow) {
@@ -233,6 +239,14 @@ fun DictionarySettingsTab(
                                 onSettingsChange { s ->
                                     s.copy(
                                         dictionarySettings = s.dictionarySettings.copy(referenceBackdrop = updated),
+                                    )
+                                }
+                            },
+                            outline = ds.referenceOutline,
+                            onOutlineChange = { updated ->
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        dictionarySettings = s.dictionarySettings.copy(referenceOutline = updated),
                                     )
                                 }
                             },

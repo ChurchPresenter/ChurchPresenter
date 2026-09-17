@@ -57,6 +57,10 @@ internal enum class CustomizeElement {
 internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = when (pane) {
     CustomizePane.STAGE_MONITOR -> emptyList()
     CustomizePane.BIBLE -> listOf(CustomizeElement.BIBLE_TEXT, CustomizeElement.BIBLE_REFERENCE)
+    // No "Slide" entry: everything that belonged to the slide rather than to one thing drawn on it
+    // -- the margins, the fades, the band height, the word wrap, the vertical alignment, the
+    // end-of-song marker -- now sits on the strip beneath the preview, where the picture it moves is
+    // in the same glance. The chip drew four sections, three of which the strip already carried.
     CustomizePane.SONGS -> listOf(
         CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_LYRICS,

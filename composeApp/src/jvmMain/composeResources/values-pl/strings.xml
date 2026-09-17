@@ -2461,6 +2461,7 @@
     <string name="song_element_look_ahead">Zapowiedź</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Język</string>
+    <string name="song_style_language">Styl</string>
     <string name="song_preview_look_ahead">Zapowiedź</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Tło</string>
@@ -2556,6 +2557,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Ruch</string>
     <string name="customize_layout">Układ</string>
+    <string name="customize_marker">Znacznik</string>
     <string name="customize_bilingual">Dwujęzycznie</string>
     <string name="customize_no_preview">Brak podglądu dla tej sekcji</string>
     <string name="customize_bible">Biblia</string>
@@ -2652,4 +2654,12 @@
     <string name="song_lottie_unsupported_note">Szablon decyduje o układzie i miejscu tytułu. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie, odstępy między wyrazami, podgląd następnej części i akordy nie mają zastosowania.</string>
     <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Obrys</string>
+    <string name="tooltip_outline_options">Opcje obrysu</string>
+    <string name="text_outline">Obrys</string>
+    <string name="text_outline_width">Szerokość</string>
+    <string name="outline_show">Pokaż obrys</string>
+    <string name="song_secondary_language">2. język</string>
+    <string name="song_primary_language">1. język</string>
 </resources>

@@ -15,6 +15,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -34,10 +35,15 @@ internal fun SongEditingCard(
     target: SongStyleTarget,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
+    /**
+     * Which language of a bilingual song these controls write. Only the lyrics and the title have a
+     * second -- see [SECOND_LANGUAGE_ELEMENTS].
+     */
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     /** Editing the title slide's elements rather than the lyric slides' -- see [SongElementRow]. */
     titleSlideView: Boolean = false,
 ) {
-    val style = settings.songSettings.elementStyle(element, target)
+    val style = settings.songSettings.elementStyle(element, target, language)
     val editingScroll = rememberScrollState()
     Box(modifier = modifier) {
         Column(
@@ -53,33 +59,34 @@ internal fun SongEditingCard(
                     element = element,
                     onElementChange = onElementChange,
                     target = target,
+                    language = language,
                     titleSlideView = titleSlideView,
                 )
                 // Keyed on what the panel is pointed at: the controls below are one set standing for
-                // ten stored profiles, and without this Compose keeps the subtree across a switch and
-                // hands each control the state of whichever control held its slot before.
-                key(element, target, titleSlideView) {
+                // eleven stored profiles, and without this Compose keeps the subtree across a switch
+                // and hands each control the state of whichever control held its slot before.
+                key(element, target, language, titleSlideView) {
                     SongTypographyPanel(
                         element = element,
                         style = style,
                         onStyleChange = { edited ->
                             onSettingsChange { s ->
-                                s.copy(songSettings = s.songSettings.withElementStyle(element, target, edited))
+                                s.copy(
+                                    songSettings = s.songSettings
+                                        .withElementStyle(element, target, language, edited),
+                                )
                             }
                         },
+                        // Reset means something different for the second language -- see
+                        // [withElementReset].
                         onReset = {
                             onSettingsChange { s ->
-                                s.copy(
-                                    songSettings = s.songSettings.withElementStyle(
-                                        element,
-                                        target,
-                                        defaultSongElementStyle(element, target),
-                                    ),
-                                )
+                                s.copy(songSettings = s.songSettings.withElementReset(element, target, language))
                             }
                         },
                         availableFonts = availableFonts,
                         onTitleSlide = titleSlideView,
+                        numberInCorner = settings.songSettings.numberCorner(target.isLowerThird) != Constants.NONE,
                     )
                 }
             }

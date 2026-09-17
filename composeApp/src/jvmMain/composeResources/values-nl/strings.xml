@@ -2489,6 +2489,7 @@
     <string name="song_element_look_ahead">Vooruitblik</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Taal</string>
+    <string name="song_style_language">Opmaak</string>
     <string name="song_preview_look_ahead">Vooruitblik</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Achtergrond</string>
@@ -2584,6 +2585,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Beweging</string>
     <string name="customize_layout">Indeling</string>
+    <string name="customize_marker">Markering</string>
     <string name="customize_bilingual">Tweetalig</string>
     <string name="customize_no_preview">Geen voorbeeld voor dit onderdeel</string>
     <string name="customize_bible">Bijbel</string>
@@ -2680,4 +2682,12 @@
     <string name="song_lottie_unsupported_note">Het sjabloon bepaalt de indeling en waar de titel staat. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen, woordafstand, vooruitblik en akkoorden gelden niet.</string>
     <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Omtrek</string>
+    <string name="tooltip_outline_options">Omtrekopties</string>
+    <string name="text_outline">Omtrek</string>
+    <string name="text_outline_width">Breedte</string>
+    <string name="outline_show">Omtrek tonen</string>
+    <string name="song_secondary_language">2e taal</string>
+    <string name="song_primary_language">1e taal</string>
 </resources>

@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.dictionarySettingsOn
 
 /**
  * The Dictionary pane's four text blocks and the card behind them: what each element offers, what
@@ -40,7 +41,7 @@ class ProjectionCustomizeDictionaryElementsTest {
     )
 
     private fun AppSettings.stored(): DictionarySettings = assertNotNull(
-        projectionSettings.screenAssignments[0].dictionaryOverride,
+        projectionSettings.screenAssignments[0].dictionarySettingsOn(dictionarySettings),
         "the output must have its own Dictionary",
     )
 

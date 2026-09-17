@@ -62,6 +62,15 @@ class PresenterScreenTest {
         showBackground: Boolean = true,
         transparentBlanking: Boolean = false,
         underneath: Color = Color.White,
+        /**
+         * An image background decodes on [kotlinx.coroutines.Dispatchers.IO], off the composition
+         * thread (#549) — a real thread hop `waitForIdle` does not track, so a test asserting on the
+         * *decoded picture* must wait for it rather than capture the instant `setContent` returns.
+         * Null while it loads still draws black (same as a missing/undecodable file), so "changed
+         * from [underneath]" is not a safe signal on its own — [awaitPixel] names what the test is
+         * actually waiting for.
+         */
+        awaitPixel: ((Color) -> Boolean)? = null,
     ): Color {
         var pixel: Color? = null
         runComposeUiTest {
@@ -77,6 +86,11 @@ class PresenterScreenTest {
                             ) {}
                         }
                     }
+                }
+            }
+            if (awaitPixel != null) {
+                waitUntil("the background image finished loading", timeoutMillis = 5_000L) {
+                    awaitPixel(onNodeWithTag("screen").captureToImage().toPixelMap()[20, 20])
                 }
             }
             pixel = onNodeWithTag("screen").captureToImage().toPixelMap()[20, 20]
@@ -238,7 +252,7 @@ class PresenterScreenTest {
                 defaultBackgroundOpacity = 1f,
             ),
         )
-        val pixel = sample(settings)
+        val pixel = sample(settings, awaitPixel = { it.blue > 0.9f })
         assertEquals(0f, pixel.red, 0.05f)
         assertEquals(0f, pixel.green, 0.05f)
         assertEquals(1f, pixel.blue, 0.05f)
@@ -252,7 +266,7 @@ class PresenterScreenTest {
                 defaultBackgroundImage = "",
             ),
         )
-        val pixel = sample(settings, underneath = Color.Red)
+        val pixel = sample(settings, underneath = Color.Red, awaitPixel = { it.red < 0.02f })
         assertEquals(0f, pixel.red, 0.02f)
     }
 
@@ -264,7 +278,7 @@ class PresenterScreenTest {
                 defaultBackgroundImage = "/no/such/file/does-not-exist.png",
             ),
         )
-        val pixel = sample(settings, underneath = Color.Red)
+        val pixel = sample(settings, underneath = Color.Red, awaitPixel = { it.red < 0.02f })
         assertEquals(0f, pixel.red, 0.02f)
     }
 
@@ -276,7 +290,7 @@ class PresenterScreenTest {
                 defaultBackgroundImage = garbageFile().absolutePath,
             ),
         )
-        val pixel = sample(settings, underneath = Color.Red)
+        val pixel = sample(settings, underneath = Color.Red, awaitPixel = { it.red < 0.02f })
         assertEquals(0f, pixel.red, 0.02f)
     }
 

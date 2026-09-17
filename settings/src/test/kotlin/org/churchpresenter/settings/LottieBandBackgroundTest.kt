@@ -47,7 +47,9 @@ class LottieBandBackgroundTest {
         val override = BackgroundSettings(
             songLowerThirdBackground = BackgroundConfig(Constants.BACKGROUND_LOTTIE, backgroundLottie = "/mine.json"),
         )
-        val assignment = ScreenAssignment(backgroundOverride = override)
+        val assignment = ScreenAssignment(
+            backgroundOverride = backgroundOverrideOf(BackgroundSettings(), override),
+        )
         val resolved = AppSettings().resolvedFor(assignment)
         assertEquals("/mine.json", resolved.backgroundSettings.songLowerThirdBackground.backgroundLottie)
         val plain = AppSettings().resolvedFor(ScreenAssignment()).backgroundSettings
@@ -65,6 +67,8 @@ class LottieBandBackgroundTest {
             val manager = SettingsManager()
             assertEquals("bible_lower_thirds", manager.bibleLowerThirdsDir.name)
             assertTrue(manager.bibleLowerThirdsDir.isDirectory, "created on construction, like the presets folder")
+            assertEquals("lottie_presets", manager.lottiePresetsDir.name)
+            assertTrue(manager.lottiePresetsDir.isDirectory, "the presets folder the comment above appeals to")
         } finally {
             System.setProperty("user.home", saved)
             home.deleteRecursively()

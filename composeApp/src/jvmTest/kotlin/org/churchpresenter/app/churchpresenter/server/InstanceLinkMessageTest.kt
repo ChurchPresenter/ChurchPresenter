@@ -339,4 +339,38 @@ class InstanceLinkMessageTest {
             assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
         }
     }
+
+    @Test
+    fun `the report cadence widens instead of reporting every 10th failure forever`() {
+        val c = clientWith(Recorder())
+
+        // CHURCH-PRESENTER-DESKTOP-68: a permanently unreachable peer (wrong IP, powered off)
+        // reached 780 consecutive "timeout" failures and 78 Sentry warnings under the old flat
+        // modulo-10 cadence. The interval must widen a decade at a time instead.
+        assertEquals(10, c.reportIntervalFor(consecutiveFailures = 1))
+        assertEquals(10, c.reportIntervalFor(consecutiveFailures = 99))
+        assertEquals(100, c.reportIntervalFor(consecutiveFailures = 100))
+        assertEquals(100, c.reportIntervalFor(consecutiveFailures = 999))
+        assertEquals(1000, c.reportIntervalFor(consecutiveFailures = 1000))
+        assertEquals(
+            100,
+            c.reportIntervalFor(consecutiveFailures = 780),
+            "780 is the reported issue's own streak length",
+        )
+    }
+
+    @Test
+    fun `a long non-benign streak reports far less than once per 10 attempts`() {
+        val c = clientWith(Recorder())
+
+        // Counting every report a "timeout" streak would generate from 1 through 780 consecutive
+        // failures: the old behaviour reported 78 times (every 10th, forever); the new cadence must
+        // report noticeably fewer times over the same run while still surfacing periodically.
+        val reportsUnderNewCadence = (1..780).count { n -> c.shouldReportConnectFailure("timeout", n) }
+        assertTrue(
+            reportsUnderNewCadence < 30,
+            "expected the widened cadence to report well under the old flat rate of 78, got $reportsUnderNewCadence",
+        )
+        assertTrue(reportsUnderNewCadence > 0, "a permanently dead peer must still surface periodically")
+    }
 }

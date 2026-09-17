@@ -2491,6 +2491,7 @@
     <string name="song_element_look_ahead">Previzualizare următor</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Limbă</string>
+    <string name="song_style_language">Stil</string>
     <string name="song_preview_look_ahead">Previzualizare următor</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Fundal</string>
@@ -2586,6 +2587,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Mișcare</string>
     <string name="customize_layout">Aspect</string>
+    <string name="customize_marker">Marcaj</string>
     <string name="customize_bilingual">Bilingv</string>
     <string name="customize_no_preview">Nicio previzualizare pentru această secțiune</string>
     <string name="customize_bible">Biblie</string>
@@ -2682,4 +2684,12 @@
     <string name="song_lottie_unsupported_note">Șablonul decide aspectul și locul titlului. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea, spațierea cuvintelor, previzualizarea următoarei părți și acordurile nu se aplică.</string>
     <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contur</string>
+    <string name="tooltip_outline_options">Opțiuni contur</string>
+    <string name="text_outline">Contur</string>
+    <string name="text_outline_width">Lățime</string>
+    <string name="outline_show">Afișează conturul</string>
+    <string name="song_secondary_language">Limba a 2-a</string>
+    <string name="song_primary_language">Limba 1</string>
 </resources>

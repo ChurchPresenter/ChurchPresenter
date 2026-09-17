@@ -2490,6 +2490,7 @@
     <string name="song_element_look_ahead">Pré-visualização</string>
     <string name="song_chunk">Fragmento</string>
     <string name="song_language_scope">Idioma</string>
+    <string name="song_style_language">Estilo</string>
     <string name="song_preview_look_ahead">Pré-visualização</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Plano de Fundo</string>
@@ -2585,6 +2586,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Movimento</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_marker">Marcador</string>
     <string name="customize_bilingual">Bilíngue</string>
     <string name="customize_no_preview">Sem pré-visualização para esta seção</string>
     <string name="customize_bible">Bíblia</string>
@@ -2681,4 +2683,12 @@
     <string name="song_lottie_unsupported_note">O modelo decide o layout e onde fica o título. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado, espaçamento entre palavras, prévia da próxima parte e acordes não se aplicam.</string>
     <string name="bible_lottie_unsupported_note">O modelo decide o layout, a posição da referência e como dois idiomas dividem a faixa. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado e espaçamento entre palavras não se aplicam.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contorno</string>
+    <string name="tooltip_outline_options">Opções de contorno</string>
+    <string name="text_outline">Contorno</string>
+    <string name="text_outline_width">Espessura</string>
+    <string name="outline_show">Mostrar contorno</string>
+    <string name="song_secondary_language">2.º idioma</string>
+    <string name="song_primary_language">1.º idioma</string>
 </resources>

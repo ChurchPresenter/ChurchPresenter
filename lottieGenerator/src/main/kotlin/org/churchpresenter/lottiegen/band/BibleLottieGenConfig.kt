@@ -10,21 +10,23 @@ import kotlinx.serialization.Serializable
 enum class BandStyle(
     val usesSecond: Boolean = false,
     val usesTertiary: Boolean = false,
+    /** Whether the style blends its colours, so the gradient's own controls apply to it. */
+    val usesGradient: Boolean = false,
 ) {
     SOLID_BAR,
-    GRADIENT_BAR(usesSecond = true),
+    GRADIENT_BAR(usesSecond = true, usesGradient = true),
     ACCENT_EDGE_BAR,
     GLASS_PANEL,
     RIBBON,
 
     /** A gradient running left to right, background colour to second. */
-    GRADIENT_HORIZONTAL(usesSecond = true),
+    GRADIENT_HORIZONTAL(usesSecond = true, usesGradient = true),
 
     /** A gradient running corner to corner, background colour to second. */
-    GRADIENT_ANGLED(usesSecond = true),
+    GRADIENT_ANGLED(usesSecond = true, usesGradient = true),
 
     /** A three-stop gradient left to right: background, second, third. */
-    GRADIENT_TRIO(usesSecond = true, usesTertiary = true),
+    GRADIENT_TRIO(usesSecond = true, usesTertiary = true, usesGradient = true),
 
     /** Top half in the background colour, bottom half in the second. */
     SPLIT_SHUTTER(usesSecond = true),
@@ -195,9 +197,24 @@ data class BandRoleLook(
     val hasWash: Boolean get() = washAlpha > 0
 }
 
-/** A picture as a data URL with its pixel size, and the file name it came from for the UI. */
+/**
+ * A picture as a data URL with its pixel size, and the file name it came from for the UI. The
+ * transform fields sit on top of the cover-fit baseline every role scales its picture to:
+ * [offsetXPercent]/[offsetYPercent] move it as a fraction of the band's width/height (positive is
+ * right/down), [scalePercent] shrinks or zooms past the cover fit, and [rotationDegrees] spins it
+ * about its own centre.
+ */
 @Serializable
-data class BandImage(val data: String, val width: Int, val height: Int, val name: String) {
+data class BandImage(
+    val data: String,
+    val width: Int,
+    val height: Int,
+    val name: String,
+    val offsetXPercent: Int = 0,
+    val offsetYPercent: Int = 0,
+    val scalePercent: Int = 100,
+    val rotationDegrees: Int = 0,
+) {
     val isUsable: Boolean get() = width > 0 && height > 0
 }
 
@@ -231,9 +248,16 @@ data class BibleLottieGenConfig(
     val tertiaryColor: String = "#F2C94C",
     val tertiaryAlpha: Int = FULL_ALPHA,
     /**
+     * Where along the band the gradient finishes, as a percentage, after which the last
+     * colour is flat. 100 spreads the blend over the whole band, which is what it did before
+     * this was a setting; lower values pull the transition towards the start.
+     */
+    val gradientPosition: Int = FULL_ALPHA,
+    /**
      * Pictures standing in for colours: any role can be a photo instead of a flat colour. Each is
-     * scaled to cover the band and shows through exactly the shapes that role paints; the
-     * background role's picture sits under everything with the background colour as a tint.
+     * scaled to cover the band and shows through exactly the shapes that role paints — the
+     * background role is drawn the same way as the other three, no tint layered over it. A colour
+     * cast over a picture is available through that role's wash, in [looks].
      */
     val images: Map<BandColorRole, BandImage> = emptyMap(),
     /** Each role's wash and blur; a role that is absent is drawn plain. */
@@ -268,6 +292,15 @@ data class BibleLottieGenConfig(
     val previewReferenceSizePx: Int = DEFAULT_PREVIEW_REFERENCE_SIZE,
     val previewTextColor: String = "#FFFFFF",
     val previewReferenceColor: String = "#FFFFFF",
+    /**
+     * How opaque the words are, 0..100, baked into the text layers' own opacity.
+     *
+     * Not part of the colour: the band's text colour comes from the app's Bible and song settings
+     * at run time, and the file only carries a placeholder for it. Opacity is a separate layer
+     * property, so it is the one part of the text's look the template can own.
+     */
+    val textAlpha: Int = FULL_ALPHA,
+    val referenceAlpha: Int = FULL_ALPHA,
     val previewBold: Boolean = false,
     val previewItalic: Boolean = false,
     /** Whether the sample shows its shadow twin, which the file ships hidden for the player to raise. */
@@ -277,7 +310,7 @@ data class BibleLottieGenConfig(
     val previewText2: String = DEFAULT_PREVIEW_TEXT_2,
     val previewReference2: String = "Juan 3:16 (RVR)",
 ) {
-    /** Whether the background role is a picture, which turns its colour into a tint. */
+    /** Whether the background role is a picture, which then replaces any gradient style's fill. */
     val hasBackgroundImage: Boolean get() = images.containsKey(BandColorRole.BACKGROUND)
 
     /** How [role] is drawn beyond its colour; plain when nothing was set. */

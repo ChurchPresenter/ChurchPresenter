@@ -54,6 +54,7 @@ class DictionarySettingsTabLabelsTest {
         "U" to 2,
         "S" to 2,
         "A" to 2,
+        "O" to 2,        // the outline button, on the word and the reference
 
         // Font controls and their stored values.
         "FONT TYPE" to 2,

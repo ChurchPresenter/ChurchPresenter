@@ -16,6 +16,9 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/** Generous: the wait ends on the frame appearing, and only a stuck read ever spends this. */
+private const val LOAD_TIMEOUT_MS = 5_000L
+
 /**
  * The Background tab's stage: a template looping from its hold frame. The loop itself waits on
  * infinite-animation frames, which a test clock never delivers, so the arithmetic is pinned on
@@ -41,8 +44,14 @@ class BibleLottieStillFrameTest {
         TestSingletons.latchSkikoHostOs()
         val dir = Files.createTempDirectory("still-frame").toFile()
         val template = LottieBandTestSupport.writeTemplate(dir)
+        // Not a Lottie at all. It used to be a well-formed one with no band in it, which the
+        // parser accepts on purpose — a hand-made file is played with the segments guessed — so
+        // the still frame drew it and this assertion only held while the load was still in
+        // flight. waitForIdle does not wait for the read, so the test was racing it.
         val plain = File(dir, "plain.json")
-        plain.writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":10,"h":10,"layers":[]}""")
+        // Valid JSON with none of the frame rate, duration or canvas a Lottie is played from, so
+        // the parse rejects it and the state it feeds stays null however long the read takes.
+        plain.writeText("""{"nothing":"to play"}""")
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -54,7 +63,11 @@ class BibleLottieStillFrameTest {
                     }
                 }
             }
-            waitForIdle()
+            // Wait on the template appearing rather than on idleness: both files are read off
+            // the main thread, and this is the positive signal that the reads have happened.
+            waitUntil("the template is loaded and drawn", LOAD_TIMEOUT_MS) {
+                onNodeWithTag("template").fetchSemanticsNode().children.isNotEmpty()
+            }
             onNodeWithTag("template").assertHeightIsEqualTo(100.dp)
             assertEquals(0, onNodeWithTag("plain").fetchSemanticsNode().children.size, "no image for a non-template")
         }

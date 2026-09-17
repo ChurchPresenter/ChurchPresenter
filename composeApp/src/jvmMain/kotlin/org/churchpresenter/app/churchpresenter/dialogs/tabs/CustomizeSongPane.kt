@@ -1,28 +1,25 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.auto_fit
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.look_ahead_next_lower_third
-import churchpresenter.composeapp.generated.resources.look_ahead_next_fullscreen
-import churchpresenter.composeapp.generated.resources.look_ahead_lower_third
-import churchpresenter.composeapp.generated.resources.look_ahead_fullscreen
-import churchpresenter.composeapp.generated.resources.customize_group_lyrics
-import churchpresenter.composeapp.generated.resources.customize_style
-import churchpresenter.composeapp.generated.resources.font_size
-import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.show_number
-import churchpresenter.composeapp.generated.resources.song_element_title
-import churchpresenter.composeapp.generated.resources.song_element_number
-import churchpresenter.composeapp.generated.resources.song_number_corner
-import churchpresenter.composeapp.generated.resources.show_title
+import androidx.compose.runtime.key
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
-import org.churchpresenter.settings.SongSettings
-import churchpresenter.composeapp.generated.resources.vertical_alignment
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.composables.LabeledControl
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.song_style_language
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -37,432 +34,146 @@ internal fun SongCustomizePane(
     element: CustomizeElement,
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /**
+     * This screen's own song language, which lives on its [ScreenAssignment] rather than in
+     * `SongSettings` -- so it is read and written past [onSettingsChange], whose edits this dialog
+     * stores as a `SongSettings` difference and nothing else.
+     */
+    songMode: String,
+    onSongModeChange: (String) -> Unit,
 ) {
     val scope = LocalOutputStyleScope.current
-    val lowerThird = scope == OutputStyleScope.LOWER_THIRD
+    val target =
+        if (scope == OutputStyleScope.LOWER_THIRD) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
     val fonts = rememberSystemFonts()
-    val ss = settings.songSettings
-
-    fun update(transform: (SongSettings) -> SongSettings) {
-        onSettingsChange { s -> s.copy(songSettings = transform(s.songSettings)) }
-    }
+    val song = settings.songSettings
 
     PaneScaffold {
-        when (element) {
-            CustomizeElement.SONG_TITLE ->
-                SongTitleGroup(ss, lowerThird, ::update)
-            CustomizeElement.SONG_NUMBER ->
-                SongNumberGroup(ss, lowerThird, ::update)
-            CustomizeElement.SONG_LOOK_AHEAD ->
-                SongLookAheadGroup(ss, lowerThird, fonts, ::update)
-            CustomizeElement.SONG_NEXT_SECTION ->
-                SongLookAheadNextGroup(ss, lowerThird, fonts, ::update)
-            CustomizeElement.SONG_TITLE_SLIDE ->
-                SongTitleSlideCustomize(ss, lowerThird, fonts, ::update)
-            // No chord colour. A chart is drawn only by `StageMonitorScreen`; all three production
-            // `SongPresenter` call sites take its `showChords = false` default, so on a full screen
-            // or a lower third -- the only two shapes that reach this pane -- the colour is read by
-            // nothing.
-            else -> {
-                SongLyricsGroup(ss, lowerThird, fonts, ::update)
-                SongTypographyGroup(ss, lowerThird, ::update)
+        val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
+        // Which of the two languages the controls below write. A song carries its lyrics and its
+        // title twice, and each half has a profile of its own, so this screen can be told to draw
+        // the second language differently from the first -- the same choice the global Song tab
+        // offers, for this one output.
+        var language by remember { mutableStateOf(SongStyleLanguage.PRIMARY) }
+        // The title slide draws six things and the chips above have one seat for all of them, so it
+        // keeps a selector of its own. The lyric slides' elements each have a chip already.
+        var slideElement by remember { mutableStateOf(SongStyleElement.TITLE) }
+        val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
+        // Only where there is a second language on this screen and an element that has a second
+        // profile for it. Everywhere else the switch would offer a choice with one answer.
+        val hasSecondLanguage = songMode == Constants.SONG_LANG_BOTH && styleElement in SECOND_LANGUAGE_ELEMENTS
+        val editingLanguage = if (hasSecondLanguage) language else SongStyleLanguage.PRIMARY
+
+        if (titleSlideView) {
+            SongTitleSlideEnabledRow(settings, onSettingsChange, showVerticalAlignment = !target.isLowerThird)
+            SegmentedButton(
+                items = TITLE_SLIDE_ELEMENTS.map { SegmentedButtonItem(it, it.label()) },
+                selectedValue = slideElement,
+                onValueChange = { slideElement = it },
+                buttonWidth = TITLE_SLIDE_CHIP_WIDTH,
+                buttonHeight = 30.dp,
+                fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                compactColumns = TITLE_SLIDE_CHIP_COLUMNS,
+            )
+        }
+
+        SongElementOptions(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            element = styleElement,
+            target = target,
+            titleSlideView = titleSlideView,
+            outputMode = songMode,
+            onOutputModeChange = onSongModeChange,
+        )
+        // The same panel the Song settings tab draws, reading and writing the same profile. Two
+        // surfaces over one definition: a control added to the tab is in the dialog the same day.
+        if (hasSecondLanguage) {
+            LabeledControl(stringResource(Res.string.song_style_language)) {
+                SegmentedButton(
+                    items = listOf(
+                        SegmentedButtonItem(
+                            SongStyleLanguage.PRIMARY,
+                            stringResource(Res.string.song_language_primary),
+                        ),
+                        SegmentedButtonItem(
+                            SongStyleLanguage.SECONDARY,
+                            stringResource(Res.string.song_language_secondary),
+                        ),
+                    ),
+                    selectedValue = editingLanguage,
+                    onValueChange = { language = it },
+                    buttonWidth = STYLE_LANGUAGE_BUTTON_WIDTH,
+                    buttonHeight = 30.dp,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                )
             }
         }
-    }
-}
-
-
-@Composable
-private fun SongLyricsGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    fonts: List<String>,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.customize_group_lyrics)) {
-        CustomizeRow(stringResource(Res.string.font_type), labelInsideControl = true) {
-            FontControl(
-                label = stringResource(Res.string.font_type),
-                value = if (lowerThird) ss.lyricsLowerThirdFontType else ss.lyricsFontType,
-                fonts = fonts,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdFontType = v)
-                        else it.copy(lyricsFontType = v)
+        // Keyed on the language too: one set of controls stands for two stored profiles, and
+        // without this Compose keeps the subtree across the switch and hands each control the state
+        // -- and the write-back lambda -- of the profile that held its slot before.
+        key(editingLanguage) {
+            SongTypographyPanel(
+                element = styleElement,
+                style = song.elementStyle(styleElement, target, editingLanguage),
+                onStyleChange = { edited ->
+                    onSettingsChange { s ->
+                        s.copy(
+                            songSettings = s.songSettings
+                                .withElementStyle(styleElement, target, editingLanguage, edited),
+                        )
                     }
                 },
+                onReset = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.withElementReset(styleElement, target, editingLanguage))
+                    }
+                },
+                availableFonts = fonts,
+                onTitleSlide = titleSlideView,
+                numberInCorner = song.numberCorner(target.isLowerThird) != Constants.NONE,
             )
         }
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) ss.lyricsLowerThirdFontSize else ss.lyricsFontSize,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdFontSize = v)
-                        else it.copy(lyricsFontSize = v)
-                    }
-                },
-                range = FONT_SIZE_RANGE,
-                autoLabel = stringResource(Res.string.auto_fit),
-                auto = if (lowerThird) ss.lyricsLowerThirdFontSizeAutoFit else ss.lyricsFontSizeAutoFit,
-                onAutoChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdFontSizeAutoFit = v)
-                        else it.copy(lyricsFontSizeAutoFit = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor,
-                onColorChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdColor = v) else it.copy(lyricsColor = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) ss.lyricsLowerThirdBold else ss.lyricsBold,
-                italic = if (lowerThird) ss.lyricsLowerThirdItalic else ss.lyricsItalic,
-                underline = if (lowerThird) ss.lyricsLowerThirdUnderline else ss.lyricsUnderline,
-                shadow = if (lowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow,
-                onBoldChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdBold = v) else it.copy(lyricsBold = v) }
-                },
-                onItalicChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdItalic = v) else it.copy(lyricsItalic = v) }
-                },
-                onUnderlineChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdUnderline = v) else it.copy(lyricsUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    update { if (lowerThird) it.copy(lyricsLowerThirdShadow = v) else it.copy(lyricsShadow = v) }
-                },
-                backdrop = if (lowerThird) ss.lyricsLowerThirdBackdrop else ss.lyricsBackdrop,
-                onBackdropChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdBackdrop = v)
-                        else it.copy(lyricsBackdrop = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
-            HorizontalAlignControl(
-                selected = if (lowerThird) ss.lyricsLowerThirdHorizontalAlignment
-                else ss.lyricsHorizontalAlignment,
+        // Where the lyric block sits on the slide -- one value for the song rather than one per
+        // element, so it is written straight onto `SongSettings` rather than into a profile. Only
+        // the lyrics carry it: the look-ahead and the next section sit under the line they follow,
+        // and the title slide has its own control above.
+        if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
+            BlockVerticalAlignmentRow(
+                selected = song.lyricsAlignment,
                 onSelect = { v ->
-                    update {
-                        if (lowerThird) it.copy(lyricsLowerThirdHorizontalAlignment = v)
-                        else it.copy(lyricsHorizontalAlignment = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.vertical_alignment)) {
-            VerticalAlignControl(ss.lyricsAlignment) { v ->
-                update { it.copy(lyricsAlignment = v) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SongTypographyGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-
-    TypographyGroup(
-        letterSpacing = if (lowerThird) ss.lyricsLowerThirdLetterSpacing else ss.lyricsLetterSpacing,
-        wordSpacing = if (lowerThird) ss.lyricsLowerThirdWordSpacing else ss.lyricsWordSpacing,
-        transform = if (lowerThird) ss.lyricsLowerThirdTransform else ss.lyricsTransform,
-        onLetterSpacing = { v ->
-            update {
-                if (lowerThird) it.copy(lyricsLowerThirdLetterSpacing = v) else it.copy(lyricsLetterSpacing = v)
-            }
-        },
-        onWordSpacing = { v ->
-            update { if (lowerThird) it.copy(lyricsLowerThirdWordSpacing = v) else it.copy(lyricsWordSpacing = v) }
-        },
-        onTransform = { v ->
-            update {
-                if (lowerThird) it.copy(lyricsLowerThirdTransform = v) else it.copy(lyricsTransform = v)
-            }
-        },
-    )
-}
-
-
-@Composable
-private fun SongTitleGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.song_element_title)) {
-        CustomizeRow(stringResource(Res.string.show_title)) {
-            ChoiceControl(
-                options = showOptions(),
-                selected = if (lowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay,
-                onSelect = { v ->
-                    update { if (lowerThird) it.copy(titleLowerThirdDisplay = v) else it.copy(titleDisplay = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize,
-                onValueChange = { v ->
-                    update { if (lowerThird) it.copy(titleLowerThirdFontSize = v) else it.copy(titleFontSize = v) }
-                },
-                range = FONT_SIZE_RANGE,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SongNumberGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.song_element_number)) {
-        CustomizeRow(stringResource(Res.string.show_number)) {
-            ChoiceControl(
-                options = showOptions(),
-                selected = if (lowerThird) ss.showNumberLowerThird else ss.showNumber,
-                onSelect = { v ->
-                    update { if (lowerThird) it.copy(showNumberLowerThird = v) else it.copy(showNumber = v) }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.song_number_corner)) {
-            DropdownControl(
-                value = ss.numberCorner(lowerThird),
-                options = songNumberCornerOptions(),
-                onValueChange = { v -> update { it.withNumberCorner(lowerThird, v) } },
-            )
-        }
-    }
-}
-
-@Composable
-private fun SongLookAheadGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    fonts: List<String>,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-    val title = stringResource(if (lowerThird) Res.string.look_ahead_lower_third else Res.string.look_ahead_fullscreen)
-    CustomizeGroup(title) {
-        CustomizeRow(stringResource(Res.string.font_type), labelInsideControl = true) {
-            FontControl(
-                label = stringResource(Res.string.font_type),
-                value = if (lowerThird) ss.lowerThirdLookAheadFontType else ss.lookAheadFontType,
-                fonts = fonts,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadFontType = v)
-                        else it.copy(lookAheadFontType = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadFontSize = v)
-                        else it.copy(lookAheadFontSize = v)
-                    }
-                },
-                range = FONT_SIZE_RANGE,
-                autoLabel = stringResource(Res.string.auto_fit),
-                auto = if (lowerThird) ss.lowerThirdLookAheadFontSizeAutoFit
-                else ss.lookAheadFontSizeAutoFit,
-                onAutoChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadFontSizeAutoFit = v)
-                        else it.copy(lookAheadFontSizeAutoFit = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) ss.lowerThirdLookAheadColor else ss.lookAheadColor,
-                onColorChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadColor = v)
-                        else it.copy(lookAheadColor = v)
-                    }
-                },
-            )
-        }
-        SongLookAheadStyleRow(ss, lowerThird, update)
-        CustomizeRow(stringResource(Res.string.horizontal_alignment)) {
-            HorizontalAlignControl(
-                selected = if (lowerThird) ss.lowerThirdLookAheadHorizontalAlignment
-                else ss.lookAheadHorizontalAlignment,
-                onSelect = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadHorizontalAlignment = v)
-                        else it.copy(lookAheadHorizontalAlignment = v)
-                    }
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v)) }
                 },
             )
         }
     }
 }
 
+/** Which stored profile a Songs chip stands for. */
+private fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this) {
+    CustomizeElement.SONG_TITLE -> SongStyleElement.TITLE
+    CustomizeElement.SONG_NUMBER -> SongStyleElement.NUMBER
+    CustomizeElement.SONG_LOOK_AHEAD -> SongStyleElement.LOOK_AHEAD
+    CustomizeElement.SONG_NEXT_SECTION -> SongStyleElement.NEXT_SECTION
+    else -> SongStyleElement.LYRICS
+}
+/** Whether this screen opens a song with a title slide, and where that slide's block sits. */
 @Composable
-private fun SongLookAheadNextGroup(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    fonts: List<String>,
-    update: ((SongSettings) -> SongSettings) -> Unit,
+private fun SongTitleSlideEnabledRow(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    showVerticalAlignment: Boolean,
 ) {
-    val title = stringResource(
-        if (lowerThird) Res.string.look_ahead_next_lower_third else Res.string.look_ahead_next_fullscreen,
-    )
-    CustomizeGroup(title) {
-        CustomizeRow(stringResource(Res.string.font_type), labelInsideControl = true) {
-            FontControl(
-                label = stringResource(Res.string.font_type),
-                value = if (lowerThird) ss.lowerThirdLookAheadNextFontType else ss.lookAheadNextFontType,
-                fonts = fonts,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextFontType = v)
-                        else it.copy(lookAheadNextFontType = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.font_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.font_size),
-                value = if (lowerThird) ss.lowerThirdLookAheadNextFontSize else ss.lookAheadNextFontSize,
-                onValueChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextFontSize = v)
-                        else it.copy(lookAheadNextFontSize = v)
-                    }
-                },
-                range = FONT_SIZE_RANGE,
-            )
-        }
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(
-                label = stringResource(Res.string.color),
-                color = if (lowerThird) ss.lowerThirdLookAheadNextColor else ss.lookAheadNextColor,
-                onColorChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextColor = v)
-                        else it.copy(lookAheadNextColor = v)
-                    }
-                },
-            )
-        }
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) ss.lowerThirdLookAheadNextBold else ss.lookAheadNextBold,
-                italic = if (lowerThird) ss.lowerThirdLookAheadNextItalic else ss.lookAheadNextItalic,
-                underline = if (lowerThird) ss.lowerThirdLookAheadNextUnderline
-                else ss.lookAheadNextUnderline,
-                shadow = if (lowerThird) ss.lowerThirdLookAheadNextShadow else ss.lookAheadNextShadow,
-                onBoldChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextBold = v)
-                        else it.copy(lookAheadNextBold = v)
-                    }
-                },
-                onItalicChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextItalic = v)
-                        else it.copy(lookAheadNextItalic = v)
-                    }
-                },
-                onUnderlineChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextUnderline = v)
-                        else it.copy(lookAheadNextUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextShadow = v)
-                        else it.copy(lookAheadNextShadow = v)
-                    }
-                },
-                backdrop = if (lowerThird) ss.lowerThirdLookAheadNextBackdrop else ss.lookAheadNextBackdrop,
-                onBackdropChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadNextBackdrop = v)
-                        else it.copy(lookAheadNextBackdrop = v)
-                    }
-                },
-            )
-        }
-    }
+    SongTitleSlideSection(settings, onSettingsChange, showVerticalAlignment)
 }
 
-/** The look-ahead line's own face buttons and backdrop, lifted out of [SongLookAheadGroup]. */
-@Composable
-private fun SongLookAheadStyleRow(
-    ss: SongSettings,
-    lowerThird: Boolean,
-    update: ((SongSettings) -> SongSettings) -> Unit,
-) {
-        CustomizeRow(stringResource(Res.string.customize_style)) {
-            StyleControl(
-                bold = if (lowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold,
-                italic = if (lowerThird) ss.lowerThirdLookAheadItalic else ss.lookAheadItalic,
-                underline = if (lowerThird) ss.lowerThirdLookAheadUnderline else ss.lookAheadUnderline,
-                shadow = if (lowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow,
-                onBoldChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadBold = v)
-                        else it.copy(lookAheadBold = v)
-                    }
-                },
-                onItalicChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadItalic = v)
-                        else it.copy(lookAheadItalic = v)
-                    }
-                },
-                onUnderlineChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadUnderline = v)
-                        else it.copy(lookAheadUnderline = v)
-                    }
-                },
-                onShadowChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadShadow = v)
-                        else it.copy(lookAheadShadow = v)
-                    }
-                },
-                backdrop = if (lowerThird) ss.lowerThirdLookAheadBackdrop else ss.lookAheadBackdrop,
-                onBackdropChange = { v ->
-                    update {
-                        if (lowerThird) it.copy(lowerThirdLookAheadBackdrop = v)
-                        else it.copy(lookAheadBackdrop = v)
-                    }
-                },
-            )
-        }
-}
+/** Wide enough for "Composer", the longest of the six. */
+private val TITLE_SLIDE_CHIP_WIDTH = 86.dp
+
+/** Six chips are wider than this column, so past three they fold onto another row. */
+private const val TITLE_SLIDE_CHIP_COLUMNS = 3
+
+/** Wide enough for "Secondary" without an ellipsis. */
+private val STYLE_LANGUAGE_BUTTON_WIDTH = 82.dp
+
+

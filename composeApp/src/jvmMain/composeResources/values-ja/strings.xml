@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">先読み</string>
     <string name="song_chunk">区切り</string>
     <string name="song_language_scope">言語</string>
+    <string name="song_style_language">スタイル</string>
     <string name="song_preview_look_ahead">先読み</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">背景</string>
@@ -2565,6 +2566,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">動き</string>
     <string name="customize_layout">レイアウト</string>
+    <string name="customize_marker">マーカー</string>
     <string name="customize_bilingual">2 言語</string>
     <string name="customize_no_preview">このセクションのプレビューはありません</string>
     <string name="customize_bible">聖書</string>
@@ -2661,4 +2663,12 @@
     <string name="song_lottie_unsupported_note">レイアウトとタイトルの位置はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔、次のプレビュー、コードは適用されません。</string>
     <string name="bible_lottie_unsupported_note">レイアウト、聖句参照の位置、2 言語のバンドの分け方はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔は適用されません。</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">縁取り</string>
+    <string name="tooltip_outline_options">縁取りのオプション</string>
+    <string name="text_outline">縁取り</string>
+    <string name="text_outline_width">太さ</string>
+    <string name="outline_show">縁取りを表示</string>
+    <string name="song_secondary_language">第2言語</string>
+    <string name="song_primary_language">第1言語</string>
 </resources>

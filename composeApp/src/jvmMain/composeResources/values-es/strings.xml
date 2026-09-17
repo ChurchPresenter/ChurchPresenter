@@ -2489,6 +2489,7 @@
     <string name="song_element_look_ahead">Vista previa</string>
     <string name="song_chunk">Fragmento</string>
     <string name="song_language_scope">Idioma</string>
+    <string name="song_style_language">Estilo</string>
     <string name="song_preview_look_ahead">Vista previa</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Fondo</string>
@@ -2584,6 +2585,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Movimiento</string>
     <string name="customize_layout">Diseño</string>
+    <string name="customize_marker">Marca</string>
     <string name="customize_bilingual">Bilingüe</string>
     <string name="customize_no_preview">No hay vista previa para esta sección</string>
     <string name="customize_bible">Biblia</string>
@@ -2680,4 +2682,12 @@
     <string name="song_lottie_unsupported_note">La plantilla decide la disposición y dónde va el título. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado, el espaciado entre palabras, la vista previa de la siguiente sección y los acordes no se aplican.</string>
     <string name="bible_lottie_unsupported_note">La plantilla decide la disposición, la posición de la referencia y cómo dos idiomas comparten la banda. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado y el espaciado entre palabras no se aplican.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Contorno</string>
+    <string name="tooltip_outline_options">Opciones de contorno</string>
+    <string name="text_outline">Contorno</string>
+    <string name="text_outline_width">Grosor</string>
+    <string name="outline_show">Mostrar contorno</string>
+    <string name="song_secondary_language">2.º idioma</string>
+    <string name="song_primary_language">1.º idioma</string>
 </resources>

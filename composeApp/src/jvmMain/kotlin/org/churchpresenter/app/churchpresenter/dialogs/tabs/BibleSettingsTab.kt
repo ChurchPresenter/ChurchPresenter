@@ -79,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.composables.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollColumn
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -807,7 +808,12 @@ private fun StylePane(
         manager.setDisplayedVerses(sampleVerses)
         manager.setPresentingMode(Presenting.BIBLE)
     }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    // Scrolls, with the bar down its edge that the rail beside it already has. The panel below the
+    // preview is a whole form and grew a row when the shadow controls stopped sharing one with the
+    // text transform; without this its last rows are simply unreachable on a window short enough --
+    // not merely below the fold but with nothing to scroll, which is how a test reaching for the
+    // shadow checkbox found "no parent layout with a Scroll SemanticsAction".
+    SettingsScrollColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         TargetSwitchRow(
             settings = settings,
             translations = translations,
@@ -843,7 +849,7 @@ private fun StylePane(
         // into whatever composes there next -- which is how the controls below ended up wired to a
         // previous selection's state.
         val translation = translations.getOrNull(selectedIndex)
-        if (translation == null) return@Column
+        if (translation == null) return@SettingsScrollColumn
         val style = translation.elementStyle(element, target)
         val verses = presenterManager?.selectedVerses?.value.orEmpty()
         val canMeasure = presenterManager != null &&

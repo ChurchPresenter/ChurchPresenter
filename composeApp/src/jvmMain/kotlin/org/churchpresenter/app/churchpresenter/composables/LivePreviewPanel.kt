@@ -90,6 +90,7 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -256,14 +257,20 @@ private fun SingleDisplayPreview(
 ) {
     // This preview must show what the real output shows, so it resolves the same per-output
     // override the presenter window does. Identical to [appSettings] when uncustomized.
-    val outputSettings = appSettings.resolvedFor(screenAssignment)
+    // Remembered: an override is a sparse tree merged into the document and decoded, which is
+    // real work to repeat on every recomposition. Keyed on both sides, so it is redone exactly
+    // when one of them changes and not otherwise.
+    val outputSettings = remember(appSettings, screenAssignment) {
+        appSettings.resolvedFor(screenAssignment)
+    }
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
-    val lottieBandClock by presenterManager.lottieBandClock
+    // The clock stays wrapped: unwrapping it here would recompose this panel on every band frame.
     val bandSongLineIndex by presenterManager.bandSongLineIndex
+    val bandOutgoing by presenterManager.bandOutgoing
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
@@ -408,8 +415,9 @@ private fun SingleDisplayPreview(
                         ).coerceAtLeast(100)
                         Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
                         CompositionLocalProvider(
-                            LocalLottieBandClock provides lottieBandClock,
+                            LocalLottieBandClock provides presenterManager.lottieBandClock,
                             LocalBandSongLineIndex provides bandSongLineIndex,
+                            LocalBandOutgoing provides bandOutgoing,
                         ) {
                         when (mode) {
                             Presenting.BIBLE ->

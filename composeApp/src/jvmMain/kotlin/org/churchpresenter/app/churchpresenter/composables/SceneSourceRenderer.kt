@@ -56,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi_wai
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -230,18 +231,23 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
             )
         } else {
             val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
-            Text(
+            OutlinedText(
                 text = source.text,
+                outline = source.outline,
+                scaleFactor = fontScale,
                 color = textColor,
                 fontSize = (source.fontSize * fontScale).sp,
                 fontFamily = fontFamily,
-                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                style = TextStyle(
+                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
                 textAlign = align,
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
-                letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
+                fillWidth = false,
                 modifier = Modifier.padding(4.dp).then(painter.modifier),
                 onTextLayout = painter::onTextLayout,
             )
@@ -257,7 +263,28 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
  * angle its own centre sits at. That is also why the line cannot wrap — newlines become spaces.
  */
 @Composable
-internal fun CurvedText(text: String, curve: Float, style: TextStyle, modifier: Modifier = Modifier) {
+internal fun CurvedText(
+    text: String,
+    curve: Float,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    /** Stroked underneath, glyph for glyph, exactly as `OutlinedText` does for laid-out text. */
+    outline: TextOutline = TextOutline(),
+    outlineScale: Float = 1f,
+) {
+    if (outline.isVisible) {
+        // The stroke first and the fill over it, both drawn into the same box: a bent line has no
+        // layout of its own to disturb, so the two passes land glyph for glyph.
+        CurvedText(
+            text = text,
+            curve = curve,
+            style = style.copy(
+                color = parseHexColor(outline.color),
+                drawStyle = Stroke(width = outline.width * outlineScale),
+            ),
+            modifier = modifier,
+        )
+    }
     val measurer = rememberTextMeasurer()
     val glyphs = remember(text, style) {
         text.replace('\n', ' ').map { measurer.measure(AnnotatedString(it.toString()), style) }
@@ -598,12 +625,20 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
         if (source.curve != 0f) {
             // A bent line is drawn glyph by glyph rather than laid out as text, so there is no line
             // box to band and no block to box: the backdrop is skipped rather than misplaced.
-            CurvedText(displayText, source.curve, style, Modifier.fillMaxSize())
+            CurvedText(
+                displayText, source.curve, style, Modifier.fillMaxSize(),
+                outline = source.outline, outlineScale = fontScale,
+            )
         } else {
             val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
-            Text(
+            OutlinedText(
                 text = displayText,
+                outline = source.outline,
+                scaleFactor = fontScale,
+                color = Color.Unspecified,
+                fontSize = TextUnit.Unspecified,
                 style = style,
+                fillWidth = false,
                 modifier = painter.modifier,
                 onTextLayout = painter::onTextLayout,
             )
@@ -721,7 +756,9 @@ private fun CurvedBibleText(
                 textDecoration = textDecorationOf(source.underline, source.strikethrough),
                 letterSpacing = trackingOf(source.letterSpacing),
             ),
-            modifier = Modifier.fillMaxWidth().weight(1f)
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            outline = source.outline,
+            outlineScale = fontScale,
         )
         if (source.referenceText.isNotEmpty()) {
             CurvedText(
@@ -741,7 +778,9 @@ private fun CurvedBibleText(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((source.referenceFontSize * fontScale * REFERENCE_ROWS).dp)
+                    .height((source.referenceFontSize * fontScale * REFERENCE_ROWS).dp),
+                outline = source.referenceOutline,
+                outlineScale = fontScale,
             )
         }
     }
@@ -1138,36 +1177,44 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
         ) {
             val versePainter = rememberTextBackdropPainter(source.backdrop, fontScale)
             val refPainter = rememberTextBackdropPainter(source.referenceBackdrop, fontScale)
-            Text(
+            OutlinedText(
                 text = source.verseText.ifEmpty { "Select a verse..." },
+                outline = source.outline,
+                scaleFactor = fontScale,
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
                 fontSize = (source.fontSize * fontScale).sp,
                 fontFamily = fontFamily,
-                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                style = TextStyle(
+                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
+                    letterSpacing = trackingOf(source.letterSpacing),
+                ),
                 textAlign = align,
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
-                letterSpacing = trackingOf(source.letterSpacing),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth().then(versePainter.modifier),
                 onTextLayout = versePainter::onTextLayout,
             )
             if (source.referenceText.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
+                OutlinedText(
                     text = source.referenceText,
+                    outline = source.referenceOutline,
+                    scaleFactor = fontScale,
                     color = refColor,
                     fontSize = (source.referenceFontSize * fontScale).sp,
                     fontFamily = fontFamily,
-                    fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
-                    textDecoration = textDecorationOf(
-                        source.referenceUnderline,
-                        source.referenceStrikethrough
+                    style = TextStyle(
+                        fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
+                        fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                        textDecoration = textDecorationOf(
+                            source.referenceUnderline,
+                            source.referenceStrikethrough,
+                        ),
+                        letterSpacing = trackingOf(source.letterSpacing),
                     ),
                     textAlign = align,
-                    letterSpacing = trackingOf(source.letterSpacing),
                     modifier = Modifier.fillMaxWidth().then(refPainter.modifier),
                     onTextLayout = refPainter::onTextLayout,
                 )

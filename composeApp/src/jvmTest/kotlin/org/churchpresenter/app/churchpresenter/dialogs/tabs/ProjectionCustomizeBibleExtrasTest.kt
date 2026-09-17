@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
 
 /**
  * The Bible pane's face, alignment and text-backing controls, on both stored profiles. The vertical
@@ -45,11 +46,17 @@ class ProjectionCustomizeBibleExtrasTest {
     )
 
     private fun AppSettings.storedTranslation(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
             .translationList()[0]
 
     private fun AppSettings.storedBible(): BibleSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleOverride, "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
 
     private val backdropChip = "Text backing"
     private val backdropCaret = "Text backing options"

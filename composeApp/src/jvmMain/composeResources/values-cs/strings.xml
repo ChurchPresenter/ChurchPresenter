@@ -2471,6 +2471,7 @@
     <string name="song_element_look_ahead">Náhled dalšího</string>
     <string name="song_chunk">Úsek</string>
     <string name="song_language_scope">Jazyk</string>
+    <string name="song_style_language">Vzhled</string>
     <string name="song_preview_look_ahead">Náhled dalšího</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Pozadí</string>
@@ -2566,6 +2567,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Pohyb</string>
     <string name="customize_layout">Rozložení</string>
+    <string name="customize_marker">Značka</string>
     <string name="customize_bilingual">Dvojjazyčně</string>
     <string name="customize_no_preview">Pro tuto sekci není náhled</string>
     <string name="customize_bible">Bible</string>
@@ -2662,4 +2664,12 @@
     <string name="song_lottie_unsupported_note">Šablona určuje rozvržení a umístění názvu. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí, mezery mezi slovy, náhled další části a akordy se nepoužijí.</string>
     <string name="bible_lottie_unsupported_note">Šablona určuje rozvržení, umístění odkazu a to, jak si dva jazyky pruh rozdělí. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí a mezery mezi slovy se nepoužijí.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Obrys</string>
+    <string name="tooltip_outline_options">Možnosti obrysu</string>
+    <string name="text_outline">Obrys</string>
+    <string name="text_outline_width">Šířka</string>
+    <string name="outline_show">Zobrazit obrys</string>
+    <string name="song_secondary_language">2. jazyk</string>
+    <string name="song_primary_language">1. jazyk</string>
 </resources>

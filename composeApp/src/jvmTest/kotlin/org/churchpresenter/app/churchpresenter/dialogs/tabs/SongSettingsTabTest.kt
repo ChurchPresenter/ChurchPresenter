@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.AppSettings
@@ -325,7 +326,9 @@ class SongSettingsTabTest {
 
     @Test
     fun `the shadow checkbox unfolds its three settings`() = songTab { get ->
-        onNodeWithText("Shadow").performClick()
+        // Scrolled to: shadow and the text transform each took a row of their own when the panel
+        // stopped crushing them into one, which puts them below the fold of a short pane.
+        onNodeWithText("Shadow").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(
@@ -338,7 +341,7 @@ class SongSettingsTabTest {
 
     @Test
     fun `text transform writes the element it is pointed at`() = songTab { get ->
-        onNodeWithText("UPPERCASE").performClick()
+        onNodeWithText("UPPERCASE").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, song(get).lyricsTransform)
@@ -402,9 +405,21 @@ class SongSettingsTabTest {
         songProfiles.forEach { (element, target) ->
             songTab {
                 pointAt(element, target)
-                val expected = if (element.hasPosition) 1 else 0
+                // The number's corner defaults to bottom right, and a cornered number is drawn over
+                // the slide rather than in the row this control places -- so of the two elements
+                // that store a position, only the title is offered one out of the box.
+                val expected = if (element.hasPosition && element != SongStyleElement.NUMBER) 1 else 0
                 onAllNodesWithText("Position").assertCountEquals(expected)
             }
+        }
+    }
+
+    /** And it comes back for the number the moment the corner stops deciding. */
+    @Test
+    fun `the number offers a position once its corner is off`() {
+        songTab(AppSettings(songSettings = SongSettings(songNumberCorner = Constants.NONE))) {
+            pointAt(SongStyleElement.NUMBER, SongStyleTarget.FULL_SCREEN)
+            onAllNodesWithText("Position").assertCountEquals(1)
         }
     }
 

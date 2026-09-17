@@ -523,6 +523,11 @@ class SystemSettingsTabTest {
             }
         }
 
+        // The scan runs off the composition, so the empty verdict arrives a frame or more later --
+        // every sibling test here waits for its own chip to appear for the same reason. Asserting
+        // straight after `setContent` passed alone and failed in the full suite, where four forks
+        // share the machine and the scan has not come back yet.
+        waitUntil { onAllNodesWithText("No files detected").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("No files detected").onFirst()
             .assertExists("a directory with no bible files says so instead of listing nothing")
     }

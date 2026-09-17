@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * The three sliders every drawn background carries: opacity, dim and blur. The fixture gives each a
@@ -46,7 +47,7 @@ class ProjectionCustomizeBackgroundSlidersTest {
     )
 
     private fun AppSettings.storedBackgrounds(): BackgroundSettings = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundOverride,
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
         "the output must have its own Backgrounds",
     )
 

@@ -45,6 +45,41 @@ class ConstantsTest {
     }
 
     @Test
+    fun `an output's stored identity names its list and its place in it`() {
+        // Two outputs of different kinds at the same index must not collide: the key is what a
+        // per-output override is filed under, so a collision silently applies one screen's look
+        // to another.
+        assertEquals("screen:0", Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, 0))
+        val keys = listOf(
+            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, 1),
+            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, 1),
+            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, 1),
+        )
+        assertEquals(keys.size, keys.toSet().size, "the kind has to survive into the key: $keys")
+    }
+
+    @Test
+    fun `audio and video extensions are lowercase and never both`() {
+        // A file is routed to one player or the other by these sets, so an extension in both is a
+        // coin toss, and an uppercase entry never matches the lowercased suffix that is looked up.
+        val audio = Constants.AUDIO_EXTENSIONS
+        val video = Constants.VIDEO_EXTENSIONS
+        assertTrue(audio.isNotEmpty() && video.isNotEmpty())
+        assertTrue(audio.none { it.startsWith(".") } && video.none { it.startsWith(".") }, "suffixes, not globs")
+        assertTrue(audio.all { it == it.lowercase() } && video.all { it == it.lowercase() })
+        assertEquals(emptySet(), audio intersect video, "an extension claimed by both players")
+    }
+
+    @Test
+    fun `the song section markers are the two shapes the parser reads back`() {
+        // Written into the song file, so they are not translated and the chorus keys off braces.
+        val markers = Constants.SONG_SECTION_MARKERS
+        assertEquals(markers.size, markers.toSet().size, "a duplicate marker offers the same section twice")
+        assertTrue(markers.all { it.startsWith("[") && it.endsWith("]") || it.startsWith("{") && it.endsWith("}") })
+        assertTrue(markers.any { it.startsWith("{") }, "the chorus is the braced one")
+    }
+
+    @Test
     fun `the media upload default is a sane size`() {
         assertTrue(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB > 0)
         assertNotNull(Constants.MEDIA_SEEK_MS)

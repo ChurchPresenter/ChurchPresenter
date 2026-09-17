@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,24 +29,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bilingual_layout
-import churchpresenter.composeapp.generated.resources.bilingual_left_right
-import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.enabled
-import churchpresenter.composeapp.generated.resources.end_of_song_spacing
-import churchpresenter.composeapp.generated.resources.fade_in
-import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_size
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
-import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.number_before_title
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.show_number
@@ -56,46 +43,31 @@ import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.show_song_number_before_title
-import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
 import churchpresenter.composeapp.generated.resources.song_chunk
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_show_on_title_slide
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
-import churchpresenter.composeapp.generated.resources.song_language_bilingual
 import churchpresenter.composeapp.generated.resources.song_language_scope
-import churchpresenter.composeapp.generated.resources.song_language_single
-import churchpresenter.composeapp.generated.resources.song_languages
-import churchpresenter.composeapp.generated.resources.song_lyrics_layout
+import churchpresenter.composeapp.generated.resources.song_primary_language
+import churchpresenter.composeapp.generated.resources.song_secondary_language
 import churchpresenter.composeapp.generated.resources.song_number_corner
 import churchpresenter.composeapp.generated.resources.song_preview_label
 import churchpresenter.composeapp.generated.resources.song_preview_look_ahead
-import churchpresenter.composeapp.generated.resources.song_title_slide
-import churchpresenter.composeapp.generated.resources.song_transition_and_markers
-import churchpresenter.composeapp.generated.resources.text_margins
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.vertical_alignment
-import churchpresenter.composeapp.generated.resources.word_wrap
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -107,15 +79,11 @@ private enum class StyleSwitch { TITLE_SLIDE, FULL_SCREEN, LOWER_THIRD }
 private val RAIL_MIN_WIDTH = 260.dp
 private val RAIL_MAX_WIDTH = 360.dp
 
-private const val MARGIN_MAX = 500
-private const val END_OF_SONG_MAX = 20
-private const val TRANSITION_MIN_MS = 100f
-private const val TRANSITION_MAX_MS = 2000f
-private const val TRANSITION_STEP_MS = 50f
-
 private val TARGET_BUTTON_WIDTH = 110.dp
+
+/** Narrower than the output switch: two words, and the row already carries three controls. */
+private val LANGUAGE_BUTTON_WIDTH = 92.dp
 /** How a row reads while the title slide is off: present, but plainly not in charge of anything. */
-private const val DISABLED_ALPHA = 0.38f
 private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
 
@@ -149,6 +117,9 @@ fun SongSettingsTab(
     val availableFonts = rememberSystemFonts()
     var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
     var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
+    // Which language of a bilingual song is being styled. Only the lyrics have two, so picking the
+    // second narrows the element strip to them -- see `SongElementRow`.
+    var language by remember { mutableStateOf(SongStyleLanguage.PRIMARY) }
     var showLookAhead by remember { mutableStateOf(false) }
     // Styling the title slide rather than the lyric slides -- for whichever output `target` names.
     // A view over the same two outputs, not a third one: the title slide is drawn on the band as
@@ -156,6 +127,11 @@ fun SongSettingsTab(
     // slide at all, so switching it off in the rail drops the tab back onto the lyric slides.
     var titleSlideView by remember { mutableStateOf(false) }
     val onTitleSlide = titleSlideView && settings.songSettings.titleSlideEnabled
+    // A song with one language on screen has no second profile to style, so that drops the switch
+    // and the panel back onto the first. The title slide keeps it: it draws *both* titles when the
+    // output shows both languages, and each has a profile of its own.
+    val bilingual = settings.songIsBilingual
+    val editingLanguage = if (bilingual) language else SongStyleLanguage.PRIMARY
 
     // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
     // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
@@ -207,6 +183,24 @@ fun SongSettingsTab(
                     },
                     element = element,
                     onElementChange = { element = it },
+                    language = editingLanguage,
+                    onLanguageChange = { picked ->
+                        language = picked
+                        // The second language is the lyrics and the title and nothing else; landing
+                        // on it while the Number tab was selected would show a strip with nowhere to
+                        // be. The title slide has no lyrics, so there it is the title.
+                        if (picked == SongStyleLanguage.SECONDARY) {
+                            // The title slide has no lyrics, so there the second language is the
+                            // title alone.
+                            val offered = if (onTitleSlide) {
+                                listOf(SongStyleElement.TITLE)
+                            } else {
+                                SECOND_LANGUAGE_ELEMENTS
+                            }
+                            if (element !in offered) element = offered.first()
+                        }
+                    },
+                    bilingual = bilingual,
                     titleSlideView = onTitleSlide,
                     onTitleSlideView = {
                         titleSlideView = true
@@ -223,289 +217,6 @@ fun SongSettingsTab(
     }
 }
 
-/** Whether a song opens with a slide naming it, and where on the screen that slide's text sits. */
-@Composable
-private fun SongTitleSlideSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    SettingsSection(title = stringResource(Res.string.song_title_slide)) {
-        LabeledCheckbox(
-            checked = settings.songSettings.titleSlideEnabled,
-            onCheckedChange = { on ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = on)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.enabled),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("song_titleSlideEnabled"),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        // The whole block -- number, title and credits -- moves as one; the lower third keeps it
-        // at the bottom of the band regardless.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(if (settings.songSettings.titleSlideEnabled) 1f else DISABLED_ALPHA),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.vertical_alignment).removeSuffix(":"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            Box(Modifier.testTag("song_titleSlideVerticalAlignment")) {
-                VerticalAlignmentButtons(
-                    selectedAlignment = settings.songSettings.titleSlideVerticalAlignment,
-                    onAlignmentChange = { value ->
-                        if (settings.songSettings.titleSlideEnabled) {
-                            onSettingsChange { s ->
-                                s.copy(songSettings = s.songSettings.copy(titleSlideVerticalAlignment = value))
-                            }
-                        }
-                    },
-                    topValue = Constants.TOP,
-                    middleValue = Constants.MIDDLE,
-                    bottomValue = Constants.BOTTOM,
-                )
-            }
-        }
-    }
-}
-
-/** How the lyrics sit on the slide, and how many languages they are shown in. */
-@Composable
-private fun SongLyricsLayoutSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    val song = settings.songSettings
-    // Written to each output's own song mode rather than to SongSettings: the song-level language
-    // fields are overridden by that mode at every real call site, so a control writing them would
-    // restrict nothing. See SongOutputLanguage.kt.
-    val bilingual = settings.songIsBilingual
-    SettingsSection(title = stringResource(Res.string.song_lyrics_layout)) {
-        LabeledCheckbox(
-            checked = song.wordWrap,
-            onCheckedChange = { on ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(wordWrap = on)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.word_wrap),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        // Off means "present the sections as the file has them", which is the only way to place a
-        // chorus deliberately — before verse 1, or after verse 2 alone.
-        LabeledCheckbox(
-            checked = song.autoRepeatChorus,
-            onCheckedChange = { on ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(autoRepeatChorus = on)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.song_auto_repeat_chorus),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("song_autoRepeatChorus"),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.vertical_alignment).removeSuffix(":"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            VerticalAlignmentButtons(
-                selectedAlignment = song.lyricsAlignment,
-                onAlignmentChange = { value ->
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = value)) }
-                },
-                topValue = Constants.TOP,
-                middleValue = Constants.MIDDLE,
-                bottomValue = Constants.BOTTOM,
-            )
-        }
-        ControlColumn(stringResource(Res.string.song_languages), Modifier.fillMaxWidth()) {
-            SegmentedButton(
-                items = listOf(
-                    SegmentedButtonItem(false, stringResource(Res.string.song_language_single)),
-                    SegmentedButtonItem(true, stringResource(Res.string.song_language_bilingual)),
-                ),
-                selectedValue = bilingual,
-                onValueChange = { wantsBoth ->
-                    onSettingsChange { s -> s.withSongBilingual(wantsBoth) }
-                },
-                buttonWidth = 120.dp,
-                buttonHeight = 32.dp,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            )
-        }
-        // Only meaningful with two languages on screen, so it follows the switch above rather than
-        // standing there offering a choice that changes nothing.
-        if (bilingual) {
-            ControlColumn(stringResource(Res.string.bilingual_layout), Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    items = listOf(
-                        SegmentedButtonItem(
-                            Constants.BILINGUAL_SIDE_BY_SIDE,
-                            stringResource(Res.string.bilingual_left_right),
-                        ),
-                        SegmentedButtonItem(
-                            Constants.BILINGUAL_TOP_BOTTOM,
-                            stringResource(Res.string.bilingual_top_bottom),
-                        ),
-                    ),
-                    selectedValue = song.bilingualLayout,
-                    onValueChange = { value ->
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = value)) }
-                    },
-                    buttonWidth = 120.dp,
-                    buttonHeight = 32.dp,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                )
-            }
-        }
-    }
-}
-
-/** How a slide arrives and leaves, and how far the end-of-song marker sits from the last line. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun SongTransitionSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    val song = settings.songSettings
-    val msSuffix = stringResource(Res.string.milliseconds_suffix)
-    SettingsSection(title = stringResource(Res.string.song_transition_and_markers)) {
-        ControlColumn(stringResource(Res.string.transition_duration), Modifier.fillMaxWidth()) {
-            SlimSlider(
-                value = song.transitionDuration,
-                onValueChange = { raw ->
-                    val snapped = (raw / TRANSITION_STEP_MS).toInt() * TRANSITION_STEP_MS
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(transitionDuration = snapped))
-                    }
-                },
-                valueRange = TRANSITION_MIN_MS..TRANSITION_MAX_MS,
-                modifier = Modifier.fillMaxWidth(),
-                trailingLabel = "${song.transitionDuration.toInt()}$msSuffix",
-            )
-        }
-        // Wraps rather than one hard row: "Fade In / Fade Out / Crossfade" is three short
-        // labels in English and three long ones in most translations -- in Russian the first
-        // two took the whole width and squeezed the third into a single-character column,
-        // which drew its label vertically.
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            LabeledCheckbox(
-                checked = song.fadeIn,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fadeIn = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.fade_in),
-                style = MaterialTheme.typography.bodySmall,
-            )
-            LabeledCheckbox(
-                checked = song.fadeOut,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fadeOut = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.fade_out),
-                style = MaterialTheme.typography.bodySmall,
-            )
-            LabeledCheckbox(
-                checked = song.crossfade,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(crossfade = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.animation_crossfade),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Checkbox(
-                checked = song.showEndOfSongIndicator,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showEndOfSongIndicator = it)) }
-                },
-                modifier = Modifier.size(24.dp).testTag("song_showEndOfSongIndicator"),
-            )
-            Text(
-                text = stringResource(Res.string.end_of_song_spacing).removeSuffix(":"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            NumberSettingsTextField(
-                initialText = song.endOfSongIndicatorSpacing,
-                onValueChange = { value ->
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(endOfSongIndicatorSpacing = value))
-                    }
-                },
-                range = 0..END_OF_SONG_MAX,
-            )
-        }
-    }
-}
-
-/** The four margins, as a plain grid; the preview above shows what they do to the text. */
-@Composable
-private fun SongMarginsSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    val song = settings.songSettings
-    fun field(label: String, value: Int, apply: (SongSettings, Int) -> SongSettings): @Composable () -> Unit = {
-        ControlColumn(label) {
-            NumberSettingsTextField(
-                modifier = Modifier.fillMaxWidth(),
-                initialText = value,
-                onValueChange = { typed ->
-                    onSettingsChange { s -> s.copy(songSettings = apply(s.songSettings, typed)) }
-                },
-                range = 0..MARGIN_MAX,
-            )
-        }
-    }
-    SettingsSection(title = stringResource(Res.string.text_margins)) {
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f)) {
-                    field(stringResource(Res.string.top), song.marginTop) { s, v -> s.copy(marginTop = v) }()
-                }
-                Box(Modifier.weight(1f)) {
-                    field(stringResource(Res.string.left), song.marginLeft) { s, v -> s.copy(marginLeft = v) }()
-                }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f)) {
-                    field(stringResource(Res.string.right), song.marginRight) { s, v -> s.copy(marginRight = v) }()
-                }
-                Box(Modifier.weight(1f)) {
-                    field(stringResource(Res.string.bottom), song.marginBottom) { s, v -> s.copy(marginBottom = v) }()
-                }
-            }
-        }
-    }
-}
-
 /** The output switch, the preview, the element tabs and the controls under them. */
 @Composable
 private fun SongStylePane(
@@ -515,6 +226,9 @@ private fun SongStylePane(
     onTargetChange: (SongStyleTarget) -> Unit,
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
+    bilingual: Boolean,
     titleSlideView: Boolean,
     onTitleSlideView: () -> Unit,
     showLookAhead: Boolean,
@@ -581,6 +295,9 @@ private fun SongStylePane(
             settings = settings,
             target = target,
             onTargetChange = onTargetChange,
+            language = language,
+            onLanguageChange = onLanguageChange,
+            bilingual = bilingual,
             titleSlideView = titleSlideView,
             onTitleSlideView = onTitleSlideView,
             showLookAhead = previewLookAhead,
@@ -616,6 +333,7 @@ private fun SongStylePane(
             element = element,
             onElementChange = onElementChange,
             target = target,
+            language = language,
             availableFonts = availableFonts,
             modifier = Modifier.weight(1f).fillMaxWidth(),
             titleSlideView = titleSlideView,
@@ -629,6 +347,9 @@ private fun SongTargetSwitchRow(
     settings: AppSettings,
     target: SongStyleTarget,
     onTargetChange: (SongStyleTarget) -> Unit,
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
+    bilingual: Boolean,
     titleSlideView: Boolean,
     onTitleSlideView: () -> Unit,
     showLookAhead: Boolean,
@@ -673,6 +394,35 @@ private fun SongTargetSwitchRow(
             fontSize = MaterialTheme.typography.labelLarge.fontSize,
             modifier = Modifier.testTag("song_style_switch"),
         )
+        // Which language is being styled, in the place the Bible tab puts its translation chips and
+        // for the same reason: a second profile needs somewhere to be selected before it can be
+        // edited. Only with two languages on screen -- with one, there is no second profile to
+        // reach, and a title slide draws one title whatever the lyrics do.
+        //
+        // "1st / 2nd" rather than "Primary / Secondary", which is what the Lang row below the
+        // element tabs already says. That row picks the languages the *output shows*; this one picks
+        // whose *look* is being edited, and sharing a word left the tab with two controls reading
+        // "Secondary" that answer different questions.
+        if (bilingual && !titleSlideView) {
+            SegmentedButton(
+                items = listOf(
+                    SegmentedButtonItem(
+                        SongStyleLanguage.PRIMARY,
+                        stringResource(Res.string.song_primary_language),
+                    ),
+                    SegmentedButtonItem(
+                        SongStyleLanguage.SECONDARY,
+                        stringResource(Res.string.song_secondary_language),
+                    ),
+                ),
+                selectedValue = language,
+                onValueChange = onLanguageChange,
+                buttonWidth = LANGUAGE_BUTTON_WIDTH,
+                buttonHeight = 34.dp,
+                fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                modifier = Modifier.testTag("song_language_switch"),
+            )
+        }
         // For the picture only. Not stored: it decides what this preview draws, not what the output
         // shows, which is settled per slide by the song and the schedule. A title slide has no
         // look-ahead, so the switch goes with it.
@@ -709,6 +459,8 @@ internal fun SongElementRow(
     element: SongStyleElement,
     onElementChange: (SongStyleElement) -> Unit,
     target: SongStyleTarget,
+    /** Which language is being styled; the second is the lyrics and nothing else. */
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     /**
      * The title slide's elements rather than the lyric slides'. What sits under the tabs changes
      * with it: the title slide has no chunk, no language scope and no first-page/every-page
@@ -717,7 +469,16 @@ internal fun SongElementRow(
     titleSlideView: Boolean = false,
 ) {
     val song = settings.songSettings
-    val elements = if (titleSlideView) TITLE_SLIDE_ELEMENTS else LYRIC_SLIDE_ELEMENTS
+    // The lyrics and the title are the two things a bilingual song carries twice, so those are the
+    // tabs the second language offers -- and on the title slide, which has no lyrics, just the
+    // title. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
+    // strip that vanished on one switch and came back on the other reads as a glitch.
+    val elements = when {
+        language.isSecondary && titleSlideView -> listOf(SongStyleElement.TITLE)
+        language.isSecondary -> SECOND_LANGUAGE_ELEMENTS
+        titleSlideView -> TITLE_SLIDE_ELEMENTS
+        else -> LYRIC_SLIDE_ELEMENTS
+    }
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -734,7 +495,89 @@ internal fun SongElementRow(
         )
         Spacer(Modifier.weight(1f))
     }
+    SongElementOptions(settings, onSettingsChange, element, target, language, titleSlideView)
+}
+
+/**
+ * Everything under the element chips that belongs to the selected element -- what a slide holds,
+ * which languages it shows, when the number and the title appear and where the number sits.
+ *
+ * Split from [SongElementRow] so the per-output Customize dialog can draw the same controls without
+ * the chip strip, which it has one of its own. Two surfaces, one definition: a control added here
+ * appears in both, which is the only way they stay in step.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun SongElementOptions(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
+    titleSlideView: Boolean = false,
+    /** See [SongLanguageScopeButtons]: set by the per-output dialog, absent on the global tab. */
+    outputMode: String? = null,
+    onOutputModeChange: ((String) -> Unit)? = null,
+) {
+    val song = settings.songSettings
     if (titleSlideView) {
+        SongTitleSlideOptions(settings, onSettingsChange, element, target, outputMode, onOutputModeChange)
+        return
+    }
+    // The chunk and the language scope belong to the output rather than to a language, and the
+    // first language's panel already carries them -- a second copy here would be the same control
+    // twice. So would the show/position row, which is the number's and the title's alone.
+    if (language.isSecondary) return
+    // How much of the song a slide holds, and which languages it shows. Both belong to the output
+    // rather than to an element, so they sit under the tabs rather than in the grid -- and on a row
+    // of their own, because five element tabs plus both of these is wider than the pane and left
+    // them crushed to a column of single letters.
+    //
+    // Flowing rather than a hard row: the two labelled groups are wider than a narrow pane, and a
+    // `Row` clips rather than wraps, so the last option lost its right-hand half ("Secondary" drawn
+    // as "Seco") with nothing to say the control continued past the edge. Each label is wrapped
+    // with its own control so the pair moves as one -- flowing them separately puts a lone "Lang"
+    // at the end of the first line and its buttons at the start of the next.
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        LabeledControl(stringResource(Res.string.song_chunk)) {
+        SegmentedButton(
+            items = listOf(
+                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_VERSE, stringResource(Res.string.song_chunk_verse)),
+                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_LINE, stringResource(Res.string.song_chunk_line)),
+            ),
+            selectedValue = song.chunkFor(element, target),
+            onValueChange = { mode ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.withChunk(element, target, mode)) }
+            },
+            buttonWidth = SCOPE_BUTTON_WIDTH,
+            buttonHeight = 30.dp,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+        )
+        }
+        LabeledControl(stringResource(Res.string.song_language_scope)) {
+            SongLanguageScopeButtons(settings, onSettingsChange, target, outputMode, onOutputModeChange)
+        }
+    }
+    SongAppearanceRow(settings, onSettingsChange, element, target)
+}
+
+/** What the title slide draws, for the element selected -- its own view of [SongElementOptions]. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SongTitleSlideOptions(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+    outputMode: String? = null,
+    onOutputModeChange: ((String) -> Unit)? = null,
+) {
+    val song = settings.songSettings
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
@@ -770,48 +613,10 @@ internal fun SongElementRow(
             // Nothing else on the slide has a translation.
             if (element == SongStyleElement.TITLE) {
                 LabeledControl(stringResource(Res.string.song_language_scope)) {
-                    SongLanguageScopeButtons(settings, onSettingsChange, target)
+                    SongLanguageScopeButtons(settings, onSettingsChange, target, outputMode, onOutputModeChange)
                 }
             }
         }
-        return
-    }
-    // How much of the song a slide holds, and which languages it shows. Both belong to the output
-    // rather than to an element, so they sit under the tabs rather than in the grid -- and on a row
-    // of their own, because five element tabs plus both of these is wider than the pane and left
-    // them crushed to a column of single letters.
-    //
-    // Flowing rather than a hard row: the two labelled groups are wider than a narrow pane, and a
-    // `Row` clips rather than wraps, so the last option lost its right-hand half ("Secondary" drawn
-    // as "Seco") with nothing to say the control continued past the edge. Each label is wrapped
-    // with its own control so the pair moves as one -- flowing them separately puts a lone "Lang"
-    // at the end of the first line and its buttons at the start of the next.
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        itemVerticalAlignment = Alignment.CenterVertically,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        LabeledControl(stringResource(Res.string.song_chunk)) {
-        SegmentedButton(
-            items = listOf(
-                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_VERSE, stringResource(Res.string.song_chunk_verse)),
-                SegmentedButtonItem(Constants.SONG_DISPLAY_MODE_LINE, stringResource(Res.string.song_chunk_line)),
-            ),
-            selectedValue = song.chunkFor(element, target),
-            onValueChange = { mode ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.withChunk(element, target, mode)) }
-            },
-            buttonWidth = SCOPE_BUTTON_WIDTH,
-            buttonHeight = 30.dp,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-        )
-        }
-        LabeledControl(stringResource(Res.string.song_language_scope)) {
-            SongLanguageScopeButtons(settings, onSettingsChange, target)
-        }
-    }
-    SongAppearanceRow(settings, onSettingsChange, element, target)
 }
 
 /**

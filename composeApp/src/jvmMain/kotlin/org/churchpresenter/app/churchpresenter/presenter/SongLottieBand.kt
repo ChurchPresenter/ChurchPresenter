@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -155,20 +156,28 @@ internal fun BoxScope.SongLottieBand(
     settings: SongSettings,
     languageDisplay: String,
     lineIndex: Int,
+    outgoingSection: LyricSection?,
+    outgoingLineIndex: Int,
     allSections: List<LyricSection>,
     displaySectionIndex: Int,
     bandFraction: Float,
-    bandClock: BibleBandClock,
+    bandClock: State<BibleBandClock>,
     isKey: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val hasSecondSlot = template.hasLayer(BibleLottieTemplate.LAYER_TEXT_2)
     val page = SongBandPage(section, allSections, displaySectionIndex, lineIndex)
+    val outgoingPage = outgoingSection?.let {
+        SongBandPage(it, allSections, displaySectionIndex, outgoingLineIndex)
+    }
     val slots = remember(page, settings, languageDisplay, hasSecondSlot, isKey) {
         songBandSlots(page, settings, languageDisplay, hasSecondSlot, isKey)
     }
-    LottieBand(template, slots, bandFraction, bandClock, isKey, showBackground, modifier)
+    val outgoingSlots = remember(outgoingPage, settings, languageDisplay, hasSecondSlot, isKey) {
+        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, hasSecondSlot, isKey) }
+    }
+    LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier)
 }
 
 /** Between credits sharing one reference line. */

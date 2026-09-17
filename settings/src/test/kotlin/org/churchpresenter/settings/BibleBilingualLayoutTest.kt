@@ -67,7 +67,10 @@ class BibleBilingualLayoutTest {
     fun `an output override carries its own arrangement`() {
         val global = AppSettings(bibleSettings = BibleSettings())
         val assignment = ScreenAssignment(
-            bibleOverride = BibleSettings(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE),
+            bibleOverride = bibleOverrideOf(
+                BibleSettings(),
+                BibleSettings(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE),
+            ),
         )
         assertEquals(
             Constants.BILINGUAL_SIDE_BY_SIDE,

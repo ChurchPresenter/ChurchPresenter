@@ -12,6 +12,17 @@ SIL Open Font License, Version 1.1 (https://openfontlicense.org/):
   Oleo Script      Copyright 2012 The Oleo Script Project Authors
   Kalam            Copyright 2014 The Kalam Project Authors
   Fredoka One      Copyright 2011 The Fredoka One Project Authors
+  Noto Sans        Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
+  Noto Sans Arabic     Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic)
+  Noto Sans Devanagari Copyright 2022 The Noto Project Authors (https://github.com/notofonts/devanagari)
+  Noto Sans Thai       Copyright 2022 The Noto Project Authors (https://github.com/notofonts/thai)
+  Noto Sans Lao        Copyright 2022 The Noto Project Authors (https://github.com/notofonts/lao)
+  Noto Sans Tamil      Copyright 2022 The Noto Project Authors (https://github.com/notofonts/tamil)
+
+The Noto Sans family entries above were instanced from Google's variable-font
+sources (wght=400/700, wdth=100) using fonttools; the outlines and copyright
+are unchanged from upstream, only the packaging (one static weight per file,
+matching every other font in this directory).
 
 The full OFL 1.1 license text is available at:
 https://openfontlicense.org/open-font-license-official-text/

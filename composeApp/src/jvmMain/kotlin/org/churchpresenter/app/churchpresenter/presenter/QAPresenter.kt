@@ -39,6 +39,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qr_code
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.Question
 import org.jetbrains.compose.resources.stringResource
@@ -124,12 +125,18 @@ fun QAPresenter(
                 contentAlignment = Alignment.Center
             ) {
                 val painter = rememberTextBackdropPainter(qaSettings.backdrop)
-                Text(
+                OutlinedText(
                     modifier = painter.modifier,
                     onTextLayout = painter::onTextLayout,
                     text = question.text,
+                    outline = qaSettings.outline,
+                    // As in the announcements presenter: the size drawn is fitted down from the
+                    // configured one, and the stroke follows it.
+                    scaleFactor = fontSize.toFloat() / qaSettings.fontSize.coerceAtLeast(1),
+                    color = Color.Unspecified,
                     style = textStyle,
                     fontSize = fontSize.sp,
+                    fillWidth = false,
                 )
             }
         }

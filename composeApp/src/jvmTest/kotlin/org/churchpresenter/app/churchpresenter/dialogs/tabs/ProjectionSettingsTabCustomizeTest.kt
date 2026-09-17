@@ -24,6 +24,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.settings.songOverrideOf
+import org.churchpresenter.settings.bibleOverrideOf
+import org.churchpresenter.app.churchpresenter.bibleSettingsOn
+import org.churchpresenter.app.churchpresenter.songSettingsOn
+import kotlinx.serialization.json.JsonObject
 
 /**
  * The per-output Customize button on each assignment row, and the dialog it opens.
@@ -92,7 +97,13 @@ class ProjectionSettingsTabCustomizeTest {
         val customized = AppSettings(
             projectionSettings = ProjectionSettings(
                 screenAssignments = listOf(
-                    ScreenAssignment(bibleOverride = BibleSettings(), songOverride = SongSettings()),
+                    ScreenAssignment(
+                        // Switched on, agreeing with the document on every setting: an empty tree
+                        // rather than none, which is the difference between "its own styles" and
+                        // "follows the global ones".
+                        bibleOverride = JsonObject(emptyMap()),
+                        songOverride = JsonObject(emptyMap()),
+                    ),
                 ),
             ),
         )
@@ -200,7 +211,9 @@ class ProjectionSettingsTabCustomizeTest {
             onNode(hasSetTextAction() and hasText("70")).performScrollTo().performTextReplacement("41")
             waitForIdle()
 
-            val stack = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+            val stack = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
                 .translationList()
             assertEquals(41, stack[1].textFontSize, "the selected translation must take the edit")
             assertEquals(70, stack[0].textFontSize, "and the one beside it must be untouched")
@@ -227,7 +240,7 @@ class ProjectionSettingsTabCustomizeTest {
 
             val edited = get().projectionSettings.screenAssignments[0]
             assertTrue(edited.isCustomized, "an edit must create this output's override")
-            assertEquals(31, assertNotNull(edited.bibleOverride).marginTop)
+            assertEquals(31, assertNotNull(edited.bibleSettingsOn(get().bibleSettings)).marginTop)
             assertFalse(
                 get().projectionSettings.screenAssignments[1].isCustomized,
                 "the other row must still be following the global settings",
@@ -245,7 +258,9 @@ class ProjectionSettingsTabCustomizeTest {
             onNodeWithText("Left / Right").performClick()
             waitForIdle()
 
-            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+            val bible = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
             assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, bible.bilingualLayout)
             assertEquals(
                 Constants.BILINGUAL_SIDE_BY_SIDE,
@@ -261,10 +276,12 @@ class ProjectionSettingsTabCustomizeTest {
             openCustomize(row = 0)
             selectPane(CustomizePane.BIBLE)
             enableOverride()
-            onNodeWithText("Top / Bottom").performClick()
+            onNodeWithText("Top / Bottom").performScrollTo().performClick()
             waitForIdle()
 
-            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleOverride)
+            val bible = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
             assertEquals(Constants.BILINGUAL_TOP_BOTTOM, bible.bilingualLayoutLowerThird)
             assertEquals(
                 Constants.BILINGUAL_TOP_BOTTOM,
@@ -291,8 +308,8 @@ class ProjectionSettingsTabCustomizeTest {
             projectionSettings = ProjectionSettings(
                 screenAssignments = listOf(
                     ScreenAssignment(
-                        bibleOverride = BibleSettings(marginTop = 12),
-                        songOverride = SongSettings(marginTop = 12),
+                        bibleOverride = bibleOverrideOf(BibleSettings(), BibleSettings(marginTop = 12)),
+                        songOverride = songOverrideOf(SongSettings(), SongSettings(marginTop = 12)),
                     ),
                 ),
             ),
@@ -306,8 +323,8 @@ class ProjectionSettingsTabCustomizeTest {
             waitForIdle()
 
             val reset = get().projectionSettings.screenAssignments[0]
-            assertNull(reset.bibleOverride, "the selected category is cleared")
-            assertNotNull(reset.songOverride, "and the others are left alone")
+            assertNull(reset.bibleSettingsOn(), "the selected category is cleared")
+            assertNotNull(reset.songSettingsOn(), "and the others are left alone")
         }
     }
 }

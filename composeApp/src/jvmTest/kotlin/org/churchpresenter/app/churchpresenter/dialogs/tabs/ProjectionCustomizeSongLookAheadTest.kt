@@ -11,11 +11,14 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.assertCountEquals
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * The Song pane's look-ahead elements on both stored profiles: the face buttons, the next section's
@@ -46,7 +49,10 @@ class ProjectionCustomizeSongLookAheadTest {
     private val band = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     // ── The look-ahead line's face buttons ──────────────────────────────────────────────────────
 
@@ -54,10 +60,12 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the look-ahead style quartet writes the full screen's own flags`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LOOK_AHEAD)
-            for (glyph in listOf("B", "I", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "I", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().stored()
             assertTrue(
@@ -85,10 +93,12 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the same quartet writes the band's look-ahead instead`() {
         projectionTab(output(band)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LOOK_AHEAD)
-            for (glyph in listOf("B", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().stored()
             assertTrue(
@@ -136,10 +146,12 @@ class ProjectionCustomizeSongLookAheadTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             // Not Italic: the next section ships italic, so clicking it would test the same button
             // in the other direction. The Italic test below does that deliberately.
-            for (glyph in listOf("B", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().stored()
             assertTrue(
@@ -166,10 +178,12 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the next section's quartet writes the band's own flags`() {
         projectionTab(output(band)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
-            for (glyph in listOf("U", SHADOW_GLYPH)) {
+            for (glyph in listOf("U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().stored()
             assertTrue(stored.lowerThirdLookAheadNextUnderline && stored.lowerThirdLookAheadNextShadow)
@@ -178,14 +192,17 @@ class ProjectionCustomizeSongLookAheadTest {
     }
 
     @Test
-    fun `the next section has no alignment of its own`() {
+    fun `the next section has a horizontal alignment of its own`() {
+        // One group of three, and no vertical alignment beside it: where the block sits on the
+        // slide belongs to the lyrics, and the next section sits under the line it follows.
         projectionTab(output()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             assertEquals(
-                0,
+                HAlign.GROUP_SIZE,
                 horizontalAlignButtons().fetchSemanticsNodes().size,
-                "the next section follows the look-ahead line it sits under",
+                "its own left/centre/right and nothing more",
             )
+            onAllNodesWithContentDescription("Align Top").assertCountEquals(0)
         }
     }
 
@@ -275,7 +292,7 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the case picker writes the full screen's lyrics`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            chooseSegment("aa")
+            chooseSegment("lowercase")
 
             val stored = get().stored()
             assertEquals(Constants.TEXT_TRANSFORM_LOWERCASE, stored.lyricsTransform)
@@ -291,7 +308,7 @@ class ProjectionCustomizeSongLookAheadTest {
     fun `the case picker writes the band's lyrics`() {
         projectionTab(output(band)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            chooseSegment("Aa")
+            chooseSegment("Capitalize")
 
             val stored = get().stored()
             assertEquals(Constants.TEXT_TRANSFORM_CAPITALIZE, stored.lyricsLowerThirdTransform)
@@ -308,7 +325,7 @@ class ProjectionCustomizeSongLookAheadTest {
         for (mode in listOf(Constants.DISPLAY_MODE_FULLSCREEN, band)) {
             projectionTab(output(mode)) { _ ->
                 openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
-                onNodeWithText("Aa").assertExists("the case picker belongs to every shape of output")
+                onNodeWithText("Capitalize").assertExists("the case picker belongs to every shape of output")
             }
         }
     }

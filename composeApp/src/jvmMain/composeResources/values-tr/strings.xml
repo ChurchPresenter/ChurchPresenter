@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Sonraki önizleme</string>
     <string name="song_chunk">Bölüm</string>
     <string name="song_language_scope">Dil</string>
+    <string name="song_style_language">Biçim</string>
     <string name="song_preview_look_ahead">Sonraki önizleme</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Arka Plan</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Hareket</string>
     <string name="customize_layout">Yerleşim</string>
+    <string name="customize_marker">İşaret</string>
     <string name="customize_bilingual">İki dilli</string>
     <string name="customize_no_preview">Bu bölüm için önizleme yok</string>
     <string name="customize_bible">Kutsal Kitap</string>
@@ -2660,4 +2662,12 @@
     <string name="song_lottie_unsupported_note">Şablon, yerleşimi ve başlığın yerini belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili, kelime aralığı, sonrakini önizleme ve akorlar uygulanmaz.</string>
     <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Dış çizgi</string>
+    <string name="tooltip_outline_options">Dış çizgi seçenekleri</string>
+    <string name="text_outline">Dış çizgi</string>
+    <string name="text_outline_width">Kalınlık</string>
+    <string name="outline_show">Dış çizgiyi göster</string>
+    <string name="song_secondary_language">2. dil</string>
+    <string name="song_primary_language">1. dil</string>
 </resources>

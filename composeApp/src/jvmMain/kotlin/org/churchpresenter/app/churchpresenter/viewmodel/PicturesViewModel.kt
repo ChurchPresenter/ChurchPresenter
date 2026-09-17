@@ -35,6 +35,9 @@ import kotlin.io.path.absolutePathString
 
 private const val MAX_RESCAN_ATTEMPTS = 3
 
+/** Grid tile size — the largest side a thumbnail is decoded to, never the display's resolution. */
+private const val THUMBNAIL_MAX_DIMENSION = 400
+
 /** How long to wait before re-reading a file whose first decode failed. */
 private const val THUMBNAIL_RETRY_MS = 120L
 
@@ -541,37 +544,9 @@ class PicturesViewModel(
         }
     }
 
-    private fun loadImageBitmap(file: File): ImageBitmap {
-        val originalImage = PictureDecoder.decode(file)
-
-        // Downscale to thumbnail size (400px max dimension) for grid display
-        val maxThumbnailSize = 400
-        val scale = maxThumbnailSize.toFloat() / maxOf(originalImage.width, originalImage.height)
-
-        return if (scale < 1.0f) {
-            val newWidth = (originalImage.width * scale).toInt()
-            val newHeight = (originalImage.height * scale).toInt()
-
-            val surface = org.jetbrains.skia.Surface.makeRasterN32Premul(newWidth, newHeight)
-            val canvas = surface.canvas
-
-            // High-quality downscale using Mitchell filter
-            val srcRect = org.jetbrains.skia.Rect.makeWH(originalImage.width.toFloat(), originalImage.height.toFloat())
-            val dstRect = org.jetbrains.skia.Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
-            canvas.drawImageRect(
-                originalImage,
-                srcRect,
-                dstRect,
-                org.jetbrains.skia.SamplingMode.MITCHELL,
-                org.jetbrains.skia.Paint(),
-                true
-            )
-
-            surface.makeImageSnapshot().toComposeImageBitmap()
-        } else {
-            originalImage.toComposeImageBitmap()
-        }
-    }
+    private fun loadImageBitmap(file: File): ImageBitmap =
+        // Grid tile size, not the display's — this is the thumbnails strip, never presented.
+        PictureDecoder.decodeScaled(file, THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION).toComposeImageBitmap()
 
     private fun startWatching(folder: File) {
         watchJob?.cancel()

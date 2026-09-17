@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Onyesho la mbele</string>
     <string name="song_chunk">Sehemu</string>
     <string name="song_language_scope">Lugha</string>
+    <string name="song_style_language">Mtindo</string>
     <string name="song_preview_look_ahead">Onyesho la mbele</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Usuli</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Mwendo</string>
     <string name="customize_layout">Mpangilio</string>
+    <string name="customize_marker">Alama</string>
     <string name="customize_bilingual">Lugha Mbili</string>
     <string name="customize_no_preview">Hakuna onyesho la awali kwa sehemu hii</string>
     <string name="customize_bible">Biblia</string>
@@ -2660,4 +2662,12 @@
     <string name="song_lottie_unsupported_note">Kiolezo huamua mpangilio na mahali pa kichwa. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta, nafasi ya maneno, hakikisho la sehemu inayofuata na kodi hazitumiki.</string>
     <string name="bible_lottie_unsupported_note">Kiolezo huamua mpangilio, mahali pa rejeleo na jinsi lugha mbili zinavyogawana mkanda. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta na nafasi ya maneno hazitumiki.</string>
     <string name="customize_type_lottie">Lottie</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Mstari wa nje</string>
+    <string name="tooltip_outline_options">Chaguo za mstari wa nje</string>
+    <string name="text_outline">Mstari wa nje</string>
+    <string name="text_outline_width">Upana</string>
+    <string name="outline_show">Onyesha mstari wa nje</string>
+    <string name="song_secondary_language">Lugha ya 2</string>
+    <string name="song_primary_language">Lugha ya 1</string>
 </resources>

@@ -101,6 +101,7 @@ class SettingsManager {
         7 to ::migrateStageMonitorZoneNames,
         8 to ::migrateLowerThirdHeight,
         9 to ::migrateSongNumberCorner,
+        10 to ::migrateSparseOutputOverrides,
     )
 
     fun loadSettings(): AppSettings {
@@ -564,6 +565,72 @@ class SettingsManager {
      * document is pinned to [Constants.NONE] and keeps drawing the number exactly where it was; the
      * corner is offered to them in settings rather than applied to them.
      */
+    /**
+     * Turns each output's override from a whole settings snapshot into the difference it meant.
+     *
+     * An override used to be a complete copy of the settings, taken when the screen was first
+     * customized. Every field the operator never touched sat in it at whatever value it had that
+     * day, and beat the document for ever after -- so a setting *added* later arrived at its class
+     * default on that screen, and the global one silently did nothing there. That is not a
+     * hypothetical: a second language set to blue for the whole install came out white on the one
+     * screen that had been customized, and nothing in the interface explained why.
+     *
+     * Diffing the snapshot against the document recovers what the operator actually chose: a field
+     * that matches the document was never a decision, and drops out. What is left is the screen's
+     * own, and everything else follows the document again -- including everything added from here
+     * on. The keys named in [SONG_GLOBAL_KEYS] and [BIBLE_GLOBAL_KEYS] drop out regardless: a
+     * snapshot may carry a library folder the operator has since moved, and no screen should hold
+     * one at all.
+     */
+    private fun migrateSparseOutputOverrides(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        val assignments = projection["screenAssignments"]?.jsonArray ?: return raw
+
+        fun globalTree(name: String): JsonObject? = root[name]?.jsonObject
+
+        // Each override key, the document section it is a difference from, and what it never keeps.
+        val categories = listOf(
+            Triple("songOverride", "songSettings", SONG_GLOBAL_KEYS),
+            Triple("bibleOverride", "bibleSettings", BIBLE_GLOBAL_KEYS),
+            Triple("dictionaryOverride", "dictionarySettings", emptySet()),
+            Triple("backgroundOverride", "backgroundSettings", emptySet()),
+            Triple("stageMonitorOverride", "stageMonitorSettings", emptySet()),
+        )
+
+        fun slimmed(assignment: JsonObject): JsonObject = buildJsonObject {
+            assignment.forEach { (key, value) ->
+                val category = categories.firstOrNull { it.first == key }
+                val snapshot = value as? JsonObject
+                if (category == null || snapshot == null) {
+                    put(key, value)
+                    return@forEach
+                }
+                val global = globalTree(category.second)
+                if (global == null) {
+                    put(key, value)
+                    return@forEach
+                }
+                val atomic = if (key == "bibleOverride") setOf(BIBLE_STACK_KEY) else emptySet()
+                val diff = diffObjects(global, snapshot, atomic)
+                put(key, JsonObject(diff.filterKeys { it !in category.third }))
+            }
+        }
+
+        return buildJsonObject {
+            root.forEach { (key, value) -> if (key != "projectionSettings") put(key, value) }
+            put(
+                "projectionSettings",
+                buildJsonObject {
+                    projection.forEach { (key, value) ->
+                        if (key != "screenAssignments") put(key, value)
+                    }
+                    put("screenAssignments", JsonArray(assignments.map { slimmed(it.jsonObject) }))
+                },
+            )
+        }.toString()
+    }
+
     private fun migrateSongNumberCorner(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
         val song = root["songSettings"]?.jsonObject ?: return raw

@@ -70,6 +70,14 @@ import churchpresenter.composeapp.generated.resources.customize_tooltip_overwrit
 import churchpresenter.composeapp.generated.resources.customize_tooltip_separator
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
+import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
+import org.churchpresenter.settings.backgroundOverrideOf
+import org.churchpresenter.settings.bibleOverrideOf
+import org.churchpresenter.settings.dictionaryOverrideOf
+import org.churchpresenter.settings.songOverrideOf
+import org.churchpresenter.settings.stageMonitorOverrideOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.ScreenAssignment
@@ -104,17 +112,45 @@ internal enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolea
         DICTIONARY -> assignment.dictionaryOverride != null
     }
 
-    /** [assignment] with this category's override taken from [edited], or cleared when [on] is false. */
-    fun applied(assignment: ScreenAssignment, edited: AppSettings, on: Boolean = true): ScreenAssignment =
-        when (this) {
+    /**
+     * [assignment] with this category's override taken from [edited], or cleared when [on] is false.
+     *
+     * What is stored is the *difference* between [edited] and [global] -- see `sparseOverrideOf`.
+     * An empty tree is not the same as no tree: a screen switched on and not yet changed has its
+     * own styles and is simply agreeing with the document on all of them, which is why the empty
+     * case stores an empty object rather than null and leaves the switch reading on.
+     */
+    fun applied(
+        assignment: ScreenAssignment,
+        global: AppSettings,
+        edited: AppSettings,
+        on: Boolean = true,
+    ): ScreenAssignment {
+        fun tree(diff: JsonObject?): JsonObject? = if (on) diff ?: JsonObject(emptyMap()) else null
+        return when (this) {
             STAGE_MONITOR -> assignment.copy(
-                stageMonitorOverride = if (on) edited.stageMonitorSettings else null,
+                stageMonitorOverride = tree(
+                    stageMonitorOverrideOf(global.stageMonitorSettings, edited.stageMonitorSettings),
+                ),
             )
-            BIBLE -> assignment.copy(bibleOverride = if (on) edited.bibleSettings else null)
-            SONGS -> assignment.copy(songOverride = if (on) edited.songSettings else null)
-            BACKGROUND -> assignment.copy(backgroundOverride = if (on) edited.backgroundSettings else null)
-            DICTIONARY -> assignment.copy(dictionaryOverride = if (on) edited.dictionarySettings else null)
+            BIBLE -> assignment.copy(
+                bibleOverride = tree(bibleOverrideOf(global.bibleSettings, edited.bibleSettings)),
+            )
+            SONGS -> assignment.copy(
+                songOverride = tree(songOverrideOf(global.songSettings, edited.songSettings)),
+            )
+            BACKGROUND -> assignment.copy(
+                backgroundOverride = tree(
+                    backgroundOverrideOf(global.backgroundSettings, edited.backgroundSettings),
+                ),
+            )
+            DICTIONARY -> assignment.copy(
+                dictionaryOverride = tree(
+                    dictionaryOverrideOf(global.dictionarySettings, edited.dictionarySettings),
+                ),
+            )
         }
+    }
 }
 
 /** The categories [displayMode] can actually use, in rail order. */
@@ -203,13 +239,14 @@ internal fun OutputCustomizeDialog(
     fun edit(transform: (AppSettings) -> AppSettings) {
         val edited = transform(draft)
         draft = edited
+        val next = pane.applied(assignment, globalSettings, edited)
         // An edit switches the category on if it was not already: the operator has just said what
         // this screen should look like, and storing that is the whole point of having typed it.
-        onApply(pane.applied(assignment, edited))
+        onApply(next)
     }
 
     fun setOverridden(on: Boolean) {
-        val next = pane.applied(assignment, draft, on)
+        val next = pane.applied(assignment, globalSettings, draft, on)
         // Turning a category off puts the global values back on screen, not the ones just abandoned.
         draft = globalSettings.resolvedFor(next)
         onApply(next)
@@ -240,6 +277,12 @@ internal fun OutputCustomizeDialog(
         text = {
             CompositionLocalProvider(
                 LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
+                // The accent fill on the selected segment, the same one the global Bible and Song
+                // tabs provide over themselves. Without it the dialog drew every segmented control
+                // it borrows from those tabs -- the element selector, the text transform, the title
+                // slide's own selector -- in the neutral tone, so the same control read one colour
+                // on the tab and another here.
+                LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT,
             ) {
                 Row(modifier = Modifier.fillMaxWidth().height(BODY_HEIGHT)) {
                     CustomizeRail(
@@ -261,6 +304,10 @@ internal fun OutputCustomizeDialog(
                         onTranslationChange = { pickedTranslation = it },
                         onElementChange = { pickedElement = it },
                         onSettingsChange = ::edit,
+                        // Straight to the assignment, not through `edit`: this is a property of the
+                        // screen rather than of its styling, and `edit` stores only what a
+                        // `SongSettings` diff can hold.
+                        onAssignmentChange = onApply,
                     )
                 }
             }
