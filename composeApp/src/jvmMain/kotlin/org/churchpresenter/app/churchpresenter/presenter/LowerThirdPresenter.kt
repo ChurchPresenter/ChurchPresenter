@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,6 +12,17 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+
+/**
+ * Fit is right for every landscape-ish canvas a lower-third graphic can be shown on -- it only
+ * shrinks the composition to a sliver when the canvas itself is portrait, since matching the
+ * composition's width to a narrow canvas leaves almost none of its height. Crop instead matches
+ * the canvas's height and crops the sides, which -- paired with the existing BottomCenter
+ * alignment -- keeps the band at a normal, readable scale at the cost of the composition's
+ * left/right edges.
+ */
+internal fun lowerThirdContentScale(canvasAspectRatio: Float): ContentScale =
+    if (canvasAspectRatio < 1f) ContentScale.Crop else ContentScale.Fit
 
 /**
  * Displays a Lottie animation in the presenter window.
@@ -42,10 +53,11 @@ fun LowerThirdPresenter(
     // exactly, which is what makes an animation look the same wherever it is sent.
     val contentModifier = Modifier.fillMaxSize()
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
+        val contentScale = lowerThirdContentScale(maxWidth / maxHeight)
         if (composition != null) {
             // Keep the live Compottie painter mounted for the whole play once composition has
             // loaded (its identity is stable for an entire play — it only changes between
@@ -62,7 +74,8 @@ fun LowerThirdPresenter(
                 Image(
                     bitmap = frame.imageBitmap,
                     contentDescription = null,
-                    contentScale = ContentScale.Fit,
+                    contentScale = contentScale,
+                    alignment = Alignment.BottomCenter,
                     colorFilter = if (isKey) keyColorFilter else null,
                     modifier = contentModifier
                 )
@@ -70,7 +83,8 @@ fun LowerThirdPresenter(
                 Image(
                     painter = painter,
                     contentDescription = null,
-                    contentScale = ContentScale.Fit,
+                    contentScale = contentScale,
+                    alignment = Alignment.BottomCenter,
                     colorFilter = if (isKey) keyColorFilter else null,
                     modifier = contentModifier
                 )
@@ -80,7 +94,8 @@ fun LowerThirdPresenter(
             Image(
                 bitmap = frame.imageBitmap,
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
+                contentScale = contentScale,
+                alignment = Alignment.BottomCenter,
                 colorFilter = if (isKey) keyColorFilter else null,
                 modifier = contentModifier
             )

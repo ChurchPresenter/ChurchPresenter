@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -150,6 +151,41 @@ internal class BibleLottieTemplate(
 private const val MILLIS_PER_SECOND = 1000.0
 private const val METADATA_KEY = "cp"
 private const val DEFAULT_TICKER_SPEED = 120f
+
+/**
+ * FillBounds is right whenever a band's own box is about as wide, relative to its height, as the
+ * template itself -- true of every ordinary landscape output, since the template is authored to
+ * match one. On a canvas narrow enough that the box's aspect falls below the template's own -- a
+ * portrait output, where the box is pinned to the canvas width but the template still expects a
+ * landscape-wide one -- FillBounds's independent width/height scale factors squish the template's
+ * background art. Worse, a slot's text is measured and positioned in the template's own pixel
+ * space before this scale is ever applied, so the same non-uniform stretch warps every glyph
+ * along with it. Fit instead scales both dimensions by the same factor -- here, the narrower one,
+ * driven by the box's width, which is what stays pinned to the canvas edge-to-edge -- so nothing
+ * warps, at the cost of the band rendering shorter than its configured height asks for.
+ */
+internal fun bandContentScale(boxAspectRatio: Float, templateAspectRatio: Float): ContentScale =
+    if (boxAspectRatio < templateAspectRatio) ContentScale.Fit else ContentScale.FillBounds
+
+/**
+ * How tall the band actually renders, as a fraction of the *whole canvas* height — not the
+ * `bandFraction` a Lottie band was asked for, which [bandContentScale] above only honours when
+ * the band's own box is at least as wide as the template. [AboveBandFill] draws its wash only
+ * down to `bandFraction` when it is not painted behind the band, on the assumption that is
+ * exactly where the band begins; once a narrow canvas makes [bandContentScale] choose `Fit`, the
+ * band renders shorter than that and the wash stops short of it, leaving a gap between the wash's
+ * own edge and the band the wash was meant to meet. Recomputes the same `boxAspectRatio` used
+ * above from [canvasAspectRatio] and [bandFraction] rather than taking it as a parameter, since
+ * this is called from the presenter's own canvas-level box, not the band's.
+ */
+internal fun effectiveBandFraction(
+    canvasAspectRatio: Float,
+    bandFraction: Float,
+    templateAspectRatio: Float,
+): Float {
+    val boxAspectRatio = canvasAspectRatio / bandFraction
+    return if (boxAspectRatio < templateAspectRatio) canvasAspectRatio / templateAspectRatio else bandFraction
+}
 
 /**
  * A file without the generator's markers still gets the five segments: the first and last

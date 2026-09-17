@@ -2,7 +2,9 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +22,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -246,7 +247,7 @@ private fun BandLayer(
         .associateWith { name ->
             val style = styles.getValue(name)
             val text = texts[name].orEmpty()
-            val box = template.slots[name] ?: LottieSlotBox(0f, 0f, template.width, template.height)
+            val box = template.effectiveBox(name, texts)
             val singleLine = name.startsWith(BibleLottieTemplate.LAYER_REFERENCE_1.dropLast(1))
             // The template may pin a justification; otherwise the content's own settings apply.
             val pinned = if (singleLine) template.meta.referenceAlign else template.meta.textAlign
@@ -294,13 +295,17 @@ private fun BandLayer(
         fontManager = LottieFonts,
         dynamicProperties = dynamic,
     )
-    Image(
-        painter = painter,
-        contentDescription = null,
-        contentScale = ContentScale.FillBounds,
-        colorFilter = colorFilter,
-        modifier = modifier,
-    )
+    BoxWithConstraints(modifier) {
+        val contentScale = bandContentScale(maxWidth / maxHeight, template.width / template.height)
+        Image(
+            painter = painter,
+            contentDescription = null,
+            contentScale = contentScale,
+            alignment = Alignment.BottomCenter,
+            colorFilter = colorFilter,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
 }
 
 /** A measurer at density 1, so a size in template pixels measures in template pixels. */
