@@ -80,6 +80,7 @@ private const val BASELINE_FACTOR = 0.35
 
 /** The ticker line also slides sideways within its mask, by this fraction of the mask width. */
 private const val INFO_SLIDE_FACTOR = 0.4
+private const val DETAIL_SLIDE_FACTOR = 0.4
 
 /** The two bars round their corners by different fractions of the configured radius. */
 private const val BAND_CORNER_FACTOR = 0.3
@@ -90,6 +91,9 @@ private const val NAME_SLIDE_START_PCT = 40.0
 private const val NAME_SLIDE_END_PCT = 76.0
 private const val INFO_SLIDE_START_PCT = 50.0
 private const val INFO_SLIDE_END_PCT = 86.0
+private const val DETAIL_START_PCT = 34.0
+private const val DETAIL_SLIDE_START_PCT = 58.0
+private const val DETAIL_SLIDE_END_PCT = 94.0
 private const val END_PCT = 100.0
 
 /** Justify codes Lottie writes for left, right and centred text. */
@@ -111,6 +115,7 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
 
     val marginHPx = remToPx(cfg.marginH.toDouble(), baseSize)
     private val marginVPx = remToPx(cfg.marginV.toDouble(), baseSize)
@@ -122,6 +127,7 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val isRight = cfg.align == "right"
     val isCenter = cfg.align == "center"
@@ -143,9 +149,18 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     private val halfBW = bandW / 2
     val bandCX = marginHPx + halfBW
 
-    val tickerCY = canvasH - marginVPx - tickerH / 2
+    /**
+     * Zero when Detail is hidden, so `tickerCY`/`bandCY` render byte-identically to before. A
+     * second ticker-style bar for Detail sits below the info ticker, pushing the whole assembly
+     * up to make room rather than moving info's own bar down into the margin.
+     */
+    private val detailBarH = if (cfg.hideDetail) 0.0 else tickerH
+    private val detailExtra = if (!cfg.hideDetail) bandGap + detailBarH else 0.0
+
+    val detailCY = canvasH - marginVPx - detailBarH / 2
+    val tickerCY = canvasH - marginVPx - detailExtra - tickerH / 2
     val bandCY = tickerCY - tickerH / 2 - bandGap - halfBH
-    private val slideFromY = canvasH + bandH + tickerH + SLIDE_CLEARANCE_PX
+    private val slideFromY = canvasH + bandH + tickerH + detailBarH + SLIDE_CLEARANCE_PX
 
     /** Where the badge meets the main area, in band-local space. */
     private val badgeBoundaryX = when {
@@ -204,6 +219,12 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         else -> JUSTIFY_LEFT
     }
 
+    /** The Detail ticker mirrors Info's own mask/text/justify shape exactly, one bar lower. */
+    val detailMaskW = infoMaskW
+    val detailTextX = infoTextX
+    val detailTextY = detailCY + detailSizePx * BASELINE_FACTOR
+    val detailJustify = infoJustify
+
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
     val logoSizePx = emToPx(cfg.logoSize.toDouble(), baseSize)
 
@@ -220,6 +241,7 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     fun bandRise() = riseKeyframes(BAND_START_PCT, bandCX, bandCY)
     fun tickerRise() = riseKeyframes(TICKER_START_PCT, bandCX, tickerCY)
+    fun detailRise() = riseKeyframes(DETAIL_START_PCT, bandCX, detailCY)
 
     /** One leaning stripe at [cx] in band-local space. */
     fun slash(cx: Double): JsonObject {
@@ -246,6 +268,7 @@ class Style12NewsBadge : StyleGenerator {
         // Added first renders on top.
         if (!cfg.hideName) builder.addHeadline(g)
         if (!cfg.hideInfo) builder.addTickerText(g)
+        if (!cfg.hideDetail) builder.addDetailTicker(g)
         builder.addLogo(g)
         if (cfg.bgEnabled && g.badgeVerts != null) {
             builder.addSlashes(g)
@@ -254,6 +277,7 @@ class Style12NewsBadge : StyleGenerator {
         if (cfg.bgEnabled) {
             builder.addMainBand(g)
             builder.addTickerBar(g)
+            if (!cfg.hideDetail) builder.addDetailBar(g)
         }
     }
 }
@@ -346,6 +370,46 @@ private fun LottieBuilder.addTickerText(g: BadgeGeometry) {
     )
 }
 
+/** The Detail ticker: a second lower bar, mirroring Info's own clip-and-slide exactly. */
+private fun LottieBuilder.addDetailTicker(g: BadgeGeometry) {
+    addShapeLayer(
+        "Detail Mask",
+        buildJsonArray {
+            add(makeGroup(listOf(makeRect(g.detailMaskW, g.tickerH * TICKER_MASK_FACTOR, 0.0), makeFill(WHITE))))
+        },
+        LottieBuilder.defaultTransform(position = LottieBuilder.animatedProp(g.detailRise())),
+        td = 1,
+    )
+
+    addFont(g.cfg.fontFamily, g.cfg.detailWeight)
+    val slide = if (g.isRight) -g.detailMaskW * DETAIL_SLIDE_FACTOR else g.detailMaskW * DETAIL_SLIDE_FACTOR
+    val posKFs = g.keyframes(
+        KeyframeInput(0.0, jsonArrayOf(g.detailTextX + slide, g.detailTextY, 0.0)),
+        KeyframeInput(DETAIL_SLIDE_START_PCT, jsonArrayOf(g.detailTextX + slide, g.detailTextY, 0.0)),
+        KeyframeInput(DETAIL_SLIDE_END_PCT, jsonArrayOf(g.detailTextX, g.detailTextY, 0.0)),
+        KeyframeInput(END_PCT, jsonArrayOf(g.detailTextX, g.detailTextY, 0.0)),
+    )
+    addTextLayer(
+        "Detail",
+        makeTextData(
+            TextRun(
+                g.cfg.detailText,
+                g.cfg.fontFamily,
+                g.detailSizePx,
+                g.cfg.detailWeight,
+                g.detailCLottie,
+                g.cfg.detailTransform,
+                g.detailJustify,
+            ),
+        ),
+        LottieBuilder.defaultTransform(
+            opacity = LottieBuilder.staticProp(g.cfg.detailColorAlpha),
+            position = LottieBuilder.animatedProp(posKFs),
+        ),
+        tt = 1,
+    )
+}
+
 /** The logo sits inside the badge, so there is nowhere for it when the badge is absent. */
 private fun LottieBuilder.addLogo(g: BadgeGeometry) {
     val cfg = g.cfg
@@ -420,5 +484,21 @@ private fun LottieBuilder.addTickerBar(g: BadgeGeometry) {
         "Ticker Bar",
         buildJsonArray { add(makeGroup(items)) },
         LottieBuilder.defaultTransform(position = LottieBuilder.animatedProp(g.tickerRise())),
+    )
+}
+
+/** The Detail bar: a second bar below the ticker, in the same accent shade. */
+private fun LottieBuilder.addDetailBar(g: BadgeGeometry) {
+    val items = mutableListOf(
+        makeRect(g.bandW, g.tickerH, g.cornerPx * TICKER_CORNER_FACTOR),
+        makeFill(g.accentLottie, g.cfg.accentColorAlpha.toDouble()),
+    )
+    makeStroke(
+        g.borderLottie, g.borderPx * TICKER_BORDER_FACTOR, g.cfg.borderColorAlpha.toDouble(),
+    )?.let { items.add(it) }
+    addShapeLayer(
+        "Detail Bar",
+        buildJsonArray { add(makeGroup(items)) },
+        LottieBuilder.defaultTransform(position = LottieBuilder.animatedProp(g.detailRise())),
     )
 }

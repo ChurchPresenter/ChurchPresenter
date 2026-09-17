@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.7
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -539,6 +539,130 @@
                         },
                         {
                             "pct": 58,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 47.7,
+                            "values": [
+                                -0.3,
+                                0.18
+                            ]
+                        },
+                        {
+                            "pct": 61.3,
+                            "values": [
+                                0.24,
+                                -0.105
+                            ]
+                        },
+                        {
+                            "pct": 75.0,
+                            "values": [
+                                -0.165,
+                                0.075
+                            ]
+                        },
+                        {
+                            "pct": 88.7,
+                            "values": [
+                                0.12,
+                                -0.054
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                -0.066,
+                                0.03
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 36.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 41.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 48.0,
+                            "values": [
+                                30
+                            ]
+                        },
+                        {
+                            "pct": 56.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 66.0,
+                            "values": [
+                                65
+                            ]
+                        },
+                        {
+                            "pct": 74.0,
                             "values": [
                                 100
                             ]

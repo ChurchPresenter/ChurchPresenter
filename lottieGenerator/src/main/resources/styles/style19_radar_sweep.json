@@ -24,7 +24,7 @@
                 "gapBeforeEm": 0.2
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -250,6 +250,89 @@
                         },
                         {
                             "pct": 66,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 60.0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "offsetUnit": "ELEMENT_WIDTH"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 60.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 82.0,
                             "values": [
                                 100
                             ]

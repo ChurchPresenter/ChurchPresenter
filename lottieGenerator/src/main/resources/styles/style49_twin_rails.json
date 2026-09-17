@@ -27,7 +27,7 @@
                 "widthEm": 1.4
             }
         ],
-        "blockHeightEm": 5.6,
+        "blockHeightEm": 6.3,
         "centerSingleLine": true
     },
     "elements": [
@@ -162,6 +162,76 @@
                         },
                         {
                             "pct": 92,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 72.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 72.0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
                             "values": [
                                 0.0,
                                 0.0

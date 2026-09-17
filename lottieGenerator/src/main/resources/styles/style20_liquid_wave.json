@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.7
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -255,6 +255,90 @@
             ]
         },
         {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 2.2,
+                "yOffsetFactor": -0.15,
+                "tracks": [
+                    {
+                        "property": "POSITION_OFFSET",
+                        "keyframes": [
+                            {
+                                "pct": 0,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 44.0,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 100.0,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            },
+                            {
+                                "pct": 100.0,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 42.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 62.0,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "type": "path",
             "id": "waveLine",
             "name": "Wave Crest",
@@ -461,6 +545,119 @@
                         }
                     ]
                 }
+            ],
+            "visibleWhen": [
+                "DETAIL_HIDDEN"
+            ]
+        },
+        {
+            "type": "path",
+            "id": "waveBodyWithDetail",
+            "name": "Wave Body (Detail)",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                {
+                    "x": -1.0,
+                    "y": 0.0,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42
+                },
+                {
+                    "x": 1.0,
+                    "y": 3.5
+                },
+                {
+                    "x": -1.0,
+                    "y": 3.5
+                }
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.3
+                },
+                "stroke": null
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 26,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
             ]
         },
         {

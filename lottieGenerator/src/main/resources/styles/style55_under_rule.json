@@ -27,7 +27,7 @@
                 "widthEm": 1.4
             }
         ],
-        "blockHeightEm": 6.2,
+        "blockHeightEm": 6.9,
         "centerSingleLine": true
     },
     "elements": [
@@ -172,6 +172,76 @@
             ]
         },
         {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 72.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 72.0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "type": "logo",
             "id": "logo",
             "name": "Logo",
@@ -243,8 +313,8 @@
             "placement": {
                 "slot": "text",
                 "anchorIn": "CENTER",
-                "line": "BLOCK_CENTER",
-                "offsetYEm": 1.55
+                "line": "DETAIL_LINE",
+                "offsetYEm": 0.55
             },
             "verticesEm": [
                 [
