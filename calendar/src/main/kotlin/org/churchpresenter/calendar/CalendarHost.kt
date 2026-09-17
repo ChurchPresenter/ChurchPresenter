@@ -24,6 +24,17 @@ data class CalendarHost(
     val loadIntoSchedule: (items: List<ScheduleItem>, replace: Boolean) -> Unit = { _, _ -> },
 
     /**
+     * Puts one item on screen, the way a tap on it in the Schedule tab would.
+     *
+     * What a fired cue does — see [CueRunner]. The app routes it through the same
+     * `executeProjectItem` its remote clients use, so a cue can show exactly what a phone can.
+     */
+    val projectItem: (ScheduleItem) -> Unit = {},
+
+    /** Clears every output — a [org.churchpresenter.calendar.model.CueAction.BLANK] cue. */
+    val blankOutputs: () -> Unit = {},
+
+    /**
      * What is in the Schedule tab right now.
      *
      * Two callers: the confirm dialog, which needs to know whether replacing would discard

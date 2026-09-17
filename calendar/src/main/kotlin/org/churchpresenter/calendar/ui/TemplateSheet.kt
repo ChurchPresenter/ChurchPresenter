@@ -27,6 +27,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_include
 import org.churchpresenter.calendar.generated.resources.calendar_save_template_sub
 import org.churchpresenter.calendar.generated.resources.calendar_save_template_title
 import org.churchpresenter.calendar.generated.resources.calendar_template_footer
+import org.churchpresenter.calendar.generated.resources.calendar_template_include_cues
+import org.churchpresenter.calendar.generated.resources.calendar_template_include_cues_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_items
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_items_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_sections
@@ -45,21 +47,20 @@ private val SHEET_WIDTH = 410.dp
  * Names the template **Template** is about to save from [service], and picks what goes in it.
  *
  * Laid out to the design: the name, pre-filled with the service's so accepting it is one click,
- * a warning when that name is already taken, and an `Include` list. The design's list also has
- * cues; the planner has no cues yet, so that box waits for the automation engine rather than
- * sitting here wired to nothing.
+ * a warning when that name is already taken, and an `Include` list.
  */
 @Composable
 fun TemplateSheet(
     service: PlannedService,
     date: LocalDate,
     existing: List<SavedTemplate>,
-    onSave: (name: String, includeSections: Boolean, includeItems: Boolean) -> Unit,
+    onSave: (name: String, includeSections: Boolean, includeItems: Boolean, includeCues: Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember(service) { mutableStateOf(service.name) }
     var sections by remember(service) { mutableStateOf(true) }
     var items by remember(service) { mutableStateOf(true) }
+    var cues by remember(service) { mutableStateOf(true) }
     val trimmed = name.trim()
     val replaces = existing.any { it.name.equals(trimmed, ignoreCase = true) }
 
@@ -82,8 +83,8 @@ fun TemplateSheet(
                 QuietButton(label = stringResource(Res.string.calendar_cancel), onClick = onDismiss)
                 PrimaryButton(
                     label = stringResource(Res.string.calendar_template_save),
-                    onClick = { onSave(trimmed, sections, items) },
-                    enabled = trimmed.isNotEmpty() && (sections || items),
+                    onClick = { onSave(trimmed, sections, items, cues) },
+                    enabled = trimmed.isNotEmpty() && (sections || items || cues),
                 )
             },
         ) {
@@ -123,6 +124,12 @@ fun TemplateSheet(
                         sub = stringResource(Res.string.calendar_template_include_items_sub),
                         on = items,
                         onToggle = { items = !items },
+                    )
+                    IncludeRow(
+                        label = stringResource(Res.string.calendar_template_include_cues),
+                        sub = stringResource(Res.string.calendar_template_include_cues_sub),
+                        on = cues,
+                        onToggle = { cues = !cues },
                     )
                 }
             }

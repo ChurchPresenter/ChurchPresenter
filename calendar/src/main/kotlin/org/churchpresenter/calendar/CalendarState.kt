@@ -14,7 +14,11 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
+import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.ServiceRepeat
+import org.churchpresenter.calendar.model.copiedCues
+import org.churchpresenter.calendar.model.withCue
+import org.churchpresenter.calendar.model.withoutCue
 import org.churchpresenter.calendar.model.copiedRows
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.storedDate
@@ -183,6 +187,11 @@ class CalendarState(
             is ServiceTemplate.CopyOf -> copiedRows(template.service.items, template.service.plannedSeconds)
             is ServiceTemplate.Saved -> copiedRows(template.template.items, template.template.plannedSeconds)
         }
+        val cues = when (template) {
+            ServiceTemplate.Blank -> emptyList()
+            is ServiceTemplate.CopyOf -> copiedCues(template.service.cues)
+            is ServiceTemplate.Saved -> copiedCues(template.template.cues)
+        }
         val service = PlannedService(
             id = UUID.randomUUID().toString(),
             date = storedDate(selectedDate),
@@ -191,6 +200,7 @@ class CalendarState(
             kind = kind.id,
             items = rows.items,
             plannedSeconds = rows.plannedSeconds,
+            cues = cues,
             armed = document.preferences.armByDefault,
         )
         commit(document.withService(service))
@@ -228,8 +238,9 @@ class CalendarState(
     /**
      * Plans a copy of [service] on each of [dates] — the Copy sheet's **Paste** and **Create N**.
      *
-     * With [includeRunOfShow] each copy gets its own re-keyed run of show; without it, an empty
-     * service with the same name, time and kind. A [repeat] other than NONE makes the copies — and
+     * With [includeRunOfShow] each copy gets its own re-keyed run of show, and with [includeCues]
+     * its cues; without either, an empty service with the same name, time and kind. A [repeat]
+     * other than NONE makes the copies — and
      * [service] itself, unless it already belongs to one — a series, which is what lets a later
      * edit or delete reach all of them. One commit for the lot, so the file is written once.
      */
@@ -237,6 +248,7 @@ class CalendarState(
         service: PlannedService,
         dates: List<LocalDate>,
         includeRunOfShow: Boolean,
+        includeCues: Boolean,
         repeat: ServiceRepeat = ServiceRepeat.NONE,
     ) {
         if (dates.isEmpty()) return
@@ -259,6 +271,7 @@ class CalendarState(
                 kind = service.kind,
                 items = rows.items,
                 plannedSeconds = rows.plannedSeconds,
+                cues = if (includeCues) copiedCues(service.cues) else emptyList(),
                 armed = service.armed,
                 seriesId = seriesId,
                 repeat = if (seriesId.isEmpty()) "" else repeat.id,
@@ -279,10 +292,17 @@ class CalendarState(
      *
      * Replacing rather than duplicating: saving "Sunday Morning" again after improving it is the
      * common case, and two templates by one name are indistinguishable in the `Start from` list.
-     * [includeSections] and [includeItems] are the sheet's two Include boxes — the headings alone
-     * make a skeleton to fill each week; the items alone, a set list without its structure.
+     * [includeSections], [includeItems] and [includeCues] are the sheet's Include boxes — the
+     * headings alone make a skeleton to fill each week; the items alone, a set list without its
+     * structure; the cues, the same automation every week without redoing it.
      */
-    fun saveTemplate(service: PlannedService, name: String, includeSections: Boolean = true, includeItems: Boolean = true) {
+    fun saveTemplate(
+        service: PlannedService,
+        name: String,
+        includeSections: Boolean = true,
+        includeItems: Boolean = true,
+        includeCues: Boolean = true,
+    ) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         val kept = service.items.filter { item ->
@@ -299,6 +319,7 @@ class CalendarState(
                     kind = service.kind,
                     items = rows.items,
                     plannedSeconds = rows.plannedSeconds,
+                    cues = if (includeCues) copiedCues(service.cues) else emptyList(),
                 )
             )
         )
@@ -306,6 +327,32 @@ class CalendarState(
 
     fun deleteTemplate(id: String) {
         commit(document.withoutTemplate(id))
+    }
+
+    // ── Cues ──────────────────────────────────────────────────────────────────
+
+    /** Adds [cue] to the service, or replaces the one with its id. Kept in firing order. */
+    fun saveCue(serviceId: String, cue: ServiceCue) {
+        val service = document.serviceById(serviceId) ?: return
+        commit(document.withService(service.withCue(cue)))
+    }
+
+    fun deleteCue(serviceId: String, cueId: String) {
+        val service = document.serviceById(serviceId) ?: return
+        commit(document.withService(service.withoutCue(cueId)))
+    }
+
+    /** Ticks or unticks one cue — "skip this one" — without touching the rest. */
+    fun setCueEnabled(serviceId: String, cueId: String, enabled: Boolean) {
+        val service = document.serviceById(serviceId) ?: return
+        val cue = service.cues.firstOrNull { it.id == cueId } ?: return
+        commit(document.withService(service.withCue(cue.copy(enabled = enabled))))
+    }
+
+    /** Arms or disarms every cue on the service at once. */
+    fun setArmed(serviceId: String, armed: Boolean) {
+        val service = document.serviceById(serviceId) ?: return
+        commit(document.withService(service.copy(armed = armed)))
     }
     // ── Run of show ───────────────────────────────────────────────────────────
     fun addItems(serviceId: String, items: List<ScheduleItem>, at: Int? = null) {

@@ -125,6 +125,8 @@ import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -1113,6 +1115,42 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 }
                             }
 
+                            // What a fired calendar cue does — the same path a phone's "project"
+                            // takes once approved, minus the approval: the operator planned it.
+                            val projectFromCalendar: (ScheduleItem) -> Unit = { item ->
+                                if (item is ScheduleItem.AnnouncementItem) {
+                                    appSettings = appSettings.withAnnouncement(item)
+                                }
+                                executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)
+                                coroutineScope.launch {
+                                    emitRemoteTabSelection(
+                                        item, remoteSelectSongFlow,
+                                        remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                    )
+                                }
+                            }
+                            val loadFromCalendar: (List<ScheduleItem>, Boolean) -> Unit = { items, replace ->
+                                if (replace) currentScheduleActions.clearSchedule()
+                                // wholePlan = true so section headings, lower thirds and scenes
+                                // survive the trip; a plan is loaded whole.
+                                items.forEach { item ->
+                                    addScheduleItem(item, currentScheduleActions, wholePlan = true)
+                                }
+                            }
+
+                            // The Calendar Manager's automation engine, up for the whole session so a
+                            // Sunday 09:45 cue fires with the planner window closed. See CueRunner.
+                            LaunchedEffect(Unit) {
+                                CueRunner(
+                                    store = CalendarStore(AppDataDir.resolve()),
+                                    host = CalendarHost(
+                                        loadIntoSchedule = loadFromCalendar,
+                                        projectItem = projectFromCalendar,
+                                        blankOutputs = { presenterManager.requestClearDisplay() },
+                                    ),
+                                ).run()
+                            }
+
                             LaunchedEffect(Unit) {
                                 companionServer.onSelectSongSection.collect { req ->
                                     val sections = presenterManager.allLyricSections.value
@@ -1782,14 +1820,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 title = "Export Run of Show"
                                             )?.toFile()
                                         },
-                                        loadIntoSchedule = { items, replace ->
-                                            if (replace) currentScheduleActions.clearSchedule()
-                                            // wholePlan = true so section headings, lower thirds
-                                            // and scenes survive the trip; a plan is loaded whole.
-                                            items.forEach { item ->
-                                                addScheduleItem(item, currentScheduleActions, wholePlan = true)
-                                            }
-                                        },
+                                        loadIntoSchedule = loadFromCalendar,
+                                        projectItem = projectFromCalendar,
+                                        blankOutputs = { presenterManager.requestClearDisplay() },
                                         currentSchedule = { currentScheduleItems },
                                     ),
                                     onClose = { showCalendarWindow = false }

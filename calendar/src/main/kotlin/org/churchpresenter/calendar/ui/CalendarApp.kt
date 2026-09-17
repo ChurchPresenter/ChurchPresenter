@@ -81,6 +81,7 @@ import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.sectionItem
+import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.monthHeading
@@ -92,9 +93,9 @@ import java.time.LocalDate
 /**
  * The Calendar Manager.
  *
- * Left is the month; right is the selected day, its services and the run of show of whichever is
- * open. The automation column the design carries is not here — cues are a later phase, and the
- * model already has the field they will fill ([PlannedService.cues]).
+ * Left is the month; centre is the selected day, its services and the run of show of whichever is
+ * open; right is that service's automation — its cues, which [org.churchpresenter.calendar.CueRunner]
+ * fires whether or not this window is open.
  *
  * [storeFolder] is where `calendar.json` goes, and [songFolder] is the song library the picker
  * reads. Both are passed in rather than resolved here, which is what lets this window be driven in
@@ -138,6 +139,9 @@ fun CalendarApp(
     var replacing by remember { mutableStateOf<ScheduleItem?>(null) }
     var loadConfirmFor by remember { mutableStateOf<PlannedService?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
+    var settingsTab by remember { mutableStateOf(SettingsTab.SECTIONS) }
+    // The cue sheet: open for a new cue (Adding) or an existing one (Editing).
+    var cueSheet by remember { mutableStateOf<CueSheetState?>(null) }
     // The service Copy or Template was pressed on, or null while that sheet is closed.
     var copyFrom by remember { mutableStateOf<PlannedService?>(null) }
     var templateFrom by remember { mutableStateOf<PlannedService?>(null) }
@@ -158,13 +162,14 @@ fun CalendarApp(
                 plannedThisMonth = state.servicesInVisibleMonth().size,
                 onToday = state::goToToday,
                 onExport = exportAction(state, host, io, scope),
-                onSettings = { settingsOpen = true },
+                onSettings = { settingsTab = SettingsTab.SECTIONS; settingsOpen = true },
                 onClose = onClose,
             )
             HorizontalDivider()
             RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
 
             Row(Modifier.fillMaxSize().weight(1f)) {
+                val service = state.selectedService
                 MonthPane(
                     month = state.visibleMonth,
                     selected = state.selectedDate,
@@ -188,7 +193,6 @@ fun CalendarApp(
                         onEditService = { editingService = it },
                     )
                     HorizontalDivider()
-                    val service = state.selectedService
                     if (service == null) {
                         NoServicesPane(
                             dayLabel = shortDate(state.selectedDate),
@@ -224,6 +228,20 @@ fun CalendarApp(
                         )
                     }
                 }
+                if (service != null) {
+                    VerticalDivider()
+                    AutomationPane(
+                        service = service,
+                        onArmed = { state.setArmed(service.id, it) },
+                        onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
+                        onEditCue = { cueSheet = CueSheetState.Editing(it) },
+                        onAddCue = { cueSheet = CueSheetState.Adding },
+                        onEditCues = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
+                        modifier = Modifier
+                            .widthIn(min = CalendarMetrics.automationPaneMin, max = CalendarMetrics.automationPaneMax)
+                            .fillMaxHeight(),
+                    )
+                }
             }
         }
     }
@@ -233,6 +251,8 @@ fun CalendarApp(
         CalendarSettingsDialog(
             preferences = state.document.preferences,
             templates = state.document.templates,
+            openService = openService,
+            initialTab = settingsTab,
             canInsertSection = openService != null,
             onPreferencesChange = state::updatePreferences,
             onAddSection = state::addSection,
@@ -246,6 +266,9 @@ fun CalendarApp(
                 }
             },
             onRemoveTemplate = state::deleteTemplate,
+            onEditCue = { settingsOpen = false; cueSheet = CueSheetState.Editing(it) },
+            onDeleteCue = { openService?.let { service -> state.deleteCue(service.id, it) } },
+            onAddCue = { settingsOpen = false; cueSheet = CueSheetState.Adding },
             onDismiss = { settingsOpen = false },
         )
     }
@@ -261,6 +284,8 @@ fun CalendarApp(
         loadConfirmFor = loadConfirmFor,
         copyFrom = copyFrom,
         templateFrom = templateFrom,
+        cueSheet = cueSheet,
+        onCueSheetClosed = { cueSheet = null },
         onServiceSheetClosed = { creatingService = false; editingService = null },
         onAddingItemClosed = { addingItem = false; replacing = null },
         onLoadConfirmClosed = { loadConfirmFor = null },
@@ -287,6 +312,8 @@ private fun CalendarDialogs(
     loadConfirmFor: PlannedService?,
     copyFrom: PlannedService?,
     templateFrom: PlannedService?,
+    cueSheet: CueSheetState?,
+    onCueSheetClosed: () -> Unit,
     onServiceSheetClosed: () -> Unit,
     onAddingItemClosed: () -> Unit,
     onLoadConfirmClosed: () -> Unit,
@@ -357,8 +384,8 @@ private fun CalendarDialogs(
             service = service,
             date = state.selectedDate,
             hasServices = state::hasServices,
-            onCopy = { dates, includeRunOfShow, repeat ->
-                state.copyService(service, dates, includeRunOfShow, repeat)
+            onCopy = { dates, includeRunOfShow, includeCues, repeat ->
+                state.copyService(service, dates, includeRunOfShow, includeCues, repeat)
                 // A single paste is a jump to where it landed; a series is visible as the dots.
                 if (repeat == ServiceRepeat.NONE) dates.firstOrNull()?.let(state::select)
                 onCopySheetClosed()
@@ -372,11 +399,23 @@ private fun CalendarDialogs(
             service = service,
             date = state.selectedDate,
             existing = state.document.templates,
-            onSave = { name, sections, items ->
-                state.saveTemplate(service, name, sections, items)
+            onSave = { name, sections, items, cues ->
+                state.saveTemplate(service, name, sections, items, cues)
                 onTemplateSheetClosed()
             },
             onDismiss = onTemplateSheetClosed,
+        )
+    }
+
+    val cueTarget = state.selectedService
+    if (cueSheet != null && cueTarget != null) {
+        val existing = (cueSheet as? CueSheetState.Editing)?.cue
+        CueSheet(
+            service = cueTarget,
+            existing = existing,
+            onSave = { state.saveCue(cueTarget.id, it); onCueSheetClosed() },
+            onDelete = existing?.let { { state.deleteCue(cueTarget.id, it.id); onCueSheetClosed() } },
+            onDismiss = onCueSheetClosed,
         )
     }
 
@@ -388,6 +427,12 @@ private fun CalendarDialogs(
             onDismiss = onLoadConfirmClosed,
         )
     }
+}
+
+/** What the cue sheet is open for. */
+sealed interface CueSheetState {
+    data object Adding : CueSheetState
+    data class Editing(val cue: ServiceCue) : CueSheetState
 }
 
 /** A `Start from` option's two lines. */

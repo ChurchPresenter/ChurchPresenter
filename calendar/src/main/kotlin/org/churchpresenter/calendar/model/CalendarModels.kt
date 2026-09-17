@@ -101,12 +101,7 @@ data class PlannedService(
      * are being measured an absent entry is what a measured suggestion fills in.
      */
     val plannedSeconds: Map<String, Int> = emptyMap(),
-    /**
-     * Declared from the first release although nothing writes it yet.
-     *
-     * The cue engine is a later phase, and an empty list here costs one key in the file — whereas
-     * adding the field afterwards would mean a schema migration for every calendar already saved.
-     */
+    /** The timed actions attached to this service, earliest first. See [ServiceCue]. */
     val cues: List<ServiceCue> = emptyList(),
     /** Whether this service's cues may fire. False is "planned, but do not automate". */
     val armed: Boolean = true,
@@ -133,10 +128,10 @@ data class PlannedService(
 /**
  * A timed action attached to a service.
  *
- * Nothing constructs one yet — see [PlannedService.cues]. The shape is fixed now because it is what
- * the rest of the design rests on: [payload] is an ordinary [ScheduleItem], so every content cue is
- * something the app can already put on screen, and [action] covers only the few things that are not
- * content at all.
+ * [payload] is an ordinary [ScheduleItem], so every content cue is something the app can already
+ * put on screen, and [action] covers only the few things that are not content at all. The payload
+ * is a copy of the run-of-show row it was chosen from, not a reference: a cue keeps firing what
+ * it was set to even if the row is later replaced, and says so in the automation pane.
  */
 @Serializable
 data class ServiceCue(
@@ -149,15 +144,30 @@ data class ServiceCue(
     /** What to put on screen, for [CueAction.PROJECT]. Null for every other action. */
     val payload: ScheduleItem? = null,
     val action: String = CueAction.PROJECT,
+    /** Off is "skip this one" — the cue stays in the list, greyed, and fires again once re-ticked. */
     val enabled: Boolean = true,
-)
+) {
+    fun isPinned(): Boolean = absoluteTime.isNotEmpty()
+}
 
-/** The few cue actions that are not "put this [ScheduleItem] on screen". */
+/**
+ * What a cue does. Strings rather than an enum so a file written by a later version still opens;
+ * an unknown action is simply never fired.
+ */
 object CueAction {
+    /** Puts [ServiceCue.payload] on screen — a song, a reading, a slideshow, a timer. */
     const val PROJECT = "project"
+    /** Starts a countdown to the service's start time on the outputs. */
+    const val COUNTDOWN = "countdown"
+    /** Loads the run of show into the Schedule tab and puts its first item on screen. */
+    const val GO_LIVE = "goLive"
+    /** Clears every output. */
     const val BLANK = "blank"
     const val OBS_SCENE = "obsScene"
     const val ATEM_KEY = "atemKey"
+
+    /** The actions the cue sheet offers — the ones the host can carry out today. */
+    val offered: List<String> = listOf(COUNTDOWN, GO_LIVE, PROJECT, BLANK)
 }
 
 /**
@@ -209,6 +219,7 @@ data class SavedTemplate(
     val kind: String = ServiceKind.SUNDAY.id,
     val items: List<ScheduleItem> = emptyList(),
     val plannedSeconds: Map<String, Int> = emptyMap(),
+    val cues: List<ServiceCue> = emptyList(),
 ) {
     fun contentItems(): List<ScheduleItem> = items.filterNot { it is ScheduleItem.LabelItem }
 }

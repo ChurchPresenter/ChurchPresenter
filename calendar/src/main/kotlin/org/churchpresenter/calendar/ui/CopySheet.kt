@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +53,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_copy_footer_onc
 import org.churchpresenter.calendar.generated.resources.calendar_copy_footer_repeat
 import org.churchpresenter.calendar.generated.resources.calendar_copy_how_many
 import org.churchpresenter.calendar.generated.resources.calendar_copy_in_two_weeks
+import org.churchpresenter.calendar.generated.resources.calendar_copy_include_cues
+import org.churchpresenter.calendar.generated.resources.calendar_copy_include_cues_sub
 import org.churchpresenter.calendar.generated.resources.calendar_copy_include_run
 import org.churchpresenter.calendar.generated.resources.calendar_copy_include_run_sub
 import org.churchpresenter.calendar.generated.resources.calendar_copy_next_month
@@ -101,21 +105,22 @@ private val LONG_DATE: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(For
  * dates it will create, each flagged when that day already has a service; then `Include`. The
  * footer says what the button will do before it is pressed.
  *
- * The design's Include list also offers cues and per-service looks; neither exists in the planner
- * yet, so only the run of show is offered rather than two boxes wired to nothing.
+ * The design's Include list also offers per-service looks; the planner has none yet, so that box
+ * is not drawn rather than wired to nothing.
  */
 @Composable
 fun CopySheet(
     service: PlannedService,
     date: LocalDate,
     hasServices: (LocalDate) -> Boolean,
-    onCopy: (dates: List<LocalDate>, includeRunOfShow: Boolean, repeat: ServiceRepeat) -> Unit,
+    onCopy: (dates: List<LocalDate>, includeRunOfShow: Boolean, includeCues: Boolean, repeat: ServiceRepeat) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var repeat by remember(service) { mutableStateOf(ServiceRepeat.NONE) }
     var target by remember(service) { mutableStateOf(CopyTarget.NEXT_WEEK) }
     var count by remember(service) { mutableStateOf(DEFAULT_REPEAT_COUNT) }
     var includeRunOfShow by remember(service) { mutableStateOf(true) }
+    var includeCues by remember(service) { mutableStateOf(true) }
 
     val once = repeat == ServiceRepeat.NONE
     val dates = if (once) listOf(target.date(date)) else recurrenceDates(date, repeat, count)
@@ -131,7 +136,7 @@ fun CopySheet(
                 Text(
                     text = stringResource(
                         when {
-                            !includeRunOfShow -> Res.string.calendar_copy_footer_empty
+                            !includeRunOfShow && !includeCues -> Res.string.calendar_copy_footer_empty
                             once -> Res.string.calendar_copy_footer_once
                             else -> Res.string.calendar_copy_footer_repeat
                         },
@@ -150,7 +155,8 @@ fun CopySheet(
                     } else {
                         stringResource(Res.string.calendar_copy_create, dates.size)
                     },
-                    onClick = { onCopy(dates, includeRunOfShow, repeat) },
+                    onClick = { onCopy(dates, includeRunOfShow, includeCues, repeat) },
+                    enabled = includeRunOfShow || includeCues,
                 )
             },
         ) {
@@ -174,14 +180,20 @@ fun CopySheet(
                     CountStepper(count = count, onChange = { count = it })
                     DatePreview(dates = dates, monthly = repeat == ServiceRepeat.MONTHLY, hasServices = hasServices)
                 }
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     FieldLabel(stringResource(Res.string.calendar_include))
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(2.dp))
                     IncludeRow(
                         label = stringResource(Res.string.calendar_copy_include_run),
                         sub = stringResource(Res.string.calendar_copy_include_run_sub, service.items.size),
                         on = includeRunOfShow,
                         onToggle = { includeRunOfShow = !includeRunOfShow },
+                    )
+                    IncludeRow(
+                        label = stringResource(Res.string.calendar_copy_include_cues),
+                        sub = stringResource(Res.string.calendar_copy_include_cues_sub, service.cues.size),
+                        on = includeCues,
+                        onToggle = { includeCues = !includeCues },
                     )
                 }
             }
@@ -190,13 +202,14 @@ fun CopySheet(
 }
 
 /** The four `Paste on` chips — where a one-off copy can go, relative to the service's own date. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PasteOn(selected: CopyTarget, onSelect: (CopyTarget) -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Column {
         FieldLabel(stringResource(Res.string.calendar_copy_paste_on))
         Spacer(Modifier.height(6.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             CopyTarget.entries.forEach { option ->
                 val on = option == selected
                 Box(

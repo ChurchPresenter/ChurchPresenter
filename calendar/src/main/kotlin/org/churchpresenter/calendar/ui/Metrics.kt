@@ -26,6 +26,10 @@ object CalendarMetrics {
     val monthPaneMin = 232.dp
     val monthPaneMax = 296.dp
 
+    /** The automation column: `clamp(250px, 25%, 336px)` in the design. */
+    val automationPaneMin = 250.dp
+    val automationPaneMax = 336.dp
+
     val dayHeaderHeight = 45.dp
     val sectionHeaderHeight = 30.dp
     val serviceChipHeight = 42.dp

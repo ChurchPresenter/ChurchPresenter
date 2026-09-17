@@ -64,6 +64,15 @@ import org.churchpresenter.calendar.generated.resources.calendar_templates_note
 import org.churchpresenter.calendar.generated.resources.calendar_template_remove
 import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
 import org.churchpresenter.calendar.model.SavedTemplate
+import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.ServiceCue
+import org.churchpresenter.calendar.model.cuesInOrder
+import org.churchpresenter.calendar.generated.resources.calendar_add_cue
+import org.churchpresenter.calendar.generated.resources.calendar_automation_no_service
+import org.churchpresenter.calendar.generated.resources.calendar_cues_for
+import org.churchpresenter.calendar.generated.resources.calendar_edit_cue
+import org.churchpresenter.calendar.generated.resources.calendar_delete
+import androidx.compose.material.icons.filled.Edit
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
@@ -73,7 +82,7 @@ import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
 
 /** The dialog's four tabs, in the design's order. */
-private enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, DEFAULTS }
+enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, DEFAULTS }
 
 private val DIALOG_WIDTH = 560.dp
 private val BODY_HEIGHT = 340.dp
@@ -93,6 +102,9 @@ private val PREF_FIELD = 74.dp
 fun CalendarSettingsDialog(
     preferences: CalendarPreferences,
     templates: List<SavedTemplate>,
+    /** The service whose cues the Automation tab lists, or null when no day is open. */
+    openService: PlannedService?,
+    initialTab: SettingsTab = SettingsTab.SECTIONS,
     canInsertSection: Boolean,
     colorPicker: (@Composable (ColorPickerRequest) -> Unit)?,
     onPreferencesChange: (CalendarPreferences) -> Unit,
@@ -102,9 +114,12 @@ fun CalendarSettingsDialog(
     onRemoveSection: (name: String) -> Unit,
     onInsertSection: (SectionStyle) -> Unit,
     onRemoveTemplate: (id: String) -> Unit,
+    onEditCue: (ServiceCue) -> Unit,
+    onDeleteCue: (cueId: String) -> Unit,
+    onAddCue: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var tab by remember { mutableStateOf(SettingsTab.SECTIONS) }
+    var tab by remember { mutableStateOf(initialTab) }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
@@ -129,7 +144,14 @@ fun CalendarSettingsDialog(
                 contentPadding = PaddingValues(horizontal = 15.dp, vertical = 13.dp),
             ) {
                 when (tab) {
-                    SettingsTab.AUTOMATION -> AutomationTab(preferences, onPreferencesChange)
+                    SettingsTab.AUTOMATION -> AutomationTab(
+                        preferences = preferences,
+                        service = openService,
+                        onChange = onPreferencesChange,
+                        onEditCue = onEditCue,
+                        onDeleteCue = onDeleteCue,
+                        onAddCue = onAddCue,
+                    )
                     SettingsTab.SECTIONS -> SectionsTab(
                         sections = preferences.sections,
                         canInsert = canInsertSection,
@@ -159,8 +181,20 @@ private fun tabLabel(tab: SettingsTab): String = stringResource(
     }
 )
 
+/**
+ * The arm-by-default switch, then the open service's cues with edit and delete — the design's
+ * Automation tab. The cues are the *service's*: the automation pane and this list are two views
+ * of one thing, so an edit here is an edit there.
+ */
 @Composable
-private fun AutomationTab(preferences: CalendarPreferences, onChange: (CalendarPreferences) -> Unit) {
+private fun AutomationTab(
+    preferences: CalendarPreferences,
+    service: PlannedService?,
+    onChange: (CalendarPreferences) -> Unit,
+    onEditCue: (ServiceCue) -> Unit,
+    onDeleteCue: (String) -> Unit,
+    onAddCue: () -> Unit,
+) {
     SettingCard {
         CardText(
             title = stringResource(Res.string.calendar_arm_default),
@@ -171,9 +205,47 @@ private fun AutomationTab(preferences: CalendarPreferences, onChange: (CalendarP
             onCheckedChange = { onChange(preferences.copy(armByDefault = it)) },
         )
     }
-    SheetOverline(stringResource(Res.string.calendar_cues), Modifier.padding(top = 2.dp))
-    NoteLine(stringResource(Res.string.calendar_automation_empty_sub))
+    if (service == null) {
+        SheetOverline(stringResource(Res.string.calendar_cues), Modifier.padding(top = 2.dp))
+        NoteLine(stringResource(Res.string.calendar_automation_no_service))
+        return
+    }
+    SheetOverline(stringResource(Res.string.calendar_cues_for, service.name), Modifier.padding(top = 2.dp))
+    val cues = service.cuesInOrder()
+    if (cues.isEmpty()) NoteLine(stringResource(Res.string.calendar_automation_empty_sub))
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        cues.forEach { cue ->
+            SettingCard(modifier = Modifier.clip(SheetMetrics.cardRadius).clickable { onEditCue(cue) }) {
+                Text(
+                    text = cueWhenLabel(cue),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = WHEN_TINT))
+                        .padding(horizontal = 7.dp, vertical = 2.dp),
+                )
+                CardText(title = cue.label.ifBlank { cueActionLabel(cue.action) }, subtitle = cueSubtitle(cue))
+                SmallIconButton(
+                    icon = Icons.Filled.Edit,
+                    description = stringResource(Res.string.calendar_edit_cue),
+                    onClick = { onEditCue(cue) },
+                )
+                SmallIconButton(
+                    icon = Icons.Filled.Close,
+                    description = stringResource(Res.string.calendar_delete),
+                    onClick = { onDeleteCue(cue.id) },
+                    destructive = true,
+                )
+            }
+        }
+    }
+    DashedAddButton(label = stringResource(Res.string.calendar_add_cue), icon = Icons.Filled.Add, onClick = onAddCue)
 }
+
+private const val WHEN_TINT = 0.16f
 
 /** The saved templates, each with the one thing to do to it here — delete. */
 @Composable
