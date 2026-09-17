@@ -40,7 +40,10 @@ class ProjectionCustomizeBibleStripTest {
     )
 
     private fun AppSettings.stored(): BibleSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
 
     // ── The margins ───────────────────────────────────────────────────────────
 

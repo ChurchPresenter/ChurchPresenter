@@ -83,13 +83,13 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
-            assertEquals(90, assertNotNull(get().assignment().songSettingsOn()).lyricsFontSize)
+            assertEquals(90, assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize)
 
             onNodeWithText("Reset to global").performClick()
             waitForIdle()
 
             assertNull(
-                get().assignment().songSettingsOn(),
+                get().assignment().songSettingsOn(get().songSettings),
                 "Reset gives the category up entirely rather than restoring values into it",
             )
         }
@@ -102,7 +102,7 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
-            assertNotNull(get().assignment().songSettingsOn())
+            assertNotNull(get().assignment().songSettingsOn(get().songSettings))
         }
     }
 
@@ -113,7 +113,7 @@ class ProjectionCustomizeOverrideTest {
             flipOverride()
             assertEquals(
                 61,
-                assertNotNull(get().assignment().songSettingsOn()).lyricsFontSize,
+                assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize,
                 "an output starts where the global settings are, not at the defaults",
             )
         }
@@ -167,7 +167,7 @@ class ProjectionCustomizeOverrideTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS, override = false)
             flipOverride()
             flipOverride()
-            assertNull(get().assignment().songSettingsOn())
+            assertNull(get().assignment().songSettingsOn(get().songSettings))
         }
     }
 
@@ -176,10 +176,13 @@ class ProjectionCustomizeOverrideTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 90)
-            assertEquals(90, assertNotNull(get().assignment().songSettingsOn()).lyricsFontSize)
+            assertEquals(90, assertNotNull(get().assignment().songSettingsOn(get().songSettings)).lyricsFontSize)
 
             flipOverride()
-            assertNull(get().assignment().songSettingsOn(), "following the global settings again means storing nothing")
+            assertNull(
+                get().assignment().songSettingsOn(get().songSettings),
+                "following the global settings again means storing nothing",
+            )
         }
     }
 
@@ -256,7 +259,8 @@ class ProjectionCustomizeOverrideTest {
 
             assertEquals(
                 55,
-                assertNotNull(get().assignment().bibleSettingsOn()).translationList()[0].textFontSize,
+                assertNotNull(get().assignment().bibleSettingsOn(get().bibleSettings))
+                    .translationList()[0].textFontSize,
                 "the output starts where the global Bible settings are",
             )
         }

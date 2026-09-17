@@ -41,7 +41,10 @@ class ProjectionCustomizeTitleSlideTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     @Test
     fun `the title slide is the first chip of the Song pane`() {

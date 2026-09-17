@@ -45,7 +45,10 @@ class ProjectionCustomizeBibleReferenceTest {
     )
 
     private fun AppSettings.stored(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
             .translationList()[0]
 
     private fun open(test: androidx.compose.ui.test.ComposeUiTest, override: Boolean = true) =

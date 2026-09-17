@@ -60,11 +60,17 @@ class ProjectionCustomizeBibleControlsTest {
     )
 
     private fun AppSettings.storedTranslation(): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
             .translationList()[0]
 
     private fun AppSettings.storedBible(): BibleSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
 
     // ── The verse text ──────────────────────────────────────────────────────────────────────────
 
@@ -74,10 +80,12 @@ class ProjectionCustomizeBibleControlsTest {
             openCustomizePane(CustomizePane.BIBLE)
             retypeNumberField(61, 72)
             recolor("#AABBCC", "#112233")
-            for (glyph in listOf("B", "I", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "I", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().storedTranslation()
             assertEquals(72, stored.textFontSize)
@@ -94,10 +102,12 @@ class ProjectionCustomizeBibleControlsTest {
             openCustomizePane(CustomizePane.BIBLE)
             retypeNumberField(62, 26)
             recolor("#DDEEFF", "#334455")
-            for (glyph in listOf("B", "I", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "I", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().storedTranslation()
             assertEquals(26, stored.lowerThirdTextFontSize)
@@ -133,7 +143,7 @@ class ProjectionCustomizeBibleControlsTest {
     fun `the case picker writes the translation's transform`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            chooseSegment("AA")
+            chooseSegment("UPPERCASE")
 
             assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, get().storedTranslation().textTransform)
         }

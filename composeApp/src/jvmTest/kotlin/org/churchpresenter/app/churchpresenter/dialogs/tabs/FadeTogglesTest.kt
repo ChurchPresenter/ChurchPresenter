@@ -30,7 +30,10 @@ class FadeTogglesTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     // ── The Song tab ──────────────────────────────────────────────────────────
 

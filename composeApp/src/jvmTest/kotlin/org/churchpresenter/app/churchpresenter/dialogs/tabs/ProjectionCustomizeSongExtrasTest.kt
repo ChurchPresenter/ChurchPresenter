@@ -40,7 +40,10 @@ class ProjectionCustomizeSongExtrasTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songSettingsOn(), "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     /** Opens the corner dropdown showing [showing] and picks [option] from its menu. */
     private fun androidx.compose.ui.test.ComposeUiTest.chooseCorner(showing: String, option: String) {

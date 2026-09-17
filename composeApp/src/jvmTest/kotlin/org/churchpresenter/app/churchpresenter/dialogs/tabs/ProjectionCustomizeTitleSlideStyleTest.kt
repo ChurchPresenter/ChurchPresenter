@@ -100,20 +100,20 @@ class ProjectionCustomizeTitleSlideStyleTest {
     }
 
     @Test
-    fun `strikethrough and shadow are two buttons, not one`() {
+    fun `strikethrough and shadow are two controls, not one`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            // Both draw an "S" -- the row is laid out bold, italic, underline, strikethrough,
-            // shadow, so the first is the line through the letters and the second the shadow.
+            // The only "S" beside B/I/U is the line through the letters. Shadow is the checkbox on
+            // the row below, which is where its colour, size and opacity fold out from.
             styleButton(group = 0, label = SHADOW_GLYPH).performScrollTo().performClick()
             waitForIdle()
-            assertTrue(get().storedTitle().strikethrough, "the first S is the strikethrough")
+            assertTrue(get().storedTitle().strikethrough, "the S is the strikethrough")
             assertFalse(get().storedTitle().shadow, "and it is not the shadow")
 
-            styleButton(group = 1, label = SHADOW_GLYPH).performScrollTo().performClick()
+            shadowCheckbox(group = 0).performScrollTo().performClick()
             waitForIdle()
-            assertTrue(get().storedTitle().shadow, "the second S is the shadow")
-            assertTrue(get().storedTitle().strikethrough, "which leaves the first one on")
+            assertTrue(get().storedTitle().shadow, "the checkbox is the shadow")
+            assertTrue(get().storedTitle().strikethrough, "which leaves the S on")
         }
     }
 
@@ -160,7 +160,7 @@ class ProjectionCustomizeTitleSlideStyleTest {
     fun `the case picker writes the title's transform`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            chooseSegment("AA")
+            chooseSegment("UPPERCASE")
 
             assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, get().storedTitle().transform)
         }

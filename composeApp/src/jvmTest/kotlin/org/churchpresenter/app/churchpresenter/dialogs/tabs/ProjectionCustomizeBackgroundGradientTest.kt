@@ -48,7 +48,7 @@ class ProjectionCustomizeBackgroundGradientTest {
 
     private fun AppSettings.storedBand(): BackgroundConfig =
         assertNotNull(
-            projectionSettings.screenAssignments[0].backgroundSettingsOn(),
+            projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
             "the output must have its own Backgrounds",
         ).bibleLowerThirdBackground
 

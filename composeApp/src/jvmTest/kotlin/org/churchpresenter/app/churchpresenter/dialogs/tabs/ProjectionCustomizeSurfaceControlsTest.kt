@@ -66,12 +66,12 @@ class ProjectionCustomizeSurfaceControlsTest {
     )
 
     private fun AppSettings.storedDictionary(): DictionarySettings = assertNotNull(
-        projectionSettings.screenAssignments[0].dictionarySettingsOn(),
+        projectionSettings.screenAssignments[0].dictionarySettingsOn(dictionarySettings),
         "the output must have its own dictionary",
     )
 
     private fun AppSettings.storedBackground(): BackgroundSettings = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundSettingsOn(),
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
         "the output must have its own background",
     )
 

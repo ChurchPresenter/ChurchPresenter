@@ -41,7 +41,7 @@ class ProjectionCustomizeDictionaryElementsTest {
     )
 
     private fun AppSettings.stored(): DictionarySettings = assertNotNull(
-        projectionSettings.screenAssignments[0].dictionarySettingsOn(),
+        projectionSettings.screenAssignments[0].dictionarySettingsOn(dictionarySettings),
         "the output must have its own Dictionary",
     )
 

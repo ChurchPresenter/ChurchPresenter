@@ -211,7 +211,9 @@ class ProjectionSettingsTabCustomizeTest {
             onNode(hasSetTextAction() and hasText("70")).performScrollTo().performTextReplacement("41")
             waitForIdle()
 
-            val stack = assertNotNull(get().projectionSettings.screenAssignments[0].bibleSettingsOn())
+            val stack = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
                 .translationList()
             assertEquals(41, stack[1].textFontSize, "the selected translation must take the edit")
             assertEquals(70, stack[0].textFontSize, "and the one beside it must be untouched")
@@ -238,7 +240,7 @@ class ProjectionSettingsTabCustomizeTest {
 
             val edited = get().projectionSettings.screenAssignments[0]
             assertTrue(edited.isCustomized, "an edit must create this output's override")
-            assertEquals(31, assertNotNull(edited.bibleSettingsOn()).marginTop)
+            assertEquals(31, assertNotNull(edited.bibleSettingsOn(get().bibleSettings)).marginTop)
             assertFalse(
                 get().projectionSettings.screenAssignments[1].isCustomized,
                 "the other row must still be following the global settings",
@@ -256,7 +258,9 @@ class ProjectionSettingsTabCustomizeTest {
             onNodeWithText("Left / Right").performClick()
             waitForIdle()
 
-            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleSettingsOn())
+            val bible = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
             assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, bible.bilingualLayout)
             assertEquals(
                 Constants.BILINGUAL_SIDE_BY_SIDE,
@@ -275,7 +279,9 @@ class ProjectionSettingsTabCustomizeTest {
             onNodeWithText("Top / Bottom").performClick()
             waitForIdle()
 
-            val bible = assertNotNull(get().projectionSettings.screenAssignments[0].bibleSettingsOn())
+            val bible = assertNotNull(
+                get().projectionSettings.screenAssignments[0].bibleSettingsOn(get().bibleSettings),
+            )
             assertEquals(Constants.BILINGUAL_TOP_BOTTOM, bible.bilingualLayoutLowerThird)
             assertEquals(
                 Constants.BILINGUAL_TOP_BOTTOM,

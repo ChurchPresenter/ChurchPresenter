@@ -35,7 +35,10 @@ class ProjectionCustomizeTranslationChipsTest {
     )
 
     private fun AppSettings.stored(index: Int): BibleTranslationSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].bibleSettingsOn(), "the output must have its own Bible")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].bibleSettingsOn(bibleSettings),
+            "the output must have its own Bible",
+        )
             .translationList()[index]
 
     private val stack = arrayOf(
