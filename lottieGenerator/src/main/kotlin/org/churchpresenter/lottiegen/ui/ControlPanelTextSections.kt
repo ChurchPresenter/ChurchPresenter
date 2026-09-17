@@ -1,6 +1,7 @@
 package org.churchpresenter.lottiegen.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +51,12 @@ internal fun TextSection(viewModel: LottieGenState) {
             label = Strings.info,
             modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
         )
+        LottieTextField(
+            value = cfg.detailText,
+            onValueChange = { viewModel.updateConfig { c -> c.copy(detailText = it) } },
+            label = Strings.detail,
+            modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
+        )
     }
 }
 
@@ -62,6 +69,7 @@ internal fun TextStyleSection(viewModel: LottieGenState, fontPicker: BandFontPic
         FontAndSizeRows(viewModel, fontPicker)
         WeightRow(viewModel)
         CaseRow(viewModel)
+        DetailWeightAndCaseRow(viewModel)
     }
 }
 
@@ -148,6 +156,18 @@ private fun FontAndSizeRows(viewModel: LottieGenState, fontPicker: BandFontPicke
             },
             label = Strings.infoSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
         )
+    }
+    FieldRow {
+        LottieTextField(
+            value = cfg.detailSize.toString(),
+            onValueChange = { v ->
+                v.toFloatOrNull()?.let {
+                    viewModel.updateConfig { c -> c.copy(detailSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
+                }
+            },
+            label = Strings.detailSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+        )
+        Box(Modifier.weight(1f))
     }
 }
 
@@ -252,6 +272,56 @@ private fun CaseRow(viewModel: LottieGenState) {
 }
 
 
+/** The detail line's weight and case, sharing one row since there is no third line to pair it with. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DetailWeightAndCaseRow(viewModel: LottieGenState) {
+    val cfg = viewModel.config
+    FieldRow {
+        var dwExpanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(dwExpanded, { dwExpanded = it }, Modifier.weight(1f)) {
+            LottieDropdown(
+                label = Strings.detailWeight,
+                value = if (cfg.detailWeight >= 700) Strings.bold else Strings.normal,
+                expanded = dwExpanded,
+                modifier = Modifier.fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+            )
+            ExposedDropdownMenu(dwExpanded, { dwExpanded = false }) {
+                DropdownMenuItem(
+                    { Text(Strings.normal) },
+                    { viewModel.updateConfig { it.copy(detailWeight = 400) }; dwExpanded = false },
+                )
+                DropdownMenuItem(
+                    { Text(Strings.bold) },
+                    { viewModel.updateConfig { it.copy(detailWeight = 700) }; dwExpanded = false },
+                )
+            }
+        }
+        var dtExpanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(dtExpanded, { dtExpanded = it }, Modifier.weight(1f)) {
+            LottieDropdown(
+                label = Strings.detailTransform,
+                value = if (cfg.detailTransform == "uppercase") Strings.uppercase else Strings.none,
+                expanded = dtExpanded,
+                modifier = Modifier.fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+            )
+            ExposedDropdownMenu(dtExpanded, { dtExpanded = false }) {
+                DropdownMenuItem(
+                    { Text(Strings.none) },
+                    { viewModel.updateConfig { it.copy(detailTransform = "none") }; dtExpanded = false },
+                )
+                DropdownMenuItem(
+                    { Text(Strings.uppercase) },
+                    { viewModel.updateConfig { it.copy(detailTransform = "uppercase") }; dtExpanded = false },
+                )
+            }
+        }
+    }
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ColorsSection(viewModel: LottieGenState) {
@@ -265,6 +335,9 @@ internal fun ColorsSection(viewModel: LottieGenState) {
             ColorPickerRow(Strings.colorInfoText, cfg.infoColor, cfg.infoColorAlpha,
                 { viewModel.updateConfig { c -> c.copy(infoColor = it) } },
                 { viewModel.updateConfig { c -> c.copy(infoColorAlpha = it) } })
+            ColorPickerRow(Strings.colorDetailText, cfg.detailColor, cfg.detailColorAlpha,
+                { viewModel.updateConfig { c -> c.copy(detailColor = it) } },
+                { viewModel.updateConfig { c -> c.copy(detailColorAlpha = it) } })
             ColorPickerRow(Strings.colorAccent, cfg.accentColor, cfg.accentColorAlpha,
                 { viewModel.updateConfig { c -> c.copy(accentColor = it) } },
                 { viewModel.updateConfig { c -> c.copy(accentColorAlpha = it) } })

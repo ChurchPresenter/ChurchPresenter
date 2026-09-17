@@ -71,11 +71,15 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     private val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
@@ -85,6 +89,7 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val accentLottie = hexToLottie(cfg.accentColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val isRight = cfg.align == "right"
     val isCenter = cfg.align == "center"
@@ -98,11 +103,17 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     private val nameBlockH = if (cfg.hideName) 0.0 else nameSizePx
     private val infoBlockH = if (cfg.hideInfo) 0.0 else infoSizePx
+    private val detailBlockH = if (cfg.hideDetail) 0.0 else detailSizePx
     private val gap = if (!cfg.hideName && !cfg.hideInfo) lineSpacingPx else 0.0
-    private val totalH = nameBlockH + gap + infoBlockH
+    private val gap2 = if (!cfg.hideInfo && !cfg.hideDetail) lineSpacingPx else 0.0
+
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtra = if (!cfg.hideDetail) gap2 + detailBlockH else 0.0
+    private val totalH = nameBlockH + gap + infoBlockH + detailExtra
     private val blockTopY = canvasH - marginVPx - totalH
     val nameCY = blockTopY + nameBlockH / 2
     val infoCY = blockTopY + nameBlockH + gap + infoBlockH / 2
+    val detailCY = blockTopY + nameBlockH + gap + infoBlockH + gap2 + detailBlockH / 2
 
     /** Both lines share one x; only the justify differs. */
     val textX = when {
@@ -117,15 +128,17 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     }
     val nameTextY = nameCY + nameSizePx * BASELINE_FACTOR
     val infoTextY = infoCY + infoSizePx * BASELINE_FACTOR
+    val detailTextY = detailCY + detailSizePx * BASELINE_FACTOR
 
     private val slant = emToPx(SLANT_EM, baseSize)
     private val padding = emToPx(PADDING_EM, baseSize)
     private val maskH = totalH + padding * 2
     val lineThickness = max(MIN_RULE_PX, baseSize * RULE_H_FACTOR)
 
-    private val maxTextW = max(
+    private val maxTextW = maxOf(
         if (cfg.hideName) 0.0 else nameM.width.toDouble(),
         if (cfg.hideInfo) 0.0 else infoM.width.toDouble(),
+        if (cfg.hideDetail) 0.0 else detailM.width.toDouble(),
     )
 
     /**
@@ -168,6 +181,13 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     }
 
     private val maskCY = blockTopY + totalH / 2
+
+    /**
+     * Where the logo centres vertically. The name/info average is the original formula,
+     * unconditional on their own visibility (matched exactly here); Detail only joins it once
+     * shown, so this is byte-identical to before while it stays hidden.
+     */
+    val logoCenterY: Double = if (cfg.hideDetail) (infoCY + nameCY) / 2 else (infoCY + nameCY + detailCY) / 3
 
     /** offStart hides the mask; offEnd has it fully covering the text. */
     private val offStart = if (isRight) wipeRight + halfMW + slant else wipeLeft - halfMW - slant
@@ -232,43 +252,65 @@ private class WipeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
 }
 
+private enum class WipeLineRole { NAME, INFO, DETAIL }
+
 /**
- * One of the two lines, in one of its two passes. Each line is drawn twice: once in the accent
- * colour, which the wipe mask only flashes, and once in its own colour, which the reveal mask
- * leaves behind.
+ * One of the (up to) three lines, in one of its two passes. Each line is drawn twice: once in the
+ * accent colour, which the wipe mask only flashes, and once in its own colour, which the reveal
+ * mask leaves behind.
  */
-private class WipeLine(g: WipeGeometry, isName: Boolean, isAccent: Boolean) {
-    val maskName = when {
-        isAccent && isName -> "Accent Name Mask"
-        isAccent -> "Accent Info Mask"
-        isName -> "Name Reveal Mask"
-        else -> "Info Reveal Mask"
+private class WipeLine(g: WipeGeometry, role: WipeLineRole, isAccent: Boolean) {
+    val maskName = when (role) {
+        WipeLineRole.NAME -> if (isAccent) "Accent Name Mask" else "Name Reveal Mask"
+        WipeLineRole.INFO -> if (isAccent) "Accent Info Mask" else "Info Reveal Mask"
+        WipeLineRole.DETAIL -> if (isAccent) "Accent Detail Mask" else "Detail Reveal Mask"
     }
-    val layerName = when {
-        isAccent && isName -> "Accent Name"
-        isAccent -> "Accent Info"
-        isName -> "Name"
-        else -> "Info"
+    val layerName = when (role) {
+        WipeLineRole.NAME -> if (isAccent) "Accent Name" else "Name"
+        WipeLineRole.INFO -> if (isAccent) "Accent Info" else "Info"
+        WipeLineRole.DETAIL -> if (isAccent) "Accent Detail" else "Detail"
     }
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val y = if (isName) g.nameTextY else g.infoTextY
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
+    val sizePx = when (role) {
+        WipeLineRole.NAME -> g.nameSizePx
+        WipeLineRole.INFO -> g.infoSizePx
+        WipeLineRole.DETAIL -> g.detailSizePx
+    }
+    val y = when (role) {
+        WipeLineRole.NAME -> g.nameTextY
+        WipeLineRole.INFO -> g.infoTextY
+        WipeLineRole.DETAIL -> g.detailTextY
+    }
+    val text = when (role) {
+        WipeLineRole.NAME -> g.cfg.nameText
+        WipeLineRole.INFO -> g.cfg.infoText
+        WipeLineRole.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (role) {
+        WipeLineRole.NAME -> g.cfg.nameWeight
+        WipeLineRole.INFO -> g.cfg.infoWeight
+        WipeLineRole.DETAIL -> g.cfg.detailWeight
+    }
+    val transform = when (role) {
+        WipeLineRole.NAME -> g.cfg.nameTransform
+        WipeLineRole.INFO -> g.cfg.infoTransform
+        WipeLineRole.DETAIL -> g.cfg.detailTransform
+    }
     val color = when {
         isAccent -> g.accentLottie
-        isName -> g.nameCLottie
-        else -> g.infoCLottie
+        role == WipeLineRole.NAME -> g.nameCLottie
+        role == WipeLineRole.INFO -> g.infoCLottie
+        else -> g.detailCLottie
     }
 
     /**
-     * The accent name takes the accent alpha, but the accent info line takes the info alpha --
+     * The accent name takes the accent alpha, but the accent info/detail lines take their own --
      * asymmetric, and preserved as it was.
      */
     val alpha = when {
-        isAccent && isName -> g.cfg.accentColorAlpha
-        isName -> g.cfg.nameColorAlpha
-        else -> g.cfg.infoColorAlpha
+        isAccent && role == WipeLineRole.NAME -> g.cfg.accentColorAlpha
+        role == WipeLineRole.NAME -> g.cfg.nameColorAlpha
+        role == WipeLineRole.INFO -> g.cfg.infoColorAlpha
+        else -> g.cfg.detailColorAlpha
     }
     val maskKeyframes = if (isAccent) g.wipeMaskKeyframes() else g.revealMaskKeyframes()
 }
@@ -278,10 +320,12 @@ class Style9DiagonalWipe : StyleGenerator {
         val g = WipeGeometry(builder, cfg)
         // Added first renders on top.
         builder.addDiagonalRule(g)
-        if (!cfg.hideName) builder.addWipedLine(g, WipeLine(g, isName = true, isAccent = true))
-        if (!cfg.hideInfo) builder.addWipedLine(g, WipeLine(g, isName = false, isAccent = true))
-        if (!cfg.hideName) builder.addWipedLine(g, WipeLine(g, isName = true, isAccent = false))
-        if (!cfg.hideInfo) builder.addWipedLine(g, WipeLine(g, isName = false, isAccent = false))
+        if (!cfg.hideName) builder.addWipedLine(g, WipeLine(g, WipeLineRole.NAME, isAccent = true))
+        if (!cfg.hideInfo) builder.addWipedLine(g, WipeLine(g, WipeLineRole.INFO, isAccent = true))
+        if (!cfg.hideDetail) builder.addWipedLine(g, WipeLine(g, WipeLineRole.DETAIL, isAccent = true))
+        if (!cfg.hideName) builder.addWipedLine(g, WipeLine(g, WipeLineRole.NAME, isAccent = false))
+        if (!cfg.hideInfo) builder.addWipedLine(g, WipeLine(g, WipeLineRole.INFO, isAccent = false))
+        if (!cfg.hideDetail) builder.addWipedLine(g, WipeLine(g, WipeLineRole.DETAIL, isAccent = false))
         builder.addLogo(g)
     }
 }
@@ -342,9 +386,10 @@ private fun LottieBuilder.addLogo(g: WipeGeometry) {
     val scale = (g.logoSizePx / cfg.logoH.toDouble()) * PERCENT_SCALE
     val cx = when {
         g.isCenter -> {
-            val maxW = max(
+            val maxW = maxOf(
                 if (cfg.hideName) 0.0 else g.nameM.width.toDouble(),
                 if (cfg.hideInfo) 0.0 else g.infoM.width.toDouble(),
+                if (cfg.hideDetail) 0.0 else g.detailM.width.toDouble(),
             )
             g.canvasW / 2 - maxW / 2 - g.logoMargin - g.logoSizePx / 2
         }
@@ -360,7 +405,7 @@ private fun LottieBuilder.addLogo(g: WipeGeometry) {
     addImageLayer(
         "Logo", "logo",
         LottieBuilder.defaultTransform(
-            position = LottieBuilder.staticPropArray(cx, (g.infoCY + g.nameCY) / 2, 0.0),
+            position = LottieBuilder.staticPropArray(cx, g.logoCenterY, 0.0),
             anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
             scale = LottieBuilder.animatedProp(scaleKFs),
         ),

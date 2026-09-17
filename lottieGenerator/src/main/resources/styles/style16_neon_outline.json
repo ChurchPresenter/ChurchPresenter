@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.8
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -250,6 +250,92 @@
                         },
                         {
                             "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 74.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 78.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 82.0,
+                            "values": [
+                                30
+                            ]
+                        },
+                        {
+                            "pct": 86.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 90.0,
+                            "values": [
+                                45
+                            ]
+                        },
+                        {
+                            "pct": 94.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                65
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
                             "values": [
                                 100
                             ]

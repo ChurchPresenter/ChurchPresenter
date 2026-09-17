@@ -24,7 +24,6 @@ import org.churchpresenter.lottiegen.lottie.makeStroke
 import org.churchpresenter.lottiegen.lottie.makeTextData
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
-import kotlin.math.max
 
 /** Lottie writes a gradient's stop count in `p`; this bar is built from four. */
 private const val GRADIENT_STOP_COUNT = 4
@@ -56,6 +55,10 @@ private const val INFO_BAR_START_PCT = 35.0
 private const val INFO_BAR_ARRIVED_PCT = 75.0
 private const val INFO_START_PCT = 40.0
 private const val INFO_ARRIVED_PCT = 80.0
+private const val DETAIL_BAR_START_PCT = 55.0
+private const val DETAIL_BAR_ARRIVED_PCT = 95.0
+private const val DETAIL_START_PCT = 55.0
+private const val DETAIL_ARRIVED_PCT = 95.0
 private const val LOGO_GROWN_PCT = 30.0
 private const val LOGO_PLATE_GROWN_PCT = 25.0
 private const val END_PCT = 100.0
@@ -79,11 +82,15 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     val paddingX = emToPx(PAD_X_EM, baseSize)
@@ -99,6 +106,7 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val canvasW = cfg.canvasW.toDouble()
     private val canvasH = cfg.canvasH.toDouble()
@@ -110,14 +118,55 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val nameBarH = nameSizePx + paddingY * 2
     val infoBarW = infoM.width + paddingX * 2 + gradientExtra
     val infoBarH = infoSizePx + paddingY * INFO_PAD_MULTIPLE
+    val detailBarW = detailM.width + paddingX * 2 + gradientExtra
+    val detailBarH = detailSizePx + paddingY * INFO_PAD_MULTIPLE
 
-    private val nameBlockH = if (cfg.hideName) 0.0 else nameBarH
-    private val infoBlockH = if (cfg.hideInfo) 0.0 else infoBarH
-    private val gap = if (!cfg.hideName && !cfg.hideInfo) lineSpacingPx else 0.0
-    private val totalBlockH = nameBlockH + gap + infoBlockH
+    private val nameVisible = !cfg.hideName
+    private val infoVisible = !cfg.hideInfo
+    private val detailVisible = !cfg.hideDetail
+    private val nameBlockH = if (nameVisible) nameBarH else 0.0
+    private val infoBlockH = if (infoVisible) infoBarH else 0.0
+    private val detailBlockH = if (detailVisible) detailBarH else 0.0
+    private val visibleCount = listOf(nameVisible, infoVisible, detailVisible).count { it }
+    private val totalBlockH = nameBlockH + infoBlockH + detailBlockH +
+        lineSpacingPx * (visibleCount - 1).coerceAtLeast(0)
     private val baseY = canvasH - marginVPx - totalBlockH / 2
-    val nameBgCY = if (cfg.hideName) baseY else baseY - (gap + infoBlockH) / 2
-    val infoBarCY = if (cfg.hideInfo) baseY else baseY + (nameBlockH + gap) / 2
+    private val stackTop = baseY - totalBlockH / 2
+
+    // Each bar's own centre, walked top-to-bottom over only the visible ones — a hidden line
+    // collapses out of the stack (this style's existing behavior) rather than reserving space.
+    // A hidden line still needs a value: addLogo() averages name and info regardless of visibility.
+    val nameBgCY: Double
+    val infoBarCY: Double
+    val detailBarCY: Double
+
+    init {
+        var cursor = stackTop
+        nameBgCY = if (nameVisible) {
+            val cy = cursor + nameBarH / 2
+            cursor += nameBarH + lineSpacingPx
+            cy
+        } else {
+            baseY
+        }
+        infoBarCY = if (infoVisible) {
+            val cy = cursor + infoBarH / 2
+            cursor += infoBarH + lineSpacingPx
+            cy
+        } else {
+            baseY
+        }
+        detailBarCY = if (detailVisible) cursor + detailBarH / 2 else baseY
+    }
+
+    /**
+     * Where the logo centres vertically. The name/info average is the original formula,
+     * unconditional on their own visibility (matched exactly here, `baseY`-per-line fallback and
+     * all); Detail only joins it once shown, so this is byte-identical to before while it stays
+     * hidden.
+     */
+    val logoCenterY: Double =
+        if (cfg.hideDetail) (nameBgCY + infoBarCY) / 2 else (nameBgCY + infoBarCY + detailBarCY) / 3
 
     val logoSizePx = emToPx(cfg.logoSize.toDouble(), baseSize)
     val logoMargin = emToPx(LOGO_MARGIN_EM, baseSize)
@@ -139,6 +188,11 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
         isRight -> canvasW - marginHPx - logoSpace - infoBarW / 2
         else -> marginHPx + logoSpace + infoBarW / 2
     }
+    val detailBarCX = when {
+        isCenter -> canvasW / 2 + logoSpace / 2
+        isRight -> canvasW - marginHPx - logoSpace - detailBarW / 2
+        else -> marginHPx + logoSpace + detailBarW / 2
+    }
     val textX = when {
         isCenter -> canvasW / 2 + logoSpace / 2
         isRight -> canvasW - marginHPx - logoSpace - paddingX
@@ -158,6 +212,7 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     }
     val nameTextY = nameBgCY + nameSizePx * BASELINE_FACTOR
     val infoTextY = infoBarCY + infoSizePx * BASELINE_FACTOR
+    val detailTextY = detailBarCY + detailSizePx * BASELINE_FACTOR
 
     /** Everything that slides comes in from a full canvas width away. */
     val slideDistance = canvasW
@@ -214,35 +269,113 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     }
 }
 
-/** One of the two bars, and the line on it. */
-private class GradientLine(g: GradientGeometry, isName: Boolean) {
-    val maskName = if (isName) "Name Mask" else "Info Mask"
-    val layerName = if (isName) "Name" else "Info"
-    val barName = if (isName) "Name Gradient Bar" else "Info Gradient Bar"
-    val maskW = if (isName) g.nameM.width + g.paddingX * 2 else g.infoM.width + g.paddingX * 2
-    val barW = if (isName) g.nameBarW else g.infoBarW
-    val barH = if (isName) g.nameBarH else g.infoBarH
-    val barCX = if (isName) g.nameBarCX else g.infoBarCX
-    val cy = if (isName) g.nameBgCY else g.infoBarCY
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val textY = if (isName) g.nameTextY else g.infoTextY
-    val startPct = if (isName) NAME_START_PCT else INFO_START_PCT
-    val arrivedPct = if (isName) NAME_ARRIVED_PCT else INFO_ARRIVED_PCT
-    val barStartPct = if (isName) NAME_BAR_START_PCT else INFO_BAR_START_PCT
-    val barArrivedPct = if (isName) NAME_BAR_ARRIVED_PCT else INFO_BAR_ARRIVED_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class GradientLineKind { NAME, INFO, DETAIL }
 
-    /** The name's bar takes the background colour; the info bar takes the accent. */
-    val barColor = if (isName) g.bgLottie else g.accentLottie
-    val barAlpha = if (isName) g.cfg.bgColorAlpha else g.cfg.accentColorAlpha
+/** One of the (up to) three bars, and the line on it. */
+private class GradientLine(g: GradientGeometry, kind: GradientLineKind) {
+    val maskName = when (kind) {
+        GradientLineKind.NAME -> "Name Mask"
+        GradientLineKind.INFO -> "Info Mask"
+        GradientLineKind.DETAIL -> "Detail Mask"
+    }
+    val layerName = when (kind) {
+        GradientLineKind.NAME -> "Name"
+        GradientLineKind.INFO -> "Info"
+        GradientLineKind.DETAIL -> "Detail"
+    }
+    val barName = when (kind) {
+        GradientLineKind.NAME -> "Name Gradient Bar"
+        GradientLineKind.INFO -> "Info Gradient Bar"
+        GradientLineKind.DETAIL -> "Detail Gradient Bar"
+    }
+    val maskW = when (kind) {
+        GradientLineKind.NAME -> g.nameM.width + g.paddingX * 2
+        GradientLineKind.INFO -> g.infoM.width + g.paddingX * 2
+        GradientLineKind.DETAIL -> g.detailM.width + g.paddingX * 2
+    }
+    val barW = when (kind) {
+        GradientLineKind.NAME -> g.nameBarW
+        GradientLineKind.INFO -> g.infoBarW
+        GradientLineKind.DETAIL -> g.detailBarW
+    }
+    val barH = when (kind) {
+        GradientLineKind.NAME -> g.nameBarH
+        GradientLineKind.INFO -> g.infoBarH
+        GradientLineKind.DETAIL -> g.detailBarH
+    }
+    val barCX = when (kind) {
+        GradientLineKind.NAME -> g.nameBarCX
+        GradientLineKind.INFO -> g.infoBarCX
+        GradientLineKind.DETAIL -> g.detailBarCX
+    }
+    val cy = when (kind) {
+        GradientLineKind.NAME -> g.nameBgCY
+        GradientLineKind.INFO -> g.infoBarCY
+        GradientLineKind.DETAIL -> g.detailBarCY
+    }
+    val sizePx = when (kind) {
+        GradientLineKind.NAME -> g.nameSizePx
+        GradientLineKind.INFO -> g.infoSizePx
+        GradientLineKind.DETAIL -> g.detailSizePx
+    }
+    val textY = when (kind) {
+        GradientLineKind.NAME -> g.nameTextY
+        GradientLineKind.INFO -> g.infoTextY
+        GradientLineKind.DETAIL -> g.detailTextY
+    }
+    val startPct = when (kind) {
+        GradientLineKind.NAME -> NAME_START_PCT
+        GradientLineKind.INFO -> INFO_START_PCT
+        GradientLineKind.DETAIL -> DETAIL_START_PCT
+    }
+    val arrivedPct = when (kind) {
+        GradientLineKind.NAME -> NAME_ARRIVED_PCT
+        GradientLineKind.INFO -> INFO_ARRIVED_PCT
+        GradientLineKind.DETAIL -> DETAIL_ARRIVED_PCT
+    }
+    val barStartPct = when (kind) {
+        GradientLineKind.NAME -> NAME_BAR_START_PCT
+        GradientLineKind.INFO -> INFO_BAR_START_PCT
+        GradientLineKind.DETAIL -> DETAIL_BAR_START_PCT
+    }
+    val barArrivedPct = when (kind) {
+        GradientLineKind.NAME -> NAME_BAR_ARRIVED_PCT
+        GradientLineKind.INFO -> INFO_BAR_ARRIVED_PCT
+        GradientLineKind.DETAIL -> DETAIL_BAR_ARRIVED_PCT
+    }
+    val text = when (kind) {
+        GradientLineKind.NAME -> g.cfg.nameText
+        GradientLineKind.INFO -> g.cfg.infoText
+        GradientLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        GradientLineKind.NAME -> g.cfg.nameWeight
+        GradientLineKind.INFO -> g.cfg.infoWeight
+        GradientLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        GradientLineKind.NAME -> g.nameCLottie
+        GradientLineKind.INFO -> g.infoCLottie
+        GradientLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        GradientLineKind.NAME -> g.cfg.nameTransform
+        GradientLineKind.INFO -> g.cfg.infoTransform
+        GradientLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        GradientLineKind.NAME -> g.cfg.nameColorAlpha
+        GradientLineKind.INFO -> g.cfg.infoColorAlpha
+        GradientLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 
-    /** Centred, the two lines slide in from opposite sides; otherwise both follow the alignment. */
+    /** The name's bar takes the background colour; info and detail bars take the accent. */
+    val barColor = if (kind == GradientLineKind.NAME) g.bgLottie else g.accentLottie
+    val barAlpha = if (kind == GradientLineKind.NAME) g.cfg.bgColorAlpha else g.cfg.accentColorAlpha
+
+    /** Centred, the name line slides in from the opposite side to info/detail; otherwise all follow the alignment. */
     val slideOffset = when {
-        g.isCenter -> if (isName) -g.slideDistance else g.slideDistance
+        g.isCenter -> if (kind == GradientLineKind.NAME) -g.slideDistance else g.slideDistance
         g.isRight -> g.slideDistance
         else -> -g.slideDistance
     }
@@ -256,14 +389,17 @@ private class GradientLine(g: GradientGeometry, isName: Boolean) {
 class Style5GradientBar : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = GradientGeometry(builder, cfg)
-        val name = GradientLine(g, isName = true)
-        val info = GradientLine(g, isName = false)
+        val name = GradientLine(g, GradientLineKind.NAME)
+        val info = GradientLine(g, GradientLineKind.INFO)
+        val detail = GradientLine(g, GradientLineKind.DETAIL)
         // Added first renders on top.
         if (!cfg.hideName) builder.addMaskedLine(g, name)
         if (!cfg.hideInfo) builder.addMaskedLine(g, info)
+        if (!cfg.hideDetail) builder.addMaskedLine(g, detail)
         builder.addLogo(g)
         if (!cfg.hideName && cfg.bgEnabled) builder.addGradientBar(g, name)
         if (!cfg.hideInfo && cfg.bgEnabled) builder.addGradientBar(g, info)
+        if (!cfg.hideDetail && cfg.bgEnabled) builder.addGradientBar(g, detail)
     }
 }
 
@@ -320,12 +456,12 @@ private fun LottieBuilder.addLogo(g: GradientGeometry) {
     val scale = (g.logoSizePx / cfg.logoH) * PERCENT_SCALE
     val cx = when {
         g.isCenter ->
-            g.canvasW / 2 + g.logoSpace / 2 - max(g.nameBarW, g.infoBarW) / 2 -
+            g.canvasW / 2 + g.logoSpace / 2 - maxOf(g.nameBarW, g.infoBarW, g.detailBarW) / 2 -
                 g.logoMargin - g.logoBgSize / 2
         g.isRight -> g.canvasW - g.marginHPx - g.logoBgSize / 2
         else -> g.marginHPx + g.logoBgSize / 2
     }
-    val cy = (g.nameBgCY + g.infoBarCY) / 2
+    val cy = g.logoCenterY
 
     val scaleKFs = g.keyframes(
         KeyframeInput(0.0, jsonArrayOf(0.0, 0.0, FULL_PERCENT_D)),

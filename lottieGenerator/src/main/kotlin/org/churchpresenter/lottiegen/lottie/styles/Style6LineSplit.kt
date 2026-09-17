@@ -38,6 +38,9 @@ private const val BORDER_THICKNESS_FACTOR = 0.1
 /** The info line's baseline sits this fraction of its size below the rule's gap. */
 private const val INFO_BASELINE_FACTOR = 0.425
 
+/** How far below info's own row the detail row sits, as a fraction of info's size. */
+private const val DETAIL_ROW_GAP_FACTOR = 0.15
+
 /** Letters pop away from the rule by this fraction of their size -- up above it, down below. */
 private const val POP_FACTOR = 0.8
 
@@ -46,6 +49,8 @@ private const val NAME_REVEAL_FROM_PCT = 20.0
 private const val NAME_REVEAL_TO_PCT = 60.0
 private const val INFO_REVEAL_FROM_PCT = 35.0
 private const val INFO_REVEAL_TO_PCT = 75.0
+private const val DETAIL_REVEAL_FROM_PCT = 50.0
+private const val DETAIL_REVEAL_TO_PCT = 90.0
 private const val LOGO_GROWN_PCT = 25.0
 private const val RULE_DRAWN_PCT = 40.0
 private const val END_PCT = 100.0
@@ -69,11 +74,15 @@ private class SplitGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     private val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     private val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    private val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     private val paddingX = emToPx(PAD_X_EM, baseSize)
@@ -85,6 +94,7 @@ private class SplitGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val canvasW = cfg.canvasW.toDouble()
     private val canvasH = cfg.canvasH.toDouble()
@@ -98,13 +108,18 @@ private class SplitGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     private val nameContentW = if (cfg.hideName) 0.0 else nameM.width + paddingX * 2
     private val infoContentW = if (cfg.hideInfo) 0.0 else infoM.width + paddingX * 2
-    val lineW = max(max(nameContentW, infoContentW), emToPx(MIN_RULE_EM, baseSize))
+    private val detailContentW = if (cfg.hideDetail) 0.0 else detailM.width + paddingX * 2
+    val lineW = maxOf(nameContentW, infoContentW, detailContentW, emToPx(MIN_RULE_EM, baseSize))
 
     private val nameBlockH = if (cfg.hideName) 0.0 else nameSizePx
     private val infoBlockH = if (cfg.hideInfo) 0.0 else infoSizePx
     private val gapAbove = if (cfg.hideName) 0.0 else lineGap
     private val gapBelow = if (cfg.hideInfo) 0.0 else lineGap
-    private val totalH = nameBlockH + gapAbove + linePx + gapBelow + infoBlockH
+
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtra = if (!cfg.hideDetail) lineGap + detailSizePx else 0.0
+
+    private val totalH = nameBlockH + gapAbove + linePx + gapBelow + infoBlockH + detailExtra
     private val blockTopY = canvasH - marginVPx - totalH
     val lineCY = blockTopY + nameBlockH + gapAbove + linePx / 2
 
@@ -122,31 +137,75 @@ private class SplitGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     val nameTextY = lineCY - lineGap - linePx / 2
     val infoTextY = lineCY + lineGap + linePx / 2 + infoSizePx * INFO_BASELINE_FACTOR
+    val detailTextY = infoTextY + lineGap + infoSizePx * DETAIL_ROW_GAP_FACTOR + detailSizePx * INFO_BASELINE_FACTOR
 
     fun keyframes(vararg points: KeyframeInput) =
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
 }
 
-/** One of the two lines: the name pops up out of the rule, the info line pops down out of it. */
-private class SplitLine(g: SplitGeometry, isName: Boolean) {
-    val layerName = if (isName) "Name" else "Info"
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val y = if (isName) g.nameTextY else g.infoTextY
-    val popFrom = if (isName) sizePx * POP_FACTOR else -sizePx * POP_FACTOR
-    val revealFrom = if (isName) NAME_REVEAL_FROM_PCT else INFO_REVEAL_FROM_PCT
-    val revealTo = if (isName) NAME_REVEAL_TO_PCT else INFO_REVEAL_TO_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class SplitLineKind { NAME, INFO, DETAIL }
+
+/** One of the (up to) three lines: the name pops up out of the rule, info and detail pop down. */
+private class SplitLine(g: SplitGeometry, kind: SplitLineKind) {
+    val layerName = when (kind) {
+        SplitLineKind.NAME -> "Name"
+        SplitLineKind.INFO -> "Info"
+        SplitLineKind.DETAIL -> "Detail"
+    }
+    val sizePx = when (kind) {
+        SplitLineKind.NAME -> g.nameSizePx
+        SplitLineKind.INFO -> g.infoSizePx
+        SplitLineKind.DETAIL -> g.detailSizePx
+    }
+    val y = when (kind) {
+        SplitLineKind.NAME -> g.nameTextY
+        SplitLineKind.INFO -> g.infoTextY
+        SplitLineKind.DETAIL -> g.detailTextY
+    }
+    val popFrom = if (kind == SplitLineKind.NAME) sizePx * POP_FACTOR else -sizePx * POP_FACTOR
+    val revealFrom = when (kind) {
+        SplitLineKind.NAME -> NAME_REVEAL_FROM_PCT
+        SplitLineKind.INFO -> INFO_REVEAL_FROM_PCT
+        SplitLineKind.DETAIL -> DETAIL_REVEAL_FROM_PCT
+    }
+    val revealTo = when (kind) {
+        SplitLineKind.NAME -> NAME_REVEAL_TO_PCT
+        SplitLineKind.INFO -> INFO_REVEAL_TO_PCT
+        SplitLineKind.DETAIL -> DETAIL_REVEAL_TO_PCT
+    }
+    val text = when (kind) {
+        SplitLineKind.NAME -> g.cfg.nameText
+        SplitLineKind.INFO -> g.cfg.infoText
+        SplitLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        SplitLineKind.NAME -> g.cfg.nameWeight
+        SplitLineKind.INFO -> g.cfg.infoWeight
+        SplitLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        SplitLineKind.NAME -> g.nameCLottie
+        SplitLineKind.INFO -> g.infoCLottie
+        SplitLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        SplitLineKind.NAME -> g.cfg.nameTransform
+        SplitLineKind.INFO -> g.cfg.infoTransform
+        SplitLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        SplitLineKind.NAME -> g.cfg.nameColorAlpha
+        SplitLineKind.INFO -> g.cfg.infoColorAlpha
+        SplitLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 }
 
 class Style6LineSplit : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = SplitGeometry(builder, cfg)
-        if (!cfg.hideName) builder.addPoppingLine(g, SplitLine(g, isName = true))
-        if (!cfg.hideInfo) builder.addPoppingLine(g, SplitLine(g, isName = false))
+        if (!cfg.hideName) builder.addPoppingLine(g, SplitLine(g, SplitLineKind.NAME))
+        if (!cfg.hideInfo) builder.addPoppingLine(g, SplitLine(g, SplitLineKind.INFO))
+        if (!cfg.hideDetail) builder.addPoppingLine(g, SplitLine(g, SplitLineKind.DETAIL))
         builder.addLogo(g)
         builder.addRule(g)
     }

@@ -6,7 +6,6 @@ import org.churchpresenter.lottiegen.lottie.emToPx
 import org.churchpresenter.lottiegen.lottie.hexToLottie
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
-import kotlin.math.max
 
 /**
  * Where a text baseline sits relative to the block's centre, as a fraction of that line's own
@@ -17,6 +16,14 @@ import kotlin.math.max
 private const val LONE_LINE_BASELINE_FACTOR = 0.35
 private const val UPPER_LINE_BASELINE_FACTOR = 0.1
 private const val LOWER_LINE_BASELINE_FACTOR = 0.9
+
+/**
+ * How far below info's own row the detail row sits, as a fraction of info's size — continuing the
+ * same name→info gap shape (a [lineSpacingPx] step plus each neighbor's own optical correction)
+ * one more row down, so the three read as an evenly-spaced stack rather than crowding the third
+ * line against the second.
+ */
+private const val DETAIL_ROW_GAP_FACTOR = 0.15
 
 
 /** A resolved point in canvas pixels. */
@@ -50,14 +57,18 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
 
     val nameSizePx = em(cfg.nameSize.toDouble())
     val infoSizePx = em(cfg.infoSize.toDouble())
+    val detailSizePx = em(cfg.detailSize.toDouble())
 
-    // Both fields are always measured — hiding a line must not shrink the block
+    // All three fields are always measured — hiding a line must not shrink the block
     // (classic-style behavior, see Style1Bar).
     val nameMeasured = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform
     )
     val infoMeasured = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform
+    )
+    val detailMeasured = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform
     )
 
     private val marginHPx = remToPx(cfg.marginH.toDouble(), baseSize)
@@ -116,6 +127,9 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     /** The info line's text-position anchor (classic baseline correction included). */
     val infoLineY: Double
 
+    /** The detail line's text-position anchor (classic baseline correction included). */
+    val detailLineY: Double
+
     init {
         val nameVisible = !cfg.hideName
         val infoVisible = !cfg.hideInfo
@@ -128,6 +142,16 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             nameLineY = baseY - lineSpacingPx / 2 - nameSizePx * UPPER_LINE_BASELINE_FACTOR
             infoLineY = baseY + lineSpacingPx / 2 + infoSizePx * LOWER_LINE_BASELINE_FACTOR
         }
+        // Purely additive: name/info above are computed exactly as before detail existed, so a
+        // spec that never places a DETAIL_LINE element renders byte-identically. Detail gets its
+        // own row one more spacing step below where info's row sits — or, when it is the only
+        // line showing (name and info both hidden), the same optical centering the other two get.
+        val detailAlone = spec.layout.centerSingleLine && !nameVisible && !infoVisible
+        detailLineY = if (detailAlone) {
+            baseY + detailSizePx * LONE_LINE_BASELINE_FACTOR
+        } else {
+            infoLineY + lineSpacingPx + infoSizePx * DETAIL_ROW_GAP_FACTOR + detailSizePx * LOWER_LINE_BASELINE_FACTOR
+        }
     }
 
     fun visible(rules: List<VisibilityRule>): Boolean = rules.all { rule ->
@@ -137,6 +161,8 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             VisibilityRule.LOGO_ENABLED -> cfg.logoEnabled
             VisibilityRule.NAME_VISIBLE -> !cfg.hideName
             VisibilityRule.INFO_VISIBLE -> !cfg.hideInfo
+            VisibilityRule.DETAIL_VISIBLE -> !cfg.hideDetail
+            VisibilityRule.DETAIL_HIDDEN -> cfg.hideDetail
             VisibilityRule.BORDER_SET -> cfg.borderThickness > 0
         }
     }
@@ -166,6 +192,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
             LineAnchor.BLOCK_CENTER -> baseY
             LineAnchor.NAME_LINE -> nameLineY
             LineAnchor.INFO_LINE -> infoLineY
+            LineAnchor.DETAIL_LINE -> detailLineY
         }
         return SpecPoint(x0 + flowSign * em(offsetXEm), y0 + em(offsetYEm))
     }
@@ -182,6 +209,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         is TextElement -> when (element.field) {
             TextFieldRef.NAME -> nameMeasured.width.toDouble() to nameSizePx
             TextFieldRef.INFO -> infoMeasured.width.toDouble() to infoSizePx
+            TextFieldRef.DETAIL -> detailMeasured.width.toDouble() to detailSizePx
         }
         is LogoElement -> {
             val sizePx = em(element.sizeEm ?: cfg.logoSize.toDouble())
@@ -214,6 +242,8 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
                 (nameMeasured.width + 2 * em(size.padXEm)) to (nameSizePx + 2 * em(size.padYEm))
             TextFieldRef.INFO ->
                 (infoMeasured.width + 2 * em(size.padXEm)) to (infoSizePx + 2 * em(size.padYEm))
+            TextFieldRef.DETAIL ->
+                (detailMeasured.width + 2 * em(size.padXEm)) to (detailSizePx + 2 * em(size.padYEm))
         }
         is SizeSpec.CanvasWidth -> canvasW to em(size.hEm)
     }
@@ -222,7 +252,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     val paint = SpecPaint(cfg, ::em, borderPx)
 
     /** Fitting a shape to the measured width of the text. */
-    val fit = SpecFit(nameMeasured, infoMeasured)
+    val fit = SpecFit(nameMeasured, infoMeasured, detailMeasured)
 
     private fun slotFor(id: String): ResolvedSlot {
         if (id.isEmpty() || id == BLOCK_SLOT) {
@@ -241,7 +271,7 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
     private fun coreWidth(slot: SlotSpec): Double = when (slot.kind) {
         SlotKind.LOGO -> em(cfg.logoSize.toDouble())
         SlotKind.FIXED -> em(slot.widthEm)
-        SlotKind.TEXT -> max(nameMeasured.width, infoMeasured.width) + TEXT_CORE_PAD_PX
+        SlotKind.TEXT -> maxOf(nameMeasured.width, infoMeasured.width, detailMeasured.width) + TEXT_CORE_PAD_PX
     }
 
     companion object {
@@ -275,6 +305,7 @@ class SpecPaint(
         when (role) {
             ColorRole.NAME -> cfg.nameColor
             ColorRole.INFO -> cfg.infoColor
+            ColorRole.DETAIL -> cfg.detailColor
             ColorRole.ACCENT -> cfg.accentColor
             ColorRole.BG -> cfg.bgColor
             ColorRole.BORDER -> cfg.borderColor
@@ -284,6 +315,7 @@ class SpecPaint(
     fun roleAlpha(role: ColorRole): Double = when (role) {
         ColorRole.NAME -> cfg.nameColorAlpha
         ColorRole.INFO -> cfg.infoColorAlpha
+        ColorRole.DETAIL -> cfg.detailColorAlpha
         ColorRole.ACCENT -> cfg.accentColorAlpha
         ColorRole.BG -> cfg.bgColorAlpha
         ColorRole.BORDER -> cfg.borderColorAlpha
@@ -299,13 +331,15 @@ class SpecPaint(
 class SpecFit(
     private val nameMeasured: TextSize,
     private val infoMeasured: TextSize,
+    private val detailMeasured: TextSize,
 ) {
     /** The measured width a fit-to-width shape stretches to. */
     fun basisWidthPx(basis: WidthBasis): Double = when (basis) {
         WidthBasis.NAME -> nameMeasured.width.toDouble()
         WidthBasis.INFO -> infoMeasured.width.toDouble()
+        WidthBasis.DETAIL -> detailMeasured.width.toDouble()
         WidthBasis.TEXT_BLOCK ->
-            max(nameMeasured.width, infoMeasured.width) + SpecLayoutContext.TEXT_CORE_PAD_PX
+            maxOf(nameMeasured.width, infoMeasured.width, detailMeasured.width) + SpecLayoutContext.TEXT_CORE_PAD_PX
     }
 
     /**
