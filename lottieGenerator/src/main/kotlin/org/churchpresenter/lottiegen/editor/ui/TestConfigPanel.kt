@@ -119,6 +119,7 @@ private fun TestColorFields(state: EditorState) {
         val (color, alpha) = when (role) {
             ColorRole.NAME -> cfg.nameColor to cfg.nameColorAlpha
             ColorRole.INFO -> cfg.infoColor to cfg.infoColorAlpha
+            ColorRole.DETAIL -> cfg.detailColor to cfg.detailColorAlpha
             ColorRole.ACCENT -> cfg.accentColor to cfg.accentColorAlpha
             ColorRole.BG -> cfg.bgColor to cfg.bgColorAlpha
             ColorRole.BORDER -> cfg.borderColor to cfg.borderColorAlpha
@@ -132,6 +133,7 @@ private fun TestColorFields(state: EditorState) {
                     when (role) {
                         ColorRole.NAME -> it.copy(nameColor = new)
                         ColorRole.INFO -> it.copy(infoColor = new)
+                        ColorRole.DETAIL -> it.copy(detailColor = new)
                         ColorRole.ACCENT -> it.copy(accentColor = new)
                         ColorRole.BG -> it.copy(bgColor = new)
                         ColorRole.BORDER -> it.copy(borderColor = new)
@@ -143,6 +145,7 @@ private fun TestColorFields(state: EditorState) {
                     when (role) {
                         ColorRole.NAME -> it.copy(nameColorAlpha = new)
                         ColorRole.INFO -> it.copy(infoColorAlpha = new)
+                        ColorRole.DETAIL -> it.copy(detailColorAlpha = new)
                         ColorRole.ACCENT -> it.copy(accentColorAlpha = new)
                         ColorRole.BG -> it.copy(bgColorAlpha = new)
                         ColorRole.BORDER -> it.copy(borderColorAlpha = new)

@@ -73,14 +73,27 @@ inconsistent/broken next to them in the picker:
 - **Alignment** (`cfg.align`: `"left"`/`"center"`/`"right"`) — drives text justify (`0`/`2`/`1`)
   and which direction elements slide in from. Study `Style1Bar.kt`'s `isRight`/`isCenter`
   branching for base position, bar position, and slide-offset sign.
-- **Visibility toggles**: `hideName`, `hideInfo`, `logoEnabled`, `bgEnabled` — each must actually
-  skip building/adding that layer, not just hide it, when false.
-- **Colors + alpha**: `nameColor`/`infoColor`/`accentColor`/`bgColor`/`borderColor`, each with a
-  matching `*ColorAlpha` (0-100) — convert hex via `hexToLottie(...)` and pass alpha into
-  `makeFill`/`makeAnimatedStroke`.
+- **Visibility toggles**: `hideName`, `hideInfo`, `hideDetail`, `logoEnabled`, `bgEnabled` — each
+  must actually skip building/adding that layer, not just hide it, when false.
+- **The optional third line** (`detailText`/`hideDetail`, added 2026-09): every style (1-60) has
+  one now, hidden by default (`hideDetail = true`) so an existing preset renders byte-identically
+  until an operator opts in. A new style must support it too. The pattern that keeps old presets
+  unaffected: compute the extra row's height as zero when `cfg.hideDetail`, add it into whatever
+  total-block-height term centers/positions the existing lines, and only then does enabling it
+  legitimately shift things (the block grows/recenters; it must never move when hidden). See
+  `Style1Bar.kt`'s `detailExtraEm`/`BarLineKind.DETAIL` for the compiled-style shape, or
+  `style14_split_shutter.json`'s `"detail"` element for the spec shape — `SpecLayoutContext`
+  already resolves `DETAIL_LINE`/`DETAIL_VISIBLE`/`TextFieldRef.DETAIL`/`ColorRole.DETAIL` for any
+  spec style for free. Verify with `./gradlew :lottieGenerator:dumpStyleReview -Pstyles=N` (see
+  the module's `AGENT.md`) before/after wiring it — that tool exists because a first attempt on
+  Style 14 duplicated a decorative element and overflowed, caught only by rendering it.
+- **Colors + alpha**: `nameColor`/`infoColor`/`detailColor`/`accentColor`/`bgColor`/`borderColor`,
+  each with a matching `*ColorAlpha` (0-100) — convert hex via `hexToLottie(...)` and pass alpha
+  into `makeFill`/`makeAnimatedStroke`.
 - **Shape**: `corners` (corner radius, via `emToPx`), `borderThickness` (0 = no border/stroke).
-- **Text style**: `nameTransform`/`infoTransform` (`"uppercase"`/`"none"`, handled inside
-  `makeTextData` — don't re-implement), `nameWeight`/`infoWeight` (Bold vs Regular cutoff at 700).
+- **Text style**: `nameTransform`/`infoTransform`/`detailTransform` (`"uppercase"`/`"none"`,
+  handled inside `makeTextData` — don't re-implement), `nameWeight`/`infoWeight`/`detailWeight`
+  (Bold vs Regular cutoff at 700).
 - **Timing**: never hardcode frame counts — always derive from `builder.inFrames`/`holdFrames`/
   `outFrames`, which already reflect `cfg.animDuration`/`holdDuration`.
 - **Layer naming** (`nm` field): follow the existing convention — `"Logo"`, `"<Field> Mask"`,
@@ -129,7 +142,8 @@ panel is the actual acceptance gate:
    - All three alignments (left/center/right)
    - Logo on and off
    - Background on and off
-   - `hideName`/`hideInfo` toggled independently
+   - `hideName`/`hideInfo`/`hideDetail` toggled independently, and confirm the layout with
+     `hideDetail = true` (the default) is unaffected by whatever Detail wiring you added
    - A light-on-dark and a dark-on-light color combination (to catch any hardcoded color
      assumption)
 3. Confirm the in→hold→out lifecycle looks right at both a short and long `animDuration`/
@@ -189,7 +203,7 @@ corners, logo, timing) by construction. The developer Style Editor authors these
    elements (N offset/rotated/scaled copies with optional fade-out — leaf rows, dot trails);
    SCALE tracks accept [sx, sy] for squash/stretch. See the bundled **vine demo** template
    (New → From vine demo, `src/main/resources/styles/demo_vine.json`) which exercises all of it.
-   **Width fitting** (`fitWidthTo` — Name width / Info width / Widest text line): on paths and
+   **Width fitting** (`fitWidthTo` — Name width / Info width / Detail width / Widest text line): on paths and
    polygons it scales x-coordinates (and tangents) so the shape spans the measured text instead
    of a fixed em width (underlines, pulse lines); on a Repeat it derives the copy x-offset so
    the whole row spans the basis width (bulb rows that hug the panel at any text length).

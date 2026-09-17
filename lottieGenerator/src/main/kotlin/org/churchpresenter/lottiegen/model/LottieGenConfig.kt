@@ -14,23 +14,30 @@ data class LottieGenConfig(
     // Text
     val nameText: String = "Church Presenter",
     val infoText: String = "Software Engineer",
+    /** A third, optional line — hidden by default so an existing preset still renders as two. */
+    val detailText: String = "",
     // Text Style
     val fontFamily: String = "Verdana",
     val baseSize: Int = 24,
     val nameSize: Float = 1.2f,
     val infoSize: Float = 0.9f,
+    val detailSize: Float = 0.75f,
     val nameWeight: Int = 700,
     val infoWeight: Int = 400,
+    val detailWeight: Int = 400,
     val nameTransform: String = "uppercase",
     val infoTransform: String = "none",
+    val detailTransform: String = "none",
     // Colors
     val nameColor: String = "#F2F2F2",
     val infoColor: String = "#CCCCCC",
+    val detailColor: String = "#CCCCCC",
     val accentColor: String = "#D54141",
     val bgColor: String = "#222222",
     val borderColor: String = "#D54141",
     val nameColorAlpha: Int = 100,
     val infoColorAlpha: Int = 100,
+    val detailColorAlpha: Int = 100,
     val accentColorAlpha: Int = 100,
     val bgColorAlpha: Int = 100,
     val borderColorAlpha: Int = 100,
@@ -41,6 +48,8 @@ data class LottieGenConfig(
     val shadowEnabled: Boolean = false,
     val hideName: Boolean = false,
     val hideInfo: Boolean = false,
+    /** Defaults hidden: the third line is opt-in, so an old preset still renders as two lines. */
+    val hideDetail: Boolean = true,
     // Logo
     val logoEnabled: Boolean = false,
     val logoSize: Float = 3.5f,

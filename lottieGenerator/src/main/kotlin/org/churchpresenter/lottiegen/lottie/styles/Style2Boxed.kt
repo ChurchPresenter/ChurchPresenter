@@ -47,6 +47,7 @@ private const val BG_CORNER_FACTOR = 1.1
 private const val NAME_START_CENTRE_PCT = 50.0
 private const val NAME_START_PCT = 45.0
 private const val INFO_START_PCT = 50.0
+private const val DETAIL_START_PCT = 55.0
 private const val LOGO_START_PCT = 50.0
 private const val LOGO_BG_GROWN_PCT = 45.0
 private const val END_PCT = 100.0
@@ -70,11 +71,15 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     val paddingX = emToPx(BOX_PAD_X_EM, baseSize)
@@ -91,6 +96,7 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val canvasW = cfg.canvasW.toDouble()
     val canvasH = cfg.canvasH.toDouble()
@@ -101,9 +107,15 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val nameBoxH = nameSizePx + paddingY * 2
     val infoBoxW = infoM.width + paddingX * 2
     val infoBoxH = infoSizePx + paddingY * 2
+    val detailBoxW = detailM.width + paddingX * 2
+    val detailBoxH = detailSizePx + paddingY * 2
 
-    val totalH = nameBoxH + lineSpacingPx + infoBoxH
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtra = if (!cfg.hideDetail) lineSpacingPx + detailBoxH else 0.0
+
+    val totalH = nameBoxH + lineSpacingPx + infoBoxH + detailExtra
     val baseY = canvasH - marginVPx - totalH / 2
+    private val stackTop = baseY - totalH / 2
 
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
     val logoBgW = if (hasLogo) logoSizePx + emToPx(LOGO_BG_PAD_W_EM, baseSize) else 0.0
@@ -143,6 +155,11 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         isCenter -> baseX
         else -> baseX + infoBoxW / 2
     }
+    val detailX = when {
+        isRight -> baseX - detailBoxW / 2
+        isCenter -> baseX
+        else -> baseX + detailBoxW / 2
+    }
     val nameTextX = when {
         isRight -> baseX - paddingX
         isCenter -> nameX
@@ -153,11 +170,18 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         isCenter -> infoX
         else -> baseX + paddingX
     }
+    val detailTextX = when {
+        isRight -> baseX - paddingX
+        isCenter -> detailX
+        else -> baseX + paddingX
+    }
 
-    val nameBgY = baseY - lineSpacingPx / 2 - infoBoxH / 2
-    val infoBgY = baseY + nameBoxH / 2 + lineSpacingPx / 2
+    val nameBgY = stackTop + nameBoxH / 2
+    val infoBgY = stackTop + nameBoxH + lineSpacingPx + infoBoxH / 2
+    val detailBgY = stackTop + nameBoxH + lineSpacingPx + infoBoxH + lineSpacingPx + detailBoxH / 2
     val nameTextY = nameBgY + nameSizePx * BASELINE_FACTOR
     val infoTextY = infoBgY + infoSizePx * BASELINE_FACTOR
+    val detailTextY = detailBgY + detailSizePx * BASELINE_FACTOR
 
     val justify = when {
         isRight -> JUSTIFY_RIGHT
@@ -167,52 +191,127 @@ private class BoxGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val namePctStart = if (isCenter) NAME_START_CENTRE_PCT else NAME_START_PCT
     private val nameSlideDir = if (isRight) 1.0 else -1.0
     private val infoSlideDir = if (isCenter) 1.0 else nameSlideDir
+    private val detailSlideDir = if (isCenter) 1.0 else nameSlideDir
     val nameSlideOffset = nameBoxW * SLIDE_CLEARANCE_FACTOR * nameSlideDir
     val infoSlideOffset = infoBoxW * SLIDE_CLEARANCE_FACTOR * infoSlideDir
+    val detailSlideOffset = detailBoxW * SLIDE_CLEARANCE_FACTOR * detailSlideDir
 
     fun keyframes(vararg points: KeyframeInput) =
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
 }
 
-/**
- * One of the two boxed lines. The name and the info line differ only in which half of the config
- * they read and which colour their plate takes, so this says that once.
- */
-private class BoxLine(g: BoxGeometry, isName: Boolean) {
-    val maskName = if (isName) "Name Mask" else "Info Mask"
-    val layerName = if (isName) "Name" else "Info"
-    val bgName = if (isName) "Name BG" else "Info BG"
-    val boxW = if (isName) g.nameBoxW else g.infoBoxW
-    val boxH = if (isName) g.nameBoxH else g.infoBoxH
-    val boxX = if (isName) g.nameX else g.infoX
-    val boxY = if (isName) g.nameBgY else g.infoBgY
-    val textX = if (isName) g.nameTextX else g.infoTextX
-    val textY = if (isName) g.nameTextY else g.infoTextY
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val slideOffset = if (isName) g.nameSlideOffset else g.infoSlideOffset
-    val startPct = if (isName) g.namePctStart else INFO_START_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class BoxLineKind { NAME, INFO, DETAIL }
 
-    /** The name's plate takes the accent colour; the info line's takes the background colour. */
-    val plateColor = if (isName) g.accentLottie else g.bgLottie
-    val plateAlpha = if (isName) g.cfg.accentColorAlpha else g.cfg.bgColorAlpha
+/**
+ * One of the (up to) three boxed lines. They differ only in which slice of the config they read
+ * and which colour their plate takes, so this says that once.
+ */
+private class BoxLine(g: BoxGeometry, kind: BoxLineKind) {
+    val maskName = when (kind) {
+        BoxLineKind.NAME -> "Name Mask"
+        BoxLineKind.INFO -> "Info Mask"
+        BoxLineKind.DETAIL -> "Detail Mask"
+    }
+    val layerName = when (kind) {
+        BoxLineKind.NAME -> "Name"
+        BoxLineKind.INFO -> "Info"
+        BoxLineKind.DETAIL -> "Detail"
+    }
+    val bgName = when (kind) {
+        BoxLineKind.NAME -> "Name BG"
+        BoxLineKind.INFO -> "Info BG"
+        BoxLineKind.DETAIL -> "Detail BG"
+    }
+    val boxW = when (kind) {
+        BoxLineKind.NAME -> g.nameBoxW
+        BoxLineKind.INFO -> g.infoBoxW
+        BoxLineKind.DETAIL -> g.detailBoxW
+    }
+    val boxH = when (kind) {
+        BoxLineKind.NAME -> g.nameBoxH
+        BoxLineKind.INFO -> g.infoBoxH
+        BoxLineKind.DETAIL -> g.detailBoxH
+    }
+    val boxX = when (kind) {
+        BoxLineKind.NAME -> g.nameX
+        BoxLineKind.INFO -> g.infoX
+        BoxLineKind.DETAIL -> g.detailX
+    }
+    val boxY = when (kind) {
+        BoxLineKind.NAME -> g.nameBgY
+        BoxLineKind.INFO -> g.infoBgY
+        BoxLineKind.DETAIL -> g.detailBgY
+    }
+    val textX = when (kind) {
+        BoxLineKind.NAME -> g.nameTextX
+        BoxLineKind.INFO -> g.infoTextX
+        BoxLineKind.DETAIL -> g.detailTextX
+    }
+    val textY = when (kind) {
+        BoxLineKind.NAME -> g.nameTextY
+        BoxLineKind.INFO -> g.infoTextY
+        BoxLineKind.DETAIL -> g.detailTextY
+    }
+    val sizePx = when (kind) {
+        BoxLineKind.NAME -> g.nameSizePx
+        BoxLineKind.INFO -> g.infoSizePx
+        BoxLineKind.DETAIL -> g.detailSizePx
+    }
+    val slideOffset = when (kind) {
+        BoxLineKind.NAME -> g.nameSlideOffset
+        BoxLineKind.INFO -> g.infoSlideOffset
+        BoxLineKind.DETAIL -> g.detailSlideOffset
+    }
+    val startPct = when (kind) {
+        BoxLineKind.NAME -> g.namePctStart
+        BoxLineKind.INFO -> INFO_START_PCT
+        BoxLineKind.DETAIL -> DETAIL_START_PCT
+    }
+    val text = when (kind) {
+        BoxLineKind.NAME -> g.cfg.nameText
+        BoxLineKind.INFO -> g.cfg.infoText
+        BoxLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        BoxLineKind.NAME -> g.cfg.nameWeight
+        BoxLineKind.INFO -> g.cfg.infoWeight
+        BoxLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        BoxLineKind.NAME -> g.nameCLottie
+        BoxLineKind.INFO -> g.infoCLottie
+        BoxLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        BoxLineKind.NAME -> g.cfg.nameTransform
+        BoxLineKind.INFO -> g.cfg.infoTransform
+        BoxLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        BoxLineKind.NAME -> g.cfg.nameColorAlpha
+        BoxLineKind.INFO -> g.cfg.infoColorAlpha
+        BoxLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
+
+    /** The name's plate takes the accent colour; info and detail take the background colour. */
+    val plateColor = if (kind == BoxLineKind.NAME) g.accentLottie else g.bgLottie
+    val plateAlpha = if (kind == BoxLineKind.NAME) g.cfg.accentColorAlpha else g.cfg.bgColorAlpha
 }
 
 class Style2Boxed : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = BoxGeometry(builder, cfg)
-        val name = BoxLine(g, isName = true)
-        val info = BoxLine(g, isName = false)
+        val name = BoxLine(g, BoxLineKind.NAME)
+        val info = BoxLine(g, BoxLineKind.INFO)
+        val detail = BoxLine(g, BoxLineKind.DETAIL)
         // Added first renders on top.
         builder.addLogo(g)
         if (!cfg.hideName) builder.addMaskedLine(g, name)
         if (!cfg.hideInfo) builder.addMaskedLine(g, info)
+        if (!cfg.hideDetail) builder.addMaskedLine(g, detail)
         if (!cfg.hideName && cfg.bgEnabled) builder.addLinePlate(g, name)
         if (!cfg.hideInfo && cfg.bgEnabled) builder.addLinePlate(g, info)
+        if (!cfg.hideDetail && cfg.bgEnabled) builder.addLinePlate(g, detail)
         builder.addLogoPlate(g)
     }
 }
