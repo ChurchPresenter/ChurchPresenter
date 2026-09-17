@@ -18,4 +18,9 @@ sealed interface ServiceTemplate {
     data class CopyOf(val service: PlannedService) : ServiceTemplate {
         override val id: String get() = service.id
     }
+
+    /** A template the user saved with **Template** in the run-of-show header. */
+    data class Saved(val template: SavedTemplate) : ServiceTemplate {
+        override val id: String get() = template.id
+    }
 }

@@ -22,6 +22,8 @@ data class CalendarDocument(
     val version: Int = CURRENT_CALENDAR_VERSION,
     val services: List<PlannedService> = emptyList(),
     val preferences: CalendarPreferences = CalendarPreferences(),
+    /** Saved run-of-show templates, offered under `Start from` when a service is added. */
+    val templates: List<SavedTemplate> = emptyList(),
 ) {
     /** Every service planned for [date], earliest start first. */
     fun servicesOn(date: String): List<PlannedService> =
@@ -44,6 +46,30 @@ data class CalendarDocument(
     }
 
     fun withoutService(id: String): CalendarDocument = copy(services = services.filterNot { it.id == id })
+
+    /** Adds every service in [added] at once, so a whole series is one write rather than one per week. */
+    fun withServices(added: List<PlannedService>): CalendarDocument =
+        added.fold(this) { document, service -> document.withService(service) }
+
+    /** Every occurrence of the series [seriesId], in date order. Empty for a blank id. */
+    fun servicesInSeries(seriesId: String): List<PlannedService> =
+        if (seriesId.isEmpty()) emptyList() else services.filter { it.seriesId == seriesId }.sortedBy { it.date }
+
+    fun templateById(id: String): SavedTemplate? = templates.firstOrNull { it.id == id }
+
+    /** Adds a template, or replaces the one already saved under the same name. */
+    fun withTemplate(template: SavedTemplate): CalendarDocument {
+        val index = templates.indexOfFirst { it.id == template.id || it.name.equals(template.name, ignoreCase = true) }
+        return copy(
+            templates = if (index >= 0) {
+                templates.toMutableList().also { it[index] = template }
+            } else {
+                templates + template
+            }
+        )
+    }
+
+    fun withoutTemplate(id: String): CalendarDocument = copy(templates = templates.filterNot { it.id == id })
 }
 
 const val CURRENT_CALENDAR_VERSION: Int = 1
@@ -84,7 +110,19 @@ data class PlannedService(
     val cues: List<ServiceCue> = emptyList(),
     /** Whether this service's cues may fire. False is "planned, but do not automate". */
     val armed: Boolean = true,
+    /**
+     * Shared by every occurrence of a repeating service; empty for a one-off.
+     *
+     * The occurrences are ordinary services — each has its own run of show and can be edited on its
+     * own — and the id is only what lets "all in series" find the others. There is no series record
+     * to keep in step with them.
+     */
+    val seriesId: String = "",
+    /** How the series repeats, a [ServiceRepeat] id. Blank on a one-off. */
+    val repeat: String = "",
 ) {
+    fun isInSeries(): Boolean = seriesId.isNotEmpty()
+
     /** The planned length of the whole service, counting only rows that have an estimate. */
     fun plannedTotalSeconds(): Int = plannedSeconds.values.sum()
 
@@ -138,6 +176,41 @@ enum class ServiceKind(val id: String, val colorHex: String) {
         /** Unknown ids fall back to [SUNDAY] rather than throwing — a hand-edited file still opens. */
         fun from(id: String): ServiceKind = entries.firstOrNull { it.id == id } ?: SUNDAY
     }
+}
+
+/**
+ * How a repeating service recurs.
+ *
+ * Monthly keeps the weekday ordinal — a service on the third Sunday stays on the third Sunday —
+ * because that is how churches plan; "the 20th of every month" lands on a weekday most months.
+ */
+enum class ServiceRepeat(val id: String) {
+    NONE(""),
+    WEEKLY("weekly"),
+    BIWEEKLY("biweekly"),
+    MONTHLY("monthly");
+
+    companion object {
+        fun from(id: String): ServiceRepeat = entries.firstOrNull { it.id == id } ?: NONE
+    }
+}
+
+/**
+ * A run of show saved to start new services from — the design's `Sunday Morning · Template`.
+ *
+ * Its rows are copied and re-keyed on every use (see `ServiceTemplate.Saved`), never shared, so
+ * editing a service made from it leaves the template as it was.
+ */
+@Serializable
+data class SavedTemplate(
+    val id: String,
+    val name: String,
+    val startTime: String,
+    val kind: String = ServiceKind.SUNDAY.id,
+    val items: List<ScheduleItem> = emptyList(),
+    val plannedSeconds: Map<String, Int> = emptyMap(),
+) {
+    fun contentItems(): List<ScheduleItem> = items.filterNot { it is ScheduleItem.LabelItem }
 }
 
 /** Calendar-wide preferences, saved beside the services rather than in `settings.json`. */

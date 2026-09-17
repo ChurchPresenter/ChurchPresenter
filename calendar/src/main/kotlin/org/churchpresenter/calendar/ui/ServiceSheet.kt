@@ -8,14 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material3.MaterialTheme
@@ -29,8 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -50,24 +45,36 @@ import org.churchpresenter.calendar.generated.resources.calendar_service_type
 import org.churchpresenter.calendar.generated.resources.calendar_start_from
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceKind
+import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
+import java.time.LocalDate
 
 private val SHEET_WIDTH = 460.dp
 /** `Start time` and `Type` share the row as 1 : 1.3, so three segment labels are not truncated. */
 private const val TYPE_FLEX = 1.3f
-private val SELECTOR_HEIGHT = 34.dp
-private val TRACK_PADDING = 2.dp
-private val TRACK_GAP = 2.dp
-private const val TRACK_TINT = 0.5f
+
+/**
+ * Everything the sheet collects, handed back whole on Save.
+ *
+ * [template] only means something for a new service; [wholeSeries] only for one that is already
+ * part of a series. The sheet shows whichever applies and leaves the other at its default.
+ */
+data class ServiceForm(
+    val name: String,
+    val startTime: String,
+    val kind: ServiceKind,
+    val template: ServiceTemplate = ServiceTemplate.Blank,
+    val wholeSeries: Boolean = false,
+)
 
 /**
  * Create or edit one service.
  *
- * Laid out to the design: `Name` full width, `Start time` beside a three-way `Type` selector, and —
- * only when the service is new — a `Start from` list. Delete sits at the far left of the footer,
- * away from Save.
+ * Laid out to the design: `Name` full width, `Start time` beside a three-way `Type` selector,
+ * `Applies to` for a series member, and — only when the service is new — a `Start from` list.
+ * Delete sits at the far left of the footer, away from Save.
  *
  * The fields are [CompactTextField], not Material 3's `OutlinedTextField`. That is the whole reason
  * this dialog reads as the design now: an M3 field is about 56dp tall with a floating label, which
@@ -77,25 +84,30 @@ private const val TRACK_TINT = 0.5f
 fun ServiceSheet(
     existing: PlannedService?,
     defaultStartTime: String,
-    dateLabel: String,
+    date: LocalDate,
+    /** How many services share [existing]'s series, for the `Applies to` note. Zero for a one-off. */
+    seriesSize: Int,
     templates: List<ServiceTemplate>,
     templateLabel: @Composable (ServiceTemplate) -> Pair<String, String>,
-    onSave: (name: String, startTime: String, kind: ServiceKind, template: ServiceTemplate) -> Unit,
-    onDelete: (() -> Unit)?,
+    onSave: (ServiceForm) -> Unit,
+    onDelete: ((wholeSeries: Boolean) -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    var name by remember(existing) { mutableStateOf(existing?.name ?: "") }
-    var startTime by remember(existing) { mutableStateOf(existing?.startTime ?: defaultStartTime) }
-    var kind by remember(existing) { mutableStateOf(ServiceKind.from(existing?.kind ?: ServiceKind.SUNDAY.id)) }
-    var template by remember(existing) { mutableStateOf<ServiceTemplate>(ServiceTemplate.Blank) }
-
-    val timeValid = parseStoredTime(startTime) != null
-    val canSave = name.isNotBlank() && timeValid
+    var form by remember(existing) {
+        mutableStateOf(
+            ServiceForm(
+                name = existing?.name ?: "",
+                startTime = existing?.startTime ?: defaultStartTime,
+                kind = ServiceKind.from(existing?.kind ?: ServiceKind.SUNDAY.id),
+            )
+        )
+    }
+    val canSave = form.name.isNotBlank() && parseStoredTime(form.startTime) != null
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
             title = if (existing == null) {
-                stringResource(Res.string.calendar_new_service_on, dateLabel)
+                stringResource(Res.string.calendar_new_service_on, shortDate(date))
             } else {
                 stringResource(Res.string.calendar_edit_service)
             },
@@ -104,7 +116,10 @@ fun ServiceSheet(
             onDismiss = onDismiss,
             footer = {
                 if (onDelete != null) {
-                    QuietButton(label = stringResource(Res.string.calendar_delete), onClick = onDelete)
+                    QuietButton(
+                        label = stringResource(Res.string.calendar_delete),
+                        onClick = { onDelete(form.wholeSeries) },
+                    )
                 }
                 Spacer(Modifier.weight(1f))
                 QuietButton(label = stringResource(Res.string.calendar_cancel), onClick = onDismiss)
@@ -114,70 +129,104 @@ fun ServiceSheet(
                     } else {
                         stringResource(Res.string.calendar_save)
                     },
-                    onClick = { onSave(name.trim(), startTime.trim(), kind, template) },
+                    onClick = { onSave(form.copy(name = form.name.trim(), startTime = form.startTime.trim())) },
                     enabled = canSave,
                 )
             },
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 13.dp),
-            ) {
-                Column {
-                    FieldLabel(stringResource(Res.string.calendar_service_name))
-                    Spacer(Modifier.height(5.dp))
-                    CompactTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        placeholder = stringResource(Res.string.calendar_service_name_hint),
-                        focused = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+            ServiceFields(
+                form = form,
+                existing = existing,
+                seriesSize = seriesSize,
+                templates = templates,
+                templateLabel = templateLabel,
+                onChange = { form = it },
+            )
+        }
+    }
+}
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Column(Modifier.weight(1f)) {
-                        FieldLabel(stringResource(Res.string.calendar_service_start))
-                        Spacer(Modifier.height(5.dp))
-                        CompactTextField(
-                            value = startTime,
-                            onValueChange = { startTime = it },
-                            errorBorder = !timeValid,
-                            modifier = Modifier.fillMaxWidth(),
+@Composable
+private fun ServiceFields(
+    form: ServiceForm,
+    existing: PlannedService?,
+    seriesSize: Int,
+    templates: List<ServiceTemplate>,
+    templateLabel: @Composable (ServiceTemplate) -> Pair<String, String>,
+    onChange: (ServiceForm) -> Unit,
+) {
+    val timeValid = parseStoredTime(form.startTime) != null
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 13.dp),
+    ) {
+        Column {
+            FieldLabel(stringResource(Res.string.calendar_service_name))
+            Spacer(Modifier.height(5.dp))
+            CompactTextField(
+                value = form.name,
+                onValueChange = { onChange(form.copy(name = it)) },
+                placeholder = stringResource(Res.string.calendar_service_name_hint),
+                focused = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f)) {
+                FieldLabel(stringResource(Res.string.calendar_service_start))
+                Spacer(Modifier.height(5.dp))
+                CompactTextField(
+                    value = form.startTime,
+                    onValueChange = { onChange(form.copy(startTime = it)) },
+                    errorBorder = !timeValid,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Column(Modifier.weight(TYPE_FLEX)) {
+                FieldLabel(stringResource(Res.string.calendar_service_type))
+                Spacer(Modifier.height(5.dp))
+                SegmentedSelector(
+                    options = ServiceKind.entries,
+                    selected = form.kind,
+                    label = { kindShortLabel(it) },
+                    onSelect = { onChange(form.copy(kind = it)) },
+                )
+            }
+        }
+
+        // Below the row rather than under the field, so an invalid time does not resize the
+        // Type selector beside it.
+        if (!timeValid) {
+            Text(
+                text = stringResource(Res.string.calendar_invalid_time),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        if (existing != null && existing.isInSeries()) {
+            SeriesScopeSection(
+                repeat = ServiceRepeat.from(existing.repeat),
+                seriesSize = seriesSize,
+                wholeSeries = form.wholeSeries,
+                onScope = { onChange(form.copy(wholeSeries = it)) },
+            )
+        }
+
+        if (existing == null && templates.isNotEmpty()) {
+            Column {
+                FieldLabel(stringResource(Res.string.calendar_start_from))
+                Spacer(Modifier.height(5.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    templates.forEach { option ->
+                        val (label, sub) = templateLabel(option)
+                        TemplateRow(
+                            label = label,
+                            sub = sub,
+                            selected = option.id == form.template.id,
+                            onClick = { onChange(form.withTemplate(option)) },
                         )
-                    }
-                    Column(Modifier.weight(TYPE_FLEX)) {
-                        FieldLabel(stringResource(Res.string.calendar_service_type))
-                        Spacer(Modifier.height(5.dp))
-                        KindSelector(selected = kind, onSelect = { kind = it })
-                    }
-                }
-
-                // Below the row rather than under the field, so an invalid time does not resize the
-                // Type selector beside it.
-                if (!timeValid) {
-                    Text(
-                        text = stringResource(Res.string.calendar_invalid_time),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-
-                if (existing == null && templates.isNotEmpty()) {
-                    Column {
-                        FieldLabel(stringResource(Res.string.calendar_start_from))
-                        Spacer(Modifier.height(5.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            templates.forEach { option ->
-                                val (label, sub) = templateLabel(option)
-                                TemplateRow(
-                                    label = label,
-                                    sub = sub,
-                                    selected = option.id == template.id,
-                                    onClick = { template = option },
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -186,53 +235,25 @@ fun ServiceSheet(
 }
 
 /**
- * The service-type control: a **segmented** selector, not three buttons.
- *
- * The design is one inset track — its own background, one border, 2dp of padding — holding three
- * borderless segments that share it, with the selected one filled. Three separately-bordered pills
- * with gaps between them is a different control entirely: it reads as three independent toggles
- * rather than as one field with three states, which is what `Type` is.
- *
- * No color dots either. The kind's color belongs on the day grid and the service chip, where it
- * distinguishes one service from another; inside a three-way picker whose options are already
- * named, it is decoration competing with the label.
+ * Picking a template pre-fills the name, time and type from it — the fields are the same ones
+ * saved with it, and typing "Sunday Morning" over a template already called that is busywork.
+ * Blank leaves the fields alone.
  */
-@Composable
-private fun KindSelector(selected: ServiceKind, onSelect: (ServiceKind) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val trackShape = RoundedCornerShape(8.dp)
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(TRACK_GAP),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(SELECTOR_HEIGHT)
-            .clip(trackShape)
-            .background(scheme.surfaceVariant.copy(alpha = TRACK_TINT))
-            .border(1.dp, scheme.outlineVariant, trackShape)
-            .padding(TRACK_PADDING),
-    ) {
-        ServiceKind.entries.forEach { kind ->
-            val on = kind == selected
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(if (on) scheme.primary else Color.Transparent)
-                    .clickable { onSelect(kind) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = kindShortLabel(kind),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
-                    fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
-                    color = if (on) scheme.onPrimary else scheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-    }
+private fun ServiceForm.withTemplate(option: ServiceTemplate): ServiceForm = when (option) {
+    ServiceTemplate.Blank -> copy(template = option)
+    is ServiceTemplate.CopyOf -> copy(
+        template = option,
+        name = option.service.name,
+        startTime = option.service.startTime,
+        kind = ServiceKind.from(option.service.kind),
+    )
+
+    is ServiceTemplate.Saved -> copy(
+        template = option,
+        name = option.template.name,
+        startTime = option.template.startTime,
+        kind = ServiceKind.from(option.template.kind),
+    )
 }
 
 /** One `Start from` option: a radio dot, a label and the line under it. */

@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_day_services_ot
 import org.churchpresenter.calendar.generated.resources.calendar_edit_service
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceKind
+import org.churchpresenter.calendar.model.ServiceRepeat
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -203,12 +205,33 @@ private fun ServiceChip(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    text = service.startTime + " \u00b7 " + itemCountLabel(service.contentItems().size),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
-                    color = scheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(
+                        text = service.startTime + " \u00b7 " + itemCountLabel(service.contentItems().size),
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
+                        color = scheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                    // A series member says so in its meta line, the way the design marks it, so
+                    // one Sunday looks different from the fourteen it was planned with.
+                    if (service.isInSeries()) {
+                        Icon(
+                            Icons.Filled.Repeat,
+                            contentDescription = null,
+                            tint = scheme.onSurfaceVariant,
+                            modifier = Modifier.size(REPEAT_MARK),
+                        )
+                        Text(
+                            text = repeatLabel(ServiceRepeat.from(service.repeat)),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
+                            color = scheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    }
+                }
             }
         }
         Box(Modifier.width(1.dp).fillMaxHeight().background(border))
@@ -230,3 +253,4 @@ private fun ServiceChip(
 }
 
 private val EDIT_TAIL_WIDTH = 26.dp
+private val REPEAT_MARK = 9.dp

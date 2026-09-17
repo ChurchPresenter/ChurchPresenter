@@ -9,13 +9,16 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
+import org.churchpresenter.calendar.model.CopiedRows
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
+import org.churchpresenter.calendar.model.ServiceRepeat
+import org.churchpresenter.calendar.model.copiedRows
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.storedDate
 import org.churchpresenter.calendar.model.ServiceTemplate
-import org.churchpresenter.calendar.model.withNewId
 import org.churchpresenter.calendar.model.withUniqueRowIds
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
@@ -63,6 +66,7 @@ class CalendarState(
         private set
     var songsLoaded by mutableStateOf(false)
         private set
+
 
     /** The primary Bible's books, as the host supplies them. Read once — see [loadBibleBooks]. */
     var bibleBooks by mutableStateOf<List<CalendarBibleBook>>(emptyList())
@@ -156,12 +160,13 @@ class CalendarState(
      * cannot keep.
      */
     fun templateOptions(): List<ServiceTemplate> {
+        val saved = document.templates.map { ServiceTemplate.Saved(it) }
         val recentByKind = ServiceKind.entries.mapNotNull { kind ->
             document.services
                 .filter { it.kind == kind.id && (parseStoredDate(it.date) ?: LocalDate.MAX) < selectedDate }
                 .maxByOrNull { it.date + it.startTime }
         }
-        return listOf(ServiceTemplate.Blank) + recentByKind.map { ServiceTemplate.CopyOf(it) }
+        return listOf(ServiceTemplate.Blank) + saved + recentByKind.map { ServiceTemplate.CopyOf(it) }
     }
 
     /** Adds a service to [selectedDate] and opens it. Returns the new service. */
@@ -171,35 +176,136 @@ class CalendarState(
         kind: ServiceKind,
         template: ServiceTemplate = ServiceTemplate.Blank,
     ): PlannedService {
-        val source = (template as? ServiceTemplate.CopyOf)?.service
         // Copied rows are re-keyed, or the new service and the one it came from share row ids — and
         // plannedSeconds is keyed by them, so editing one estimate would move the other's too.
-        val copied = source?.items?.map { it.withNewId() }.orEmpty()
-        val plannedByIndex = source?.items?.mapIndexedNotNull { index, item ->
-            source.plannedSeconds[item.id]?.let { index to it }
-        }.orEmpty()
+        val rows = when (template) {
+            ServiceTemplate.Blank -> CopiedRows(emptyList(), emptyMap())
+            is ServiceTemplate.CopyOf -> copiedRows(template.service.items, template.service.plannedSeconds)
+            is ServiceTemplate.Saved -> copiedRows(template.template.items, template.template.plannedSeconds)
+        }
         val service = PlannedService(
             id = UUID.randomUUID().toString(),
             date = storedDate(selectedDate),
             name = name,
             startTime = startTime,
             kind = kind.id,
-            items = copied,
-            plannedSeconds = plannedByIndex.associate { (index, seconds) -> copied[index].id to seconds },
+            items = rows.items,
+            plannedSeconds = rows.plannedSeconds,
             armed = document.preferences.armByDefault,
         )
         commit(document.withService(service))
         selectedServiceId = service.id
         return service
     }
-    fun updateService(service: PlannedService) {
-        commit(document.withService(service))
+
+    /**
+     * Saves [service]'s name, time and kind — and, with [wholeSeries], the same three on every other
+     * occurrence of its series. Never the run of show: each week's is its own.
+     */
+    fun updateService(service: PlannedService, wholeSeries: Boolean = false) {
+        val siblings = if (wholeSeries) document.servicesInSeries(service.seriesId) else emptyList()
+        val updated = siblings
+            .filterNot { it.id == service.id }
+            .map { it.copy(name = service.name, startTime = service.startTime, kind = service.kind) }
+        commit(document.withServices(listOf(service) + updated))
     }
-    fun deleteService(id: String) {
-        commit(document.withoutService(id))
-        if (selectedServiceId == id) {
+
+    fun deleteService(id: String, wholeSeries: Boolean = false) {
+        val target = document.serviceById(id) ?: return
+        val ids = if (wholeSeries && target.isInSeries()) {
+            document.servicesInSeries(target.seriesId).map { it.id }
+        } else {
+            listOf(id)
+        }
+        commit(ids.fold(document) { current, each -> current.withoutService(each) })
+        if (selectedServiceId in ids) {
             selectedServiceId = servicesOnDay.firstOrNull()?.id
         }
+    }
+
+    // ── Copy ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Plans a copy of [service] on each of [dates] — the Copy sheet's **Paste** and **Create N**.
+     *
+     * With [includeRunOfShow] each copy gets its own re-keyed run of show; without it, an empty
+     * service with the same name, time and kind. A [repeat] other than NONE makes the copies — and
+     * [service] itself, unless it already belongs to one — a series, which is what lets a later
+     * edit or delete reach all of them. One commit for the lot, so the file is written once.
+     */
+    fun copyService(
+        service: PlannedService,
+        dates: List<LocalDate>,
+        includeRunOfShow: Boolean,
+        repeat: ServiceRepeat = ServiceRepeat.NONE,
+    ) {
+        if (dates.isEmpty()) return
+        val seriesId = when {
+            repeat == ServiceRepeat.NONE -> ""
+            service.isInSeries() -> service.seriesId
+            else -> UUID.randomUUID().toString()
+        }
+        val copies = dates.map { date ->
+            val rows = if (includeRunOfShow) {
+                copiedRows(service.items, service.plannedSeconds)
+            } else {
+                CopiedRows(emptyList(), emptyMap())
+            }
+            PlannedService(
+                id = UUID.randomUUID().toString(),
+                date = storedDate(date),
+                name = service.name,
+                startTime = service.startTime,
+                kind = service.kind,
+                items = rows.items,
+                plannedSeconds = rows.plannedSeconds,
+                armed = service.armed,
+                seriesId = seriesId,
+                repeat = if (seriesId.isEmpty()) "" else repeat.id,
+            )
+        }
+        val source = if (seriesId.isNotEmpty() && !service.isInSeries()) {
+            listOf(service.copy(seriesId = seriesId, repeat = repeat.id))
+        } else {
+            emptyList()
+        }
+        commit(document.withServices(source + copies))
+    }
+
+    // ── Templates ─────────────────────────────────────────────────────────────
+
+    /**
+     * Saves [service]'s run of show as a template called [name], replacing one of the same name.
+     *
+     * Replacing rather than duplicating: saving "Sunday Morning" again after improving it is the
+     * common case, and two templates by one name are indistinguishable in the `Start from` list.
+     * [includeSections] and [includeItems] are the sheet's two Include boxes — the headings alone
+     * make a skeleton to fill each week; the items alone, a set list without its structure.
+     */
+    fun saveTemplate(service: PlannedService, name: String, includeSections: Boolean = true, includeItems: Boolean = true) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        val kept = service.items.filter { item ->
+            if (item is ScheduleItem.LabelItem) includeSections else includeItems
+        }
+        val rows = copiedRows(kept, service.plannedSeconds)
+        val existing = document.templates.firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
+        commit(
+            document.withTemplate(
+                SavedTemplate(
+                    id = existing?.id ?: UUID.randomUUID().toString(),
+                    name = trimmed,
+                    startTime = service.startTime,
+                    kind = service.kind,
+                    items = rows.items,
+                    plannedSeconds = rows.plannedSeconds,
+                )
+            )
+        )
+    }
+
+    fun deleteTemplate(id: String) {
+        commit(document.withoutTemplate(id))
     }
     // ── Run of show ───────────────────────────────────────────────────────────
     fun addItems(serviceId: String, items: List<ScheduleItem>, at: Int? = null) {

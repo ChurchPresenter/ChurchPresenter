@@ -70,6 +70,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_recovered_title
 import org.churchpresenter.calendar.generated.resources.calendar_template_blank
 import org.churchpresenter.calendar.generated.resources.calendar_template_blank_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_copy_sub
+import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
 import org.churchpresenter.calendar.generated.resources.calendar_title
 import org.churchpresenter.calendar.generated.resources.calendar_today
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -80,18 +81,13 @@ import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.sectionItem
+import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.monthHeading
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
-
-/** The short date the design puts in the sheet title and in a template's second line. */
-private val SHORT_DATE: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
 
 /**
  * The Calendar Manager.
@@ -142,6 +138,9 @@ fun CalendarApp(
     var replacing by remember { mutableStateOf<ScheduleItem?>(null) }
     var loadConfirmFor by remember { mutableStateOf<PlannedService?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
+    // The service Copy or Template was pressed on, or null while that sheet is closed.
+    var copyFrom by remember { mutableStateOf<PlannedService?>(null) }
+    var templateFrom by remember { mutableStateOf<PlannedService?>(null) }
 
     // Fetched when the picker is first opened, not up front and not per recomposition. The host's
     // CalendarHost is rebuilt by the app on every recomposition, so keying an effect on it would
@@ -192,7 +191,7 @@ fun CalendarApp(
                     val service = state.selectedService
                     if (service == null) {
                         NoServicesPane(
-                            dayLabel = state.selectedDate.format(SHORT_DATE.withLocale(Locale.getDefault())),
+                            dayLabel = shortDate(state.selectedDate),
                             copyLabel = state.mostRecentServiceBefore()?.name,
                             onAddService = { creatingService = true },
                             onCopyLast = { creatingService = true },
@@ -208,6 +207,8 @@ fun CalendarApp(
                             onPlannedSecondsChange = { itemId, seconds ->
                                 state.setPlannedSeconds(service.id, itemId, seconds)
                             },
+                            onCopy = { copyFrom = service },
+                            onSaveTemplate = { templateFrom = service },
                             modifier = Modifier.weight(1f),
                         )
                         HorizontalDivider()
@@ -231,6 +232,7 @@ fun CalendarApp(
         val openService = state.selectedService
         CalendarSettingsDialog(
             preferences = state.document.preferences,
+            templates = state.document.templates,
             canInsertSection = openService != null,
             onPreferencesChange = state::updatePreferences,
             onAddSection = state::addSection,
@@ -243,6 +245,7 @@ fun CalendarApp(
                     state.addItems(service.id, listOf(sectionItem(section.name, section.colorHex)))
                 }
             },
+            onRemoveTemplate = state::deleteTemplate,
             onDismiss = { settingsOpen = false },
         )
     }
@@ -256,9 +259,13 @@ fun CalendarApp(
         editingService = editingService,
         addingItem = addingItem,
         loadConfirmFor = loadConfirmFor,
+        copyFrom = copyFrom,
+        templateFrom = templateFrom,
         onServiceSheetClosed = { creatingService = false; editingService = null },
         onAddingItemClosed = { addingItem = false; replacing = null },
         onLoadConfirmClosed = { loadConfirmFor = null },
+        onCopySheetClosed = { copyFrom = null },
+        onTemplateSheetClosed = { templateFrom = null },
     )
 }
 
@@ -278,29 +285,37 @@ private fun CalendarDialogs(
     editingService: PlannedService?,
     addingItem: Boolean,
     loadConfirmFor: PlannedService?,
+    copyFrom: PlannedService?,
+    templateFrom: PlannedService?,
     onServiceSheetClosed: () -> Unit,
     onAddingItemClosed: () -> Unit,
     onLoadConfirmClosed: () -> Unit,
+    onCopySheetClosed: () -> Unit,
+    onTemplateSheetClosed: () -> Unit,
 ) {
     if (creatingService || editingService != null) {
         val existing = editingService
         ServiceSheet(
             existing = existing,
             defaultStartTime = state.document.preferences.defaultStartTime,
-            dateLabel = state.selectedDate.format(SHORT_DATE.withLocale(Locale.getDefault())),
+            date = state.selectedDate,
+            seriesSize = existing?.let { state.document.servicesInSeries(it.seriesId).size } ?: 0,
             templates = state.templateOptions(),
             templateLabel = { templateLabel(it) },
-            onSave = { name, startTime, kind, template ->
+            onSave = { form ->
                 if (existing == null) {
-                    state.addService(name, startTime, kind, template)
+                    state.addService(form.name, form.startTime, form.kind, form.template)
                 } else {
-                    state.updateService(existing.copy(name = name, startTime = startTime, kind = kind.id))
+                    state.updateService(
+                        existing.copy(name = form.name, startTime = form.startTime, kind = form.kind.id),
+                        wholeSeries = form.wholeSeries,
+                    )
                 }
                 onServiceSheetClosed()
             },
             onDelete = existing?.let {
-                {
-                    state.deleteService(it.id)
+                { wholeSeries ->
+                    state.deleteService(it.id, wholeSeries)
                     onServiceSheetClosed()
                 }
             },
@@ -337,6 +352,34 @@ private fun CalendarDialogs(
         )
     }
 
+    copyFrom?.let { service ->
+        CopySheet(
+            service = service,
+            date = state.selectedDate,
+            hasServices = state::hasServices,
+            onCopy = { dates, includeRunOfShow, repeat ->
+                state.copyService(service, dates, includeRunOfShow, repeat)
+                // A single paste is a jump to where it landed; a series is visible as the dots.
+                if (repeat == ServiceRepeat.NONE) dates.firstOrNull()?.let(state::select)
+                onCopySheetClosed()
+            },
+            onDismiss = onCopySheetClosed,
+        )
+    }
+
+    templateFrom?.let { service ->
+        TemplateSheet(
+            service = service,
+            date = state.selectedDate,
+            existing = state.document.templates,
+            onSave = { name, sections, items ->
+                state.saveTemplate(service, name, sections, items)
+                onTemplateSheetClosed()
+            },
+            onDismiss = onTemplateSheetClosed,
+        )
+    }
+
     loadConfirmFor?.let { service ->
         LoadServiceConfirm(
             currentCount = host.currentSchedule().size,
@@ -354,15 +397,19 @@ private fun templateLabel(option: ServiceTemplate): Pair<String, String> = when 
         stringResource(Res.string.calendar_template_blank_sub)
 
     is ServiceTemplate.CopyOf -> {
-        val date = parseStoredDate(option.service.date)
-            ?.format(SHORT_DATE.withLocale(Locale.getDefault()))
-            .orEmpty()
+        val date = parseStoredDate(option.service.date)?.let(::shortDate).orEmpty()
         option.service.name to stringResource(
             Res.string.calendar_template_copy_sub,
             date,
             option.service.contentItems().size,
         )
     }
+
+    is ServiceTemplate.Saved -> option.template.name to stringResource(
+        Res.string.calendar_template_saved_sub,
+        option.template.startTime,
+        option.template.contentItems().size,
+    )
 }
 
 /**
@@ -386,7 +433,7 @@ private fun exportAction(
     scope: CoroutineScope,
 ): (() -> Unit)? {
     val service = state.selectedService ?: return null
-    val label = state.selectedDate.format(SHORT_DATE.withLocale(Locale.getDefault()))
+    val label = shortDate(state.selectedDate)
     return { scope.launch { exportRunOfShow(service, label, host, io) } }
 }
 

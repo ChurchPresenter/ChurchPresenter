@@ -60,6 +60,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_settings_sectio
 import org.churchpresenter.calendar.generated.resources.calendar_settings_sub
 import org.churchpresenter.calendar.generated.resources.calendar_settings_templates
 import org.churchpresenter.calendar.generated.resources.calendar_templates_empty_sub
+import org.churchpresenter.calendar.generated.resources.calendar_templates_note
+import org.churchpresenter.calendar.generated.resources.calendar_template_remove
+import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
+import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
@@ -88,6 +92,7 @@ private val PREF_FIELD = 74.dp
 @Composable
 fun CalendarSettingsDialog(
     preferences: CalendarPreferences,
+    templates: List<SavedTemplate>,
     canInsertSection: Boolean,
     colorPicker: (@Composable (ColorPickerRequest) -> Unit)?,
     onPreferencesChange: (CalendarPreferences) -> Unit,
@@ -96,6 +101,7 @@ fun CalendarSettingsDialog(
     onSectionColor: (name: String, colorHex: String) -> Unit,
     onRemoveSection: (name: String) -> Unit,
     onInsertSection: (SectionStyle) -> Unit,
+    onRemoveTemplate: (id: String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var tab by remember { mutableStateOf(SettingsTab.SECTIONS) }
@@ -135,7 +141,7 @@ fun CalendarSettingsDialog(
                         onInsert = onInsertSection,
                     )
 
-                    SettingsTab.TEMPLATES -> NoteLine(stringResource(Res.string.calendar_templates_empty_sub))
+                    SettingsTab.TEMPLATES -> TemplatesTab(templates, onRemoveTemplate)
                     SettingsTab.DEFAULTS -> DefaultsTab(preferences, onPreferencesChange)
                 }
             }
@@ -167,6 +173,36 @@ private fun AutomationTab(preferences: CalendarPreferences, onChange: (CalendarP
     }
     SheetOverline(stringResource(Res.string.calendar_cues), Modifier.padding(top = 2.dp))
     NoteLine(stringResource(Res.string.calendar_automation_empty_sub))
+}
+
+/** The saved templates, each with the one thing to do to it here — delete. */
+@Composable
+private fun TemplatesTab(templates: List<SavedTemplate>, onRemove: (String) -> Unit) {
+    if (templates.isEmpty()) {
+        NoteLine(stringResource(Res.string.calendar_templates_empty_sub))
+        return
+    }
+    NoteLine(stringResource(Res.string.calendar_templates_note))
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        templates.forEach { template ->
+            SettingCard {
+                CardText(
+                    title = template.name,
+                    subtitle = stringResource(
+                        Res.string.calendar_template_saved_sub,
+                        template.startTime,
+                        template.contentItems().size,
+                    ),
+                )
+                SmallIconButton(
+                    icon = Icons.Filled.Close,
+                    description = stringResource(Res.string.calendar_template_remove),
+                    onClick = { onRemove(template.id) },
+                    destructive = true,
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -43,6 +43,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -66,9 +67,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_empty_hint
 import org.churchpresenter.calendar.generated.resources.calendar_move_down
 import org.churchpresenter.calendar.generated.resources.calendar_move_up
 import org.churchpresenter.calendar.generated.resources.calendar_nothing_planned_for
-import org.churchpresenter.calendar.generated.resources.calendar_planned_total
 import org.churchpresenter.calendar.generated.resources.calendar_remove_row
-import org.churchpresenter.calendar.generated.resources.calendar_run_of_show
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.formatDuration
@@ -109,13 +108,15 @@ fun RunOfShowPane(
     onRemove: (itemId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     onPlannedSecondsChange: (itemId: String, seconds: Int?) -> Unit,
+    onCopy: () -> Unit,
+    onSaveTemplate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val clocks = remember(service) { runClocks(service) }
     val listState = rememberLazyListState()
     val reorder = rememberReorderState(listState, service.items.size, onMove)
     Column(modifier.fillMaxSize()) {
-        SectionHeader(service)
+        RunOfShowHeader(service, onCopy = onCopy, onSaveTemplate = onSaveTemplate)
         ScrollableList(
             state = listState,
             modifier = Modifier.fillMaxSize().padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 12.dp),
@@ -146,46 +147,6 @@ fun RunOfShowPane(
 }
 
 @Composable
-private fun SectionHeader(service: PlannedService) {
-    val scheme = MaterialTheme.colorScheme
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(CalendarMetrics.sectionHeaderHeight)
-            .padding(horizontal = 13.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.calendar_run_of_show).uppercase(),
-            style = overlineStyle(),
-            color = scheme.onSurfaceVariant.copy(alpha = 0.7f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = runMeta(service),
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-            color = scheme.onSurfaceVariant,
-            maxLines = 1,
-        )
-    }
-}
-
-@Composable
-private fun runMeta(service: PlannedService): String {
-    val count = itemCountLabel(service.contentItems().size)
-    val total = service.plannedTotalSeconds()
-    // "0 planned" would be noise on a service nobody has estimated yet.
-    return if (total > 0) {
-        "$count · " + stringResource(Res.string.calendar_planned_total, formatDuration(total))
-    } else {
-        count
-    }
-}
-
-@Composable
 private fun RunRow(
     item: ScheduleItem,
     clock: RowClock?,
@@ -210,6 +171,9 @@ private fun RunRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        // The whole row opens the picker on this item, so a wrong song is changed in place rather
+        // than removed and re-added. The grip, the duration and the three actions sit on top with
+        // gestures of their own, which win over the row's — a click lands on them first.
         modifier = modifier
             .zIndex(if (dragging) 1f else 0f)
             .graphicsLayer { translationY = reorder.translationFor(item.id) }
@@ -221,6 +185,7 @@ private fun RunRow(
                 color = if (dragging) scheme.primary else scheme.outlineVariant.copy(alpha = ROW_ALPHA),
                 shape = CalendarMetrics.rowRadius,
             )
+            .clickable(onClick = onChange)
             .padding(horizontal = 9.dp, vertical = 8.dp),
     ) {
         DragGrip(reorder = reorder, key = item.id)
@@ -243,16 +208,7 @@ private fun RunRow(
         ) {
             Icon(look.icon, contentDescription = null, tint = look.color, modifier = Modifier.size(12.dp))
         }
-        // The row's body opens the picker on this item, so a wrong song is changed in place rather
-        // than removed and re-added. The grip and the actions keep their own gestures; only this
-        // column is clickable.
-        Column(
-            Modifier
-                .weight(1f)
-                .clip(CalendarMetrics.smallRadius)
-                .clickable(onClick = onChange)
-                .padding(vertical = 1.dp),
-        ) {
+        Column(Modifier.weight(1f).padding(vertical = 1.dp)) {
             Text(
                 text = item.displayText,
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
@@ -319,6 +275,9 @@ private fun DragGrip(reorder: ReorderState, key: Any) {
         modifier = Modifier
             .size(width = GRIP_WIDTH, height = GRIP_HEIGHT)
             .pointerHoverIcon(PointerIcon.Hand)
+            // A drag detector lets a plain click through to the row's clickable beneath, which
+            // would open the picker from the one place that says "this moves". Swallow it.
+            .pointerInput(key) { detectTapGestures { } }
             .pointerInput(key) {
                 detectDragGestures(
                     onDragStart = { reorder.start(key) },
@@ -594,3 +553,4 @@ fun NoServicesPane(
 }
 
 private const val SECTION_TRACKING = 0.07f
+

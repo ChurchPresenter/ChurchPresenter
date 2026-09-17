@@ -27,6 +27,24 @@ fun ScheduleItem.withNewId(): ScheduleItem {
     }
 }
 
+/** A run of show and its estimates, re-keyed together. */
+data class CopiedRows(val items: List<ScheduleItem>, val plannedSeconds: Map<String, Int>)
+
+/**
+ * A fresh-keyed copy of [items] with [plannedSeconds] following each row to its new id.
+ *
+ * Every copy a service makes of another's rows — from a template, from last week, into the next
+ * occurrence of a series — goes through here, or the two services share row ids and editing one
+ * estimate moves the other's too.
+ */
+fun copiedRows(items: List<ScheduleItem>, plannedSeconds: Map<String, Int>): CopiedRows {
+    val copied = items.map { it.withNewId() }
+    val seconds = items.indices.mapNotNull { index ->
+        plannedSeconds[items[index].id]?.let { copied[index].id to it }
+    }
+    return CopiedRows(copied, seconds.toMap())
+}
+
 /**
  * The same document with every service's row ids made unique.
  *
