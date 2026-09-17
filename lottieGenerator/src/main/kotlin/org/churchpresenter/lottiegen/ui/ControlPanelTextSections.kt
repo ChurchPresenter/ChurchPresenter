@@ -1,4 +1,5 @@
 package org.churchpresenter.lottiegen.ui
+import java.text.MessageFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,11 +28,16 @@ import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
 import org.churchpresenter.lottiegen.ui.components.ColorPickerRow
 import org.churchpresenter.lottiegen.ui.components.DeleteIconButton
+import org.churchpresenter.lottiegen.ui.components.HiddenFieldWarning
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
 
+
+/** A field's own "Hide X" checkbox is checked, so it won't render. */
+private fun fieldHiddenTooltip(hideCheckboxLabel: String): String =
+    MessageFormat.format(Strings.byKey("field_hidden_tooltip"), hideCheckboxLabel)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,18 +49,27 @@ internal fun TextSection(viewModel: LottieGenState) {
             value = cfg.nameText,
             onValueChange = { viewModel.updateConfig { c -> c.copy(nameText = it) } },
             label = Strings.name,
+            trailingIcon = if (cfg.hideName && cfg.nameText.isNotEmpty()) {
+                { HiddenFieldWarning(fieldHiddenTooltip(Strings.hideName)) }
+            } else null,
             modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
         )
         LottieTextField(
             value = cfg.infoText,
             onValueChange = { viewModel.updateConfig { c -> c.copy(infoText = it) } },
             label = Strings.info,
+            trailingIcon = if (cfg.hideInfo && cfg.infoText.isNotEmpty()) {
+                { HiddenFieldWarning(fieldHiddenTooltip(Strings.hideInfo)) }
+            } else null,
             modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
         )
         LottieTextField(
             value = cfg.detailText,
             onValueChange = { viewModel.updateConfig { c -> c.copy(detailText = it) } },
             label = Strings.detail,
+            trailingIcon = if (cfg.hideDetail && cfg.detailText.isNotEmpty()) {
+                { HiddenFieldWarning(fieldHiddenTooltip(Strings.hideDetail)) }
+            } else null,
             modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
         )
     }
