@@ -247,7 +247,7 @@ private fun BandLayer(
         .associateWith { name ->
             val style = styles.getValue(name)
             val text = texts[name].orEmpty()
-            val box = template.slots[name] ?: LottieSlotBox(0f, 0f, template.width, template.height)
+            val box = template.effectiveBox(name, texts)
             val singleLine = name.startsWith(BibleLottieTemplate.LAYER_REFERENCE_1.dropLast(1))
             // The template may pin a justification; otherwise the content's own settings apply.
             val pinned = if (singleLine) template.meta.referenceAlign else template.meta.textAlign
