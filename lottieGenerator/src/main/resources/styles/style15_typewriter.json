@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.7
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -176,6 +176,55 @@
                         },
                         {
                             "pct": 90,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 70.0,
+                "endPct": 100.0
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 70.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
                             "values": [
                                 100
                             ]
@@ -374,6 +423,81 @@
                     ],
                     "easing": "LINEAR"
                 }
+            ],
+            "visibleWhen": [
+                "DETAIL_HIDDEN"
+            ]
+        },
+        {
+            "type": "path",
+            "id": "ruleWithDetail",
+            "name": "Baseline Rule (Detail)",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "DETAIL_LINE",
+                "offsetYEm": 0.3
+            },
+            "verticesEm": [
+                {
+                    "x": -1.0,
+                    "y": 0.0
+                },
+                {
+                    "x": 1.0,
+                    "y": 0.0
+                }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "BORDER",
+                    "width": {
+                        "type": "em",
+                        "em": 0.05
+                    }
+                }
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 52,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ],
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
             ]
         },
         {

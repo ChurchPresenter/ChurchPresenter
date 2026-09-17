@@ -15,7 +15,6 @@ import org.churchpresenter.lottiegen.lottie.makeRandomFadeAnimator
 import org.churchpresenter.lottiegen.lottie.makeTextDataWithAnimators
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
-import kotlin.math.max
 
 /** The gap between the logo and the text block, in em. */
 private const val LOGO_MARGIN_EM = 1.0
@@ -28,6 +27,8 @@ private const val NAME_FADE_FROM_PCT = 0.0
 private const val NAME_FADE_TO_PCT = 55.0
 private const val INFO_FADE_FROM_PCT = 25.0
 private const val INFO_FADE_TO_PCT = 70.0
+private const val DETAIL_FADE_FROM_PCT = 40.0
+private const val DETAIL_FADE_TO_PCT = 85.0
 
 /** The logo has finished scaling up by here. */
 private const val LOGO_GROWN_PCT = 25.0
@@ -52,11 +53,15 @@ private class FadeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
@@ -65,6 +70,7 @@ private class FadeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val canvasW = cfg.canvasW.toDouble()
     val canvasH = cfg.canvasH.toDouble()
@@ -76,14 +82,30 @@ private class FadeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
     private val logoSpace = if (hasLogo) logoSizePx + logoMargin else 0.0
 
-    /** A hidden line takes no vertical space, and there is no gap unless both lines are shown. */
+    /**
+     * A hidden line takes no vertical space, and there is a gap only between two shown
+     * neighbours — the exact shape the original name/info formula already used; detail is added
+     * purely additively so `totalH`/`nameCY`/`infoCY` reduce to exactly the old values when it is
+     * hidden (the default).
+     */
     private val nameBlockH = if (cfg.hideName) 0.0 else nameSizePx
     private val infoBlockH = if (cfg.hideInfo) 0.0 else infoSizePx
+    private val detailBlockH = if (cfg.hideDetail) 0.0 else detailSizePx
     private val gap = if (!cfg.hideName && !cfg.hideInfo) lineSpacingPx else 0.0
-    private val totalH = nameBlockH + gap + infoBlockH
+    private val gap2 = if (!cfg.hideInfo && !cfg.hideDetail) lineSpacingPx else 0.0
+    private val detailExtra = if (!cfg.hideDetail) gap2 + detailBlockH else 0.0
+    private val totalH = nameBlockH + gap + infoBlockH + detailExtra
     private val blockTopY = canvasH - marginVPx - totalH
     val nameCY = blockTopY + nameBlockH / 2
     val infoCY = blockTopY + nameBlockH + gap + infoBlockH / 2
+    val detailCY = blockTopY + nameBlockH + gap + infoBlockH + gap2 + detailBlockH / 2
+
+    /**
+     * Where the logo centres vertically. The name/info average is the original formula,
+     * unconditional on their own visibility (matched exactly here); Detail only joins it once
+     * shown, so this is byte-identical to before while it stays hidden.
+     */
+    val logoCenterY: Double = if (cfg.hideDetail) (nameCY + infoCY) / 2 else (nameCY + infoCY + detailCY) / 3
 
     val textX = when {
         isCenter -> canvasW / 2
@@ -98,30 +120,74 @@ private class FadeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     val nameTextY = nameCY + nameSizePx * BASELINE_FACTOR
     val infoTextY = infoCY + infoSizePx * BASELINE_FACTOR
+    val detailTextY = detailCY + detailSizePx * BASELINE_FACTOR
 
     fun keyframes(vararg points: KeyframeInput) =
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
 }
 
-/** One of the two lines: they differ only in their config half and their fade window. */
-private class FadeLine(g: FadeGeometry, isName: Boolean) {
-    val layerName = if (isName) "Name" else "Info"
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val y = if (isName) g.nameTextY else g.infoTextY
-    val fadeFrom = if (isName) NAME_FADE_FROM_PCT else INFO_FADE_FROM_PCT
-    val fadeTo = if (isName) NAME_FADE_TO_PCT else INFO_FADE_TO_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class FadeLineKind { NAME, INFO, DETAIL }
+
+/** One of the (up to) three lines: they differ only in their config slice and their fade window. */
+private class FadeLine(g: FadeGeometry, kind: FadeLineKind) {
+    val layerName = when (kind) {
+        FadeLineKind.NAME -> "Name"
+        FadeLineKind.INFO -> "Info"
+        FadeLineKind.DETAIL -> "Detail"
+    }
+    val sizePx = when (kind) {
+        FadeLineKind.NAME -> g.nameSizePx
+        FadeLineKind.INFO -> g.infoSizePx
+        FadeLineKind.DETAIL -> g.detailSizePx
+    }
+    val y = when (kind) {
+        FadeLineKind.NAME -> g.nameTextY
+        FadeLineKind.INFO -> g.infoTextY
+        FadeLineKind.DETAIL -> g.detailTextY
+    }
+    val fadeFrom = when (kind) {
+        FadeLineKind.NAME -> NAME_FADE_FROM_PCT
+        FadeLineKind.INFO -> INFO_FADE_FROM_PCT
+        FadeLineKind.DETAIL -> DETAIL_FADE_FROM_PCT
+    }
+    val fadeTo = when (kind) {
+        FadeLineKind.NAME -> NAME_FADE_TO_PCT
+        FadeLineKind.INFO -> INFO_FADE_TO_PCT
+        FadeLineKind.DETAIL -> DETAIL_FADE_TO_PCT
+    }
+    val text = when (kind) {
+        FadeLineKind.NAME -> g.cfg.nameText
+        FadeLineKind.INFO -> g.cfg.infoText
+        FadeLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        FadeLineKind.NAME -> g.cfg.nameWeight
+        FadeLineKind.INFO -> g.cfg.infoWeight
+        FadeLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        FadeLineKind.NAME -> g.nameCLottie
+        FadeLineKind.INFO -> g.infoCLottie
+        FadeLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        FadeLineKind.NAME -> g.cfg.nameTransform
+        FadeLineKind.INFO -> g.cfg.infoTransform
+        FadeLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        FadeLineKind.NAME -> g.cfg.nameColorAlpha
+        FadeLineKind.INFO -> g.cfg.infoColorAlpha
+        FadeLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 }
 
 class Style7RandomFade : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = FadeGeometry(builder, cfg)
-        if (!cfg.hideName) builder.addFadingLine(g, FadeLine(g, isName = true))
-        if (!cfg.hideInfo) builder.addFadingLine(g, FadeLine(g, isName = false))
+        if (!cfg.hideName) builder.addFadingLine(g, FadeLine(g, FadeLineKind.NAME))
+        if (!cfg.hideInfo) builder.addFadingLine(g, FadeLine(g, FadeLineKind.INFO))
+        if (!cfg.hideDetail) builder.addFadingLine(g, FadeLine(g, FadeLineKind.DETAIL))
         builder.addLogo(g)
     }
 }
@@ -150,9 +216,10 @@ private fun LottieBuilder.addLogo(g: FadeGeometry) {
     val scale = (g.logoSizePx / cfg.logoH.toDouble()) * PERCENT_SCALE
     val cx = when {
         g.isCenter -> {
-            val maxW = max(
+            val maxW = maxOf(
                 if (cfg.hideName) 0.0 else g.nameM.width.toDouble(),
                 if (cfg.hideInfo) 0.0 else g.infoM.width.toDouble(),
+                if (cfg.hideDetail) 0.0 else g.detailM.width.toDouble(),
             )
             g.canvasW / 2 - maxW / 2 - g.logoMargin - g.logoSizePx / 2
         }
@@ -168,7 +235,7 @@ private fun LottieBuilder.addLogo(g: FadeGeometry) {
     addImageLayer(
         "Logo", "logo",
         LottieBuilder.defaultTransform(
-            position = LottieBuilder.staticPropArray(cx, (g.nameCY + g.infoCY) / 2, 0.0),
+            position = LottieBuilder.staticPropArray(cx, g.logoCenterY, 0.0),
             anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
             scale = LottieBuilder.animatedProp(scaleKFs),
         ),

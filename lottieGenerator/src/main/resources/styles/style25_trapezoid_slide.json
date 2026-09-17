@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.9
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -175,6 +175,50 @@
             ]
         },
         {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 74.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "type": "polygon",
             "id": "accent",
             "name": "Accent",
@@ -186,19 +230,19 @@
             "verticesEm": [
                 [
                     -1.0,
-                    2.36
+                    2.96
                 ],
                 [
                     1.0,
-                    2.36
+                    2.96
                 ],
                 [
                     1.0,
-                    1.9069
+                    2.5069
                 ],
                 [
                     -0.9923,
-                    1.9069
+                    2.5069
                 ]
             ],
             "closed": true,
@@ -268,11 +312,11 @@
                 ],
                 [
                     1.0,
-                    2.36
+                    2.96
                 ],
                 [
                     -1.0,
-                    2.36
+                    2.96
                 ]
             ],
             "closed": true,

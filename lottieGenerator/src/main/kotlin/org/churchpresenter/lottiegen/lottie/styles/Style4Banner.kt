@@ -53,6 +53,8 @@ private const val NAME_START_PCT = 15.0
 private const val NAME_ARRIVED_PCT = 55.0
 private const val INFO_START_PCT = 40.0
 private const val INFO_ARRIVED_PCT = 80.0
+private const val DETAIL_START_PCT = 55.0
+private const val DETAIL_ARRIVED_PCT = 95.0
 private const val RULE_START_PCT = 30.0
 private const val RULE_DRAWN_PCT = 70.0
 private const val ACCENT_GROWN_PCT = 20.0
@@ -76,6 +78,7 @@ private class BannerGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     private val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
@@ -92,6 +95,7 @@ private class BannerGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     private val canvasW = cfg.canvasW.toDouble()
     private val canvasH = cfg.canvasH.toDouble()
@@ -106,10 +110,18 @@ private class BannerGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val topLineW = nameBoxW + accentW
     val infoBarW = topLineW
     val infoBarH = infoSizePx + paddingY * INFO_PAD_MULTIPLE
+    val detailBarW = topLineW
+    val detailBarH = detailSizePx + paddingY * INFO_PAD_MULTIPLE
 
-    private val baseY = canvasH - marginVPx - (nameBoxH + lineSpacingPx + infoBarH) / 2
-    val nameBgCY = baseY - lineSpacingPx / 2 - infoBarH / 2
-    val infoBarCY = baseY + nameBoxH / 2 + lineSpacingPx / 2
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtra = if (!cfg.hideDetail) lineSpacingPx + detailBarH else 0.0
+
+    private val totalH = nameBoxH + lineSpacingPx + infoBarH + detailExtra
+    private val baseY = canvasH - marginVPx - totalH / 2
+    private val stackTop = baseY - totalH / 2
+    val nameBgCY = stackTop + nameBoxH / 2
+    val infoBarCY = stackTop + nameBoxH + lineSpacingPx + infoBarH / 2
+    val detailBarCY = stackTop + nameBoxH + lineSpacingPx + infoBarH + lineSpacingPx + detailBarH / 2
     val topLineY = nameBgCY - nameBoxH / 2 - topLineH / 2 - RULE_CLEARANCE_PX
 
     /** The banner hangs off one margin; everything is measured from that edge. */
@@ -121,11 +133,14 @@ private class BannerGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val topLineAnchorX = if (isRight) topLineW / 2 else -topLineW / 2
     val infoEdgeX = edgeX
     val infoAnchorX = if (isRight) infoBarW / 2 else -infoBarW / 2
+    val detailEdgeX = edgeX
+    val detailAnchorX = if (isRight) detailBarW / 2 else -detailBarW / 2
 
     val justify = if (isRight) JUSTIFY_RIGHT else JUSTIFY_LEFT
     val textX = if (isRight) edgeX - paddingX else edgeX + paddingX
     val nameTextY = nameBgCY + nameSizePx * BASELINE_FACTOR
     val infoTextY = infoBarCY + infoSizePx * BASELINE_FACTOR
+    val detailTextY = detailBarCY + detailSizePx * BASELINE_FACTOR
 
     /** The name slides in from one side and the info bar from the other. */
     val dir = if (isRight) -1.0 else 1.0
@@ -134,47 +149,120 @@ private class BannerGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
 }
 
-/**
- * One of the two banded lines. They differ in their box, their timing, which way they slide and
- * what colour their plate takes.
- */
-private class BannerLine(g: BannerGeometry, isName: Boolean) {
-    val maskName = if (isName) "Name Mask" else "Info Mask"
-    val layerName = if (isName) "Name" else "Info"
-    val bgName = if (isName) "Name BG" else "Info Bar"
-    val boxW = if (isName) g.nameBoxW else g.infoBarW
-    val boxH = if (isName) g.nameBoxH else g.infoBarH
-    val edgeX = if (isName) g.nameEdgeX else g.infoEdgeX
-    val anchorX = if (isName) g.nameAnchorX else g.infoAnchorX
-    val cy = if (isName) g.nameBgCY else g.infoBarCY
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val textY = if (isName) g.nameTextY else g.infoTextY
-    val slideOffset = if (isName) boxW * g.dir else boxW * -g.dir
-    val startPct = if (isName) NAME_START_PCT else INFO_START_PCT
-    val arrivedPct = if (isName) NAME_ARRIVED_PCT else INFO_ARRIVED_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class BannerLineKind { NAME, INFO, DETAIL }
 
-    /** The name's plate takes the background colour; the info bar takes the accent. */
-    val plateColor = if (isName) g.bgLottie else g.accentLottie
-    val plateAlpha = if (isName) g.cfg.bgColorAlpha else g.cfg.accentColorAlpha
+/**
+ * One of the (up to) three banded lines. They differ in their box, their timing, which way they
+ * slide and what colour their plate takes.
+ */
+private class BannerLine(g: BannerGeometry, kind: BannerLineKind) {
+    val maskName = when (kind) {
+        BannerLineKind.NAME -> "Name Mask"
+        BannerLineKind.INFO -> "Info Mask"
+        BannerLineKind.DETAIL -> "Detail Mask"
+    }
+    val layerName = when (kind) {
+        BannerLineKind.NAME -> "Name"
+        BannerLineKind.INFO -> "Info"
+        BannerLineKind.DETAIL -> "Detail"
+    }
+    val bgName = when (kind) {
+        BannerLineKind.NAME -> "Name BG"
+        BannerLineKind.INFO -> "Info Bar"
+        BannerLineKind.DETAIL -> "Detail Bar"
+    }
+    val boxW = when (kind) {
+        BannerLineKind.NAME -> g.nameBoxW
+        BannerLineKind.INFO -> g.infoBarW
+        BannerLineKind.DETAIL -> g.detailBarW
+    }
+    val boxH = when (kind) {
+        BannerLineKind.NAME -> g.nameBoxH
+        BannerLineKind.INFO -> g.infoBarH
+        BannerLineKind.DETAIL -> g.detailBarH
+    }
+    val edgeX = when (kind) {
+        BannerLineKind.NAME -> g.nameEdgeX
+        BannerLineKind.INFO -> g.infoEdgeX
+        BannerLineKind.DETAIL -> g.detailEdgeX
+    }
+    val anchorX = when (kind) {
+        BannerLineKind.NAME -> g.nameAnchorX
+        BannerLineKind.INFO -> g.infoAnchorX
+        BannerLineKind.DETAIL -> g.detailAnchorX
+    }
+    val cy = when (kind) {
+        BannerLineKind.NAME -> g.nameBgCY
+        BannerLineKind.INFO -> g.infoBarCY
+        BannerLineKind.DETAIL -> g.detailBarCY
+    }
+    val sizePx = when (kind) {
+        BannerLineKind.NAME -> g.nameSizePx
+        BannerLineKind.INFO -> g.infoSizePx
+        BannerLineKind.DETAIL -> g.detailSizePx
+    }
+    val textY = when (kind) {
+        BannerLineKind.NAME -> g.nameTextY
+        BannerLineKind.INFO -> g.infoTextY
+        BannerLineKind.DETAIL -> g.detailTextY
+    }
+    val slideOffset = if (kind == BannerLineKind.NAME) boxW * g.dir else boxW * -g.dir
+    val startPct = when (kind) {
+        BannerLineKind.NAME -> NAME_START_PCT
+        BannerLineKind.INFO -> INFO_START_PCT
+        BannerLineKind.DETAIL -> DETAIL_START_PCT
+    }
+    val arrivedPct = when (kind) {
+        BannerLineKind.NAME -> NAME_ARRIVED_PCT
+        BannerLineKind.INFO -> INFO_ARRIVED_PCT
+        BannerLineKind.DETAIL -> DETAIL_ARRIVED_PCT
+    }
+    val text = when (kind) {
+        BannerLineKind.NAME -> g.cfg.nameText
+        BannerLineKind.INFO -> g.cfg.infoText
+        BannerLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        BannerLineKind.NAME -> g.cfg.nameWeight
+        BannerLineKind.INFO -> g.cfg.infoWeight
+        BannerLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        BannerLineKind.NAME -> g.nameCLottie
+        BannerLineKind.INFO -> g.infoCLottie
+        BannerLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        BannerLineKind.NAME -> g.cfg.nameTransform
+        BannerLineKind.INFO -> g.cfg.infoTransform
+        BannerLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        BannerLineKind.NAME -> g.cfg.nameColorAlpha
+        BannerLineKind.INFO -> g.cfg.infoColorAlpha
+        BannerLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
+
+    /** The name's plate takes the background colour; info and detail bars take the accent. */
+    val plateColor = if (kind == BannerLineKind.NAME) g.bgLottie else g.accentLottie
+    val plateAlpha = if (kind == BannerLineKind.NAME) g.cfg.bgColorAlpha else g.cfg.accentColorAlpha
 }
 
 class Style4Banner : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = BannerGeometry(builder, cfg)
-        val name = BannerLine(g, isName = true)
-        val info = BannerLine(g, isName = false)
+        val name = BannerLine(g, BannerLineKind.NAME)
+        val info = BannerLine(g, BannerLineKind.INFO)
+        val detail = BannerLine(g, BannerLineKind.DETAIL)
         // Added first renders on top.
         if (!cfg.hideName) builder.addMaskedLine(g, name)
         if (!cfg.hideInfo) builder.addMaskedLine(g, info)
+        if (!cfg.hideDetail) builder.addMaskedLine(g, detail)
         if (g.borderPx > 0) builder.addTopRule(g)
         if (cfg.bgEnabled) builder.addAccentBlock(g)
         if (!cfg.hideName && cfg.bgEnabled) builder.addLinePlate(g, name)
         if (!cfg.hideInfo && cfg.bgEnabled) builder.addLinePlate(g, info)
+        if (!cfg.hideDetail && cfg.bgEnabled) builder.addLinePlate(g, detail)
     }
 }
 

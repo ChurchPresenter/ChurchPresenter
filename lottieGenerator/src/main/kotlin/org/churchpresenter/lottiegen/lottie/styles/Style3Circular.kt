@@ -34,6 +34,9 @@ private const val BASELINE_NUDGE_FACTOR = 0.15
 private const val UPPER_LINE_FACTOR = 0.1
 private const val LOWER_LINE_FACTOR = 0.9
 
+/** How far below info's own row the detail row sits, as a fraction of info's size. */
+private const val DETAIL_ROW_GAP_FACTOR = 0.15
+
 /** The rounded square that holds the logo, and how much of it the logo fills, in em. */
 private const val CIRCLE_SIZE_EM = 5.5
 private const val LOGO_MAX_EM = 4.5
@@ -79,11 +82,15 @@ private class CircleGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
+    )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
     )
 
     val circleSize = emToPx(CIRCLE_SIZE_EM, baseSize)
@@ -98,17 +105,29 @@ private class CircleGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     val canvasW = cfg.canvasW.toDouble()
     val canvasH = cfg.canvasH.toDouble()
     val isRight = cfg.align == "right"
     val isCenter = cfg.align == "center"
 
-    val textBlockW = max(nameM.width, infoM.width) + TEXT_BLOCK_SLACK_PX
+    val textBlockW = maxOf(nameM.width, infoM.width, detailM.width) + TEXT_BLOCK_SLACK_PX
     val bgBarW = textBlockW + emToPx(BAR_PAD_EM, baseSize)
-    val bgBarH = circleSize - emToPx(BAR_INSET_EM, baseSize)
 
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailRowExtra = if (!cfg.hideDetail) {
+        lineSpacingPx + infoSizePx * DETAIL_ROW_GAP_FACTOR + detailSizePx * LOWER_LINE_FACTOR
+    } else {
+        0.0
+    }
+    val bgBarH = circleSize - emToPx(BAR_INSET_EM, baseSize) + detailRowExtra
+
+    /** The circle's own centre never moves; only the bar (below) grows to make room for Detail. */
     val baseY = canvasH - marginVPx - circleSize / 2
+
+    /** Where the background bar is centred — shifted down from [baseY] so it grows downward only. */
+    val barCenterY = baseY + detailRowExtra / 2
     val hasLogo = cfg.logoEnabled && cfg.logoData != null
 
     val circleX = when {
@@ -131,6 +150,7 @@ private class CircleGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
 
     val nameY = baseY - lineSpacingPx / 2 - nameSizePx * UPPER_LINE_FACTOR
     val infoY = baseY + lineSpacingPx / 2 + infoSizePx * LOWER_LINE_FACTOR
+    val detailY = infoY + lineSpacingPx + infoSizePx * DETAIL_ROW_GAP_FACTOR + detailSizePx * LOWER_LINE_FACTOR
     val slideAmount = circleSize * SLIDE_CLEARANCE_FACTOR
     val justify = if (isRight) JUSTIFY_RIGHT else JUSTIFY_LEFT
 
@@ -151,30 +171,73 @@ private class CircleGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     )
 }
 
+private enum class CircleLineKind { NAME, INFO, DETAIL }
+
 /**
- * One of the two lines. They differ only in which half of the config they read and which way they
- * slide -- the name drops from above, the info line rises from below.
+ * One of the (up to) three lines. They differ only in which slice of the config they read and
+ * which way they slide -- the name drops from above, info and detail rise from below.
  */
-private class CircleLine(g: CircleGeometry, isName: Boolean) {
-    val maskName = if (isName) "Name Mask" else "Info Mask"
-    val layerName = if (isName) "Name" else "Info"
-    val width = if (isName) g.nameM.width else g.infoM.width
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val y = if (isName) g.nameY else g.infoY
-    val slideFrom = if (isName) y + g.slideAmount else y - g.slideAmount
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private class CircleLine(g: CircleGeometry, kind: CircleLineKind) {
+    val maskName = when (kind) {
+        CircleLineKind.NAME -> "Name Mask"
+        CircleLineKind.INFO -> "Info Mask"
+        CircleLineKind.DETAIL -> "Detail Mask"
+    }
+    val layerName = when (kind) {
+        CircleLineKind.NAME -> "Name"
+        CircleLineKind.INFO -> "Info"
+        CircleLineKind.DETAIL -> "Detail"
+    }
+    val width = when (kind) {
+        CircleLineKind.NAME -> g.nameM.width
+        CircleLineKind.INFO -> g.infoM.width
+        CircleLineKind.DETAIL -> g.detailM.width
+    }
+    val sizePx = when (kind) {
+        CircleLineKind.NAME -> g.nameSizePx
+        CircleLineKind.INFO -> g.infoSizePx
+        CircleLineKind.DETAIL -> g.detailSizePx
+    }
+    val y = when (kind) {
+        CircleLineKind.NAME -> g.nameY
+        CircleLineKind.INFO -> g.infoY
+        CircleLineKind.DETAIL -> g.detailY
+    }
+    val slideFrom = if (kind == CircleLineKind.NAME) y + g.slideAmount else y - g.slideAmount
+    val text = when (kind) {
+        CircleLineKind.NAME -> g.cfg.nameText
+        CircleLineKind.INFO -> g.cfg.infoText
+        CircleLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        CircleLineKind.NAME -> g.cfg.nameWeight
+        CircleLineKind.INFO -> g.cfg.infoWeight
+        CircleLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        CircleLineKind.NAME -> g.nameCLottie
+        CircleLineKind.INFO -> g.infoCLottie
+        CircleLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        CircleLineKind.NAME -> g.cfg.nameTransform
+        CircleLineKind.INFO -> g.cfg.infoTransform
+        CircleLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        CircleLineKind.NAME -> g.cfg.nameColorAlpha
+        CircleLineKind.INFO -> g.cfg.infoColorAlpha
+        CircleLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 }
 
 class Style3Circular : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = CircleGeometry(builder, cfg)
         builder.addLogo(g)
-        if (!cfg.hideName) builder.addMaskedLine(g, CircleLine(g, isName = true))
-        if (!cfg.hideInfo) builder.addMaskedLine(g, CircleLine(g, isName = false))
+        if (!cfg.hideName) builder.addMaskedLine(g, CircleLine(g, CircleLineKind.NAME))
+        if (!cfg.hideInfo) builder.addMaskedLine(g, CircleLine(g, CircleLineKind.INFO))
+        if (!cfg.hideDetail) builder.addMaskedLine(g, CircleLine(g, CircleLineKind.DETAIL))
         builder.addLogoPlate(g)
         if (cfg.bgEnabled) builder.addBackgroundBar(g)
     }
@@ -300,9 +363,9 @@ private fun LottieBuilder.addBackgroundBar(g: CircleGeometry) {
         KeyframeInput(END_PCT, jsonArrayOf(g.bgBarW, g.bgBarH)),
     )
     val posKFs = g.keyframes(
-        KeyframeInput(0.0, jsonArrayOf(edgeX, g.baseY, 0.0)),
-        KeyframeInput(SQUARE_SETTLED_PCT, jsonArrayOf(edgeX, g.baseY, 0.0)),
-        KeyframeInput(END_PCT, jsonArrayOf(centreEnd, g.baseY, 0.0)),
+        KeyframeInput(0.0, jsonArrayOf(edgeX, g.barCenterY, 0.0)),
+        KeyframeInput(SQUARE_SETTLED_PCT, jsonArrayOf(edgeX, g.barCenterY, 0.0)),
+        KeyframeInput(END_PCT, jsonArrayOf(centreEnd, g.barCenterY, 0.0)),
     )
     val items = mutableListOf(
         makeAnimatedRect(sizeKFs, g.cornerPx * BG_CORNER_FACTOR),

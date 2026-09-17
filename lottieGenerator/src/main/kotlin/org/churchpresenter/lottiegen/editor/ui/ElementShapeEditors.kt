@@ -121,6 +121,7 @@ internal fun FitWidthDropdown(
                 null -> Strings.editorFitNone
                 WidthBasis.NAME -> Strings.editorFitName
                 WidthBasis.INFO -> Strings.editorFitInfo
+                WidthBasis.DETAIL -> Strings.editorFitDetail
                 WidthBasis.TEXT_BLOCK -> Strings.editorFitTextBlock
             }
         },

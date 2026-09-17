@@ -18,7 +18,7 @@
                 "gapBeforeEm": 0.9
             }
         ],
-        "blockHeightEm": 3.5,
+        "blockHeightEm": 4.2,
         "centerSingleLine": false
     },
     "elements": [
@@ -102,7 +102,8 @@
                     "center": {
                         "anchorIn": "CENTER"
                     }
-                }
+                },
+                "offsetYEm": -0.4
             },
             "tracks": [
                 {
@@ -146,7 +147,8 @@
                     "center": {
                         "anchorIn": "CENTER"
                     }
-                }
+                },
+                "offsetYEm": -0.4
             },
             "tracks": [
                 {
@@ -175,6 +177,51 @@
             ]
         },
         {
+            "type": "text",
+            "id": "detail",
+            "name": "Detail",
+            "field": "DETAIL",
+            "visibleWhen": [
+                "DETAIL_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "DETAIL_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                },
+                "offsetYEm": -0.4
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 78.0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "type": "polygon",
             "id": "accent",
             "name": "Accent",
@@ -186,19 +233,19 @@
             "verticesEm": [
                 [
                     -1.0,
-                    2.36
+                    3.06
                 ],
                 [
                     1.0,
-                    2.36
+                    3.06
                 ],
                 [
                     0.9,
-                    1.7558
+                    2.4558
                 ],
                 [
                     -1.0,
-                    2.1334
+                    2.8334
                 ]
             ],
             "closed": true,
@@ -291,11 +338,11 @@
                 ],
                 [
                     1.0,
-                    2.36
+                    3.06
                 ],
                 [
                     -1.0,
-                    2.36
+                    3.06
                 ]
             ],
             "closed": true,

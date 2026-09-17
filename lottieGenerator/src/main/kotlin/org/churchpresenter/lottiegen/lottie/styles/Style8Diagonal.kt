@@ -45,6 +45,7 @@ private const val TOP_PAD_MULTIPLE = 2.0
 /** Where each line's baseline sits within the content block, as a fraction of its own size. */
 private const val INFO_BASELINE_FACTOR = 0.4
 private const val NAME_BASELINE_FACTOR = 0.7
+private const val DETAIL_BASELINE_FACTOR = 0.4
 
 /** Letters rise into place from this far below, as a fraction of their line size. */
 private const val REVEAL_RISE_FACTOR = 0.6
@@ -55,6 +56,8 @@ private const val INFO_REVEAL_FROM_PCT = 30.0
 private const val INFO_REVEAL_TO_PCT = 65.0
 private const val NAME_REVEAL_FROM_PCT = 35.0
 private const val NAME_REVEAL_TO_PCT = 70.0
+private const val DETAIL_REVEAL_FROM_PCT = 45.0
+private const val DETAIL_REVEAL_TO_PCT = 80.0
 
 /** Justify codes Lottie writes for left, right and centred text. */
 private const val JUSTIFY_LEFT = 0
@@ -75,6 +78,7 @@ private class DiagonalGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     private val paddingX = emToPx(PAD_X_EM, baseSize)
     private val paddingY = emToPx(PAD_Y_EM, baseSize)
     private val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
@@ -91,6 +95,7 @@ private class DiagonalGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
     private val overflow = emToPx(OVERFLOW_EM, baseSize)
     private val barLeft = -overflow
@@ -98,8 +103,13 @@ private class DiagonalGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
 
     private val infoBlockH = if (cfg.hideInfo) 0.0 else infoSizePx
     private val nameBlockH = if (cfg.hideName) 0.0 else nameSizePx
+    private val detailBlockH = if (cfg.hideDetail) 0.0 else detailSizePx
     private val gap = if (!cfg.hideName && !cfg.hideInfo) lineSpacingPx * LINE_GAP_FACTOR else 0.0
-    private val contentH = infoBlockH + gap + nameBlockH + paddingY * CONTENT_PAD_MULTIPLE
+    private val gap2 = if (!cfg.hideName && !cfg.hideDetail) lineSpacingPx * LINE_GAP_FACTOR else 0.0
+
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtra = if (!cfg.hideDetail) gap2 + detailBlockH else 0.0
+    private val contentH = infoBlockH + gap + nameBlockH + detailExtra + paddingY * CONTENT_PAD_MULTIPLE
     private val barH = contentH + slant
 
     val barFinalY = canvasH - barH / 2
@@ -143,6 +153,9 @@ private class DiagonalGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     val nameRelY = infoRelY +
         (if (cfg.hideInfo) 0.0 else infoBlockH + gap) +
         (if (cfg.hideName) 0.0 else nameSizePx * NAME_BASELINE_FACTOR)
+    val detailRelY = nameRelY +
+        (if (cfg.hideName) 0.0 else nameBlockH + gap2) +
+        (if (cfg.hideDetail) 0.0 else detailSizePx * DETAIL_BASELINE_FACTOR)
 
     fun keyframes(vararg points: KeyframeInput) =
         buildKeyframes(points.toList(), inF, holdF, outF, Easing.DEFAULT)
@@ -164,25 +177,68 @@ private class DiagonalGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
     )
 }
 
-/** One of the two lines: they differ in their config half, their reveal window and their offset. */
-private class DiagonalLine(g: DiagonalGeometry, isName: Boolean) {
-    val layerName = if (isName) "Name" else "Info"
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val relY = if (isName) g.nameRelY else g.infoRelY
-    val revealFrom = if (isName) NAME_REVEAL_FROM_PCT else INFO_REVEAL_FROM_PCT
-    val revealTo = if (isName) NAME_REVEAL_TO_PCT else INFO_REVEAL_TO_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private enum class DiagonalLineKind { NAME, INFO, DETAIL }
+
+/** One of the (up to) three lines: they differ in their config slice, reveal window and offset. */
+private class DiagonalLine(g: DiagonalGeometry, kind: DiagonalLineKind) {
+    val layerName = when (kind) {
+        DiagonalLineKind.NAME -> "Name"
+        DiagonalLineKind.INFO -> "Info"
+        DiagonalLineKind.DETAIL -> "Detail"
+    }
+    val sizePx = when (kind) {
+        DiagonalLineKind.NAME -> g.nameSizePx
+        DiagonalLineKind.INFO -> g.infoSizePx
+        DiagonalLineKind.DETAIL -> g.detailSizePx
+    }
+    val relY = when (kind) {
+        DiagonalLineKind.NAME -> g.nameRelY
+        DiagonalLineKind.INFO -> g.infoRelY
+        DiagonalLineKind.DETAIL -> g.detailRelY
+    }
+    val revealFrom = when (kind) {
+        DiagonalLineKind.NAME -> NAME_REVEAL_FROM_PCT
+        DiagonalLineKind.INFO -> INFO_REVEAL_FROM_PCT
+        DiagonalLineKind.DETAIL -> DETAIL_REVEAL_FROM_PCT
+    }
+    val revealTo = when (kind) {
+        DiagonalLineKind.NAME -> NAME_REVEAL_TO_PCT
+        DiagonalLineKind.INFO -> INFO_REVEAL_TO_PCT
+        DiagonalLineKind.DETAIL -> DETAIL_REVEAL_TO_PCT
+    }
+    val text = when (kind) {
+        DiagonalLineKind.NAME -> g.cfg.nameText
+        DiagonalLineKind.INFO -> g.cfg.infoText
+        DiagonalLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        DiagonalLineKind.NAME -> g.cfg.nameWeight
+        DiagonalLineKind.INFO -> g.cfg.infoWeight
+        DiagonalLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        DiagonalLineKind.NAME -> g.nameCLottie
+        DiagonalLineKind.INFO -> g.infoCLottie
+        DiagonalLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        DiagonalLineKind.NAME -> g.cfg.nameTransform
+        DiagonalLineKind.INFO -> g.cfg.infoTransform
+        DiagonalLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        DiagonalLineKind.NAME -> g.cfg.nameColorAlpha
+        DiagonalLineKind.INFO -> g.cfg.infoColorAlpha
+        DiagonalLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 }
 
 class Style8Diagonal : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = DiagonalGeometry(builder, cfg)
-        if (!cfg.hideInfo) builder.addRevealedLine(g, DiagonalLine(g, isName = false))
-        if (!cfg.hideName) builder.addRevealedLine(g, DiagonalLine(g, isName = true))
+        if (!cfg.hideInfo) builder.addRevealedLine(g, DiagonalLine(g, DiagonalLineKind.INFO))
+        if (!cfg.hideName) builder.addRevealedLine(g, DiagonalLine(g, DiagonalLineKind.NAME))
+        if (!cfg.hideDetail) builder.addRevealedLine(g, DiagonalLine(g, DiagonalLineKind.DETAIL))
         if (g.borderPx > 0) builder.addTopEdge(g)
         if (cfg.bgEnabled) builder.addBar(g)
     }
