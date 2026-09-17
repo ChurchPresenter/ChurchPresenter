@@ -6,6 +6,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -128,6 +129,7 @@ class LowerThirdOffscreenRenderer(
                     ),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
+                    alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize()
                 )
             }

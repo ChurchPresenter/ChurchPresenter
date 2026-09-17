@@ -63,6 +63,7 @@ fun LowerThirdPresenter(
                     bitmap = frame.imageBitmap,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
+                    alignment = Alignment.BottomCenter,
                     colorFilter = if (isKey) keyColorFilter else null,
                     modifier = contentModifier
                 )
@@ -71,6 +72,7 @@ fun LowerThirdPresenter(
                     painter = painter,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
+                    alignment = Alignment.BottomCenter,
                     colorFilter = if (isKey) keyColorFilter else null,
                     modifier = contentModifier
                 )
@@ -81,6 +83,7 @@ fun LowerThirdPresenter(
                 bitmap = frame.imageBitmap,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
+                alignment = Alignment.BottomCenter,
                 colorFilter = if (isKey) keyColorFilter else null,
                 modifier = contentModifier
             )
