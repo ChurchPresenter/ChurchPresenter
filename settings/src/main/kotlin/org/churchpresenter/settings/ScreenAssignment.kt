@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -85,41 +86,30 @@ data class ScreenAssignment(
      */
     val screenName: String = "",
     /**
-     * This output's own Stage Monitor settings, or null to follow the global ones.
+     * What this output changes about the Stage Monitor, or null to follow the global settings.
      *
-     * Null is not "no stage monitor" — it is "the same one everybody else uses". An output only
-     * gets an entry here once the operator has customized it, so an install that never opens the
-     * Customize dialog carries none of these and keeps behaving exactly as it did.
+     * **Sparse: only the settings the operator actually changed on this screen** -- see
+     * [sparseOverrideOf], which also says why a whole snapshot was the wrong shape. Null is not "no
+     * stage monitor", it is "the same one everybody else uses", and a key absent from the tree means
+     * the same thing for that one setting. Read it through `AppSettings.resolvedFor`.
      */
-    val stageMonitorOverride: StageMonitorSettings? = null,
+    val stageMonitorOverride: JsonObject? = null,
+    /** What this output changes about the Bible's appearance. Sparse, like [stageMonitorOverride];
+     *  the library folder and the translation stack stay the global document's. */
+    val bibleOverride: JsonObject? = null,
+    /** What this output changes about songs' appearance. Sparse, like [stageMonitorOverride]; the
+     *  song folder and the list columns stay the global document's. */
+    val songOverride: JsonObject? = null,
+    /** What this output changes about the Strong's dictionary. Sparse, like [stageMonitorOverride]. */
+    val dictionaryOverride: JsonObject? = null,
     /**
-     * This output's own Bible appearance, or null to follow the global settings.
+     * What this output changes about its backgrounds. Sparse, like [stageMonitorOverride].
      *
-     * Stored as a whole [BibleSettings] rather than a diff so the settings tab can edit it
-     * unchanged, but only its *appearance* is ever read: the library folder, the file list and the
-     * translation stack come from the global document — see `BibleSettings.withAppearanceOf`.
+     * Note these win over the backgrounds an Instance Link follower mirrors from its primary -- a
+     * background chosen for *this* screen is a local decision, and the mirror is the fallback for
+     * screens that have not made one.
      */
-    val bibleOverride: BibleSettings? = null,
-    /** This output's own Song appearance, or null to follow the global settings. Mirrors
-     *  [bibleOverride], including that only its appearance is read. */
-    val songOverride: SongSettings? = null,
-    /**
-     * This output's own Strong's dictionary appearance, or null to follow the global settings.
-     *
-     * Replaced whole rather than merged: unlike Bible and Song, [DictionarySettings] is nothing but
-     * appearance — it names no folder and selects no content — so there is nothing in it that has
-     * to stay one per install.
-     */
-    val dictionaryOverride: DictionarySettings? = null,
-    /**
-     * This output's own backgrounds, or null to follow the global settings.
-     *
-     * Replaced whole, like [dictionaryOverride]: [BackgroundSettings] is colours, images, videos and
-     * opacities and nothing else. Note this wins over the backgrounds an Instance Link follower
-     * mirrors from its primary — a background chosen for *this* screen is a local decision, and the
-     * mirror is the fallback for screens that have not made one.
-     */
-    val backgroundOverride: BackgroundSettings? = null,
+    val backgroundOverride: JsonObject? = null,
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries

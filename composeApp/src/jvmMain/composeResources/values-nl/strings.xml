@@ -2489,6 +2489,7 @@
     <string name="song_element_look_ahead">Vooruitblik</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Taal</string>
+    <string name="song_style_language">Opmaak</string>
     <string name="song_preview_look_ahead">Vooruitblik</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Achtergrond</string>
@@ -2584,6 +2585,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Beweging</string>
     <string name="customize_layout">Indeling</string>
+    <string name="customize_marker">Markering</string>
     <string name="customize_bilingual">Tweetalig</string>
     <string name="customize_no_preview">Geen voorbeeld voor dit onderdeel</string>
     <string name="customize_bible">Bijbel</string>

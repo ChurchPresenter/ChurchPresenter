@@ -15,6 +15,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -34,17 +35,15 @@ internal fun SongEditingCard(
     target: SongStyleTarget,
     availableFonts: List<String>,
     modifier: Modifier = Modifier,
-    /** Which language of a bilingual song these controls write. Only the lyrics have a second. */
+    /**
+     * Which language of a bilingual song these controls write. Only the lyrics and the title have a
+     * second -- see [SECOND_LANGUAGE_ELEMENTS].
+     */
     language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
     /** Editing the title slide's elements rather than the lyric slides' -- see [SongElementRow]. */
     titleSlideView: Boolean = false,
 ) {
-    val secondary = language.isSecondary
-    val style = if (secondary) {
-        settings.songSettings.secondaryLyricsStyle(target)
-    } else {
-        settings.songSettings.elementStyle(element, target)
-    }
+    val style = settings.songSettings.elementStyle(element, target, language)
     val editingScroll = rememberScrollState()
     Box(modifier = modifier) {
         Column(
@@ -72,37 +71,22 @@ internal fun SongEditingCard(
                         style = style,
                         onStyleChange = { edited ->
                             onSettingsChange { s ->
-                                val song = s.songSettings
                                 s.copy(
-                                    songSettings = if (secondary) {
-                                        song.withSecondaryLyricsStyle(target, edited)
-                                    } else {
-                                        song.withElementStyle(element, target, edited)
-                                    },
+                                    songSettings = s.songSettings
+                                        .withElementStyle(element, target, language, edited),
                                 )
                             }
                         },
-                        // Reset means something different for the second language: not "back to the
-                        // factory look" but "back to being drawn like the first", which is the state
-                        // it is in until anything here is touched and the only way back to it.
+                        // Reset means something different for the second language -- see
+                        // [withElementReset].
                         onReset = {
                             onSettingsChange { s ->
-                                val song = s.songSettings
-                                s.copy(
-                                    songSettings = if (secondary) {
-                                        song.withSecondaryLyricsFollowingPrimary()
-                                    } else {
-                                        song.withElementStyle(
-                                            element,
-                                            target,
-                                            defaultSongElementStyle(element, target),
-                                        )
-                                    },
-                                )
+                                s.copy(songSettings = s.songSettings.withElementReset(element, target, language))
                             }
                         },
                         availableFonts = availableFonts,
                         onTitleSlide = titleSlideView,
+                        numberInCorner = settings.songSettings.numberCorner(target.isLowerThird) != Constants.NONE,
                     )
                 }
             }

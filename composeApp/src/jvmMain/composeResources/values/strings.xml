@@ -898,9 +898,11 @@
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>
     <string name="song_language_scope">Lang</string>
+    <string name="song_style_language">Styling</string>
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>
+    <string name="customize_element_slide">Slide</string>
     <string name="song_primary_language">1st Language</string>
     <string name="song_secondary_language">2nd Language</string>
     <string name="text_outline">Outline</string>
@@ -1020,6 +1022,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Motion</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_marker">Marker</string>
     <string name="customize_bilingual">Bilingual</string>
     <string name="customize_no_preview">No preview for this section</string>
     <string name="customize_bible">Bible</string>

@@ -9,6 +9,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,8 +42,17 @@ class ProjectionCustomizeTitleSlideStyleTest {
         projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode))),
     )
 
-    private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+    /**
+     * What this output actually draws songs with.
+     *
+     * An override stopped being a whole `SongSettings` snapshot and became a sparse tree of what the
+     * screen changed, so it is resolved against the document rather than read as settings.
+     */
+    private fun AppSettings.stored(): SongSettings {
+        val assignment = projectionSettings.screenAssignments[0]
+        assertNotNull(assignment.songOverride, "the output must have its own Songs")
+        return resolvedFor(assignment).songSettings
+    }
 
     /** The profile the pane edits: the title, on a full screen. The picker opens on it. */
     private fun AppSettings.storedTitle(): SongElementStyle =
@@ -90,20 +100,20 @@ class ProjectionCustomizeTitleSlideStyleTest {
     }
 
     @Test
-    fun `strikethrough and shadow are two buttons, not one`() {
+    fun `strikethrough and shadow are two controls, not one`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            // Both draw an "S" -- the row is laid out bold, italic, underline, strikethrough,
-            // shadow, so the first is the line through the letters and the second the shadow.
+            // The only "S" beside B/I/U is the line through the letters. Shadow is the checkbox on
+            // the row below, which is where its colour, size and opacity fold out from.
             styleButton(group = 0, label = SHADOW_GLYPH).performScrollTo().performClick()
             waitForIdle()
-            assertTrue(get().storedTitle().strikethrough, "the first S is the strikethrough")
+            assertTrue(get().storedTitle().strikethrough, "the S is the strikethrough")
             assertFalse(get().storedTitle().shadow, "and it is not the shadow")
 
-            styleButton(group = 1, label = SHADOW_GLYPH).performScrollTo().performClick()
+            shadowCheckbox(group = 0).performScrollTo().performClick()
             waitForIdle()
-            assertTrue(get().storedTitle().shadow, "the second S is the shadow")
-            assertTrue(get().storedTitle().strikethrough, "which leaves the first one on")
+            assertTrue(get().storedTitle().shadow, "the checkbox is the shadow")
+            assertTrue(get().storedTitle().strikethrough, "which leaves the S on")
         }
     }
 
@@ -150,7 +160,7 @@ class ProjectionCustomizeTitleSlideStyleTest {
     fun `the case picker writes the title's transform`() {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            chooseSegment("AA")
+            chooseSegment("UPPERCASE")
 
             assertEquals(Constants.TEXT_TRANSFORM_UPPERCASE, get().storedTitle().transform)
         }
@@ -161,12 +171,12 @@ class ProjectionCustomizeTitleSlideStyleTest {
         projectionTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
             tapSliderTrack("Letter spacing", "3px", fraction = 0.5f)
-            assertEquals(40, get().storedTitle().letterSpacing, "halfway along a -20..100 track")
+            assertEquals(10, get().storedTitle().letterSpacing, "halfway along a -10..30 track")
             assertEquals(7, get().storedTitle().wordSpacing, "the slider below it must not move")
 
             tapSliderTrack("Word spacing", "7px", fraction = 0.5f)
-            assertEquals(40, get().storedTitle().wordSpacing)
-            assertEquals(40, get().storedTitle().letterSpacing, "nor the one above it, afterwards")
+            assertEquals(20, get().storedTitle().wordSpacing, "and halfway along a 0..40 one")
+            assertEquals(10, get().storedTitle().letterSpacing, "nor the one above it, afterwards")
         }
     }
 }

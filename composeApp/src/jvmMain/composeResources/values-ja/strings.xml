@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">先読み</string>
     <string name="song_chunk">区切り</string>
     <string name="song_language_scope">言語</string>
+    <string name="song_style_language">スタイル</string>
     <string name="song_preview_look_ahead">先読み</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">背景</string>
@@ -2565,6 +2566,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">動き</string>
     <string name="customize_layout">レイアウト</string>
+    <string name="customize_marker">マーカー</string>
     <string name="customize_bilingual">2 言語</string>
     <string name="customize_no_preview">このセクションのプレビューはありません</string>
     <string name="customize_bible">聖書</string>

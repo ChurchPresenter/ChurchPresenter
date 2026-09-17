@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Pratinjau berikutnya</string>
     <string name="song_chunk">Bagian</string>
     <string name="song_language_scope">Bahasa</string>
+    <string name="song_style_language">Gaya</string>
     <string name="song_preview_look_ahead">Pratinjau berikutnya</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Latar Belakang</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Gerak</string>
     <string name="customize_layout">Tata Letak</string>
+    <string name="customize_marker">Penanda</string>
     <string name="customize_bilingual">Dua Bahasa</string>
     <string name="customize_no_preview">Tidak ada pratinjau untuk bagian ini</string>
     <string name="customize_bible">Alkitab</string>

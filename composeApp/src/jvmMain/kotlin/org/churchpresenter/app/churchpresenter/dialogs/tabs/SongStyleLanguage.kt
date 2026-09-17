@@ -10,9 +10,9 @@ import org.churchpresenter.settings.SongSettings
  * two languages rather than a list, so this is a pair rather than an index -- but it is the same
  * move, and the switch above the preview is the same control.
  *
- * Only the lyrics have a second profile. Everything else on the slide -- the number, the title, the
- * look-ahead -- is drawn once whatever language the words are in, so [SECONDARY] shows the lyrics
- * alone rather than a strip of elements that cannot answer it.
+ * The lyrics and the title have a second profile each -- both are text the song carries twice. The
+ * number, the look-ahead and the credits do not: they are drawn once whatever language the words
+ * are in, so [SECONDARY] narrows the element strip to the two that can answer it.
  */
 internal enum class SongStyleLanguage { PRIMARY, SECONDARY }
 
@@ -86,7 +86,7 @@ internal fun SongSettings.withSecondaryLyricsFollowingPrimary(): SongSettings =
 private fun SongSettings.lyricsStyleFor(target: SongStyleTarget): SongElementStyle =
     elementStyle(SongStyleElement.LYRICS, target)
 
-private fun SongLyricStyle.toElementStyle() = SongElementStyle(
+internal fun SongLyricStyle.toElementStyle() = SongElementStyle(
     color = color,
     fontType = fontType,
     fontSize = fontSize,
@@ -107,7 +107,7 @@ private fun SongLyricStyle.toElementStyle() = SongElementStyle(
     outline = outline,
 )
 
-private fun SongElementStyle.toLyricStyle() = SongLyricStyle(
+internal fun SongElementStyle.toLyricStyle() = SongLyricStyle(
     color = color,
     fontType = fontType,
     fontSize = fontSize,

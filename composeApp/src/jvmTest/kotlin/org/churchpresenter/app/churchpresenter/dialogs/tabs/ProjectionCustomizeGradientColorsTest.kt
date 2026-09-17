@@ -12,6 +12,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /**
  * The two ends of a band's gradient. Only the lower-third surfaces offer one, so every fixture here
@@ -40,7 +41,7 @@ class ProjectionCustomizeGradientColorsTest {
     )
 
     private fun AppSettings.stored(): BackgroundSettings = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundOverride,
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
         "the output must have its own Backgrounds",
     )
 

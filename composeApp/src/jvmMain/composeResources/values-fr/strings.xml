@@ -2489,6 +2489,7 @@
     <string name="song_element_look_ahead">Aperçu suivant</string>
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Langue</string>
+    <string name="song_style_language">Style</string>
     <string name="song_preview_look_ahead">Aperçu suivant</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Arrière-plan</string>
@@ -2584,6 +2585,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Mouvement</string>
     <string name="customize_layout">Disposition</string>
+    <string name="customize_marker">Repère</string>
     <string name="customize_bilingual">Bilingue</string>
     <string name="customize_no_preview">Aucun aperçu pour cette section</string>
     <string name="customize_bible">Bible</string>

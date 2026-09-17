@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">Sonraki önizleme</string>
     <string name="song_chunk">Bölüm</string>
     <string name="song_language_scope">Dil</string>
+    <string name="song_style_language">Biçim</string>
     <string name="song_preview_look_ahead">Sonraki önizleme</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Arka Plan</string>
@@ -2564,6 +2565,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Hareket</string>
     <string name="customize_layout">Yerleşim</string>
+    <string name="customize_marker">İşaret</string>
     <string name="customize_bilingual">İki dilli</string>
     <string name="customize_no_preview">Bu bölüm için önizleme yok</string>
     <string name="customize_bible">Kutsal Kitap</string>

@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.settings.backgroundOverrideOf
 
 class LottieBandLogicTest {
 
@@ -39,7 +40,10 @@ class LottieBandLogicTest {
                 screenAssignments = listOf(
                     ScreenAssignment(),
                     ScreenAssignment(
-                        backgroundOverride = BackgroundSettings(songLowerThirdBackground = lottie("/mine.json")),
+                        backgroundOverride = backgroundOverrideOf(
+                            BackgroundSettings(),
+                            BackgroundSettings(songLowerThirdBackground = lottie("/mine.json")),
+                        ),
                     ),
                 ),
             ),

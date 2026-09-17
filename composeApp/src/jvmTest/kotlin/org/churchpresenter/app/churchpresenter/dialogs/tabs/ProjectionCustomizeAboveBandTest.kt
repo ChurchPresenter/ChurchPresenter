@@ -14,6 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.backgroundSettingsOn
 
 /** The Background pane's wash rows, on the output whose shape actually has an area above a band. */
 class ProjectionCustomizeAboveBandTest {
@@ -44,7 +45,7 @@ class ProjectionCustomizeAboveBandTest {
     )
 
     private fun AppSettings.storedBand() = assertNotNull(
-        projectionSettings.screenAssignments[0].backgroundOverride,
+        projectionSettings.screenAssignments[0].backgroundSettingsOn(backgroundSettings),
         "the output must have its own Backgrounds",
     ).bibleLowerThirdBackground
 

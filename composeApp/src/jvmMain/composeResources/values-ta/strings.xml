@@ -2474,6 +2474,7 @@
     <string name="song_element_look_ahead">அடுத்ததின் முன்னோட்டம்</string>
     <string name="song_chunk">பகுதி</string>
     <string name="song_language_scope">மொழி</string>
+    <string name="song_style_language">பாணி</string>
     <string name="song_preview_look_ahead">அடுத்ததின் முன்னோட்டம்</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">பின்னணி</string>
@@ -2569,6 +2570,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">அசைவு</string>
     <string name="customize_layout">அமைப்பு</string>
+    <string name="customize_marker">குறி</string>
     <string name="customize_bilingual">இருமொழி</string>
     <string name="customize_no_preview">இந்தப் பிரிவுக்கு முன்னோட்டம் இல்லை</string>
     <string name="customize_bible">வேதாகமம்</string>

@@ -2469,6 +2469,7 @@
     <string name="song_element_look_ahead">پیش‌نمای بعدی</string>
     <string name="song_chunk">بخش</string>
     <string name="song_language_scope">زبان</string>
+    <string name="song_style_language">قالب‌بندی</string>
     <string name="song_preview_look_ahead">پیش‌نمای بعدی</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">پس‌زمینه</string>
@@ -2565,6 +2566,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">حرکت</string>
     <string name="customize_layout">چیدمان</string>
+    <string name="customize_marker">نشانگر</string>
     <string name="customize_bilingual">دوزبانه</string>
     <string name="customize_no_preview">برای این بخش پیش‌نمایشی نیست</string>
     <string name="customize_bible">کتاب‌مقدس</string>

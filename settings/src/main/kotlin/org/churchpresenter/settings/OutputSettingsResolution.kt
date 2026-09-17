@@ -1,41 +1,74 @@
 package org.churchpresenter.settings
 
+import kotlinx.serialization.json.JsonObject
+
 /**
  * Resolving one output's own appearance against the global settings document.
  *
- * An override on [ScreenAssignment] stores a whole [BibleSettings]/[SongSettings] rather than a
- * diff, so that the existing settings tabs can edit one without knowing they are editing an
- * override. Only its *appearance* is ever read back: the library folder, the file list, the
- * translation stack and the browsing panels stay one per install, because an output holding its own
- * copy of those could point at a folder the operator has since moved, or present a translation the
- * Bible tab no longer lists.
+ * An override on [ScreenAssignment] is a **sparse tree of what that screen changed** -- see
+ * [sparseOverrideOf]. A setting the operator never touched is absent from it, and absent means
+ * follow the document, so a screen can only ever hold a value it was actually given. That is the
+ * whole of the rule; there is no list here of what an override is allowed to say.
+ *
+ * What a screen may not say at all is named below: the library folders, the file lists and the
+ * browsing panels are one per install, because an output holding its own copy could point at a
+ * folder the operator has since moved. Those keys are dropped as the override is written.
  */
 
+/** The song settings a screen never carries: one per install, whatever any one output shows. */
+val SONG_GLOBAL_KEYS = setOf(
+    "storageDirectory", "songFiles", "colWidthNumber", "colWidthTitle", "colWidthSongbook",
+    "colWidthTune", "colWidthPlayCount", "colWidthAuthor", "colWidthComposer",
+    "lyricsPanelWidthDp", "editorShowChords",
+)
+
+/** The Bible's equivalent. [BIBLE_STACK_KEY] is excluded separately -- it is styled, not chosen. */
+val BIBLE_GLOBAL_KEYS = setOf(
+    "storageDirectory", "bibleFiles", "primaryBible", "secondaryBible",
+    "bibleColWidthBook", "bibleColWidthChapter", "captionLanguage",
+    "splitBrowseMode", "splitLivePanelWidth", "crossReferencesEnabled", "crossReferencesPanel",
+)
+
 /**
- * [override]'s appearance on top of this document's library, selection and panel state.
+ * The translation stack, which is matched by file name rather than by position.
  *
- * The global stack decides *which* translations present and in what order; [override] supplies each
- * one's styling, matched by file name. A translation added to the stack after the override was made
- * has no styling there, and keeps the global styling rather than vanishing from the output.
- *
- * A translation's rename travels with the global entry rather than the override: what a translation
- * is *called* is one fact per install, like its file name, and the per-output settings surface does
- * not offer the field.
+ * A list cannot be diffed entry by entry without giving position a meaning it does not have here,
+ * so the override carries each styled translation whole and they are matched back on by name when
+ * the output is resolved. Which translations present, and in what order, stays the document's.
  */
-fun BibleSettings.withAppearanceOf(override: BibleSettings): BibleSettings {
-    val overrideStyles = override.translationList().associateBy { it.fileName }
-    return override.copy(
-        storageDirectory = storageDirectory,
-        bibleFiles = bibleFiles,
-        primaryBible = primaryBible,
-        secondaryBible = secondaryBible,
-        bibleColWidthBook = bibleColWidthBook,
-        bibleColWidthChapter = bibleColWidthChapter,
-        captionLanguage = captionLanguage,
-        splitBrowseMode = splitBrowseMode,
-        splitLivePanelWidth = splitLivePanelWidth,
-        crossReferencesEnabled = crossReferencesEnabled,
-        crossReferencesPanel = crossReferencesPanel,
+const val BIBLE_STACK_KEY = "translations"
+
+fun AppSettings.resolvedFor(assignment: ScreenAssignment): AppSettings {
+    if (!assignment.isCustomized) return this
+    return copy(
+        stageMonitorSettings = withSparseOverride(
+            stageMonitorSettings, assignment.stageMonitorOverride, StageMonitorSettings.serializer(),
+        ),
+        bibleSettings = bibleSettings.withSparseBibleOverride(assignment.bibleOverride),
+        songSettings = withSparseOverride(songSettings, assignment.songOverride, SongSettings.serializer()),
+        dictionarySettings = withSparseOverride(
+            dictionarySettings, assignment.dictionaryOverride, DictionarySettings.serializer(),
+        ),
+        backgroundSettings = withSparseOverride(
+            backgroundSettings, assignment.backgroundOverride, BackgroundSettings.serializer(),
+        ),
+    )
+}
+
+/**
+ * The Bible's sparse override, with the translation *stack* still the document's.
+ *
+ * Which translations are presented, and in what order, is one decision for the whole install --
+ * a screen styles them, it does not choose them. The stack is a list matched by file name rather
+ * than by position, so it cannot be diffed entry by entry like everything else; the override
+ * carries each styled translation whole and they are matched back on by name here, exactly as the
+ * snapshot model did.
+ */
+private fun BibleSettings.withSparseBibleOverride(override: JsonObject?): BibleSettings {
+    if (override == null || override.isEmpty()) return this
+    val merged = withSparseOverride(this, override, BibleSettings.serializer())
+    val overrideStyles = merged.translationList().associateBy { it.fileName }
+    return merged.copy(
         translations = translationList().map { global ->
             val styled = overrideStyles[global.fileName] ?: return@map global
             styled.copy(
@@ -46,62 +79,29 @@ fun BibleSettings.withAppearanceOf(override: BibleSettings): BibleSettings {
     )
 }
 
-/**
- * [override]'s appearance on top of this document's library and song-list column state.
- *
- * **An override is a whole [SongSettings], so a field it never carried still wins.** It is a
- * snapshot taken when the screen was first customized, and every property the operator has not
- * touched sits at whatever value it had then -- which, for a property that did not exist then, is
- * the class default. That default silently beats the document, and the global setting appears to do
- * nothing on that one screen with nothing anywhere to say why. [secondaryLanguage] is the first
- * property to hit it and is handled below; anything nested added later has to answer the same
- * question before it ships.
- */
-fun SongSettings.withAppearanceOf(override: SongSettings): SongSettings = override.copy(
-    storageDirectory = storageDirectory,
-    songFiles = songFiles,
-    colWidthNumber = colWidthNumber,
-    colWidthTitle = colWidthTitle,
-    colWidthSongbook = colWidthSongbook,
-    colWidthTune = colWidthTune,
-    colWidthPlayCount = colWidthPlayCount,
-    colWidthAuthor = colWidthAuthor,
-    colWidthComposer = colWidthComposer,
-    lyricsPanelWidthDp = lyricsPanelWidthDp,
-    editorShowChords = editorShowChords,
-    // `enabled = false` is the *absence* of a second-language styling rather than a choice of one,
-    // so a screen that has never stated its own follows the document -- which is what an operator
-    // who set the second language's colour once, globally, expects every screen to do. A screen
-    // that does want to say something states it by ticking its own box, and then it wins: the tick
-    // seeds that screen's profile from the first language, so "drawn like the first language here,
-    // blue everywhere else" is still expressible.
-    secondaryLanguage = if (override.secondaryLanguage.enabled) {
-        override.secondaryLanguage
-    } else {
-        secondaryLanguage
-    },
-)
+// ── Writing an override ─────────────────────────────────────────────────────────────────────────
+//
+// One per category, each naming what that category keeps global. The dialog edits a resolved copy
+// of the settings and hands the edited one back here; what is stored is the difference, so a screen
+// that changed one colour stores one colour.
 
-/**
- * The settings [assignment]'s output should actually render with.
- *
- * Only the rendering paths see these; editing and persistence keep using the global document, so a
- * customized output never saves its own styling over everyone else's. The same shape, and the same
- * reason, as `withMirroredBackgrounds` in the app's `MainLogic`.
- *
- * An output with no override at all gets **this very instance** back rather than an equal copy —
- * that path is the overwhelmingly common one, and the presenter windows key `remember` and
- * `Crossfade` off these objects.
- */
-fun AppSettings.resolvedFor(assignment: ScreenAssignment): AppSettings {
-    if (!assignment.isCustomized) return this
-    return copy(
-        stageMonitorSettings = assignment.stageMonitorOverride ?: stageMonitorSettings,
-        bibleSettings = assignment.bibleOverride
-            ?.let { bibleSettings.withAppearanceOf(it) } ?: bibleSettings,
-        songSettings = assignment.songOverride
-            ?.let { songSettings.withAppearanceOf(it) } ?: songSettings,
-        dictionarySettings = assignment.dictionaryOverride ?: dictionarySettings,
-        backgroundSettings = assignment.backgroundOverride ?: backgroundSettings,
+fun songOverrideOf(global: SongSettings, customized: SongSettings): JsonObject? =
+    sparseOverrideOf(global, customized, SongSettings.serializer(), ignoredKeys = SONG_GLOBAL_KEYS)
+
+fun bibleOverrideOf(global: BibleSettings, customized: BibleSettings): JsonObject? =
+    sparseOverrideOf(
+        global,
+        customized,
+        BibleSettings.serializer(),
+        ignoredKeys = BIBLE_GLOBAL_KEYS,
+        atomicKeys = setOf(BIBLE_STACK_KEY),
     )
-}
+
+fun dictionaryOverrideOf(global: DictionarySettings, customized: DictionarySettings): JsonObject? =
+    sparseOverrideOf(global, customized, DictionarySettings.serializer())
+
+fun backgroundOverrideOf(global: BackgroundSettings, customized: BackgroundSettings): JsonObject? =
+    sparseOverrideOf(global, customized, BackgroundSettings.serializer())
+
+fun stageMonitorOverrideOf(global: StageMonitorSettings, customized: StageMonitorSettings): JsonObject? =
+    sparseOverrideOf(global, customized, StageMonitorSettings.serializer())

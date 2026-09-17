@@ -257,7 +257,12 @@ private fun SingleDisplayPreview(
 ) {
     // This preview must show what the real output shows, so it resolves the same per-output
     // override the presenter window does. Identical to [appSettings] when uncustomized.
-    val outputSettings = appSettings.resolvedFor(screenAssignment)
+    // Remembered: an override is a sparse tree merged into the document and decoded, which is
+    // real work to repeat on every recomposition. Keyed on both sides, so it is redone exactly
+    // when one of them changes and not otherwise.
+    val outputSettings = remember(appSettings, screenAssignment) {
+        appSettings.resolvedFor(screenAssignment)
+    }
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses

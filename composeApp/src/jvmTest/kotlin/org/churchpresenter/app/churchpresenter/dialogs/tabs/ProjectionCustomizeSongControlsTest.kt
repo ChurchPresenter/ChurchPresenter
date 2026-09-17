@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.songSettingsOn
 
 /**
  * Driving the Song pane's controls, and reading back what each one stored.
@@ -58,7 +59,10 @@ class ProjectionCustomizeSongControlsTest {
     )
 
     private fun AppSettings.stored(): SongSettings =
-        assertNotNull(projectionSettings.screenAssignments[0].songOverride, "the output must have its own Songs")
+        assertNotNull(
+            projectionSettings.screenAssignments[0].songSettingsOn(songSettings),
+            "the output must have its own Songs",
+        )
 
     // ── The lyrics ──────────────────────────────────────────────────────────────────────────────
 
@@ -69,10 +73,12 @@ class ProjectionCustomizeSongControlsTest {
             retypeNumberField(61, 72)
             toggleCheckbox("Auto")
             recolor("#AABBCC", "#112233")
-            for (glyph in listOf("B", "I", "U", SHADOW_GLYPH)) {
+            for (glyph in listOf("B", "I", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
+            shadowCheckbox(group = 0).performScrollTo().performClick()
+            waitForIdle()
 
             val stored = get().stored()
             assertEquals(72, stored.lyricsFontSize)
@@ -110,7 +116,7 @@ class ProjectionCustomizeSongControlsTest {
             waitForIdle()
             onNodeWithContentDescription("Align Top").performScrollTo().performClick()
             waitForIdle()
-            chooseSegment("AA")
+            chooseSegment("UPPERCASE")
 
             val stored = get().stored()
             assertEquals(Constants.LEFT, stored.lyricsHorizontalAlignment)
@@ -187,7 +193,7 @@ class ProjectionCustomizeSongControlsTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             retypeNumberField(57, 43)
             recolor("#667788", "#889900")
-            styleButton(group = 0, label = SHADOW_GLYPH).performScrollTo().performClick()
+            shadowCheckbox(group = 0).performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().stored()
@@ -246,7 +252,9 @@ class ProjectionCustomizeSongControlsTest {
         projectionTab(bilingualBand) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(29, 40)
-            chooseSegment("Top / Bottom", scroll = false)
+            // The strip scrolls now, and Bilingual is its last row -- past the fold on a band, whose
+            // strip carries the band height as well.
+            chooseSegment("Top / Bottom")
 
             val stored = get().stored()
             assertEquals(40, stored.lowerThirdHeightPercent)

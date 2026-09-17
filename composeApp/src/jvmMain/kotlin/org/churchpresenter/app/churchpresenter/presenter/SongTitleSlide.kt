@@ -30,6 +30,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongElementStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.secondaryTitleStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isCredit
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isLowerThird
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.shownOnTitleSlide
@@ -64,6 +65,13 @@ internal data class TitleSlideLine(
     val element: SongStyleElement,
     val text: String,
     val number: String? = null,
+    /**
+     * The song's *second* title, on a slide showing both -- drawn in the second title's own profile.
+     *
+     * Both titles used to go through the first's, so a church wanting its two languages told apart
+     * had no way to say so: the only control was the Title element, and it moved both lines at once.
+     */
+    val secondaryLanguage: Boolean = false,
 ) {
     /** The line as plain text, for the stage monitor and the companion app. */
     val plainText: String get() = listOfNotNull(number, text).joinToString(" \u2013 ")
@@ -92,7 +100,7 @@ internal fun titleSlideLines(
     val titles = titleSlideTitles(section, langDisplay)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()
-        .map { TitleSlideLine(SongStyleElement.TITLE, it) }
+        .map { TitleSlideLine(SongStyleElement.TITLE, it.text, secondaryLanguage = it.secondary) }
     val heading = when {
         number == null -> titles
         settings.titleSlideNumberBeforeTitle && titles.isNotEmpty() ->
@@ -109,14 +117,23 @@ internal fun titleSlideLines(
     return heading + credits
 }
 
+/** One title of the song, and whether it is the second language's -- which decides its profile. */
+private data class SlideTitle(val text: String, val secondary: Boolean)
+
 /** The song's title in whichever language(s) [langDisplay] asks for, the primary first. */
-private fun titleSlideTitles(section: LyricSection, langDisplay: String): List<String> {
+private fun titleSlideTitles(section: LyricSection, langDisplay: String): List<SlideTitle> {
     val secondary = section.secondaryTitle.takeIf { it.isNotBlank() && it != section.title }
     return when (langDisplay) {
-        Constants.SONG_LANG_SECONDARY -> listOf(secondary ?: section.title)
-        Constants.SONG_LANG_BOTH -> listOfNotNull(section.title, secondary)
-        else -> listOf(section.title)
-    }.filter { it.isNotBlank() }
+        // The second title where the song has one, and the first as a stand-in where it does not --
+        // which is the first title, so it keeps the first title's look.
+        Constants.SONG_LANG_SECONDARY ->
+            secondary?.let { listOf(SlideTitle(it, secondary = true)) } ?: listOf(SlideTitle(section.title, false))
+        Constants.SONG_LANG_BOTH -> listOfNotNull(
+            SlideTitle(section.title, secondary = false),
+            secondary?.let { SlideTitle(it, secondary = true) },
+        )
+        else -> listOf(SlideTitle(section.title, secondary = false))
+    }.filter { it.text.isNotBlank() }
 }
 
 /** The CCLI number is drawn as the licence line reads on a printed sheet: "CCLI #22025". */
@@ -164,7 +181,11 @@ internal fun SongTitleSlideContent(
                 val fallbackFont = if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
                 TitleSlideText(
                     line = line,
-                    style = settings.elementStyle(line.element, target),
+                    style = if (line.secondaryLanguage) {
+                        settings.secondaryTitleStyle(target)
+                    } else {
+                        settings.elementStyle(line.element, target)
+                    },
                     // The number ahead of the title in the same paragraph, in its own style, so a
                     // long title wraps under it as one line of text would -- laid out as two
                     // boxes side by side, the title centred in what was left beside the number.

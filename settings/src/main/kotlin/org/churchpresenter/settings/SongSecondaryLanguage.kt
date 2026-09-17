@@ -40,7 +40,11 @@ data class SongSecondaryLanguage(
 }
 
 /**
- * One language's lyrics, everywhere the presenter draws them.
+ * One language's text, everywhere the presenter draws it.
+ *
+ * Held twice by [SongSettings]: once for the lyrics and once for the title. The shape is the same
+ * either way -- a full font-and-colour profile per output -- so it is one definition rather than
+ * two that would drift.
  *
  * The same fields the lyrics' own flat family on [SongSettings] carries, in a record: a second full
  * profile could not be added there as flat fields -- see [SongOutlines] for the ceiling that stops

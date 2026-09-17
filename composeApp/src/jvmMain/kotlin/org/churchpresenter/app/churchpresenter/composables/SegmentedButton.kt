@@ -26,12 +26,18 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/** Tight enough that a two-line label still fits a segment sized for one and a bit. */
+private const val LINE_HEIGHT_RATIO = 1.15f
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,7 +50,9 @@ fun <T> SegmentedButton(
     buttonHeight: Dp = 40.dp,
     fontSize: TextUnit = 16.sp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-    compactColumns: Int? = null
+    compactColumns: Int? = null,
+    /** How many lines a label may take before it is ellipsized. One, unless the caller says more. */
+    maxLines: Int = 1,
 ) {
     require(items.isNotEmpty()) { "SegmentedButton requires at least one item" }
 
@@ -58,6 +66,7 @@ fun <T> SegmentedButton(
             buttonHeight = buttonHeight,
             fontSize = fontSize,
             contentPadding = contentPadding,
+            maxLines = maxLines,
             modifier = modifier
         )
     } else {
@@ -72,7 +81,8 @@ fun <T> SegmentedButton(
                 buttonWidth = buttonWidth,
                 buttonHeight = buttonHeight,
                 fontSize = fontSize,
-                contentPadding = contentPadding
+                contentPadding = contentPadding,
+                maxLines = maxLines
             )
         }
     }
@@ -89,6 +99,7 @@ private fun <T> SegmentedButtonGrid(
     buttonHeight: Dp,
     fontSize: TextUnit,
     contentPadding: PaddingValues,
+    maxLines: Int = 1,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -115,7 +126,8 @@ private fun <T> SegmentedButtonGrid(
                                 onClick = { onValueChange(item.value) },
                                 modifier = Modifier
                                     .height(buttonHeight)
-                                    .width(buttonWidth),
+                                    .width(buttonWidth)
+                                    .then(item.testTag?.let { Modifier.testTag(it) } ?: Modifier),
                                 shape = shape,
                                 border = BorderStroke(
                                     1.dp,
@@ -145,7 +157,22 @@ private fun <T> SegmentedButtonGrid(
                                         text = item.label,
                                         fontSize = fontSize,
                                         fontWeight = FontWeight.Bold,
-                                        maxLines = 1
+                                        // Only tightened where a label may actually take two
+                                        // lines. Setting it on a single-line label shrinks the line
+                                        // box around the glyphs, which the button then centres by
+                                        // the box rather than by the type -- so the word sits off
+                                        // centre in a control whose whole job is to line up.
+                                        lineHeight = if (maxLines > 1) {
+                                            fontSize * LINE_HEIGHT_RATIO
+                                        } else {
+                                            TextUnit.Unspecified
+                                        },
+                                        textAlign = TextAlign.Center,
+                                        // Ellipsized rather than clipped. A segment too narrow for
+                                        // its label used to cut it mid-glyph, which reads as a
+                                        // rendering fault rather than as a label that does not fit.
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = maxLines
                                     )
                                 }
                             }
