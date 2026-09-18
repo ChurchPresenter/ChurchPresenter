@@ -47,7 +47,9 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceKind
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
-import org.churchpresenter.calendar.model.parseStoredTime
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.parseClockText
+import org.churchpresenter.calendar.model.storedTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 
@@ -93,16 +95,19 @@ fun ServiceSheet(
     onDelete: ((wholeSeries: Boolean) -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    var form by remember(existing) {
+    // The form holds the time as it is shown; it is stored as HH:mm only on save.
+    val use24Hour = LocalUse24HourClock.current
+    var form by remember(existing, use24Hour) {
         mutableStateOf(
             ServiceForm(
                 name = existing?.name ?: "",
-                startTime = existing?.startTime ?: defaultStartTime,
+                startTime = clockText(existing?.startTime ?: defaultStartTime, use24Hour),
                 kind = ServiceKind.from(existing?.kind ?: ServiceKind.SUNDAY.id),
             )
         )
     }
-    val canSave = form.name.isNotBlank() && parseStoredTime(form.startTime) != null
+    val startAt = parseClockText(form.startTime)
+    val canSave = form.name.isNotBlank() && startAt != null
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
@@ -129,7 +134,9 @@ fun ServiceSheet(
                     } else {
                         stringResource(Res.string.calendar_save)
                     },
-                    onClick = { onSave(form.copy(name = form.name.trim(), startTime = form.startTime.trim())) },
+                    onClick = {
+                        startAt?.let { onSave(form.copy(name = form.name.trim(), startTime = storedTime(it))) }
+                    },
                     enabled = canSave,
                 )
             },
@@ -155,7 +162,7 @@ private fun ServiceFields(
     templateLabel: @Composable (ServiceTemplate) -> Pair<String, String>,
     onChange: (ServiceForm) -> Unit,
 ) {
-    val timeValid = parseStoredTime(form.startTime) != null
+    val timeValid = parseClockText(form.startTime) != null
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 13.dp),
@@ -199,7 +206,10 @@ private fun ServiceFields(
         // Type selector beside it.
         if (!timeValid) {
             Text(
-                text = stringResource(Res.string.calendar_invalid_time),
+                text = stringResource(
+                    Res.string.calendar_invalid_time,
+                    clockText(EXAMPLE_TIME, LocalUse24HourClock.current),
+                ),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                 color = MaterialTheme.colorScheme.error,
             )
@@ -215,6 +225,7 @@ private fun ServiceFields(
         }
 
         if (existing == null && templates.isNotEmpty()) {
+            val use24Hour = LocalUse24HourClock.current
             Column {
                 FieldLabel(stringResource(Res.string.calendar_start_from))
                 Spacer(Modifier.height(5.dp))
@@ -225,7 +236,7 @@ private fun ServiceFields(
                             label = label,
                             sub = sub,
                             selected = option.id == form.template.id,
-                            onClick = { onChange(form.withTemplate(option)) },
+                            onClick = { onChange(form.withTemplate(option, use24Hour)) },
                         )
                     }
                 }
@@ -239,19 +250,19 @@ private fun ServiceFields(
  * saved with it, and typing "Sunday Morning" over a template already called that is busywork.
  * Blank leaves the fields alone.
  */
-private fun ServiceForm.withTemplate(option: ServiceTemplate): ServiceForm = when (option) {
+private fun ServiceForm.withTemplate(option: ServiceTemplate, use24Hour: Boolean): ServiceForm = when (option) {
     ServiceTemplate.Blank -> copy(template = option)
     is ServiceTemplate.CopyOf -> copy(
         template = option,
         name = option.service.name,
-        startTime = option.service.startTime,
+        startTime = clockText(option.service.startTime, use24Hour),
         kind = ServiceKind.from(option.service.kind),
     )
 
     is ServiceTemplate.Saved -> copy(
         template = option,
         name = option.template.name,
-        startTime = option.template.startTime,
+        startTime = clockText(option.template.startTime, use24Hour),
         kind = ServiceKind.from(option.template.kind),
     )
 }
@@ -284,3 +295,6 @@ private fun TemplateRow(label: String, sub: String, selected: Boolean, onClick: 
 }
 
 private const val ON_TINT = 0.16f
+
+/** The time the invalid-time hint is written with, in whichever format is on. */
+private const val EXAMPLE_TIME = "10:00"

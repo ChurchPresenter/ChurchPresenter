@@ -34,12 +34,15 @@ private const val DURATION_COLUMN = 52f
  * When it returns null the built-in Helvetica stands in, and any character that face cannot encode
  * is replaced rather than thrown on: a Cyrillic song library would otherwise fail the whole export
  * on its first row.
+ *
+ * [use24Hour] is the calendar's clock format, so the sheet reads the way the window does.
  */
 fun exportRunOfShowPdf(
     service: PlannedService,
     target: File,
     dateLabel: String,
     font: (bold: Boolean) -> ByteArray?,
+    use24Hour: Boolean = true,
 ) {
     PDDocument().use { document ->
         val regular = loadFont(document, font(false), PDType1Font.HELVETICA)
@@ -51,7 +54,8 @@ fun exportRunOfShowPdf(
         var y = page.mediaBox.height - MARGIN
 
         try {
-            y = drawHeading(stream, service, dateLabel, bold, regular, embedded, y)
+            val meta = headingMeta(service, dateLabel, use24Hour)
+            y = drawHeading(stream, service.name, meta, bold, regular, embedded, y)
             val clocks = runClocks(service)
 
             service.items.forEach { item ->
@@ -64,7 +68,8 @@ fun exportRunOfShowPdf(
                 y = if (item is ScheduleItem.LabelItem) {
                     drawSection(stream, item, bold, embedded, y)
                 } else {
-                    drawRow(stream, item, clocks[item.id], service.plannedSeconds[item.id], regular, embedded, y)
+                    val clock = clocks[item.id]?.let { clockText(it.time, use24Hour) }.orEmpty()
+                    drawRow(stream, item, clock, service.plannedSeconds[item.id], regular, embedded, y)
                 }
             }
         } finally {
@@ -79,29 +84,30 @@ private fun newPage(document: PDDocument): PDPage = PDPage(PDRectangle.A4).also 
 private fun loadFont(document: PDDocument, bytes: ByteArray?, fallback: PDFont): PDFont =
     bytes?.let { runCatching { PDType0Font.load(document, ByteArrayInputStream(it), true) }.getOrNull() } ?: fallback
 
+/** The line under the title: the date, the start time and, once anything is estimated, the planned length. */
+private fun headingMeta(service: PlannedService, dateLabel: String, use24Hour: Boolean): String = buildString {
+    append(dateLabel)
+    append(" · ")
+    append(clockText(service.startTime, use24Hour))
+    val total = service.plannedTotalSeconds()
+    if (total > 0) {
+        append(" · ")
+        append(formatDuration(total))
+    }
+}
+
 private fun drawHeading(
     stream: PDPageContentStream,
-    service: PlannedService,
-    dateLabel: String,
+    title: String,
+    meta: String,
     bold: PDFont,
     regular: PDFont,
     embedded: Boolean,
     top: Float,
 ): Float {
     var y = top
-    stream.text(service.name, MARGIN, y, bold, TITLE_SIZE, embedded)
+    stream.text(title, MARGIN, y, bold, TITLE_SIZE, embedded)
     y -= TITLE_SIZE + 4f
-
-    val total = service.plannedTotalSeconds()
-    val meta = buildString {
-        append(dateLabel)
-        append(" · ")
-        append(service.startTime)
-        if (total > 0) {
-            append(" · ")
-            append(formatDuration(total))
-        }
-    }
     stream.text(meta, MARGIN, y, regular, SUB_SIZE, embedded)
     y -= SUB_SIZE + 10f
 
@@ -125,14 +131,14 @@ private fun drawSection(
 private fun drawRow(
     stream: PDPageContentStream,
     item: ScheduleItem,
-    clock: RowClock?,
+    clock: String,
     plannedSeconds: Int?,
     regular: PDFont,
     embedded: Boolean,
     top: Float,
 ): Float {
     val right = PDRectangle.A4.width - MARGIN
-    stream.text(clock?.time.orEmpty(), MARGIN, top, regular, META_SIZE, embedded)
+    stream.text(clock, MARGIN, top, regular, META_SIZE, embedded)
     stream.text(item.displayText, MARGIN + TIME_COLUMN, top, regular, ROW_SIZE, embedded)
     if (plannedSeconds != null) {
         stream.text(formatDuration(plannedSeconds), right - DURATION_COLUMN, top, regular, META_SIZE, embedded)

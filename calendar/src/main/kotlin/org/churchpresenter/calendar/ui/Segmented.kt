@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -47,6 +48,7 @@ fun <T> SegmentedSelector(
     label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    height: Dp = SELECTOR_HEIGHT,
 ) {
     val scheme = MaterialTheme.colorScheme
     val trackShape = RoundedCornerShape(8.dp)
@@ -54,7 +56,7 @@ fun <T> SegmentedSelector(
         horizontalArrangement = Arrangement.spacedBy(TRACK_GAP),
         modifier = modifier
             .fillMaxWidth()
-            .height(SELECTOR_HEIGHT)
+            .height(height)
             .clip(trackShape)
             .background(scheme.surfaceVariant.copy(alpha = TRACK_TINT))
             .border(1.dp, scheme.outlineVariant, trackShape)

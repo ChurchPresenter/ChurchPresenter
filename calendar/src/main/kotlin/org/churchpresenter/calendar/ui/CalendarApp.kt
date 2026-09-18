@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -161,145 +162,150 @@ fun CalendarApp(
     }
     val scope = rememberCoroutineScope()
 
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(Modifier.fillMaxSize()) {
-            Header(
-                monthLabel = monthHeading(state.visibleMonth),
-                plannedThisMonth = state.servicesInVisibleMonth().size,
-                onToday = state::goToToday,
-                onExport = exportAction(state, host, io, scope),
-                onSettings = { settingsTab = SettingsTab.SECTIONS; settingsOpen = true },
-                onClose = onClose,
-            )
-            HorizontalDivider()
-            RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
-
-            Row(Modifier.fillMaxSize().weight(1f)) {
-                val service = state.selectedService
-                MonthPane(
-                    month = state.visibleMonth,
-                    selected = state.selectedDate,
-                    today = today,
-                    servicesOn = state::servicesOn,
-                    onSelect = state::select,
-                    onPreviousMonth = state::showPreviousMonth,
-                    onNextMonth = state::showNextMonth,
-                    modifier = Modifier
-                        .widthIn(min = CalendarMetrics.monthPaneMin, max = CalendarMetrics.monthPaneMax)
-                        .fillMaxHeight(),
+    CompositionLocalProvider(LocalUse24HourClock provides state.document.preferences.use24HourClock) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(Modifier.fillMaxSize()) {
+                Header(
+                    monthLabel = monthHeading(state.visibleMonth),
+                    plannedThisMonth = state.servicesInVisibleMonth().size,
+                    onToday = state::goToToday,
+                    onExport = exportAction(state, host, io, scope),
+                    onSettings = { settingsTab = SettingsTab.SECTIONS; settingsOpen = true },
+                    onClose = onClose,
                 )
-                VerticalDivider()
-                Column(Modifier.weight(1f).fillMaxHeight()) {
-                    DayPane(
-                        date = state.selectedDate,
-                        services = state.servicesOnSelectedDate,
-                        selectedServiceId = state.selectedService?.id,
-                        onSelectService = state::selectService,
-                        onAddService = { creatingService = true },
-                        onEditService = { editingService = it },
+                HorizontalDivider()
+                RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
+
+                Row(Modifier.fillMaxSize().weight(1f)) {
+                    val service = state.selectedService
+                    MonthPane(
+                        month = state.visibleMonth,
+                        selected = state.selectedDate,
+                        today = today,
+                        servicesOn = state::servicesOn,
+                        onSelect = state::select,
+                        onPreviousMonth = state::showPreviousMonth,
+                        onNextMonth = state::showNextMonth,
+                        modifier = Modifier
+                            .widthIn(min = CalendarMetrics.monthPaneMin, max = CalendarMetrics.monthPaneMax)
+                            .fillMaxHeight(),
                     )
-                    HorizontalDivider()
-                    if (service == null) {
-                        NoServicesPane(
-                            dayLabel = shortDate(state.selectedDate),
-                            copyLabel = state.mostRecentServiceBefore()?.name,
+                    VerticalDivider()
+                    Column(Modifier.weight(1f).fillMaxHeight()) {
+                        DayPane(
+                            date = state.selectedDate,
+                            services = state.servicesOnSelectedDate,
+                            selectedServiceId = state.selectedService?.id,
+                            onSelectService = state::selectService,
                             onAddService = { creatingService = true },
-                            onCopyLast = { creatingService = true },
-                            modifier = Modifier.weight(1f),
-                        )
-                    } else {
-                        RunOfShowPane(
-                            service = service,
-                            onAddItem = { replacing = null; addingItem = true },
-                            onChangeItem = { replacing = it; addingItem = true },
-                            onRemove = { state.removeItem(service.id, it) },
-                            onMove = { from, to -> state.moveItem(service.id, from, to) },
-                            onPlannedSecondsChange = { itemId, seconds ->
-                                state.setPlannedSeconds(service.id, itemId, seconds)
-                            },
-                            onCopy = { copyFrom = service },
-                            onSaveTemplate = { templateFrom = service },
-                            modifier = Modifier.weight(1f),
+                            onEditService = { editingService = it },
                         )
                         HorizontalDivider()
-                        Footer(
-                            onLoad = {
-                                // Only ask when replacing would actually discard something.
-                                if (host.currentSchedule().isEmpty()) {
-                                    host.loadIntoSchedule(service.items, true)
-                                } else {
-                                    loadConfirmFor = service
-                                }
-                            },
+                        if (service == null) {
+                            NoServicesPane(
+                                dayLabel = shortDate(state.selectedDate),
+                                copyLabel = state.mostRecentServiceBefore()?.name,
+                                onAddService = { creatingService = true },
+                                onCopyLast = { creatingService = true },
+                                modifier = Modifier.weight(1f),
+                            )
+                        } else {
+                            RunOfShowPane(
+                                service = service,
+                                onAddItem = { replacing = null; addingItem = true },
+                                onChangeItem = { replacing = it; addingItem = true },
+                                onRemove = { state.removeItem(service.id, it) },
+                                onMove = { from, to -> state.moveItem(service.id, from, to) },
+                                onPlannedSecondsChange = { itemId, seconds ->
+                                    state.setPlannedSeconds(service.id, itemId, seconds)
+                                },
+                                onCopy = { copyFrom = service },
+                                onSaveTemplate = { templateFrom = service },
+                                modifier = Modifier.weight(1f),
+                            )
+                            HorizontalDivider()
+                            Footer(
+                                onLoad = {
+                                    // Only ask when replacing would actually discard something.
+                                    if (host.currentSchedule().isEmpty()) {
+                                        host.loadIntoSchedule(service.items, true)
+                                    } else {
+                                        loadConfirmFor = service
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    if (service != null) {
+                        VerticalDivider()
+                        AutomationPane(
+                            service = service,
+                            onArmed = { state.setArmed(service.id, it) },
+                            onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
+                            onEditCue = { cueSheet = CueSheetState.Editing(it) },
+                            onAddCue = { cueSheet = CueSheetState.Adding },
+                            onEditCues = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
+                            modifier = Modifier
+                                .widthIn(
+                                    min = CalendarMetrics.automationPaneMin,
+                                    max = CalendarMetrics.automationPaneMax,
+                                )
+                                .fillMaxHeight(),
                         )
                     }
                 }
-                if (service != null) {
-                    VerticalDivider()
-                    AutomationPane(
-                        service = service,
-                        onArmed = { state.setArmed(service.id, it) },
-                        onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
-                        onEditCue = { cueSheet = CueSheetState.Editing(it) },
-                        onAddCue = { cueSheet = CueSheetState.Adding },
-                        onEditCues = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
-                        modifier = Modifier
-                            .widthIn(min = CalendarMetrics.automationPaneMin, max = CalendarMetrics.automationPaneMax)
-                            .fillMaxHeight(),
-                    )
-                }
             }
         }
-    }
 
-    if (settingsOpen) {
-        val openService = state.selectedService
-        CalendarSettingsDialog(
-            preferences = state.document.preferences,
-            templates = state.document.templates,
-            presets = state.presets,
-            openService = openService,
-            initialTab = settingsTab,
-            canInsertSection = openService != null,
-            onPreferencesChange = state::updatePreferences,
-            onAddSection = state::addSection,
-            onRenameSection = state::renameSection,
-            onSectionColor = state::setSectionColor,
-            onRemoveSection = state::removeSection,
-            colorPicker = colorPicker,
-            onInsertSection = { section ->
-                openService?.let { service ->
-                    state.addItems(service.id, listOf(sectionItem(section.name, section.colorHex)))
-                }
-            },
-            onRemoveTemplate = state::deleteTemplate,
-            onRemovePreset = state::deletePreset,
-            onEditCue = { settingsOpen = false; cueSheet = CueSheetState.Editing(it) },
-            onDeleteCue = { openService?.let { service -> state.deleteCue(service.id, it) } },
-            onAddCue = { settingsOpen = false; cueSheet = CueSheetState.Adding },
-            onDismiss = { settingsOpen = false },
+        if (settingsOpen) {
+            val openService = state.selectedService
+            CalendarSettingsDialog(
+                preferences = state.document.preferences,
+                templates = state.document.templates,
+                presets = state.presets,
+                openService = openService,
+                initialTab = settingsTab,
+                canInsertSection = openService != null,
+                onPreferencesChange = state::updatePreferences,
+                onAddSection = state::addSection,
+                onRenameSection = state::renameSection,
+                onSectionColor = state::setSectionColor,
+                onRemoveSection = state::removeSection,
+                colorPicker = colorPicker,
+                onInsertSection = { section ->
+                    openService?.let { service ->
+                        state.addItems(service.id, listOf(sectionItem(section.name, section.colorHex)))
+                    }
+                },
+                onRemoveTemplate = state::deleteTemplate,
+                onRemovePreset = state::deletePreset,
+                onEditCue = { settingsOpen = false; cueSheet = CueSheetState.Editing(it) },
+                onDeleteCue = { openService?.let { service -> state.deleteCue(service.id, it) } },
+                onAddCue = { settingsOpen = false; cueSheet = CueSheetState.Adding },
+                onDismiss = { settingsOpen = false },
+            )
+        }
+
+        CalendarDialogs(
+            state = state,
+            host = host,
+            songEditor = songEditor,
+            replacing = replacing,
+            creatingService = creatingService,
+            editingService = editingService,
+            addingItem = addingItem,
+            loadConfirmFor = loadConfirmFor,
+            copyFrom = copyFrom,
+            templateFrom = templateFrom,
+            cueSheet = cueSheet,
+            onCueSheetClosed = { cueSheet = null },
+            onServiceSheetClosed = { creatingService = false; editingService = null },
+            onAddingItemClosed = { addingItem = false; replacing = null },
+            onLoadConfirmClosed = { loadConfirmFor = null },
+            onCopySheetClosed = { copyFrom = null },
+            onTemplateSheetClosed = { templateFrom = null },
         )
     }
-
-    CalendarDialogs(
-        state = state,
-        host = host,
-        songEditor = songEditor,
-        replacing = replacing,
-        creatingService = creatingService,
-        editingService = editingService,
-        addingItem = addingItem,
-        loadConfirmFor = loadConfirmFor,
-        copyFrom = copyFrom,
-        templateFrom = templateFrom,
-        cueSheet = cueSheet,
-        onCueSheetClosed = { cueSheet = null },
-        onServiceSheetClosed = { creatingService = false; editingService = null },
-        onAddingItemClosed = { addingItem = false; replacing = null },
-        onLoadConfirmClosed = { loadConfirmFor = null },
-        onCopySheetClosed = { copyFrom = null },
-        onTemplateSheetClosed = { templateFrom = null },
-    )
 }
 
 /**
@@ -489,7 +495,8 @@ private fun exportAction(
 ): (() -> Unit)? {
     val service = state.selectedService ?: return null
     val label = shortDate(state.selectedDate)
-    return { scope.launch { exportRunOfShow(service, label, host, io) } }
+    val use24Hour = state.document.preferences.use24HourClock
+    return { scope.launch { exportRunOfShow(service, label, host, io, use24Hour) } }
 }
 
 private suspend fun exportRunOfShow(
@@ -497,10 +504,11 @@ private suspend fun exportRunOfShow(
     dateLabel: String,
     host: CalendarHost,
     io: CoroutineDispatcher,
+    use24Hour: Boolean,
 ) {
     val target = host.chooseExportFile("${service.name} - ${service.date}.pdf") ?: return
     // Off the composing thread: this embeds a font and writes a file.
-    withContext(io) { runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont) } }
+    withContext(io) { runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont, use24Hour) } }
 }
 
 /**

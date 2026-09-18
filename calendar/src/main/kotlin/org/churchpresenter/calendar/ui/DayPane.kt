@@ -46,6 +46,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import org.churchpresenter.calendar.model.clockText
 
 /** The selected day's heading — `Sunday, 20 September 2026`, in the machine's own locale. */
 private val DAY_HEADING: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
@@ -210,7 +211,8 @@ private fun ServiceChip(
                     horizontalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     Text(
-                        text = service.startTime + " \u00b7 " + itemCountLabel(service.contentItems().size),
+                        text = clockText(service.startTime, LocalUse24HourClock.current) +
+                            " \u00b7 " + itemCountLabel(service.contentItems().size),
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
                         color = scheme.onSurfaceVariant,
                         maxLines = 1,

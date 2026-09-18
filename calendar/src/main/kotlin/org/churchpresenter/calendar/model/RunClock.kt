@@ -1,11 +1,12 @@
 package org.churchpresenter.calendar.model
 
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.time.LocalTime
 
 /** A run-of-show row's clock time, and whether it can be trusted. */
 data class RowClock(
-    /** `10:05`. */
-    val time: String,
+    /** The wall-clock time; the caller formats it, as the clock format is a preference. */
+    val time: LocalTime,
     /**
      * False once some earlier row has no planned length.
      *
@@ -29,7 +30,7 @@ fun runClocks(service: PlannedService): Map<String, RowClock> {
     var offset = 0L
     var exact = true
     return service.items.associate { item ->
-        val clock = RowClock(storedTime(start.plusSeconds(offset)), exact)
+        val clock = RowClock(start.plusSeconds(offset), exact)
         if (item !is ScheduleItem.LabelItem) {
             val planned = service.plannedSeconds[item.id]
             if (planned == null) exact = false else offset += planned

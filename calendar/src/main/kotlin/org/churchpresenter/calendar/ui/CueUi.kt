@@ -21,8 +21,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_cues_count_othe
 import org.churchpresenter.calendar.model.CueAction
 import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.canPlayRepeatedly
+import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.cueFireTime
-import org.churchpresenter.calendar.model.storedTime
 import org.jetbrains.compose.resources.stringResource
 
 /** The words for a cue, shared by the pane, the settings tab and the sheet so they cannot drift. */
@@ -58,7 +58,8 @@ fun cueSubtitle(cue: ServiceCue): String {
 /** `At start`, `15 min before`, `30 min in`, or `at 11:00` when pinned. */
 @Composable
 fun cueWhenLabel(cue: ServiceCue): String = when {
-    cue.isPinned() -> stringResource(Res.string.calendar_cue_pinned_at, cue.absoluteTime)
+    cue.isPinned() ->
+        stringResource(Res.string.calendar_cue_pinned_at, clockText(cue.absoluteTime, LocalUse24HourClock.current))
     else -> offsetLabel(cue.offsetMinutes)
 }
 
@@ -70,8 +71,9 @@ fun offsetLabel(minutes: Int): String = when {
 }
 
 /** The clock time a cue fires on a service starting at [startTime], as `09:45`; blank if it cannot. */
+@Composable
 fun cueTimeText(cue: ServiceCue, startTime: String): String =
-    cueFireTime(cue, startTime)?.let(::storedTime).orEmpty()
+    cueFireTime(cue, startTime)?.let { clockText(it, LocalUse24HourClock.current) }.orEmpty()
 
 @Composable
 fun cueCountLabel(count: Int): String = if (count == 1) {

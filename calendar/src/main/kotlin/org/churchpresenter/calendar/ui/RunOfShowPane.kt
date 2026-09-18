@@ -75,6 +75,7 @@ import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.calendar.model.runClocks
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.calendar.model.clockText
 
 private const val ROW_ALPHA = 0.45f
 private const val BADGE_ALPHA = 0.18f
@@ -190,7 +191,7 @@ private fun RunRow(
     ) {
         DragGrip(reorder = reorder, key = item.id)
         Text(
-            text = clock?.time.orEmpty(),
+            text = clock?.let { clockText(it.time, LocalUse24HourClock.current) }.orEmpty(),
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
             // Dimmed once an earlier row has no estimate: the clock is a projection from there on,
             // and a confident-looking time nobody can rely on is worse than an obviously soft one.

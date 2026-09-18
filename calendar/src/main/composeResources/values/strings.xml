@@ -30,7 +30,7 @@
     <string name="calendar_service_start">Start time</string>
     <string name="calendar_service_type">Type</string>
     <string name="calendar_service_name_hint">Sunday Morning</string>
-    <string name="calendar_invalid_time">Use a 24-hour time, such as 10:00</string>
+    <string name="calendar_invalid_time">Enter a time such as %1$s</string>
     <string name="calendar_save">Save</string>
     <string name="calendar_cancel">Cancel</string>
     <string name="calendar_delete">Delete</string>
@@ -242,6 +242,10 @@
     <string name="calendar_cues_for">Cues · %1$s</string>
     <string name="calendar_default_sermon">Default sermon length</string>
     <string name="calendar_default_sermon_sub">Offered when a presentation has no length of its own</string>
+    <string name="calendar_time_format">Time format</string>
+    <string name="calendar_time_format_sub">Times show as %1$s and %2$s</string>
+    <string name="calendar_time_12h">12-hour</string>
+    <string name="calendar_time_24h">24-hour</string>
     <string name="calendar_default_item">Default item length</string>
     <string name="calendar_default_item_sub">Offered when a song has no measured length yet</string>
     <string name="calendar_pick_search">Search songs, or type a reference</string>

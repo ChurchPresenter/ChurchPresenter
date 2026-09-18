@@ -84,8 +84,14 @@ import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseDuration
-import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.calendar.generated.resources.calendar_time_format
+import org.churchpresenter.calendar.generated.resources.calendar_time_format_sub
+import org.churchpresenter.calendar.generated.resources.calendar_time_12h
+import org.churchpresenter.calendar.generated.resources.calendar_time_24h
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.parseClockText
+import org.churchpresenter.calendar.model.storedTime
 
 /** The dialog's four tabs, in the design's order. */
 enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, PRESETS, DEFAULTS }
@@ -95,6 +101,12 @@ private val BODY_HEIGHT = 340.dp
 private val SWATCH_BUTTON = 26.dp
 private val HEX_FIELD = 82.dp
 private val PREF_FIELD = 74.dp
+private val PREF_FIELD_HEIGHT = 29.dp
+private val FORMAT_SELECTOR = 150.dp
+
+/** The two times the format row demonstrates with — one each side of noon, as the design's are. */
+private const val MORNING_EXAMPLE = "10:00"
+private const val EVENING_EXAMPLE = "18:30"
 
 /**
  * Calendar-wide settings — everything that applies to every service rather than to today's.
@@ -272,7 +284,7 @@ private fun TemplatesTab(templates: List<SavedTemplate>, onRemove: (String) -> U
                     title = template.name,
                     subtitle = stringResource(
                         Res.string.calendar_template_saved_sub,
-                        template.startTime,
+                        clockText(template.startTime, LocalUse24HourClock.current),
                         template.contentItems().size,
                     ),
                 )
@@ -527,12 +539,33 @@ private fun AddSectionRow(existing: List<SectionStyle>, onAdd: (String, String) 
 
 @Composable
 private fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPreferences) -> Unit) {
+    val use24Hour = preferences.use24HourClock
+    SettingCard {
+        CardText(
+            title = stringResource(Res.string.calendar_time_format),
+            subtitle = stringResource(
+                Res.string.calendar_time_format_sub,
+                clockText(MORNING_EXAMPLE, use24Hour),
+                clockText(EVENING_EXAMPLE, use24Hour),
+            ),
+        )
+        SegmentedSelector(
+            options = listOf(false, true),
+            selected = use24Hour,
+            label = { stringResource(if (it) Res.string.calendar_time_24h else Res.string.calendar_time_12h) },
+            onSelect = { onChange(preferences.copy(use24HourClock = it)) },
+            height = PREF_FIELD_HEIGHT,
+            modifier = Modifier.width(FORMAT_SELECTOR),
+        )
+    }
     PrefRow(
         title = stringResource(Res.string.calendar_default_start),
         subtitle = stringResource(Res.string.calendar_default_start_sub),
-        value = preferences.defaultStartTime,
-        isValid = { parseStoredTime(it) != null },
-        onCommit = { onChange(preferences.copy(defaultStartTime = it.trim())) },
+        value = clockText(preferences.defaultStartTime, use24Hour),
+        isValid = { parseClockText(it) != null },
+        onCommit = { text ->
+            parseClockText(text)?.let { onChange(preferences.copy(defaultStartTime = storedTime(it))) }
+        },
     )
     PrefRow(
         title = stringResource(Res.string.calendar_default_item),
@@ -571,7 +604,7 @@ private fun PrefRow(
         CompactTextField(
             value = draft,
             onValueChange = { draft = it },
-            height = 29.dp,
+            height = PREF_FIELD_HEIGHT,
             textAlign = TextAlign.Center,
             errorBorder = !isValid(draft),
             modifier = Modifier

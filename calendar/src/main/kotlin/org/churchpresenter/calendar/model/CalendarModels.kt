@@ -259,6 +259,12 @@ data class CalendarPreferences(
     /** Whether a newly added service starts armed for automation. */
     val armByDefault: Boolean = true,
     /**
+     * Whether times are shown as `18:30` rather than `6:30 PM` — everywhere one is shown, and in
+     * what a time field starts out holding. Starts as whatever the locale does; times are stored
+     * as `HH:mm` regardless.
+     */
+    val use24HourClock: Boolean = localeUses24HourClock(),
+    /**
      * The section headings available in every run of show, matched by name.
      *
      * Names rather than ids, which is what makes a section defined here apply to services that

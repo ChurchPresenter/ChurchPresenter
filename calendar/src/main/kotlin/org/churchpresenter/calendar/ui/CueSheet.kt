@@ -102,10 +102,12 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.isTargetFor
-import org.churchpresenter.calendar.model.parseStoredTime
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.parseClockText
+import org.churchpresenter.calendar.model.storedTime
 
 private val SHEET_WIDTH = 760.dp
 private val COLUMN_GAP = 18.dp
@@ -153,11 +155,13 @@ fun CueSheet(
     var payload by remember(existing) { mutableStateOf(existing?.payload) }
     var offset by remember(existing) { mutableStateOf(existing?.offsetMinutes ?: DEFAULT_OFFSET) }
     var pinned by remember(existing) { mutableStateOf(existing?.isPinned() == true) }
-    var pinnedTime by remember(existing) { mutableStateOf(existing?.absoluteTime?.ifEmpty { null } ?: DEFAULT_PINNED) }
+    val use24Hour = LocalUse24HourClock.current
+    var pinnedTime by remember(existing, use24Hour) { mutableStateOf(pinnedTimeText(existing, use24Hour)) }
     var label by remember(existing) { mutableStateOf(existing?.label ?: "") }
     var plays by remember(existing) { mutableStateOf(existing?.plays ?: 1) }
 
-    val pinnedValid = !pinned || parseStoredTime(pinnedTime) != null
+    val pinnedAt = parseClockText(pinnedTime)
+    val pinnedValid = !pinned || pinnedAt != null
     val hasTarget = action in CueAction.withTarget
     // Countdown and go live have a built-in fallback; the loop and a scene need a pick.
     val needsPick = action == CueAction.PROJECT || action == CueAction.SCENE
@@ -166,7 +170,7 @@ fun CueSheet(
     val draft = ServiceCue(
         id = existing?.id ?: UUID.randomUUID().toString(),
         offsetMinutes = offset,
-        absoluteTime = if (pinned) pinnedTime.trim() else "",
+        absoluteTime = if (pinned) pinnedAt?.let(::storedTime).orEmpty() else "",
         label = label.trim(),
         payload = if (hasTarget) target else null,
         action = action,
@@ -618,7 +622,10 @@ private fun builtInTarget(action: String, service: PlannedService, source: Targe
     if (source != TargetSource.SERVICE) return null
     return when (action) {
         CueAction.COUNTDOWN ->
-            stringResource(Res.string.calendar_cue_builtin_countdown, service.startTime) to
+            stringResource(
+                Res.string.calendar_cue_builtin_countdown,
+                clockText(service.startTime, LocalUse24HourClock.current),
+            ) to
                 stringResource(Res.string.calendar_cue_builtin)
         CueAction.GO_LIVE ->
             stringResource(Res.string.calendar_cue_first_item) to stringResource(Res.string.calendar_cue_default)
@@ -828,7 +835,7 @@ private fun WhenSection(
                 CompactTextField(
                     value = pinnedTime,
                     onValueChange = onPinnedTime,
-                    placeholder = DEFAULT_PINNED,
+                    placeholder = clockText(DEFAULT_PINNED, LocalUse24HourClock.current),
                     errorBorder = !pinnedValid,
                     height = 28.dp,
                     modifier = Modifier.width(TIME_FIELD),
@@ -838,7 +845,10 @@ private fun WhenSection(
         val hintColor = if (pinned) scheme.tertiary else scheme.primary
         Text(
             text = if (pinned) {
-                stringResource(Res.string.calendar_cue_hint_pinned, pinnedTime)
+                stringResource(
+                    Res.string.calendar_cue_hint_pinned,
+                    parseClockText(pinnedTime)?.let { clockText(it, LocalUse24HourClock.current) } ?: pinnedTime,
+                )
             } else {
                 stringResource(
                     Res.string.calendar_cue_hint_relative,
@@ -857,3 +867,7 @@ private fun WhenSection(
         )
     }
 }
+
+/** What the pinned-time field starts out holding: the cue's own time, or the default, in the format that is on. */
+private fun pinnedTimeText(existing: ServiceCue?, use24Hour: Boolean): String =
+    clockText(existing?.absoluteTime?.ifEmpty { null } ?: DEFAULT_PINNED, use24Hour)

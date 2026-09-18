@@ -41,6 +41,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `model/CalendarModels.kt` | `CalendarDocument`, `PlannedService`, `ServiceCue`, `ServiceKind`, `SectionStyle` — the file format |
 | `model/CalendarTime.kt` | Dates, the locale week start, month names, the grid's dates. Pure |
 | `model/DurationText.kt` | `4:30` ⇄ 270 seconds. Pure |
+| `model/ClockText.kt` | `18:30` ⇄ `6:30 PM`: the clock format, and what a time field accepts. Pure |
 | `model/RunClock.kt` | Each row's projected clock time, and whether it is exact |
 | `model/ReferenceParser.kt` | `John 3:16-17` → a `BibleVerseItem`; and the browsed-verse builder |
 | `model/RowIdentity.kt` | Re-keying rows, and the unique-id pass every load goes through |
@@ -52,6 +53,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `ui/Sheet.kt` | The dialog scaffold and the parts every dialog is built from |
 | `ui/Fields.kt` | `CompactTextField`, `FieldLabel` and the `commitOnExit` modifier |
 | `ui/Metrics.kt` | The design's sizes and type, named once |
+| `ui/ClockFormat.kt` | `LocalUse24HourClock`, the one place the clock format is read from |
 | `ui/ReorderState.kt` | Drag-to-reorder for the run of show |
 | `ui/` (the rest) | The screens and the three dialogs |
 
@@ -68,6 +70,10 @@ and the module stops compiling with unresolved `Res` references that no source f
   abbreviated, in every locale — see `CalendarTime.monthName`. The CCLI report window's
   `ccli_month_*` (12 strings × 34 locales) is what not doing this costs.
 - **The week does not start on Monday.** It starts on `WeekFields.of(locale).firstDayOfWeek`.
+- **Never draw a stored time as it is stored.** `startTime` and `absoluteTime` are `HH:mm` on disk
+  whatever the user chose; every place one is shown goes through `clockText(…, LocalUse24HourClock.current)`
+  and every field one is typed into parses with `parseClockText`, which takes both forms. The format
+  is `CalendarPreferences.use24HourClock`, provided once at the root of `CalendarApp`.
 - **Icons are vector assets, never text or emoji.** The design this was built from uses `♪`, `✝`
   and `▣`; the root `AGENT.md` forbids exactly that. See `ui/ItemLook.kt`.
 - **Every mutation saves.** `CalendarState.commit` is the only place the document changes and the
