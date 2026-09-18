@@ -81,6 +81,34 @@ class ProjectionSettingsTabGridTest {
         }
     }
 
+    @Test
+    fun `a display that has since been unplugged is reset rather than kept stale`() {
+        // Saved back when a second monitor drove this slot. That monitor is gone by the time this
+        // composes (noExternalScreens), so the row now stands in as the dev fallback window --
+        // and outputSizeOf prefers non-zero targetBoundsW/H over devWindowWidth/Height, so a stale
+        // record here silently overrides whatever resolution the operator picks for that window.
+        val stale = settingsWith {
+            copy(
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetDisplay = 1, targetBoundsX = 1920, targetBoundsY = 0,
+                        targetBoundsW = 1920, targetBoundsH = 1080,
+                        devWindowWidth = 1280, devWindowHeight = 720,
+                    ),
+                ),
+            )
+        }
+        projectionTab(initial = stale, screens = noExternalScreens()) { get ->
+            val assignment = get().projectionSettings.screenAssignments[0]
+            assertEquals(
+                Constants.KEY_TARGET_NONE, assignment.targetDisplay,
+                "the disconnected display must not be kept",
+            )
+            assertEquals(0, assignment.targetBoundsW, "nor its stale width")
+            assertEquals(0, assignment.targetBoundsH, "nor its stale height")
+        }
+    }
+
     // ── Key output ──────────────────────────────────────────────────────────────────────────────
 
     @Test

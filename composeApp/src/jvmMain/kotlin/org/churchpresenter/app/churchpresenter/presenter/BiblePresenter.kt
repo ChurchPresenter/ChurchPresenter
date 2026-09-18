@@ -464,10 +464,14 @@ fun BiblePresenter(
         if (loaded != null) {
             val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / PERCENT
             val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
-            Box(modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier.fillMaxSize()) {
                 AboveBandFill(
                     fill = if (showBackground) above.fill else null,
-                    bandFraction = lowerThirdFraction,
+                    bandFraction = effectiveBandFraction(
+                        canvasAspectRatio = maxWidth / maxHeight,
+                        bandFraction = lowerThirdFraction,
+                        templateAspectRatio = loaded.width / loaded.height,
+                    ),
                     fillsBehindBand = above.fillsBehindBand,
                 )
                 BibleLottieBand(

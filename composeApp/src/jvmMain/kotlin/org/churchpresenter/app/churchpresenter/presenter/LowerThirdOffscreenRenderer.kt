@@ -6,11 +6,11 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Density
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
@@ -127,7 +127,8 @@ class LowerThirdOffscreenRenderer(
                         fontManager = LottieFonts
                     ),
                     contentDescription = null,
-                    contentScale = ContentScale.Fit,
+                    contentScale = lowerThirdContentScale(width.toFloat() / height.toFloat()),
+                    alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize()
                 )
             }
