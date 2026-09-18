@@ -156,6 +156,9 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.app.churchpresenter.dialogs.SavePresetDialog
+import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
@@ -167,6 +170,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ThemeMode
 
 import java.io.File
+import java.util.UUID
+import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.viewmodel.clearDetectedReferences
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.invalidateInstanceLinkBibleCache
@@ -389,6 +394,9 @@ fun MainDesktop(
         selectedTabIndex = resolveTabSelection(tab, visibleTabs, selectedTabIndex)
     }
     var showAddLabelDialog by remember { mutableStateOf(false) }
+    // The item a tab's Save preset is naming, or null while that dialog is closed.
+    var presetToSave by remember { mutableStateOf<ScheduleItem?>(null) }
+    val presetStore = remember { PresetStore(AppDataDir.resolve()) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
@@ -1321,6 +1329,19 @@ fun MainDesktop(
                                     addWebsite = actions.addWebsite,
                                     addLabel = actions.addLabel,
                                     addLowerThird = actions.addLowerThird,
+                                    presentScene = { sceneId ->
+                                        sceneViewModel.selectScene(sceneId)
+                                        presenterManager.setActiveScene(sceneViewModel.scenes.find { it.id == sceneId })
+                                        selectTab(Tabs.CANVAS)
+                                        presenting(Presenting.CANVAS)
+                                    },
+                                    playSlideshow = { item, plays ->
+                                        when (item) {
+                                            is ScheduleItem.PictureItem -> picturesViewModel.requestPlayback(plays)
+                                            is ScheduleItem.PresentationItem -> presentationViewModel.requestPlayback(plays)
+                                            else -> Unit
+                                        }
+                                    },
                                 )
                             )
                         },
@@ -1549,6 +1570,11 @@ fun MainDesktop(
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
+                                onSavePreset = { folderPath, folderName, imageCount ->
+                                    presetToSave = ScheduleItem.PictureItem(
+                                        UUID.randomUUID().toString(), folderPath, folderName, imageCount,
+                                    )
+                                },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
                                 onInstanceLinkSendNextPicture = instanceLinkSendNextPicture,
                                 onInstanceLinkSendPreviousPicture = instanceLinkSendPreviousPicture,
@@ -1566,6 +1592,11 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
+                                },
+                                onSavePreset = { filePath, fileName, slideCount, fileType ->
+                                    presetToSave = ScheduleItem.PresentationItem(
+                                        UUID.randomUUID().toString(), filePath, fileName, slideCount, fileType,
+                                    )
                                 },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
                                 onInstanceLinkSendNextSlide = instanceLinkSendNextSlide,
@@ -1595,6 +1626,11 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
+                                },
+                                onSavePreset = { mediaUrl, mediaTitle, mediaType ->
+                                    presetToSave = ScheduleItem.MediaItem(
+                                        UUID.randomUUID().toString(), mediaUrl, mediaTitle, mediaType,
+                                    )
                                 },
                                 selectedMediaItem = selectedMediaItem,
                                 selectedMediaItemVersion = selectedMediaItemVersion,
@@ -1660,7 +1696,8 @@ fun MainDesktop(
                                         settings.backdrop,
                                         settings.outline,
                                     )
-                                }
+                                },
+                                onSavePreset = { settings -> presetToSave = announcementPresetItem(settings) }
                             )
 
                             Tabs.WEB -> WebTab(
@@ -1686,6 +1723,9 @@ fun MainDesktop(
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)
+                                },
+                                onSavePreset = { sceneId, sceneName ->
+                                    presetToSave = ScheduleItem.SceneItem(UUID.randomUUID().toString(), sceneId, sceneName)
                                 },
                                 dialogDismissSignal = dialogDismissSignal
                             )
@@ -1818,6 +1858,13 @@ fun MainDesktop(
             } // end Box (available-width measurement)
         }
     }
+
+    SavePresetDialog(
+        item = presetToSave,
+        existingNames = remember(presetToSave) { if (presetToSave == null) emptyList() else presetStore.load().presets.map { it.name } },
+        onConfirm = { name -> presetToSave?.let { presetStore.add(name, it) } },
+        onDismiss = { presetToSave = null },
+    )
 
     AddLabelDialog(
         isVisible = showAddLabelDialog,

@@ -24,12 +24,13 @@ data class CalendarHost(
     val loadIntoSchedule: (items: List<ScheduleItem>, replace: Boolean) -> Unit = { _, _ -> },
 
     /**
-     * Puts one item on screen, the way a tap on it in the Schedule tab would.
+     * Puts one item on screen, the way a tap on it in the Schedule tab would, and plays it
+     * [plays] times — 1 once, 0 until something else goes live — where the item has a run to play.
      *
      * What a fired cue does — see [CueRunner]. The app routes it through the same
      * `executeProjectItem` its remote clients use, so a cue can show exactly what a phone can.
      */
-    val projectItem: (ScheduleItem) -> Unit = {},
+    val projectItem: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
 
     /** Clears every output — a [org.churchpresenter.calendar.model.CueAction.BLANK] cue. */
     val blankOutputs: () -> Unit = {},

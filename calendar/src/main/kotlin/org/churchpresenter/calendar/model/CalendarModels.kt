@@ -146,28 +146,55 @@ data class ServiceCue(
     val action: String = CueAction.PROJECT,
     /** Off is "skip this one" — the cue stays in the list, greyed, and fires again once re-ticked. */
     val enabled: Boolean = true,
+    /**
+     * How many times a shown item plays through: 1 once, 0 until something else goes live, N that
+     * many. Only read for [CueAction.PROJECT] with a payload that plays — a slideshow, a
+     * presentation, a video, an animated announcement.
+     */
+    val plays: Int = 1,
 ) {
     fun isPinned(): Boolean = absoluteTime.isNotEmpty()
+    fun loops(): Boolean = plays == LOOP_FOREVER
 }
+
+/** The [ServiceCue.plays] value that means "keep going". */
+const val LOOP_FOREVER: Int = 0
 
 /**
  * What a cue does. Strings rather than an enum so a file written by a later version still opens;
  * an unknown action is simply never fired.
  */
 object CueAction {
-    /** Puts [ServiceCue.payload] on screen — a song, a reading, a slideshow, a timer. */
+    /**
+     * The announcement loop: puts [ServiceCue.payload] — a slideshow, a deck or a clip — on screen
+     * and plays it [ServiceCue.plays] times.
+     */
     const val PROJECT = "project"
-    /** Starts a countdown to the service's start time on the outputs. */
+    /**
+     * Starts a countdown on the outputs: [ServiceCue.payload] if it is a timer item, otherwise
+     * one built at fire time that counts to the service's start.
+     */
     const val COUNTDOWN = "countdown"
-    /** Loads the run of show into the Schedule tab and puts its first item on screen. */
+    /**
+     * Loads the run of show into the Schedule tab and puts an item on screen — [ServiceCue.payload]
+     * if one was chosen, else the first the host can show.
+     */
     const val GO_LIVE = "goLive"
+    /** Puts a canvas scene — [ServiceCue.payload], a scene item — on screen. */
+    const val SCENE = "scene"
     /** Clears every output. */
     const val BLANK = "blank"
     const val OBS_SCENE = "obsScene"
     const val ATEM_KEY = "atemKey"
 
-    /** The actions the cue sheet offers — the ones the host can carry out today. */
-    val offered: List<String> = listOf(COUNTDOWN, GO_LIVE, PROJECT, BLANK)
+    /** The actions the cue sheet offers — the ones the host can carry out today, in the design's order. */
+    val offered: List<String> = listOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE, BLANK)
+
+    /** The actions that point at an item, and so show a target list in the sheet. */
+    val withTarget: Set<String> = setOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE)
+
+    /** The actions whose item has a run to play, and so show `Play` in the sheet. */
+    val withPlays: Set<String> = setOf(PROJECT, GO_LIVE)
 }
 
 /**

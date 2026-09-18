@@ -1117,16 +1117,38 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
 
                             // What a fired calendar cue does — the same path a phone's "project"
                             // takes once approved, minus the approval: the operator planned it.
-                            val projectFromCalendar: (ScheduleItem) -> Unit = { item ->
-                                if (item is ScheduleItem.AnnouncementItem) {
-                                    appSettings = appSettings.withAnnouncement(item)
-                                }
-                                executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)
-                                coroutineScope.launch {
-                                    emitRemoteTabSelection(
-                                        item, remoteSelectSongFlow,
-                                        remoteSelectPictureFlow, remoteSelectPresentationFlow,
-                                    )
+                            // [plays] is the cue's Once / Loop / N times: 1, 0, or N. Each kind of
+                            // item already has its own notion of a repeat, so it is mapped onto
+                            // that rather than timed from here.
+                            val projectFromCalendar: (ScheduleItem, Int) -> Unit = { item, plays ->
+                                when (item) {
+                                    // Scenes are driven by MainDesktop's own ViewModel; the bridge is
+                                    // the one way there. Everything else is what a phone can project.
+                                    is ScheduleItem.SceneItem -> currentScheduleActions.presentScene(item.sceneId)
+                                    else -> {
+                                        val shown = if (item is ScheduleItem.AnnouncementItem && !item.isTimer && plays != 1) {
+                                            // The announcement's own loop count: 0 is forever there too.
+                                            item.copy(loopCount = plays)
+                                        } else {
+                                            item
+                                        }
+                                        if (shown is ScheduleItem.AnnouncementItem) {
+                                            appSettings = appSettings.withAnnouncement(shown)
+                                        }
+                                        executeProjectItem(shown, currentScheduleActions, presenterManager, statisticsManager)
+                                        if (shown is ScheduleItem.MediaItem) {
+                                            mediaViewModel.setLooping(plays != 1)
+                                            // Media counts repeats after the first play; 0 is forever.
+                                            mediaViewModel.setLoopCount(if (plays == 0) 0 else plays - 1)
+                                        }
+                                        currentScheduleActions.playSlideshow(shown, plays)
+                                        coroutineScope.launch {
+                                            emitRemoteTabSelection(
+                                                shown, remoteSelectSongFlow,
+                                                remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                             val loadFromCalendar: (List<ScheduleItem>, Boolean) -> Unit = { items, replace ->

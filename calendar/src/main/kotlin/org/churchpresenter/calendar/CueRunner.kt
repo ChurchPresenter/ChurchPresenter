@@ -60,12 +60,15 @@ class CueRunner(
     private fun fire(due: DueCue) {
         val service = due.service
         when (due.cue.action) {
-            CueAction.COUNTDOWN -> countdownItem(service.startTime)?.let(host.projectItem)
+            CueAction.COUNTDOWN -> (due.cue.payload ?: countdownItem(service.startTime))?.let { host.projectItem(it, ONCE) }
             CueAction.GO_LIVE -> {
                 host.loadIntoSchedule(service.items, true)
-                service.items.firstOrNull { it.isProjectableByCue() }?.let(host.projectItem)
+                val first = due.cue.payload ?: service.items.firstOrNull { it.isProjectableByCue() }
+                first?.takeIf { it.isProjectableByCue() }?.let { host.projectItem(it, due.cue.plays) }
             }
-            CueAction.PROJECT -> due.cue.payload?.takeIf { it.isProjectableByCue() }?.let(host.projectItem)
+            CueAction.PROJECT, CueAction.SCENE -> due.cue.payload?.takeIf { it.isProjectableByCue() }?.let {
+                host.projectItem(it, due.cue.plays)
+            }
             CueAction.BLANK -> host.blankOutputs()
             else -> Unit
         }
@@ -74,3 +77,4 @@ class CueRunner(
 
 /** Ten seconds: close enough that a cue lands within its minute, cheap enough to run all day. */
 private const val TICK_MILLIS = 10_000L
+private const val ONCE = 1

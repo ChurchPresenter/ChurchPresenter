@@ -7,6 +7,10 @@
     <string name="no_song_selected">No song selected</string>
     <string name="go_live">Go Live</string>
     <string name="add_to_schedule">Add to Schedule</string>
+    <string name="save_preset">Save preset</string>
+    <string name="preset_name">Preset name</string>
+    <string name="preset_name_hint">Sunday announcements</string>
+    <string name="preset_replaces">A preset called %1$s already exists and will be replaced.</string>
     <string name="copy_verse">Copy Verse</string>
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>

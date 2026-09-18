@@ -10,6 +10,7 @@ import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.CopiedRows
+import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
@@ -53,6 +54,7 @@ class CalendarState(
     private val store: CalendarStore,
     private val songFolder: File?,
     private val today: LocalDate = LocalDate.now(),
+    private val presetStore: PresetStore? = null,
 ) {
     var document by mutableStateOf(CalendarDocument())
         private set
@@ -69,6 +71,10 @@ class CalendarState(
     var songs by mutableStateOf<List<SongItem>>(emptyList())
         private set
     var songsLoaded by mutableStateOf(false)
+        private set
+
+    /** The items saved with **Save preset** from the app's tabs, newest first. */
+    var presets by mutableStateOf<List<ItemPreset>>(emptyList())
         private set
 
 
@@ -96,6 +102,22 @@ class CalendarState(
         // promise those are unique. See withUniqueRowIds.
         document = loaded.document.withUniqueRowIds()
         source = loaded.source
+        reloadPresets(io)
+    }
+
+    /**
+     * Re-reads `presets.json`. Called on load and whenever the window comes back to the front —
+     * the tabs write presets while this window is open, and it has no other way to hear of them.
+     */
+    suspend fun reloadPresets(io: CoroutineDispatcher = Dispatchers.IO) {
+        val store = presetStore ?: return
+        presets = withContext(io) { store.load().presets }.sortedByDescending { it.savedAt }
+    }
+
+    fun deletePreset(id: String) {
+        val store = presetStore ?: return
+        runCatching { store.remove(id) }
+        presets = presets.filterNot { it.id == id }
     }
     /** Reads the song folder for the add-item picker. Thousands of files — never on the UI thread. */
     suspend fun loadSongsAsync(io: CoroutineDispatcher = Dispatchers.IO) {

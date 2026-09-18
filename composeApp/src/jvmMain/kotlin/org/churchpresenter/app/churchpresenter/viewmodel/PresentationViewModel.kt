@@ -150,6 +150,32 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
+    /** How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth. The tab's own Loop toggle is 0. */
+    private var passesWanted = 0
+    private var passesDone = 0
+
+    /**
+     * A calendar cue's "play N times". Slides render after [selectPresentation] returns, and the
+     * playing flag set before they exist would advance nothing, so this is applied once
+     * [slideFiles] has content — see [applyPendingPlayback].
+     */
+    private var pendingPlays: Int? = null
+
+    fun requestPlayback(plays: Int) {
+        pendingPlays = plays
+        if (_slideFiles.isNotEmpty()) applyPendingPlayback()
+    }
+
+    private fun applyPendingPlayback() {
+        val plays = pendingPlays ?: return
+        pendingPlays = null
+        passesWanted = plays
+        passesDone = 0
+        _isLooping.value = plays != 1
+        _selectedSlideIndex.value = 0
+        _isPlaying.value = true
+    }
+
     private val _transitionDuration = mutableStateOf(appSettings?.presentationSettings?.transitionDuration ?: 500f)
     var transitionDuration: Float
         get() = _transitionDuration.value
@@ -273,7 +299,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         }
                     }
                     if (cached) {
-                        withContext(Dispatchers.Main) { _slideFiles.add(slideFile); _slideNotes.add("") }
+                        withContext(Dispatchers.Main) { _slideFiles.add(slideFile); _slideNotes.add(""); applyPendingPlayback() }
                     }
                 }
                 if (_slideFiles.isNotEmpty()) {
@@ -340,10 +366,13 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         _enteredViaPreviousSlide.value = false
         if (_selectedSlideIndex.value < _slideFiles.size - 1) {
             _selectedSlideIndex.value++
-        } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
+        } else if (_isLooping.value && _slideFiles.isNotEmpty() && (passesWanted == 0 || passesDone + 1 < passesWanted)) {
+            passesDone++
             _selectedSlideIndex.value = 0
         } else {
             _isPlaying.value = false
+            passesWanted = 0
+            passesDone = 0
         }
         onInstanceLinkSendNext?.invoke()
     }
@@ -404,6 +433,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 _slideNotes.addAll(cached.notes)
                 _deck.value = exposableDeck(parsed)
                 _loadGeneration.value++
+                applyPendingPlayback()
             }
         } else {
             renderSlides(file, renderWidth)
@@ -455,6 +485,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         )
                         withContext(Dispatchers.Main) {
                             _slideFiles.add(slideFile)
+                            applyPendingPlayback()
                             _slideNotes.add(slide.notes)
                         }
                     } catch (e: CancellationException) {

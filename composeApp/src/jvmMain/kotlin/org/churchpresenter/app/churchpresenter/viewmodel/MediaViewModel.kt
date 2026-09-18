@@ -113,6 +113,12 @@ class MediaViewModel {
         _loopsPlayed.intValue = 0
     }
 
+    /** Sets looping outright — a calendar cue's Once / Loop / N times, rather than the tab's toggle. */
+    fun setLooping(looping: Boolean) {
+        _isLooping.value = looping
+        _loopsPlayed.intValue = 0
+    }
+
     fun setLoopCount(count: Int) {
         _loopCount.intValue = count.coerceAtLeast(0)
         _loopsPlayed.intValue = 0

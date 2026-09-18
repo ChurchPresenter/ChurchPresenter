@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -64,6 +65,11 @@ import org.churchpresenter.calendar.generated.resources.calendar_templates_note
 import org.churchpresenter.calendar.generated.resources.calendar_template_remove
 import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
 import org.churchpresenter.calendar.model.SavedTemplate
+import org.churchpresenter.calendar.model.ItemPreset
+import org.churchpresenter.calendar.generated.resources.calendar_settings_presets
+import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_sub
+import org.churchpresenter.calendar.generated.resources.calendar_presets_note
+import org.churchpresenter.calendar.generated.resources.calendar_preset_remove
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.cuesInOrder
@@ -82,7 +88,7 @@ import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
 
 /** The dialog's four tabs, in the design's order. */
-enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, DEFAULTS }
+enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, PRESETS, DEFAULTS }
 
 private val DIALOG_WIDTH = 560.dp
 private val BODY_HEIGHT = 340.dp
@@ -102,6 +108,7 @@ private val PREF_FIELD = 74.dp
 fun CalendarSettingsDialog(
     preferences: CalendarPreferences,
     templates: List<SavedTemplate>,
+    presets: List<ItemPreset>,
     /** The service whose cues the Automation tab lists, or null when no day is open. */
     openService: PlannedService?,
     initialTab: SettingsTab = SettingsTab.SECTIONS,
@@ -114,6 +121,7 @@ fun CalendarSettingsDialog(
     onRemoveSection: (name: String) -> Unit,
     onInsertSection: (SectionStyle) -> Unit,
     onRemoveTemplate: (id: String) -> Unit,
+    onRemovePreset: (id: String) -> Unit,
     onEditCue: (ServiceCue) -> Unit,
     onDeleteCue: (cueId: String) -> Unit,
     onAddCue: () -> Unit,
@@ -164,6 +172,7 @@ fun CalendarSettingsDialog(
                     )
 
                     SettingsTab.TEMPLATES -> TemplatesTab(templates, onRemoveTemplate)
+                    SettingsTab.PRESETS -> PresetsTab(presets, onRemovePreset)
                     SettingsTab.DEFAULTS -> DefaultsTab(preferences, onPreferencesChange)
                 }
             }
@@ -177,6 +186,7 @@ private fun tabLabel(tab: SettingsTab): String = stringResource(
         SettingsTab.AUTOMATION -> Res.string.calendar_settings_automation
         SettingsTab.SECTIONS -> Res.string.calendar_settings_sections
         SettingsTab.TEMPLATES -> Res.string.calendar_settings_templates
+        SettingsTab.PRESETS -> Res.string.calendar_settings_presets
         SettingsTab.DEFAULTS -> Res.string.calendar_settings_defaults
     }
 )
@@ -270,6 +280,39 @@ private fun TemplatesTab(templates: List<SavedTemplate>, onRemove: (String) -> U
                     icon = Icons.Filled.Close,
                     description = stringResource(Res.string.calendar_template_remove),
                     onClick = { onRemove(template.id) },
+                    destructive = true,
+                )
+            }
+        }
+    }
+}
+
+/** The items saved from the app's tabs, each with the one thing to do to it here — delete. */
+@Composable
+private fun PresetsTab(presets: List<ItemPreset>, onRemove: (String) -> Unit) {
+    if (presets.isEmpty()) {
+        NoteLine(stringResource(Res.string.calendar_presets_empty_sub))
+        return
+    }
+    NoteLine(stringResource(Res.string.calendar_presets_note))
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        presets.forEach { preset ->
+            val look = lookFor(preset.item)
+            SettingCard {
+                Box(
+                    Modifier
+                        .size(CalendarMetrics.rowIcon)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(look.color.copy(alpha = WHEN_TINT)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(look.icon, contentDescription = null, tint = look.color, modifier = Modifier.size(12.dp))
+                }
+                CardText(title = preset.name, subtitle = preset.item.displayText)
+                SmallIconButton(
+                    icon = Icons.Filled.Close,
+                    description = stringResource(Res.string.calendar_preset_remove),
+                    onClick = { onRemove(preset.id) },
                     destructive = true,
                 )
             }
@@ -548,7 +591,7 @@ private fun NoteLine(text: String) {
 }
 
 @Composable
-internal fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
     val scheme = MaterialTheme.colorScheme
     Box(
         Modifier

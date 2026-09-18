@@ -51,6 +51,7 @@ import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarSource
 import org.churchpresenter.calendar.CalendarState
 import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_all_saved
 import org.churchpresenter.calendar.generated.resources.calendar_cancel
@@ -126,7 +127,7 @@ fun CalendarApp(
     io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     val state = remember(storeFolder, songFolder) {
-        CalendarState(CalendarStore(storeFolder), songFolder, today)
+        CalendarState(CalendarStore(storeFolder), songFolder, today, PresetStore(storeFolder))
     }
     LaunchedEffect(storeFolder) { state.loadAsync(io) }
     LaunchedEffect(songFolder) { state.loadSongsAsync(io) }
@@ -152,6 +153,11 @@ fun CalendarApp(
     // loaded yet, so doing it eagerly can produce an empty list that never refills.
     LaunchedEffect(addingItem) {
         if (addingItem && state.bibleBooks.isEmpty()) state.loadBibleBooks(host.bibleBooks())
+    }
+    // Presets are written by the app's tabs while this window may be open, so re-read them each
+    // time something that offers them opens rather than once at load.
+    LaunchedEffect(addingItem, cueSheet, settingsOpen) {
+        if (addingItem || cueSheet != null || settingsOpen) state.reloadPresets(io)
     }
     val scope = rememberCoroutineScope()
 
@@ -251,6 +257,7 @@ fun CalendarApp(
         CalendarSettingsDialog(
             preferences = state.document.preferences,
             templates = state.document.templates,
+            presets = state.presets,
             openService = openService,
             initialTab = settingsTab,
             canInsertSection = openService != null,
@@ -266,6 +273,7 @@ fun CalendarApp(
                 }
             },
             onRemoveTemplate = state::deleteTemplate,
+            onRemovePreset = state::deletePreset,
             onEditCue = { settingsOpen = false; cueSheet = CueSheetState.Editing(it) },
             onDeleteCue = { openService?.let { service -> state.deleteCue(service.id, it) } },
             onAddCue = { settingsOpen = false; cueSheet = CueSheetState.Adding },
@@ -356,6 +364,7 @@ private fun CalendarDialogs(
             songs = state.songs,
             songsLoaded = state.songsLoaded,
             currentSchedule = host.currentSchedule(),
+            presets = state.presets,
             sections = state.document.preferences.sections,
             bibleBooks = state.bibleBooks,
             serviceName = addTarget.name,
@@ -412,6 +421,7 @@ private fun CalendarDialogs(
         val existing = (cueSheet as? CueSheetState.Editing)?.cue
         CueSheet(
             service = cueTarget,
+            presets = state.presets,
             existing = existing,
             onSave = { state.saveCue(cueTarget.id, it); onCueSheetClosed() },
             onDelete = existing?.let { { state.deleteCue(cueTarget.id, it.id); onCueSheetClosed() } },

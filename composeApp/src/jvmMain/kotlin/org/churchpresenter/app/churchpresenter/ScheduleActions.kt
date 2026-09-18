@@ -32,4 +32,18 @@ data class ScheduleActions(
     val addLabel: (text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit =
         { _, _, _, _ -> },
+    /**
+     * Puts a canvas scene on screen by id — what a tap on a scene row in the Schedule tab does.
+     *
+     * Here rather than in `executeProjectItem` because the scenes live in a ViewModel owned by
+     * `MainDesktop`, which this bridge is the one sanctioned way out of; a calendar cue that shows
+     * a scene comes through it.
+     */
+    val presentScene: (sceneId: String) -> Unit = {},
+    /**
+     * Starts a slideshow or a deck playing through [plays] times — 1 once, 0 until stopped — for a
+     * calendar cue that shows a picture folder or a presentation. Same reason as [presentScene]:
+     * the two ViewModels belong to `MainDesktop`.
+     */
+    val playSlideshow: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
 )

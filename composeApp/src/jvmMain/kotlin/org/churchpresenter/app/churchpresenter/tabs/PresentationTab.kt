@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.recent_pin
@@ -150,6 +151,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
@@ -218,6 +220,8 @@ fun PresentationTab(
     hostWindow: AwtWindow? = null,
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
+    /** Save preset, to the left of Add to Schedule: the same file, kept for the Calendar Manager. */
+    onSavePreset: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Every go-live
      *  (including slide navigation) sends via PROJECT rather than the narrower SELECT_SLIDE: the
      *  primary only has slide bytes cached for a presentation it has itself loaded/added to its own
@@ -536,6 +540,16 @@ fun PresentationTab(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             )
+            if (onSavePreset != null) {
+                SavePresetButton(
+                    onClick = {
+                        val f = viewModel.selectedPresentation ?: return@SavePresetButton
+                        onSavePreset(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    tooltipText = stringResource(Res.string.save_preset)
+                )
+            }
             if (onAddToSchedule != null) {
                 AddToScheduleButton(
                     onClick = {

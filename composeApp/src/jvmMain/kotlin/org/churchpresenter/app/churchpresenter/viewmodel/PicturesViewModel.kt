@@ -240,6 +240,32 @@ class PicturesViewModel(
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
+    /** How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth. The tab's own Loop toggle is 0. */
+    private var passesWanted = 0
+    private var passesDone = 0
+
+    /**
+     * A calendar cue's "play N times", remembered until the folder it fired for has loaded —
+     * [selectFolder] clears the playing flag on the way in, so setting it here directly would be
+     * undone a moment later. Consumed by [applyPendingPlayback].
+     */
+    private var pendingPlays: Int? = null
+
+    fun requestPlayback(plays: Int) {
+        pendingPlays = plays
+        if (_images.isNotEmpty()) applyPendingPlayback()
+    }
+
+    private fun applyPendingPlayback() {
+        val plays = pendingPlays ?: return
+        pendingPlays = null
+        passesWanted = plays
+        passesDone = 0
+        _isLooping.value = plays != 1
+        _selectedImageIndex.value = 0
+        _isPlaying.value = true
+    }
+
     private val _transitionDuration = mutableStateOf(appSettings?.pictureSettings?.transitionDuration ?: 500f)
     var transitionDuration: Float
         get() = _transitionDuration.value
@@ -309,6 +335,7 @@ class PicturesViewModel(
         clearImages() // also cancels the previous folder's watcher
         loadImagesFromFolder(folder)
         startWatching(folder)
+        applyPendingPlayback()
     }
 
     fun loadImagesFromFolder(folder: File) {
@@ -418,11 +445,14 @@ class PicturesViewModel(
         if (_images.isNotEmpty()) {
             if (_selectedImageIndex.value < _images.size - 1) {
                 _selectedImageIndex.value = (_selectedImageIndex.value + 1)
-            } else if (_isLooping.value) {
+            } else if (_isLooping.value && (passesWanted == 0 || passesDone + 1 < passesWanted)) {
+                passesDone++
                 _selectedImageIndex.value = 0
             } else {
-                // Stop playing if at the end and not looping
+                // Stop playing if at the end and not looping — or after the pass a cue asked for.
                 _isPlaying.value = false
+                passesWanted = 0
+                passesDone = 0
             }
         }
         onInstanceLinkSendNext?.invoke()

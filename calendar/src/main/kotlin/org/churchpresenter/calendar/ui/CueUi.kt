@@ -6,17 +6,21 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_action_blan
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_countdown
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_project
+import org.churchpresenter.calendar.generated.resources.calendar_cue_action_scene
 import org.churchpresenter.calendar.generated.resources.calendar_cue_after
 import org.churchpresenter.calendar.generated.resources.calendar_cue_at_start
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_timer
 import org.churchpresenter.calendar.generated.resources.calendar_cue_before
 import org.churchpresenter.calendar.generated.resources.calendar_cue_item_missing
+import org.churchpresenter.calendar.generated.resources.calendar_cue_loops
+import org.churchpresenter.calendar.generated.resources.calendar_cue_times
 import org.churchpresenter.calendar.generated.resources.calendar_cue_pinned_at
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_one
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_other
 import org.churchpresenter.calendar.model.CueAction
 import org.churchpresenter.calendar.model.ServiceCue
+import org.churchpresenter.calendar.model.canPlayRepeatedly
 import org.churchpresenter.calendar.model.cueFireTime
 import org.churchpresenter.calendar.model.storedTime
 import org.jetbrains.compose.resources.stringResource
@@ -28,6 +32,7 @@ fun cueActionLabel(action: String): String = stringResource(
     when (action) {
         CueAction.COUNTDOWN -> Res.string.calendar_cue_action_countdown
         CueAction.GO_LIVE -> Res.string.calendar_cue_action_go_live
+        CueAction.SCENE -> Res.string.calendar_cue_action_scene
         CueAction.BLANK -> Res.string.calendar_cue_action_blank
         else -> Res.string.calendar_cue_action_project
     }

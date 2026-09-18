@@ -52,13 +52,34 @@ fun countdownItem(startTime: String): ScheduleItem.AnnouncementItem? {
 }
 
 /**
+ * Whether [item] is something the cue [action] can point at — the design's per-action row kinds:
+ * a countdown wants a timer, the announcement loop wants slides or a clip, go live takes anything
+ * the host can show, a scene wants a scene.
+ */
+fun ScheduleItem.isTargetFor(action: String): Boolean = when (action) {
+    CueAction.COUNTDOWN -> this is ScheduleItem.AnnouncementItem && isTimer
+    CueAction.PROJECT -> this is ScheduleItem.PictureItem || this is ScheduleItem.PresentationItem ||
+        this is ScheduleItem.MediaItem
+    CueAction.GO_LIVE -> isProjectableByCue()
+    CueAction.SCENE -> this is ScheduleItem.SceneItem
+    else -> false
+}
+
+/** Whether [ServiceCue.plays] means anything for this item — it has a run to play through. */
+fun ScheduleItem.canPlayRepeatedly(): Boolean = when (this) {
+    is ScheduleItem.PictureItem, is ScheduleItem.PresentationItem, is ScheduleItem.MediaItem -> true
+    is ScheduleItem.AnnouncementItem -> !isTimer
+    else -> false
+}
+
+/**
  * Whether the host can put [item] on screen from a cue.
  *
- * Section headings are structure, not content; a lower third and a scene are driven by their own
- * tabs rather than by the projection path a cue uses, so offering them would make a cue that
- * fires and shows nothing.
+ * Section headings are structure, not content, and a lower third is driven by its own tab rather
+ * than by the projection path a cue uses, so offering either would make a cue that fires and
+ * shows nothing.
  */
 fun ScheduleItem.isProjectableByCue(): Boolean = when (this) {
-    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem, is ScheduleItem.SceneItem -> false
+    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem -> false
     else -> true
 }

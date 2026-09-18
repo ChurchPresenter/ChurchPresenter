@@ -70,6 +70,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_pick_empty_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_no_bible
 import org.churchpresenter.calendar.generated.resources.calendar_pick_reference
 import org.churchpresenter.calendar.generated.resources.calendar_pick_schedule
+import org.churchpresenter.calendar.generated.resources.calendar_pick_presets
+import org.churchpresenter.calendar.generated.resources.calendar_presets_empty
+import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_sub
 import org.churchpresenter.calendar.generated.resources.calendar_pick_search
 import org.churchpresenter.calendar.generated.resources.calendar_pick_section
 import org.churchpresenter.calendar.generated.resources.calendar_pick_songs
@@ -77,6 +80,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_pick_whole_chap
 import org.churchpresenter.calendar.generated.resources.calendar_schedule_empty
 import org.churchpresenter.calendar.generated.resources.calendar_section_new
 import org.churchpresenter.calendar.generated.resources.calendar_songs_loading
+import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.bibleVerseItem
 import org.churchpresenter.calendar.model.parseDuration
@@ -96,7 +100,7 @@ private fun verseRange(anchor: Int?, extent: Int?): IntRange? {
 }
 
 /** Which source the picker is showing. */
-private enum class PickKind { SONGS, BIBLE, SECTION, SCHEDULE }
+private enum class PickKind { SONGS, BIBLE, SECTION, SCHEDULE, PRESETS }
 
 private val SHEET_WIDTH = 470.dp
 private val BODY_HEIGHT = 330.dp
@@ -121,6 +125,7 @@ fun AddItemSheet(
     songs: List<SongItem>,
     songsLoaded: Boolean,
     currentSchedule: List<ScheduleItem>,
+    presets: List<ItemPreset>,
     sections: List<SectionStyle>,
     bibleBooks: List<CalendarBibleBook>,
     serviceName: String,
@@ -285,6 +290,7 @@ fun AddItemSheet(
 
                     PickKind.SECTION -> SectionResults(sections, query, add)
                     PickKind.SCHEDULE -> ScheduleResults(currentSchedule, add)
+                    PickKind.PRESETS -> PresetResults(presets, query, add)
                 }
             }
         }
@@ -332,6 +338,7 @@ private fun searchPlaceholder(kind: PickKind): String = when (kind) {
     PickKind.BIBLE -> stringResource(Res.string.calendar_bible_hint_short)
     PickKind.SECTION -> stringResource(Res.string.calendar_section_hint)
     PickKind.SCHEDULE -> ""
+    PickKind.PRESETS -> stringResource(Res.string.calendar_pick_search)
 }
 
 @Composable
@@ -341,6 +348,7 @@ private fun pickKindLabel(kind: PickKind): String = stringResource(
         PickKind.BIBLE -> Res.string.calendar_pick_bible
         PickKind.SECTION -> Res.string.calendar_pick_section
         PickKind.SCHEDULE -> Res.string.calendar_pick_schedule
+        PickKind.PRESETS -> Res.string.calendar_pick_presets
     }
 )
 
@@ -552,6 +560,31 @@ private fun ScheduleResults(currentSchedule: List<ScheduleItem>, onAdd: (List<Sc
                 title = item.displayText,
                 subtitle = item.subtitle(),
                 onClick = { onAdd(listOf(item.withNewId())) },
+            )
+        }
+    }
+}
+
+/** The saved presets, newest first, filtered by name as the query is typed. */
+@Composable
+private fun PresetResults(presets: List<ItemPreset>, query: String, onAdd: (List<ScheduleItem>) -> Unit) {
+    if (presets.isEmpty()) {
+        EmptyBody(
+            stringResource(Res.string.calendar_presets_empty),
+            stringResource(Res.string.calendar_presets_empty_sub),
+        )
+        return
+    }
+    val q = query.trim()
+    val shown = presets.filter { q.isEmpty() || it.name.contains(q, ignoreCase = true) }
+    ScrollableList(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        itemsIndexed(shown, key = { _, preset -> preset.id }) { _, preset ->
+            val look = lookFor(preset.item)
+            ResultRow(
+                title = preset.name,
+                subtitle = preset.item.displayText,
+                color = look.color,
+                onClick = { onAdd(listOf(preset.item.withNewId())) },
             )
         }
     }
