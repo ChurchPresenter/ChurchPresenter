@@ -71,16 +71,17 @@ class ServiceAutoLoader(
         }
         val service = calendar.serviceToAutoLoad(at) ?: return
         val key = service.loadKey()
-        if (key in landed) return
-        // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
-        // alone from here, whatever the operator does to it. Asking whether *these* rows are
-        // there, rather than whether the Schedule holds anything, is what tells a load that
-        // arrived from one that called into a no-op while last week's schedule sat there.
-        if (service.isInSchedule(host.currentSchedule())) {
-            landed += key
-            return
+        when {
+            key in landed -> Unit
+            // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
+            // alone from here, whatever the operator does to it. Asking whether *these* rows are
+            // there, rather than whether the Schedule holds anything, is what tells a load that
+            // arrived from one that called into a no-op while last week's schedule sat there.
+            service.isInSchedule(host.currentSchedule()) -> landed += key
+            else -> host.loadIntoSchedule(
+                service.rowsForSchedule(), service.timingForSchedule(), true, service.armed,
+            )
         }
-        host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
     }
 }
 
@@ -93,10 +94,18 @@ class ServiceAutoLoader(
  * already been loaded stayed behind the one that was: rows added to the calendar were simply not
  * there when the automation looked for the next item, and the hand-off found nothing.
  */
-/** Whether [rows] are this service's -- its first row is in them, ids and all. */
+/**
+ * Whether [rows] hold this plan -- every one of its rows, by id.
+ *
+ * Every row and not just the first: a plan edited after it was loaded usually keeps its opening
+ * row, so asking about that one alone reported an edited plan as already loaded and it never
+ * reached the Schedule. Rows *beside* the plan's are ignored -- projecting a picture folder or a
+ * clip appends one, and that must not make the plan look absent.
+ */
 private fun PlannedService.isInSchedule(rows: List<ScheduleItem>): Boolean {
-    val first = items.firstOrNull()?.id ?: return false
-    return rows.any { it.id == first }
+    if (items.isEmpty()) return false
+    val present = rows.mapTo(HashSet()) { it.id }
+    return items.all { it.id in present }
 }
 
 private fun PlannedService.loadKey(): String =

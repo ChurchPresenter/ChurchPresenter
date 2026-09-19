@@ -107,6 +107,8 @@ fun SongsTab(
     hostWindow: AwtWindow? = null,
     viewModel: SongsViewModel,
     appSettings: AppSettings,
+    /** How long a song usually stays on screen here, measured -- see `LiveDurationLog`. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
@@ -644,6 +646,7 @@ fun SongsTab(
         tuning = dialogs.editing?.let { appSettings.tuningFor(it.songId) } ?: SongTuning(),
         showTuningFields = hasStageMonitorScreen,
         chordsVisible = appSettings.songSettings.editorShowChords,
+        typicalSeconds = dialogs.editing?.let(typicalSongSeconds),
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },
@@ -724,6 +727,7 @@ fun SongsTab(
         theme = theme,
         showTuningFields = hasStageMonitorScreen,
         chordsVisible = appSettings.songSettings.editorShowChords,
+        typicalSeconds = dialogs.editing?.let(typicalSongSeconds),
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },

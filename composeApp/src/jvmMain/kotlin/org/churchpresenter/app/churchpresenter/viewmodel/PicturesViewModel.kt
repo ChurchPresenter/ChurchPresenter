@@ -23,7 +23,6 @@ import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.calendar.automationTrace
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID
@@ -266,7 +265,6 @@ class PicturesViewModel(
     fun requestPlayback(plays: Int, folderPath: String? = null) {
         pendingPlays = plays
         pendingFolder = folderPath
-        automationTrace("requestPlayback plays=$plays for=$folderPath loaded=${_selectedFolder.value?.absolutePath}")
         applyPendingPlayback()
     }
 
@@ -279,10 +277,6 @@ class PicturesViewModel(
     private fun applyPendingPlayback() {
         val plays = pendingPlays ?: return
         val wanted = pendingFolder
-        automationTrace(
-            "applyPendingPlayback plays=$plays wanted=$wanted " +
-                "loaded=${_selectedFolder.value?.absolutePath} images=${_images.size}"
-        )
         // Waits for the folder it was meant for, and for that folder to have images: a request
         // spent on an empty list would set `isPlaying` with nothing to advance through.
         if (wanted != null && _selectedFolder.value?.absolutePath != wanted) return
@@ -297,7 +291,6 @@ class PicturesViewModel(
         _isLooping.value = plays != 1
         _selectedImageIndex.value = 0
         _isPlaying.value = true
-        automationTrace("PLAYING images=${_images.size} looping=${_isLooping.value} interval=$autoScrollInterval")
     }
 
     private val _transitionDuration = mutableStateOf(appSettings?.pictureSettings?.transitionDuration ?: 500f)
@@ -468,7 +461,6 @@ class PicturesViewModel(
         _thumbnails.clear()
         _thumbnailFailures.clear()
         _selectedImageIndex.value = 0
-        automationTrace("clearImages: stopping")
         _isPlaying.value = false
     }
 
@@ -477,9 +469,6 @@ class PicturesViewModel(
      *  which is the normal case — Controller mode doesn't mirror the primary's content) so next/prev
      *  still reaches the primary's own currently-live folder. See Constants.WS_CMD_NEXT_PICTURE. */
     fun nextImage(onInstanceLinkSendNext: (() -> Unit)? = null) {
-        automationTrace(
-            "nextImage index=${_selectedImageIndex.value} playing=${_isPlaying.value} images=${_images.size}"
-        )
         if (_images.isNotEmpty()) {
             if (_selectedImageIndex.value < _images.size - 1) {
                 _selectedImageIndex.value = (_selectedImageIndex.value + 1)
@@ -488,7 +477,6 @@ class PicturesViewModel(
                 _selectedImageIndex.value = 0
             } else {
                 // Stop playing if at the end and not looping — or after the pass a cue asked for.
-                automationTrace("nextImage: end of run, stopping")
                 clearPlaybackRequest()
                 _isPlaying.value = false
                 passesWanted = 0

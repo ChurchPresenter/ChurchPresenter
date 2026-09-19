@@ -1891,6 +1891,7 @@
     <string name="song_chords_used">%1$d used</string>
     <string name="song_insert_chord">Insert chord</string>
     <string name="song_stats">%1$d sections · %2$d lines · %3$d words</string>
+    <string name="song_typical_live">usually %1$s live</string>
 
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Song Samples</string>

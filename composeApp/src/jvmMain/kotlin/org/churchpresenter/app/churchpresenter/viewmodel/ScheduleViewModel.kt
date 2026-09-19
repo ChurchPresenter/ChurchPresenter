@@ -746,6 +746,13 @@ class ScheduleViewModel(
      * Presents a schedule item by coordinating all relevant ViewModels.
      * Triggers the appropriate callbacks for tab switching and presenting mode.
      */
+    /**
+     * Told whenever a row is put on screen from here -- how long each thing takes is measured from
+     * this, and from the cue path's own equivalent. A lambda, not a listener object: nothing here
+     * should know what is doing the measuring.
+     */
+    var onItemPresented: ((ScheduleItem) -> Unit)? = null
+
     fun presentItem(
         item: ScheduleItem,
         onPresenting: (Presenting) -> Unit,
@@ -761,6 +768,7 @@ class ScheduleViewModel(
         onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
         onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
     ) {
+        onItemPresented?.invoke(item)
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
             is ScheduleItem.BibleVerseItem -> onPresentBible?.invoke(item) ?: onPresenting(Presenting.BIBLE)

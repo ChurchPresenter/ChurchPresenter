@@ -243,6 +243,10 @@ fun MainDesktop(
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
     /** A projected video, handed to the Media tab so it actually loads and plays it. */
     remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
+    /** A row the operator put on screen from the Schedule -- timed, so its length can be learnt. */
+    onRowWentLive: (ScheduleItem) -> Unit = {},
+    /** How long a song usually runs here, measured -- shown in the song editor. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
     /** Instance Link Controller-mode navigation — advance/retreat whatever the primary currently has
      *  live (no id needed, see Constants.WS_CMD_NEXT_PICTURE and siblings). Received on the primary
      *  side; sent from the Controller side via [instanceLinkSendNextPicture] and siblings below. */
@@ -815,6 +819,10 @@ fun MainDesktop(
     // Load a presentation file uploaded by a mobile client (POST /api/presentations/upload).
     // addPresentation renders the slides and triggers onSlidesLoaded → companionServer.updatePresentation,
     // which broadcasts WS_EVENT_PRESENTATION_UPDATED so the mobile's GET /api/presentations finds it.
+    LaunchedEffect(scheduleViewModel) {
+        scheduleViewModel.onItemPresented = onRowWentLive
+    }
+
     // A clip a cue started belongs on the live output: being handed the row cleared it, and
     // nothing else will push it back. See MediaViewModel.onCuePlaybackStarted.
     LaunchedEffect(mediaViewModel, presenterManager) {
@@ -1571,6 +1579,8 @@ fun MainDesktop(
                                 hostWindow = hostWindow,
                                 viewModel = songsViewModel,
                                 appSettings = appSettings,
+                                typicalSongSeconds = typicalSongSeconds,
+                               
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
                                     currentScheduleActions.addSong(songNumber, title, songbook, songId)

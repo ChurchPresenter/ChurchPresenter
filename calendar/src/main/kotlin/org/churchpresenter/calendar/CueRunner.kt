@@ -85,15 +85,9 @@ class CueRunner(
         val rows = items()
         val timings = timing()
         val isArmed = armed()
-        automationTrace(
-            "tick armed=$isArmed rows=${rows.size} timings=${timings.size} " +
-                "due=${dueRows(rows, timings, isArmed, at, fired).map { it.displayText.take(18) }} " +
-                "pendingEnds=${pendingEnds.map { it.rowId.take(6) + "@" + it.at.toLocalTime() }}"
-        )
         dueRows(rows, timings, isArmed, at, fired).forEach { row ->
             fired += row.id
             val plan = timings[row.id] ?: RowTiming.DEFAULT
-            automationTrace("FIRE ${row.displayText.take(30)} plays=${plan.repeats} plan=$plan")
             liveRow = row.id
             runCatching { host.projectItem(row, plan.repeats) }
             CueFeed.post(FiredCue(row, at.toLocalTime()))
@@ -132,7 +126,6 @@ class CueRunner(
         val (rowId, plan) = awaitingItemEnd ?: return
         if (rowId != liveRow) return
         awaitingItemEnd = null
-        automationTrace("ITEM FINISHED ${rowId.take(6)} action=${plan.atEnd}")
         runEnd(items(), rowId, plan.atEnd, now())
     }
 
@@ -141,11 +134,9 @@ class CueRunner(
         if (due.isEmpty()) return
         pendingEnds.removeAll(due)
         due.forEach { end ->
-            if (end.rowId != liveRow) {
-                automationTrace("END ${end.rowId.take(6)} dropped -- no longer live")
-                return@forEach
-            }
-            automationTrace("END ${end.rowId.take(6)} action=${end.action}")
+            // Stale: something else is on screen now, and "the row after this one" is not what
+            // anybody is waiting for. See [liveRow].
+            if (end.rowId != liveRow) return@forEach
             runEnd(rows, end.rowId, end.action, at)
         }
     }
@@ -158,11 +149,7 @@ class CueRunner(
                     liveRow = ""
                     host.blankOutputs()
                 }
-                RowEnd.NEXT -> (rows.nextContentRow(rowId) ?: run {
-                    automationTrace("  -> nothing after ${rowId.take(6)} in ${rows.map { it.id.take(6) }}")
-                    null
-                })?.let { next ->
-                    automationTrace("  -> next ${next.displayText.take(30)}")
+                RowEnd.NEXT -> rows.nextContentRow(rowId)?.let { next ->
                     val plan = timing()[next.id] ?: RowTiming.DEFAULT
                     liveRow = next.id
                     host.projectItem(next, plan.repeats)
@@ -230,16 +217,6 @@ object CueFeed {
 
     fun post(event: FiredCue) {
         log.update { (listOf(event) + it).take(LOG_LIMIT) }
-    }
-}
-
-/** TEMPORARY, while the automation is being confirmed on a real machine. Remove with its callers. */
-fun automationTrace(message: String) {
-    val line = java.time.LocalTime.now().withNano(0).toString() + " [Cue] " + message
-    System.err.println(line)
-    runCatching {
-        java.io.File(System.getProperty("user.home"), ".churchpresenter/automation-debug.log")
-            .appendText(line + "\n")
     }
 }
 

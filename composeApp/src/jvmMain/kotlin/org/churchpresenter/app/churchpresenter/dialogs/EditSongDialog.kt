@@ -105,6 +105,8 @@ import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
 import churchpresenter.composeapp.generated.resources.song_stats
+import churchpresenter.composeapp.generated.resources.song_typical_live
+import org.churchpresenter.calendar.model.formatDuration
 import churchpresenter.composeapp.generated.resources.song_syntax
 import churchpresenter.composeapp.generated.resources.song_syntax_chord_hint
 import churchpresenter.composeapp.generated.resources.song_tempo
@@ -155,6 +157,13 @@ fun EditSongDialog(
     tuning: SongTuning = SongTuning(),
     showTuningFields: Boolean = false,
     chordsVisible: Boolean = true,
+    /**
+     * How long this song usually stays on screen here, in seconds, or null until it is known.
+     *
+     * Measured rather than typed -- see `LiveDurationLog`. Shown beside the section and word
+     * counts because that is where somebody editing a song asks "how long does this one run".
+     */
+    typicalSeconds: Int? = null,
     onChordsVisibleChange: (Boolean) -> Unit = {},
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
                                   lowerThirdBackground: SongBackground) -> Unit)? = null,
@@ -183,6 +192,7 @@ fun EditSongDialog(
             tuning = tuning,
             showTuningFields = showTuningFields,
             chordsVisible = chordsVisible,
+            typicalSeconds = typicalSeconds,
             onChordsVisibleChange = onChordsVisibleChange,
             isVisible = isVisible,
             onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
@@ -249,6 +259,8 @@ internal fun EditSongContent(
     tuning: SongTuning = SongTuning(),
     showTuningFields: Boolean = false,
     chordsVisible: Boolean = true,
+    /** How long this song usually runs here -- measured, see [EditSongDialog]. */
+    typicalSeconds: Int? = null,
     onChordsVisibleChange: (Boolean) -> Unit = {},
     isVisible: Boolean = true,
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
@@ -563,8 +575,11 @@ internal fun EditSongContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
+                    val counts = stringResource(Res.string.song_stats, stats.sections, stats.lines, stats.words)
+                    val typical = typicalSeconds
+                        ?.let { stringResource(Res.string.song_typical_live, formatDuration(it)) }
                     Text(
-                        text = stringResource(Res.string.song_stats, stats.sections, stats.lines, stats.words),
+                        text = listOfNotNull(counts, typical).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),

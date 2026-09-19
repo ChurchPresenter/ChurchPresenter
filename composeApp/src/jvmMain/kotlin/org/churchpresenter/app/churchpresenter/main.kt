@@ -67,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
 import org.churchpresenter.settings.withBundledBible
+import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -810,6 +811,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
     val remoteSelectPresentationFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
+    // How long each thing actually stays on screen, kept beside the calendar it informs.
+    val liveDurationLog = remember { LiveDurationLog(File(AppDataDir.resolve(), "durations.json")) }
     val remoteSelectMediaFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 8) }
     var dialogDismissSignal by remember { mutableStateOf(0) }
@@ -1139,6 +1142,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             val projectFromCalendar: (ScheduleItem, Int) -> Unit = { item, plays ->
                                 // Select it as a click would, so the Schedule shows what is live.
                                 currentScheduleActions.selectItem(item.id)
+                                liveDurationLog.wentLive(item)
                                 when (item) {
                                     // Scenes are driven by MainDesktop's own ViewModel; the bridge is
                                     // the one way there. Everything else is what a phone can project.
@@ -1188,7 +1192,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             val cueHost = CalendarHost(
                                 loadIntoSchedule = loadFromCalendar,
                                 projectItem = projectFromCalendar,
-                                blankOutputs = { presenterManager.requestClearDisplay() },
+                                blankOutputs = {
+                                    presenterManager.requestClearDisplay()
+                                    liveDurationLog.wentBlank()
+                                },
                             )
                             val fireScheduleCue: (ScheduleItem.CueItem) -> Unit = { cue ->
                                 fireCue(cueHost, currentScheduleItems, cue, loadRows = false)
@@ -1481,6 +1488,18 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             MainDesktop(
                                 hostWindow = window,
                                 onPresentCue = fireScheduleCue,
+                                onRowWentLive = { item -> liveDurationLog.wentLive(item) },
+                                typicalSongSeconds = { song ->
+                                    liveDurationLog.median(
+                                        ScheduleItem.SongItem(
+                                            id = song.songId,
+                                            songNumber = song.number.toIntOrNull() ?: 0,
+                                            title = song.title,
+                                            songbook = song.songbook,
+                                            songId = song.songId,
+                                        )
+                                    )
+                                },
                                 instanceLinkConnectionStatus =
                                     instanceLinkViewModel.connectionStatus.collectAsState().value,
                                 instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
@@ -1867,6 +1886,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         // it advances at. Null for anything that cannot say.
                                         itemRunSeconds = { item ->
                                             withContext(Dispatchers.IO) {
+                                                // What it is known to take, else what it has
+                                                // actually taken here -- see LiveDurationLog.
                                                 when (item) {
                                                     is ScheduleItem.MediaItem ->
                                                         mediaDurationSeconds(item.mediaUrl)
@@ -1879,7 +1900,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                         appSettings.presentationSettings.autoScrollInterval,
                                                     )
                                                     else -> null
-                                                }
+                                                } ?: liveDurationLog.median(item)
                                             }
                                         },
                                         // The run-of-show PDF embeds this. OpenSans covers Cyrillic,
