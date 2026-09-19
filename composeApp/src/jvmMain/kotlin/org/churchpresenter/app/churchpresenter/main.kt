@@ -40,6 +40,8 @@ import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+import org.churchpresenter.app.churchpresenter.utils.mediaDurationSeconds
+import org.churchpresenter.app.churchpresenter.utils.slideshowSeconds
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
@@ -808,6 +810,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
     val remoteSelectPresentationFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
+    val remoteSelectMediaFlow =
+        remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 8) }
     var dialogDismissSignal by remember { mutableStateOf(0) }
     var showOptionsDialog by remember { mutableStateOf(false) }
     var optionsDialogInitialTab by remember { mutableStateOf(0) }
@@ -1101,6 +1105,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             emitRemoteTabSelection(
                                                 item, remoteSelectSongFlow,
                                                 remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                                remoteSelectMediaFlow,
                                             )
                                         }
                                         pending.decision.complete(true)
@@ -1132,6 +1137,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             // item already has its own notion of a repeat, so it is mapped onto
                             // that rather than timed from here.
                             val projectFromCalendar: (ScheduleItem, Int) -> Unit = { item, plays ->
+                                // Select it as a click would, so the Schedule shows what is live.
+                                currentScheduleActions.selectItem(item.id)
                                 when (item) {
                                     // Scenes are driven by MainDesktop's own ViewModel; the bridge is
                                     // the one way there. Everything else is what a phone can project.
@@ -1157,6 +1164,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             emitRemoteTabSelection(
                                                 shown, remoteSelectSongFlow,
                                                 remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                                remoteSelectMediaFlow,
                                             )
                                         }
                                     }
@@ -1188,13 +1196,22 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
 
                             // The automation engine, up for the whole session: it watches the live
                             // Schedule and fires its cue rows at their time. See CueRunner.
-                            LaunchedEffect(Unit) {
+                            val cueRunner = remember {
                                 CueRunner(
                                     items = { currentScheduleItems },
                                     timing = { currentScheduleActions.currentTiming() },
                                     armed = { automationArmed },
                                     host = cueHost,
-                                ).run()
+                                )
+                            }
+                            LaunchedEffect(Unit) { cueRunner.run() }
+
+                            // A row set to run for its *own* length has no number for the engine to
+                            // count -- the video itself decides when it is over. MediaViewModel
+                            // already reports that (it is what clears the output), so the row's
+                            // "at end" action hangs off the same signal.
+                            LaunchedEffect(mediaViewModel.mediaFinished) {
+                                if (mediaViewModel.mediaFinished) cueRunner.liveItemFinished()
                             }
 
                             // And the other half of leaving it to run: the service that is about
@@ -1640,6 +1657,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 remoteSelectSongFlow = remoteSelectSongFlow,
                                 remoteSelectPictureFlow = remoteSelectPictureFlow,
                                 remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+                                remoteSelectMediaFlow = remoteSelectMediaFlow,
                                 nextPictureFlow = kotlinx.coroutines.flow.flow {
                                     companionServer.onNextPicture.collect { emit(Unit) }
                                 },
@@ -1843,6 +1861,27 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     appDataDirectory = AppDataDir.resolve(),
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
                                     host = CalendarHost(
+                                        // How long a row runs by itself, so a plan does not have
+                                        // to be timed by hand: a clip's own duration, read from
+                                        // its header, and a slideshow's count times the interval
+                                        // it advances at. Null for anything that cannot say.
+                                        itemRunSeconds = { item ->
+                                            withContext(Dispatchers.IO) {
+                                                when (item) {
+                                                    is ScheduleItem.MediaItem ->
+                                                        mediaDurationSeconds(item.mediaUrl)
+                                                    is ScheduleItem.PictureItem -> slideshowSeconds(
+                                                        item.imageCount,
+                                                        appSettings.pictureSettings.autoScrollInterval,
+                                                    )
+                                                    is ScheduleItem.PresentationItem -> slideshowSeconds(
+                                                        item.slideCount,
+                                                        appSettings.presentationSettings.autoScrollInterval,
+                                                    )
+                                                    else -> null
+                                                }
+                                            }
+                                        },
                                         // The run-of-show PDF embeds this. OpenSans covers Cyrillic,
                                         // which PDFBox's built-in Helvetica does not — and this app's
                                         // song libraries routinely are Cyrillic.

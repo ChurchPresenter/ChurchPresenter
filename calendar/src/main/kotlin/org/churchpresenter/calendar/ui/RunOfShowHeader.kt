@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -45,6 +46,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_auto_starts
 import org.churchpresenter.calendar.generated.resources.calendar_armed
 import org.churchpresenter.calendar.generated.resources.calendar_armed_off
 import org.churchpresenter.calendar.generated.resources.calendar_copy_service_tip
+import org.churchpresenter.calendar.generated.resources.calendar_lay_out_times_tip
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock_reset
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock_tip
@@ -96,6 +98,12 @@ internal fun RunOfShowHeader(
             onReset = actions.onClockReset,
         )
         ArmSwitch(armed = service.armed, onArmed = actions.onArmed)
+        HeaderIcon(
+            icon = Icons.Filled.Timeline,
+            tooltip = stringResource(Res.string.calendar_lay_out_times_tip),
+            tint = scheme.tertiary,
+            onClick = actions.onLayOutTimes,
+        )
         Box(Modifier.width(1.dp).height(HEADER_RULE_HEIGHT).background(scheme.outlineVariant))
         HeaderIcon(
             icon = Icons.Filled.ContentCopy,

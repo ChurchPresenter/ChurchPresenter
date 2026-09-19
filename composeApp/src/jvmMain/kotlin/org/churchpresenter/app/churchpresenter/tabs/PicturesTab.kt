@@ -141,6 +141,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.calendar.automationTrace
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -200,6 +201,10 @@ fun PicturesTab(
 
     // Auto-scroll effect
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {
+        automationTrace(
+            "advance effect: playing=${viewModel.isPlaying} images=${viewModel.images.size} " +
+                "index=${viewModel.selectedImageIndex} interval=${viewModel.autoScrollInterval}"
+        )
         if (viewModel.isPlaying && viewModel.images.isNotEmpty()) {
             delay((viewModel.autoScrollInterval * MILLIS_PER_SECOND).toLong())
             viewModel.nextImage()

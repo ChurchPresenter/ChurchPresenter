@@ -53,3 +53,31 @@ fun runClocks(service: PlannedService): Map<String, RowClock> {
         item.id to rowClock
     }
 }
+
+/**
+ * Every row pinned to the time the plan says it runs: the first row keeps its own time, and each
+ * row after it starts when the one before it ends.
+ *
+ * What "lay out the times" does. A run of show built with both pins and `→ Next` asks for two
+ * different things -- the pins say when, the lengths say how long, and they contradict each other
+ * the moment one row runs longer than the gap to the next pin. This resolves it the way a plan is
+ * actually read: in order, from the top.
+ *
+ * It stops at the first row with no planned length, leaving that row and everything after it
+ * untouched: a row of unknown length makes every time after it a guess, and a plan that quietly
+ * invents times is worse than one that visibly stops.
+ */
+fun PlannedService.withTimesLaidOut(): PlannedService {
+    val rows = items.filter { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
+    val anchor = rows.firstNotNullOfOrNull { parseStoredTime(timingOf(it.id).startAt) }
+        ?: parseStoredTime(startTime)
+        ?: return this
+    var clock = anchor
+    val laid = timing.toMutableMap()
+    for (row in rows) {
+        laid[row.id] = timingOf(row.id).copy(startAt = storedTime(clock))
+        val planned = plannedSeconds[row.id] ?: break
+        clock = clock.plusSeconds(planned.toLong() * timingOf(row.id).repeats.coerceAtLeast(1))
+    }
+    return copy(timing = laid)
+}

@@ -17,6 +17,8 @@ import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.isDurationTimer
+import org.churchpresenter.calendar.model.withStartMovedFrom
+import org.churchpresenter.calendar.model.withTimesLaidOut
 import org.churchpresenter.calendar.model.withTimerSeconds
 import org.churchpresenter.calendar.model.withCuesAsRows
 import org.churchpresenter.calendar.model.copiedRows
@@ -231,12 +233,26 @@ class CalendarState(
      * Saves [service]'s name, time and kind — and, with [wholeSeries], the same three on every other
      * occurrence of its series. Never the run of show: each week's is its own.
      */
+    /**
+     * Saves an edited service -- and moves its plan with it.
+     *
+     * A start time that changed carries every pinned row and cue by the same amount, so a
+     * pre-service sequence built as `−20 / −15 / −5` still reads that way after the service moves.
+     * See [withStartMovedFrom]. Each service of a series is shifted by its *own* difference, not
+     * by the edited one's.
+     */
     fun updateService(service: PlannedService, wholeSeries: Boolean = false) {
+        val target = document.serviceById(service.id)
+            ?.let { service.withStartMovedFrom(it.startTime) }
+            ?: service
         val siblings = if (wholeSeries) document.servicesInSeries(service.seriesId) else emptyList()
         val updated = siblings
             .filterNot { it.id == service.id }
-            .map { it.copy(name = service.name, startTime = service.startTime, kind = service.kind) }
-        commit(document.withServices(listOf(service) + updated))
+            .map {
+                it.copy(name = service.name, startTime = service.startTime, kind = service.kind)
+                    .withStartMovedFrom(it.startTime)
+            }
+        commit(document.withServices(listOf(target) + updated))
     }
 
     fun deleteService(id: String, wholeSeries: Boolean = false) {
@@ -349,6 +365,12 @@ class CalendarState(
 
     fun deleteTemplate(id: String) {
         commit(document.withoutTemplate(id))
+    }
+
+    /** Times every row of the service from the first one -- see [withTimesLaidOut]. */
+    fun layOutTimes(serviceId: String) {
+        val service = document.serviceById(serviceId) ?: return
+        commit(document.withService(service.withTimesLaidOut()))
     }
 
     // ── Cues ──────────────────────────────────────────────────────────────────

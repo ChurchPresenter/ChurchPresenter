@@ -45,6 +45,7 @@ internal fun RemoteCommandEffects(
     onSongItemSelected: (ScheduleItem.SongItem) -> Unit,
     onPictureItemSelected: (ScheduleItem.PictureItem) -> Unit,
     onPresentationItemSelected: (ScheduleItem.PresentationItem) -> Unit,
+    onMediaItemSelected: (ScheduleItem.MediaItem) -> Unit,
     onSelectTab: (Tabs) -> Unit,
     pushCurrentSlideIfLive: suspend () -> Unit,
     remotePresentationPlayPauseFlow: Flow<Unit>? = null,
@@ -60,6 +61,7 @@ internal fun RemoteCommandEffects(
     remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
     remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
+    remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
     uploadPresentationFlow: Flow<File>? = null,
 ) {
 LaunchedEffect(remotePresentationPlayPauseFlow) {
@@ -223,6 +225,13 @@ LaunchedEffect(remoteSelectPresentationFlow) {
     remoteSelectPresentationFlow?.collect { presentationItem ->
         onPresentationItemSelected(presentationItem)
         onSelectTab(Tabs.PRESENTATION)
+    }
+}
+
+LaunchedEffect(remoteSelectMediaFlow) {
+    remoteSelectMediaFlow?.collect { mediaItem ->
+        onMediaItemSelected(mediaItem)
+        onSelectTab(Tabs.MEDIA)
     }
 }
 

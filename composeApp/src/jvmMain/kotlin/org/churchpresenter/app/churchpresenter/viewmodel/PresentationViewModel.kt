@@ -161,14 +161,23 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
      */
     private var pendingPlays: Int? = null
 
-    fun requestPlayback(plays: Int) {
+    /** The deck [pendingPlays] was asked for, so the request cannot land on a different one. */
+    private var pendingFile: String? = null
+
+    /** A cue asking for this deck to play -- see `PicturesViewModel.requestPlayback` for why the file matters. */
+    fun requestPlayback(plays: Int, filePath: String? = null) {
         pendingPlays = plays
-        if (_slideFiles.isNotEmpty()) applyPendingPlayback()
+        pendingFile = filePath
+        applyPendingPlayback()
     }
 
     private fun applyPendingPlayback() {
         val plays = pendingPlays ?: return
+        val wanted = pendingFile
+        if (wanted != null && _selectedPresentation.value?.absolutePath != wanted) return
+        if (_slideFiles.isEmpty()) return
         pendingPlays = null
+        pendingFile = null
         passesWanted = plays
         passesDone = 0
         _isLooping.value = plays != 1

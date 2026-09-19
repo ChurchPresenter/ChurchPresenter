@@ -241,6 +241,8 @@ fun MainDesktop(
      *  composable to actually load the real content into the corresponding ViewModel. */
     remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
+    /** A projected video, handed to the Media tab so it actually loads and plays it. */
+    remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
     /** Instance Link Controller-mode navigation — advance/retreat whatever the primary currently has
      *  live (no id needed, see Constants.WS_CMD_NEXT_PICTURE and siblings). Received on the primary
      *  side; sent from the Controller side via [instanceLinkSendNextPicture] and siblings below. */
@@ -825,6 +827,7 @@ fun MainDesktop(
         onSongItemSelected = { selectedSongItem = it },
         onPictureItemSelected = { selectedPictureItem = it; selectedPictureItemVersion++ },
         onPresentationItemSelected = { selectedPresentationItem = it; selectedPresentationItemVersion++ },
+        onMediaItemSelected = { selectedMediaItem = it; selectedMediaItemVersion++ },
         onSelectTab = ::selectTab,
         pushCurrentSlideIfLive = ::pushCurrentSlideIfLive,
         remotePresentationPlayPauseFlow = remotePresentationPlayPauseFlow,
@@ -840,6 +843,7 @@ fun MainDesktop(
         remoteSelectSongFlow = remoteSelectSongFlow,
         remoteSelectPictureFlow = remoteSelectPictureFlow,
         remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+        remoteSelectMediaFlow = remoteSelectMediaFlow,
         uploadPresentationFlow = uploadPresentationFlow,
     )
 
@@ -1334,6 +1338,7 @@ fun MainDesktop(
                                     addWebsite = actions.addWebsite,
                                     addCue = actions.addCue,
                                     addRow = actions.addRow,
+                                    selectItem = actions.selectItem,
                                     currentTiming = actions.currentTiming,
                                     addLabel = actions.addLabel,
                                     addLowerThird = actions.addLowerThird,
@@ -1345,8 +1350,10 @@ fun MainDesktop(
                                     },
                                     playSlideshow = { item, plays ->
                                         when (item) {
-                                            is ScheduleItem.PictureItem -> picturesViewModel.requestPlayback(plays)
-                                            is ScheduleItem.PresentationItem -> presentationViewModel.requestPlayback(plays)
+                                            is ScheduleItem.PictureItem ->
+                                                picturesViewModel.requestPlayback(plays, item.folderPath)
+                                            is ScheduleItem.PresentationItem ->
+                                                presentationViewModel.requestPlayback(plays, item.filePath)
                                             else -> Unit
                                         }
                                     },

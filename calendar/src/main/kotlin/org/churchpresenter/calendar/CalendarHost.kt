@@ -84,6 +84,19 @@ data class CalendarHost(
      */
     val chooseExportFile: suspend (suggestedName: String) -> File? = { null },
 
+    /**
+     * How long [ScheduleItem] runs by itself, in whole seconds, or null when nothing can say.
+     *
+     * The app answers it because the answer is the app's: a clip's duration comes from ffmpeg,
+     * which it already ships for cameras, and a picture folder's is its image count times the
+     * slideshow interval the operator has set. A planned length is what the run of show's clock
+     * times are built from and what the engine measures a row's run by, so anything that can know
+     * its own length should never have to be timed by hand.
+     *
+     * `suspend` because reading a file header is not something to do on the composing thread.
+     */
+    val itemRunSeconds: suspend (item: ScheduleItem) -> Int? = { null },
+
     /** What the picker's preset previews can draw with -- the app's video player and deck rasterizer. */
     val preview: PreviewSources = PreviewSources(),
 )

@@ -425,10 +425,14 @@ internal suspend fun emitRemoteTabSelection(
     songFlow: MutableSharedFlow<ScheduleItem.SongItem>,
     pictureFlow: MutableSharedFlow<ScheduleItem.PictureItem>,
     presentationFlow: MutableSharedFlow<ScheduleItem.PresentationItem>,
+    mediaFlow: MutableSharedFlow<ScheduleItem.MediaItem>,
 ): Boolean = when (item) {
     is ScheduleItem.SongItem -> { songFlow.emit(item); true }
     is ScheduleItem.PictureItem -> { pictureFlow.emit(item); true }
     is ScheduleItem.PresentationItem -> { presentationFlow.emit(item); true }
+    // Without this a projected video set the presenter to MEDIA mode and played nothing: the file
+    // is loaded by the Media tab, which only learns of it by being handed the item.
+    is ScheduleItem.MediaItem -> { mediaFlow.emit(item); true }
     else -> false
 }
 

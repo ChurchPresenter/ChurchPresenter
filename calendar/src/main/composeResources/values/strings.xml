@@ -223,6 +223,7 @@
     <string name="calendar_cue_fired_at">Fired %1$s</string>
     <string name="calendar_cue_next_in">Next · in %1$d min</string>
     <string name="calendar_run_clock">Run clock</string>
+    <string name="calendar_lay_out_times_tip">Time every row from the first — each one starts when the one before it ends</string>
     <string name="calendar_run_clock_tip">Step the service clock on 5 min to see which cues would have fired</string>
     <string name="calendar_run_clock_tip_stepped">Stepped clock · click to go on 5 min, × to go back to the real time</string>
     <string name="calendar_run_clock_reset">Back to the real time</string>
@@ -245,8 +246,18 @@
     <string name="calendar_saved_as_you_change">Saved as you change it</string>
     <string name="calendar_timing_starts">Starts</string>
     <string name="calendar_timing_cued">Cued</string>
+    <string name="calendar_timing_cued_hint">Waits until you put it on screen yourself</string>
+    <string name="calendar_timing_minus_hint">12</string>
+    <string name="calendar_timing_before">min before</string>
+    <string name="calendar_timing_own_hint">Runs for as long as the item itself lasts</string>
+    <string name="calendar_timing_loop_hint">Keeps playing until something else goes live</string>
+    <string name="calendar_timing_times_hint_long">Plays through %1$d time(s), then does the At end action</string>
+    <string name="calendar_timing_hold_hint">Stays on screen until you move on</string>
+    <string name="calendar_timing_next_hint">Puts the next item on screen on its own</string>
+    <string name="calendar_timing_blank_hint">Clears every output</string>
     <string name="calendar_timing_on_time">On time</string>
     <string name="calendar_timing_minus">−%1$d</string>
+    <string name="calendar_timing_plus">+%1$d</string>
     <string name="calendar_timing_or">or</string>
     <string name="calendar_timing_runs">Runs</string>
     <string name="calendar_timing_own">Its own</string>

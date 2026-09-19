@@ -44,6 +44,26 @@ class CueRunner(
     /** End actions waiting for their moment: the row's id, when its run is over, and what then. */
     private val pendingEnds = ArrayList<PendingEnd>()
 
+    /**
+     * The row the engine last put on screen.
+     *
+     * An end action is booked minutes ahead, and by the time it comes the service may have moved
+     * on -- a later pinned row fired, or the operator went live with something else. Running it
+     * then projects "the row after" something nobody is watching any more, over whatever *is* on
+     * screen: a timer's `→ Next`, booked at 07:06 for 07:11, put the pre-service slideshow back up
+     * on top of the video that had just started. So an end only runs while its own row is still
+     * the live one.
+     */
+    private var liveRow = ""
+
+    /**
+     * A row whose length is its own -- `Runs: own length` -- waiting for the item to finish.
+     *
+     * There is no number to count, so the end action can only be driven by the thing playing it;
+     * [liveItemFinished] is how the app reports that the video reached its last frame.
+     */
+    private var awaitingItemEnd: Pair<String, RowTiming>? = null
+
     /** Checks and fires forever, every [tickMillis]. Cancel the coroutine to stop. */
     suspend fun run(tickMillis: Long = TICK_MILLIS) {
         while (true) {
@@ -65,9 +85,16 @@ class CueRunner(
         val rows = items()
         val timings = timing()
         val isArmed = armed()
+        automationTrace(
+            "tick armed=$isArmed rows=${rows.size} timings=${timings.size} " +
+                "due=${dueRows(rows, timings, isArmed, at, fired).map { it.displayText.take(18) }} " +
+                "pendingEnds=${pendingEnds.map { it.rowId.take(6) + "@" + it.at.toLocalTime() }}"
+        )
         dueRows(rows, timings, isArmed, at, fired).forEach { row ->
             fired += row.id
             val plan = timings[row.id] ?: RowTiming.DEFAULT
+            automationTrace("FIRE ${row.displayText.take(30)} plays=${plan.repeats} plan=$plan")
+            liveRow = row.id
             runCatching { host.projectItem(row, plan.repeats) }
             CueFeed.post(FiredCue(row, at.toLocalTime()))
             scheduleEnd(row, plan, at)
@@ -80,13 +107,33 @@ class CueRunner(
         runEnds(rows, at)
     }
 
-    /** Books the row's end action, if it has one and a length to measure it from. */
+    /** Books the row's end action: on the clock when it has a length, on the item when it does not. */
     private fun scheduleEnd(row: ScheduleItem, plan: RowTiming, startedAt: LocalDateTime) {
+        awaitingItemEnd = null
         if (plan.atEnd == RowEnd.HOLD) return
-        val seconds = plan.runSeconds ?: return
+        val seconds = plan.runSeconds
+        if (seconds == null) {
+            // `Runs: own length`: the item decides when it is over -- see [liveItemFinished].
+            awaitingItemEnd = row.id to plan
+            return
+        }
         // A row played N times runs N times as long; a loop runs its stated length.
         val total = seconds.toLong() * plan.repeats.coerceAtLeast(1)
         pendingEnds += PendingEnd(row.id, startedAt.plusSeconds(total), plan.atEnd)
+    }
+
+    /**
+     * The item on screen played itself out -- run the end action of the row that put it there.
+     *
+     * Only for the row that is still live, and only while it was waiting on its own length: a
+     * video finishing says nothing about a row that was replaced two minutes ago.
+     */
+    fun liveItemFinished() {
+        val (rowId, plan) = awaitingItemEnd ?: return
+        if (rowId != liveRow) return
+        awaitingItemEnd = null
+        automationTrace("ITEM FINISHED ${rowId.take(6)} action=${plan.atEnd}")
+        runEnd(items(), rowId, plan.atEnd, now())
     }
 
     private fun runEnds(rows: List<ScheduleItem>, at: LocalDateTime) {
@@ -94,17 +141,32 @@ class CueRunner(
         if (due.isEmpty()) return
         pendingEnds.removeAll(due)
         due.forEach { end ->
-            runCatching {
-                when (end.action) {
-                    RowEnd.BLANK -> host.blankOutputs()
-                    RowEnd.NEXT -> rows.nextContentRow(end.rowId)?.let { next ->
-                        val plan = timing()[next.id] ?: RowTiming.DEFAULT
-                        host.projectItem(next, plan.repeats)
-                        CueFeed.post(FiredCue(next, at.toLocalTime()))
-                        scheduleEnd(next, plan, at)
-                    }
-                    else -> Unit
+            if (end.rowId != liveRow) {
+                automationTrace("END ${end.rowId.take(6)} dropped -- no longer live")
+                return@forEach
+            }
+            automationTrace("END ${end.rowId.take(6)} action=${end.action}")
+            runEnd(rows, end.rowId, end.action, at)
+        }
+    }
+
+    /** Carries out one row's end action: the next content row goes live, or the outputs blank. */
+    private fun runEnd(rows: List<ScheduleItem>, rowId: String, action: String, at: LocalDateTime) {
+        runCatching {
+            when (action) {
+                RowEnd.BLANK -> {
+                    liveRow = ""
+                    host.blankOutputs()
                 }
+                RowEnd.NEXT -> rows.nextContentRow(rowId)?.let { next ->
+                    automationTrace("  -> next ${next.displayText.take(30)}")
+                    val plan = timing()[next.id] ?: RowTiming.DEFAULT
+                    liveRow = next.id
+                    host.projectItem(next, plan.repeats)
+                    CueFeed.post(FiredCue(next, at.toLocalTime()))
+                    scheduleEnd(next, plan, at)
+                }
+                else -> Unit
             }
         }
     }
@@ -165,6 +227,16 @@ object CueFeed {
 
     fun post(event: FiredCue) {
         log.update { (listOf(event) + it).take(LOG_LIMIT) }
+    }
+}
+
+/** TEMPORARY, while the automation is being confirmed on a real machine. Remove with its callers. */
+fun automationTrace(message: String) {
+    val line = java.time.LocalTime.now().withNano(0).toString() + " [Cue] " + message
+    System.err.println(line)
+    runCatching {
+        java.io.File(System.getProperty("user.home"), ".churchpresenter/automation-debug.log")
+            .appendText(line + "\n")
     }
 }
 

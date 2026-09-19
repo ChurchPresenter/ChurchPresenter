@@ -7,6 +7,8 @@ internal data class RunOfShowHeaderActions(
     /** Drops the preview clock, back to the wall clock or to none. */
     val onClockReset: () -> Unit,
     val onArmed: (Boolean) -> Unit,
+    /** Times every row from the first, so the block runs in order instead of by contradicting pins. */
+    val onLayOutTimes: () -> Unit,
     val onCopy: () -> Unit,
     val onSaveTemplate: () -> Unit,
 )

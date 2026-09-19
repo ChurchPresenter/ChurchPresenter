@@ -170,6 +170,17 @@ fun CalendarApp(
     val scope = rememberCoroutineScope()
 
     val openService = state.selectedService
+    // Rows that can say how long they run, but were planned before anything asked them -- a clip
+    // added by hand, a folder that grew. Filled once per service, and only where nothing is set,
+    // so a typed length is never overwritten.
+    LaunchedEffect(openService?.id) {
+        val service = openService ?: return@LaunchedEffect
+        service.items
+            .filter { service.plannedSeconds[it.id] == null }
+            .forEach { row ->
+                host.itemRunSeconds(row)?.let { state.setPlannedSeconds(service.id, row.id, it) }
+            }
+    }
     val clock = rememberRunClock(openService, today)
     // The latest fired cue, until dismissed. Keyed by firing, so the same cue going off again --
     // fired by hand, or on another day -- shows again.
@@ -237,6 +248,7 @@ fun CalendarApp(
                                     onClockStep = clock.step,
                                     onClockReset = clock.reset,
                                     onArmed = { state.setArmed(service.id, it) },
+                                    onLayOutTimes = { state.layOutTimes(service.id) },
                                     onCopy = { copyFrom = service },
                                     onSaveTemplate = { templateFrom = service },
                                 ),
@@ -360,6 +372,7 @@ private fun CalendarDialogs(
     onCopySheetClosed: () -> Unit,
     onTemplateSheetClosed: () -> Unit,
 ) {
+    val dialogScope = rememberCoroutineScope()
     if (creatingService || editingService != null) {
         val existing = editingService
         ServiceSheet(
@@ -423,6 +436,14 @@ private fun CalendarDialogs(
                 // length is its planned length whether or not one was typed.
                 items.forEach { item ->
                     (plannedSeconds ?: item.timerSeconds())?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
+                    // A clip knows how long it is, and a picture folder is its count times the
+                    // slideshow interval; nobody should have to type either in. Only for a row
+                    // that arrived without a length, and off the composing thread.
+                    if (plannedSeconds == null) {
+                        dialogScope.launch {
+                            host.itemRunSeconds(item)?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
+                        }
+                    }
                     if (!timing.isDefault() && item !is ScheduleItem.LabelItem) state.setTiming(addTarget.id, item.id, timing)
                 }
                 onAddingItemClosed()

@@ -29,10 +29,16 @@ class ServiceAutoLoader(
     private var loaded = ""
 
     /** Checks and loads forever, every [tickMillis]. Cancel the coroutine to stop. */
-    suspend fun run(tickMillis: Long = TICK_MILLIS) {
-        trace("started, every ${tickMillis}ms")
+    suspend fun run(tickMillis: Long = TICK_MILLIS, startupMillis: Long = STARTUP_MILLIS) {
+        // The Schedule tab publishes the actions a load goes through when it first composes, and
+        // this loop starts in the same instant: a tick before that lands nowhere, and the service
+        // then waits a whole tick for the retry -- long enough for a row pinned in the gap to fall
+        // outside the engine's grace window. The lead is five minutes; a moment here costs nothing.
+        delay(startupMillis)
         while (true) {
-            runCatching { tick() }.onFailure { trace("tick threw: $it") }
+            // A tick that throws must not end the loop: the next service of the day still has to
+            // load. Same reasoning as CueRunner's runCatching around each host call.
+            runCatching { tick() }
             delay(tickMillis)
         }
     }
@@ -41,13 +47,8 @@ class ServiceAutoLoader(
     suspend fun tick() {
         val calendar = document()
         val at = now()
-        val service = calendar.serviceToAutoLoad(at)
-        trace(
-            "at=$at on=${calendar.preferences.autoLoadService} " +
-                "services=${calendar.services.size} due=${service?.name} loaded=$loaded"
-        )
         if (!calendar.preferences.autoLoadService) return
-        service ?: return
+        val service = calendar.serviceToAutoLoad(at) ?: return
         val key = service.loadKey()
         // "Already loaded" is only believed while the Schedule actually holds something.
         //
@@ -58,22 +59,7 @@ class ServiceAutoLoader(
         // an empty Schedule means it is tried again on the next tick instead.
         if (key == loaded && host.currentSchedule().isNotEmpty()) return
         loaded = key
-        trace("loading ${service.name} (${service.items.size} rows)")
         host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
-    }
-}
-
-/**
- * TEMPORARY while this is being confirmed on a real machine -- stderr *and* a file beside
- * `calendar.json`, because the app is usually started from something whose console nobody reads.
- * Remove both this and its callers once the feature is confirmed working.
- */
-private fun trace(message: String) {
-    val line = java.time.LocalTime.now().withNano(0).toString() + " [AutoLoad] " + message
-    System.err.println(line)
-    runCatching {
-        java.io.File(System.getProperty("user.home"), ".churchpresenter/autoload-debug.log")
-            .appendText(line + "\n")
     }
 }
 
@@ -91,3 +77,6 @@ private fun PlannedService.loadKey(): String = "$date|$id|$startTime"
  * worth having, and each tick reads and parses `calendar.json`.
  */
 private const val TICK_MILLIS = 60_000L
+
+/** Long enough for the first composition to have published the Schedule's actions. */
+private const val STARTUP_MILLIS = 5_000L

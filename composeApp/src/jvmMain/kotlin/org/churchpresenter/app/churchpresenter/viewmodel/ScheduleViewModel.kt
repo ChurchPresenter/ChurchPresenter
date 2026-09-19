@@ -727,6 +727,17 @@ class ScheduleViewModel(
         _selectedItemId.value = if (_selectedItemId.value == id) null else id
     }
 
+    /**
+     * Selects [id] outright -- what the automation does when it puts a row on screen.
+     *
+     * Not [selectItem]: that toggles, because a second click on a row is how the operator clears
+     * the selection. A row going live is not a click, and firing the same row twice must not
+     * deselect it.
+     */
+    fun selectOnly(id: String) {
+        _selectedItemId.value = id
+    }
+
     fun clearSelection() {
         _selectedItemId.value = null
     }

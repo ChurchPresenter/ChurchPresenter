@@ -185,6 +185,7 @@ internal fun RunOfShowPane(
                         item = item,
                         clock = clocks[item.id],
                         timing = service.timingOf(item.id),
+                        serviceStartTime = service.startTime,
                         plannedSeconds = service.plannedSeconds[item.id],
                         isFirst = index == 0,
                         isLast = index == lastIndex,
@@ -208,6 +209,8 @@ private fun RunRow(
     item: ScheduleItem,
     clock: RowClock?,
     timing: RowTiming,
+    /** What a pinned start is said relative to -- see [startOffsetLabel]. */
+    serviceStartTime: String,
     plannedSeconds: Int?,
     isFirst: Boolean,
     isLast: Boolean,
@@ -280,7 +283,7 @@ private fun RunRow(
                 )
             }
         }
-        TimingChips(timing = timing, onOpen = onChange)
+        TimingChips(timing = timing, serviceStartTime = serviceStartTime, onOpen = onChange)
         DurationControl(seconds = plannedSeconds, onChange = onPlannedSecondsChange)
         RowAction(Icons.Filled.ArrowUpward, stringResource(Res.string.calendar_move_up), !isFirst, onMoveUp)
         RowAction(Icons.Filled.ArrowDownward, stringResource(Res.string.calendar_move_down), !isLast, onMoveDown)
@@ -290,10 +293,10 @@ private fun RunRow(
 
 /**
  * What the row does on its own, as the design's chips: `⟳ Loop` / `⟳ 3`, `→ Next` / `Blank`, and
- * `⚡ 9:45 AM` for a row that starts by itself. Each opens the row editor, where they are set.
+ * `⚡ −15` for a row that starts by itself. Each opens the row editor, where they are set.
  */
 @Composable
-private fun TimingChips(timing: RowTiming, onOpen: () -> Unit) {
+private fun TimingChips(timing: RowTiming, serviceStartTime: String, onOpen: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     if (timing.repeats != 1) {
         RowChip(
@@ -318,12 +321,14 @@ private fun TimingChips(timing: RowTiming, onOpen: () -> Unit) {
         )
     }
     if (timing.startsOnItsOwn()) {
-        RowChip(
-            text = clockText(timing.startAt, LocalUse24HourClock.current),
-            icon = Icons.Filled.Bolt,
-            tone = scheme.tertiary,
-            onClick = onOpen,
-        )
+        Hint(clockText(timing.startAt, LocalUse24HourClock.current)) {
+            RowChip(
+                text = startOffsetLabel(timing.startAt, serviceStartTime),
+                icon = Icons.Filled.Bolt,
+                tone = scheme.tertiary,
+                onClick = onOpen,
+            )
+        }
     }
 }
 

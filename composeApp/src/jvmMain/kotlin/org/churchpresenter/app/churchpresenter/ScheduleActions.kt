@@ -56,4 +56,6 @@ data class ScheduleActions(
      * the two ViewModels belong to `MainDesktop`.
      */
     val playSlideshow: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
+    /** Selects a row, so the Schedule shows what the automation has just put on screen. */
+    val selectItem: (id: String) -> Unit = {},
 )

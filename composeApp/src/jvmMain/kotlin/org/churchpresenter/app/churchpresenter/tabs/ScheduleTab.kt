@@ -135,6 +135,8 @@ data class ScheduleTabActions(
     val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
     val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
     val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
+    /** Selects a row, so the Schedule shows what the automation has just put on screen. */
+    val selectItem: (id: String) -> Unit = {},
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
 )
 
@@ -271,6 +273,7 @@ fun ScheduleTab(
                 addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) },
                 addCue           = { item -> viewModel.addCue(item) },
                 addRow           = { item, timing -> viewModel.addRow(item, timing) },
+                selectItem       = { id -> viewModel.selectOnly(id) },
                 currentTiming    = { viewModel.timing.toMap() },
             )
         )

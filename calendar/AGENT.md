@@ -56,6 +56,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `model/RunClock.kt` | Each row's projected clock time, and whether it is exact |
 | `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
 | `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
+| `model/ServiceMove.kt` | Moving a service: every pinned row and cue travels with its start time. Pure |
 | `model/AutoLoad.kt` | When a service is due to be loaded: its first row's clock time, less five minutes. Pure |
 | `model/CueStatus.kt` | Each cue's fired / next status against a clock, the rows and timing as they go into the Schedule, the old-file migration. Pure |
 | `model/TimerRows.kt` | Reading and setting a timer row's length. Timers come in as presets. Pure |
