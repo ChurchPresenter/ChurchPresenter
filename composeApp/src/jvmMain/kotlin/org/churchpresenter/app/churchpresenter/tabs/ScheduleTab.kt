@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
 import org.churchpresenter.calendar.model.scheduleClocks
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -307,6 +308,7 @@ fun ScheduleTab(
             onRedo = { viewModel.redo() },
             onAddLabel = onAddLabel,
             onImportPlanningCenter = { showPlanningCenterImport = true },
+            onOpenCalendar = LocalOpenCalendar.current,
             onClearSchedule = { viewModel.clearSchedule() },
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,

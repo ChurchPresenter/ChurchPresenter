@@ -959,6 +959,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                     CompositionLocalProvider(
                         LocalMediaViewModel provides mediaViewModel,
                         LocalMainWindowState provides state,
+                        LocalOpenCalendar provides { showCalendarWindow = true },
                         LocalShortcuts provides remember(appSettings.keyboardShortcutSettings) {
                             ShortcutMap.from(appSettings.keyboardShortcutSettings)
                         }
