@@ -8,7 +8,10 @@ import churchpresenter.composeapp.generated.resources.schedule_timing_blank
 import churchpresenter.composeapp.generated.resources.schedule_timing_loop
 import churchpresenter.composeapp.generated.resources.schedule_timing_next
 import churchpresenter.composeapp.generated.resources.schedule_timing_times
+import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.formatDuration
+import org.churchpresenter.calendar.model.storedTime
 import org.churchpresenter.calendar.model.localeUses24HourClock
 import androidx.compose.runtime.collectAsState
 import churchpresenter.composeapp.generated.resources.schedule_cue_fired
@@ -236,6 +239,8 @@ private fun RowScope.ScheduleRowActionButtons(
 internal fun ScheduleItemRow(
     item: ScheduleItem,
     timing: RowTiming = RowTiming.DEFAULT,
+    /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
+    clock: RowClock? = null,
     dragHandleModifier: Modifier = Modifier,
     density: ScheduleDensity,
     /** Legacy layout: buttons on their own line under the title instead of the hover overlay. */
@@ -372,6 +377,7 @@ internal fun ScheduleItemRow(
                                 density = density,
                                 isSelected = isSelected,
                                 timing = timing,
+                                clock = clock,
                             )
                         }
 
@@ -569,6 +575,8 @@ internal fun ScheduleItemContent(
     isSelected: Boolean,
     /** How the row runs on its own, from the plan it was loaded from; the default says nothing. */
     timing: RowTiming = RowTiming.DEFAULT,
+    /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
+    clock: RowClock? = null,
 ) {
     val titleColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
     val detailColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -592,13 +600,30 @@ internal fun ScheduleItemContent(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
         )
-        if (timing.startsOnItsOwn()) {
-            // `⚡ 9:45 AM` -- the row goes live by itself, and the engine tells you when.
+        // The row's own length, where the plan knows it -- `5:00`.
+        timing.runSeconds?.let { seconds ->
             Text(
-                text = "⚡ " + clockText(timing.startAt, localeUses24HourClock()),
+                text = formatDuration(seconds * timing.repeats.coerceAtLeast(1)),
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+        // When it goes live: its own pinned time, or the time the plan works out to. A reckoned
+        // time is dimmed, and dimmer still once a row of unknown length has been passed -- it is
+        // an estimate from there on, and should not read like a promise.
+        val shown = timing.startAt.takeIf { it.isNotEmpty() } ?: clock?.let { storedTime(it.time) }
+        if (shown != null) {
+            Text(
+                text = clockText(shown, localeUses24HourClock()),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (timing.startsOnItsOwn()) FontWeight.Bold else FontWeight.Medium,
+                color = when {
+                    timing.startsOnItsOwn() -> MaterialTheme.colorScheme.tertiary
+                    clock?.exact == true -> MaterialTheme.colorScheme.onSurfaceVariant
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = ESTIMATE_ALPHA)
+                },
                 maxLines = 1,
                 softWrap = false,
             )
@@ -738,3 +763,6 @@ internal fun ScheduleItemContent(
         }
     }
 }
+
+/** How faint a reckoned time goes once a row of unknown length has been passed. */
+private const val ESTIMATE_ALPHA = 0.55f

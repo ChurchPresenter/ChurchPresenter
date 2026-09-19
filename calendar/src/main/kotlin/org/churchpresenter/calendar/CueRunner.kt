@@ -158,7 +158,10 @@ class CueRunner(
                     liveRow = ""
                     host.blankOutputs()
                 }
-                RowEnd.NEXT -> rows.nextContentRow(rowId)?.let { next ->
+                RowEnd.NEXT -> (rows.nextContentRow(rowId) ?: run {
+                    automationTrace("  -> nothing after ${rowId.take(6)} in ${rows.map { it.id.take(6) }}")
+                    null
+                })?.let { next ->
                     automationTrace("  -> next ${next.displayText.take(30)}")
                     val plan = timing()[next.id] ?: RowTiming.DEFAULT
                     liveRow = next.id

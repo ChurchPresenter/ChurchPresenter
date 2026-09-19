@@ -39,6 +39,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_timing_minus_hi
 import org.churchpresenter.calendar.generated.resources.calendar_timing_loop_hint
 import org.churchpresenter.calendar.generated.resources.calendar_timing_hold_hint
 import org.churchpresenter.calendar.generated.resources.calendar_timing_cued_hint
+import org.churchpresenter.calendar.generated.resources.calendar_timing_follows
+import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_hint
 import org.churchpresenter.calendar.generated.resources.calendar_timing_blank_hint
 import org.churchpresenter.calendar.generated.resources.calendar_timing_before
 import org.churchpresenter.calendar.generated.resources.calendar_timing_hold
@@ -123,8 +125,15 @@ private fun StartRows(
             TimingChip(
                 label = stringResource(Res.string.calendar_timing_cued),
                 hint = stringResource(Res.string.calendar_timing_cued_hint),
-                selected = draft.startText.isBlank(),
-                onClick = { onChange(draft.copy(startText = "")) },
+                selected = draft.startText.isBlank() && !draft.followsPrevious,
+                onClick = { onChange(draft.copy(startText = "", followsPrevious = false)) },
+            )
+            TimingChip(
+                label = stringResource(Res.string.calendar_timing_follows),
+                hint = stringResource(Res.string.calendar_timing_follows_hint),
+                selected = draft.followsPrevious && draft.startText.isBlank(),
+                accent = true,
+                onClick = { onChange(draft.copy(startText = "", followsPrevious = true)) },
             )
             if (start != null) {
                 START_OFFSETS.forEach { minutes ->
@@ -140,7 +149,9 @@ private fun StartRows(
                         hint = clockText(at, use24Hour),
                         selected = pickedStart == at,
                         accent = true,
-                        onClick = { onChange(draft.copy(startText = clockText(at, use24Hour))) },
+                        onClick = {
+                            onChange(draft.copy(startText = clockText(at, use24Hour), followsPrevious = false))
+                        },
                     )
                 }
                 // Any other offset, typed: the chips stop at 60 and step in fives.

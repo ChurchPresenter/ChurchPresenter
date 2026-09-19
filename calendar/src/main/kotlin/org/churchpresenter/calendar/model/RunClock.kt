@@ -1,5 +1,7 @@
 package org.churchpresenter.calendar.model
 
+import org.churchpresenter.core.models.schedule.RowEnd
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.time.LocalTime
 
@@ -75,9 +77,61 @@ fun PlannedService.withTimesLaidOut(): PlannedService {
     var clock = anchor
     val laid = timing.toMutableMap()
     for (row in rows) {
-        laid[row.id] = timingOf(row.id).copy(startAt = storedTime(clock))
+        val timing = timingOf(row.id)
+        // A row that waits its turn keeps waiting: pinning it would take the hand-off away, which
+        // is the one thing it was set to do.
+        laid[row.id] = if (timing.followsPrevious) timing else timing.copy(startAt = storedTime(clock))
         val planned = plannedSeconds[row.id] ?: break
-        clock = clock.plusSeconds(planned.toLong() * timingOf(row.id).repeats.coerceAtLeast(1))
+        clock = clock.plusSeconds(planned.toLong() * timing.repeats.coerceAtLeast(1))
     }
     return copy(timing = laid)
+}
+
+/**
+ * The rows set to follow the previous one that nothing ever hands to.
+ *
+ * A row waits its turn, but a turn only comes if the row before it is set to advance -- and the
+ * first row of a service has nothing before it at all. Both are easy to create and impossible to
+ * see: the row sits there looking scheduled and never goes live. The run of show marks these.
+ */
+fun PlannedService.followsWithoutHandoff(): Set<String> {
+    val rows = items.filter { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
+    return rows.withIndex()
+        .filter { (index, row) ->
+            val timing = timingOf(row.id)
+            if (!timing.followsPrevious || timing.startsOnItsOwn()) return@filter false
+            val previous = rows.getOrNull(index - 1) ?: return@filter true
+            timingOf(previous.id).atEnd != RowEnd.NEXT
+        }
+        .map { (_, row) -> row.id }
+        .toSet()
+}
+
+/**
+ * Each row's projected clock time over a **loaded schedule** -- the same reckoning as [runClocks],
+ * read off the timings the rows carry rather than a service's planned lengths.
+ *
+ * The Schedule tab is where a service actually runs, and until this it could only show a time on a
+ * row that carried a pin: everything between two pinned rows sat blank, though the plan says
+ * exactly when each one lands. Anchored on the first pinned row, because a schedule has no start
+ * time of its own; with no pinned row there is nothing to reckon from and the map is empty.
+ *
+ * [RowClock.exact] goes false once a row of unknown length has been passed -- every time after it
+ * is a guess, and the caller draws it as one.
+ */
+fun scheduleClocks(items: List<ScheduleItem>, timing: Map<String, RowTiming>): Map<String, RowClock> {
+    val rows = items.filter { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
+    var clock = rows.firstNotNullOfOrNull { parseStoredTime(timing[it.id]?.startAt.orEmpty()) } ?: return emptyMap()
+    var exact = true
+    return rows.associate { row ->
+        val plan = timing[row.id] ?: RowTiming.DEFAULT
+        parseStoredTime(plan.startAt)?.let {
+            clock = it
+            exact = true
+        }
+        val rowClock = RowClock(clock, exact)
+        val runs = plan.runSeconds
+        if (runs == null) exact = false else clock = clock.plusSeconds(runs.toLong() * plan.repeats.coerceAtLeast(1))
+        row.id to rowClock
+    }
 }

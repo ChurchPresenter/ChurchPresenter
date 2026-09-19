@@ -124,7 +124,14 @@ private fun pickKindOf(item: ScheduleItem): PickKind = when (item) {
     else -> PickKind.PRESETS
 }
 
-private val SHEET_WIDTH = 700.dp
+/**
+ * Wide enough for the timing panel's longest row to stay on one line.
+ *
+ * `Starts` now carries Cued, After previous, seven offsets, On time, a typed offset and a typed
+ * time; wrapped over two lines they stop reading as one choice of many. Still well inside the
+ * 1280dp the Calendar Manager window opens at.
+ */
+private val SHEET_WIDTH = 960.dp
 private val BODY_HEIGHT = 230.dp
 private val RESULT_ICON = 24.dp
 private val ADD_BADGE = 21.dp

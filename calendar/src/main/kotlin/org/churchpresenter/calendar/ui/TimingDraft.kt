@@ -30,6 +30,8 @@ import java.time.LocalTime
 data class TimingDraft(
     /** As typed, or the picked chip's time in the current clock format. Empty is "cued". */
     val startText: String = "",
+    /** The `After previous` chip: this row's turn comes when the one before it ends. */
+    val followsPrevious: Boolean = false,
     val durationText: String = "",
     val repeats: Int = 1,
     /** The `N` field's own text; the chips write it, and typing it sets [repeats]. */
@@ -42,6 +44,7 @@ data class TimingDraft(
     /** The timing this draft describes; run length is carried separately as the planned length. */
     fun toTiming(): RowTiming = RowTiming(
         startAt = startTime()?.let(::storedTime).orEmpty(),
+        followsPrevious = followsPrevious && startText.isBlank(),
         repeats = repeats,
         atEnd = atEnd,
     )
@@ -49,6 +52,7 @@ data class TimingDraft(
     companion object {
         fun of(timing: RowTiming, plannedSeconds: Int?, use24Hour: Boolean): TimingDraft = TimingDraft(
             startText = timing.startAt.takeIf { it.isNotEmpty() }?.let { clockText(it, use24Hour) }.orEmpty(),
+            followsPrevious = timing.followsPrevious,
             durationText = plannedSeconds?.let(::formatDuration).orEmpty(),
             repeats = timing.repeats,
             repeatsText = if (timing.repeats > 1) timing.repeats.toString() else "",

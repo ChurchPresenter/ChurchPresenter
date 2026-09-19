@@ -246,6 +246,9 @@
     <string name="calendar_saved_as_you_change">Saved as you change it</string>
     <string name="calendar_timing_starts">Starts</string>
     <string name="calendar_timing_cued">Cued</string>
+    <string name="calendar_timing_follows">After previous</string>
+    <string name="calendar_timing_follows_stranded">Nothing hands to this row — set the row before it to “Next”, or give this one a time</string>
+    <string name="calendar_timing_follows_hint">Goes live as the row before it ends — that row must be set to “Next”</string>
     <string name="calendar_timing_cued_hint">Waits until you put it on screen yourself</string>
     <string name="calendar_timing_minus_hint">12</string>
     <string name="calendar_timing_before">min before</string>

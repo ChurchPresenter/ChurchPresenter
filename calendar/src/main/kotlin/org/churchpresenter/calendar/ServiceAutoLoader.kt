@@ -64,13 +64,16 @@ class ServiceAutoLoader(
 }
 
 /**
- * What makes one loading of a service distinct from another: the day, the service, and its start.
+ * What makes one loading of a service distinct from another: the day, the service, its start, and
+ * the run of show itself.
  *
- * The start time is in it deliberately. Moving a service is a decision about when it runs, so the
- * moved service is due again -- without that, correcting a start time after the run of show had
- * already gone into the Schedule would silently do nothing.
+ * All of it is deliberate. Moving a service is a decision about when it runs; editing its rows is
+ * a decision about what runs. Without the rows in the key, a plan edited after the Schedule had
+ * already been loaded stayed behind the one that was: rows added to the calendar were simply not
+ * there when the automation looked for the next item, and the hand-off found nothing.
  */
-private fun PlannedService.loadKey(): String = "$date|$id|$startTime"
+private fun PlannedService.loadKey(): String =
+    "$date|$id|$startTime|" + items.joinToString(",") { it.id } + "|" + timing.hashCode()
 
 /**
  * A minute, and no more often: the lead is five minutes, so a minute's granularity costs nothing

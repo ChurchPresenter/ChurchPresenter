@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.calendar.model.scheduleClocks
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -313,6 +314,12 @@ fun ScheduleTab(
             onToggleButton = onToggleToolbarButton
         )
 
+        // When each row is expected to go live, reckoned from the first pinned row across the
+        // whole schedule -- so every row shows a time, not only the ones carrying a pin.
+        val rowClocks = remember(scheduleItems, viewModel.timing) {
+            scheduleClocks(scheduleItems, viewModel.timing)
+        }
+
         val viewModelState = rememberUpdatedState(viewModel)
         var listHeightPx by remember { mutableStateOf(0) }
         Box(
@@ -482,6 +489,7 @@ fun ScheduleTab(
                         ScheduleItemRow(
                             item = item,
                             timing = viewModel.timingFor(item.id),
+                            clock = rowClocks[item.id],
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,

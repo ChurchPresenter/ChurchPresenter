@@ -939,7 +939,11 @@ class PresenterManager {
             _announcementTickerActive.value = false
             _announcementTimerExpired.value = true
             pushAnnouncementTextIfLive(expiredText)
-            setPresentingMode(Presenting.ANNOUNCEMENTS)
+            // Only where the timer is still what is on screen. A countdown row set to advance at
+            // its end hands on at the very second it reaches zero, and this used to drag the
+            // output straight back to the expired message -- the next item appeared for an
+            // instant and then vanished. Same condition the push above is guarded by.
+            if (announcementIsLive()) setPresentingMode(Presenting.ANNOUNCEMENTS)
         }
     }
 
@@ -1040,9 +1044,14 @@ class PresenterManager {
     }
 
     internal fun pushAnnouncementTextIfLive(text: String) {
+        if (announcementIsLive()) setAnnouncementText(text)
+    }
+
+    /** Whether an announcement is what any output is showing -- globally, or on a locked screen. */
+    private fun announcementIsLive(): Boolean {
         val anyScreenOnAnnouncements = _presentingMode.value == Presenting.ANNOUNCEMENTS ||
             _screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
-        if (anyScreenOnAnnouncements && _announcementTickerLive.value) setAnnouncementText(text)
+        return anyScreenOnAnnouncements && _announcementTickerLive.value
     }
 
     // Q&A display state

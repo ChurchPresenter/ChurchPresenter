@@ -69,10 +69,14 @@ import org.churchpresenter.calendar.generated.resources.calendar_move_down
 import org.churchpresenter.calendar.generated.resources.calendar_move_up
 import org.churchpresenter.calendar.generated.resources.calendar_nothing_planned_for
 import org.churchpresenter.calendar.generated.resources.calendar_remove_row
+import org.churchpresenter.calendar.generated.resources.calendar_timing_follows
+import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_hint
+import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_stranded
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.cueStatuses
+import org.churchpresenter.calendar.model.followsWithoutHandoff
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.calendar.model.runClocks
@@ -86,6 +90,7 @@ import org.churchpresenter.core.models.schedule.RowEnd
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bolt
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
@@ -135,6 +140,8 @@ internal fun RunOfShowPane(
     modifier: Modifier = Modifier,
 ) {
     val clocks = remember(service) { runClocks(service) }
+    // Rows that wait for a turn nothing gives them -- see followsWithoutHandoff.
+    val stranded = remember(service) { service.followsWithoutHandoff() }
     val statuses = remember(service, now) { service.cueStatuses(now) }
     val listState = rememberLazyListState()
     // A drop lands on an item or a section, never on a cue; the keys are the rows' ids, and the
@@ -186,6 +193,7 @@ internal fun RunOfShowPane(
                         clock = clocks[item.id],
                         timing = service.timingOf(item.id),
                         serviceStartTime = service.startTime,
+                        stranded = item.id in stranded,
                         plannedSeconds = service.plannedSeconds[item.id],
                         isFirst = index == 0,
                         isLast = index == lastIndex,
@@ -211,6 +219,8 @@ private fun RunRow(
     timing: RowTiming,
     /** What a pinned start is said relative to -- see [startOffsetLabel]. */
     serviceStartTime: String,
+    /** True when this row waits for a turn nothing hands it -- drawn as a warning, not a plan. */
+    stranded: Boolean = false,
     plannedSeconds: Int?,
     isFirst: Boolean,
     isLast: Boolean,
@@ -283,7 +293,12 @@ private fun RunRow(
                 )
             }
         }
-        TimingChips(timing = timing, serviceStartTime = serviceStartTime, onOpen = onChange)
+        TimingChips(
+            timing = timing,
+            serviceStartTime = serviceStartTime,
+            stranded = stranded,
+            onOpen = onChange,
+        )
         DurationControl(seconds = plannedSeconds, onChange = onPlannedSecondsChange)
         RowAction(Icons.Filled.ArrowUpward, stringResource(Res.string.calendar_move_up), !isFirst, onMoveUp)
         RowAction(Icons.Filled.ArrowDownward, stringResource(Res.string.calendar_move_down), !isLast, onMoveDown)
@@ -296,7 +311,12 @@ private fun RunRow(
  * `⚡ −15` for a row that starts by itself. Each opens the row editor, where they are set.
  */
 @Composable
-private fun TimingChips(timing: RowTiming, serviceStartTime: String, onOpen: () -> Unit) {
+private fun TimingChips(
+    timing: RowTiming,
+    serviceStartTime: String,
+    stranded: Boolean,
+    onOpen: () -> Unit,
+) {
     val scheme = MaterialTheme.colorScheme
     if (timing.repeats != 1) {
         RowChip(
@@ -319,6 +339,20 @@ private fun TimingChips(timing: RowTiming, serviceStartTime: String, onOpen: () 
             tone = if (timing.atEnd == RowEnd.NEXT) scheme.tertiary else scheme.error,
             onClick = onOpen,
         )
+    }
+    if (timing.followsPrevious && !timing.startsOnItsOwn()) {
+        Hint(
+            stringResource(
+                if (stranded) Res.string.calendar_timing_follows_stranded else Res.string.calendar_timing_follows_hint
+            )
+        ) {
+            RowChip(
+                text = stringResource(Res.string.calendar_timing_follows),
+                icon = Icons.AutoMirrored.Filled.ArrowForward,
+                tone = if (stranded) scheme.error else scheme.tertiary,
+                onClick = onOpen,
+            )
+        }
     }
     if (timing.startsOnItsOwn()) {
         Hint(clockText(timing.startAt, LocalUse24HourClock.current)) {

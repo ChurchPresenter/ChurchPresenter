@@ -15,6 +15,15 @@ import kotlinx.serialization.Serializable
 data class RowTiming(
     /** `09:45` on the wall clock to start on its own; empty to wait to be cued. */
     val startAt: String = "",
+    /**
+     * True when this row goes live as the row before it finishes -- its turn in the order.
+     *
+     * The third way a row can start, beside a clock time and waiting to be cued. It says on the
+     * row itself what used to be implied only by the *previous* row's [RowEnd.NEXT]: a reader of
+     * the plan could not tell a row waiting for its turn from one the operator drives by hand,
+     * and neither could the run of show's clock column.
+     */
+    val followsPrevious: Boolean = false,
     /** How long it runs, in seconds; null to use the item's own length. */
     val runSeconds: Int? = null,
     /** 1 once, 0 until something else goes live, N that many times. */
@@ -23,6 +32,9 @@ data class RowTiming(
     val atEnd: String = RowEnd.HOLD,
 ) {
     fun startsOnItsOwn(): Boolean = startAt.isNotEmpty()
+
+    /** Whether the row runs itself somehow -- on the clock, or as its turn comes. */
+    fun startsWithoutCue(): Boolean = startsOnItsOwn() || followsPrevious
     fun loops(): Boolean = repeats == 0
 
     /** Whether this says anything a missing entry would not. */

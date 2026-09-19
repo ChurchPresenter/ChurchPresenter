@@ -815,6 +815,16 @@ fun MainDesktop(
     // Load a presentation file uploaded by a mobile client (POST /api/presentations/upload).
     // addPresentation renders the slides and triggers onSlidesLoaded → companionServer.updatePresentation,
     // which broadcasts WS_EVENT_PRESENTATION_UPDATED so the mobile's GET /api/presentations finds it.
+    // A clip a cue started belongs on the live output: being handed the row cleared it, and
+    // nothing else will push it back. See MediaViewModel.onCuePlaybackStarted.
+    LaunchedEffect(mediaViewModel, presenterManager) {
+        mediaViewModel?.onCuePlaybackStarted = { url, type ->
+            presenterManager.setCurrentMedia(url, type)
+            presenterManager.setPresentingMode(Presenting.MEDIA)
+            presenterManager.setShowPresenterWindow(true)
+        }
+    }
+
     RemoteCommandEffects(
         appSettings = appSettings,
         picturesViewModel = picturesViewModel,
@@ -1350,6 +1360,8 @@ fun MainDesktop(
                                     },
                                     playSlideshow = { item, plays ->
                                         when (item) {
+                                            is ScheduleItem.MediaItem ->
+                                                mediaViewModel?.requestPlayback(plays, item.mediaUrl)
                                             is ScheduleItem.PictureItem ->
                                                 picturesViewModel.requestPlayback(plays, item.folderPath)
                                             is ScheduleItem.PresentationItem ->
