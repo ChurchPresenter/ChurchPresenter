@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Yayında</string>
     <string name="calendar_cue_item">Öğe</string>
     <string name="calendar_cue_item_missing">Öğe artık bu akış planında değil</string>
-    <string name="calendar_cues_count_one">%1$d işaret</string>
-    <string name="calendar_cues_count_other">%1$d işaret</string>
     <string name="calendar_copy_include_cues">Otomasyon işaretleri</string>
     <string name="calendar_copy_include_cues_sub">%1$d işaret, kaymalar korunur</string>
     <string name="calendar_template_include_cues">Otomasyon işaretleri</string>

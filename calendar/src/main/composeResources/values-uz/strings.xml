@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Efirga</string>
     <string name="calendar_cue_item">Element</string>
     <string name="calendar_cue_item_missing">Element bu xizmat tartibida endi yo‘q</string>
-    <string name="calendar_cues_count_one">%1$d belgi</string>
-    <string name="calendar_cues_count_other">%1$d ta belgi</string>
     <string name="calendar_copy_include_cues">Avtomatlashtirish belgilari</string>
     <string name="calendar_copy_include_cues_sub">%1$d ta belgi, siljishlar saqlandi</string>
     <string name="calendar_template_include_cues">Avtomatlashtirish belgilari</string>

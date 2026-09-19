@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">U programu</string>
     <string name="calendar_cue_item">Stavka</string>
     <string name="calendar_cue_item_missing">Stavke više nema u ovom tijeku bogoslužja</string>
-    <string name="calendar_cues_count_one">%1$d oznaka</string>
-    <string name="calendar_cues_count_other">%1$d oznaka</string>
     <string name="calendar_copy_include_cues">Oznake automatizacije</string>
     <string name="calendar_copy_include_cues_sub">%1$d oznaka, pomaci sačuvani</string>
     <string name="calendar_template_include_cues">Oznake automatizacije</string>

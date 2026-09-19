@@ -10,7 +10,8 @@ import java.time.format.DateTimeFormatter
 /** How many previous versions of the calendar survive beside the current one. */
 internal const val BACKUPS_KEPT = 3
 
-private const val CALENDAR_FILE = "calendar.json"
+/** The one file this module keeps; [CalendarFileWatcher] watches for it by name. */
+internal const val CALENDAR_FILE = "calendar.json"
 private const val BACKUP_SUFFIX = ".bak"
 private const val CORRUPT_SUFFIX = ".corrupt-"
 private val CORRUPT_STAMP: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")

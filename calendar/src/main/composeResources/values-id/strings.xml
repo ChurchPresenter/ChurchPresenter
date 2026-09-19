@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Tayang</string>
     <string name="calendar_cue_item">Item</string>
     <string name="calendar_cue_item_missing">Item tidak lagi ada di susunan acara ini</string>
-    <string name="calendar_cues_count_one">%1$d penanda</string>
-    <string name="calendar_cues_count_other">%1$d penanda</string>
     <string name="calendar_copy_include_cues">Penanda otomatisasi</string>
     <string name="calendar_copy_include_cues_sub">%1$d penanda, selisih waktu dipertahankan</string>
     <string name="calendar_template_include_cues">Penanda otomatisasi</string>

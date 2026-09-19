@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">ออกอากาศ</string>
     <string name="calendar_cue_item">รายการ</string>
     <string name="calendar_cue_item_missing">รายการนี้ไม่อยู่ในลำดับรายการนี้แล้ว</string>
-    <string name="calendar_cues_count_one">%1$d เครื่องหมาย</string>
-    <string name="calendar_cues_count_other">%1$d เครื่องหมาย</string>
     <string name="calendar_copy_include_cues">เครื่องหมายอัตโนมัติ</string>
     <string name="calendar_copy_include_cues_sub">%1$d เครื่องหมาย คงระยะเวลาเดิมไว้</string>
     <string name="calendar_template_include_cues">เครื่องหมายอัตโนมัติ</string>

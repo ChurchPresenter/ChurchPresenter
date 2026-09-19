@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Moja kwa moja</string>
     <string name="calendar_cue_item">Kipengee</string>
     <string name="calendar_cue_item_missing">Kipengee hakipo tena katika mtiririko huu wa ibada</string>
-    <string name="calendar_cues_count_one">Alama %1$d</string>
-    <string name="calendar_cues_count_other">Alama %1$d</string>
     <string name="calendar_copy_include_cues">Alama za uendeshaji otomatiki</string>
     <string name="calendar_copy_include_cues_sub">Alama %1$d, nyakati zimehifadhiwa</string>
     <string name="calendar_template_include_cues">Alama za uendeshaji otomatiki</string>

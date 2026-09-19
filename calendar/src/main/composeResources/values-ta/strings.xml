@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">நேரலை</string>
     <string name="calendar_cue_item">உருப்படி</string>
     <string name="calendar_cue_item_missing">இந்த உருப்படி இனி இந்த ஆராதனை வரிசையில் இல்லை</string>
-    <string name="calendar_cues_count_one">%1$d குறி</string>
-    <string name="calendar_cues_count_other">%1$d குறிகள்</string>
     <string name="calendar_copy_include_cues">தன்னியக்கக் குறிகள்</string>
     <string name="calendar_copy_include_cues_sub">%1$d குறிகள், நேர இடைவெளிகள் அப்படியே</string>
     <string name="calendar_template_include_cues">தன்னியக்கக் குறிகள்</string>

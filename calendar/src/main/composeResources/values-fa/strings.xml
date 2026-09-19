@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">زنده</string>
     <string name="calendar_cue_item">مورد</string>
     <string name="calendar_cue_item_missing">این مورد دیگر در این ترتیب برنامه نیست</string>
-    <string name="calendar_cues_count_one">%1$d نشانه</string>
-    <string name="calendar_cues_count_other">%1$d نشانه</string>
     <string name="calendar_copy_include_cues">نشانه‌های خودکارسازی</string>
     <string name="calendar_copy_include_cues_sub">%1$d نشانه، فاصله‌های زمانی حفظ می‌شود</string>
     <string name="calendar_template_include_cues">نشانه‌های خودکارسازی</string>

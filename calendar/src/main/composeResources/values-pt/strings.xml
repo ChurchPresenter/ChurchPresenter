@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">No ar</string>
     <string name="calendar_cue_item">Item</string>
     <string name="calendar_cue_item_missing">O item já não está nesta ordem do culto</string>
-    <string name="calendar_cues_count_one">%1$d marca</string>
-    <string name="calendar_cues_count_other">%1$d marcas</string>
     <string name="calendar_copy_include_cues">Marcas de automação</string>
     <string name="calendar_copy_include_cues_sub">%1$d marcas, desvios preservados</string>
     <string name="calendar_template_include_cues">Marcas de automação</string>

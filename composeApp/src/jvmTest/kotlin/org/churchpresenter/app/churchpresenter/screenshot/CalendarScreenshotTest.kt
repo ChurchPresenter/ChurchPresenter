@@ -290,6 +290,8 @@ class CalendarScreenshotTest {
                                 now = { NOW },
                                 // Unconfined so the store and the song folder are read inline: the
                                 // window is what is being photographed, not the disk it loads from.
+                                // A watch that never finishes is a test that never settles.
+                                watchStoreFolder = false,
                                 io = Dispatchers.Unconfined,
                             )
                         }

@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Naživo</string>
     <string name="calendar_cue_item">Položka</string>
     <string name="calendar_cue_item_missing">Položka už v tomto priebehu bohoslužby nie je</string>
-    <string name="calendar_cues_count_one">%1$d značka</string>
-    <string name="calendar_cues_count_other">%1$d značiek</string>
     <string name="calendar_copy_include_cues">Značky automatizácie</string>
     <string name="calendar_copy_include_cues_sub">%1$d značiek, posuny zachované</string>
     <string name="calendar_template_include_cues">Značky automatizácie</string>

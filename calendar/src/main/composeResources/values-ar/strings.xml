@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">مباشر</string>
     <string name="calendar_cue_item">عنصر</string>
     <string name="calendar_cue_item_missing">لم يعد العنصر في ترتيب الاجتماع هذا</string>
-    <string name="calendar_cues_count_one">%1$d علامة</string>
-    <string name="calendar_cues_count_other">%1$d علامات</string>
     <string name="calendar_copy_include_cues">علامات الأتمتة</string>
     <string name="calendar_copy_include_cues_sub">%1$d علامات، مع الحفاظ على الفروق الزمنية</string>
     <string name="calendar_template_include_cues">علامات الأتمتة</string>

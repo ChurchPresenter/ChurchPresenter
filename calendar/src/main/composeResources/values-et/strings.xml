@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Otse</string>
     <string name="calendar_cue_item">Punkt</string>
     <string name="calendar_cue_item_missing">Punkti pole enam selles kavas</string>
-    <string name="calendar_cues_count_one">%1$d märge</string>
-    <string name="calendar_cues_count_other">%1$d märget</string>
     <string name="calendar_copy_include_cues">Automaatikamärked</string>
     <string name="calendar_copy_include_cues_sub">%1$d märget, nihked säilivad</string>
     <string name="calendar_template_include_cues">Automaatikamärked</string>

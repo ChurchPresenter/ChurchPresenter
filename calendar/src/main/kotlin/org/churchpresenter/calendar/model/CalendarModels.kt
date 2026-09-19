@@ -1,6 +1,8 @@
 package org.churchpresenter.calendar.model
 
 import kotlinx.serialization.Serializable
+import java.time.Duration
+import java.time.Instant
 import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -26,6 +28,17 @@ data class CalendarDocument(
     val preferences: CalendarPreferences = CalendarPreferences(),
     /** Saved run-of-show templates, offered under `Start from` when a service is added. */
     val templates: List<SavedTemplate> = emptyList(),
+    /**
+     * Services deleted here, as id → when, so a delete survives a merge.
+     *
+     * Without these, syncing two copies of this file can only ever *add*: the machine that still
+     * has the service sees an id the other one lacks and puts it back. The stamp is what makes a
+     * deletion something that happened at a time rather than an absence — a service edited after
+     * it was deleted elsewhere is kept, which is the answer somebody would expect.
+     *
+     * Pruned by [mergedWith] once they are older than anything a merge could still resurrect.
+     */
+    val deletedServices: Map<String, String> = emptyMap(),
 ) {
     /** Every service planned for [date], earliest start first. */
     fun servicesOn(date: String): List<PlannedService> =
@@ -47,7 +60,11 @@ data class CalendarDocument(
         )
     }
 
-    fun withoutService(id: String): CalendarDocument = copy(services = services.filterNot { it.id == id })
+    fun withoutService(id: String, at: Instant = Instant.now()): CalendarDocument = copy(
+        services = services.filterNot { it.id == id },
+        // Remembered rather than simply dropped -- see [deletedServices].
+        deletedServices = deletedServices + (id to at.toString()),
+    )
 
     /** Adds every service in [added] at once, so a whole series is one write rather than one per week. */
     fun withServices(added: List<PlannedService>): CalendarDocument =
@@ -72,6 +89,73 @@ data class CalendarDocument(
     }
 
     fun withoutTemplate(id: String): CalendarDocument = copy(templates = templates.filterNot { it.id == id })
+
+    /**
+     * This calendar and [other] as one, for two machines keeping the same file.
+     *
+     * The rule is per service rather than per file, which is what makes syncing safe: a whole-file
+     * "newest wins" loses the Sunday somebody added on the laptop the moment the desktop saves
+     * anything at all. Services and templates are keyed by id, so each one is decided on its own:
+     *
+     * - on one side only, and not deleted on the other → kept
+     * - on both → the one edited later, by [PlannedService.updatedAt]
+     * - deleted on one side → gone, unless the other side edited it *after* the deletion
+     *
+     * [preferences] is deliberately not merged: the clock format and the default start time are
+     * about the machine that set them, not about the plan.
+     */
+    fun mergedWith(other: CalendarDocument, now: Instant = Instant.now()): CalendarDocument {
+        val tombstones = (deletedServices + other.deletedServices).mapValues { (id, stamp) ->
+            maxOf(stamp, deletedServices[id] ?: stamp, other.deletedServices[id] ?: stamp)
+        }
+        val merged = (services + other.services)
+            .groupBy { it.id }
+            .mapNotNull { (id, both) ->
+                val newest = both.maxBy { it.updatedAt }
+                val deletedAt = tombstones[id]
+                // Edited after it was deleted elsewhere: somebody went back to it, so it stays.
+                if (deletedAt != null && newest.updatedAt <= deletedAt) null else newest
+            }
+        return copy(
+            version = maxOf(version, other.version),
+            // Ordered by id last, so the two machines produce *byte-identical* merges: a stable
+            // sort otherwise keeps whatever order each side happened to hold, and two files that
+            // differ only in order are two machines writing merges at each other for ever.
+            services = merged.sortedWith(compareBy({ it.date }, { it.startTime }, { it.id })),
+            templates = (templates + other.templates).distinctBy { it.id },
+            deletedServices = tombstones.filterValues { it > storedInstant(now.minus(TOMBSTONE_LIFETIME)) },
+        )
+    }
+}
+
+/**
+ * How long a deletion is remembered.
+ *
+ * Long enough that a machine which has been switched off for a month still learns about it, short
+ * enough that the list does not grow for ever. A machine away for longer than this brings the
+ * service back, which is the failure worth having: something reappearing is noticed, something
+ * vanishing is not.
+ */
+private val TOMBSTONE_LIFETIME: Duration = Duration.ofDays(90)
+
+/** An instant as the file stores it. */
+fun storedInstant(at: Instant): String = at.toString()
+
+/**
+ * This document with [at] stamped on every service that differs from [previous].
+ *
+ * Stamped here rather than at each mutation for the same reason the save is: there are two dozen
+ * ways to change a service and every one of them would otherwise have to remember. Comparing
+ * against the previous document is what keeps a stamp meaning "changed" — re-saving an untouched
+ * service must not make it look newer than the copy on the other machine.
+ */
+fun CalendarDocument.stampingChanged(previous: CalendarDocument, at: Instant): CalendarDocument {
+    val before = previous.services.associateBy { it.id }
+    val stamped = services.map { service ->
+        val old = before[service.id]
+        if (old != null && old == service) service else service.copy(updatedAt = storedInstant(at))
+    }
+    return if (stamped == services) this else copy(services = stamped)
 }
 
 const val CURRENT_CALENDAR_VERSION: Int = 1
@@ -125,6 +209,16 @@ data class PlannedService(
     val seriesId: String = "",
     /** How the series repeats, a [ServiceRepeat] id. Blank on a one-off. */
     val repeat: String = "",
+    /**
+     * When this service was last changed, as an ISO-8601 instant — `2026-09-20T09:14:02Z`.
+     *
+     * An instant, unlike [date] and [startTime], because this one really is a point in time: it is
+     * only ever compared against the same field on another machine's copy, and comparing those as
+     * wall clocks would make the answer depend on whose zone they were typed in. Empty on a service
+     * written before this field existed, which sorts before every real stamp — so anything edited
+     * since wins over it, which is the right way round.
+     */
+    val updatedAt: String = "",
 ) {
     fun isInSeries(): Boolean = seriesId.isNotEmpty()
 

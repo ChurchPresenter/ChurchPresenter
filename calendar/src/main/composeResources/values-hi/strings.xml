@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">लाइव</string>
     <string name="calendar_cue_item">आइटम</string>
     <string name="calendar_cue_item_missing">यह आइटम अब इस सभा क्रम में नहीं है</string>
-    <string name="calendar_cues_count_one">%1$d चिह्न</string>
-    <string name="calendar_cues_count_other">%1$d चिह्न</string>
     <string name="calendar_copy_include_cues">स्वचालन चिह्न</string>
     <string name="calendar_copy_include_cues_sub">%1$d चिह्न, समय अंतर बरकरार</string>
     <string name="calendar_template_include_cues">स्वचालन चिह्न</string>

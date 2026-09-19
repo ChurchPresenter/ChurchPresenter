@@ -218,11 +218,17 @@ sealed class ScheduleItem {
  * What a [ScheduleItem.CueItem] does. An unknown action is simply never fired.
  */
 object CueAction {
-    /** Puts [ScheduleItem.CueItem.payload] -- a slideshow, a deck, a clip -- on screen and plays it [ScheduleItem.CueItem.plays] times. */
+    /**
+     * Puts [ScheduleItem.CueItem.payload] -- a slideshow, a deck, a clip -- on screen, and plays it
+     * [ScheduleItem.CueItem.plays] times.
+     */
     const val PROJECT = "project"
     /** Starts a countdown: the payload if it is a timer, otherwise one counting to the service's start. */
     const val COUNTDOWN = "countdown"
-    /** Loads the run of show into the Schedule and puts an item on screen -- the payload, else the first that can be. */
+    /**
+     * Loads the run of show into the Schedule and puts an item on screen -- the payload, else the
+     * first row that can be projected.
+     */
     const val GO_LIVE = "goLive"
     /** Puts a canvas scene -- the payload, a scene item -- on screen. */
     const val SCENE = "scene"

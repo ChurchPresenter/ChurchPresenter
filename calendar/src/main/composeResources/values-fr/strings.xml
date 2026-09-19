@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">À l'antenne</string>
     <string name="calendar_cue_item">Élément</string>
     <string name="calendar_cue_item_missing">L'élément n'est plus dans ce déroulé</string>
-    <string name="calendar_cues_count_one">%1$d repère</string>
-    <string name="calendar_cues_count_other">%1$d repères</string>
     <string name="calendar_copy_include_cues">Repères d'automatisation</string>
     <string name="calendar_copy_include_cues_sub">%1$d repères, décalages conservés</string>
     <string name="calendar_template_include_cues">Repères d'automatisation</string>

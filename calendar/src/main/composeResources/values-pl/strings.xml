@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Na żywo</string>
     <string name="calendar_cue_item">Pozycja</string>
     <string name="calendar_cue_item_missing">Pozycji nie ma już w tym przebiegu nabożeństwa</string>
-    <string name="calendar_cues_count_one">%1$d znacznik</string>
-    <string name="calendar_cues_count_other">%1$d znaczników</string>
     <string name="calendar_copy_include_cues">Znaczniki automatyzacji</string>
     <string name="calendar_copy_include_cues_sub">%1$d znaczników, przesunięcia zachowane</string>
     <string name="calendar_template_include_cues">Znaczniki automatyzacji</string>

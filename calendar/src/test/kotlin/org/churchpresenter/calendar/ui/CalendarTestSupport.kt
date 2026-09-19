@@ -63,7 +63,8 @@ internal fun withCalendar(
                         storeFolder = folder,
                         songFolder = songFolder,
                         host = host,
-                        io = Dispatchers.Unconfined,
+                        watchStoreFolder = false,
+                    io = Dispatchers.Unconfined,
                         today = TODAY,
                         onClose = {},
                     )
@@ -97,7 +98,8 @@ internal fun withCalendarEditor(
                         songFolder = songFolder,
                         host = CalendarHost(),
                         songEditor = songEditor,
-                        io = Dispatchers.Unconfined,
+                        watchStoreFolder = false,
+                    io = Dispatchers.Unconfined,
                         today = TODAY,
                         onClose = {},
                     )
@@ -120,6 +122,7 @@ internal fun withCalendarFolder(folder: File, body: ComposeUiTest.() -> Unit) {
                     storeFolder = folder,
                     songFolder = null,
                     host = CalendarHost(),
+                    watchStoreFolder = false,
                     io = Dispatchers.Unconfined,
                     today = TODAY,
                     onClose = {},

@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">В эфир</string>
     <string name="calendar_cue_item">Элемент</string>
     <string name="calendar_cue_item_missing">Элемента больше нет в этом порядке служения</string>
-    <string name="calendar_cues_count_one">%1$d метка</string>
-    <string name="calendar_cues_count_other">%1$d меток</string>
     <string name="calendar_copy_include_cues">Метки автоматизации</string>
     <string name="calendar_copy_include_cues_sub">%1$d меток, смещения сохранены</string>
     <string name="calendar_template_include_cues">Метки автоматизации</string>

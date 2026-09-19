@@ -22,6 +22,7 @@ import org.churchpresenter.calendar.model.withTimerSeconds
 import org.churchpresenter.calendar.model.withCuesAsRows
 import org.churchpresenter.calendar.model.copiedRows
 import org.churchpresenter.calendar.model.parseStoredDate
+import org.churchpresenter.calendar.model.stampingChanged
 import org.churchpresenter.calendar.model.storedDate
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.withUniqueRowIds
@@ -30,6 +31,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
 import java.io.File
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -56,6 +58,13 @@ class CalendarState(
     private val songFolder: File?,
     private val today: LocalDate = LocalDate.now(),
     private val presetStore: PresetStore? = null,
+    /** Where an edit's timestamp comes from; a test pins it so a merge can be reasoned about. */
+    private val now: () -> Instant = { Instant.now() },
+    /**
+     * Called after every save, so a watcher can tell this window's own write from another
+     * machine's — see [CalendarFileWatcher].
+     */
+    private val onSaved: () -> Unit = {},
 ) {
     var document by mutableStateOf(CalendarDocument())
         private set
@@ -535,10 +544,39 @@ class CalendarState(
      * The one place the document changes, and the one place it is written.
      *
      * Saving here rather than at each call site is what makes "every mutation is saved" true by
-     * construction instead of by everyone remembering.
+     * construction instead of by everyone remembering — and, since this is also the only place a
+     * service can change, the one place each one's [PlannedService.updatedAt] is stamped. Two
+     * machines sharing this file decide *per service* which copy is newer, so a stamp that was
+     * only written sometimes would lose whichever edit forgot it.
      */
     private fun commit(next: CalendarDocument) {
-        document = next
-        runCatching { store.save(next) }
+        val stamped = next.stampingChanged(document, now())
+        document = stamped
+        runCatching { store.save(stamped) }
+        onSaved()
+    }
+
+    /**
+     * Takes what is on disk now and folds it into what is open here — see
+     * [CalendarDocument.mergedWith].
+     *
+     * Called when the file changes underneath, which is what a shared folder does when the other
+     * machine saves. The result is written back, so both copies end up holding the merge rather
+     * than each holding half of it.
+     */
+    suspend fun reloadMerging(io: CoroutineDispatcher = Dispatchers.IO) {
+        val onDisk = withContext(io) { store.load() }.document.withCuesAsRows().withUniqueRowIds()
+        if (onDisk == document) return
+        val merged = document.mergedWith(onDisk, now())
+        document = merged
+        // Only when the merge added something the file did not have: two machines writing the same
+        // merge back at each other is a loop, and an identical document is not worth a write.
+        if (merged != onDisk) {
+            runCatching { store.save(merged) }
+            onSaved()
+        }
+        if (selectedServiceId != null && document.serviceById(selectedServiceId!!) == null) {
+            selectedServiceId = servicesOnDay.firstOrNull()?.id
+        }
     }
 }

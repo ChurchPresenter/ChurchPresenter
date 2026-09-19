@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">上画面</string>
     <string name="calendar_cue_item">项目</string>
     <string name="calendar_cue_item_missing">该项目已不在此聚会流程中</string>
-    <string name="calendar_cues_count_one">%1$d 个标记</string>
-    <string name="calendar_cues_count_other">%1$d 个标记</string>
     <string name="calendar_copy_include_cues">自动化标记</string>
     <string name="calendar_copy_include_cues_sub">%1$d 个标记，保留时间偏移</string>
     <string name="calendar_template_include_cues">自动化标记</string>

@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Item</string>
     <string name="calendar_cue_item_missing">Wala na ang item sa takbong ito ng programa</string>
-    <string name="calendar_cues_count_one">%1$d marka</string>
-    <string name="calendar_cues_count_other">%1$d na marka</string>
     <string name="calendar_copy_include_cues">Mga marka ng awtomasyon</string>
     <string name="calendar_copy_include_cues_sub">%1$d na marka, nananatili ang mga offset</string>
     <string name="calendar_template_include_cues">Mga marka ng awtomasyon</string>

@@ -49,6 +49,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.collectAsState
+import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarSource
 import org.churchpresenter.calendar.CalendarState
@@ -142,12 +143,33 @@ fun CalendarApp(
      * different picture every minute, which a screenshot cannot pin and a test cannot assert on.
      */
     now: () -> LocalTime = { LocalTime.now() },
+    /**
+     * Whether to watch the store folder for another machine's save — see [CalendarFileWatcher].
+     *
+     * On in the app, and off in a test: the watch is a loop that never finishes, and a Compose test
+     * waits for every effect to be idle before it can look at anything. A test that wants the
+     * merging reload calls `CalendarState.reloadMerging` itself, which is what the watch calls.
+     */
+    watchStoreFolder: Boolean = true,
     io: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    // The watcher is made first so the state can tell it which writes were this window's own.
+    val watcher = remember(storeFolder) { CalendarFileWatcher(storeFolder, io) }
     val state = remember(storeFolder, songFolder) {
-        CalendarState(CalendarStore(storeFolder), songFolder, today, PresetStore(storeFolder))
+        CalendarState(
+            store = CalendarStore(storeFolder),
+            songFolder = songFolder,
+            today = today,
+            presetStore = PresetStore(storeFolder),
+            onSaved = watcher::savedHere,
+        )
     }
     LaunchedEffect(storeFolder) { state.loadAsync(io) }
+    // A shared folder is how two machines keep one calendar (see CalendarFileWatcher): the other
+    // machine's save arrives as a file change, and what it holds is merged into what is open here.
+    if (watchStoreFolder) {
+        LaunchedEffect(storeFolder) { watcher.run { state.reloadMerging(io) } }
+    }
     LaunchedEffect(songFolder) { state.loadSongsAsync(io) }
 
 

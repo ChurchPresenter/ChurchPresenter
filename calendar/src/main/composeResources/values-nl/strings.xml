@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Onderdeel</string>
     <string name="calendar_cue_item_missing">Onderdeel staat niet meer in dit draaiboek</string>
-    <string name="calendar_cues_count_one">%1$d markering</string>
-    <string name="calendar_cues_count_other">%1$d markeringen</string>
     <string name="calendar_copy_include_cues">Automatiseringsmarkeringen</string>
     <string name="calendar_copy_include_cues_sub">%1$d markeringen, tijdverschuivingen behouden</string>
     <string name="calendar_template_include_cues">Automatiseringsmarkeringen</string>

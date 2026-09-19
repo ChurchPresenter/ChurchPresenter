@@ -10,8 +10,6 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_action_scen
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_timer
 import org.churchpresenter.calendar.generated.resources.calendar_cue_item_missing
-import org.churchpresenter.calendar.generated.resources.calendar_cues_count_one
-import org.churchpresenter.calendar.generated.resources.calendar_cues_count_other
 import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.clockText
@@ -52,10 +50,3 @@ fun cueSubtitle(cue: ScheduleItem.CueItem): String {
 @Composable
 fun cueTimeText(cue: ScheduleItem.CueItem, startTime: String?): String =
     cueFireTime(cue, startTime)?.let { clockText(it, LocalUse24HourClock.current) }.orEmpty()
-
-@Composable
-fun cueCountLabel(count: Int): String = if (count == 1) {
-    stringResource(Res.string.calendar_cues_count_one, count)
-} else {
-    stringResource(Res.string.calendar_cues_count_other, count)
-}

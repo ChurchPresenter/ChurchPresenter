@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Pārraide</string>
     <string name="calendar_cue_item">Punkts</string>
     <string name="calendar_cue_item_missing">Punkta vairs nav šajā norises kārtībā</string>
-    <string name="calendar_cues_count_one">%1$d atzīme</string>
-    <string name="calendar_cues_count_other">%1$d atzīmes</string>
     <string name="calendar_copy_include_cues">Automatizācijas atzīmes</string>
     <string name="calendar_copy_include_cues_sub">%1$d atzīmes, nobīdes saglabātas</string>
     <string name="calendar_template_include_cues">Automatizācijas atzīmes</string>

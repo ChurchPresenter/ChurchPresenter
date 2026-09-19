@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Kohta</string>
     <string name="calendar_cue_item_missing">Kohta ei ole enää tässä kulkusuunnitelmassa</string>
-    <string name="calendar_cues_count_one">%1$d merkki</string>
-    <string name="calendar_cues_count_other">%1$d merkkiä</string>
     <string name="calendar_copy_include_cues">Automaatiomerkit</string>
     <string name="calendar_copy_include_cues_sub">%1$d merkkiä, siirtymät säilytetään</string>
     <string name="calendar_template_include_cues">Automaatiomerkit</string>

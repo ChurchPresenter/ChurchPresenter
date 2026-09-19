@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Эфирге</string>
     <string name="calendar_cue_item">Элемент</string>
     <string name="calendar_cue_item_missing">Элемент бұл қызмет ретінде жоқ</string>
-    <string name="calendar_cues_count_one">%1$d белгі</string>
-    <string name="calendar_cues_count_other">%1$d белгі</string>
     <string name="calendar_copy_include_cues">Автоматтандыру белгілері</string>
     <string name="calendar_copy_include_cues_sub">%1$d белгі, ығысулар сақталды</string>
     <string name="calendar_template_include_cues">Автоматтандыру белгілері</string>

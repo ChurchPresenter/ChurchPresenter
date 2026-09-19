@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Post</string>
     <string name="calendar_cue_item_missing">Posten er ikke lenger i denne kjøreplanen</string>
-    <string name="calendar_cues_count_one">%1$d merke</string>
-    <string name="calendar_cues_count_other">%1$d merker</string>
     <string name="calendar_copy_include_cues">Automatikkmerker</string>
     <string name="calendar_copy_include_cues_sub">%1$d merker, tidsforskyvninger beholdes</string>
     <string name="calendar_template_include_cues">Automatikkmerker</string>

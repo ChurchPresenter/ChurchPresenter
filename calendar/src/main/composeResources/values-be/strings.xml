@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">У эфір</string>
     <string name="calendar_cue_item">Элемент</string>
     <string name="calendar_cue_item_missing">Элемента больш няма ў гэтым парадку служэння</string>
-    <string name="calendar_cues_count_one">%1$d метка</string>
-    <string name="calendar_cues_count_other">%1$d метак</string>
     <string name="calendar_copy_include_cues">Меткі аўтаматызацыі</string>
     <string name="calendar_copy_include_cues_sub">%1$d метак, зрухі захаваны</string>
     <string name="calendar_template_include_cues">Меткі аўтаматызацыі</string>

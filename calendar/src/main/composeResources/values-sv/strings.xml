@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Punkt</string>
     <string name="calendar_cue_item_missing">Punkten finns inte längre i det här körschemat</string>
-    <string name="calendar_cues_count_one">%1$d markering</string>
-    <string name="calendar_cues_count_other">%1$d markeringar</string>
     <string name="calendar_copy_include_cues">Automatikmarkeringar</string>
     <string name="calendar_copy_include_cues_sub">%1$d markeringar, tidsförskjutningar bevaras</string>
     <string name="calendar_template_include_cues">Automatikmarkeringar</string>

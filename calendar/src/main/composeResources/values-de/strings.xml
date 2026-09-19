@@ -121,8 +121,6 @@
     <string name="calendar_cue_badge_go_live">Live</string>
     <string name="calendar_cue_item">Element</string>
     <string name="calendar_cue_item_missing">Element ist nicht mehr in diesem Ablauf</string>
-    <string name="calendar_cues_count_one">%1$d Marker</string>
-    <string name="calendar_cues_count_other">%1$d Marker</string>
     <string name="calendar_copy_include_cues">Automatisierungsmarker</string>
     <string name="calendar_copy_include_cues_sub">%1$d Marker, Zeitversätze bleiben erhalten</string>
     <string name="calendar_template_include_cues">Automatisierungsmarker</string>
