@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -71,8 +72,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_s
 import org.churchpresenter.calendar.generated.resources.calendar_presets_note
 import org.churchpresenter.calendar.generated.resources.calendar_preset_remove
 import org.churchpresenter.calendar.model.PlannedService
-import org.churchpresenter.calendar.model.ServiceCue
-import org.churchpresenter.calendar.model.cuesInOrder
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.generated.resources.calendar_add_cue
 import org.churchpresenter.calendar.generated.resources.calendar_automation_no_service
 import org.churchpresenter.calendar.generated.resources.calendar_cues_for
@@ -100,7 +100,7 @@ private val DIALOG_WIDTH = 560.dp
 private val BODY_HEIGHT = 340.dp
 private val SWATCH_BUTTON = 26.dp
 private val HEX_FIELD = 82.dp
-private val PREF_FIELD = 74.dp
+private val PREF_FIELD = 88.dp
 private val PREF_FIELD_HEIGHT = 29.dp
 private val FORMAT_SELECTOR = 150.dp
 
@@ -134,7 +134,7 @@ fun CalendarSettingsDialog(
     onInsertSection: (SectionStyle) -> Unit,
     onRemoveTemplate: (id: String) -> Unit,
     onRemovePreset: (id: String) -> Unit,
-    onEditCue: (ServiceCue) -> Unit,
+    onEditCue: (ScheduleItem.CueItem) -> Unit,
     onDeleteCue: (cueId: String) -> Unit,
     onAddCue: () -> Unit,
     onDismiss: () -> Unit,
@@ -213,7 +213,7 @@ private fun AutomationTab(
     preferences: CalendarPreferences,
     service: PlannedService?,
     onChange: (CalendarPreferences) -> Unit,
-    onEditCue: (ServiceCue) -> Unit,
+    onEditCue: (ScheduleItem.CueItem) -> Unit,
     onDeleteCue: (String) -> Unit,
     onAddCue: () -> Unit,
 ) {
@@ -233,7 +233,7 @@ private fun AutomationTab(
         return
     }
     SheetOverline(stringResource(Res.string.calendar_cues_for, service.name), Modifier.padding(top = 2.dp))
-    val cues = service.cuesInOrder()
+    val cues = service.cueRows()
     if (cues.isEmpty()) NoteLine(stringResource(Res.string.calendar_automation_empty_sub))
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         cues.forEach { cue ->
@@ -601,16 +601,21 @@ private fun PrefRow(
     var draft by remember(value) { mutableStateOf(value) }
     SettingCard {
         CardText(title = title, subtitle = subtitle)
-        CompactTextField(
-            value = draft,
-            onValueChange = { draft = it },
-            height = PREF_FIELD_HEIGHT,
-            textAlign = TextAlign.Center,
-            errorBorder = !isValid(draft),
-            modifier = Modifier
-                .width(PREF_FIELD)
-                .commitOnExit(draft != value) { if (isValid(draft)) onCommit(draft) else draft = value },
-        )
+        // A fresh field whenever the value is replaced from outside -- the clock format flipping
+        // `10:00` to `10:00 AM` and back. The text field keeps its horizontal scroll across a
+        // value change, so a shorter text arrived drawn where the longer one had been scrolled to.
+        key(value) {
+            CompactTextField(
+                value = draft,
+                onValueChange = { draft = it },
+                height = PREF_FIELD_HEIGHT,
+                textAlign = TextAlign.Center,
+                errorBorder = !isValid(draft),
+                modifier = Modifier
+                    .width(PREF_FIELD)
+                    .commitOnExit(draft != value) { if (isValid(draft)) onCommit(draft) else draft = value },
+            )
+        }
     }
 }
 

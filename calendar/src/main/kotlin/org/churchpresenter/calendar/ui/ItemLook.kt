@@ -1,6 +1,7 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.automirrored.filled.Label
@@ -52,6 +53,8 @@ fun lookFor(item: ScheduleItem): ItemLook {
         // A label is a section heading here, which is the one row that is structure rather than
         // content — so it takes the outline role and not a content color.
         is ScheduleItem.LabelItem -> ItemLook(Icons.AutoMirrored.Filled.Label, scheme.outline)
+        // A cue is automation: the bolt, in the color the arm switch and the fired marks use.
+        is ScheduleItem.CueItem -> ItemLook(Icons.Filled.Bolt, scheme.tertiary)
     }
 }
 
@@ -71,6 +74,7 @@ fun ScheduleItem.subtitle(): String = when (this) {
     is ScheduleItem.SceneItem -> sceneName
     is ScheduleItem.DictionaryItem -> transliteration
     is ScheduleItem.LabelItem -> ""
+    is ScheduleItem.CueItem -> payload?.displayText ?: action
 }
 
 private const val SUBTITLE_CHARS = 60

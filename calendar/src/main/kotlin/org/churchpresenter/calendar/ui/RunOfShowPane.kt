@@ -70,12 +70,24 @@ import org.churchpresenter.calendar.generated.resources.calendar_nothing_planned
 import org.churchpresenter.calendar.generated.resources.calendar_remove_row
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.RowClock
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.cueStatuses
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.calendar.model.runClocks
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.calendar.generated.resources.calendar_chip_times
+import org.churchpresenter.calendar.generated.resources.calendar_chip_next
+import org.churchpresenter.calendar.generated.resources.calendar_chip_loop
+import org.churchpresenter.calendar.generated.resources.calendar_chip_blank
+import org.churchpresenter.core.models.schedule.RowTiming
+import org.churchpresenter.core.models.schedule.RowEnd
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Bolt
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.calendar.model.clockText
+import java.time.LocalTime
 
 private const val ROW_ALPHA = 0.45f
 private const val BADGE_ALPHA = 0.18f
@@ -88,36 +100,60 @@ private val GRIP_WIDTH = 8.dp
 private val GRIP_HEIGHT = 14.dp
 private const val GRIP_ROWS = 3
 private const val GRIP_ALPHA = 0.5f
+private const val CHIP_TINT = 0.16f
 
 /**
  * A service's run of show: one row per [ScheduleItem], in order, each with its expected clock time
- * and an optional planned length.
+ * and an optional planned length -- the service's cues among them, as rows, where they fire.
  *
  * Laid out to the design — `[time] [icon] [title/sub] [duration] [remove]`, section headings as
- * colored rules between them, and the add control as a dashed button at the end of the list rather
- * than in the header.
+ * colored rules between them, a cue as `[time] [tick] [bolt] [title/sub] [status] [badge] [fire]`,
+ * and the add control as a dashed button at the end of the list rather than in the header.
  *
- * Reordering is by the two arrow buttons rather than by drag. Drag is what the design shows and is
- * nicer; it is also the part most likely to be reworked once this is seen running, so the rows
- * carry the cheap version until the layout is settled.
+ * [now] is the clock the cues are judged against -- the wall clock when the service is today, a
+ * preview clock stepped from the header, or null for a service on another day, which has no
+ * "fired" or "next" to speak of.
+ *
+ * Reordering is by drag on the grip, or by the two arrow buttons. A cue row is placed by its time
+ * when it is saved, so it is neither dragged nor dropped on.
  */
 @Composable
-fun RunOfShowPane(
+internal fun RunOfShowPane(
     service: PlannedService,
+    now: LocalTime?,
+    header: RunOfShowHeaderActions,
     onAddItem: () -> Unit,
     onChangeItem: (ScheduleItem) -> Unit,
     onRemove: (itemId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     onPlannedSecondsChange: (itemId: String, seconds: Int?) -> Unit,
-    onCopy: () -> Unit,
-    onSaveTemplate: () -> Unit,
+    onCueEnabled: (cueId: String, enabled: Boolean) -> Unit,
+    onEditCue: (ScheduleItem.CueItem) -> Unit,
+    onFireCue: (ScheduleItem.CueItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val clocks = remember(service) { runClocks(service) }
+    val statuses = remember(service, now) { service.cueStatuses(now) }
     val listState = rememberLazyListState()
-    val reorder = rememberReorderState(listState, service.items.size, onMove)
+    // A drop lands on an item or a section, never on a cue; the keys are the rows' ids, and the
+    // position each stands for is looked up here rather than assumed from the list.
+    val positions = remember(service.items) {
+        service.items.withIndex()
+            .filter { (_, item) -> item !is ScheduleItem.CueItem }
+            .associate { (index, item) -> item.id to index }
+    }
+    val reorder = rememberReorderState(
+        listState = listState,
+        isTarget = { it in positions },
+        onMove = { from, to ->
+            val fromIndex = positions[from]
+            val toIndex = positions[to]
+            if (fromIndex != null && toIndex != null) onMove(fromIndex, toIndex)
+        },
+    )
+    val lastIndex = service.items.lastIndex
     Column(modifier.fillMaxSize()) {
-        RunOfShowHeader(service, onCopy = onCopy, onSaveTemplate = onSaveTemplate)
+        RunOfShowHeader(service = service, now = now, actions = header)
         ScrollableList(
             state = listState,
             modifier = Modifier.fillMaxSize().padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 12.dp),
@@ -127,20 +163,39 @@ fun RunOfShowPane(
             // list follows it rather than redrawing everything. Uniqueness is guaranteed on load
             // by CalendarDocument.withUniqueRowIds, not assumed here.
             itemsIndexed(service.items, key = { _, item -> item.id }) { index, item ->
-                RunRow(
-                    item = item,
-                    clock = clocks[item.id],
-                    plannedSeconds = service.plannedSeconds[item.id],
-                    isFirst = index == 0,
-                    isLast = index == service.items.lastIndex,
-                    reorder = reorder,
-                    onChange = { onChangeItem(item) },
-                    onMoveUp = { onMove(index, index - 1) },
-                    onMoveDown = { onMove(index, index + 1) },
-                    onRemove = { onRemove(item.id) },
-                    onPlannedSecondsChange = { onPlannedSecondsChange(item.id, it) },
-                    modifier = Modifier.animateItem(),
-                )
+                when (item) {
+                    is ScheduleItem.LabelItem -> SectionRow(
+                        item = item,
+                        reorder = reorder,
+                        onRemove = { onRemove(item.id) },
+                        modifier = Modifier.animateItem(),
+                    )
+                    is ScheduleItem.CueItem -> CueRow(
+                        cue = item,
+                        startTime = service.startTime,
+                        armed = service.armed,
+                        status = statuses[item.id],
+                        onToggle = { onCueEnabled(item.id, !item.enabled) },
+                        onEdit = { onEditCue(item) },
+                        onFire = { onFireCue(item) },
+                        modifier = Modifier.animateItem(),
+                    )
+                    else -> RunRow(
+                        item = item,
+                        clock = clocks[item.id],
+                        timing = service.timingOf(item.id),
+                        plannedSeconds = service.plannedSeconds[item.id],
+                        isFirst = index == 0,
+                        isLast = index == lastIndex,
+                        reorder = reorder,
+                        onChange = { onChangeItem(item) },
+                        onMoveUp = { onMove(index, index - 1) },
+                        onMoveDown = { onMove(index, index + 1) },
+                        onRemove = { onRemove(item.id) },
+                        onPlannedSecondsChange = { onPlannedSecondsChange(item.id, it) },
+                        modifier = Modifier.animateItem(),
+                    )
+                }
             }
             item(key = "add") { AddItemButton(onClick = onAddItem) }
         }
@@ -151,6 +206,7 @@ fun RunOfShowPane(
 private fun RunRow(
     item: ScheduleItem,
     clock: RowClock?,
+    timing: RowTiming,
     plannedSeconds: Int?,
     isFirst: Boolean,
     isLast: Boolean,
@@ -162,10 +218,6 @@ private fun RunRow(
     onPlannedSecondsChange: (Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (item.isSection()) {
-        SectionRow(item = item, reorder = reorder, onRemove = onRemove, modifier = modifier)
-        return
-    }
     val scheme = MaterialTheme.colorScheme
     val look = lookFor(item)
     val dragging = reorder.isDragging(item.id)
@@ -198,7 +250,7 @@ private fun RunRow(
             color = scheme.onSurfaceVariant.copy(alpha = if (clock?.exact == true) 1f else DIM_ALPHA),
             textAlign = TextAlign.Start,
             maxLines = 1,
-            modifier = Modifier.width(CalendarMetrics.rowTimeColumn),
+            modifier = Modifier.width(rowTimeColumnWidth()),
         )
         Box(
             Modifier
@@ -227,6 +279,7 @@ private fun RunRow(
                 )
             }
         }
+        TimingChips(timing = timing, onOpen = onChange)
         DurationControl(seconds = plannedSeconds, onChange = onPlannedSecondsChange)
         RowAction(Icons.Filled.ArrowUpward, stringResource(Res.string.calendar_move_up), !isFirst, onMoveUp)
         RowAction(Icons.Filled.ArrowDownward, stringResource(Res.string.calendar_move_down), !isLast, onMoveDown)
@@ -234,9 +287,74 @@ private fun RunRow(
     }
 }
 
+/**
+ * What the row does on its own, as the design's chips: `⟳ Loop` / `⟳ 3`, `→ Next` / `Blank`, and
+ * `⚡ 9:45 AM` for a row that starts by itself. Each opens the row editor, where they are set.
+ */
+@Composable
+private fun TimingChips(timing: RowTiming, onOpen: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    if (timing.repeats != 1) {
+        RowChip(
+            text = if (timing.loops()) {
+                stringResource(Res.string.calendar_chip_loop)
+            } else {
+                stringResource(Res.string.calendar_chip_times, timing.repeats)
+            },
+            icon = Icons.Filled.Repeat,
+            tone = scheme.tertiary,
+            onClick = onOpen,
+        )
+    }
+    if (timing.atEnd != RowEnd.HOLD) {
+        RowChip(
+            text = stringResource(
+                if (timing.atEnd == RowEnd.NEXT) Res.string.calendar_chip_next else Res.string.calendar_chip_blank
+            ),
+            icon = null,
+            tone = if (timing.atEnd == RowEnd.NEXT) scheme.tertiary else scheme.error,
+            onClick = onOpen,
+        )
+    }
+    if (timing.startsOnItsOwn()) {
+        RowChip(
+            text = clockText(timing.startAt, LocalUse24HourClock.current),
+            icon = Icons.Filled.Bolt,
+            tone = scheme.tertiary,
+            onClick = onOpen,
+        )
+    }
+}
+
+@Composable
+private fun RowChip(text: String, icon: ImageVector?, tone: Color, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier
+            .height(CalendarMetrics.rowAction)
+            .clip(CalendarMetrics.smallRadius)
+            .background(tone.copy(alpha = CHIP_TINT))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp),
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = tone, modifier = Modifier.size(9.dp))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+            fontWeight = FontWeight.Bold,
+            color = tone,
+            maxLines = 1,
+            softWrap = false,
+        )
+    }
+}
+
 @Composable
 private fun RowAction(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     description: String,
     enabled: Boolean,
     onClick: () -> Unit,

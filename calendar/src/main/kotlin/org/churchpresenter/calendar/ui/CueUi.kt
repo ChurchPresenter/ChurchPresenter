@@ -18,8 +18,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_times
 import org.churchpresenter.calendar.generated.resources.calendar_cue_pinned_at
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_one
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_other
-import org.churchpresenter.calendar.model.CueAction
-import org.churchpresenter.calendar.model.ServiceCue
+import org.churchpresenter.core.models.schedule.CueAction
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.canPlayRepeatedly
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.cueFireTime
@@ -48,7 +48,7 @@ fun cueBadge(action: String): String? = when (action) {
 
 /** What the cue does, under its label — the action and, for a shown item, which. */
 @Composable
-fun cueSubtitle(cue: ServiceCue): String {
+fun cueSubtitle(cue: ScheduleItem.CueItem): String {
     val action = cueActionLabel(cue.action)
     if (cue.action != CueAction.PROJECT) return action
     val payload = cue.payload ?: return action + " · " + stringResource(Res.string.calendar_cue_item_missing)
@@ -57,7 +57,7 @@ fun cueSubtitle(cue: ServiceCue): String {
 
 /** `At start`, `15 min before`, `30 min in`, or `at 11:00` when pinned. */
 @Composable
-fun cueWhenLabel(cue: ServiceCue): String = when {
+fun cueWhenLabel(cue: ScheduleItem.CueItem): String = when {
     cue.isPinned() ->
         stringResource(Res.string.calendar_cue_pinned_at, clockText(cue.absoluteTime, LocalUse24HourClock.current))
     else -> offsetLabel(cue.offsetMinutes)
@@ -72,7 +72,7 @@ fun offsetLabel(minutes: Int): String = when {
 
 /** The clock time a cue fires on a service starting at [startTime], as `09:45`; blank if it cannot. */
 @Composable
-fun cueTimeText(cue: ServiceCue, startTime: String): String =
+fun cueTimeText(cue: ScheduleItem.CueItem, startTime: String?): String =
     cueFireTime(cue, startTime)?.let { clockText(it, LocalUse24HourClock.current) }.orEmpty()
 
 @Composable

@@ -36,6 +36,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.scale
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -77,6 +79,7 @@ import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.ic_zoom_in
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
+import churchpresenter.composeapp.generated.resources.schedule_automation_armed
 import churchpresenter.composeapp.generated.resources.schedule_density_compact
 import churchpresenter.composeapp.generated.resources.schedule_density_detailed
 import churchpresenter.composeapp.generated.resources.schedule_density_normal
@@ -134,7 +137,11 @@ internal fun ScheduleHeader(
     legacyRowActions: Boolean = false,
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
     hiddenButtons: Set<String> = emptySet(),
-    onToggleButton: (ScheduleToolbarButton) -> Unit = {}
+    onToggleButton: (ScheduleToolbarButton) -> Unit = {},
+    /** How many cue rows the schedule holds; the arm switch is drawn only when there are any. */
+    cueCount: Int = 0,
+    automationArmed: Boolean = true,
+    onAutomationArmedChange: (Boolean) -> Unit = {},
 ) {
     fun shown(button: ScheduleToolbarButton) = button.name !in hiddenButtons
     Column(
@@ -167,6 +174,26 @@ internal fun ScheduleHeader(
                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                 )
             }
+            }
+            if (cueCount > 0) {
+                // The automation switch: what it shows armed is exactly what the engine will fire.
+                PillGroup {
+                    Text(
+                        text = stringResource(Res.string.schedule_automation_armed, cueCount),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (automationArmed) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                    Box(Modifier.height(24.dp).width(40.dp), contentAlignment = Alignment.Center) {
+                        Switch(
+                            checked = automationArmed,
+                            onCheckedChange = onAutomationArmedChange,
+                            modifier = Modifier.scale(ARM_SWITCH_SCALE)
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
             if (shown(ScheduleToolbarButton.ZOOM)) {
@@ -595,3 +622,5 @@ internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel)
         }
     }
 }
+
+private const val ARM_SWITCH_SCALE = 0.7f

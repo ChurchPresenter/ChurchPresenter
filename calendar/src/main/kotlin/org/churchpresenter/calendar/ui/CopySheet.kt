@@ -73,6 +73,7 @@ import org.churchpresenter.calendar.model.CopyTarget
 import org.churchpresenter.calendar.model.DEFAULT_REPEAT_COUNT
 import org.churchpresenter.calendar.model.MAX_REPEAT_COUNT
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.recurrenceDates
 import org.jetbrains.compose.resources.stringResource
@@ -185,13 +186,16 @@ fun CopySheet(
                     Spacer(Modifier.height(2.dp))
                     IncludeRow(
                         label = stringResource(Res.string.calendar_copy_include_run),
-                        sub = stringResource(Res.string.calendar_copy_include_run_sub, service.items.size),
+                        sub = stringResource(
+                            Res.string.calendar_copy_include_run_sub,
+                            service.items.count { it !is ScheduleItem.CueItem },
+                        ),
                         on = includeRunOfShow,
                         onToggle = { includeRunOfShow = !includeRunOfShow },
                     )
                     IncludeRow(
                         label = stringResource(Res.string.calendar_copy_include_cues),
-                        sub = stringResource(Res.string.calendar_copy_include_cues_sub, service.cues.size),
+                        sub = stringResource(Res.string.calendar_copy_include_cues_sub, service.cueRows().size),
                         on = includeCues,
                         onToggle = { includeCues = !includeCues },
                     )

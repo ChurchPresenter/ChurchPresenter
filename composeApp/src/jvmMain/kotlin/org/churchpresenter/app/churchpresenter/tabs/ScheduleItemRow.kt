@@ -1,6 +1,17 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.calendar.CueFeed
+import org.churchpresenter.core.models.schedule.RowEnd
+import org.churchpresenter.core.models.schedule.RowTiming
+import churchpresenter.composeapp.generated.resources.schedule_timing_blank
+import churchpresenter.composeapp.generated.resources.schedule_timing_loop
+import churchpresenter.composeapp.generated.resources.schedule_timing_next
+import churchpresenter.composeapp.generated.resources.schedule_timing_times
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.localeUses24HourClock
+import androidx.compose.runtime.collectAsState
+import churchpresenter.composeapp.generated.resources.schedule_cue_fired
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -224,7 +235,7 @@ private fun RowScope.ScheduleRowActionButtons(
 @Composable
 internal fun ScheduleItemRow(
     item: ScheduleItem,
-
+    timing: RowTiming = RowTiming.DEFAULT,
     dragHandleModifier: Modifier = Modifier,
     density: ScheduleDensity,
     /** Legacy layout: buttons on their own line under the title instead of the hover overlay. */
@@ -356,7 +367,12 @@ internal fun ScheduleItemRow(
                                 overflow = TextOverflow.Ellipsis
                             )
                         } else {
-                            ScheduleItemContent(item = item, density = density, isSelected = isSelected)
+                            ScheduleItemContent(
+                                item = item,
+                                density = density,
+                                isSelected = isSelected,
+                                timing = timing,
+                            )
                         }
 
                     }
@@ -547,7 +563,13 @@ internal fun ScheduleItemRow(
 }
 
 @Composable
-internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, isSelected: Boolean) {
+internal fun ScheduleItemContent(
+    item: ScheduleItem,
+    density: ScheduleDensity,
+    isSelected: Boolean,
+    /** How the row runs on its own, from the plan it was loaded from; the default says nothing. */
+    timing: RowTiming = RowTiming.DEFAULT,
+) {
     val titleColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
     val detailColor = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -570,9 +592,42 @@ internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, i
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
         )
+        if (timing.startsOnItsOwn()) {
+            // `⚡ 9:45 AM` -- the row goes live by itself, and the engine tells you when.
+            Text(
+                text = "⚡ " + clockText(timing.startAt, localeUses24HourClock()),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.tertiary,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
     }
 
     if (!scheduleShowDetailLine(density.percent)) return
+
+    if (timing.repeats != 1 || timing.atEnd != RowEnd.HOLD) {
+        // `Loop · then next` -- what the row does around its run, under the title.
+        val parts = listOfNotNull(
+            when {
+                timing.loops() -> stringResource(Res.string.schedule_timing_loop)
+                timing.repeats > 1 -> stringResource(Res.string.schedule_timing_times, timing.repeats)
+                else -> null
+            },
+            when (timing.atEnd) {
+                RowEnd.NEXT -> stringResource(Res.string.schedule_timing_next)
+                RowEnd.BLANK -> stringResource(Res.string.schedule_timing_blank)
+                else -> null
+            },
+        )
+        Text(
+            text = parts.joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            maxLines = 1,
+        )
+    }
 
     when (item) {
         is ScheduleItem.SongItem -> if (item.songbook.isNotBlank()) {
@@ -628,6 +683,24 @@ internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, i
             text = item.transliteration,
             style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
         )
+        is ScheduleItem.CueItem -> {
+            // `Fired 9:45 AM` once the engine -- or a hand -- has set it off this session.
+            val fired by CueFeed.fired.collectAsState()
+            val firedAt = fired.firstOrNull { it.row.id == item.id }?.at
+            val detail = scheduleItemDetailText(item).orEmpty()
+            Text(
+                text = if (firedAt == null) {
+                    detail
+                } else {
+                    val at = clockText(firedAt, localeUses24HourClock())
+                    detail + " · " + stringResource(Res.string.schedule_cue_fired, at)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = if (firedAt == null) detailColor else MaterialTheme.colorScheme.tertiary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         is ScheduleItem.LabelItem, is ScheduleItem.SceneItem -> {  }
     }
 

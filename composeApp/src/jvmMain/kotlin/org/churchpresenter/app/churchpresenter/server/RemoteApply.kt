@@ -334,6 +334,7 @@ internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (
     is ScheduleItem.WebsiteItem -> item.title to item.url
     is ScheduleItem.SceneItem -> item.sceneName to "Scene"
     is ScheduleItem.DictionaryItem -> item.word to item.number
+    is ScheduleItem.CueItem -> item.displayText to item.absoluteTime
 }
 
 /**
@@ -510,6 +511,9 @@ internal fun executeProjectItem(
             presenterManager.setShowPresenterWindow(true)
         }
 
+        // A cue is fired through `fireCue`, never projected as content; a remote asking for it gets nothing.
+        is ScheduleItem.CueItem -> Unit
+
         is ScheduleItem.DictionaryItem -> {
             presenterManager.setDisplayedDictionaryEntry(
                 StrongsEntry(
@@ -655,6 +659,8 @@ internal fun addScheduleItem(
 
         is ScheduleItem.WebsiteItem -> scheduleActions.addWebsite(item.url, item.title)
 
+        is ScheduleItem.CueItem -> scheduleActions.addCue(item)
+
         else -> return false
     }
     return true
@@ -671,7 +677,8 @@ internal fun addScheduleItem(
 private fun ScheduleItem.isPlanOnly(): Boolean =
     this is ScheduleItem.LabelItem ||
         this is ScheduleItem.LowerThirdItem ||
-        this is ScheduleItem.SceneItem
+        this is ScheduleItem.SceneItem ||
+        this is ScheduleItem.CueItem
 
 /** The BIBLE half of [applyRemoteLiveState]: either this instance's own wording, or the primary's. */
 private fun applyRemoteBible(

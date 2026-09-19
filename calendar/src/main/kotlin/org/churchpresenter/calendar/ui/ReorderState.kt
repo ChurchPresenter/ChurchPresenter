@@ -25,13 +25,14 @@ import androidx.compose.runtime.setValue
  * - **The offset is rebased after every swap.** A swap moves the row's laid-out position under the
  *   pointer; without rebasing, the row would visibly jump by its own height each time.
  *
- * [itemCount] excludes anything after the reorderable rows — this list ends with an "add" row that
- * is not a drop target.
+ * Not every row of the list is a drop target: it ends with an "add" row, and the cues merged into
+ * it are placed by the clock rather than by hand. [isTarget] says which keys a row can be dropped
+ * on, and [onMove] is told the two keys -- the caller knows what position each stands for.
  */
 class ReorderState(
     private val listState: LazyListState,
-    private val itemCount: () -> Int,
-    private val onMove: (from: Int, to: Int) -> Unit,
+    private val isTarget: (key: Any) -> Boolean,
+    private val onMove: (fromKey: Any, toKey: Any) -> Unit,
 ) {
     /** The key of the row being dragged, or null. */
     var draggingKey by mutableStateOf<Any?>(null)
@@ -62,11 +63,11 @@ class ReorderState(
         val centre = (top + info.size / 2f).toInt()
         val target = listState.layoutInfo.visibleItemsInfo.firstOrNull { candidate ->
             candidate.index != info.index &&
-                candidate.index < itemCount() &&
+                isTarget(candidate.key) &&
                 centre in candidate.offset..(candidate.offset + candidate.size)
         } ?: return
 
-        onMove(info.index, target.index)
+        onMove(key, target.key)
         // The row will be laid out where the target currently is. Keep `anchor + offset` at the
         // same screen position so nothing jumps under the pointer.
         anchor = target.offset
@@ -79,16 +80,16 @@ class ReorderState(
     }
 }
 
-/** A [ReorderState] that survives recomposition and always calls the latest [onMove]. */
+/** A [ReorderState] that survives recomposition and always calls the latest [isTarget] and [onMove]. */
 @Composable
 fun rememberReorderState(
     listState: LazyListState,
-    itemCount: Int,
-    onMove: (from: Int, to: Int) -> Unit,
+    isTarget: (key: Any) -> Boolean,
+    onMove: (fromKey: Any, toKey: Any) -> Unit,
 ): ReorderState {
-    val currentCount by rememberUpdatedState(itemCount)
+    val currentIsTarget by rememberUpdatedState(isTarget)
     val currentOnMove by rememberUpdatedState(onMove)
     return remember(listState) {
-        ReorderState(listState, { currentCount }, { from, to -> currentOnMove(from, to) })
+        ReorderState(listState, { currentIsTarget(it) }, { from, to -> currentOnMove(from, to) })
     }
 }

@@ -95,6 +95,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
@@ -125,8 +126,12 @@ import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
-import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.CueRunner
+import org.churchpresenter.calendar.fireCue
+import org.churchpresenter.calendar.ui.PreviewSources
+import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
+import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -825,6 +830,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     // Companion server. The Calendar Manager reads it to decide whether "load" would discard
     // anything, and to copy a live-built service back onto a date.
     var currentScheduleItems by remember { mutableStateOf<List<ScheduleItem>>(emptyList()) }
+    // Whether the Schedule's cue rows may fire. Set from the service's own switch as it is loaded
+    // from the Calendar Manager, and from the Schedule tab's switch after that; the engine reads it
+    // every tick, so what the tab shows armed is exactly what will fire.
+    var automationArmed by remember { mutableStateOf(true) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
     var showMemoryMonitorWindow by remember { mutableStateOf(false) }
@@ -1151,25 +1160,38 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     }
                                 }
                             }
-                            val loadFromCalendar: (List<ScheduleItem>, Boolean) -> Unit = { items, replace ->
+                            val loadFromCalendar: (
+                                List<ScheduleItem>, Map<String, RowTiming>, Boolean, Boolean,
+                            ) -> Unit = { items, timing, replace, armed ->
                                 if (replace) currentScheduleActions.clearSchedule()
-                                // wholePlan = true so section headings, lower thirds and scenes
-                                // survive the trip; a plan is loaded whole.
+                                // Rows go in whole, ids and all: a plan's headings, lower thirds,
+                                // scenes and cues survive the trip, and each row's timing lands on it.
                                 items.forEach { item ->
-                                    addScheduleItem(item, currentScheduleActions, wholePlan = true)
+                                    currentScheduleActions.addRow(item, timing[item.id])
                                 }
+                                // The service's own switch comes with it: what was armed on the
+                                // calendar is armed here, where the cues actually fire from.
+                                automationArmed = armed
+                            }
+                            // What a cue does when it goes off -- the engine, the Schedule tab's
+                            // go-live on a cue row and the Calendar Manager's ▶ all fire through it.
+                            val cueHost = CalendarHost(
+                                loadIntoSchedule = loadFromCalendar,
+                                projectItem = projectFromCalendar,
+                                blankOutputs = { presenterManager.requestClearDisplay() },
+                            )
+                            val fireScheduleCue: (ScheduleItem.CueItem) -> Unit = { cue ->
+                                fireCue(cueHost, currentScheduleItems, cue, loadRows = false)
                             }
 
-                            // The Calendar Manager's automation engine, up for the whole session so a
-                            // Sunday 09:45 cue fires with the planner window closed. See CueRunner.
+                            // The automation engine, up for the whole session: it watches the live
+                            // Schedule and fires its cue rows at their time. See CueRunner.
                             LaunchedEffect(Unit) {
                                 CueRunner(
-                                    store = CalendarStore(AppDataDir.resolve()),
-                                    host = CalendarHost(
-                                        loadIntoSchedule = loadFromCalendar,
-                                        projectItem = projectFromCalendar,
-                                        blankOutputs = { presenterManager.requestClearDisplay() },
-                                    ),
+                                    items = { currentScheduleItems },
+                                    timing = { currentScheduleActions.currentTiming() },
+                                    armed = { automationArmed },
+                                    host = cueHost,
                                 ).run()
                             }
 
@@ -1428,6 +1450,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
                             MainDesktop(
                                 hostWindow = window,
+                                onPresentCue = fireScheduleCue,
+                                automationArmed = automationArmed,
+                                onAutomationArmedChange = { automationArmed = it },
                                 instanceLinkConnectionStatus =
                                     instanceLinkViewModel.connectionStatus.collectAsState().value,
                                 instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
@@ -1846,6 +1871,18 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         projectItem = projectFromCalendar,
                                         blankOutputs = { presenterManager.requestClearDisplay() },
                                         currentSchedule = { currentScheduleItems },
+                                        // The picker's preset previews: the same muted looping
+                                        // player the backgrounds use, and the deck rasterizer at
+                                        // thumbnail width.
+                                        preview = PreviewSources(
+                                            video = { path, modifier -> LoopingVideoBackground(path, modifier) },
+                                            slideThumbnails = ::slideThumbnails,
+                                            scene = { sceneId, modifier ->
+                                                scenesForInstanceLink.firstOrNull { it.id == sceneId }?.let { scene ->
+                                                    ScenePresenter(modifier = modifier, scene = scene)
+                                                }
+                                            },
+                                        ),
                                     ),
                                     onClose = { showCalendarWindow = false }
                                 )

@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -131,7 +132,10 @@ data class ScheduleTabActions(
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
+    val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
+    val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
 )
 
 private const val ZOOM_DEFAULT = 100
@@ -168,6 +172,9 @@ fun ScheduleTab(
     onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
     onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
     onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
+    onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
+    automationArmed: Boolean = true,
+    onAutomationArmedChange: (Boolean) -> Unit = {},
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -263,7 +270,10 @@ fun ScheduleTab(
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
                 addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) },
-                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) }
+                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) },
+                addCue           = { item -> viewModel.addCue(item) },
+                addRow           = { item, timing -> viewModel.addRow(item, timing) },
+                currentTiming    = { viewModel.timing.toMap() },
             )
         )
     }
@@ -299,7 +309,10 @@ fun ScheduleTab(
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
-            onToggleButton = onToggleToolbarButton
+            onToggleButton = onToggleToolbarButton,
+            cueCount = scheduleItems.count { it is ScheduleItem.CueItem },
+            automationArmed = automationArmed,
+            onAutomationArmedChange = onAutomationArmedChange,
         )
 
         val viewModelState = rememberUpdatedState(viewModel)
@@ -470,6 +483,7 @@ fun ScheduleTab(
                     ) {
                         ScheduleItemRow(
                             item = item,
+                            timing = viewModel.timingFor(item.id),
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,
@@ -500,7 +514,8 @@ fun ScheduleTab(
                                     onPresentLowerThird = onPresentLowerThird,
                                     onPresentWebsite = onPresentWebsite,
                                     onPresentDictionary = onPresentDictionary,
-                                    onPresentScene = onPresentScene
+                                    onPresentScene = onPresentScene,
+                                    onPresentCue = onPresentCue,
                                 )
                             },
                             onEditLabel = {

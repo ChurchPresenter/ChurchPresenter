@@ -15,16 +15,18 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
-import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.ServiceRepeat
-import org.churchpresenter.calendar.model.copiedCues
+import org.churchpresenter.calendar.model.isDurationTimer
 import org.churchpresenter.calendar.model.withCue
+import org.churchpresenter.calendar.model.withTimerSeconds
+import org.churchpresenter.calendar.model.withCuesAsRows
 import org.churchpresenter.calendar.model.withoutCue
 import org.churchpresenter.calendar.model.copiedRows
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.storedDate
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.withUniqueRowIds
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
@@ -100,7 +102,7 @@ class CalendarState(
         val loaded = withContext(io) { store.load() }
         // Before anything renders: the run of show keys its rows by id, and a file on disk cannot
         // promise those are unique. See withUniqueRowIds.
-        document = loaded.document.withUniqueRowIds()
+        document = loaded.document.withCuesAsRows().withUniqueRowIds()
         source = loaded.source
         reloadPresets(io)
     }
@@ -206,13 +208,10 @@ class CalendarState(
         // plannedSeconds is keyed by them, so editing one estimate would move the other's too.
         val rows = when (template) {
             ServiceTemplate.Blank -> CopiedRows(emptyList(), emptyMap())
-            is ServiceTemplate.CopyOf -> copiedRows(template.service.items, template.service.plannedSeconds)
-            is ServiceTemplate.Saved -> copiedRows(template.template.items, template.template.plannedSeconds)
-        }
-        val cues = when (template) {
-            ServiceTemplate.Blank -> emptyList()
-            is ServiceTemplate.CopyOf -> copiedCues(template.service.cues)
-            is ServiceTemplate.Saved -> copiedCues(template.template.cues)
+            is ServiceTemplate.CopyOf ->
+                copiedRows(template.service.items, template.service.plannedSeconds, template.service.timing)
+            is ServiceTemplate.Saved ->
+                copiedRows(template.template.items, template.template.plannedSeconds, template.template.timing)
         }
         val service = PlannedService(
             id = UUID.randomUUID().toString(),
@@ -222,7 +221,7 @@ class CalendarState(
             kind = kind.id,
             items = rows.items,
             plannedSeconds = rows.plannedSeconds,
-            cues = cues,
+            timing = rows.timing,
             armed = document.preferences.armByDefault,
         )
         commit(document.withService(service))
@@ -261,7 +260,7 @@ class CalendarState(
      * Plans a copy of [service] on each of [dates] — the Copy sheet's **Paste** and **Create N**.
      *
      * With [includeRunOfShow] each copy gets its own re-keyed run of show, and with [includeCues]
-     * its cues; without either, an empty service with the same name, time and kind. A [repeat]
+     * the cue rows in it; without either, an empty service with the same name, time and kind. A [repeat]
      * other than NONE makes the copies — and
      * [service] itself, unless it already belongs to one — a series, which is what lets a later
      * edit or delete reach all of them. One commit for the lot, so the file is written once.
@@ -279,12 +278,11 @@ class CalendarState(
             service.isInSeries() -> service.seriesId
             else -> UUID.randomUUID().toString()
         }
+        val kept = service.items.filter { item ->
+            if (item is ScheduleItem.CueItem) includeCues else includeRunOfShow
+        }
         val copies = dates.map { date ->
-            val rows = if (includeRunOfShow) {
-                copiedRows(service.items, service.plannedSeconds)
-            } else {
-                CopiedRows(emptyList(), emptyMap())
-            }
+            val rows = copiedRows(kept, service.plannedSeconds, service.timing)
             PlannedService(
                 id = UUID.randomUUID().toString(),
                 date = storedDate(date),
@@ -293,7 +291,7 @@ class CalendarState(
                 kind = service.kind,
                 items = rows.items,
                 plannedSeconds = rows.plannedSeconds,
-                cues = if (includeCues) copiedCues(service.cues) else emptyList(),
+                timing = rows.timing,
                 armed = service.armed,
                 seriesId = seriesId,
                 repeat = if (seriesId.isEmpty()) "" else repeat.id,
@@ -328,9 +326,13 @@ class CalendarState(
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         val kept = service.items.filter { item ->
-            if (item is ScheduleItem.LabelItem) includeSections else includeItems
+            when (item) {
+                is ScheduleItem.LabelItem -> includeSections
+                is ScheduleItem.CueItem -> includeCues
+                else -> includeItems
+            }
         }
-        val rows = copiedRows(kept, service.plannedSeconds)
+        val rows = copiedRows(kept, service.plannedSeconds, service.timing)
         val existing = document.templates.firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
         commit(
             document.withTemplate(
@@ -341,7 +343,7 @@ class CalendarState(
                     kind = service.kind,
                     items = rows.items,
                     plannedSeconds = rows.plannedSeconds,
-                    cues = if (includeCues) copiedCues(service.cues) else emptyList(),
+                    timing = rows.timing,
                 )
             )
         )
@@ -353,8 +355,8 @@ class CalendarState(
 
     // ── Cues ──────────────────────────────────────────────────────────────────
 
-    /** Adds [cue] to the service, or replaces the one with its id. Kept in firing order. */
-    fun saveCue(serviceId: String, cue: ServiceCue) {
+    /** Adds [cue] to the service, or replaces the row with its id. Placed in the list by its time. */
+    fun saveCue(serviceId: String, cue: ScheduleItem.CueItem) {
         val service = document.serviceById(serviceId) ?: return
         commit(document.withService(service.withCue(cue)))
     }
@@ -367,8 +369,10 @@ class CalendarState(
     /** Ticks or unticks one cue — "skip this one" — without touching the rest. */
     fun setCueEnabled(serviceId: String, cueId: String, enabled: Boolean) {
         val service = document.serviceById(serviceId) ?: return
-        val cue = service.cues.firstOrNull { it.id == cueId } ?: return
-        commit(document.withService(service.withCue(cue.copy(enabled = enabled))))
+        val cue = service.cueRows().firstOrNull { it.id == cueId } ?: return
+        // In place, not re-placed: ticking a cue is not moving it.
+        val rows = service.items.map { if (it.id == cueId) cue.copy(enabled = enabled) else it }
+        commit(document.withService(service.copy(items = rows)))
     }
 
     /** Arms or disarms every cue on the service at once. */
@@ -427,6 +431,10 @@ class CalendarState(
         commit(document.withService(service.copy(items = next)))
     }
     /** Sets a row's planned length, or clears it when [seconds] is null. */
+    /**
+     * Sets a row's planned length. On a duration timer the length *is* the timer, so typing `10:00`
+     * on one makes it a ten-minute countdown rather than an estimate beside a fifteen-minute one.
+     */
     fun setPlannedSeconds(serviceId: String, itemId: String, seconds: Int?) {
         val service = document.serviceById(serviceId) ?: return
         val next = if (seconds == null) {
@@ -434,7 +442,18 @@ class CalendarState(
         } else {
             service.plannedSeconds + (itemId to seconds)
         }
-        commit(document.withService(service.copy(plannedSeconds = next)))
+        val rows = service.items.map { row ->
+            val timer = (row as? ScheduleItem.AnnouncementItem)?.takeIf { it.id == itemId && it.isDurationTimer() }
+            if (seconds != null && timer != null) timer.withTimerSeconds(seconds) else row
+        }
+        commit(document.withService(service.copy(items = rows, plannedSeconds = next)))
+    }
+
+    /** Sets how a row runs -- its start, repeats and end. The default entry is dropped, not stored. */
+    fun setTiming(serviceId: String, itemId: String, timing: RowTiming) {
+        val service = document.serviceById(serviceId) ?: return
+        val next = if (timing.isDefault()) service.timing - itemId else service.timing + (itemId to timing)
+        commit(document.withService(service.copy(timing = next)))
     }
     // ── The song library ──────────────────────────────────────────────────────
 

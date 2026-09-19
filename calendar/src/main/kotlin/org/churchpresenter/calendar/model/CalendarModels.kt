@@ -1,6 +1,8 @@
 package org.churchpresenter.calendar.model
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.schedule.CueAction
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 
 /**
@@ -101,7 +103,15 @@ data class PlannedService(
      * are being measured an absent entry is what a measured suggestion fills in.
      */
     val plannedSeconds: Map<String, Int> = emptyMap(),
-    /** The timed actions attached to this service, earliest first. See [ServiceCue]. */
+    /**
+     * How each row runs -- its own start time, repeats, what happens when it ends -- keyed by
+     * [ScheduleItem.id] like [plannedSeconds], and absent for a row that is simply cued by hand.
+     */
+    val timing: Map<String, RowTiming> = emptyMap(),
+    /**
+     * Cues as an older file stored them, beside the rows rather than among them. Empty in anything
+     * this version writes: they are folded into [items] on load. See [ServiceCue].
+     */
     val cues: List<ServiceCue> = emptyList(),
     /** Whether this service's cues may fire. False is "planned, but do not automate". */
     val armed: Boolean = true,
@@ -118,83 +128,56 @@ data class PlannedService(
 ) {
     fun isInSeries(): Boolean = seriesId.isNotEmpty()
 
-    /** The planned length of the whole service, counting only rows that have an estimate. */
-    fun plannedTotalSeconds(): Int = plannedSeconds.values.sum()
+    /**
+     * The planned length of the whole service, counting only rows that have an estimate; a row
+     * played N times counts N times.
+     */
+    fun plannedTotalSeconds(): Int =
+        plannedSeconds.entries.sumOf { (id, seconds) -> seconds * timingOf(id).repeats.coerceAtLeast(1) }
 
-    /** Run-of-show rows that are content rather than section headings. */
-    fun contentItems(): List<ScheduleItem> = items.filterNot { it is ScheduleItem.LabelItem }
+    /** Run-of-show rows that are content rather than section headings or cues. */
+    fun contentItems(): List<ScheduleItem> =
+        items.filterNot { it is ScheduleItem.LabelItem || it is ScheduleItem.CueItem }
+
+    /** The service's cues, in list order -- which `withCue` keeps as firing order. */
+    fun cueRows(): List<ScheduleItem.CueItem> = items.filterIsInstance<ScheduleItem.CueItem>()
+
+    fun timingOf(itemId: String): RowTiming = timing[itemId] ?: RowTiming.DEFAULT
+
+    /** How many rows start on their own, cues included. */
+    fun autoStartCount(): Int =
+        timing.values.count { it.startsOnItsOwn() } + cueRows().size
 }
 
 /**
- * A timed action attached to a service.
+ * A cue as `calendar.json` stored it before cues became run-of-show rows.
  *
- * [payload] is an ordinary [ScheduleItem], so every content cue is something the app can already
- * put on screen, and [action] covers only the few things that are not content at all. The payload
- * is a copy of the run-of-show row it was chosen from, not a reference: a cue keeps firing what
- * it was set to even if the row is later replaced, and says so in the automation pane.
+ * Read only. A file that still carries these has them turned into [ScheduleItem.CueItem] rows on
+ * load -- see `withCuesAsRows` -- and is written back without them. Kept so an older file opens;
+ * nothing new is ever written in this shape.
  */
 @Serializable
 data class ServiceCue(
     val id: String,
-    /** Minutes relative to the service start; negative is before it. Ignored when [absoluteTime] is set. */
     val offsetMinutes: Int = 0,
-    /** `09:45` to pin the cue to the wall clock instead of to the service start. Empty to use [offsetMinutes]. */
     val absoluteTime: String = "",
     val label: String = "",
-    /** What to put on screen, for [CueAction.PROJECT]. Null for every other action. */
     val payload: ScheduleItem? = null,
     val action: String = CueAction.PROJECT,
-    /** Off is "skip this one" — the cue stays in the list, greyed, and fires again once re-ticked. */
     val enabled: Boolean = true,
-    /**
-     * How many times a shown item plays through: 1 once, 0 until something else goes live, N that
-     * many. Only read for [CueAction.PROJECT] with a payload that plays — a slideshow, a
-     * presentation, a video, an animated announcement.
-     */
     val plays: Int = 1,
 ) {
-    fun isPinned(): Boolean = absoluteTime.isNotEmpty()
-    fun loops(): Boolean = plays == LOOP_FOREVER
-}
-
-/** The [ServiceCue.plays] value that means "keep going". */
-const val LOOP_FOREVER: Int = 0
-
-/**
- * What a cue does. Strings rather than an enum so a file written by a later version still opens;
- * an unknown action is simply never fired.
- */
-object CueAction {
-    /**
-     * The announcement loop: puts [ServiceCue.payload] — a slideshow, a deck or a clip — on screen
-     * and plays it [ServiceCue.plays] times.
-     */
-    const val PROJECT = "project"
-    /**
-     * Starts a countdown on the outputs: [ServiceCue.payload] if it is a timer item, otherwise
-     * one built at fire time that counts to the service's start.
-     */
-    const val COUNTDOWN = "countdown"
-    /**
-     * Loads the run of show into the Schedule tab and puts an item on screen — [ServiceCue.payload]
-     * if one was chosen, else the first the host can show.
-     */
-    const val GO_LIVE = "goLive"
-    /** Puts a canvas scene — [ServiceCue.payload], a scene item — on screen. */
-    const val SCENE = "scene"
-    /** Clears every output. */
-    const val BLANK = "blank"
-    const val OBS_SCENE = "obsScene"
-    const val ATEM_KEY = "atemKey"
-
-    /** The actions the cue sheet offers — the ones the host can carry out today, in the design's order. */
-    val offered: List<String> = listOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE, BLANK)
-
-    /** The actions that point at an item, and so show a target list in the sheet. */
-    val withTarget: Set<String> = setOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE)
-
-    /** The actions whose item has a run to play, and so show `Play` in the sheet. */
-    val withPlays: Set<String> = setOf(PROJECT, GO_LIVE)
+    /** The same cue as a run-of-show row. */
+    fun asRow(): ScheduleItem.CueItem = ScheduleItem.CueItem(
+        id = id,
+        action = action,
+        label = label,
+        offsetMinutes = offsetMinutes,
+        absoluteTime = absoluteTime,
+        payload = payload,
+        plays = plays,
+        enabled = enabled,
+    )
 }
 
 /**
@@ -246,9 +229,14 @@ data class SavedTemplate(
     val kind: String = ServiceKind.SUNDAY.id,
     val items: List<ScheduleItem> = emptyList(),
     val plannedSeconds: Map<String, Int> = emptyMap(),
+    val timing: Map<String, RowTiming> = emptyMap(),
+    /** As on [PlannedService]: an older file's cues, folded into [items] on load. */
     val cues: List<ServiceCue> = emptyList(),
 ) {
-    fun contentItems(): List<ScheduleItem> = items.filterNot { it is ScheduleItem.LabelItem }
+    fun contentItems(): List<ScheduleItem> =
+        items.filterNot { it is ScheduleItem.LabelItem || it is ScheduleItem.CueItem }
+
+    fun cueRows(): List<ScheduleItem.CueItem> = items.filterIsInstance<ScheduleItem.CueItem>()
 }
 
 /** Calendar-wide preferences, saved beside the services rather than in `settings.json`. */

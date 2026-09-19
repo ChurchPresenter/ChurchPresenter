@@ -26,10 +26,6 @@ object CalendarMetrics {
     val monthPaneMin = 232.dp
     val monthPaneMax = 296.dp
 
-    /** The automation column: `clamp(250px, 25%, 336px)` in the design. */
-    val automationPaneMin = 250.dp
-    val automationPaneMax = 336.dp
-
     val dayHeaderHeight = 45.dp
     val sectionHeaderHeight = 30.dp
     val serviceChipHeight = 42.dp
@@ -40,7 +36,9 @@ object CalendarMetrics {
 
     val rowIcon = 21.dp
     val rowAction = 19.dp
-    val rowTimeColumn = 30.dp
+    val rowTimeColumn = 36.dp
+    /** The same column when times carry `AM`/`PM`, which `10:00` alone was sized for. */
+    val rowTimeColumnWide = 58.dp
     val durationFieldWidth = 44.dp
 
     val dayCellRadius = RoundedCornerShape(7.dp)

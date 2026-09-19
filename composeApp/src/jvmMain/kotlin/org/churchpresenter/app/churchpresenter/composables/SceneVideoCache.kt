@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.diagnostics.CrashReporter
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import uk.co.caprica.vlcj.player.base.MediaPlayer
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
@@ -26,6 +28,7 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.File
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -255,6 +258,21 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
     }
     player.videoSurface().set(factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true))
 
+    // The volume the layers last asked for. A volume set before libvlc has built its audio output
+    // is dropped on the floor -- which is how a "silent" background was heard -- so it is applied
+    // again the moment playback actually starts, and zero is a real mute rather than a level.
+    val wantedPercent = AtomicInteger(VOLUME_PERCENT_SCALE)
+    fun applyVolume() {
+        val percent = wantedPercent.get()
+        try {
+            player.audio().isMute = percent == 0
+            player.audio().setVolume(percent)
+        } catch (_: Throwable) { }
+    }
+    player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
+        override fun playing(mediaPlayer: MediaPlayer) = applyVolume()
+    })
+
     Thread.sleep(PLAYER_SETTLE_MS)
     try {
         if (spec.loop) player.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK, VLC_OPT_LOOP)
@@ -265,7 +283,8 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
         override val frameVersion: Long get() = version.get()
         override val frame: BufferedImage? get() = holder.get()
         override fun setVolume(percent: Int) {
-            try { player.audio().setVolume(percent) } catch (_: Throwable) { }
+            wantedPercent.set(percent)
+            applyVolume()
         }
         override fun close() {
             try {

@@ -25,10 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import org.churchpresenter.calendar.generated.resources.calendar_preview_toggle
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import org.churchpresenter.calendar.generated.resources.calendar_edit_song
-import org.churchpresenter.calendar.generated.resources.calendar_replace_row
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +55,6 @@ import androidx.compose.ui.window.DialogProperties
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_add_item
-import org.churchpresenter.calendar.generated.resources.calendar_duration_hint
 import org.churchpresenter.calendar.generated.resources.calendar_bible_hint_short
 import org.churchpresenter.calendar.generated.resources.calendar_section_hint
 import org.churchpresenter.calendar.generated.resources.calendar_no_results
@@ -65,30 +66,55 @@ import org.churchpresenter.calendar.generated.resources.calendar_pick_verse_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_bible
 import org.churchpresenter.calendar.generated.resources.calendar_pick_chapters
 import org.churchpresenter.calendar.generated.resources.calendar_pick_choose_chapter
-import org.churchpresenter.calendar.generated.resources.calendar_pick_duration
 import org.churchpresenter.calendar.generated.resources.calendar_pick_empty_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_no_bible
 import org.churchpresenter.calendar.generated.resources.calendar_pick_reference
-import org.churchpresenter.calendar.generated.resources.calendar_pick_schedule
 import org.churchpresenter.calendar.generated.resources.calendar_pick_presets
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_all
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_announcements
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_lower_thirds
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_media
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_other
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_presentations
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_scenes
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_slides
+import org.churchpresenter.calendar.generated.resources.calendar_preset_kind_timers
+import org.churchpresenter.calendar.generated.resources.calendar_cue_filter_presets
 import org.churchpresenter.calendar.generated.resources.calendar_presets_empty
 import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_sub
 import org.churchpresenter.calendar.generated.resources.calendar_pick_search
+import org.churchpresenter.calendar.generated.resources.calendar_timer_count_up_sub
+import org.churchpresenter.calendar.generated.resources.calendar_timer_count_up
+import org.churchpresenter.calendar.generated.resources.calendar_timer_to_start_sub
+import org.churchpresenter.calendar.generated.resources.calendar_timer_to_start
+import org.churchpresenter.calendar.generated.resources.calendar_timer_countdown_sub
+import org.churchpresenter.calendar.generated.resources.calendar_timer_countdown
+import org.churchpresenter.calendar.generated.resources.calendar_pick_timer
+import org.churchpresenter.calendar.model.countdownTimerItem
+import org.churchpresenter.calendar.model.countdownItem
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.formatDuration
+import org.churchpresenter.calendar.model.countUpTimerItem
+import org.churchpresenter.calendar.model.DEFAULT_COUNTDOWN_SECONDS
 import org.churchpresenter.calendar.generated.resources.calendar_pick_section
 import org.churchpresenter.calendar.generated.resources.calendar_pick_songs
 import org.churchpresenter.calendar.generated.resources.calendar_pick_whole_chapter
-import org.churchpresenter.calendar.generated.resources.calendar_schedule_empty
 import org.churchpresenter.calendar.generated.resources.calendar_section_new
 import org.churchpresenter.calendar.generated.resources.calendar_songs_loading
 import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.bibleVerseItem
-import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.calendar.model.sectionItem
 import org.churchpresenter.calendar.model.toScheduleItem
 import org.churchpresenter.calendar.model.withNewId
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.calendar.generated.resources.calendar_settings_done
+import org.churchpresenter.calendar.generated.resources.calendar_saved_as_you_change
+import org.churchpresenter.calendar.generated.resources.calendar_section_no_timing
+import org.churchpresenter.calendar.generated.resources.calendar_editing_row
+import androidx.compose.material3.HorizontalDivider
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
 
@@ -100,13 +126,21 @@ private fun verseRange(anchor: Int?, extent: Int?): IntRange? {
 }
 
 /** Which source the picker is showing. */
-private enum class PickKind { SONGS, BIBLE, SECTION, SCHEDULE, PRESETS }
+private enum class PickKind { SONGS, BIBLE, TIMER, SECTION, PRESETS }
 
-private val SHEET_WIDTH = 470.dp
-private val BODY_HEIGHT = 330.dp
+/** The tab a row of this kind would have come from. */
+private fun pickKindOf(item: ScheduleItem): PickKind = when (item) {
+    is ScheduleItem.SongItem -> PickKind.SONGS
+    is ScheduleItem.BibleVerseItem -> PickKind.BIBLE
+    is ScheduleItem.LabelItem -> PickKind.SECTION
+    is ScheduleItem.AnnouncementItem -> if (item.isTimer) PickKind.TIMER else PickKind.PRESETS
+    else -> PickKind.PRESETS
+}
+
+private val SHEET_WIDTH = 700.dp
+private val BODY_HEIGHT = 230.dp
 private val RESULT_ICON = 24.dp
 private val ADD_BADGE = 21.dp
-private val DURATION_FIELD = 62.dp
 private const val DEFAULT_SECTION_COLOR = "#5B9DF5"
 private val SCOPE_LIST_HEIGHT = 196.dp
 
@@ -124,42 +158,63 @@ private val SCOPE_LIST_HEIGHT = 196.dp
 fun AddItemSheet(
     songs: List<SongItem>,
     songsLoaded: Boolean,
-    currentSchedule: List<ScheduleItem>,
     presets: List<ItemPreset>,
     sections: List<SectionStyle>,
     bibleBooks: List<CalendarBibleBook>,
     serviceName: String,
-    /** The row being replaced, or null when the picker is appending. */
+    /** The service's start, which a countdown-to-start timer counts to. */
+    serviceStartTime: String,
+    /** The row being edited -- replaced or retimed -- or null when the picker is appending. */
     replacing: ScheduleItem?,
     songbooks: List<String>,
     songEditor: (@Composable (SongEditRequest) -> Unit)?,
     onSaveSong: suspend (original: SongItem, edited: SongItem) -> Unit,
-    onAdd: (items: List<ScheduleItem>, plannedSeconds: Int?) -> Unit,
+    onAdd: (items: List<ScheduleItem>, plannedSeconds: Int?, timing: RowTiming) -> Unit,
     onDismiss: () -> Unit,
+    /** How [replacing] runs today, and its planned length -- what the timing panel opens showing. */
+    timing: RowTiming = RowTiming.DEFAULT,
+    plannedSeconds: Int? = null,
+    /** A timing change on [replacing], applied as it is made -- the row is saved as you change it. */
+    onTimingChange: (timing: RowTiming, plannedSeconds: Int?) -> Unit = { _, _ -> },
+    /** What a preset's preview can draw with; see [PreviewSources]. */
+    previewSources: PreviewSources = PreviewSources(),
 ) {
     val scope = rememberCoroutineScope()
     var editingSong by remember { mutableStateOf<SongItem?>(null) }
-    var kind by remember { mutableStateOf(PickKind.SONGS) }
+    // Editing a row, the picker opens on that row's kind, so a replacement is one click away.
+    var kind by remember(replacing) { mutableStateOf(replacing?.let(::pickKindOf) ?: PickKind.SONGS) }
     var query by remember { mutableStateOf("") }
     var songBook by remember { mutableStateOf<String?>(null) }
-    var durationText by remember { mutableStateOf("") }
+    // Which kind of preset the Presets tab is narrowed to, or null for all of them.
+    var presetKind by remember { mutableStateOf<PresetKind?>(null) }
+    val use24Hour = LocalUse24HourClock.current
+    var draft by remember(replacing) { mutableStateOf(TimingDraft.of(timing, plannedSeconds, use24Hour)) }
+    // Editing a row, a change lands on it at once; adding, it waits for the pick.
+    fun changeTiming(next: TimingDraft) {
+        draft = next
+        if (replacing != null) onTimingChange(next.toTiming(), next.runSeconds())
+    }
     var book by remember { mutableStateOf<CalendarBibleBook?>(null) }
     var chapter by remember { mutableStateOf<Int?>(null) }
     // The verse range being built: the first tap anchors it, a second tap extends it.
     var anchor by remember { mutableStateOf<Int?>(null) }
     var extent by remember { mutableStateOf<Int?>(null) }
 
-    val planned = parseDuration(durationText)
-    val add: (List<ScheduleItem>) -> Unit = { items -> onAdd(items, planned) }
+    val planned = draft.runSeconds()
+    val add: (List<ScheduleItem>) -> Unit = { items -> onAdd(items, planned, draft.toTiming()) }
+    // A section heading is structure, not something that goes on screen: nothing about it starts,
+    // runs or ends, so the timing panel is shown for what it is -- inert -- and the footer says why.
+    val isSection = replacing is ScheduleItem.LabelItem || kind == PickKind.SECTION
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
             title = if (replacing == null) {
                 stringResource(Res.string.calendar_add_item)
             } else {
-                stringResource(Res.string.calendar_replace_row, replacing.displayText)
+                stringResource(Res.string.calendar_editing_row, replacing.displayText)
             },
-            icon = Icons.Filled.Add,
+            subtitle = if (replacing == null) null else stringResource(Res.string.calendar_saved_as_you_change),
+            icon = if (replacing == null) Icons.Filled.Add else lookFor(replacing).icon,
             width = SHEET_WIDTH,
             onDismiss = onDismiss,
             footer = {
@@ -169,28 +224,23 @@ fun AddItemSheet(
                 } else {
                     null
                 }
+                // What the panel says, read back; and where a pick lands while adding.
                 Text(
-                    text = stringResource(Res.string.calendar_pick_adds_to, serviceName),
+                    text = when {
+                        isSection -> stringResource(Res.string.calendar_section_no_timing)
+                        replacing == null ->
+                            timingSummary(draft) + " · " + stringResource(Res.string.calendar_pick_adds_to, serviceName)
+                        else -> timingSummary(draft)
+                    },
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-                Text(
-                    text = stringResource(Res.string.calendar_pick_duration),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                CompactTextField(
-                    value = durationText,
-                    onValueChange = { durationText = it },
-                    placeholder = stringResource(Res.string.calendar_duration_hint),
-                    height = 27.dp,
-                    fontSize = 11f,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(DURATION_FIELD),
-                )
+                if (replacing != null) {
+                    PrimaryButton(label = stringResource(Res.string.calendar_settings_done), onClick = onDismiss)
+                }
                 if (pending != null) {
                     PrimaryButton(
                         label = stringResource(Res.string.calendar_pick_add_range, pending.displayText),
@@ -238,6 +288,9 @@ fun AddItemSheet(
                 }
                 if (kind == PickKind.SONGS && songs.isNotEmpty()) {
                     SongBookScope(songs = songs, selected = songBook) { songBook = it }
+                }
+                if (kind == PickKind.PRESETS && presets.isNotEmpty()) {
+                    PresetKindScope(presets = presets, selected = presetKind) { presetKind = it }
                 }
                 if (kind == PickKind.BIBLE && bibleBooks.isNotEmpty()) {
                     BibleCrumbs(
@@ -288,11 +341,23 @@ fun AddItemSheet(
                         onAdd = add,
                     )
 
+                    PickKind.TIMER -> TimerResults(
+                        startTime = serviceStartTime,
+                        seconds = planned ?: DEFAULT_COUNTDOWN_SECONDS,
+                        onAdd = add,
+                    )
                     PickKind.SECTION -> SectionResults(sections, query, add)
-                    PickKind.SCHEDULE -> ScheduleResults(currentSchedule, add)
-                    PickKind.PRESETS -> PresetResults(presets, query, add)
+                    PickKind.PRESETS -> PresetResults(presets, presetKind, query, previewSources, add)
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            TimingPanel(
+                draft = draft,
+                serviceStartTime = serviceStartTime,
+                onChange = ::changeTiming,
+                enabled = !isSection,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            )
         }
     }
 
@@ -336,9 +401,9 @@ private fun SongEditorHost(
 private fun searchPlaceholder(kind: PickKind): String = when (kind) {
     PickKind.SONGS -> stringResource(Res.string.calendar_pick_search)
     PickKind.BIBLE -> stringResource(Res.string.calendar_bible_hint_short)
+    PickKind.TIMER -> ""
     PickKind.SECTION -> stringResource(Res.string.calendar_section_hint)
-    PickKind.SCHEDULE -> ""
-    PickKind.PRESETS -> stringResource(Res.string.calendar_pick_search)
+    PickKind.PRESETS -> stringResource(Res.string.calendar_cue_filter_presets)
 }
 
 @Composable
@@ -346,8 +411,8 @@ private fun pickKindLabel(kind: PickKind): String = stringResource(
     when (kind) {
         PickKind.SONGS -> Res.string.calendar_pick_songs
         PickKind.BIBLE -> Res.string.calendar_pick_bible
+        PickKind.TIMER -> Res.string.calendar_pick_timer
         PickKind.SECTION -> Res.string.calendar_pick_section
-        PickKind.SCHEDULE -> Res.string.calendar_pick_schedule
         PickKind.PRESETS -> Res.string.calendar_pick_presets
     }
 )
@@ -375,6 +440,54 @@ private fun PickChip(label: String, selected: Boolean, onClick: () -> Unit) {
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             color = if (selected) scheme.primary else scheme.onSurfaceVariant,
         )
+    }
+}
+
+/** The kinds a preset can be, for narrowing the Presets tab -- one per content type it can hold. */
+private enum class PresetKind { SLIDES, PRESENTATIONS, MEDIA, TIMERS, ANNOUNCEMENTS, SCENES, LOWER_THIRDS, OTHER }
+
+private fun presetKindOf(item: ScheduleItem): PresetKind = when (item) {
+    is ScheduleItem.PictureItem -> PresetKind.SLIDES
+    is ScheduleItem.PresentationItem -> PresetKind.PRESENTATIONS
+    is ScheduleItem.MediaItem -> PresetKind.MEDIA
+    is ScheduleItem.AnnouncementItem -> if (item.isTimer) PresetKind.TIMERS else PresetKind.ANNOUNCEMENTS
+    is ScheduleItem.SceneItem -> PresetKind.SCENES
+    is ScheduleItem.LowerThirdItem -> PresetKind.LOWER_THIRDS
+    else -> PresetKind.OTHER
+}
+
+@Composable
+private fun presetKindLabel(kind: PresetKind): String = stringResource(
+    when (kind) {
+        PresetKind.SLIDES -> Res.string.calendar_preset_kind_slides
+        PresetKind.PRESENTATIONS -> Res.string.calendar_preset_kind_presentations
+        PresetKind.MEDIA -> Res.string.calendar_preset_kind_media
+        PresetKind.TIMERS -> Res.string.calendar_preset_kind_timers
+        PresetKind.ANNOUNCEMENTS -> Res.string.calendar_preset_kind_announcements
+        PresetKind.SCENES -> Res.string.calendar_preset_kind_scenes
+        PresetKind.LOWER_THIRDS -> Res.string.calendar_preset_kind_lower_thirds
+        PresetKind.OTHER -> Res.string.calendar_preset_kind_other
+    }
+)
+
+/**
+ * The preset kind chips: `All` and one per kind that has a preset, each with its count. Only the
+ * kinds present -- a row of eight chips for a library of three slideshows says nothing.
+ */
+@Composable
+private fun PresetKindScope(presets: List<ItemPreset>, selected: PresetKind?, onSelect: (PresetKind?) -> Unit) {
+    val counts = remember(presets) { presets.groupingBy { presetKindOf(it.item) }.eachCount() }
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        PickChip(
+            label = stringResource(Res.string.calendar_preset_kind_all) + "  " + presets.size,
+            selected = selected == null,
+        ) { onSelect(null) }
+        PresetKind.entries.forEach { kind ->
+            val count = counts[kind] ?: return@forEach
+            PickChip(label = presetKindLabel(kind) + "  " + count, selected = selected == kind) {
+                onSelect(if (selected == kind) null else kind)
+            }
+        }
     }
 }
 
@@ -548,26 +661,61 @@ private fun SectionResults(sections: List<SectionStyle>, query: String, onAdd: (
     }
 }
 
+/**
+ * The Timer tab: the three timers the mockup offers, made on the spot. A countdown runs for the
+ * length typed in the footer -- 15:00 until something is typed -- a countdown to the service's
+ * start counts to that clock time, and a duration timer counts up from zero.
+ */
 @Composable
-private fun ScheduleResults(currentSchedule: List<ScheduleItem>, onAdd: (List<ScheduleItem>) -> Unit) {
-    if (currentSchedule.isEmpty()) {
-        EmptyBody(stringResource(Res.string.calendar_schedule_empty), "")
-        return
-    }
+private fun TimerResults(startTime: String, seconds: Int, onAdd: (List<ScheduleItem>) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val use24Hour = LocalUse24HourClock.current
+    val length = formatDuration(seconds)
     ScrollableList(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        itemsIndexed(currentSchedule, key = { index, item -> "$index:${item.id}" }) { _, item ->
+        item(key = "countdown") {
             ResultRow(
-                title = item.displayText,
-                subtitle = item.subtitle(),
-                onClick = { onAdd(listOf(item.withNewId())) },
+                title = stringResource(Res.string.calendar_timer_countdown),
+                subtitle = stringResource(Res.string.calendar_timer_countdown_sub, length),
+                color = scheme.tertiary,
+                onClick = { onAdd(listOf(countdownTimerItem(seconds))) },
+            )
+        }
+        countdownItem(startTime)?.let { toStart ->
+            item(key = "to_start") {
+                ResultRow(
+                    title = stringResource(Res.string.calendar_timer_to_start),
+                    subtitle = stringResource(Res.string.calendar_timer_to_start_sub, clockText(startTime, use24Hour)),
+                    color = scheme.tertiary,
+                    onClick = { onAdd(listOf(toStart)) },
+                )
+            }
+        }
+        item(key = "count_up") {
+            ResultRow(
+                title = stringResource(Res.string.calendar_timer_count_up),
+                subtitle = stringResource(Res.string.calendar_timer_count_up_sub),
+                color = scheme.tertiary,
+                onClick = { onAdd(listOf(countUpTimerItem())) },
             )
         }
     }
 }
 
-/** The saved presets, newest first, filtered by name as the query is typed. */
+/**
+ * The saved presets, newest first, narrowed to one [kind] and to what the query matches -- the
+ * preset's name, or the item's own text, so a scene preset renamed "Opener" is still found by
+ * typing the scene's name.
+ */
 @Composable
-private fun PresetResults(presets: List<ItemPreset>, query: String, onAdd: (List<ScheduleItem>) -> Unit) {
+private fun PresetResults(
+    presets: List<ItemPreset>,
+    kind: PresetKind?,
+    query: String,
+    previewSources: PreviewSources,
+    onAdd: (List<ScheduleItem>) -> Unit,
+) {
+    // The one preset opened to show what it puts on screen; opening another closes it.
+    var expanded by remember { mutableStateOf<String?>(null) }
     if (presets.isEmpty()) {
         EmptyBody(
             stringResource(Res.string.calendar_presets_empty),
@@ -576,16 +724,29 @@ private fun PresetResults(presets: List<ItemPreset>, query: String, onAdd: (List
         return
     }
     val q = query.trim()
-    val shown = presets.filter { q.isEmpty() || it.name.contains(q, ignoreCase = true) }
+    val shown = presets.filter { preset ->
+        (kind == null || presetKindOf(preset.item) == kind) &&
+            (q.isEmpty() || preset.name.contains(q, true) || preset.item.displayText.contains(q, true))
+    }
+    if (shown.isEmpty()) {
+        EmptyBody(stringResource(Res.string.calendar_no_results), "")
+        return
+    }
     ScrollableList(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
         itemsIndexed(shown, key = { _, preset -> preset.id }) { _, preset ->
             val look = lookFor(preset.item)
-            ResultRow(
-                title = preset.name,
-                subtitle = preset.item.displayText,
-                color = look.color,
-                onClick = { onAdd(listOf(preset.item.withNewId())) },
-            )
+            val open = expanded == preset.id
+            Column {
+                ResultRow(
+                    title = preset.name,
+                    subtitle = preset.item.displayText,
+                    color = look.color,
+                    onClick = { onAdd(listOf(preset.item.withNewId())) },
+                    expanded = open,
+                    onToggle = { expanded = if (open) null else preset.id },
+                )
+                if (open) PresetPreview(item = preset.item, sources = previewSources)
+            }
         }
     }
 }
@@ -625,6 +786,9 @@ private fun ResultRow(
     badge: String? = null,
     color: Color? = null,
     onEdit: (() -> Unit)? = null,
+    /** With [onToggle], the row carries a caret that opens a preview beneath it. */
+    expanded: Boolean = false,
+    onToggle: (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
     val tint = color ?: scheme.onSurfaceVariant
@@ -689,6 +853,14 @@ private fun ResultRow(
                 icon = Icons.Filled.Edit,
                 description = stringResource(Res.string.calendar_edit_song),
                 onClick = onEdit,
+                size = ADD_BADGE,
+            )
+        }
+        if (onToggle != null) {
+            SmallIconButton(
+                icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                description = stringResource(Res.string.calendar_preview_toggle),
+                onClick = onToggle,
                 size = ADD_BADGE,
             )
         }

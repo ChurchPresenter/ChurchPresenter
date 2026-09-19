@@ -1,5 +1,7 @@
 package org.churchpresenter.calendar
 
+import org.churchpresenter.calendar.ui.PreviewSources
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 
@@ -16,23 +18,31 @@ import java.io.File
  */
 data class CalendarHost(
     /**
-     * Puts a planned run of show into the Schedule tab.
+     * Puts a planned run of show -- rows and cue rows alike -- into the Schedule tab.
      *
      * [replace] true clears the current schedule first; false appends. The window asks the user
-     * which, and only when there is something to lose — see `LoadServiceConfirm`.
+     * which, and only when there is something to lose — see `LoadServiceConfirm`. [armed] is the
+     * service's own switch, carried over so what was armed on the calendar is armed in the
+     * Schedule, where the cues actually fire from. [timing] is how each row runs -- start, length,
+     * repeats, end -- keyed by row id, for the rows that have one.
      */
-    val loadIntoSchedule: (items: List<ScheduleItem>, replace: Boolean) -> Unit = { _, _ -> },
+    val loadIntoSchedule: (
+        items: List<ScheduleItem>,
+        timing: Map<String, RowTiming>,
+        replace: Boolean,
+        armed: Boolean,
+    ) -> Unit = { _, _, _, _ -> },
 
     /**
      * Puts one item on screen, the way a tap on it in the Schedule tab would, and plays it
      * [plays] times — 1 once, 0 until something else goes live — where the item has a run to play.
      *
-     * What a fired cue does — see [CueRunner]. The app routes it through the same
+     * What a fired cue does — see `fireCue`. The app routes it through the same
      * `executeProjectItem` its remote clients use, so a cue can show exactly what a phone can.
      */
     val projectItem: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
 
-    /** Clears every output — a [org.churchpresenter.calendar.model.CueAction.BLANK] cue. */
+    /** Clears every output — a [org.churchpresenter.core.models.schedule.CueAction.BLANK] cue. */
     val blankOutputs: () -> Unit = {},
 
     /**
@@ -73,6 +83,9 @@ data class CalendarHost(
      * to run on the composing thread.
      */
     val chooseExportFile: suspend (suggestedName: String) -> File? = { null },
+
+    /** What the picker's preset previews can draw with -- the app's video player and deck rasterizer. */
+    val preview: PreviewSources = PreviewSources(),
 )
 
 /**

@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.model
 
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.util.UUID
 
@@ -24,25 +25,37 @@ fun ScheduleItem.withNewId(): ScheduleItem {
         is ScheduleItem.WebsiteItem -> copy(id = fresh)
         is ScheduleItem.SceneItem -> copy(id = fresh)
         is ScheduleItem.DictionaryItem -> copy(id = fresh)
+        is ScheduleItem.CueItem -> copy(id = fresh, payload = payload?.withNewId())
     }
 }
 
-/** A run of show and its estimates, re-keyed together. */
-data class CopiedRows(val items: List<ScheduleItem>, val plannedSeconds: Map<String, Int>)
+/** A run of show, its estimates and its timing, re-keyed together. */
+data class CopiedRows(
+    val items: List<ScheduleItem>,
+    val plannedSeconds: Map<String, Int>,
+    val timing: Map<String, RowTiming> = emptyMap(),
+)
 
 /**
- * A fresh-keyed copy of [items] with [plannedSeconds] following each row to its new id.
+ * A fresh-keyed copy of [items] with [plannedSeconds] and [timing] following each row to its new id.
  *
  * Every copy a service makes of another's rows — from a template, from last week, into the next
  * occurrence of a series — goes through here, or the two services share row ids and editing one
  * estimate moves the other's too.
  */
-fun copiedRows(items: List<ScheduleItem>, plannedSeconds: Map<String, Int>): CopiedRows {
+fun copiedRows(
+    items: List<ScheduleItem>,
+    plannedSeconds: Map<String, Int>,
+    timing: Map<String, RowTiming> = emptyMap(),
+): CopiedRows {
     val copied = items.map { it.withNewId() }
     val seconds = items.indices.mapNotNull { index ->
         plannedSeconds[items[index].id]?.let { copied[index].id to it }
     }
-    return CopiedRows(copied, seconds.toMap())
+    val timings = items.indices.mapNotNull { index ->
+        timing[items[index].id]?.let { copied[index].id to it }
+    }
+    return CopiedRows(copied, seconds.toMap(), timings.toMap())
 }
 
 /**
@@ -76,8 +89,12 @@ private fun PlannedService.withUniqueRowIds(): PlannedService {
     // A duplicated id can only carry one estimate between them, so the first row keeps it and each
     // later copy takes the same value rather than losing it.
     val seconds = plannedSeconds.toMutableMap()
-    remapped.forEach { (original, fresh) -> plannedSeconds[original]?.let { seconds[fresh] = it } }
-    return copy(items = fixed, plannedSeconds = seconds)
+    val timings = timing.toMutableMap()
+    remapped.forEach { (original, fresh) ->
+        plannedSeconds[original]?.let { seconds[fresh] = it }
+        timing[original]?.let { timings[fresh] = it }
+    }
+    return copy(items = fixed, plannedSeconds = seconds, timing = timings)
 }
 
 /** The section heading a name and a color make, as an ordinary run-of-show row. */

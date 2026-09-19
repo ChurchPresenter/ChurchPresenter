@@ -95,11 +95,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_play_note_times
 import org.churchpresenter.calendar.generated.resources.calendar_play_once
 import org.churchpresenter.calendar.generated.resources.calendar_save_cue
 import org.churchpresenter.calendar.model.CUE_OFFSETS
-import org.churchpresenter.calendar.model.CueAction
+import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.calendar.model.ItemPreset
-import org.churchpresenter.calendar.model.LOOP_FOREVER
+import org.churchpresenter.core.models.schedule.LOOP_FOREVER
 import org.churchpresenter.calendar.model.PlannedService
-import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.isTargetFor
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -146,8 +145,8 @@ private val PLAY_CHOICES = listOf(1, 2, 3, 5, LOOP_FOREVER)
 fun CueSheet(
     service: PlannedService,
     presets: List<ItemPreset>,
-    existing: ServiceCue?,
-    onSave: (ServiceCue) -> Unit,
+    existing: ScheduleItem.CueItem?,
+    onSave: (ScheduleItem.CueItem) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
@@ -167,15 +166,15 @@ fun CueSheet(
     val needsPick = action == CueAction.PROJECT || action == CueAction.SCENE
     val target = payload?.takeIf { it.isTargetFor(action) }
     val canSave = pinnedValid && (!needsPick || target != null)
-    val draft = ServiceCue(
+    val draft = ScheduleItem.CueItem(
         id = existing?.id ?: UUID.randomUUID().toString(),
+        action = action,
+        label = label.trim(),
         offsetMinutes = offset,
         absoluteTime = if (pinned) pinnedAt?.let(::storedTime).orEmpty() else "",
-        label = label.trim(),
         payload = if (hasTarget) target else null,
-        action = action,
-        enabled = existing?.enabled ?: true,
         plays = if (action in CueAction.withPlays) plays else 1,
+        enabled = existing?.enabled ?: true,
     )
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -347,12 +346,18 @@ private fun TargetSection(
     var source by remember(action) { mutableStateOf(initial) }
     var filter by remember(action, source) { mutableStateOf("") }
     val pool = if (source == TargetSource.SERVICE) {
-        rows.map { Target(it.item, it.item.displayText, it.meta) }
+        rows.map { Target("row:" + it.item.id, it.item, it.item.displayText, it.meta) }
     } else {
-        fromPresets.map { Target(it.item, it.name, it.item.displayText) }
+        fromPresets.map { Target("preset:" + it.id, it.item, it.name, it.item.displayText) }
     }
     val query = filter.trim()
     val shown = if (query.isEmpty()) pool else pool.filter { it.label.contains(query, true) || it.meta.contains(query, true) }
+    // Which row is lit. The row that was clicked, by its own key -- two presets saved from the
+    // same scene hold equal items, so matching on the item lit both. Before anything is clicked
+    // (an existing cue being edited) the first row holding the saved item stands for it.
+    var pickedKey by remember(action) { mutableStateOf<String?>(null) }
+    val picked = pool.firstOrNull { it.key == pickedKey }
+        ?: selected?.let { sel -> pool.firstOrNull { it.item.sameAs(sel) } }
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -415,7 +420,7 @@ private fun TargetSection(
                     label = builtIn.first,
                     meta = builtIn.second,
                     selected = selected == null,
-                    onClick = { onSelect(null) },
+                    onClick = { pickedKey = null; onSelect(null) },
                 )
             }
             shown.forEach { target ->
@@ -424,12 +429,11 @@ private fun TargetSection(
                     icon = { Icon(look.icon, contentDescription = null, tint = look.color, modifier = Modifier.size(12.dp)) },
                     label = target.label,
                     meta = target.meta,
-                    selected = selected != null && target.item.sameAs(selected),
-                    onClick = { onSelect(target.item) },
+                    selected = target.key == picked?.key,
+                    onClick = { pickedKey = target.key; onSelect(target.item) },
                 )
             }
         }
-        val picked = selected?.let { sel -> pool.firstOrNull { it.item.sameAs(sel) } }
         when {
             picked != null -> PreviewCard(
                 item = picked.item,
@@ -599,7 +603,7 @@ private fun BoxScope.LoopBadge(plays: Int) {
     }
 }
 
-private data class Target(val item: ScheduleItem, val label: String, val meta: String)
+private data class Target(val key: String, val item: ScheduleItem, val label: String, val meta: String)
 private data class ServiceTarget(val item: ScheduleItem, val meta: String)
 
 /** The run-of-show rows [action] can use, each with the section it sits under and its length. */
@@ -765,7 +769,7 @@ private fun PlaySection(plays: Int, onPlays: (Int) -> Unit) {
 @Composable
 private fun WhenSection(
     service: PlannedService,
-    draft: ServiceCue,
+    draft: ScheduleItem.CueItem,
     pinned: Boolean,
     pinnedTime: String,
     pinnedValid: Boolean,
@@ -869,5 +873,5 @@ private fun WhenSection(
 }
 
 /** What the pinned-time field starts out holding: the cue's own time, or the default, in the format that is on. */
-private fun pinnedTimeText(existing: ServiceCue?, use24Hour: Boolean): String =
+private fun pinnedTimeText(existing: ScheduleItem.CueItem?, use24Hour: Boolean): String =
     clockText(existing?.absoluteTime?.ifEmpty { null } ?: DEFAULT_PINNED, use24Hour)

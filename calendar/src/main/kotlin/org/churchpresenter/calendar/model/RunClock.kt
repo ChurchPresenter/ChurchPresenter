@@ -21,20 +21,35 @@ data class RowClock(
  *
  * Empty when the service's own start time is unreadable, which is the one case where no row has a
  * meaningful clock. A section heading takes the clock of the row it introduces — a heading is a
- * divider, not something that takes time.
+ * divider, not something that takes time — and a cue row takes none either: it fires at its own
+ * time, beside the rows, rather than holding the service up.
+ *
+ * A row that starts on its own sits at its own time, exactly, and the rows after it flow on from
+ * there; the others accumulate from the service's start. A row that plays N times takes N times
+ * its length; one that loops takes its stated length.
  *
  * Times wrap at midnight, which is what a service running past it actually does.
  */
 fun runClocks(service: PlannedService): Map<String, RowClock> {
     val start = parseStoredTime(service.startTime) ?: return emptyMap()
-    var offset = 0L
+    var clock = start
     var exact = true
     return service.items.associate { item ->
-        val clock = RowClock(start.plusSeconds(offset), exact)
-        if (item !is ScheduleItem.LabelItem) {
-            val planned = service.plannedSeconds[item.id]
-            if (planned == null) exact = false else offset += planned
+        val timing = service.timingOf(item.id)
+        val pinned = timing.startAt.takeIf { it.isNotEmpty() }?.let(::parseStoredTime)
+        if (pinned != null) {
+            clock = pinned
+            exact = true
         }
-        item.id to clock
+        val rowClock = RowClock(clock, exact)
+        if (item !is ScheduleItem.LabelItem && item !is ScheduleItem.CueItem) {
+            val planned = service.plannedSeconds[item.id]
+            if (planned == null) {
+                exact = false
+            } else {
+                clock = clock.plusSeconds(planned.toLong() * timing.repeats.coerceAtLeast(1))
+            }
+        }
+        item.id to rowClock
     }
 }

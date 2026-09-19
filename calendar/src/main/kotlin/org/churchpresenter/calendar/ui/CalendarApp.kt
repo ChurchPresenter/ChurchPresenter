@@ -48,11 +48,20 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.collectAsState
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarSource
 import org.churchpresenter.calendar.CalendarState
 import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.CueFeed
 import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.calendar.fireCue
+import org.churchpresenter.calendar.generated.resources.calendar_all_manual
+import org.churchpresenter.calendar.generated.resources.calendar_auto_start_one
+import org.churchpresenter.calendar.generated.resources.calendar_auto_starts
+import org.churchpresenter.calendar.model.rowsForSchedule
+import org.churchpresenter.calendar.model.timerSeconds
+import org.churchpresenter.calendar.model.timingForSchedule
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_all_saved
 import org.churchpresenter.calendar.generated.resources.calendar_cancel
@@ -81,9 +90,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_pdf
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.sectionItem
-import org.churchpresenter.calendar.model.ServiceCue
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.monthHeading
@@ -95,8 +104,8 @@ import java.time.LocalDate
 /**
  * The Calendar Manager.
  *
- * Left is the month; centre is the selected day, its services and the run of show of whichever is
- * open; right is that service's automation — its cues, which [org.churchpresenter.calendar.CueRunner]
+ * Left is the month; right is the selected day, its services and the run of show of whichever is
+ * open — with that service's cues merged into it, which [org.churchpresenter.calendar.CueRunner]
  * fires whether or not this window is open.
  *
  * [storeFolder] is where `calendar.json` goes, and [songFolder] is the song library the picker
@@ -162,8 +171,17 @@ fun CalendarApp(
     }
     val scope = rememberCoroutineScope()
 
+    val openService = state.selectedService
+    val clock = rememberRunClock(openService, today)
+    // The latest fired cue, until dismissed. Keyed by firing, so the same cue going off again --
+    // fired by hand, or on another day -- shows again.
+    val firedCues by CueFeed.fired.collectAsState()
+    var dismissedToast by remember { mutableStateOf<String?>(null) }
+    val toast = firedCues.firstOrNull()?.takeUnless { it.key == dismissedToast }
+
     CompositionLocalProvider(LocalUse24HourClock provides state.document.preferences.use24HourClock) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Box(Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize()) {
                 Header(
                     monthLabel = monthHeading(state.visibleMonth),
@@ -212,6 +230,15 @@ fun CalendarApp(
                         } else {
                             RunOfShowPane(
                                 service = service,
+                                now = clock.now,
+                                header = RunOfShowHeaderActions(
+                                    onClockStep = clock.step,
+                                    onClockReset = clock.reset,
+                                    onArmed = { state.setArmed(service.id, it) },
+                                    onOpenAutomation = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
+                                    onCopy = { copyFrom = service },
+                                    onSaveTemplate = { templateFrom = service },
+                                ),
                                 onAddItem = { replacing = null; addingItem = true },
                                 onChangeItem = { replacing = it; addingItem = true },
                                 onRemove = { state.removeItem(service.id, it) },
@@ -219,16 +246,26 @@ fun CalendarApp(
                                 onPlannedSecondsChange = { itemId, seconds ->
                                     state.setPlannedSeconds(service.id, itemId, seconds)
                                 },
-                                onCopy = { copyFrom = service },
-                                onSaveTemplate = { templateFrom = service },
+                                onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
+                                onEditCue = { cueSheet = CueSheetState.Editing(it) },
+                                onFireCue = { cue ->
+                                    fireCue(host, service.rowsForSchedule(), cue, startTime = service.startTime)
+                                },
                                 modifier = Modifier.weight(1f),
                             )
                             HorizontalDivider()
                             Footer(
+                                status = service.name + " · " + when (val count = service.autoStartCount()) {
+                                    0 -> stringResource(Res.string.calendar_all_manual)
+                                    1 -> stringResource(Res.string.calendar_auto_start_one)
+                                    else -> stringResource(Res.string.calendar_auto_starts, count)
+                                },
                                 onLoad = {
                                     // Only ask when replacing would actually discard something.
                                     if (host.currentSchedule().isEmpty()) {
-                                        host.loadIntoSchedule(service.items, true)
+                                        host.loadIntoSchedule(
+                                            service.rowsForSchedule(), service.timingForSchedule(), true, service.armed,
+                                        )
                                     } else {
                                         loadConfirmFor = service
                                     }
@@ -236,29 +273,19 @@ fun CalendarApp(
                             )
                         }
                     }
-                    if (service != null) {
-                        VerticalDivider()
-                        AutomationPane(
-                            service = service,
-                            onArmed = { state.setArmed(service.id, it) },
-                            onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
-                            onEditCue = { cueSheet = CueSheetState.Editing(it) },
-                            onAddCue = { cueSheet = CueSheetState.Adding },
-                            onEditCues = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
-                            modifier = Modifier
-                                .widthIn(
-                                    min = CalendarMetrics.automationPaneMin,
-                                    max = CalendarMetrics.automationPaneMax,
-                                )
-                                .fillMaxHeight(),
-                        )
-                    }
                 }
+            }
+            if (toast != null) {
+                CueToast(
+                    event = toast,
+                    onDismiss = { dismissedToast = toast.key },
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(TOAST_MARGIN),
+                )
+            }
             }
         }
 
         if (settingsOpen) {
-            val openService = state.selectedService
             CalendarSettingsDialog(
                 preferences = state.document.preferences,
                 templates = state.document.templates,
@@ -369,24 +396,35 @@ private fun CalendarDialogs(
         AddItemSheet(
             songs = state.songs,
             songsLoaded = state.songsLoaded,
-            currentSchedule = host.currentSchedule(),
             presets = state.presets,
             sections = state.document.preferences.sections,
             bibleBooks = state.bibleBooks,
             serviceName = addTarget.name,
+            serviceStartTime = addTarget.startTime,
             replacing = replacing,
             songbooks = state.songbooks(),
             songEditor = songEditor,
             onSaveSong = { original, edited -> state.saveSong(original, edited) },
-            onAdd = { items, plannedSeconds ->
+            timing = replacing?.let { addTarget.timingOf(it.id) } ?: RowTiming.DEFAULT,
+            plannedSeconds = replacing?.let { addTarget.plannedSeconds[it.id] },
+            previewSources = host.preview,
+            onTimingChange = { timing, seconds ->
+                replacing?.let { row ->
+                    state.setTiming(addTarget.id, row.id, timing)
+                    state.setPlannedSeconds(addTarget.id, row.id, seconds)
+                }
+            },
+            onAdd = { items, plannedSeconds, timing ->
                 if (replacing != null) {
                     state.replaceItem(addTarget.id, replacing.id, items)
                 } else {
                     state.addItems(addTarget.id, items)
                 }
-                // The duration typed in the picker's footer applies to what was just added.
-                if (plannedSeconds != null) {
-                    items.forEach { state.setPlannedSeconds(addTarget.id, it.id, plannedSeconds) }
+                // The panel's length and timing apply to what was just added; a countdown's own
+                // length is its planned length whether or not one was typed.
+                items.forEach { item ->
+                    (plannedSeconds ?: item.timerSeconds())?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
+                    if (!timing.isDefault() && item !is ScheduleItem.LabelItem) state.setTiming(addTarget.id, item.id, timing)
                 }
                 onAddingItemClosed()
             },
@@ -438,8 +476,14 @@ private fun CalendarDialogs(
     loadConfirmFor?.let { service ->
         LoadServiceConfirm(
             currentCount = host.currentSchedule().size,
-            onReplace = { host.loadIntoSchedule(service.items, true); onLoadConfirmClosed() },
-            onAppend = { host.loadIntoSchedule(service.items, false); onLoadConfirmClosed() },
+            onReplace = {
+                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
+                onLoadConfirmClosed()
+            },
+            onAppend = {
+                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), false, service.armed)
+                onLoadConfirmClosed()
+            },
             onDismiss = onLoadConfirmClosed,
         )
     }
@@ -448,7 +492,7 @@ private fun CalendarDialogs(
 /** What the cue sheet is open for. */
 sealed interface CueSheetState {
     data object Adding : CueSheetState
-    data class Editing(val cue: ServiceCue) : CueSheetState
+    data class Editing(val cue: ScheduleItem.CueItem) : CueSheetState
 }
 
 /** A `Start from` option's two lines. */
@@ -637,13 +681,23 @@ private fun HeaderButton(
 }
 
 @Composable
-private fun Footer(onLoad: () -> Unit) {
+private fun Footer(status: String, onLoad: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
     ) {
+        // `Sunday Morning · 4 of 4 cues will fire automatically`: what the automation will do,
+        // said once where it is read last.
+        Text(
+            text = status,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.5.sp),
+            color = scheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -744,3 +798,5 @@ private val HEADER_HEIGHT = 52.dp
 private val HEADER_BADGE = 30.dp
 private val HEADER_BUTTON = 28.dp
 private const val BADGE_TINT = 0.16f
+
+private val TOAST_MARGIN = 14.dp

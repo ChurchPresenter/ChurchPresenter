@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.model
 
+import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.TimerModes
 import java.time.LocalTime
@@ -8,29 +9,49 @@ import java.util.UUID
 /** The offsets the cue sheet offers, in minutes from the service start. */
 val CUE_OFFSETS: List<Int> = listOf(-30, -15, -10, -5, 0, 30, 65, 90)
 
-/** When [cue] fires on a service that starts at [startTime], or null if neither time parses. */
-fun cueFireTime(cue: ServiceCue, startTime: String): LocalTime? {
+/**
+ * When [cue] fires on a service that starts at [startTime], or null if neither time parses.
+ *
+ * A pinned cue -- and every cue once it is in the live schedule -- carries its own clock time and
+ * needs no start. [startTime] is null where there is none to give, and a relative cue then has no
+ * time at all rather than a wrong one.
+ */
+fun cueFireTime(cue: ScheduleItem.CueItem, startTime: String?): LocalTime? {
     if (cue.isPinned()) return parseStoredTime(cue.absoluteTime)
-    val start = parseStoredTime(startTime) ?: return null
+    val start = startTime?.let(::parseStoredTime) ?: return null
     return start.plusMinutes(cue.offsetMinutes.toLong())
 }
 
-/** [service]'s cues in firing order — pinned and relative cues interleaved by the clock, not the list. */
-fun PlannedService.cuesInOrder(): List<ServiceCue> =
-    cues.sortedBy { cueFireTime(it, startTime)?.toSecondOfDay() ?: Int.MAX_VALUE }
+/** [cue] with its time written down as a clock time, so it fires the same wherever the row goes. */
+fun ScheduleItem.CueItem.pinnedTo(startTime: String): ScheduleItem.CueItem =
+    cueFireTime(this, startTime)?.let { copy(absoluteTime = storedTime(it)) } ?: this
 
-/** The same service with [cue] added or, if one with its id exists, replaced; kept in firing order. */
-fun PlannedService.withCue(cue: ServiceCue): PlannedService {
-    val next = cues.filterNot { it.id == cue.id } + cue
-    return copy(cues = next).let { it.copy(cues = it.cuesInOrder()) }
+/**
+ * The same service with [cue] added or, if a row with its id exists, replaced -- put in the list
+ * where it fires: before the first row whose clock is not earlier than the cue's, or at the end.
+ * A cue's *time* is what fires it; its place in the list is so the list reads as the service will
+ * run.
+ */
+fun PlannedService.withCue(cue: ScheduleItem.CueItem): PlannedService {
+    val without = items.filterNot { it.id == cue.id }
+    val at = cueFireTime(cue, startTime)
+    val clocks = runClocks(copy(items = without))
+    val index = if (at == null) {
+        without.size
+    } else {
+        without.indexOfFirst { row ->
+            val rowTime = when (row) {
+                is ScheduleItem.CueItem -> cueFireTime(row, startTime)
+                is ScheduleItem.LabelItem -> null
+                else -> clocks[row.id]?.time
+            }
+            rowTime != null && !rowTime.isBefore(at)
+        }.let { if (it < 0) without.size else it }
+    }
+    return copy(items = without.toMutableList().also { it.add(index, cue) })
 }
 
-fun PlannedService.withoutCue(cueId: String): PlannedService = copy(cues = cues.filterNot { it.id == cueId })
-
-/** A fresh-keyed copy of [cues], for a service or template made from another. */
-fun copiedCues(cues: List<ServiceCue>): List<ServiceCue> = cues.map { cue ->
-    cue.copy(id = UUID.randomUUID().toString(), payload = cue.payload?.withNewId())
-}
+fun PlannedService.withoutCue(cueId: String): PlannedService = copy(items = items.filterNot { it.id == cueId })
 
 /**
  * The timer a [CueAction.COUNTDOWN] cue puts on screen: a clock countdown to [startTime].
@@ -38,8 +59,8 @@ fun copiedCues(cues: List<ServiceCue>): List<ServiceCue> = cues.map { cue ->
  * Built at fire time rather than stored, so moving the service moves the countdown's target with
  * it — the one thing a stored payload could not do.
  */
-fun countdownItem(startTime: String): ScheduleItem.AnnouncementItem? {
-    val start = parseStoredTime(startTime) ?: return null
+fun countdownItem(startTime: String?): ScheduleItem.AnnouncementItem? {
+    val start = startTime?.let(::parseStoredTime) ?: return null
     return ScheduleItem.AnnouncementItem(
         id = UUID.randomUUID().toString(),
         text = "",
@@ -65,7 +86,7 @@ fun ScheduleItem.isTargetFor(action: String): Boolean = when (action) {
     else -> false
 }
 
-/** Whether [ServiceCue.plays] means anything for this item — it has a run to play through. */
+/** Whether [ScheduleItem.CueItem.plays] means anything for this item — it has a run to play through. */
 fun ScheduleItem.canPlayRepeatedly(): Boolean = when (this) {
     is ScheduleItem.PictureItem, is ScheduleItem.PresentationItem, is ScheduleItem.MediaItem -> true
     is ScheduleItem.AnnouncementItem -> !isTimer
@@ -75,11 +96,11 @@ fun ScheduleItem.canPlayRepeatedly(): Boolean = when (this) {
 /**
  * Whether the host can put [item] on screen from a cue.
  *
- * Section headings are structure, not content, and a lower third is driven by its own tab rather
- * than by the projection path a cue uses, so offering either would make a cue that fires and
+ * Section headings and cues are structure, not content, and a lower third is driven by its own tab
+ * rather than by the projection path a cue uses, so offering any would make a cue that fires and
  * shows nothing.
  */
 fun ScheduleItem.isProjectableByCue(): Boolean = when (this) {
-    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem -> false
+    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem, is ScheduleItem.CueItem -> false
     else -> true
 }

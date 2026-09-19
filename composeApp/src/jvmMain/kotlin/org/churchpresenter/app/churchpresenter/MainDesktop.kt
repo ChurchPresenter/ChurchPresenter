@@ -200,6 +200,11 @@ fun MainDesktop(
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
     verseSequenceLog: VerseSequenceLog? = null,
+    /** Fires a cue row of the Schedule by hand -- the same path the automation engine takes. */
+    onPresentCue: (ScheduleItem.CueItem) -> Unit = {},
+    /** Whether the Schedule's cue rows may fire, and the switch that changes it. */
+    automationArmed: Boolean = true,
+    onAutomationArmedChange: (Boolean) -> Unit = {},
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -1227,6 +1232,9 @@ fun MainDesktop(
                             presenterManager.setShowPresenterWindow(true)
                             presenting(Presenting.ANNOUNCEMENTS)
                         },
+                        onPresentCue = onPresentCue,
+                        automationArmed = automationArmed,
+                        onAutomationArmedChange = onAutomationArmedChange,
                         onPresentScene = { item ->
                             sceneViewModel.selectScene(item.sceneId)
                             val scene = sceneViewModel.scenes.find { it.id == item.sceneId }
@@ -1288,6 +1296,8 @@ fun MainDesktop(
                                 is ScheduleItem.DictionaryItem -> {
                                     dictionaryViewModel.selectByNumber(item.number)
                                 }
+
+                                is ScheduleItem.CueItem -> Unit
                             }
                         },
                         onEditLabel = { labelItem ->
@@ -1327,6 +1337,9 @@ fun MainDesktop(
                                         )
                                     },
                                     addWebsite = actions.addWebsite,
+                                    addCue = actions.addCue,
+                                    addRow = actions.addRow,
+                                    currentTiming = actions.currentTiming,
                                     addLabel = actions.addLabel,
                                     addLowerThird = actions.addLowerThird,
                                     presentScene = { sceneId ->

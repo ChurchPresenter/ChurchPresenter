@@ -19,9 +19,20 @@ already has; a planned service is the same shape as a saved `.schedule` file plu
 The consequences are the reason it is written that way:
 
 - "Load into Schedule" is a **copy**, not a conversion, so nothing can be lost in a mapping.
+- **Automation is a property of the row.** `RowTiming` (`:core-models`) says when a row starts on
+  its own, how long it runs, how many times, and what happens at the end — kept *beside* the list
+  in `PlannedService.timing`, keyed by row id like `plannedSeconds`, so a song stays a song. The
+  picker doubles as the row editor (click a row): pick a replacement, or change the timing panel.
+  It goes into the Schedule with the run of show (`timingForSchedule()`) and fires *from* the
+  Schedule: the engine (`CueRunner`) watches the live schedule, not `calendar.json`.
+- **A cue is a row too** — `ScheduleItem.CueItem`, for a standalone action (blank the outputs, go
+  live) with nothing of its own to show. On the calendar its time is relative to the service start;
+  `rowsForSchedule()` pins it to the clock as it is loaded.
 - A cue's payload is an ordinary `ScheduleItem`, which the app's own `executeProjectItem` already
   knows how to put on screen — the planner never has to learn what any item type *means*.
 - An existing `.schedule` file could be dropped onto a calendar day for free.
+- `PlannedService.cues` / `SavedTemplate.cues` are the **old** shape, read only: `withCuesAsRows()`
+  folds them into `items` on load and nothing writes them again.
 
 **Do not add a `CalendarItem`/`RunRow` type.** If a row needs something a `ScheduleItem` has no
 field for, it belongs beside the list (as `plannedSeconds` does — a map keyed by item id), not in a
@@ -38,11 +49,15 @@ and the module stops compiling with unresolved `Res` references that no source f
 
 | File | Holds |
 |---|---|
-| `model/CalendarModels.kt` | `CalendarDocument`, `PlannedService`, `ServiceCue`, `ServiceKind`, `SectionStyle` — the file format |
+| `model/CalendarModels.kt` | `CalendarDocument`, `PlannedService`, `ServiceKind`, `SectionStyle` — the file format; `ServiceCue` is the pre-row cue shape, read only |
 | `model/CalendarTime.kt` | Dates, the locale week start, month names, the grid's dates. Pure |
 | `model/DurationText.kt` | `4:30` ⇄ 270 seconds. Pure |
 | `model/ClockText.kt` | `18:30` ⇄ `6:30 PM`: the clock format, and what a time field accepts. Pure |
 | `model/RunClock.kt` | Each row's projected clock time, and whether it is exact |
+| `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
+| `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
+| `model/CueStatus.kt` | Each cue's fired / next status against a clock, the rows and timing as they go into the Schedule, the old-file migration. Pure |
+| `model/TimerRows.kt` | The timers the picker's Timer tab makes, and setting a timer row's length. Pure |
 | `model/ReferenceParser.kt` | `John 3:16-17` → a `BibleVerseItem`; and the browsed-verse builder |
 | `model/RowIdentity.kt` | Re-keying rows, and the unique-id pass every load goes through |
 | `model/ServiceTemplate.kt` | What a new service starts from |
@@ -50,11 +65,16 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `CalendarStore.kt` | `calendar.json`, its three backups and its corrupt-file quarantine |
 | `CalendarState.kt` | What the window is showing; the only thing that writes the store |
 | `CalendarHost.kt` | The whole surface between this module and the app |
+| `CueRunner.kt` | The automation engine over the live schedule, `fireCue` (the one place a cue becomes host calls) and `CueFeed`, what has fired |
 | `ui/Sheet.kt` | The dialog scaffold and the parts every dialog is built from |
 | `ui/Fields.kt` | `CompactTextField`, `FieldLabel` and the `commitOnExit` modifier |
 | `ui/Metrics.kt` | The design's sizes and type, named once |
 | `ui/ClockFormat.kt` | `LocalUse24HourClock`, the one place the clock format is read from |
-| `ui/ReorderState.kt` | Drag-to-reorder for the run of show |
+| `ui/ReorderState.kt` | Drag-to-reorder for the run of show, by row key |
+| `ui/RunClockState.kt` | The clock the run of show judges its cues against: wall clock today, stepped preview otherwise |
+| `ui/CueRows.kt` | A cue row of the run of show |
+| `ui/TimingPanel.kt`, `ui/TimingDraft.kt` | The row editor's Starts / Runs / Repeats / At end panel, and its typed state |
+| `ui/CueToast.kt` | The `Cue fired` card in the window's corner |
 | `ui/` (the rest) | The screens and the three dialogs |
 
 ## Rules
