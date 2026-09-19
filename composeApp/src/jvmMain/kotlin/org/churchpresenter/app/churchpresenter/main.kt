@@ -1213,6 +1213,13 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             }
                             LaunchedEffect(Unit) { cueRunner.run() }
 
+                            // Nothing is on screen any more, so whatever was is no longer being
+                            // timed -- see LiveDurationLog.
+                            val liveMode = presenterManager.presentingMode.value
+                            LaunchedEffect(liveMode) {
+                                if (liveMode == Presenting.NONE) liveDurationLog.wentBlank()
+                            }
+
                             // A row set to run for its *own* length has no number for the engine to
                             // count -- the video itself decides when it is over. MediaViewModel
                             // already reports that (it is what clears the output), so the row's

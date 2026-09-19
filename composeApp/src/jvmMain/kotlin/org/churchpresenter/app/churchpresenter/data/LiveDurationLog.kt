@@ -118,3 +118,19 @@ class LiveDurationLog(private val file: File) {
         }
     }
 }
+
+/**
+ * A library song as the row that identifies it, so what is measured in the Songs tab and what is
+ * measured in the Schedule are the same thing.
+ *
+ * Only the identifying fields matter here -- [LiveDurationLog.durationKey] reads the songbook and
+ * number, never the row id.
+ */
+fun org.churchpresenter.core.models.songs.SongItem.asDurationRow(): ScheduleItem.SongItem =
+    ScheduleItem.SongItem(
+        id = songId,
+        songNumber = number.toIntOrNull() ?: 0,
+        title = title,
+        songbook = songbook,
+        songId = songId,
+    )

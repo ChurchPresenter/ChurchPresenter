@@ -109,6 +109,11 @@ fun SongsTab(
     appSettings: AppSettings,
     /** How long a song usually stays on screen here, measured -- see `LiveDurationLog`. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
+    /**
+     * The song that has just gone live from this tab -- which is where songs are actually
+     * presented from, rather than from a schedule row.
+     */
+    onSongWentLive: (SongItem) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
@@ -579,7 +584,12 @@ fun SongsTab(
             onFavoritesExpandedChange = { favoritesExpanded = it },
             onFavPanelHeightChange = { favPanelHeightPx = it },
             onAddToSchedule = onAddToSchedule,
-            onPresenting = onPresenting,
+            onPresenting = { mode ->
+                // Going live from here is the start of the measurement: what is timed is the song
+                // on screen, not a row somebody clicked.
+                if (mode == Presenting.LYRICS) filteredSongs.getOrNull(selectedSongIndex)?.let(onSongWentLive)
+                onPresenting(mode)
+            },
             sendToPresenter = ::sendToPresenter,
         )
 
