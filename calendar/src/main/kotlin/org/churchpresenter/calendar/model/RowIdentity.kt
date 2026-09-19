@@ -29,6 +29,29 @@ fun ScheduleItem.withNewId(): ScheduleItem {
     }
 }
 
+/**
+ * The same row shown under [text].
+ *
+ * A row's `displayText` is built from the item's own fields -- `Scene: $sceneName`,
+ * `$fileName ($slideCount slides)` -- which is right for something added straight from a tab and
+ * wrong for a preset: the name the preset was *saved* under is the one the user picked it by, and
+ * a scene left on its default name reached the run of show as `Scene: Scene`.
+ */
+internal fun ScheduleItem.renamed(text: String): ScheduleItem = when (this) {
+    is ScheduleItem.SongItem -> copy(displayText = text)
+    is ScheduleItem.BibleVerseItem -> copy(displayText = text)
+    is ScheduleItem.LabelItem -> copy(displayText = text)
+    is ScheduleItem.PictureItem -> copy(displayText = text)
+    is ScheduleItem.PresentationItem -> copy(displayText = text)
+    is ScheduleItem.MediaItem -> copy(displayText = text)
+    is ScheduleItem.LowerThirdItem -> copy(displayText = text)
+    is ScheduleItem.AnnouncementItem -> copy(displayText = text)
+    is ScheduleItem.WebsiteItem -> copy(displayText = text)
+    is ScheduleItem.SceneItem -> copy(displayText = text)
+    is ScheduleItem.DictionaryItem -> copy(displayText = text)
+    is ScheduleItem.CueItem -> copy(displayText = text)
+}
+
 /** A run of show, its estimates and its timing, re-keyed together. */
 data class CopiedRows(
     val items: List<ScheduleItem>,

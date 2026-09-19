@@ -173,8 +173,6 @@ fun ScheduleTab(
     onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
     onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
     onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
-    automationArmed: Boolean = true,
-    onAutomationArmedChange: (Boolean) -> Unit = {},
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -309,10 +307,7 @@ fun ScheduleTab(
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
-            onToggleButton = onToggleToolbarButton,
-            cueCount = scheduleItems.count { it is ScheduleItem.CueItem },
-            automationArmed = automationArmed,
-            onAutomationArmedChange = onAutomationArmedChange,
+            onToggleButton = onToggleToolbarButton
         )
 
         val viewModelState = rememberUpdatedState(viewModel)

@@ -126,7 +126,9 @@ import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.CueRunner
+import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.calendar.fireCue
 import org.churchpresenter.calendar.ui.PreviewSources
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
@@ -1195,6 +1197,17 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 ).run()
                             }
 
+                            // And the other half of leaving it to run: the service that is about
+                            // to start loads itself into the Schedule. Reads calendar.json on a
+                            // background thread, so it works with the Calendar window closed.
+                            LaunchedEffect(Unit) {
+                                val store = CalendarStore(AppDataDir.resolve())
+                                ServiceAutoLoader(
+                                    document = { withContext(Dispatchers.IO) { store.load().document } },
+                                    host = cueHost,
+                                ).run()
+                            }
+
                             LaunchedEffect(Unit) {
                                 companionServer.onSelectSongSection.collect { req ->
                                     val sections = presenterManager.allLyricSections.value
@@ -1451,8 +1464,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             MainDesktop(
                                 hostWindow = window,
                                 onPresentCue = fireScheduleCue,
-                                automationArmed = automationArmed,
-                                onAutomationArmedChange = { automationArmed = it },
                                 instanceLinkConnectionStatus =
                                     instanceLinkViewModel.connectionStatus.collectAsState().value,
                                 instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,

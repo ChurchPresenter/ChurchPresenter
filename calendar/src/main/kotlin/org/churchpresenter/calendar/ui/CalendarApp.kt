@@ -151,8 +151,6 @@ fun CalendarApp(
     var loadConfirmFor by remember { mutableStateOf<PlannedService?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
     var settingsTab by remember { mutableStateOf(SettingsTab.SECTIONS) }
-    // The cue sheet: open for a new cue (Adding) or an existing one (Editing).
-    var cueSheet by remember { mutableStateOf<CueSheetState?>(null) }
     // The service Copy or Template was pressed on, or null while that sheet is closed.
     var copyFrom by remember { mutableStateOf<PlannedService?>(null) }
     var templateFrom by remember { mutableStateOf<PlannedService?>(null) }
@@ -166,8 +164,8 @@ fun CalendarApp(
     }
     // Presets are written by the app's tabs while this window may be open, so re-read them each
     // time something that offers them opens rather than once at load.
-    LaunchedEffect(addingItem, cueSheet, settingsOpen) {
-        if (addingItem || cueSheet != null || settingsOpen) state.reloadPresets(io)
+    LaunchedEffect(addingItem, settingsOpen) {
+        if (addingItem || settingsOpen) state.reloadPresets(io)
     }
     val scope = rememberCoroutineScope()
 
@@ -189,7 +187,6 @@ fun CalendarApp(
                     onToday = state::goToToday,
                     onExport = exportAction(state, host, io, scope),
                     onSettings = { settingsTab = SettingsTab.SECTIONS; settingsOpen = true },
-                    onClose = onClose,
                 )
                 HorizontalDivider()
                 RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
@@ -227,15 +224,19 @@ fun CalendarApp(
                                 onCopyLast = { creatingService = true },
                                 modifier = Modifier.weight(1f),
                             )
+                            HorizontalDivider()
+                            // The footer is the window's own bar, not the run of show's: Close
+                            // lives here, so it cannot disappear with the day's only service.
+                            Footer(status = "", onLoad = null, onClose = onClose)
                         } else {
                             RunOfShowPane(
                                 service = service,
                                 now = clock.now,
+                                previewing = clock.previewing,
                                 header = RunOfShowHeaderActions(
                                     onClockStep = clock.step,
                                     onClockReset = clock.reset,
                                     onArmed = { state.setArmed(service.id, it) },
-                                    onOpenAutomation = { settingsTab = SettingsTab.AUTOMATION; settingsOpen = true },
                                     onCopy = { copyFrom = service },
                                     onSaveTemplate = { templateFrom = service },
                                 ),
@@ -247,7 +248,6 @@ fun CalendarApp(
                                     state.setPlannedSeconds(service.id, itemId, seconds)
                                 },
                                 onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
-                                onEditCue = { cueSheet = CueSheetState.Editing(it) },
                                 onFireCue = { cue ->
                                     fireCue(host, service.rowsForSchedule(), cue, startTime = service.startTime)
                                 },
@@ -260,12 +260,16 @@ fun CalendarApp(
                                     1 -> stringResource(Res.string.calendar_auto_start_one)
                                     else -> stringResource(Res.string.calendar_auto_starts, count)
                                 },
+                                onClose = onClose,
                                 onLoad = {
                                     // Only ask when replacing would actually discard something.
                                     if (host.currentSchedule().isEmpty()) {
                                         host.loadIntoSchedule(
                                             service.rowsForSchedule(), service.timingForSchedule(), true, service.armed,
                                         )
+                                        // The run of show is in the Schedule tab now, which is
+                                        // where the next thing happens -- so get out of the way.
+                                        onClose?.invoke()
                                     } else {
                                         loadConfirmFor = service
                                     }
@@ -290,7 +294,6 @@ fun CalendarApp(
                 preferences = state.document.preferences,
                 templates = state.document.templates,
                 presets = state.presets,
-                openService = openService,
                 initialTab = settingsTab,
                 canInsertSection = openService != null,
                 onPreferencesChange = state::updatePreferences,
@@ -306,9 +309,6 @@ fun CalendarApp(
                 },
                 onRemoveTemplate = state::deleteTemplate,
                 onRemovePreset = state::deletePreset,
-                onEditCue = { settingsOpen = false; cueSheet = CueSheetState.Editing(it) },
-                onDeleteCue = { openService?.let { service -> state.deleteCue(service.id, it) } },
-                onAddCue = { settingsOpen = false; cueSheet = CueSheetState.Adding },
                 onDismiss = { settingsOpen = false },
             )
         }
@@ -322,10 +322,9 @@ fun CalendarApp(
             editingService = editingService,
             addingItem = addingItem,
             loadConfirmFor = loadConfirmFor,
+            onLoaded = { onClose?.invoke() },
             copyFrom = copyFrom,
             templateFrom = templateFrom,
-            cueSheet = cueSheet,
-            onCueSheetClosed = { cueSheet = null },
             onServiceSheetClosed = { creatingService = false; editingService = null },
             onAddingItemClosed = { addingItem = false; replacing = null },
             onLoadConfirmClosed = { loadConfirmFor = null },
@@ -351,10 +350,10 @@ private fun CalendarDialogs(
     editingService: PlannedService?,
     addingItem: Boolean,
     loadConfirmFor: PlannedService?,
+    /** Called once a run of show has been put into the Schedule -- the window closes behind it. */
+    onLoaded: () -> Unit,
     copyFrom: PlannedService?,
     templateFrom: PlannedService?,
-    cueSheet: CueSheetState?,
-    onCueSheetClosed: () -> Unit,
     onServiceSheetClosed: () -> Unit,
     onAddingItemClosed: () -> Unit,
     onLoadConfirmClosed: () -> Unit,
@@ -460,39 +459,22 @@ private fun CalendarDialogs(
         )
     }
 
-    val cueTarget = state.selectedService
-    if (cueSheet != null && cueTarget != null) {
-        val existing = (cueSheet as? CueSheetState.Editing)?.cue
-        CueSheet(
-            service = cueTarget,
-            presets = state.presets,
-            existing = existing,
-            onSave = { state.saveCue(cueTarget.id, it); onCueSheetClosed() },
-            onDelete = existing?.let { { state.deleteCue(cueTarget.id, it.id); onCueSheetClosed() } },
-            onDismiss = onCueSheetClosed,
-        )
-    }
-
     loadConfirmFor?.let { service ->
         LoadServiceConfirm(
             currentCount = host.currentSchedule().size,
             onReplace = {
                 host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
                 onLoadConfirmClosed()
+                onLoaded()
             },
             onAppend = {
                 host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), false, service.armed)
                 onLoadConfirmClosed()
+                onLoaded()
             },
             onDismiss = onLoadConfirmClosed,
         )
     }
-}
-
-/** What the cue sheet is open for. */
-sealed interface CueSheetState {
-    data object Adding : CueSheetState
-    data class Editing(val cue: ScheduleItem.CueItem) : CueSheetState
 }
 
 /** A `Start from` option's two lines. */
@@ -560,8 +542,8 @@ private suspend fun exportRunOfShow(
  *
  * Ordered as the design has it: the badge, the title and its subtitle, a rule, then **Today** —
  * all on the left, directly over the month pane it acts on — and only then the spacer that pushes
- * the saved note, Export, Settings and Close to the right. Today sitting out on the right, next to
- * Close, reads as a window-level action rather than as calendar navigation, which is what it is.
+ * the saved note, Export and Settings to the right. Close is not here: it sits in the footer,
+ * beside Load into Schedule, where the window's two ways out are next to each other.
  */
 @Composable
 private fun Header(
@@ -570,7 +552,6 @@ private fun Header(
     onToday: () -> Unit,
     onExport: (() -> Unit)?,
     onSettings: () -> Unit,
-    onClose: (() -> Unit)?,
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(
@@ -641,9 +622,6 @@ private fun Header(
             icon = Icons.Filled.Settings,
             onClick = onSettings,
         )
-        if (onClose != null) {
-            PrimaryButton(stringResource(Res.string.calendar_close), onClose)
-        }
     }
 }
 
@@ -680,8 +658,14 @@ private fun HeaderButton(
     }
 }
 
+/**
+ * The window's bottom bar: what the automation will do, then Close and Load into Schedule.
+ *
+ * The two are deliberately unalike. Load is the primary action and is filled with it; Close is the
+ * quiet bordered one beside it, so the pair does not read as two equal choices.
+ */
 @Composable
-private fun Footer(status: String, onLoad: () -> Unit) {
+private fun Footer(status: String, onLoad: (() -> Unit)?, onClose: (() -> Unit)?) {
     val scheme = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -698,6 +682,14 @@ private fun Footer(status: String, onLoad: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onClose != null) {
+            QuietButton(
+                label = stringResource(Res.string.calendar_close),
+                onClick = onClose,
+                height = CalendarMetrics.addServiceButtonHeight,
+            )
+        }
+        if (onLoad == null) return@Row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),

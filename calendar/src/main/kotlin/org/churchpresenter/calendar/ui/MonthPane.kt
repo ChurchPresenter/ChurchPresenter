@@ -165,16 +165,23 @@ private fun NavButton(
     onClick: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier
-            .size(CalendarMetrics.monthNavButton)
-            .clip(RoundedCornerShape(7.dp))
-            .background(scheme.surfaceVariant.copy(alpha = CELL_TINT_ALPHA))
-            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(7.dp))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(icon, contentDescription = description, tint = scheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+    Hint(description) {
+        Box(
+            Modifier
+                .size(CalendarMetrics.monthNavButton)
+                .clip(RoundedCornerShape(7.dp))
+                .background(scheme.surfaceVariant.copy(alpha = CELL_TINT_ALPHA))
+                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(7.dp))
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                icon,
+                contentDescription = description,
+                tint = scheme.onSurfaceVariant,
+                modifier = Modifier.size(14.dp),
+            )
+        }
     }
 }
 

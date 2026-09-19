@@ -265,6 +265,13 @@ data class CalendarPreferences(
     val defaultItemSeconds: Int = DEFAULT_ITEM_SECONDS,
     /** Offered as a presentation's length when nothing better is known. */
     val defaultSermonSeconds: Int = DEFAULT_SERMON_SECONDS,
+    /**
+     * Whether a service about to start loads itself into the Schedule tab -- see [ServiceAutoLoader].
+     *
+     * Off by default: a planner that puts things into the live Schedule on its own is not what
+     * somebody expects the first time they open it.
+     */
+    val autoLoadService: Boolean = false,
 )
 
 /** 4:30 — the length of a fairly ordinary worship song. */

@@ -7,15 +7,11 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_action_coun
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_project
 import org.churchpresenter.calendar.generated.resources.calendar_cue_action_scene
-import org.churchpresenter.calendar.generated.resources.calendar_cue_after
-import org.churchpresenter.calendar.generated.resources.calendar_cue_at_start
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_timer
-import org.churchpresenter.calendar.generated.resources.calendar_cue_before
 import org.churchpresenter.calendar.generated.resources.calendar_cue_item_missing
 import org.churchpresenter.calendar.generated.resources.calendar_cue_loops
 import org.churchpresenter.calendar.generated.resources.calendar_cue_times
-import org.churchpresenter.calendar.generated.resources.calendar_cue_pinned_at
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_one
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_other
 import org.churchpresenter.core.models.schedule.CueAction
@@ -53,21 +49,6 @@ fun cueSubtitle(cue: ScheduleItem.CueItem): String {
     if (cue.action != CueAction.PROJECT) return action
     val payload = cue.payload ?: return action + " · " + stringResource(Res.string.calendar_cue_item_missing)
     return action + " · " + payload.displayText
-}
-
-/** `At start`, `15 min before`, `30 min in`, or `at 11:00` when pinned. */
-@Composable
-fun cueWhenLabel(cue: ScheduleItem.CueItem): String = when {
-    cue.isPinned() ->
-        stringResource(Res.string.calendar_cue_pinned_at, clockText(cue.absoluteTime, LocalUse24HourClock.current))
-    else -> offsetLabel(cue.offsetMinutes)
-}
-
-@Composable
-fun offsetLabel(minutes: Int): String = when {
-    minutes == 0 -> stringResource(Res.string.calendar_cue_at_start)
-    minutes < 0 -> stringResource(Res.string.calendar_cue_before, -minutes)
-    else -> stringResource(Res.string.calendar_cue_after, minutes)
 }
 
 /** The clock time a cue fires on a service starting at [startTime], as `09:45`; blank if it cannot. */

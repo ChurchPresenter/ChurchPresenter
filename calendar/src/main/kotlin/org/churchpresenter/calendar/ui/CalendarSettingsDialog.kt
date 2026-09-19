@@ -40,10 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.churchpresenter.calendar.generated.resources.Res
-import org.churchpresenter.calendar.generated.resources.calendar_arm_default
-import org.churchpresenter.calendar.generated.resources.calendar_arm_default_sub
-import org.churchpresenter.calendar.generated.resources.calendar_automation_empty_sub
-import org.churchpresenter.calendar.generated.resources.calendar_cues
+import org.churchpresenter.calendar.generated.resources.calendar_auto_load
+import org.churchpresenter.calendar.generated.resources.calendar_auto_load_sub
 import org.churchpresenter.calendar.generated.resources.calendar_default_item
 import org.churchpresenter.calendar.generated.resources.calendar_default_item_sub
 import org.churchpresenter.calendar.generated.resources.calendar_default_sermon
@@ -55,7 +53,6 @@ import org.churchpresenter.calendar.generated.resources.calendar_section_insert
 import org.churchpresenter.calendar.generated.resources.calendar_section_remove
 import org.churchpresenter.calendar.generated.resources.calendar_sections_note
 import org.churchpresenter.calendar.generated.resources.calendar_settings
-import org.churchpresenter.calendar.generated.resources.calendar_settings_automation
 import org.churchpresenter.calendar.generated.resources.calendar_settings_defaults
 import org.churchpresenter.calendar.generated.resources.calendar_settings_done
 import org.churchpresenter.calendar.generated.resources.calendar_settings_sections
@@ -71,17 +68,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_settings_preset
 import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_sub
 import org.churchpresenter.calendar.generated.resources.calendar_presets_note
 import org.churchpresenter.calendar.generated.resources.calendar_preset_remove
-import org.churchpresenter.calendar.model.PlannedService
-import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.calendar.generated.resources.calendar_add_cue
-import org.churchpresenter.calendar.generated.resources.calendar_automation_no_service
-import org.churchpresenter.calendar.generated.resources.calendar_cues_for
-import org.churchpresenter.calendar.generated.resources.calendar_edit_cue
-import org.churchpresenter.calendar.generated.resources.calendar_delete
-import androidx.compose.material.icons.filled.Edit
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
+import org.churchpresenter.calendar.model.AUTO_LOAD_LEAD_MINUTES
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseDuration
 import org.jetbrains.compose.resources.stringResource
@@ -94,7 +84,7 @@ import org.churchpresenter.calendar.model.parseClockText
 import org.churchpresenter.calendar.model.storedTime
 
 /** The dialog's four tabs, in the design's order. */
-enum class SettingsTab { AUTOMATION, SECTIONS, TEMPLATES, PRESETS, DEFAULTS }
+enum class SettingsTab { SECTIONS, TEMPLATES, PRESETS, DEFAULTS }
 
 private val DIALOG_WIDTH = 560.dp
 private val BODY_HEIGHT = 340.dp
@@ -111,18 +101,15 @@ private const val EVENING_EXAMPLE = "18:30"
 /**
  * Calendar-wide settings — everything that applies to every service rather than to today's.
  *
- * All four of the design's tabs are here. `Sections` and `Defaults` are live. `Automation` shows
- * the one control it already has — whether new services start armed — above an explanation of what
- * the cue list is waiting on, and `Templates` says the same for saved templates. Neither invents a
- * control wired to nothing.
+ * `Sections`, `Presets` and `Defaults` are live; `Templates` lists what has been saved and says so
+ * when nothing has. Cues are not settings: they are rows of the run of show, armed and skipped
+ * there.
  */
 @Composable
 fun CalendarSettingsDialog(
     preferences: CalendarPreferences,
     templates: List<SavedTemplate>,
     presets: List<ItemPreset>,
-    /** The service whose cues the Automation tab lists, or null when no day is open. */
-    openService: PlannedService?,
     initialTab: SettingsTab = SettingsTab.SECTIONS,
     canInsertSection: Boolean,
     colorPicker: (@Composable (ColorPickerRequest) -> Unit)?,
@@ -134,9 +121,6 @@ fun CalendarSettingsDialog(
     onInsertSection: (SectionStyle) -> Unit,
     onRemoveTemplate: (id: String) -> Unit,
     onRemovePreset: (id: String) -> Unit,
-    onEditCue: (ScheduleItem.CueItem) -> Unit,
-    onDeleteCue: (cueId: String) -> Unit,
-    onAddCue: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var tab by remember { mutableStateOf(initialTab) }
@@ -164,14 +148,6 @@ fun CalendarSettingsDialog(
                 contentPadding = PaddingValues(horizontal = 15.dp, vertical = 13.dp),
             ) {
                 when (tab) {
-                    SettingsTab.AUTOMATION -> AutomationTab(
-                        preferences = preferences,
-                        service = openService,
-                        onChange = onPreferencesChange,
-                        onEditCue = onEditCue,
-                        onDeleteCue = onDeleteCue,
-                        onAddCue = onAddCue,
-                    )
                     SettingsTab.SECTIONS -> SectionsTab(
                         sections = preferences.sections,
                         canInsert = canInsertSection,
@@ -195,77 +171,12 @@ fun CalendarSettingsDialog(
 @Composable
 private fun tabLabel(tab: SettingsTab): String = stringResource(
     when (tab) {
-        SettingsTab.AUTOMATION -> Res.string.calendar_settings_automation
         SettingsTab.SECTIONS -> Res.string.calendar_settings_sections
         SettingsTab.TEMPLATES -> Res.string.calendar_settings_templates
         SettingsTab.PRESETS -> Res.string.calendar_settings_presets
         SettingsTab.DEFAULTS -> Res.string.calendar_settings_defaults
     }
 )
-
-/**
- * The arm-by-default switch, then the open service's cues with edit and delete — the design's
- * Automation tab. The cues are the *service's*: the automation pane and this list are two views
- * of one thing, so an edit here is an edit there.
- */
-@Composable
-private fun AutomationTab(
-    preferences: CalendarPreferences,
-    service: PlannedService?,
-    onChange: (CalendarPreferences) -> Unit,
-    onEditCue: (ScheduleItem.CueItem) -> Unit,
-    onDeleteCue: (String) -> Unit,
-    onAddCue: () -> Unit,
-) {
-    SettingCard {
-        CardText(
-            title = stringResource(Res.string.calendar_arm_default),
-            subtitle = stringResource(Res.string.calendar_arm_default_sub),
-        )
-        Switch(
-            checked = preferences.armByDefault,
-            onCheckedChange = { onChange(preferences.copy(armByDefault = it)) },
-        )
-    }
-    if (service == null) {
-        SheetOverline(stringResource(Res.string.calendar_cues), Modifier.padding(top = 2.dp))
-        NoteLine(stringResource(Res.string.calendar_automation_no_service))
-        return
-    }
-    SheetOverline(stringResource(Res.string.calendar_cues_for, service.name), Modifier.padding(top = 2.dp))
-    val cues = service.cueRows()
-    if (cues.isEmpty()) NoteLine(stringResource(Res.string.calendar_automation_empty_sub))
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        cues.forEach { cue ->
-            SettingCard(modifier = Modifier.clip(SheetMetrics.cardRadius).clickable { onEditCue(cue) }) {
-                Text(
-                    text = cueWhenLabel(cue),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = WHEN_TINT))
-                        .padding(horizontal = 7.dp, vertical = 2.dp),
-                )
-                CardText(title = cue.label.ifBlank { cueActionLabel(cue.action) }, subtitle = cueSubtitle(cue))
-                SmallIconButton(
-                    icon = Icons.Filled.Edit,
-                    description = stringResource(Res.string.calendar_edit_cue),
-                    onClick = { onEditCue(cue) },
-                )
-                SmallIconButton(
-                    icon = Icons.Filled.Close,
-                    description = stringResource(Res.string.calendar_delete),
-                    onClick = { onDeleteCue(cue.id) },
-                    destructive = true,
-                )
-            }
-        }
-    }
-    DashedAddButton(label = stringResource(Res.string.calendar_add_cue), icon = Icons.Filled.Add, onClick = onAddCue)
-}
 
 private const val WHEN_TINT = 0.16f
 
@@ -581,6 +492,16 @@ private fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPre
         isValid = { parseDuration(it) != null },
         onCommit = { parseDuration(it)?.let { secs -> onChange(preferences.copy(defaultSermonSeconds = secs)) } },
     )
+    SettingCard {
+        CardText(
+            title = stringResource(Res.string.calendar_auto_load),
+            subtitle = stringResource(Res.string.calendar_auto_load_sub, AUTO_LOAD_LEAD_MINUTES),
+        )
+        Switch(
+            checked = preferences.autoLoadService,
+            onCheckedChange = { onChange(preferences.copy(autoLoadService = it)) },
+        )
+    }
 }
 
 /**

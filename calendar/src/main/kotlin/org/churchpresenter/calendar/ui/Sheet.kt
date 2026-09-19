@@ -251,23 +251,25 @@ fun SmallIconButton(
     size: Dp = SheetMetrics.smallButton,
 ) {
     val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier
-            .size(size)
-            .clip(RoundedCornerShape(6.dp))
-            .background(
-                if (destructive) scheme.error.copy(alpha = DESTRUCTIVE_TINT)
-                else scheme.surfaceVariant.copy(alpha = BUTTON_TINT)
+    Hint(description) {
+        Box(
+            Modifier
+                .size(size)
+                .clip(RoundedCornerShape(6.dp))
+                .background(
+                    if (destructive) scheme.error.copy(alpha = DESTRUCTIVE_TINT)
+                    else scheme.surfaceVariant.copy(alpha = BUTTON_TINT)
+                )
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                icon,
+                contentDescription = description,
+                tint = if (destructive) scheme.error else scheme.onSurfaceVariant,
+                modifier = Modifier.size(size * ICON_RATIO),
             )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = if (destructive) scheme.error else scheme.onSurfaceVariant,
-            modifier = Modifier.size(size * ICON_RATIO),
-        )
+        }
     }
 }
 

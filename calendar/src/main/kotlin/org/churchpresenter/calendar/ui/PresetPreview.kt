@@ -26,9 +26,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -44,15 +45,22 @@ import org.churchpresenter.calendar.generated.resources.calendar_preview_scene_u
 import org.churchpresenter.calendar.generated.resources.calendar_preview_stream
 import org.churchpresenter.calendar.generated.resources.calendar_preview_slides
 import org.churchpresenter.calendar.generated.resources.calendar_preview_slides_cap
+import org.churchpresenter.calendar.generated.resources.calendar_preview_timer_clock_display
+import org.churchpresenter.calendar.generated.resources.calendar_preview_timer_clock
+import org.churchpresenter.calendar.generated.resources.calendar_preview_timer_duration
+import org.churchpresenter.calendar.generated.resources.calendar_preview_timer_then
+import org.churchpresenter.calendar.generated.resources.calendar_preview_timer_up
 import org.churchpresenter.calendar.generated.resources.calendar_preview_video_done
 import org.churchpresenter.calendar.generated.resources.calendar_preview_video_unavailable
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.formatDuration
+import org.churchpresenter.calendar.model.secondsUntil
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.TimerModes
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Image as AwtImage
-import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URI
-import javax.imageio.ImageIO
+import java.time.LocalTime
 
 /** How many pictures or slides a preview shows -- the first ten, and it says so. */
 const val PREVIEW_CAP: Int = 10
@@ -64,15 +72,20 @@ internal val THUMB_WIDTH = 96.dp
 internal val THUMB_HEIGHT = 54.dp
 private val VIDEO_WIDTH = 240.dp
 private val VIDEO_HEIGHT = 135.dp
-private const val THUMB_PIXELS = 192
+private val TIMER_READOUT_SIZE = 34.sp
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
+private const val MAX_HOUR = 23
+private const val MAX_MINUTE = 59
 private val PICTURE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
 
 /**
  * The accordion body under a preset row: what the preset puts on screen.
  *
  * A picture folder shows its first [PREVIEW_CAP] pictures and says how many there are; a deck its
- * first slides the same way; a video plays for [VIDEO_PREVIEW_MILLIS] and stops; anything else --
- * a timer, an announcement, a scene -- is described in a line, there being nothing to draw.
+ * first slides the same way; a video plays for [VIDEO_PREVIEW_MILLIS] and stops; a scene is drawn
+ * by the app; a timer shows the readout it starts on. Anything else -- an announcement -- is
+ * described in a line, there being nothing to draw.
  */
 @Composable
 fun PresetPreview(item: ScheduleItem, sources: PreviewSources, modifier: Modifier = Modifier) {
@@ -85,6 +98,12 @@ fun PresetPreview(item: ScheduleItem, sources: PreviewSources, modifier: Modifie
             is ScheduleItem.PresentationItem -> SlidePreview(item, sources)
             is ScheduleItem.MediaItem -> VideoPreview(item, sources)
             is ScheduleItem.SceneItem -> ScenePreview(item, sources)
+            is ScheduleItem.AnnouncementItem ->
+                if (item.isTimer) {
+                    TimerPreview(item)
+                } else {
+                    Caption(item.displayText.ifBlank { stringResource(Res.string.calendar_preview_none) })
+                }
             else -> Caption(item.displayText.ifBlank { stringResource(Res.string.calendar_preview_none) })
         }
     }
@@ -162,6 +181,51 @@ private fun ScenePreview(item: ScheduleItem.SceneItem, sources: PreviewSources) 
     Caption(item.sceneName)
 }
 
+/**
+ * The timer as it reaches the screen: its opening readout, in its own color on black.
+ *
+ * Static, and [now] is a parameter rather than a call inside the composition -- a preview that
+ * ticks is a live clock in a list, and a clock read from inside a composable is the leak that
+ * makes a picture of it different every time it is taken.
+ */
+@Composable
+private fun TimerPreview(item: ScheduleItem.AnnouncementItem, now: LocalTime = LocalTime.now()) {
+    val use24Hour = LocalUse24HourClock.current
+    val target = LocalTime.of(
+        item.targetHour.coerceIn(0, MAX_HOUR),
+        item.targetMinute.coerceIn(0, MAX_MINUTE),
+        item.targetSecond.coerceIn(0, MAX_MINUTE),
+    )
+    val readout = when (item.timerMode) {
+        TimerModes.COUNT_UP -> formatDuration(0)
+        TimerModes.CLOCK -> formatDuration(secondsUntil(now, target))
+        TimerModes.CLOCK_DISPLAY -> clockText(now, use24Hour)
+        else -> formatDuration(
+            item.timerHours * SECONDS_PER_HOUR + item.timerMinutes * SECONDS_PER_MINUTE + item.timerSeconds
+        )
+    }
+    PreviewFrame(background = Color.Black) {
+        Text(
+            text = readout,
+            style = MaterialTheme.typography.displaySmall.copy(fontSize = TIMER_READOUT_SIZE),
+            fontWeight = FontWeight.Bold,
+            color = parseHex(item.timerTextColor),
+            maxLines = 1,
+        )
+    }
+    Caption(
+        when (item.timerMode) {
+            TimerModes.COUNT_UP -> stringResource(Res.string.calendar_preview_timer_up)
+            TimerModes.CLOCK -> stringResource(Res.string.calendar_preview_timer_clock, clockText(target, use24Hour))
+            TimerModes.CLOCK_DISPLAY -> stringResource(Res.string.calendar_preview_timer_clock_display)
+            else -> stringResource(Res.string.calendar_preview_timer_duration, readout)
+        }
+    )
+    if (item.timerExpiredText.isNotBlank()) {
+        Caption(stringResource(Res.string.calendar_preview_timer_then, item.timerExpiredText))
+    }
+}
+
 /** A path as a media row stores it -- a plain path, or a `file:` URI -- as a file, or null for a stream. */
 private fun localMediaFile(mediaUrl: String): File? = when {
     mediaUrl.startsWith("file:") -> runCatching { File(URI(mediaUrl)) }.getOrNull()
@@ -211,15 +275,15 @@ private fun VideoPreview(item: ScheduleItem.MediaItem, sources: PreviewSources) 
     if (!playing) Caption(stringResource(Res.string.calendar_preview_video_done))
 }
 
-/** The 16:9 box a video or a scene is drawn in. */
+/** The 16:9 box a video, a scene or a timer is drawn in. */
 @Composable
-private fun PreviewFrame(content: @Composable () -> Unit) {
+private fun PreviewFrame(background: Color? = null, content: @Composable () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Box(
         Modifier
             .size(VIDEO_WIDTH, VIDEO_HEIGHT)
             .clip(RoundedCornerShape(6.dp))
-            .background(scheme.surfaceVariant)
+            .background(background ?: scheme.surfaceVariant)
             .border(1.dp, scheme.outlineVariant, RoundedCornerShape(6.dp)),
         contentAlignment = Alignment.Center,
     ) {
@@ -255,18 +319,4 @@ private fun Caption(text: String) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 2,
     )
-}
-
-/** [file] decoded and scaled to thumbnail size, or null when it is not an image after all. */
-private fun thumbnailOf(file: File): ImageBitmap? {
-    val source = runCatching { ImageIO.read(file) }.getOrNull() ?: return null
-    val scale = THUMB_PIXELS.toDouble() / maxOf(source.width, source.height).coerceAtLeast(1)
-    if (scale >= 1.0) return source.toComposeImageBitmap()
-    val width = (source.width * scale).toInt().coerceAtLeast(1)
-    val height = (source.height * scale).toInt().coerceAtLeast(1)
-    val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-    val graphics = scaled.createGraphics()
-    graphics.drawImage(source.getScaledInstance(width, height, AwtImage.SCALE_SMOOTH), 0, 0, null)
-    graphics.dispose()
-    return scaled.toComposeImageBitmap()
 }

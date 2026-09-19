@@ -742,7 +742,6 @@
     <string name="schedule_density_detailed">Detailed</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="schedule_kind_cue">Cue</string>
-    <string name="schedule_automation_armed">%1$d cues</string>
     <string name="schedule_cue_fired">Fired %1$s</string>
     <string name="schedule_timing_loop">Loops</string>
     <string name="schedule_timing_times">Plays %1$d×</string>

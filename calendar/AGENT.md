@@ -56,8 +56,9 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `model/RunClock.kt` | Each row's projected clock time, and whether it is exact |
 | `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
 | `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
+| `model/AutoLoad.kt` | When a service is due to be loaded: its first row's clock time, less five minutes. Pure |
 | `model/CueStatus.kt` | Each cue's fired / next status against a clock, the rows and timing as they go into the Schedule, the old-file migration. Pure |
-| `model/TimerRows.kt` | The timers the picker's Timer tab makes, and setting a timer row's length. Pure |
+| `model/TimerRows.kt` | Reading and setting a timer row's length. Timers come in as presets. Pure |
 | `model/ReferenceParser.kt` | `John 3:16-17` → a `BibleVerseItem`; and the browsed-verse builder |
 | `model/RowIdentity.kt` | Re-keying rows, and the unique-id pass every load goes through |
 | `model/ServiceTemplate.kt` | What a new service starts from |
@@ -66,13 +67,14 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `CalendarState.kt` | What the window is showing; the only thing that writes the store |
 | `CalendarHost.kt` | The whole surface between this module and the app |
 | `CueRunner.kt` | The automation engine over the live schedule, `fireCue` (the one place a cue becomes host calls) and `CueFeed`, what has fired |
+| `ServiceAutoLoader.kt` | Loads the service that is about to start into the Schedule tab, with the window closed |
 | `ui/Sheet.kt` | The dialog scaffold and the parts every dialog is built from |
 | `ui/Fields.kt` | `CompactTextField`, `FieldLabel` and the `commitOnExit` modifier |
 | `ui/Metrics.kt` | The design's sizes and type, named once |
 | `ui/ClockFormat.kt` | `LocalUse24HourClock`, the one place the clock format is read from |
 | `ui/ReorderState.kt` | Drag-to-reorder for the run of show, by row key |
 | `ui/RunClockState.kt` | The clock the run of show judges its cues against: wall clock today, stepped preview otherwise |
-| `ui/CueRows.kt` | A cue row of the run of show |
+| `ui/CueRows.kt` | A cue row of the run of show — armed, skipped or fired there; there is no cue editor |
 | `ui/TimingPanel.kt`, `ui/TimingDraft.kt` | The row editor's Starts / Runs / Repeats / At end panel, and its typed state |
 | `ui/CueToast.kt` | The `Cue fired` card in the window's corner |
 | `ui/` (the rest) | The screens and the three dialogs |

@@ -17,10 +17,8 @@ import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.isDurationTimer
-import org.churchpresenter.calendar.model.withCue
 import org.churchpresenter.calendar.model.withTimerSeconds
 import org.churchpresenter.calendar.model.withCuesAsRows
-import org.churchpresenter.calendar.model.withoutCue
 import org.churchpresenter.calendar.model.copiedRows
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.storedDate
@@ -354,17 +352,6 @@ class CalendarState(
     }
 
     // ── Cues ──────────────────────────────────────────────────────────────────
-
-    /** Adds [cue] to the service, or replaces the row with its id. Placed in the list by its time. */
-    fun saveCue(serviceId: String, cue: ScheduleItem.CueItem) {
-        val service = document.serviceById(serviceId) ?: return
-        commit(document.withService(service.withCue(cue)))
-    }
-
-    fun deleteCue(serviceId: String, cueId: String) {
-        val service = document.serviceById(serviceId) ?: return
-        commit(document.withService(service.withoutCue(cueId)))
-    }
 
     /** Ticks or unticks one cue — "skip this one" — without touching the rest. */
     fun setCueEnabled(serviceId: String, cueId: String, enabled: Boolean) {

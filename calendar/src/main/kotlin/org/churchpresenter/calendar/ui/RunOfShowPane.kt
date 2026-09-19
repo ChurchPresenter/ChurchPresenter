@@ -63,6 +63,7 @@ import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_add_item
 import org.churchpresenter.calendar.generated.resources.calendar_copy_last
 import org.churchpresenter.calendar.generated.resources.calendar_duration_hint
+import org.churchpresenter.calendar.generated.resources.calendar_duration_tip
 import org.churchpresenter.calendar.generated.resources.calendar_empty_hint
 import org.churchpresenter.calendar.generated.resources.calendar_move_down
 import org.churchpresenter.calendar.generated.resources.calendar_move_up
@@ -121,6 +122,8 @@ private const val CHIP_TINT = 0.16f
 internal fun RunOfShowPane(
     service: PlannedService,
     now: LocalTime?,
+    /** Whether [now] is a stepped preview clock -- the header offers to put it back. */
+    previewing: Boolean,
     header: RunOfShowHeaderActions,
     onAddItem: () -> Unit,
     onChangeItem: (ScheduleItem) -> Unit,
@@ -128,7 +131,6 @@ internal fun RunOfShowPane(
     onMove: (from: Int, to: Int) -> Unit,
     onPlannedSecondsChange: (itemId: String, seconds: Int?) -> Unit,
     onCueEnabled: (cueId: String, enabled: Boolean) -> Unit,
-    onEditCue: (ScheduleItem.CueItem) -> Unit,
     onFireCue: (ScheduleItem.CueItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -153,7 +155,7 @@ internal fun RunOfShowPane(
     )
     val lastIndex = service.items.lastIndex
     Column(modifier.fillMaxSize()) {
-        RunOfShowHeader(service = service, now = now, actions = header)
+        RunOfShowHeader(service = service, now = now, previewing = previewing, actions = header)
         ScrollableList(
             state = listState,
             modifier = Modifier.fillMaxSize().padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 12.dp),
@@ -176,7 +178,6 @@ internal fun RunOfShowPane(
                         armed = service.armed,
                         status = statuses[item.id],
                         onToggle = { onCueEnabled(item.id, !item.enabled) },
-                        onEdit = { onEditCue(item) },
                         onFire = { onFireCue(item) },
                         modifier = Modifier.animateItem(),
                     )
@@ -360,20 +361,22 @@ private fun RowAction(
     onClick: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier
-            .size(CalendarMetrics.rowAction)
-            .clip(CalendarMetrics.smallRadius)
-            .background(scheme.surface.copy(alpha = if (enabled) 1f else 0f))
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = scheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else DIM_ALPHA * 0.6f),
-            modifier = Modifier.size(11.dp),
-        )
+    Hint(description) {
+        Box(
+            Modifier
+                .size(CalendarMetrics.rowAction)
+                .clip(CalendarMetrics.smallRadius)
+                .background(scheme.surface.copy(alpha = if (enabled) 1f else 0f))
+                .clickable(enabled = enabled, onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                icon,
+                contentDescription = description,
+                tint = scheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else DIM_ALPHA * 0.6f),
+                modifier = Modifier.size(11.dp),
+            )
+        }
     }
 }
 
@@ -484,20 +487,22 @@ private fun DurationControl(seconds: Int?, onChange: (Int?) -> Unit) {
     var editing by remember { mutableStateOf(false) }
 
     if (!editing) {
-        Box(
-            Modifier
-                .height(CalendarMetrics.rowAction)
-                .clip(CalendarMetrics.smallRadius)
-                .clickable { editing = true }
-                .padding(horizontal = 6.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = formatDuration(seconds),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
-                color = scheme.onSurfaceVariant.copy(alpha = if (seconds == null) DIM_ALPHA else 1f),
-                maxLines = 1,
-            )
+        Hint(stringResource(Res.string.calendar_duration_tip)) {
+            Box(
+                Modifier
+                    .height(CalendarMetrics.rowAction)
+                    .clip(CalendarMetrics.smallRadius)
+                    .clickable { editing = true }
+                    .padding(horizontal = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = formatDuration(seconds),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
+                    color = scheme.onSurfaceVariant.copy(alpha = if (seconds == null) DIM_ALPHA else 1f),
+                    maxLines = 1,
+                )
+            }
         }
         return
     }

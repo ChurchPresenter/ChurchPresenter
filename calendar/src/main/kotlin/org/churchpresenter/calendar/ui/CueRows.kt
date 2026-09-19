@@ -80,22 +80,24 @@ internal fun CueStatusChip(status: CueStatus, cue: ScheduleItem.CueItem, startTi
 @Composable
 private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier
-            .size(TICK_BOX)
-            .clip(RoundedCornerShape(5.dp))
-            .background(if (enabled) scheme.primary else scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
-            .border(1.dp, if (enabled) Color.Transparent else scheme.outlineVariant, RoundedCornerShape(5.dp))
-            .clickable(onClick = onToggle),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (enabled) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = stringResource(Res.string.calendar_cue_skip_tip),
-                tint = scheme.onPrimary,
-                modifier = Modifier.size(10.dp),
-            )
+    Hint(stringResource(Res.string.calendar_cue_skip_tip)) {
+        Box(
+            Modifier
+                .size(TICK_BOX)
+                .clip(RoundedCornerShape(5.dp))
+                .background(if (enabled) scheme.primary else scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
+                .border(1.dp, if (enabled) Color.Transparent else scheme.outlineVariant, RoundedCornerShape(5.dp))
+                .clickable(onClick = onToggle),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (enabled) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = stringResource(Res.string.calendar_cue_skip_tip),
+                    tint = scheme.onPrimary,
+                    modifier = Modifier.size(10.dp),
+                )
+            }
         }
     }
 }
@@ -104,20 +106,22 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
 @Composable
 private fun FireButton(onFire: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier
-            .size(CalendarMetrics.rowAction)
-            .clip(CalendarMetrics.smallRadius)
-            .background(scheme.primary.copy(alpha = CHIP_TINT))
-            .clickable(onClick = onFire),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            Icons.Filled.PlayArrow,
-            contentDescription = stringResource(Res.string.calendar_cue_fire_now),
-            tint = scheme.primary,
-            modifier = Modifier.size(12.dp),
-        )
+    Hint(stringResource(Res.string.calendar_cue_fire_now)) {
+        Box(
+            Modifier
+                .size(CalendarMetrics.rowAction)
+                .clip(CalendarMetrics.smallRadius)
+                .background(scheme.primary.copy(alpha = CHIP_TINT))
+                .clickable(onClick = onFire),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.PlayArrow,
+                contentDescription = stringResource(Res.string.calendar_cue_fire_now),
+                tint = scheme.primary,
+                modifier = Modifier.size(12.dp),
+            )
+        }
     }
 }
 
@@ -139,8 +143,8 @@ private fun CueBadge(action: String, ink: Float) {
 }
 
 /**
- * A cue as a row: `[time] [tick] [bolt] [title / what it does] [status] [badge] [fire]`. The row
- * opens the cue for editing; the tick and the fire button keep gestures of their own.
+ * A cue as a row: `[time] [tick] [bolt] [title / what it does] [status] [badge] [fire]`. The tick
+ * skips it for today and the fire button runs it now; nothing here edits the cue.
  */
 @Composable
 internal fun CueRow(
@@ -149,7 +153,6 @@ internal fun CueRow(
     armed: Boolean,
     status: CueStatus?,
     onToggle: () -> Unit,
-    onEdit: () -> Unit,
     onFire: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -174,7 +177,6 @@ internal fun CueRow(
                 },
                 shape = CalendarMetrics.rowRadius,
             )
-            .clickable(onClick = onEdit)
             .padding(end = 9.dp, top = 6.dp, bottom = 6.dp),
     ) {
         Box(

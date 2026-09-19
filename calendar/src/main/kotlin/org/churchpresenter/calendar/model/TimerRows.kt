@@ -2,34 +2,19 @@ package org.churchpresenter.calendar.model
 
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.TimerModes
-import java.util.UUID
+import java.time.LocalTime
 
 /*
- * The timers the picker's Timer tab makes on the spot, and what the run of show can do to one --
- * a timer is an `AnnouncementItem` with `isTimer`, the same row the Announcements tab adds, so
- * the Schedule tab and the outputs already know how to run it.
+ * What the run of show can do to a timer row -- a timer is an `AnnouncementItem` with `isTimer`,
+ * the same row the Announcements tab adds, so the Schedule tab and the outputs already know how to
+ * run it. Timers come into a run of show as presets; the picker has no tab that makes one.
  */
 
-/** 15:00 -- the mockup's countdown, and about what a pre-service countdown is. */
-const val DEFAULT_COUNTDOWN_SECONDS: Int = 900
-
-/** A timer that counts down for [seconds] and then shows [expiredText]. */
-fun countdownTimerItem(seconds: Int, expiredText: String = ""): ScheduleItem.AnnouncementItem =
-    ScheduleItem.AnnouncementItem(
-        id = UUID.randomUUID().toString(),
-        text = "",
-        isTimer = true,
-        timerMode = TimerModes.DURATION,
-        timerExpiredText = expiredText,
-    ).withTimerSeconds(seconds)
-
-/** A timer that counts up from zero until it is taken off. */
-fun countUpTimerItem(): ScheduleItem.AnnouncementItem = ScheduleItem.AnnouncementItem(
-    id = UUID.randomUUID().toString(),
-    text = "",
-    isTimer = true,
-    timerMode = TimerModes.COUNT_UP,
-)
+/** How long from [now] to [target], counting on to tomorrow rather than going negative. */
+fun secondsUntil(now: LocalTime, target: LocalTime): Int {
+    val seconds = target.toSecondOfDay() - now.toSecondOfDay()
+    return if (seconds < 0) seconds + SECONDS_PER_DAY else seconds
+}
 
 /** Whether this row is a timer whose length is a duration -- the one kind a typed length can set. */
 fun ScheduleItem.isDurationTimer(): Boolean =
@@ -60,3 +45,4 @@ fun ScheduleItem.timerSeconds(): Int? {
 
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3600
+private const val SECONDS_PER_DAY = 86_400

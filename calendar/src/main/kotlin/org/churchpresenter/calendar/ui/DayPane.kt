@@ -237,19 +237,21 @@ private fun ServiceChip(
             }
         }
         Box(Modifier.width(1.dp).fillMaxHeight().background(border))
-        Box(
-            Modifier
-                .width(EDIT_TAIL_WIDTH)
-                .fillMaxHeight()
-                .clickable(onClick = onEdit),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.Edit,
-                contentDescription = stringResource(Res.string.calendar_edit_service),
-                tint = scheme.onSurfaceVariant,
-                modifier = Modifier.size(13.dp),
-            )
+        Hint(stringResource(Res.string.calendar_edit_service)) {
+            Box(
+                Modifier
+                    .width(EDIT_TAIL_WIDTH)
+                    .fillMaxHeight()
+                    .clickable(onClick = onEdit),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(Res.string.calendar_edit_service),
+                    tint = scheme.onSurfaceVariant,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
         }
     }
 }

@@ -21,7 +21,13 @@ import java.time.LocalTime
  * because a service on another day has no "fired" or "next" to speak of. The preview is per
  * service -- switching services drops it.
  */
-internal class RunClockState(val now: LocalTime?, val step: () -> Unit, val reset: () -> Unit)
+internal class RunClockState(
+    val now: LocalTime?,
+    /** Whether [now] is a stepped preview rather than the wall clock -- what the chip's × needs. */
+    val previewing: Boolean,
+    val step: () -> Unit,
+    val reset: () -> Unit,
+)
 
 @Composable
 internal fun rememberRunClock(service: PlannedService?, today: LocalDate): RunClockState {
@@ -36,6 +42,7 @@ internal fun rememberRunClock(service: PlannedService?, today: LocalDate): RunCl
     val now = preview ?: wallClock.takeIf { service?.date == storedDate(today) }
     return RunClockState(
         now = now,
+        previewing = preview != null,
         step = {
             if (service != null) {
                 preview = (preview ?: previewClockStart(service.startTime, now)).plusMinutes(CLOCK_STEP_MINUTES)

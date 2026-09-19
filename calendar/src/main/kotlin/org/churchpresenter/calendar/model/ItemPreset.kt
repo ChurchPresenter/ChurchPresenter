@@ -20,6 +20,15 @@ data class ItemPreset(
     val savedAt: String = "",
 )
 
+/**
+ * The preset as a run-of-show row: a fresh id, and the name it was saved under as its row text.
+ *
+ * The name is the only thing the user chose about it, and for a scene it is often the only thing
+ * that tells two apart -- scenes carry a default name, so three presets of three different scenes
+ * all read `Scene: Scene` if the item's own text is kept.
+ */
+fun ItemPreset.asRow(): ScheduleItem = item.withNewId().renamed(name)
+
 /** The whole of `presets.json`. */
 @Serializable
 data class PresetDocument(

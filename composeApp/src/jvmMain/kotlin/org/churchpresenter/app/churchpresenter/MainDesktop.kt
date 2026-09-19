@@ -202,9 +202,6 @@ fun MainDesktop(
     verseSequenceLog: VerseSequenceLog? = null,
     /** Fires a cue row of the Schedule by hand -- the same path the automation engine takes. */
     onPresentCue: (ScheduleItem.CueItem) -> Unit = {},
-    /** Whether the Schedule's cue rows may fire, and the switch that changes it. */
-    automationArmed: Boolean = true,
-    onAutomationArmedChange: (Boolean) -> Unit = {},
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -1233,8 +1230,6 @@ fun MainDesktop(
                             presenting(Presenting.ANNOUNCEMENTS)
                         },
                         onPresentCue = onPresentCue,
-                        automationArmed = automationArmed,
-                        onAutomationArmedChange = onAutomationArmedChange,
                         onPresentScene = { item ->
                             sceneViewModel.selectScene(item.sceneId)
                             val scene = sceneViewModel.scenes.find { it.id == item.sceneId }

@@ -7,8 +7,6 @@ internal data class RunOfShowHeaderActions(
     /** Drops the preview clock, back to the wall clock or to none. */
     val onClockReset: () -> Unit,
     val onArmed: (Boolean) -> Unit,
-    /** Opens the settings on the Automation tab, where the cues are listed and edited. */
-    val onOpenAutomation: () -> Unit,
     val onCopy: () -> Unit,
     val onSaveTemplate: () -> Unit,
 )

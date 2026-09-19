@@ -62,6 +62,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_pick_adds_to
 import org.churchpresenter.calendar.generated.resources.calendar_pick_all_bible_books
 import org.churchpresenter.calendar.generated.resources.calendar_pick_all_books
 import org.churchpresenter.calendar.generated.resources.calendar_pick_add_range
+import org.churchpresenter.calendar.generated.resources.calendar_pick_add_tip
 import org.churchpresenter.calendar.generated.resources.calendar_pick_verse_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_bible
 import org.churchpresenter.calendar.generated.resources.calendar_pick_chapters
@@ -83,19 +84,6 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_filter_pres
 import org.churchpresenter.calendar.generated.resources.calendar_presets_empty
 import org.churchpresenter.calendar.generated.resources.calendar_presets_empty_sub
 import org.churchpresenter.calendar.generated.resources.calendar_pick_search
-import org.churchpresenter.calendar.generated.resources.calendar_timer_count_up_sub
-import org.churchpresenter.calendar.generated.resources.calendar_timer_count_up
-import org.churchpresenter.calendar.generated.resources.calendar_timer_to_start_sub
-import org.churchpresenter.calendar.generated.resources.calendar_timer_to_start
-import org.churchpresenter.calendar.generated.resources.calendar_timer_countdown_sub
-import org.churchpresenter.calendar.generated.resources.calendar_timer_countdown
-import org.churchpresenter.calendar.generated.resources.calendar_pick_timer
-import org.churchpresenter.calendar.model.countdownTimerItem
-import org.churchpresenter.calendar.model.countdownItem
-import org.churchpresenter.calendar.model.clockText
-import org.churchpresenter.calendar.model.formatDuration
-import org.churchpresenter.calendar.model.countUpTimerItem
-import org.churchpresenter.calendar.model.DEFAULT_COUNTDOWN_SECONDS
 import org.churchpresenter.calendar.generated.resources.calendar_pick_section
 import org.churchpresenter.calendar.generated.resources.calendar_pick_songs
 import org.churchpresenter.calendar.generated.resources.calendar_pick_whole_chapter
@@ -107,7 +95,7 @@ import org.churchpresenter.calendar.model.bibleVerseItem
 import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.calendar.model.sectionItem
 import org.churchpresenter.calendar.model.toScheduleItem
-import org.churchpresenter.calendar.model.withNewId
+import org.churchpresenter.calendar.model.asRow
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.generated.resources.calendar_settings_done
 import org.churchpresenter.calendar.generated.resources.calendar_saved_as_you_change
@@ -126,14 +114,13 @@ private fun verseRange(anchor: Int?, extent: Int?): IntRange? {
 }
 
 /** Which source the picker is showing. */
-private enum class PickKind { SONGS, BIBLE, TIMER, SECTION, PRESETS }
+private enum class PickKind { SONGS, BIBLE, SECTION, PRESETS }
 
 /** The tab a row of this kind would have come from. */
 private fun pickKindOf(item: ScheduleItem): PickKind = when (item) {
     is ScheduleItem.SongItem -> PickKind.SONGS
     is ScheduleItem.BibleVerseItem -> PickKind.BIBLE
     is ScheduleItem.LabelItem -> PickKind.SECTION
-    is ScheduleItem.AnnouncementItem -> if (item.isTimer) PickKind.TIMER else PickKind.PRESETS
     else -> PickKind.PRESETS
 }
 
@@ -162,7 +149,7 @@ fun AddItemSheet(
     sections: List<SectionStyle>,
     bibleBooks: List<CalendarBibleBook>,
     serviceName: String,
-    /** The service's start, which a countdown-to-start timer counts to. */
+    /** The service's start, which the timing panel offers as a start time. */
     serviceStartTime: String,
     /** The row being edited -- replaced or retimed -- or null when the picker is appending. */
     replacing: ScheduleItem?,
@@ -340,12 +327,6 @@ fun AddItemSheet(
                         },
                         onAdd = add,
                     )
-
-                    PickKind.TIMER -> TimerResults(
-                        startTime = serviceStartTime,
-                        seconds = planned ?: DEFAULT_COUNTDOWN_SECONDS,
-                        onAdd = add,
-                    )
                     PickKind.SECTION -> SectionResults(sections, query, add)
                     PickKind.PRESETS -> PresetResults(presets, presetKind, query, previewSources, add)
                 }
@@ -401,7 +382,6 @@ private fun SongEditorHost(
 private fun searchPlaceholder(kind: PickKind): String = when (kind) {
     PickKind.SONGS -> stringResource(Res.string.calendar_pick_search)
     PickKind.BIBLE -> stringResource(Res.string.calendar_bible_hint_short)
-    PickKind.TIMER -> ""
     PickKind.SECTION -> stringResource(Res.string.calendar_section_hint)
     PickKind.PRESETS -> stringResource(Res.string.calendar_cue_filter_presets)
 }
@@ -411,7 +391,6 @@ private fun pickKindLabel(kind: PickKind): String = stringResource(
     when (kind) {
         PickKind.SONGS -> Res.string.calendar_pick_songs
         PickKind.BIBLE -> Res.string.calendar_pick_bible
-        PickKind.TIMER -> Res.string.calendar_pick_timer
         PickKind.SECTION -> Res.string.calendar_pick_section
         PickKind.PRESETS -> Res.string.calendar_pick_presets
     }
@@ -662,46 +641,6 @@ private fun SectionResults(sections: List<SectionStyle>, query: String, onAdd: (
 }
 
 /**
- * The Timer tab: the three timers the mockup offers, made on the spot. A countdown runs for the
- * length typed in the footer -- 15:00 until something is typed -- a countdown to the service's
- * start counts to that clock time, and a duration timer counts up from zero.
- */
-@Composable
-private fun TimerResults(startTime: String, seconds: Int, onAdd: (List<ScheduleItem>) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val use24Hour = LocalUse24HourClock.current
-    val length = formatDuration(seconds)
-    ScrollableList(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        item(key = "countdown") {
-            ResultRow(
-                title = stringResource(Res.string.calendar_timer_countdown),
-                subtitle = stringResource(Res.string.calendar_timer_countdown_sub, length),
-                color = scheme.tertiary,
-                onClick = { onAdd(listOf(countdownTimerItem(seconds))) },
-            )
-        }
-        countdownItem(startTime)?.let { toStart ->
-            item(key = "to_start") {
-                ResultRow(
-                    title = stringResource(Res.string.calendar_timer_to_start),
-                    subtitle = stringResource(Res.string.calendar_timer_to_start_sub, clockText(startTime, use24Hour)),
-                    color = scheme.tertiary,
-                    onClick = { onAdd(listOf(toStart)) },
-                )
-            }
-        }
-        item(key = "count_up") {
-            ResultRow(
-                title = stringResource(Res.string.calendar_timer_count_up),
-                subtitle = stringResource(Res.string.calendar_timer_count_up_sub),
-                color = scheme.tertiary,
-                onClick = { onAdd(listOf(countUpTimerItem())) },
-            )
-        }
-    }
-}
-
-/**
  * The saved presets, newest first, narrowed to one [kind] and to what the query matches -- the
  * preset's name, or the item's own text, so a scene preset renamed "Opener" is still found by
  * typing the scene's name.
@@ -741,7 +680,7 @@ private fun PresetResults(
                     title = preset.name,
                     subtitle = preset.item.displayText,
                     color = look.color,
-                    onClick = { onAdd(listOf(preset.item.withNewId())) },
+                    onClick = { onAdd(listOf(preset.asRow())) },
                     expanded = open,
                     onToggle = { expanded = if (open) null else preset.id },
                 )
@@ -864,11 +803,19 @@ private fun ResultRow(
                 size = ADD_BADGE,
             )
         }
-        Box(
-            Modifier.size(ADD_BADGE).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.16f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(12.dp))
+        val addTip = stringResource(Res.string.calendar_pick_add_tip)
+        Hint(addTip) {
+            Box(
+                Modifier.size(ADD_BADGE).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = addTip,
+                    tint = scheme.primary,
+                    modifier = Modifier.size(12.dp),
+                )
+            }
         }
     }
 }
