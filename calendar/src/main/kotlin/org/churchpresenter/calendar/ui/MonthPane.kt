@@ -123,7 +123,9 @@ fun MonthPane(
         KindLegend(
             month = month,
             servicesOn = servicesOn,
-            modifier = Modifier.weight(1f).padding(start = PANE_PADDING, end = PANE_PADDING, top = 10.dp, bottom = 12.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = PANE_PADDING, end = PANE_PADDING, top = 10.dp, bottom = 12.dp),
         )
     }
 }
@@ -133,7 +135,9 @@ private fun MonthHeader(month: YearMonth, onPrevious: () -> Unit, onNext: () -> 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(7.dp),
-        modifier = Modifier.fillMaxWidth().padding(start = PANE_PADDING, end = PANE_PADDING, top = 11.dp, bottom = 9.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = PANE_PADDING, end = PANE_PADDING, top = 11.dp, bottom = 9.dp),
     ) {
         NavButton(
             icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,

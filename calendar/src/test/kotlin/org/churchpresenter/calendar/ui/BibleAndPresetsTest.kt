@@ -95,7 +95,9 @@ class BibleAndPresetsTest {
             ),
             ItemPreset(
                 id = "p2", name = "Welcome clip",
-                item = ScheduleItem.MediaItem(id = "m", mediaUrl = "/c.mp4", mediaTitle = "Welcome", mediaType = "local"),
+                item = ScheduleItem.MediaItem(
+                    id = "m", mediaUrl = "/c.mp4", mediaTitle = "Welcome", mediaType = "local",
+                ),
             ),
         )
         clickFirst("Add song, verse or section")

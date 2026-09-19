@@ -220,10 +220,20 @@ private fun PasteOn(selected: CopyTarget, onSelect: (CopyTarget) -> Unit) {
                     Modifier
                         .height(TARGET_HEIGHT)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (on) scheme.primary.copy(alpha = ON_TINT) else scheme.surfaceVariant.copy(alpha = CARD_TINT))
+                        .background(
+                            if (on) {
+                                scheme.primary.copy(alpha = ON_TINT)
+                            } else {
+                                scheme.surfaceVariant.copy(alpha = CARD_TINT)
+                            }
+                        )
                         .border(
                             1.dp,
-                            if (on) scheme.primary.copy(alpha = ON_BORDER) else scheme.outlineVariant.copy(alpha = CARD_BORDER),
+                            if (on) {
+                                scheme.primary.copy(alpha = ON_BORDER)
+                            } else {
+                                scheme.outlineVariant.copy(alpha = CARD_BORDER)
+                            },
                             RoundedCornerShape(8.dp),
                         )
                         .clickable { onSelect(option) }
@@ -282,7 +292,11 @@ private fun CountStepper(count: Int, onChange: (Int) -> Unit) {
                 modifier = Modifier.width(COUNT_FIELD),
             )
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                StepButton(Icons.Filled.KeyboardArrowUp, stringResource(Res.string.calendar_count_up), count < MAX_REPEAT_COUNT) {
+                StepButton(
+                    icon = Icons.Filled.KeyboardArrowUp,
+                    description = stringResource(Res.string.calendar_count_up),
+                    enabled = count < MAX_REPEAT_COUNT,
+                ) {
                     onChange(count + 1)
                 }
                 StepButton(Icons.Filled.KeyboardArrowDown, stringResource(Res.string.calendar_count_down), count > 1) {

@@ -577,7 +577,10 @@ private fun SongResults(
     when {
         !songsLoaded -> EmptyBody(stringResource(Res.string.calendar_songs_loading), "")
         matches.isEmpty() && reference == null ->
-            EmptyBody(stringResource(Res.string.calendar_no_results), stringResource(Res.string.calendar_pick_empty_hint))
+            EmptyBody(
+                stringResource(Res.string.calendar_no_results),
+                stringResource(Res.string.calendar_pick_empty_hint),
+            )
 
         else -> ScrollableList(
             modifier = Modifier.fillMaxSize(),

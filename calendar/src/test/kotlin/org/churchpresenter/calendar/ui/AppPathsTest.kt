@@ -8,7 +8,6 @@ import org.churchpresenter.calendar.CueFeed
 import org.churchpresenter.calendar.FiredCue
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import java.io.File
 import java.nio.file.Files
 import java.time.LocalTime
 import kotlin.test.Test

@@ -444,7 +444,9 @@ private fun CalendarDialogs(
                             host.itemRunSeconds(item)?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
                         }
                     }
-                    if (!timing.isDefault() && item !is ScheduleItem.LabelItem) state.setTiming(addTarget.id, item.id, timing)
+                    if (!timing.isDefault() && item !is ScheduleItem.LabelItem) {
+                        state.setTiming(addTarget.id, item.id, timing)
+                    }
                 }
                 onAddingItemClosed()
             },

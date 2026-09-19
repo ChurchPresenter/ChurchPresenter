@@ -4,11 +4,7 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.hasSetTextAction
 import org.churchpresenter.calendar.CalendarHost
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

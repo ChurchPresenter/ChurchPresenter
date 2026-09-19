@@ -103,7 +103,12 @@ fun IncludeRow(label: String, sub: String, on: Boolean, onToggle: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             if (on) {
-                Icon(Icons.Filled.Check, contentDescription = null, tint = scheme.onPrimary, modifier = Modifier.size(11.dp))
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = scheme.onPrimary,
+                    modifier = Modifier.size(11.dp),
+                )
             }
         }
         CardText(title = label, subtitle = sub)

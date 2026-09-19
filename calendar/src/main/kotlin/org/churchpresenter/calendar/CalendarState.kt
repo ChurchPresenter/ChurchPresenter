@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.CopiedRows

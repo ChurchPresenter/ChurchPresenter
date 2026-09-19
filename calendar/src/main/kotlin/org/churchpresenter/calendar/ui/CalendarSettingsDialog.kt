@@ -44,7 +44,6 @@ import org.churchpresenter.calendar.generated.resources.calendar_auto_load
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_lead
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_lead_sub
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_sub
-import org.churchpresenter.calendar.generated.resources.calendar_minutes_short
 import org.churchpresenter.calendar.generated.resources.calendar_default_item
 import org.churchpresenter.calendar.generated.resources.calendar_default_item_sub
 import org.churchpresenter.calendar.generated.resources.calendar_default_sermon
@@ -76,6 +75,7 @@ import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.AUTO_LOAD_LEAD_MAX
 import org.churchpresenter.calendar.model.AUTO_LOAD_LEAD_MIN
+import org.churchpresenter.calendar.model.parseLeadMinutes
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseDuration
 import org.jetbrains.compose.resources.stringResource
@@ -514,7 +514,7 @@ private fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPre
             subtitle = stringResource(
                 Res.string.calendar_auto_load_lead_sub, AUTO_LOAD_LEAD_MIN, AUTO_LOAD_LEAD_MAX,
             ),
-            value = stringResource(Res.string.calendar_minutes_short, preferences.autoLoadLead()),
+            value = preferences.autoLoadLead().toString(),
             isValid = { parseLeadMinutes(it) != null },
             onCommit = { text ->
                 parseLeadMinutes(text)?.let { onChange(preferences.copy(autoLoadLeadMinutes = it)) }
@@ -522,17 +522,6 @@ private fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPre
         )
     }
 }
-
-/**
- * The minutes typed into the lead field, or null when it is not a number in range.
- *
- * `min` is accepted after the number because that is how the field draws the value, so what is
- * shown can be edited in place rather than cleared first.
- */
-private fun parseLeadMinutes(text: String): Int? = text.trim()
-    .removeSuffix("min").trim()
-    .toIntOrNull()
-    ?.takeIf { it in AUTO_LOAD_LEAD_MIN..AUTO_LOAD_LEAD_MAX }
 
 /**
  * A default: its name, what it is for, and a narrow value field.

@@ -17,6 +17,16 @@ const val AUTO_LOAD_LEAD_MIN: Int = 1
 const val AUTO_LOAD_LEAD_MAX: Int = 120
 
 /**
+ * The minutes typed into the settings' lead field, or null when it is not a number in range.
+ *
+ * A bare number, because the unit is in the row's subtitle: a field that draws `5 min` can only be
+ * typed back in if the parser knows the word, and that word differs in each locale this ships in.
+ */
+fun parseLeadMinutes(text: String): Int? = text.trim()
+    .toIntOrNull()
+    ?.takeIf { it in AUTO_LOAD_LEAD_MIN..AUTO_LOAD_LEAD_MAX }
+
+/**
  * Which planned service, if any, belongs in the Schedule tab at [at].
  *
  * A service is due from [AUTO_LOAD_LEAD_MINUTES] before **its first row's start time** until it

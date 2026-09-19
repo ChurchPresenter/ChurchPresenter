@@ -10,13 +10,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_action_scen
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_go_live
 import org.churchpresenter.calendar.generated.resources.calendar_cue_badge_timer
 import org.churchpresenter.calendar.generated.resources.calendar_cue_item_missing
-import org.churchpresenter.calendar.generated.resources.calendar_cue_loops
-import org.churchpresenter.calendar.generated.resources.calendar_cue_times
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_one
 import org.churchpresenter.calendar.generated.resources.calendar_cues_count_other
 import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.calendar.model.canPlayRepeatedly
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.cueFireTime
 import org.jetbrains.compose.resources.stringResource

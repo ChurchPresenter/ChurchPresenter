@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -167,7 +168,9 @@ fun SheetTab(label: String, selected: Boolean, onClick: () -> Unit) {
         Modifier
             .height(SheetMetrics.tabHeight)
             .clip(RoundedCornerShape(7.dp))
-            .background(if (selected) scheme.primary.copy(alpha = TAB_TINT) else androidx.compose.ui.graphics.Color.Transparent)
+            .background(
+                if (selected) scheme.primary.copy(alpha = TAB_TINT) else Color.Transparent
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 13.dp),
         contentAlignment = Alignment.Center,
@@ -311,8 +314,18 @@ fun QuietButton(
         modifier
             .height(height)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (accent) scheme.primary.copy(alpha = ACCENT_TINT) else scheme.surfaceVariant.copy(alpha = BUTTON_TINT))
-            .border(1.dp, if (accent) scheme.primary.copy(alpha = 0.5f) else scheme.outlineVariant, RoundedCornerShape(8.dp))
+            .background(
+                if (accent) {
+                    scheme.primary.copy(alpha = ACCENT_TINT)
+                } else {
+                    scheme.surfaceVariant.copy(alpha = BUTTON_TINT)
+                }
+            )
+            .border(
+                width = 1.dp,
+                color = if (accent) scheme.primary.copy(alpha = ACCENT_BORDER) else scheme.outlineVariant,
+                shape = RoundedCornerShape(8.dp),
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
@@ -332,6 +345,9 @@ fun QuietButton(
 
 private const val ICON_TINT = 0.16f
 private const val BUTTON_TINT = 0.5f
+
+/** The outline of an accented quiet button -- the primary color, half strength. */
+private const val ACCENT_BORDER = 0.5f
 private const val TAB_TINT = 0.16f
 private const val CARD_TINT = 0.4f
 private const val CARD_BORDER = 0.6f
