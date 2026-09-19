@@ -100,6 +100,7 @@ import org.churchpresenter.calendar.model.parseStoredDate
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * The Calendar Manager.
@@ -134,6 +135,13 @@ fun CalendarApp(
     songEditor: (@Composable (SongEditRequest) -> Unit)? = null,
     onClose: (() -> Unit)? = null,
     today: LocalDate = LocalDate.now(),
+    /**
+     * The wall clock the run of show judges its cues against — see [rememberRunClock].
+     *
+     * A parameter for the same reason [today] is one: a window that reads the real clock draws a
+     * different picture every minute, which a screenshot cannot pin and a test cannot assert on.
+     */
+    now: () -> LocalTime = { LocalTime.now() },
     io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     val state = remember(storeFolder, songFolder) {
@@ -181,7 +189,7 @@ fun CalendarApp(
                 host.itemRunSeconds(row)?.let { state.setPlannedSeconds(service.id, row.id, it) }
             }
     }
-    val clock = rememberRunClock(openService, today)
+    val clock = rememberRunClock(openService, today, now)
     // The latest fired cue, until dismissed. Keyed by firing, so the same cue going off again --
     // fired by hand, or on another day -- shows again.
     val firedCues by CueFeed.fired.collectAsState()

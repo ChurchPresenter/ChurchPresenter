@@ -29,13 +29,22 @@ internal class RunClockState(
     val reset: () -> Unit,
 )
 
+/**
+ * [clock] is where the wall clock comes from — `LocalTime.now()` in the app, and a fixed time in a
+ * test, which is the only way a run of show that draws the time can be photographed twice and come
+ * out the same. Ticking still happens; it just re-reads whatever this returns.
+ */
 @Composable
-internal fun rememberRunClock(service: PlannedService?, today: LocalDate): RunClockState {
-    var wallClock by remember { mutableStateOf(LocalTime.now()) }
+internal fun rememberRunClock(
+    service: PlannedService?,
+    today: LocalDate,
+    clock: () -> LocalTime = { LocalTime.now() },
+): RunClockState {
+    var wallClock by remember { mutableStateOf(clock()) }
     LaunchedEffect(Unit) {
         while (true) {
             delay(CLOCK_TICK_MILLIS)
-            wallClock = LocalTime.now()
+            wallClock = clock()
         }
     }
     var preview by remember(service?.id) { mutableStateOf<LocalTime?>(null) }
