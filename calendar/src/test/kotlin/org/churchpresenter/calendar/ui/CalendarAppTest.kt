@@ -30,7 +30,7 @@ class CalendarAppTest {
 
     @Test
     fun `a day with nothing planned offers to plan something`() = withCalendar {
-        awaitText("No services")
+        awaitText("Nothing planned")
     }
 
     @Test
@@ -94,7 +94,7 @@ class CalendarAppTest {
 
     @Test
     fun `a service can be added to the open day`() = withCalendar {
-        awaitText("No services")
+        awaitText("Nothing planned")
 
         clickFirst("Add service")
         awaitText("Add service")
