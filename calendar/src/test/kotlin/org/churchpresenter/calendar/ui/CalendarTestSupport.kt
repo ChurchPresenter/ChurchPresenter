@@ -11,6 +11,8 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
@@ -262,5 +264,82 @@ internal fun ComposeUiTest.clickInSheet(text: String, anchor: String = "All book
     val index = nodes.fetchSemanticsNodes().indexOfFirst { it.root === sheet }
     check(index >= 0) { "\"$text\" is not in the open sheet" }
     nodes[index].performClick()
+    waitForIdle()
+}
+
+/** Empties the first field on screen -- how a duration cell is cleared rather than retyped. */
+internal fun ComposeUiTest.clearFirstField() {
+    onAllNodes(hasSetTextAction())[0].performTextClearance()
+    waitForIdle()
+}
+
+/** Clicks the [index]th icon button carrying [description] — one row's arrow rather than another's. */
+internal fun ComposeUiTest.clickIconAt(description: String, index: Int) {
+    onAllNodesWithContentDescription(description, substring = true)[index].performClick()
+    waitForIdle()
+}
+
+/** Types into the [index]th field on screen -- a panel with several needs the one it means. */
+internal fun ComposeUiTest.typeIntoFieldAt(index: Int, text: String) {
+    onAllNodes(hasSetTextAction())[index].performTextInput(text)
+    waitForIdle()
+}
+
+/** Empties the field of whatever opened last -- a sheet's name field opens pre-filled. */
+internal fun ComposeUiTest.clearLastField() {
+    val fields = onAllNodes(hasSetTextAction())
+    fields[fields.fetchSemanticsNodes().size - 1].performTextClearance()
+    waitForIdle()
+}
+
+/**
+ * Whether the open sheet shows [text] — as opposed to anything on screen.
+ *
+ * A dialog is drawn over the window, and the window is a month grid and a run of show full of the
+ * same words: a service called "Sunday Morning", a row reading "Amazing Grace", a footer saying
+ * "All manual". Asserting across every root therefore passes for reasons that have nothing to do
+ * with the sheet, and *clicking* across every root lands on the window behind it. [anchor] is a
+ * label only the sheet draws.
+ */
+internal fun ComposeUiTest.showsInSheet(text: String, anchor: String = "Add song, verse or section"): Boolean {
+    val sheet = onAllNodesWithText(anchor, substring = true, ignoreCase = true)
+        .fetchSemanticsNodes().lastOrNull()?.root ?: return false
+    return onAllNodesWithText(text, substring = true, ignoreCase = true)
+        .fetchSemanticsNodes().any { it.root === sheet }
+}
+
+/** Clicks the first node of the open sheet holding [text]; see [showsInSheet] for why. */
+internal fun ComposeUiTest.clickInSheetContaining(text: String, anchor: String = "Add song, verse or section") {
+    val sheet = onAllNodesWithText(anchor, substring = true, ignoreCase = true)
+        .fetchSemanticsNodes().last().root
+    val nodes = onAllNodesWithText(text, substring = true, ignoreCase = true)
+    val index = nodes.fetchSemanticsNodes().indexOfFirst { it.root === sheet }
+    check(index >= 0) { "\"$text\" is not in the open sheet" }
+    nodes[index].performClick()
+    waitForIdle()
+}
+
+/** Empties the [index]th field on screen, so what is typed next replaces rather than joins it. */
+internal fun ComposeUiTest.clearFieldAt(index: Int) {
+    onAllNodes(hasSetTextAction())[index].performTextClearance()
+    waitForIdle()
+}
+
+/**
+ * Moves focus to the first field on screen, which is how a field that commits on exit is committed.
+ *
+ * Clicking a label does not do it: `Modifier.commitOnExit` fires on losing focus, and a `Text` has
+ * none to take. [focus] is the field to move to, which must not be the one being edited -- clicking
+ * the field it is already in changes nothing. See `Fields.kt` for why editing commits that way
+ * rather than per keystroke.
+ */
+internal fun ComposeUiTest.commitByLeavingField(focus: Int = 0) {
+    onAllNodes(hasSetTextAction())[focus].performClick()
+    waitForIdle()
+}
+
+/** Scrolls [text] into view — a list's last row is not composed until it is. */
+internal fun ComposeUiTest.scrollTo(text: String) {
+    onAllNodesWithText(text, substring = true, ignoreCase = true)[0].performScrollTo()
     waitForIdle()
 }

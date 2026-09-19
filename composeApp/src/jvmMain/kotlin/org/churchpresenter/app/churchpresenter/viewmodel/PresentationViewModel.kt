@@ -150,9 +150,20 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
-    /** How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth. The tab's own Loop toggle is 0. */
+    /**
+     * How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth.
+     * The tab's own Loop toggle is 0.
+     */
     private var passesWanted = 0
     private var passesDone = 0
+
+    /**
+     * Whether another pass through the deck is still owed.
+     *
+     * A cue asking for N plays stops after the Nth; the tab's own Loop toggle asks for 0, which
+     * means "keep going" and never runs out.
+     */
+    private fun hasAnotherPass(): Boolean = passesWanted == 0 || passesDone + 1 < passesWanted
 
     /**
      * A calendar cue's "play N times". Slides render after [selectPresentation] returns, and the
@@ -308,7 +319,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         }
                     }
                     if (cached) {
-                        withContext(Dispatchers.Main) { _slideFiles.add(slideFile); _slideNotes.add(""); applyPendingPlayback() }
+                        withContext(Dispatchers.Main) {
+                            _slideFiles.add(slideFile)
+                            _slideNotes.add("")
+                            applyPendingPlayback()
+                        }
                     }
                 }
                 if (_slideFiles.isNotEmpty()) {
@@ -375,7 +390,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         _enteredViaPreviousSlide.value = false
         if (_selectedSlideIndex.value < _slideFiles.size - 1) {
             _selectedSlideIndex.value++
-        } else if (_isLooping.value && _slideFiles.isNotEmpty() && (passesWanted == 0 || passesDone + 1 < passesWanted)) {
+        } else if (_isLooping.value && _slideFiles.isNotEmpty() && hasAnotherPass()) {
             passesDone++
             _selectedSlideIndex.value = 0
         } else {

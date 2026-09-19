@@ -240,7 +240,10 @@ class PicturesViewModel(
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
-    /** How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth. The tab's own Loop toggle is 0. */
+    /**
+     * How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth.
+     * The tab's own Loop toggle is 0.
+     */
     private var passesWanted = 0
     private var passesDone = 0
 

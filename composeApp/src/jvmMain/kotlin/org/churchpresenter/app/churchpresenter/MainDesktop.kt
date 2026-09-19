@@ -1764,7 +1764,11 @@ fun MainDesktop(
                                     currentScheduleActions.addScene(sceneId, sceneName)
                                 },
                                 onSavePreset = { sceneId, sceneName ->
-                                    presetToSave = ScheduleItem.SceneItem(UUID.randomUUID().toString(), sceneId, sceneName)
+                                    presetToSave = ScheduleItem.SceneItem(
+                                        id = UUID.randomUUID().toString(),
+                                        sceneId = sceneId,
+                                        sceneName = sceneName,
+                                    )
                                 },
                                 dialogDismissSignal = dialogDismissSignal
                             )
@@ -1900,7 +1904,9 @@ fun MainDesktop(
 
     SavePresetDialog(
         item = presetToSave,
-        existingNames = remember(presetToSave) { if (presetToSave == null) emptyList() else presetStore.load().presets.map { it.name } },
+        existingNames = remember(presetToSave) {
+            if (presetToSave == null) emptyList() else presetStore.load().presets.map { it.name }
+        },
         onConfirm = { name -> presetToSave?.let { presetStore.add(name, it) } },
         onDismiss = { presetToSave = null },
     )

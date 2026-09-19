@@ -1,20 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.calendar.CueFeed
-import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
-import churchpresenter.composeapp.generated.resources.schedule_timing_blank
-import churchpresenter.composeapp.generated.resources.schedule_timing_loop
-import churchpresenter.composeapp.generated.resources.schedule_timing_next
-import churchpresenter.composeapp.generated.resources.schedule_timing_times
 import org.churchpresenter.calendar.model.RowClock
-import org.churchpresenter.calendar.model.clockText
-import org.churchpresenter.calendar.model.formatDuration
-import org.churchpresenter.calendar.model.storedTime
-import org.churchpresenter.calendar.model.localeUses24HourClock
-import androidx.compose.runtime.collectAsState
-import churchpresenter.composeapp.generated.resources.schedule_cue_fired
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -26,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -76,7 +64,6 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_note
-import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
 import churchpresenter.composeapp.generated.resources.tooltip_note
 import churchpresenter.composeapp.generated.resources.tooltip_note_clear
@@ -91,15 +78,10 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.churchpresenter.app.churchpresenter.utils.scheduleShowDetailLine
-import org.churchpresenter.app.churchpresenter.utils.scheduleShowKindDetails
-import org.churchpresenter.app.churchpresenter.viewmodel.announcementTimerSubtext
-import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemDetailText
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
-import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemKindLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
 
@@ -384,163 +366,50 @@ internal fun ScheduleItemRow(
                     }
 
                     if (!legacyRowActions) {
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .testTag(SCHEDULE_ROW_ACTIONS_TAG)
-
-                                .fillMaxHeight()
-                                .alpha(actionsAlpha)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        0f to Color.Transparent,
-                                        GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
-                                        1f to cardBg.copy(alpha = 0.82f)
-                                    )
-                                )
-                                .padding(start = 20.dp)
-                                .finalPassCombinedClickable(
-                                    onClick = { onSelect() },
-                                    onDoubleClick = if (!isSection) { { onPresent() } } else null
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(1.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ScheduleRowActionButtons(
-                                isSection = isSection,
-                                note = note,
-                                noteExpanded = noteExpanded,
-                                removeFirst = false,
-                                onMoveUp = onMoveUp,
-                                onMoveDown = onMoveDown,
-                                onToggleNote = { noteExpanded = !noteExpanded },
-                                onRemove = onRemove,
-                                onPresent = onPresent,
-                                onEditLabel = onEditLabel
-                            )
-                        }
+                        ScheduleRowHoverActions(
+                            isSection = isSection,
+                            note = note,
+                            noteExpanded = noteExpanded,
+                            alpha = actionsAlpha,
+                            cardBg = cardBg,
+                            onSelect = onSelect,
+                            onMoveUp = onMoveUp,
+                            onMoveDown = onMoveDown,
+                            onToggleNote = { noteExpanded = !noteExpanded },
+                            onRemove = onRemove,
+                            onPresent = onPresent,
+                            onEditLabel = onEditLabel,
+                        )
                     }
                 }
             }
 
             if (legacyRowActions) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(SCHEDULE_ROW_LEGACY_ACTIONS_TAG)
-                        .padding(start = 12.dp, end = 6.dp, bottom = 2.dp)
-                        .finalPassCombinedClickable(
-                            onClick = { onSelect() },
-                            onDoubleClick = if (!isSection) { { onPresent() } } else null
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(1.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ScheduleRowActionButtons(
-                        isSection = isSection,
-                        note = note,
-                        noteExpanded = noteExpanded,
-                        removeFirst = true,
-                        onMoveUp = onMoveUp,
-                        onMoveDown = onMoveDown,
-                        onToggleNote = { noteExpanded = !noteExpanded },
-                        onRemove = onRemove,
-                        onPresent = onPresent,
-                        onEditLabel = onEditLabel
-                    )
-                }
+                ScheduleRowLegacyActions(
+                    isSection = isSection,
+                    note = note,
+                    noteExpanded = noteExpanded,
+                    onSelect = onSelect,
+                    onMoveUp = onMoveUp,
+                    onMoveDown = onMoveDown,
+                    onToggleNote = { noteExpanded = !noteExpanded },
+                    onRemove = onRemove,
+                    onPresent = onPresent,
+                    onEditLabel = onEditLabel,
+                )
             }
 
             if (note.isNotEmpty() && !noteExpanded) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-                        .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                        .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = note,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
-                    )
-                    ScheduleRowActionButton(
-                        painter = painterResource(Res.drawable.ic_edit),
-                        text = stringResource(Res.string.tooltip_note),
-                        onClick = { noteExpanded = true },
-                        iconSize = 11.dp,
-                        iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-                    )
-                }
+                ScheduleRowNoteChip(note = note, onEdit = { noteExpanded = true })
             }
 
             AnimatedVisibility(visible = noteExpanded) {
-                val noteInteractionSource = remember { MutableInteractionSource() }
-                val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
-                        .border(
-                            width = 1.dp,
-                            color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(7.dp)
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BasicTextField(
-                        value = noteText,
-                        onValueChange = { noteText = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        textStyle = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        maxLines = 3,
-                        interactionSource = noteInteractionSource,
-                        decorationBox = { innerTextField ->
-                            Box {
-                                if (noteText.isEmpty()) {
-                                    Text(
-                                        stringResource(Res.string.schedule_note_placeholder),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
-                    TooltipIconButton(
-                        painter = painterResource(Res.drawable.ic_check),
-                        text = stringResource(Res.string.tooltip_note_done),
-                        onClick = {
-                            onNoteChanged(noteText)
-                            noteExpanded = false
-                        },
-                        buttonSize = 32.dp,
-                        iconSize = 15.dp,
-                        iconTint = MaterialTheme.colorScheme.primary
-                    )
-                    TooltipIconButton(
-                        painter = painterResource(Res.drawable.ic_close),
-                        text = stringResource(Res.string.tooltip_note_clear),
-                        onClick = {
-                            noteText = ""
-                            onNoteChanged("")
-                        },
-                        modifier = Modifier.padding(end = 4.dp),
-                        buttonSize = 32.dp,
-                        iconSize = 15.dp,
-                        iconTint = MaterialTheme.colorScheme.error
-                    )
-                }
+                ScheduleRowNoteEditor(
+                    noteText = noteText,
+                    onNoteTextChange = { noteText = it },
+                    onCommit = onNoteChanged,
+                    onClose = { noteExpanded = false },
+                )
             }
         }
 
@@ -568,6 +437,214 @@ internal fun ScheduleItemRow(
     }
 }
 
+/**
+ * The row's buttons on a line of their own — the pre-overlay layout, kept for anyone who prefers
+ * it. The hover overlay draws the same [ScheduleRowActionButtons]; only the placement differs.
+ */
+
+/**
+ * The buttons that fade in over the right-hand end of a row while the pointer is on it.
+ *
+ * [alpha] is the hover animation, and the row is still clickable underneath at any alpha — the
+ * overlay only draws; it does not take the pointer.
+ */
+@Composable
+private fun BoxScope.ScheduleRowHoverActions(
+    isSection: Boolean,
+    note: String,
+    noteExpanded: Boolean,
+    alpha: Float,
+    cardBg: Color,
+    onSelect: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onToggleNote: () -> Unit,
+    onRemove: () -> Unit,
+    onPresent: () -> Unit,
+    onEditLabel: () -> Unit,
+) {
+Row(
+    modifier = Modifier
+        .align(Alignment.CenterEnd)
+        .testTag(SCHEDULE_ROW_ACTIONS_TAG)
+        .fillMaxHeight()
+        .alpha(alpha)
+        .background(
+            Brush.horizontalGradient(
+                0f to Color.Transparent,
+                GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
+                1f to cardBg.copy(alpha = 0.82f)
+            )
+        )
+        .padding(start = 20.dp)
+        .finalPassCombinedClickable(
+            onClick = { onSelect() },
+            onDoubleClick = if (!isSection) { { onPresent() } } else null
+        ),
+    horizontalArrangement = Arrangement.spacedBy(1.dp),
+    verticalAlignment = Alignment.CenterVertically
+) {
+    ScheduleRowActionButtons(
+        isSection = isSection,
+        note = note,
+        noteExpanded = noteExpanded,
+        removeFirst = false,
+        onMoveUp = onMoveUp,
+        onMoveDown = onMoveDown,
+        onToggleNote = onToggleNote,
+        onRemove = onRemove,
+        onPresent = onPresent,
+        onEditLabel = onEditLabel
+    )
+}
+}
+
+@Composable
+private fun ScheduleRowLegacyActions(
+    isSection: Boolean,
+    note: String,
+    noteExpanded: Boolean,
+    onSelect: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onToggleNote: () -> Unit,
+    onRemove: () -> Unit,
+    onPresent: () -> Unit,
+    onEditLabel: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(SCHEDULE_ROW_LEGACY_ACTIONS_TAG)
+            .padding(start = 12.dp, end = 6.dp, bottom = 2.dp)
+            .finalPassCombinedClickable(
+                onClick = { onSelect() },
+                onDoubleClick = if (!isSection) { { onPresent() } } else null
+            ),
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ScheduleRowActionButtons(
+            isSection = isSection,
+            note = note,
+            noteExpanded = noteExpanded,
+            removeFirst = true,
+            onMoveUp = onMoveUp,
+            onMoveDown = onMoveDown,
+            onToggleNote = onToggleNote,
+            onRemove = onRemove,
+            onPresent = onPresent,
+            onEditLabel = onEditLabel
+        )
+    }
+}
+
+/** A note that is written but not being edited: the text, and a pencil to open it. */
+@Composable
+private fun ScheduleRowNoteChip(note: String, onEdit: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
+            .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+            .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = note,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
+        )
+        ScheduleRowActionButton(
+            painter = painterResource(Res.drawable.ic_edit),
+            text = stringResource(Res.string.tooltip_note),
+            onClick = onEdit,
+            iconSize = 11.dp,
+            iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+        )
+    }
+}
+
+/**
+ * The note being edited.
+ *
+ * [onCommit] is the row's `onNoteChanged`, and is called as the text changes rather than on close:
+ * a note half-typed when the app goes down is still a note somebody wrote.
+ */
+@Composable
+private fun ScheduleRowNoteEditor(
+    noteText: String,
+    onNoteTextChange: (String) -> Unit,
+    onCommit: (String) -> Unit,
+    onClose: () -> Unit,
+) {
+    val noteInteractionSource = remember { MutableInteractionSource() }
+    val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
+            .border(
+                width = 1.dp,
+                color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(7.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicTextField(
+            value = noteText,
+            onValueChange = onNoteTextChange,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            textStyle = MaterialTheme.typography.bodySmall.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            maxLines = 3,
+            interactionSource = noteInteractionSource,
+            decorationBox = { innerTextField ->
+                Box {
+                    if (noteText.isEmpty()) {
+                        Text(
+                            stringResource(Res.string.schedule_note_placeholder),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        TooltipIconButton(
+            painter = painterResource(Res.drawable.ic_check),
+            text = stringResource(Res.string.tooltip_note_done),
+            onClick = {
+                onCommit(noteText)
+                onClose()
+            },
+            buttonSize = 32.dp,
+            iconSize = 15.dp,
+            iconTint = MaterialTheme.colorScheme.primary
+        )
+        TooltipIconButton(
+            painter = painterResource(Res.drawable.ic_close),
+            text = stringResource(Res.string.tooltip_note_clear),
+            onClick = {
+                onNoteTextChange("")
+                onCommit("")
+            },
+            modifier = Modifier.padding(end = 4.dp),
+            buttonSize = 32.dp,
+            iconSize = 15.dp,
+            iconTint = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
 @Composable
 internal fun ScheduleItemContent(
     item: ScheduleItem,
@@ -578,191 +655,11 @@ internal fun ScheduleItemContent(
     /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
     clock: RowClock? = null,
 ) {
-    val titleColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
-    val detailColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (item is ScheduleItem.SongItem && item.songNumber > 0) {
-            Text(
-                text = item.songNumber.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        Text(
-
-            text = if (item is ScheduleItem.SongItem) item.title else item.displayText,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-            color = titleColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        // The row's own length, where the plan knows it -- `5:00`.
-        timing.runSeconds?.let { seconds ->
-            Text(
-                text = formatDuration(seconds * timing.repeats.coerceAtLeast(1)),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-        // When it goes live: its own pinned time, or the time the plan works out to. A reckoned
-        // time is dimmed, and dimmer still once a row of unknown length has been passed -- it is
-        // an estimate from there on, and should not read like a promise.
-        val shown = timing.startAt.takeIf { it.isNotEmpty() } ?: clock?.let { storedTime(it.time) }
-        if (shown != null) {
-            Text(
-                text = clockText(shown, localeUses24HourClock()),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (timing.startsOnItsOwn()) FontWeight.Bold else FontWeight.Medium,
-                color = when {
-                    timing.startsOnItsOwn() -> MaterialTheme.colorScheme.tertiary
-                    clock?.exact == true -> MaterialTheme.colorScheme.onSurfaceVariant
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = ESTIMATE_ALPHA)
-                },
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-    }
+    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock)
 
     if (!scheduleShowDetailLine(density.percent)) return
 
-    if (timing.repeats != 1 || timing.atEnd != RowEnd.HOLD) {
-        // `Loop · then next` -- what the row does around its run, under the title.
-        val parts = listOfNotNull(
-            when {
-                timing.loops() -> stringResource(Res.string.schedule_timing_loop)
-                timing.repeats > 1 -> stringResource(Res.string.schedule_timing_times, timing.repeats)
-                else -> null
-            },
-            when (timing.atEnd) {
-                RowEnd.NEXT -> stringResource(Res.string.schedule_timing_next)
-                RowEnd.BLANK -> stringResource(Res.string.schedule_timing_blank)
-                else -> null
-            },
-        )
-        Text(
-            text = parts.joinToString(" · "),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.tertiary,
-            maxLines = 1,
-        )
-    }
-
-    when (item) {
-        is ScheduleItem.SongItem -> if (item.songbook.isNotBlank()) {
-            Text(
-                text = item.songbook,
-                style = MaterialTheme.typography.bodySmall,
-                color = detailColor,
-                maxLines = 1,
-
-                overflow = TextOverflow.StartEllipsis
-            )
-        }
-        is ScheduleItem.BibleVerseItem -> Text(
-            text = scheduleItemDetailText(item).orEmpty(),
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
-        is ScheduleItem.PictureItem -> Text(
-            text = scheduleItemDetailText(item).orEmpty(),
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
-        is ScheduleItem.PresentationItem -> if (!scheduleShowKindDetails(density.percent)) {
-            Text(
-                text = scheduleItemDetailText(item).orEmpty(),
-                style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
-        }
-        is ScheduleItem.MediaItem -> if (!scheduleShowKindDetails(density.percent)) {
-            Text(
-                text = scheduleItemDetailText(item).orEmpty(),
-                style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
-        }
-        is ScheduleItem.LowerThirdItem -> if (item.pauseAtFrame) {
-            Text(
-                text = stringResource(Res.string.pause_duration_ms, item.pauseDurationMs),
-                style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1
-            )
-        }
-        is ScheduleItem.AnnouncementItem -> {
-            val timerSubtext = announcementTimerSubtext(item)
-            if (item.isTimer && timerSubtext != null) {
-                Text(
-                    text = timerSubtext,
-                    style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1
-                )
-            }
-        }
-        is ScheduleItem.WebsiteItem -> Text(
-            text = item.url,
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
-        is ScheduleItem.DictionaryItem -> Text(
-            text = item.transliteration,
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
-        is ScheduleItem.CueItem -> {
-            // `Fired 9:45 AM` once the engine -- or a hand -- has set it off this session.
-            val fired by CueFeed.fired.collectAsState()
-            val firedAt = fired.firstOrNull { it.row.id == item.id }?.at
-            val detail = scheduleItemDetailText(item).orEmpty()
-            Text(
-                text = if (firedAt == null) {
-                    detail
-                } else {
-                    val at = clockText(firedAt, localeUses24HourClock())
-                    detail + " · " + stringResource(Res.string.schedule_cue_fired, at)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = if (firedAt == null) detailColor else MaterialTheme.colorScheme.tertiary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        is ScheduleItem.LabelItem, is ScheduleItem.SceneItem -> {  }
-    }
-
-    if (scheduleShowKindDetails(density.percent)) {
-        val path = when (item) {
-            is ScheduleItem.PresentationItem -> item.filePath
-            is ScheduleItem.MediaItem -> item.mediaUrl
-            else -> null
-        }
-        Row(
-            modifier = Modifier.padding(top = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val (chipBg, chipFg) = scheduleChipColors(scheduleItemPaletteIndex(item))
-            Box(
-                modifier = Modifier.background(chipBg, RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 1.dp)
-            ) {
-                Text(
-                    text = stringResource(scheduleItemKindLabel(item)).uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = chipFg
-                )
-            }
-            if (path != null) {
-                Text(
-                    text = path,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = detailColor.copy(alpha = 0.7f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
+    ScheduleRowTimingLine(timing)
+    ScheduleRowDetailLine(item = item, density = density)
+    ScheduleRowKindChips(item = item, density = density)
 }
-
-/** How faint a reckoned time goes once a row of unknown length has been passed. */
-private const val ESTIMATE_ALPHA = 0.55f

@@ -544,7 +544,12 @@ fun PresentationTab(
                 SavePresetButton(
                     onClick = {
                         val f = viewModel.selectedPresentation ?: return@SavePresetButton
-                        onSavePreset(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
+                        onSavePreset(
+                            f.absolutePath,
+                            f.nameWithoutExtension,
+                            viewModel.slideFiles.size,
+                            f.extension.lowercase(),
+                        )
                     },
                     enabled = viewModel.selectedPresentation != null,
                     tooltipText = stringResource(Res.string.save_preset)

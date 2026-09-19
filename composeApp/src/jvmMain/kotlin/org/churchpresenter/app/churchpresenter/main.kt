@@ -1148,7 +1148,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     // the one way there. Everything else is what a phone can project.
                                     is ScheduleItem.SceneItem -> currentScheduleActions.presentScene(item.sceneId)
                                     else -> {
-                                        val shown = if (item is ScheduleItem.AnnouncementItem && !item.isTimer && plays != 1) {
+                                        val looping = item is ScheduleItem.AnnouncementItem &&
+                                            !item.isTimer && plays != 1
+                                        val shown = if (looping) {
                                             // The announcement's own loop count: 0 is forever there too.
                                             item.copy(loopCount = plays)
                                         } else {
@@ -1157,7 +1159,12 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         if (shown is ScheduleItem.AnnouncementItem) {
                                             appSettings = appSettings.withAnnouncement(shown)
                                         }
-                                        executeProjectItem(shown, currentScheduleActions, presenterManager, statisticsManager)
+                                        executeProjectItem(
+                                            shown,
+                                            currentScheduleActions,
+                                            presenterManager,
+                                            statisticsManager,
+                                        )
                                         if (shown is ScheduleItem.MediaItem) {
                                             mediaViewModel.setLooping(plays != 1)
                                             // Media counts repeats after the first play; 0 is forever.

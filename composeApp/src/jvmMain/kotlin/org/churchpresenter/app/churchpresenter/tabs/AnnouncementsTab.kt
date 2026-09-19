@@ -390,7 +390,20 @@ fun AnnouncementsTab(
             }
             if (onSavePreset != null) {
                 SavePresetButton(
-                    onClick = { onSavePreset.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
+                    onClick = {
+                        // A saved announcement is the text and its look; the timer fields
+                        // belong to a timer preset, not to this one.
+                        onSavePreset.invoke(
+                            viewModel.buildSettings().copy(
+                                timerHours = 0,
+                                timerMinutes = 0,
+                                timerSeconds = 0,
+                                timerTextColor = "#FFFFFF",
+                                timerExpiredText = "",
+                                timerMode = Constants.TIMER_MODE_DURATION,
+                            )
+                        )
+                    },
                     enabled = viewModel.text.isNotBlank(),
                     tooltipText = stringResource(Res.string.save_preset)
                 )

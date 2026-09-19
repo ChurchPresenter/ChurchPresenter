@@ -339,7 +339,11 @@ fun PicturesTab(
             )
             if (onSavePreset != null) {
                 SavePresetButton(
-                    onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onSavePreset(path, name, count) } },
+                    onClick = {
+                        viewModel.getScheduleData()?.let { (path, name, count) ->
+                            onSavePreset(path, name, count)
+                        }
+                    },
                     enabled = viewModel.images.isNotEmpty(),
                     tooltipText = stringResource(Res.string.save_preset)
                 )

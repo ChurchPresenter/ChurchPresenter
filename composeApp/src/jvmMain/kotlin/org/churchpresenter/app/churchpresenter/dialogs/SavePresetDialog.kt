@@ -100,7 +100,12 @@ internal fun SavePresetDialogContent(
             Spacer(Modifier.height(6.dp))
             CompactTextField(
                 value = name,
-                onValueChange = { name = cleanPresetName(it).let { clean -> if (it.endsWith(" ")) "$clean " else clean } },
+                onValueChange = { typed ->
+                    // A trailing space survives the clean, so a name can still be typed one
+                    // word at a time.
+                    val clean = cleanPresetName(typed)
+                    name = if (typed.endsWith(" ")) "$clean " else clean
+                },
                 placeholder = stringResource(Res.string.preset_name_hint),
                 height = FIELD_HEIGHT,
                 fontSize = 13f,
