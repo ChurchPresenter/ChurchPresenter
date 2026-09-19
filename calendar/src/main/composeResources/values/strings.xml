@@ -188,7 +188,10 @@
     <string name="calendar_section_new">New section</string>
     <string name="calendar_section_insert">Insert</string>
     <string name="calendar_auto_load">Load the service automatically</string>
-    <string name="calendar_auto_load_sub">Puts the run of show into the Schedule tab %1$d minutes before its first item, clearing whatever is there</string>
+    <string name="calendar_auto_load_sub">Puts the run of show into the Schedule tab before its first item, clearing whatever is there</string>
+    <string name="calendar_auto_load_lead">How far ahead</string>
+    <string name="calendar_auto_load_lead_sub">Minutes before the first item, from %1$d to %2$d</string>
+    <string name="calendar_minutes_short">%1$d min</string>
     <string name="calendar_default_sermon">Default sermon length</string>
     <string name="calendar_default_sermon_sub">Offered when a presentation has no length of its own</string>
     <string name="calendar_time_format">Time format</string>

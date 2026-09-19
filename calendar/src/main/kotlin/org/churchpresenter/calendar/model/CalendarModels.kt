@@ -272,7 +272,16 @@ data class CalendarPreferences(
      * somebody expects the first time they open it.
      */
     val autoLoadService: Boolean = false,
-)
+    /**
+     * How long before its first item a service loads itself, in minutes. Read only while
+     * [autoLoadService] is on, and clamped to [AUTO_LOAD_LEAD_MIN]..[AUTO_LOAD_LEAD_MAX] where it
+     * is used -- a file is hand-editable and a lead of 0 or 10,000 is not a setting anybody meant.
+     */
+    val autoLoadLeadMinutes: Int = AUTO_LOAD_LEAD_MINUTES,
+) {
+    /** The lead as the loader uses it, whatever the file says. */
+    fun autoLoadLead(): Int = autoLoadLeadMinutes.coerceIn(AUTO_LOAD_LEAD_MIN, AUTO_LOAD_LEAD_MAX)
+}
 
 /** 4:30 — the length of a fairly ordinary worship song. */
 private const val DEFAULT_ITEM_SECONDS = 270

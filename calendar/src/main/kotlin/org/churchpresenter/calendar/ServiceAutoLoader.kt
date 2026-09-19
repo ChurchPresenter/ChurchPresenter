@@ -49,7 +49,7 @@ class ServiceAutoLoader(
         // The Schedule tab publishes the actions a load goes through when it first composes, and
         // this loop starts in the same instant: a tick before that lands nowhere, and the service
         // then waits a whole tick for the retry -- long enough for a row pinned in the gap to fall
-        // outside the engine's grace window. The lead is five minutes; a moment here costs nothing.
+        // outside the engine's grace window. The lead is minutes; a moment here costs nothing.
         delay(startupMillis)
         while (true) {
             // A tick that throws must not end the loop: the next service of the day still has to
@@ -69,7 +69,7 @@ class ServiceAutoLoader(
             landed.clear()
             landedDate = today
         }
-        val service = calendar.serviceToAutoLoad(at) ?: return
+        val service = calendar.serviceToAutoLoad(at, calendar.preferences.autoLoadLead()) ?: return
         val key = service.loadKey()
         when {
             key in landed -> Unit
@@ -112,8 +112,8 @@ private fun PlannedService.loadKey(): String =
     "$date|$id|$startTime|" + items.joinToString(",") { it.id } + "|" + timing.hashCode()
 
 /**
- * A minute, and no more often: the lead is five minutes, so a minute's granularity costs nothing
- * worth having, and each tick reads and parses `calendar.json`.
+ * A minute, and no more often: the lead is minutes and never less than one, so a minute's
+ * granularity costs nothing worth having, and each tick reads and parses `calendar.json`.
  */
 private const val TICK_MILLIS = 60_000L
 

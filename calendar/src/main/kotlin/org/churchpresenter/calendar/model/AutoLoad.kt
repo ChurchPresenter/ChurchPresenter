@@ -7,6 +7,16 @@ import java.time.LocalTime
 const val AUTO_LOAD_LEAD_MINUTES: Int = 5
 
 /**
+ * How far ahead the lead may be set, in minutes.
+ *
+ * A minute at the bottom because zero would mean "load it as it starts", which is a load nobody
+ * has time to look at; two hours at the top because past that the window's own end -- the service
+ * is assumed over -- starts before the lead does, and the service would never load at all.
+ */
+const val AUTO_LOAD_LEAD_MIN: Int = 1
+const val AUTO_LOAD_LEAD_MAX: Int = 120
+
+/**
  * Which planned service, if any, belongs in the Schedule tab at [at].
  *
  * A service is due from [AUTO_LOAD_LEAD_MINUTES] before **its first row's start time** until it
