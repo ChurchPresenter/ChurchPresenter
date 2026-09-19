@@ -65,6 +65,9 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
+import org.churchpresenter.calendar.model.scheduleClocks
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -131,7 +134,12 @@ data class ScheduleTabActions(
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
+    val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
+    /** Selects a row, so the Schedule shows what the automation has just put on screen. */
+    val selectItem: (id: String) -> Unit = {},
+    val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
 )
 
 private const val ZOOM_DEFAULT = 100
@@ -168,6 +176,7 @@ fun ScheduleTab(
     onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
     onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
     onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
+    onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -263,7 +272,11 @@ fun ScheduleTab(
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
                 addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) },
-                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) }
+                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) },
+                addCue           = { item -> viewModel.addCue(item) },
+                addRow           = { item, timing -> viewModel.addRow(item, timing) },
+                selectItem       = { id -> viewModel.selectOnly(id) },
+                currentTiming    = { viewModel.timing.toMap() },
             )
         )
     }
@@ -295,12 +308,19 @@ fun ScheduleTab(
             onRedo = { viewModel.redo() },
             onAddLabel = onAddLabel,
             onImportPlanningCenter = { showPlanningCenterImport = true },
+            onOpenCalendar = LocalOpenCalendar.current,
             onClearSchedule = { viewModel.clearSchedule() },
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
             onToggleButton = onToggleToolbarButton
         )
+
+        // When each row is expected to go live, reckoned from the first pinned row across the
+        // whole schedule -- so every row shows a time, not only the ones carrying a pin.
+        val rowClocks = remember(scheduleItems, viewModel.timing) {
+            scheduleClocks(scheduleItems, viewModel.timing)
+        }
 
         val viewModelState = rememberUpdatedState(viewModel)
         var listHeightPx by remember { mutableStateOf(0) }
@@ -470,6 +490,8 @@ fun ScheduleTab(
                     ) {
                         ScheduleItemRow(
                             item = item,
+                            timing = viewModel.timingFor(item.id),
+                            clock = rowClocks[item.id],
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,
@@ -500,7 +522,8 @@ fun ScheduleTab(
                                     onPresentLowerThird = onPresentLowerThird,
                                     onPresentWebsite = onPresentWebsite,
                                     onPresentDictionary = onPresentDictionary,
-                                    onPresentScene = onPresentScene
+                                    onPresentScene = onPresentScene,
+                                    onPresentCue = onPresentCue,
                                 )
                             },
                             onEditLabel = {

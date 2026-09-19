@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.alpha
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -106,6 +107,30 @@ fun GoLiveButton(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         modifier = if (dimmed) modifier.alpha(DIMMED_ALPHA) else modifier
+    )
+}
+
+/**
+ * **Save preset** — sits to the left of [AddToScheduleButton] on the tabs whose item can be saved
+ * for later: pictures, presentation, media, announcements and canvas. What it saves is the same
+ * item Add to Schedule would add, kept in `presets.json` for the Calendar Manager to pick up.
+ */
+@Composable
+fun SavePresetButton(
+    onClick: () -> Unit,
+    tooltipText: String,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    ActionIconButton(
+        onClick = onClick,
+        tooltipText = tooltipText,
+        icon = Icons.Filled.BookmarkAdd,
+        enabled = enabled,
+        // Filled like its neighbours: surfaceVariant read as the disabled state next to them.
+        containerColor = MaterialTheme.colorScheme.tertiary,
+        contentColor = MaterialTheme.colorScheme.onTertiary,
+        modifier = modifier
     )
 }
 

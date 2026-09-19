@@ -42,6 +42,7 @@ class RemoteCommandEffectsTest {
     private val songsSelected = mutableListOf<ScheduleItem.SongItem>()
     private val picturesSelected = mutableListOf<ScheduleItem.PictureItem>()
     private val presentationsSelected = mutableListOf<ScheduleItem.PresentationItem>()
+    private val mediaSelected = mutableListOf<ScheduleItem.MediaItem>()
     private var settings = AppSettings()
     private var songVersionBumps = 0
     private var slidePushes = 0
@@ -60,6 +61,7 @@ class RemoteCommandEffectsTest {
         val selectSong = MutableSharedFlow<ScheduleItem.SongItem>()
         val selectPictureItem = MutableSharedFlow<ScheduleItem.PictureItem>()
         val selectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>()
+        val selectMedia = MutableSharedFlow<ScheduleItem.MediaItem>()
     }
 
     @BeforeTest
@@ -108,6 +110,7 @@ class RemoteCommandEffectsTest {
                 onSongItemSelected = { songsSelected.add(it) },
                 onPictureItemSelected = { picturesSelected.add(it) },
                 onPresentationItemSelected = { presentationsSelected.add(it) },
+                onMediaItemSelected = { mediaSelected.add(it) },
                 onSelectTab = { selectedTabs.add(it) },
                 pushCurrentSlideIfLive = { slidePushes++ },
                 remotePresentationPlayPauseFlow = flows?.playPause,
@@ -123,6 +126,7 @@ class RemoteCommandEffectsTest {
                 remoteSelectSongFlow = flows?.selectSong,
                 remoteSelectPictureFlow = flows?.selectPictureItem,
                 remoteSelectPresentationFlow = flows?.selectPresentation,
+                remoteSelectMediaFlow = flows?.selectMedia,
             )
         }
         waitForIdle()
@@ -350,6 +354,26 @@ class RemoteCommandEffectsTest {
 
         assertEquals(listOf(item), presentationsSelected)
         assertEquals(listOf(Tabs.PRESENTATION), selectedTabs)
+    }
+
+    /**
+     * A clip has to reach the Media tab, which is the only thing that loads and plays one.
+     *
+     * Media was missing from this dispatch entirely, so a projected video left the presenter in
+     * MEDIA mode with nothing loaded -- a black output while everything else looked right.
+     */
+    @Test
+    fun `a remote media selection opens the media tab`() = runComposeUiTest {
+        val flows = Flows()
+        effects(flows)
+        val item = ScheduleItem.MediaItem(
+            id = "1", mediaUrl = "/clips/welcome.mp4", mediaTitle = "welcome", mediaType = "local",
+        )
+
+        emit(flows.selectMedia, item)
+
+        assertEquals(listOf(item), mediaSelected)
+        assertEquals(listOf(Tabs.MEDIA), selectedTabs)
     }
 
     @Test

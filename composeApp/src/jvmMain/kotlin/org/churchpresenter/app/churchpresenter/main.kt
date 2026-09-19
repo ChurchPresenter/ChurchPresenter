@@ -40,6 +40,8 @@ import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+import org.churchpresenter.app.churchpresenter.utils.mediaDurationSeconds
+import org.churchpresenter.app.churchpresenter.utils.slideshowSeconds
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
@@ -65,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
 import org.churchpresenter.settings.withBundledBible
+import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -76,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.converter.ui.ConverterTab
+import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import churchpresenter.composeapp.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
@@ -94,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
@@ -121,6 +126,17 @@ import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewM
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.CueRunner
+import org.churchpresenter.calendar.ServiceAutoLoader
+import org.churchpresenter.calendar.fireCue
+import org.churchpresenter.calendar.ui.PreviewSources
+import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
+import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -148,6 +164,7 @@ import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
+import javax.swing.filechooser.FileNameExtensionFilter
 import java.io.File
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -794,6 +811,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
     val remoteSelectPresentationFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
+    // How long each thing actually stays on screen, kept beside the calendar it informs.
+    val liveDurationLog = remember { LiveDurationLog(File(AppDataDir.resolve(), "durations.json")) }
+    val remoteSelectMediaFlow =
+        remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 8) }
     var dialogDismissSignal by remember { mutableStateOf(0) }
     var showOptionsDialog by remember { mutableStateOf(false) }
     var optionsDialogInitialTab by remember { mutableStateOf(0) }
@@ -813,6 +834,15 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by remember { mutableStateOf(ConverterTab.BIBLES) }
     var showSongLibraryWindow by remember { mutableStateOf(false) }
+    var showCalendarWindow by remember { mutableStateOf(false) }
+    // What the Schedule tab holds right now, mirrored here from the same callback that feeds the
+    // Companion server. The Calendar Manager reads it to decide whether "load" would discard
+    // anything, and to copy a live-built service back onto a date.
+    var currentScheduleItems by remember { mutableStateOf<List<ScheduleItem>>(emptyList()) }
+    // Whether the Schedule's cue rows may fire. Set from the service's own switch as it is loaded
+    // from the Calendar Manager, and from the Schedule tab's switch after that; the engine reads it
+    // every tick, so what the tab shows armed is exactly what will fire.
+    var automationArmed by remember { mutableStateOf(true) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
     var showMemoryMonitorWindow by remember { mutableStateOf(false) }
@@ -929,6 +959,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                     CompositionLocalProvider(
                         LocalMediaViewModel provides mediaViewModel,
                         LocalMainWindowState provides state,
+                        LocalOpenCalendar provides { showCalendarWindow = true },
                         LocalShortcuts provides remember(appSettings.keyboardShortcutSettings) {
                             ShortcutMap.from(appSettings.keyboardShortcutSettings)
                         }
@@ -1078,6 +1109,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             emitRemoteTabSelection(
                                                 item, remoteSelectSongFlow,
                                                 remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                                remoteSelectMediaFlow,
                                             )
                                         }
                                         pending.decision.complete(true)
@@ -1101,6 +1133,118 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         ))
                                     }
                                 }
+                            }
+
+                            // What a fired calendar cue does — the same path a phone's "project"
+                            // takes once approved, minus the approval: the operator planned it.
+                            // [plays] is the cue's Once / Loop / N times: 1, 0, or N. Each kind of
+                            // item already has its own notion of a repeat, so it is mapped onto
+                            // that rather than timed from here.
+                            val projectFromCalendar: (ScheduleItem, Int) -> Unit = { item, plays ->
+                                // Select it as a click would, so the Schedule shows what is live.
+                                currentScheduleActions.selectItem(item.id)
+                                liveDurationLog.wentLive(item)
+                                when (item) {
+                                    // Scenes are driven by MainDesktop's own ViewModel; the bridge is
+                                    // the one way there. Everything else is what a phone can project.
+                                    is ScheduleItem.SceneItem -> currentScheduleActions.presentScene(item.sceneId)
+                                    else -> {
+                                        val looping = item is ScheduleItem.AnnouncementItem &&
+                                            !item.isTimer && plays != 1
+                                        val shown = if (looping) {
+                                            // The announcement's own loop count: 0 is forever there too.
+                                            item.copy(loopCount = plays)
+                                        } else {
+                                            item
+                                        }
+                                        if (shown is ScheduleItem.AnnouncementItem) {
+                                            appSettings = appSettings.withAnnouncement(shown)
+                                        }
+                                        executeProjectItem(
+                                            shown,
+                                            currentScheduleActions,
+                                            presenterManager,
+                                            statisticsManager,
+                                        )
+                                        if (shown is ScheduleItem.MediaItem) {
+                                            mediaViewModel.setLooping(plays != 1)
+                                            // Media counts repeats after the first play; 0 is forever.
+                                            mediaViewModel.setLoopCount(if (plays == 0) 0 else plays - 1)
+                                        }
+                                        currentScheduleActions.playSlideshow(shown, plays)
+                                        coroutineScope.launch {
+                                            emitRemoteTabSelection(
+                                                shown, remoteSelectSongFlow,
+                                                remoteSelectPictureFlow, remoteSelectPresentationFlow,
+                                                remoteSelectMediaFlow,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            val loadFromCalendar: (
+                                List<ScheduleItem>, Map<String, RowTiming>, Boolean, Boolean,
+                            ) -> Unit = { items, timing, replace, armed ->
+                                if (replace) currentScheduleActions.clearSchedule()
+                                // Rows go in whole, ids and all: a plan's headings, lower thirds,
+                                // scenes and cues survive the trip, and each row's timing lands on it.
+                                items.forEach { item ->
+                                    currentScheduleActions.addRow(item, timing[item.id])
+                                }
+                                // The service's own switch comes with it: what was armed on the
+                                // calendar is armed here, where the cues actually fire from.
+                                automationArmed = armed
+                            }
+                            // What a cue does when it goes off -- the engine, the Schedule tab's
+                            // go-live on a cue row and the Calendar Manager's ▶ all fire through it.
+                            val cueHost = CalendarHost(
+                                loadIntoSchedule = loadFromCalendar,
+                                projectItem = projectFromCalendar,
+                                blankOutputs = {
+                                    presenterManager.requestClearDisplay()
+                                    liveDurationLog.wentBlank()
+                                },
+                            )
+                            val fireScheduleCue: (ScheduleItem.CueItem) -> Unit = { cue ->
+                                fireCue(cueHost, currentScheduleItems, cue, loadRows = false)
+                            }
+
+                            // The automation engine, up for the whole session: it watches the live
+                            // Schedule and fires its cue rows at their time. See CueRunner.
+                            val cueRunner = remember {
+                                CueRunner(
+                                    items = { currentScheduleItems },
+                                    timing = { currentScheduleActions.currentTiming() },
+                                    armed = { automationArmed },
+                                    host = cueHost,
+                                )
+                            }
+                            LaunchedEffect(Unit) { cueRunner.run() }
+
+                            // Nothing is on screen any more, so whatever was is no longer being
+                            // timed -- see LiveDurationLog.
+                            val liveMode = presenterManager.presentingMode.value
+                            LaunchedEffect(liveMode) {
+                                if (liveMode == Presenting.NONE) liveDurationLog.wentBlank()
+                            }
+
+                            // A row set to run for its *own* length has no number for the engine to
+                            // count -- the video itself decides when it is over. MediaViewModel
+                            // already reports that (it is what clears the output), so the row's
+                            // "at end" action hangs off the same signal.
+                            LaunchedEffect(mediaViewModel.mediaFinished) {
+                                if (mediaViewModel.mediaFinished) cueRunner.liveItemFinished()
+                            }
+
+                            // And the other half of leaving it to run: the service that is about
+                            // to start loads itself into the Schedule. Reads calendar.json on a
+                            // background thread, so it works with the Calendar window closed.
+                            LaunchedEffect(Unit) {
+                                val store = CalendarStore(AppDataDir.resolve())
+                                ServiceAutoLoader(
+                                    document = { withContext(Dispatchers.IO) { store.load().document } },
+                                    host = cueHost,
+                                ).run()
                             }
 
                             LaunchedEffect(Unit) {
@@ -1295,6 +1439,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     showConverterWindow = true
                                 },
                                 onSongLibrary = { showSongLibraryWindow = true },
+                                onCalendar = { showCalendarWindow = true },
                                 onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
                                 onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
                                 onCheckForUpdates = {
@@ -1357,6 +1502,19 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
                             MainDesktop(
                                 hostWindow = window,
+                                onPresentCue = fireScheduleCue,
+                                onRowWentLive = { item -> liveDurationLog.wentLive(item) },
+                                typicalSongSeconds = { song ->
+                                    liveDurationLog.median(
+                                        ScheduleItem.SongItem(
+                                            id = song.songId,
+                                            songNumber = song.number.toIntOrNull() ?: 0,
+                                            title = song.title,
+                                            songbook = song.songbook,
+                                            songId = song.songId,
+                                        )
+                                    )
+                                },
                                 instanceLinkConnectionStatus =
                                     instanceLinkViewModel.connectionStatus.collectAsState().value,
                                 instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
@@ -1502,7 +1660,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         )
                                     )
                                 },
-                                onScheduleChanged = { items -> companionServer.updateSchedule(items) },
+                                onScheduleChanged = { items ->
+                                    currentScheduleItems = items
+                                    companionServer.updateSchedule(items)
+                                },
                                 onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
                                     companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
                                 },
@@ -1530,6 +1691,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 remoteSelectSongFlow = remoteSelectSongFlow,
                                 remoteSelectPictureFlow = remoteSelectPictureFlow,
                                 remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+                                remoteSelectMediaFlow = remoteSelectMediaFlow,
                                 nextPictureFlow = kotlinx.coroutines.flow.flow {
                                     companionServer.onNextPicture.collect { emit(Unit) }
                                 },
@@ -1725,6 +1887,90 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     // already watches -- so the list behind this window reloads on
                                     // its own rather than on close.
                                     onClose = { showSongLibraryWindow = false }
+                                )
+                            }
+                            if (showCalendarWindow) {
+                                CalendarWindow(
+                                    theme = theme,
+                                    appDataDirectory = AppDataDir.resolve(),
+                                    songStorageDirectory = appSettings.songSettings.storageDirectory,
+                                    host = CalendarHost(
+                                        // How long a row runs by itself, so a plan does not have
+                                        // to be timed by hand: a clip's own duration, read from
+                                        // its header, and a slideshow's count times the interval
+                                        // it advances at. Null for anything that cannot say.
+                                        itemRunSeconds = { item ->
+                                            withContext(Dispatchers.IO) {
+                                                // What it is known to take, else what it has
+                                                // actually taken here -- see LiveDurationLog.
+                                                when (item) {
+                                                    is ScheduleItem.MediaItem ->
+                                                        mediaDurationSeconds(item.mediaUrl)
+                                                    is ScheduleItem.PictureItem -> slideshowSeconds(
+                                                        item.imageCount,
+                                                        appSettings.pictureSettings.autoScrollInterval,
+                                                    )
+                                                    is ScheduleItem.PresentationItem -> slideshowSeconds(
+                                                        item.slideCount,
+                                                        appSettings.presentationSettings.autoScrollInterval,
+                                                    )
+                                                    else -> null
+                                                } ?: liveDurationLog.median(item)
+                                            }
+                                        },
+                                        // The run-of-show PDF embeds this. OpenSans covers Cyrillic,
+                                        // which PDFBox's built-in Helvetica does not — and this app's
+                                        // song libraries routinely are Cyrillic.
+                                        pdfFont = { bold ->
+                                            val name = if (bold) "OpenSans-Bold" else "OpenSans-Regular"
+                                            object {}.javaClass
+                                                .getResourceAsStream("/fonts/$name.ttf")
+                                                ?.use { it.readBytes() }
+                                        },
+                                        // Flattened from the loaded primary Bible, so the picker's
+                                        // book / chapter / verse grids offer exactly what this
+                                        // translation actually has.
+                                        bibleBooks = {
+                                            primaryBibleForInstanceLink?.let { bible ->
+                                                (0 until bible.getBookCount()).map { index ->
+                                                    CalendarBibleBook(
+                                                        bookId = bible.getBookId(index),
+                                                        name = bible.getBooks().getOrElse(index) { "" },
+                                                        verseCounts = (1..bible.getChapterCount(index)).map { chapter ->
+                                                            bible.getVerseCountForChapter(index, chapter)
+                                                        },
+                                                    )
+                                                }
+                                            }.orEmpty()
+                                        },
+                                        chooseExportFile = { suggested ->
+                                            FileChooser.platformInstance.save(
+                                                location = null,
+                                                suggestedName = suggested,
+                                                filters = listOf(
+                                                    FileNameExtensionFilter("PDF Document (*.pdf)", "pdf")
+                                                ),
+                                                title = "Export Run of Show"
+                                            )?.toFile()
+                                        },
+                                        loadIntoSchedule = loadFromCalendar,
+                                        projectItem = projectFromCalendar,
+                                        blankOutputs = { presenterManager.requestClearDisplay() },
+                                        currentSchedule = { currentScheduleItems },
+                                        // The picker's preset previews: the same muted looping
+                                        // player the backgrounds use, and the deck rasterizer at
+                                        // thumbnail width.
+                                        preview = PreviewSources(
+                                            video = { path, modifier -> LoopingVideoBackground(path, modifier) },
+                                            slideThumbnails = ::slideThumbnails,
+                                            scene = { sceneId, modifier ->
+                                                scenesForInstanceLink.firstOrNull { it.id == sceneId }?.let { scene ->
+                                                    ScenePresenter(modifier = modifier, scene = scene)
+                                                }
+                                            },
+                                        ),
+                                    ),
+                                    onClose = { showCalendarWindow = false }
                                 )
                             }
                             if (showLottieGenWindow) {

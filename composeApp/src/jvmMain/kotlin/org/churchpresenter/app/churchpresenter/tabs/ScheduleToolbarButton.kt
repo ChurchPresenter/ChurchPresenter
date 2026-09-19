@@ -8,7 +8,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 enum class ScheduleToolbarButton {
     /** Title-row readouts rather than toolbar buttons, but hidden from the same menu. */
     ITEM_COUNT, ZOOM,
-    NEW, OPEN, SAVE, CLEAR, UNDO, REDO, ADD_LABEL, PLANNING_CENTER;
+    NEW, OPEN, SAVE, CLEAR, UNDO, REDO, ADD_LABEL, PLANNING_CENTER, CALENDAR;
 
     /** The menu's own test tag for this entry. */
     val menuTag: String get() = "schedule_options_button_${name.lowercase()}"
@@ -21,7 +21,10 @@ private val TOOLBAR_GROUPS = listOf(
         ScheduleToolbarButton.SAVE, ScheduleToolbarButton.CLEAR,
     ),
     listOf(ScheduleToolbarButton.UNDO, ScheduleToolbarButton.REDO),
-    listOf(ScheduleToolbarButton.ADD_LABEL, ScheduleToolbarButton.PLANNING_CENTER),
+    listOf(
+        ScheduleToolbarButton.ADD_LABEL, ScheduleToolbarButton.PLANNING_CENTER,
+        ScheduleToolbarButton.CALENDAR,
+    ),
 )
 
 /** Whether a divider still separates anything once [hidden] is taken out. */

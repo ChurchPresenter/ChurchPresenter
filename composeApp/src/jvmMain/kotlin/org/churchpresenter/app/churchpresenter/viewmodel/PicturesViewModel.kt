@@ -240,6 +240,62 @@ class PicturesViewModel(
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
+    /**
+     * How many passes a calendar cue asked for: 0 keeps going, N stops after the Nth.
+     * The tab's own Loop toggle is 0.
+     */
+    private var passesWanted = 0
+    private var passesDone = 0
+
+    /**
+     * A calendar cue's "play N times", remembered until the folder it fired for has loaded —
+     * [selectFolder] clears the playing flag on the way in, so setting it here directly would be
+     * undone a moment later. Consumed by [applyPendingPlayback].
+     */
+    private var pendingPlays: Int? = null
+
+    /** The folder [pendingPlays] was asked for, so the request cannot land on a different one. */
+    private var pendingFolder: String? = null
+
+    /**
+     * A cue asking for this folder to play, from wherever the cue fired.
+     *
+     * [folderPath] is what makes it reliable. Without it the request was applied the moment it
+     * arrived if *any* folder was loaded -- so a cue firing while last week's folder was still
+     * open started that one, cleared the request, and the folder it was actually for arrived
+     * stopped, which looked exactly like the slideshow ignoring the settings.
+     */
+    fun requestPlayback(plays: Int, folderPath: String? = null) {
+        pendingPlays = plays
+        pendingFolder = folderPath
+        applyPendingPlayback()
+    }
+
+    /** Forgets a cue's play request: the run it asked for is over, or the operator has taken over. */
+    private fun clearPlaybackRequest() {
+        pendingPlays = null
+        pendingFolder = null
+    }
+
+    private fun applyPendingPlayback() {
+        val plays = pendingPlays ?: return
+        val wanted = pendingFolder
+        // Waits for the folder it was meant for, and for that folder to have images: a request
+        // spent on an empty list would set `isPlaying` with nothing to advance through.
+        if (wanted != null && _selectedFolder.value?.absolutePath != wanted) return
+        if (_images.isEmpty()) return
+        // The request is deliberately *not* consumed here. Selecting a folder clears playback on
+        // the way in, and the tab re-selects the folder a cue asked for right after the cue has
+        // started it -- so a request spent on the first application was wiped a moment later and
+        // the slideshow sat on image 1. It stays armed for its folder until the run ends or the
+        // operator takes over; see [clearPlaybackRequest].
+        passesWanted = plays
+        passesDone = 0
+        _isLooping.value = plays != 1
+        _selectedImageIndex.value = 0
+        _isPlaying.value = true
+    }
+
     private val _transitionDuration = mutableStateOf(appSettings?.pictureSettings?.transitionDuration ?: 500f)
     var transitionDuration: Float
         get() = _transitionDuration.value
@@ -309,6 +365,7 @@ class PicturesViewModel(
         clearImages() // also cancels the previous folder's watcher
         loadImagesFromFolder(folder)
         startWatching(folder)
+        applyPendingPlayback()
     }
 
     fun loadImagesFromFolder(folder: File) {
@@ -418,11 +475,15 @@ class PicturesViewModel(
         if (_images.isNotEmpty()) {
             if (_selectedImageIndex.value < _images.size - 1) {
                 _selectedImageIndex.value = (_selectedImageIndex.value + 1)
-            } else if (_isLooping.value) {
+            } else if (_isLooping.value && (passesWanted == 0 || passesDone + 1 < passesWanted)) {
+                passesDone++
                 _selectedImageIndex.value = 0
             } else {
-                // Stop playing if at the end and not looping
+                // Stop playing if at the end and not looping — or after the pass a cue asked for.
+                clearPlaybackRequest()
                 _isPlaying.value = false
+                passesWanted = 0
+                passesDone = 0
             }
         }
         onInstanceLinkSendNext?.invoke()
@@ -470,6 +531,9 @@ class PicturesViewModel(
     }
 
     fun togglePlayPause() {
+        // The operator taking over ends a cue's request: without this, re-opening that folder
+        // later would start it playing again on its own.
+        clearPlaybackRequest()
         _isPlaying.value = !_isPlaying.value
     }
 

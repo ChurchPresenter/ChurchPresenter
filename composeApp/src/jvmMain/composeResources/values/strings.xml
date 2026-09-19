@@ -7,6 +7,10 @@
     <string name="no_song_selected">No song selected</string>
     <string name="go_live">Go Live</string>
     <string name="add_to_schedule">Add to Schedule</string>
+    <string name="save_preset">Save preset</string>
+    <string name="preset_name">Preset name</string>
+    <string name="preset_name_hint">Sunday announcements</string>
+    <string name="preset_replaces">A preset called %1$s already exists and will be replaced.</string>
     <string name="copy_verse">Copy Verse</string>
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>
@@ -219,6 +223,7 @@
     <string name="diagnostic_info_save_failed">Failed to save diagnostic info.</string>
     <string name="open_converter">Converter</string>
     <string name="open_song_library">Song Library Manager</string>
+    <string name="open_calendar_manager">Calendar Manager</string>
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>
@@ -736,6 +741,12 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detailed</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="schedule_kind_cue">Cue</string>
+    <string name="schedule_cue_fired">Fired %1$s</string>
+    <string name="schedule_timing_loop">Loops</string>
+    <string name="schedule_timing_times">Plays %1$d×</string>
+    <string name="schedule_timing_next">then next item</string>
+    <string name="schedule_timing_blank">then blank</string>
     <string name="tooltip_schedule_options">Schedule Options</string>
     <string name="schedule_show_buttons_under_title">Show buttons under title</string>
     <string name="schedule_option_item_count">Item Count</string>
@@ -1880,6 +1891,7 @@
     <string name="song_chords_used">%1$d used</string>
     <string name="song_insert_chord">Insert chord</string>
     <string name="song_stats">%1$d sections · %2$d lines · %3$d words</string>
+    <string name="song_typical_live">usually %1$s live</string>
 
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Song Samples</string>

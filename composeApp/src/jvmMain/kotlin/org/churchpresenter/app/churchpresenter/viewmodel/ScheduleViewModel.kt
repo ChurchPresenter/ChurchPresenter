@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.core.models.io.writeTextAtomically
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -118,7 +119,7 @@ class ScheduleViewModel(
                 if (isDirty && _scheduleItems.isNotEmpty()) {
                     try {
                         autoSaveFile.parentFile?.mkdirs()
-                        val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+                        val scheduleFile = scheduleFileDocument()
                         val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
                         autoSaveFile.writeTextAtomically(encrypt(serialized))
                         isDirty = false
@@ -177,16 +178,13 @@ class ScheduleViewModel(
         return try {
             val raw = autoSaveFile.readText()
             val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
-            val (items, notes) = try {
-                val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
-                Pair(schedFile.items, schedFile.notes)
-            } catch (_: Exception) {
-                Pair(json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText), emptyMap())
-            }
+            val (items, notes, timing) = decodeSchedule(jsonText)
             _scheduleItems.clear()
             _scheduleItems.addAll(items)
             _notes.clear()
             _notes.putAll(notes)
+            _timing.clear()
+            _timing.putAll(timing)
             currentFilePath = null
             undoStack.clear()
             redoStack.clear()
@@ -221,7 +219,8 @@ class ScheduleViewModel(
 
     private data class ScheduleSnapshot(
         val items: List<ScheduleItem>,
-        val notes: Map<String, String>
+        val notes: Map<String, String>,
+        val timing: Map<String, RowTiming> = emptyMap(),
     )
 
     private val undoStack = ArrayDeque<ScheduleSnapshot>()
@@ -233,7 +232,7 @@ class ScheduleViewModel(
     val canRedo: Boolean get() = _canRedo.value
 
     private fun pushUndoSnapshot() {
-        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
         if (undoStack.size > MAX_UNDO_DEPTH) undoStack.removeFirst()
         redoStack.clear()
         _canUndo.value = true
@@ -242,12 +241,14 @@ class ScheduleViewModel(
 
     fun undo() {
         if (_isFollowingRemote.value || undoStack.isEmpty()) return
-        redoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        redoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
         val snapshot = undoStack.removeLast()
         _scheduleItems.clear()
         _scheduleItems.addAll(snapshot.items)
         _notes.clear()
         _notes.putAll(snapshot.notes)
+        _timing.clear()
+        _timing.putAll(snapshot.timing)
         _canUndo.value = undoStack.isNotEmpty()
         _canRedo.value = true
         notifyChanged()
@@ -255,12 +256,14 @@ class ScheduleViewModel(
 
     fun redo() {
         if (_isFollowingRemote.value || redoStack.isEmpty()) return
-        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
         val snapshot = redoStack.removeLast()
         _scheduleItems.clear()
         _scheduleItems.addAll(snapshot.items)
         _notes.clear()
         _notes.putAll(snapshot.notes)
+        _timing.clear()
+        _timing.putAll(snapshot.timing)
         _canUndo.value = true
         _canRedo.value = redoStack.isNotEmpty()
         notifyChanged()
@@ -283,6 +286,30 @@ class ScheduleViewModel(
         if ((_notes[itemId] ?: "") == next) return
         pushUndoSnapshot()
         if (next.isEmpty()) _notes.remove(itemId) else _notes[itemId] = next
+        notifyChanged()
+    }
+
+    // ── Timing ────────────────────────────────────────────────────────────────
+
+    /**
+     * How each row runs on its own, keyed by row id -- what the Calendar Manager planned for it.
+     * A row with no entry is cued by hand and runs its own length once, which is every row that
+     * was not loaded from a plan.
+     */
+    private val _timing = mutableStateMapOf<String, RowTiming>()
+    val timing: Map<String, RowTiming> get() = _timing
+
+    fun timingFor(itemId: String): RowTiming = _timing[itemId] ?: RowTiming.DEFAULT
+
+    /** Adds a planned row whole -- its id kept, so [timing] and any cue payload still point at it. */
+    fun addRow(item: ScheduleItem, timing: RowTiming?) {
+        if (_isFollowingRemote.value) {
+            onPushToRemoteSchedule?.invoke(item)
+            return
+        }
+        pushUndoSnapshot()
+        _scheduleItems.add(item)
+        if (timing != null && !timing.isDefault()) _timing[item.id] = timing
         notifyChanged()
     }
 
@@ -335,7 +362,7 @@ class ScheduleViewModel(
         val existing = currentFilePath
         if (existing != null) {
             val file = File(existing)
-            val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+            val scheduleFile = scheduleFileDocument()
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
             clearAutoSave()
@@ -365,7 +392,7 @@ class ScheduleViewModel(
             title = dialogTitle
         )
         if (file != null) {
-            val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+            val scheduleFile = scheduleFileDocument()
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
             currentFilePath = file.absolutePathString()
@@ -390,11 +417,13 @@ class ScheduleViewModel(
         try {
             val raw = file.readText()
             val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
-            val (items, notes) = decodeSchedule(jsonText)
+            val (items, notes, timing) = decodeSchedule(jsonText)
             _scheduleItems.clear()
             _scheduleItems.addAll(items)
             _notes.clear()
             _notes.putAll(notes)
+            _timing.clear()
+            _timing.putAll(timing)
             currentFilePath = file.absolutePathString()
             undoStack.clear()
             redoStack.clear()
@@ -411,19 +440,31 @@ class ScheduleViewModel(
         }
     }
 
-    /** Try new format (v2 with notes), fall back to legacy plain array. */
-    private fun decodeSchedule(jsonText: String): Pair<List<ScheduleItem>, Map<String, String>> = try {
-        val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
-        schedFile.items to schedFile.notes
-    } catch (_: Exception) {
-        json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText) to emptyMap()
-    }
+    /** The schedule as it is written to disk: the rows, their notes and their timing. */
+    private fun scheduleFileDocument(): ScheduleFileV2 =
+        ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap(), timing = _timing.toMap())
+
+    /** Try new format (v2 with notes and timing), fall back to legacy plain array. */
+    private fun decodeSchedule(jsonText: String): DecodedSchedule =
+        try {
+            val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
+            DecodedSchedule(schedFile.items, schedFile.notes, schedFile.timing)
+        } catch (_: Exception) {
+            DecodedSchedule(json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText))
+        }
+
+    private data class DecodedSchedule(
+        val items: List<ScheduleItem>,
+        val notes: Map<String, String> = emptyMap(),
+        val timing: Map<String, RowTiming> = emptyMap(),
+    )
 
     /** Clears the schedule and forgets the current file path. */
     fun newSchedule() {
         if (_isFollowingRemote.value) return
         _scheduleItems.clear()
         _notes.clear()
+        _timing.clear()
         currentFilePath = null
         undoStack.clear()
         redoStack.clear()
@@ -548,6 +589,20 @@ class ScheduleViewModel(
         addOrPush(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
     }
 
+    /** Adds a cue row whole -- its payload, time and play count come with it -- under a fresh id. */
+    fun addCue(item: ScheduleItem.CueItem) {
+        addOrPush(item.copy(id = UUID.randomUUID().toString()))
+    }
+
+    /** Ticks or unticks one cue row -- "skip this one" -- in place. */
+    fun setCueEnabled(id: String, enabled: Boolean) {
+        val index = _scheduleItems.indexOfFirst { it.id == id }
+        val cue = _scheduleItems.getOrNull(index) as? ScheduleItem.CueItem ?: return
+        pushUndoSnapshot()
+        _scheduleItems[index] = cue.copy(enabled = enabled)
+        notifyChanged()
+    }
+
     fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
         addOrPush(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
     }
@@ -592,6 +647,7 @@ class ScheduleViewModel(
         pushUndoSnapshot()
         _scheduleItems.removeAll { it.id == id }
         _notes.remove(id)
+        _timing.remove(id)
         notifyChanged()
     }
 
@@ -663,11 +719,23 @@ class ScheduleViewModel(
         pushUndoSnapshot()
         _scheduleItems.clear()
         _notes.clear()
+        _timing.clear()
         notifyChanged()
     }
 
     fun selectItem(id: String) {
         _selectedItemId.value = if (_selectedItemId.value == id) null else id
+    }
+
+    /**
+     * Selects [id] outright -- what the automation does when it puts a row on screen.
+     *
+     * Not [selectItem]: that toggles, because a second click on a row is how the operator clears
+     * the selection. A row going live is not a click, and firing the same row twice must not
+     * deselect it.
+     */
+    fun selectOnly(id: String) {
+        _selectedItemId.value = id
     }
 
     fun clearSelection() {
@@ -678,6 +746,13 @@ class ScheduleViewModel(
      * Presents a schedule item by coordinating all relevant ViewModels.
      * Triggers the appropriate callbacks for tab switching and presenting mode.
      */
+    /**
+     * Told whenever a row is put on screen from here -- how long each thing takes is measured from
+     * this, and from the cue path's own equivalent. A lambda, not a listener object: nothing here
+     * should know what is doing the measuring.
+     */
+    var onItemPresented: ((ScheduleItem) -> Unit)? = null
+
     fun presentItem(
         item: ScheduleItem,
         onPresenting: (Presenting) -> Unit,
@@ -690,8 +765,10 @@ class ScheduleViewModel(
         onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
         onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
         onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
-        onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null
+        onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
+        onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
     ) {
+        onItemPresented?.invoke(item)
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
             is ScheduleItem.BibleVerseItem -> onPresentBible?.invoke(item) ?: onPresenting(Presenting.BIBLE)
@@ -704,6 +781,7 @@ class ScheduleViewModel(
             is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
             is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
             is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.CueItem -> onPresentCue?.invoke(item)
         }
     }
 
@@ -741,5 +819,7 @@ class ScheduleViewModel(
 private data class ScheduleFileV2(
     val version: Int = 2,
     val items: List<ScheduleItem>,
-    val notes: Map<String, String> = emptyMap()
+    val notes: Map<String, String> = emptyMap(),
+    /** How each row runs on its own -- start, length, repeats, end -- keyed by row id. See [RowTiming]. */
+    val timing: Map<String, RowTiming> = emptyMap(),
 )
