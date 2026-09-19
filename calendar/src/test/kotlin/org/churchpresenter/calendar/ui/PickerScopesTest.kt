@@ -4,11 +4,9 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

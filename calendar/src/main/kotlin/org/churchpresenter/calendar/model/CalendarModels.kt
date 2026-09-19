@@ -136,7 +136,7 @@ data class CalendarDocument(
  * service back, which is the failure worth having: something reappearing is noticed, something
  * vanishing is not.
  */
-private val TOMBSTONE_LIFETIME: Duration = Duration.ofDays(90)
+internal val TOMBSTONE_LIFETIME: Duration = Duration.ofDays(90)
 
 /** An instant as the file stores it. */
 fun storedInstant(at: Instant): String = at.toString()

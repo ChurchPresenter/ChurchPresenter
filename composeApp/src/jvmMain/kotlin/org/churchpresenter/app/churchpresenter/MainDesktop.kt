@@ -158,6 +158,7 @@ import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.app.churchpresenter.dialogs.SavePresetDialog
 import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
 import org.churchpresenter.core.models.songs.LyricSection
@@ -172,7 +173,6 @@ import org.churchpresenter.theme.ThemeMode
 
 import java.io.File
 import java.util.UUID
-import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.viewmodel.clearDetectedReferences
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.invalidateInstanceLinkBibleCache
@@ -405,7 +405,7 @@ fun MainDesktop(
     var showAddLabelDialog by remember { mutableStateOf(false) }
     // The item a tab's Save preset is naming, or null while that dialog is closed.
     var presetToSave by remember { mutableStateOf<ScheduleItem?>(null) }
-    val presetStore = remember { PresetStore(AppDataDir.resolve()) }
+    val presetStore = remember(appSettings.calendarStorageDirectory) { PresetStore(appSettings.calendarFolder()) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
 

@@ -2,6 +2,8 @@ package org.churchpresenter.calendar
 
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.model.CalendarDocument
+import org.churchpresenter.calendar.model.withPathsRelativeTo
+import org.churchpresenter.calendar.model.withPathsResolvedFrom
 import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
 import java.time.LocalDateTime
@@ -100,7 +102,8 @@ class CalendarStore(private val folder: File) {
     fun save(document: CalendarDocument) {
         folder.mkdirs()
         rotateBackups()
-        file.writeTextAtomically(json.encodeToString(CalendarDocument.serializer(), document))
+        val stored = document.withPathsRelativeTo(folder)
+        file.writeTextAtomically(json.encodeToString(CalendarDocument.serializer(), stored))
     }
 
     private fun rotateBackups() {
@@ -116,7 +119,7 @@ class CalendarStore(private val folder: File) {
 
     /** Decodes [source], or null if it cannot be read or does not parse. */
     private fun decode(source: File): CalendarDocument? = runCatching {
-        json.decodeFromString(CalendarDocument.serializer(), source.readText())
+        json.decodeFromString(CalendarDocument.serializer(), source.readText()).withPathsResolvedFrom(folder)
     }.getOrNull()
 
     /** Moves [bad] aside under a timestamped name. Best effort: a failure here must not fail a load. */
@@ -126,4 +129,25 @@ class CalendarStore(private val folder: File) {
             bad.renameTo(File(folder, "${bad.name}$CORRUPT_SUFFIX$stamp"))
         }
     }
+}
+
+/**
+ * Puts the calendar and its presets into a folder that has neither, so pointing the app at a new
+ * folder starts it from what was there rather than from nothing. A file the new folder already has
+ * is left alone -- joining a shared folder means taking the shared calendar, and the watcher's
+ * merge is what brings this machine's own services into it afterwards. Returns whether anything
+ * was copied.
+ */
+fun seedCalendarFolder(from: File, to: File): Boolean {
+    if (from.canonicalFile == to.canonicalFile) return false
+    var copied = false
+    for (name in listOf(CALENDAR_FILE, PRESET_FILE)) {
+        val source = File(from, name)
+        val target = File(to, name)
+        if (!source.isFile || target.exists()) continue
+        to.mkdirs()
+        source.copyTo(target)
+        copied = true
+    }
+    return copied
 }

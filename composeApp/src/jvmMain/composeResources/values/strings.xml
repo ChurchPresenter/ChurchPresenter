@@ -1994,6 +1994,9 @@
     <string name="system_storage_status_not_found">Folder not found</string>
     <string name="system_storage_status_read_only">Read only</string>
     <string name="system_storage_status_linked">Linked</string>
+    <string name="calendar_storage">Calendar</string>
+    <string name="calendar_storage_status_default">App data folder</string>
+    <string name="use_default_directory">Use Default</string>
     <string name="system_storage_status_file_count">%1$d files</string>
     <string name="system_storage_status_needs_converting">%1$d need converting</string>
     <string name="system_manage_settings">Manage settings</string>

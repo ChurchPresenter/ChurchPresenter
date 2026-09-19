@@ -160,7 +160,7 @@ fun CalendarApp(
             store = CalendarStore(storeFolder),
             songFolder = songFolder,
             today = today,
-            presetStore = PresetStore(storeFolder),
+            presetStore = PresetStore(storeFolder, onSaved = watcher::savedPresetsHere),
             onSaved = watcher::savedHere,
         )
     }
@@ -168,7 +168,12 @@ fun CalendarApp(
     // A shared folder is how two machines keep one calendar (see CalendarFileWatcher): the other
     // machine's save arrives as a file change, and what it holds is merged into what is open here.
     if (watchStoreFolder) {
-        LaunchedEffect(storeFolder) { watcher.run { state.reloadMerging(io) } }
+        LaunchedEffect(storeFolder) {
+            watcher.run(
+                onChanged = { state.reloadMerging(io) },
+                onPresetsChanged = { state.reloadPresetsMerging(io) },
+            )
+        }
     }
     LaunchedEffect(songFolder) { state.loadSongsAsync(io) }
 

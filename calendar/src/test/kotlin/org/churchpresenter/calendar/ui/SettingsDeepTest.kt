@@ -143,7 +143,8 @@ class SettingsDeepTest {
 
     @Test
     fun `a lead outside what the window offers is refused`() = withCalendar(
-        documentWith(service()).copy(preferences = CalendarPreferences(autoLoadService = true, autoLoadLeadMinutes = 10))
+        documentWith(service())
+            .copy(preferences = CalendarPreferences(autoLoadService = true, autoLoadLeadMinutes = 10))
     ) { folder ->
         openSettings(tab = "Defaults")
         awaitText("How far ahead")

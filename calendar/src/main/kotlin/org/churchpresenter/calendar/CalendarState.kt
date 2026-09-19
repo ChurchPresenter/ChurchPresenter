@@ -10,6 +10,7 @@ import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.CopiedRows
 import org.churchpresenter.calendar.model.ItemPreset
+import org.churchpresenter.calendar.model.PresetDocument
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
@@ -86,6 +87,8 @@ class CalendarState(
     /** The items saved with **Save preset** from the app's tabs, newest first. */
     var presets by mutableStateOf<List<ItemPreset>>(emptyList())
         private set
+    /** `presets.json` as last read, so another machine's copy can be merged against it. */
+    private var presetDocument = PresetDocument()
 
 
     /** The primary Bible's books, as the host supplies them. Read once — see [loadBibleBooks]. */
@@ -121,12 +124,29 @@ class CalendarState(
      */
     suspend fun reloadPresets(io: CoroutineDispatcher = Dispatchers.IO) {
         val store = presetStore ?: return
-        presets = withContext(io) { store.load().presets }.sortedByDescending { it.savedAt }
+        showPresets(withContext(io) { store.load() })
+    }
+
+    /**
+     * Another machine wrote `presets.json`: what it holds is merged with what was last read here,
+     * preset by preset, and written back only if the merge added something — the same shape as
+     * [reloadMerging], in [PresetStore.reloadMerging].
+     */
+    suspend fun reloadPresetsMerging(io: CoroutineDispatcher = Dispatchers.IO) {
+        val store = presetStore ?: return
+        val known = presetDocument
+        showPresets(withContext(io) { store.reloadMerging(known) })
+    }
+
+    private fun showPresets(document: PresetDocument) {
+        presetDocument = document
+        presets = document.presets.sortedWith(compareByDescending<ItemPreset> { it.savedAt }.thenBy { it.id })
     }
 
     fun deletePreset(id: String) {
         val store = presetStore ?: return
         runCatching { store.remove(id) }
+        presetDocument = presetDocument.withoutPreset(id, now())
         presets = presets.filterNot { it.id == id }
     }
     /** Reads the song folder for the add-item picker. Thousands of files — never on the UI thread. */

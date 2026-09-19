@@ -5,7 +5,6 @@ package org.churchpresenter.calendar.ui
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import org.churchpresenter.calendar.CalendarStore
-import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import kotlin.test.Test

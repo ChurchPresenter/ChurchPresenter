@@ -130,6 +130,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.calendar.fireCue
@@ -137,6 +138,7 @@ import org.churchpresenter.calendar.ui.PreviewSources
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
 import org.churchpresenter.core.models.schedule.RowTiming
+import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
@@ -1239,8 +1241,13 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             // And the other half of leaving it to run: the service that is about
                             // to start loads itself into the Schedule. Reads calendar.json on a
                             // background thread, so it works with the Calendar window closed.
-                            LaunchedEffect(Unit) {
-                                val store = CalendarStore(AppDataDir.resolve())
+                            val calendarFolder =
+                                remember(appSettings.calendarStorageDirectory) { appSettings.calendarFolder() }
+                            LaunchedEffect(calendarFolder) {
+                                // A folder chosen in Settings starts from what the app data folder
+                                // holds, once, so the calendar does not vanish on the switch.
+                                withContext(Dispatchers.IO) { seedCalendarFolder(AppDataDir.resolve(), calendarFolder) }
+                                val store = CalendarStore(calendarFolder)
                                 ServiceAutoLoader(
                                     document = { withContext(Dispatchers.IO) { store.load().document } },
                                     host = cueHost,
@@ -1892,7 +1899,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             if (showCalendarWindow) {
                                 CalendarWindow(
                                     theme = theme,
-                                    appDataDirectory = AppDataDir.resolve(),
+                                    appDataDirectory = calendarFolder,
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
                                     host = CalendarHost(
                                         // How long a row runs by itself, so a plan does not have

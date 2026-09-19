@@ -451,13 +451,15 @@ class SystemSettingsTabTest {
             "Lower Third",
             "Presentation",
             "Media",
+            "Calendar",
             "General",
             "Manage settings",
         ).forEach { title ->
             onAllNodesWithText(title).onFirst().assertExists("the $title heading must render")
         }
-        onAllNodesWithText("Browse...").assertCountEquals(6)
+        onAllNodesWithText("Browse...").assertCountEquals(7)
         onAllNodesWithText("Set All").assertCountEquals(6)
+        onAllNodesWithText("Use Default").assertCountEquals(1)
     }
 
     @Test
@@ -1167,7 +1169,7 @@ class SystemSettingsTabTest {
         val missing = File(tempDir(), "moved-away")
         showAllFolders(bible.path, missing.path)
 
-        waitUntil { onAllNodesWithText("5 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 need attention").onFirst()
             .assertExists("the folder that is gone is counted as needing attention")
     }
@@ -1177,7 +1179,7 @@ class SystemSettingsTabTest {
         val dir = tempDir()
         showAllFolders(dir.path, tempDir().path)
 
-        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("7 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("need attention", substring = true).assertCountEquals(0)
     }
 
@@ -1186,7 +1188,8 @@ class SystemSettingsTabTest {
         setContent { MaterialTheme { SystemSettingsTab() } }
 
         waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
-        onAllNodesWithText("0 linked").onFirst().assertExists("nothing is linked before anything is chosen")
+        onAllNodesWithText("1 linked").onFirst()
+            .assertExists("only the calendar, at its default, is linked before anything is chosen")
     }
 
     @Test

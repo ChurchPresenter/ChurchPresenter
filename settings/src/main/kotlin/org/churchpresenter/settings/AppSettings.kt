@@ -34,6 +34,12 @@ data class AppSettings(
     val keyboardShortcutSettings: KeyboardShortcutSettings = KeyboardShortcutSettings(),
     val presentationStorageDirectory: String = "",
     val mediaStorageDirectory: String = "",
+    /**
+     * Where `calendar.json` and `presets.json` are kept. Blank means the app data folder, which is
+     * where they have always been; a path is what makes two computers share one calendar -- point
+     * both at the same synced folder. Resolved by [calendarFolder].
+     */
+    val calendarStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
     val schedulePanelCollapsed: Boolean = false,
     val scheduleItemZoomPercent: Int = 100,
