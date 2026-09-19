@@ -86,6 +86,8 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > **[`presentation-engine/`](./presentation-engine)** — PPTX/PPT/Keynote/PDF parsing, timing and
 > animation, entirely in-JVM. `./gradlew :presentation-engine:test`.
 
+Use **Help → Service folder creator** to prepare materials for a service. Choose your services directory and enter a date in `DD.MM.YYYY` format. The utility creates a dated folder containing `Pictures`, `Presentations`, and `Media`, preserving existing files. It shows where to save `plan.cps`; it does not create a plan or change the application's library settings. No PowerShell installation is required.
+
 
 ---
 

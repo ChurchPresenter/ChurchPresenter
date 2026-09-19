@@ -3453,4 +3453,14 @@
     <string name="profile_pos_bottom_left">Bottom left</string>
     <string name="profile_pos_bottom_center">Bottom center</string>
     <string name="profile_pos_bottom_right">Bottom right</string>
+    <string name="service_folders_title">Service folder creator</string>
+    <string name="service_folders_description">Choose the folder containing your services and enter a date. Existing files are preserved.</string>
+    <string name="service_folders_root">Services folder</string>
+    <string name="service_folders_browse">Choose folder</string>
+    <string name="service_folders_date">Date (DD.MM.YYYY)</string>
+    <string name="service_folders_invalid_date">Enter a valid date in DD.MM.YYYY format.</string>
+    <string name="service_folders_create">Create folders</string>
+    <string name="service_folders_ready">Folders are ready. Save your ChurchPresenter plan here:</string>
+    <string name="service_folders_error">Could not create folders. Check the selected location and write permissions. Some folders may already have been created; you can safely try again.</string>
+    <string name="service_folders_picker_error">Could not open the folder chooser. Please try again.</string>
 </resources>

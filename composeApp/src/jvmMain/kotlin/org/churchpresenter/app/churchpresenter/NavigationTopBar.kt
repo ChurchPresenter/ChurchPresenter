@@ -63,6 +63,7 @@ import churchpresenter.composeapp.generated.resources.menu_file
 import churchpresenter.composeapp.generated.resources.menu_help
 import churchpresenter.composeapp.generated.resources.menu_help_item
 import churchpresenter.composeapp.generated.resources.menu_how_to_blog
+import churchpresenter.composeapp.generated.resources.service_folders_title
 import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.open_calendar_manager
 import churchpresenter.composeapp.generated.resources.open_song_library
@@ -114,6 +115,7 @@ fun FrameWindowScope.NavigationTopBar(
     onHowToBlog: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
     onConverter: () -> Unit = {},
+    onServiceFolders: () -> Unit = {},
     onSongLibrary: () -> Unit = {},
     onCalendar: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
@@ -158,7 +160,7 @@ fun FrameWindowScope.NavigationTopBar(
         ViewMenu(theme, currentTheme, hasCustomTheme, onCustomizeTheme)
         LanguageMenu(onLanguageChange)
         HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onKeyboardShortcuts, onHowToBlog,
-            onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
+            onConverter, onServiceFolders, onSongLibrary, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
             DeveloperMenu(isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
                 onSetDevWindowAlwaysOnTop, onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt)
@@ -381,6 +383,7 @@ private fun MenuBarScope.HelpMenu(
     onKeyboardShortcuts: () -> Unit,
     onHowToBlog: () -> Unit,
     onConverter: () -> Unit,
+    onServiceFolders: () -> Unit,
     onSongLibrary: () -> Unit,
     onCalendar: () -> Unit,
     onAbout: () -> Unit,
@@ -407,6 +410,7 @@ private fun MenuBarScope.HelpMenu(
             onClick = onCalendar,
             shortcut = accel(ShortcutAction.OPEN_CALENDAR_MANAGER),
         )
+        Item(stringResource(Res.string.service_folders_title), onClick = onServiceFolders)
         Item(stringResource(Res.string.menu_about), onClick = onAbout)
         Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
         Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)

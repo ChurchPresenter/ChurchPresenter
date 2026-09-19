@@ -413,6 +413,7 @@ class NavigationTopBarTest {
         var keyboardShortcuts = 0
         var howToBlog = 0
         var converter = 0
+        var serviceFolders = 0
         var songLibrary = 0
         var calendar = 0
         var about = 0
@@ -424,6 +425,7 @@ class NavigationTopBarTest {
             onKeyboardShortcuts = { keyboardShortcuts++ },
             onHowToBlog = { howToBlog++ },
             onConverter = { converter++ },
+            onServiceFolders = { serviceFolders++ },
             onSongLibrary = { songLibrary++ },
             onCalendar = { calendar++ },
             onAbout = { about++ },
@@ -433,29 +435,31 @@ class NavigationTopBarTest {
         ) {
             val helpMenu = getMenu(6)
             assertEquals("Help", helpMenu.text)
-            assertEquals(10, helpMenu.itemCount)
+            assertEquals(11, helpMenu.itemCount)
             assertEquals("Getting Started…", helpMenu.getItem(0).text)
             assertEquals("Keyboard Shortcuts", helpMenu.getItem(1).text)
             assertEquals("How To Blog", helpMenu.getItem(2).text)
             assertEquals("Song and Bible Converter", helpMenu.getItem(3).text)
-            assertEquals("Song Library Manager", helpMenu.getItem(4).text)
-            assertEquals("Calendar Manager", helpMenu.getItem(5).text)
-            assertEquals("About", helpMenu.getItem(6).text)
-            assertEquals("Help", helpMenu.getItem(7).text)
-            assertEquals("Contact", helpMenu.getItem(8).text)
-            assertEquals("Check for Updates…", helpMenu.getItem(9).text)
+            assertEquals("Service folder creator", helpMenu.getItem(4).text)
+            assertEquals("Song Library Manager", helpMenu.getItem(5).text)
+            assertEquals("Calendar Manager", helpMenu.getItem(6).text)
+            assertEquals("About", helpMenu.getItem(7).text)
+            assertEquals("Help", helpMenu.getItem(8).text)
+            assertEquals("Contact", helpMenu.getItem(9).text)
+            assertEquals("Check for Updates…", helpMenu.getItem(10).text)
             assertNotNull(helpMenu.getItem(3).accelerator, "the converter has a shortcut")
-            assertNotNull(helpMenu.getItem(4).accelerator, "the song library has a shortcut")
-            assertNotNull(helpMenu.getItem(5).accelerator, "the calendar has a shortcut")
+            assertNotNull(helpMenu.getItem(5).accelerator, "the song library has a shortcut")
+            assertNotNull(helpMenu.getItem(6).accelerator, "the calendar has a shortcut")
             assertEquals(KeyEvent.VK_K, helpMenu.getItem(3).accelerator.keyCode)
-            assertEquals(KeyEvent.VK_L, helpMenu.getItem(4).accelerator.keyCode)
-            assertEquals(KeyEvent.VK_D, helpMenu.getItem(5).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_L, helpMenu.getItem(5).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_D, helpMenu.getItem(6).accelerator.keyCode)
             for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick()
         }
         assertEquals(1, gettingStarted)
         assertEquals(1, keyboardShortcuts)
         assertEquals(1, howToBlog)
         assertEquals(1, converter)
+        assertEquals(1, serviceFolders)
         assertEquals(1, songLibrary)
         assertEquals(1, calendar)
         assertEquals(1, about)

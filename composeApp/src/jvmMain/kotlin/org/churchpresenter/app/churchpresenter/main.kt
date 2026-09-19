@@ -81,6 +81,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ServiceFoldersWindow
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
@@ -901,6 +902,7 @@ private fun ApplicationScope.ChurchPresenterApp(
     var contactDialogInitialType by remember { mutableStateOf<String?>(null) }
     var showStoryPrompt by remember { mutableStateOf(false) }
     var showConverterWindow by remember { mutableStateOf(false) }
+    var showServiceFoldersWindow by remember { mutableStateOf(false) }
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by remember { mutableStateOf(ConverterTab.BIBLES) }
@@ -1644,6 +1646,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 isInstanceLinkConnected = isInstanceLinkActive(
                                     instanceLinkViewModel.connectionStatus.collectAsState().value
                                 ),
+                                onServiceFolders = { showServiceFoldersWindow = true },
                                 onConverter = {
                                     converterInitialTab = ConverterTab.BIBLES
                                     showConverterWindow = true
@@ -2122,6 +2125,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 },
                                 onDismiss = { showStoryPrompt = false; dialogDismissSignal++ }
                             )
+                            if (showServiceFoldersWindow) {
+                                ServiceFoldersWindow(theme = theme, onClose = { showServiceFoldersWindow = false })
+                            }
                             if (showConverterWindow) {
                                 ConverterWindow(
                                     theme = theme,
