@@ -5,6 +5,8 @@ import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.serviceToAutoLoad
+import org.churchpresenter.calendar.model.storedDate
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.timingForSchedule
 import java.time.LocalDateTime
 
@@ -17,16 +19,30 @@ import java.time.LocalDateTime
  *
  * **It clears the Schedule and puts the service in its place.** That is deliberate and was asked
  * for: the tab is meant to hold the service that is about to run, so whatever is left over from
- * last week goes. It happens once per service per day, so work done in the Schedule after the load
- * is never wiped by a later tick.
+ * last week goes. It happens **once** per plan, though: once the rows have been seen in the
+ * Schedule, an operator who then clears it meant to, and putting the service back a minute later
+ * would be the opposite of helping. Editing the plan makes it a different plan -- see [loadKey] --
+ * and that one loads.
  */
 class ServiceAutoLoader(
     private val document: suspend () -> CalendarDocument,
     private val host: CalendarHost,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) {
-    /** What was last loaded -- see [loadKey] -- so a service loads once rather than every tick. */
-    private var loaded = ""
+    /**
+     * Every plan whose rows have been seen in the Schedule today -- see [loadKey].
+     *
+     * A set rather than "the last one", because a day can hold several services and their windows
+     * can overlap: a long morning service is still inside its own window when the evening one
+     * loads, and would otherwise be due again -- and reload itself -- the moment the evening
+     * window closed.
+     *
+     * Kept per day, and only for plans that actually *arrived*. A load asked for before the
+     * Schedule tab has published the actions it goes through lands nowhere and must be tried
+     * again; one that landed and was then cleared by the operator must not.
+     */
+    private val landed = HashSet<String>()
+    private var landedDate = ""
 
     /** Checks and loads forever, every [tickMillis]. Cancel the coroutine to stop. */
     suspend fun run(tickMillis: Long = TICK_MILLIS, startupMillis: Long = STARTUP_MILLIS) {
@@ -48,17 +64,22 @@ class ServiceAutoLoader(
         val calendar = document()
         val at = now()
         if (!calendar.preferences.autoLoadService) return
+        val today = storedDate(at.toLocalDate())
+        if (today != landedDate) {
+            landed.clear()
+            landedDate = today
+        }
         val service = calendar.serviceToAutoLoad(at) ?: return
         val key = service.loadKey()
-        // "Already loaded" is only believed while the Schedule actually holds something.
-        //
-        // The load goes through the Schedule tab's own actions, and those do not exist until that
-        // tab has first composed -- a tick in that gap (the app is started seconds before a
-        // service, which is exactly when this feature is wanted) calls into a no-op and loads
-        // nothing. Recording it as done there would lose the service for the rest of the day, so
-        // an empty Schedule means it is tried again on the next tick instead.
-        if (key == loaded && host.currentSchedule().isNotEmpty()) return
-        loaded = key
+        if (key in landed) return
+        // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
+        // alone from here, whatever the operator does to it. Asking whether *these* rows are
+        // there, rather than whether the Schedule holds anything, is what tells a load that
+        // arrived from one that called into a no-op while last week's schedule sat there.
+        if (service.isInSchedule(host.currentSchedule())) {
+            landed += key
+            return
+        }
         host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
     }
 }
@@ -72,6 +93,12 @@ class ServiceAutoLoader(
  * already been loaded stayed behind the one that was: rows added to the calendar were simply not
  * there when the automation looked for the next item, and the hand-off found nothing.
  */
+/** Whether [rows] are this service's -- its first row is in them, ids and all. */
+private fun PlannedService.isInSchedule(rows: List<ScheduleItem>): Boolean {
+    val first = items.firstOrNull()?.id ?: return false
+    return rows.any { it.id == first }
+}
+
 private fun PlannedService.loadKey(): String =
     "$date|$id|$startTime|" + items.joinToString(",") { it.id } + "|" + timing.hashCode()
 
