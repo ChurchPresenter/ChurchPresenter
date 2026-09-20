@@ -43,20 +43,8 @@ import org.jetbrains.compose.resources.stringResource
  * One file because the three dialogs have to agree: the design draws them all with the same header
  * (an icon badge, a title and a subtitle, a square close button), the same row card, the same tab
  * strip and the same footer rule. Building each dialog out of whatever Material 3 offered is what
- * made them drift apart in the first place.
- */
-object SheetMetrics {
-    val radius = RoundedCornerShape(13.dp)
-    val cardRadius = RoundedCornerShape(9.dp)
-    val headerIcon = 28.dp
-    val closeButton = 26.dp
-    val tabHeight = 27.dp
-    val smallButton = 22.dp
-    val rowButton = 24.dp
-    val doneHeight = 30.dp
-}
-
-/**
+ * made them drift apart in the first place. Their sizes are [SheetMetrics].
+ *
  * A dialog laid out the way the design draws them: header, optional tab strip, scrolling body,
  * footer.
  *
@@ -343,6 +331,30 @@ fun QuietButton(
     }
 }
 
+/** The filled accent button a sheet's footer commits with. */
+@Composable
+fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .height(SheetMetrics.doneHeight)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (enabled) scheme.primary else scheme.primary.copy(alpha = DISABLED))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 17.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+            fontWeight = FontWeight.Bold,
+            color = scheme.onPrimary.copy(alpha = if (enabled) 1f else DISABLED),
+            maxLines = 1,
+            softWrap = false,
+        )
+    }
+}
+
 private const val ICON_TINT = 0.16f
 private const val BUTTON_TINT = 0.5f
 
@@ -355,3 +367,4 @@ private const val DESTRUCTIVE_TINT = 0.14f
 private const val DASHED_BORDER = 0.45f
 private const val ACCENT_TINT = 0.14f
 private const val ICON_RATIO = 0.5f
+private const val DISABLED = 0.38f

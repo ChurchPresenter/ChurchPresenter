@@ -53,7 +53,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `model/CalendarTime.kt` | Dates, the locale week start, month names, the grid's dates. Pure |
 | `model/DurationText.kt` | `4:30` ⇄ 270 seconds. Pure |
 | `model/ClockText.kt` | `18:30` ⇄ `6:30 PM`: the clock format, and what a time field accepts. Pure |
-| `model/RunClock.kt` | Each row's projected clock time, and whether it is exact |
+| `model/RunClock.kt`, `model/RowClock.kt` | Each row's projected clock time, and whether it is exact |
 | `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
 | `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
 | `model/ServiceMove.kt` | Moving a service: every pinned row and cue travels with its start time. Pure |
@@ -71,7 +71,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `ServiceAutoLoader.kt` | Loads the service that is about to start into the Schedule tab, with the window closed |
 | `ui/Sheet.kt` | The dialog scaffold and the parts every dialog is built from |
 | `ui/Fields.kt` | `CompactTextField`, `FieldLabel` and the `commitOnExit` modifier |
-| `ui/Metrics.kt` | The design's sizes and type, named once |
+| `ui/Metrics.kt` | The design's sizes and type, named once — `CalendarMetrics` for the panes, `SheetMetrics` for the dialogs |
 | `ui/ClockFormat.kt` | `LocalUse24HourClock`, the one place the clock format is read from |
 | `ui/ReorderState.kt` | Drag-to-reorder for the run of show, by row key |
 | `ui/RunClockState.kt` | The clock the run of show judges its cues against: wall clock today, stepped preview otherwise |

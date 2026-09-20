@@ -60,6 +60,18 @@ object CalendarMetrics {
     val chipAccentHeight = 24.dp
 }
 
+/** The dialogs' own sizes -- the header, the tab strip, the row card and their buttons. */
+object SheetMetrics {
+    val radius = RoundedCornerShape(13.dp)
+    val cardRadius = RoundedCornerShape(9.dp)
+    val headerIcon = 28.dp
+    val closeButton = 26.dp
+    val tabHeight = 27.dp
+    val smallButton = 22.dp
+    val rowButton = 24.dp
+    val doneHeight = 30.dp
+}
+
 /**
  * The uppercase, letter-spaced, heavy micro-heading the design uses for `SERVICE TYPES` and
  * `RUN OF SHOW`.

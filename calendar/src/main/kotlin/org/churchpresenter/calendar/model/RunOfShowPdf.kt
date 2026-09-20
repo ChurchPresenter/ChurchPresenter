@@ -23,6 +23,12 @@ private const val SECTION_GAP = 10f
 private const val TIME_COLUMN = 46f
 private const val DURATION_COLUMN = 52f
 
+private const val TITLE_GAP = 4f
+private const val META_GAP = 10f
+private const val HEADING_GAP = 14f
+private const val SECTION_RULE_GAP = 4f
+private const val RULE_WIDTH = 0.5f
+
 /**
  * The run of show as a one-page-per-however-many-rows PDF, for the band and the booth.
  *
@@ -45,41 +51,40 @@ fun exportRunOfShowPdf(
     use24Hour: Boolean = true,
 ) {
     PDDocument().use { document ->
-        val regular = loadFont(document, font(false), PDType1Font.HELVETICA)
-        val bold = loadFont(document, font(true), PDType1Font.HELVETICA_BOLD)
-        val embedded = regular !is PDType1Font
-
-        var page = newPage(document)
-        var stream = PDPageContentStream(document, page)
-        var y = page.mediaBox.height - MARGIN
-
-        try {
-            val meta = headingMeta(service, dateLabel, use24Hour)
-            y = drawHeading(stream, service.name, meta, bold, regular, embedded, y)
-            val clocks = runClocks(service)
-
-            service.items.forEach { item ->
-                if (y < MARGIN + ROW_HEIGHT) {
-                    stream.close()
-                    page = newPage(document)
-                    stream = PDPageContentStream(document, page)
-                    y = page.mediaBox.height - MARGIN
-                }
-                y = if (item is ScheduleItem.LabelItem) {
-                    drawSection(stream, item, bold, embedded, y)
-                } else {
-                    val clock = clocks[item.id]?.let { clockText(it.time, use24Hour) }.orEmpty()
-                    drawRow(stream, item, clock, service.plannedSeconds[item.id], regular, embedded, y)
-                }
-            }
-        } finally {
-            stream.close()
-        }
+        val faces = Faces(
+            regular = loadFont(document, font(false), PDType1Font.HELVETICA),
+            bold = loadFont(document, font(true), PDType1Font.HELVETICA_BOLD),
+        )
+        drawSheet(document, faces, service, headingMeta(service, dateLabel, use24Hour), use24Hour)
         document.save(target)
     }
 }
 
-private fun newPage(document: PDDocument): PDPage = PDPage(PDRectangle.A4).also { document.addPage(it) }
+private fun drawSheet(
+    document: PDDocument,
+    faces: Faces,
+    service: PlannedService,
+    meta: String,
+    use24Hour: Boolean,
+) {
+    val clocks = runClocks(service).mapValues { (_, clock) -> clockText(clock.time, use24Hour) }
+    var page = SheetPage(document, faces)
+    try {
+        page.heading(service.name, meta)
+        for (item in service.items) {
+            if (!page.hasRoomForRow) {
+                page.close()
+                page = SheetPage(document, faces)
+            }
+            when (item) {
+                is ScheduleItem.LabelItem -> page.section(item)
+                else -> page.row(item, clocks[item.id].orEmpty(), service.plannedSeconds[item.id])
+            }
+        }
+    } finally {
+        page.close()
+    }
+}
 
 private fun loadFont(document: PDDocument, bytes: ByteArray?, fallback: PDFont): PDFont =
     bytes?.let { runCatching { PDType0Font.load(document, ByteArrayInputStream(it), true) }.getOrNull() } ?: fallback
@@ -96,78 +101,63 @@ private fun headingMeta(service: PlannedService, dateLabel: String, use24Hour: B
     }
 }
 
-private fun drawHeading(
-    stream: PDPageContentStream,
-    title: String,
-    meta: String,
-    bold: PDFont,
-    regular: PDFont,
-    embedded: Boolean,
-    top: Float,
-): Float {
-    var y = top
-    stream.text(title, MARGIN, y, bold, TITLE_SIZE, embedded)
-    y -= TITLE_SIZE + 4f
-    stream.text(meta, MARGIN, y, regular, SUB_SIZE, embedded)
-    y -= SUB_SIZE + 10f
-
-    stream.rule(MARGIN, y, PDRectangle.A4.width - MARGIN)
-    return y - 14f
+/** The two faces the sheet is set in, and whether they are the embedded ones or the built-in fallback. */
+private class Faces(val regular: PDFont, val bold: PDFont) {
+    val embedded: Boolean = regular !is PDType1Font
 }
 
-private fun drawSection(
-    stream: PDPageContentStream,
-    item: ScheduleItem.LabelItem,
-    bold: PDFont,
-    embedded: Boolean,
-    top: Float,
-): Float {
-    val y = top - SECTION_GAP
-    stream.text(item.text.uppercase(), MARGIN, y, bold, SECTION_SIZE, embedded)
-    stream.rule(MARGIN, y - 4f, PDRectangle.A4.width - MARGIN)
-    return y - ROW_HEIGHT
-}
+/** One A4 page of the sheet, with the cursor that walks down it. */
+private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCloseable {
+    private val page = PDPage(PDRectangle.A4).also { document.addPage(it) }
+    private val stream = PDPageContentStream(document, page)
+    private val right = PDRectangle.A4.width - MARGIN
+    private var y = page.mediaBox.height - MARGIN
 
-private fun drawRow(
-    stream: PDPageContentStream,
-    item: ScheduleItem,
-    clock: String,
-    plannedSeconds: Int?,
-    regular: PDFont,
-    embedded: Boolean,
-    top: Float,
-): Float {
-    val right = PDRectangle.A4.width - MARGIN
-    stream.text(clock, MARGIN, top, regular, META_SIZE, embedded)
-    stream.text(item.displayText, MARGIN + TIME_COLUMN, top, regular, ROW_SIZE, embedded)
-    if (plannedSeconds != null) {
-        stream.text(formatDuration(plannedSeconds), right - DURATION_COLUMN, top, regular, META_SIZE, embedded)
+    val hasRoomForRow: Boolean get() = y >= MARGIN + ROW_HEIGHT
+
+    fun heading(title: String, meta: String) {
+        text(title, MARGIN, faces.bold, TITLE_SIZE)
+        y -= TITLE_SIZE + TITLE_GAP
+        text(meta, MARGIN, faces.regular, SUB_SIZE)
+        y -= SUB_SIZE + META_GAP
+        rule(y)
+        y -= HEADING_GAP
     }
-    return top - ROW_HEIGHT
-}
 
-/** One line of text, with whatever the font cannot encode replaced rather than thrown on. */
-private fun PDPageContentStream.text(
-    value: String,
-    x: Float,
-    y: Float,
-    font: PDFont,
-    size: Float,
-    embedded: Boolean,
-) {
-    if (value.isEmpty()) return
-    beginText()
-    setFont(font, size)
-    newLineAtOffset(x, y)
-    showText(if (embedded) value else value.toWinAnsiSafe())
-    endText()
-}
+    fun section(item: ScheduleItem.LabelItem) {
+        y -= SECTION_GAP
+        text(item.text.uppercase(), MARGIN, faces.bold, SECTION_SIZE)
+        rule(y - SECTION_RULE_GAP)
+        y -= ROW_HEIGHT
+    }
 
-private fun PDPageContentStream.rule(fromX: Float, y: Float, toX: Float) {
-    setLineWidth(0.5f)
-    moveTo(fromX, y)
-    lineTo(toX, y)
-    stroke()
+    fun row(item: ScheduleItem, clock: String, plannedSeconds: Int?) {
+        text(clock, MARGIN, faces.regular, META_SIZE)
+        text(item.displayText, MARGIN + TIME_COLUMN, faces.regular, ROW_SIZE)
+        if (plannedSeconds != null) {
+            text(formatDuration(plannedSeconds), right - DURATION_COLUMN, faces.regular, META_SIZE)
+        }
+        y -= ROW_HEIGHT
+    }
+
+    override fun close() = stream.close()
+
+    /** One line of text at the cursor, with whatever the font cannot encode replaced rather than thrown on. */
+    private fun text(value: String, x: Float, font: PDFont, size: Float) {
+        if (value.isEmpty()) return
+        stream.beginText()
+        stream.setFont(font, size)
+        stream.newLineAtOffset(x, y)
+        stream.showText(if (faces.embedded) value else value.toWinAnsiSafe())
+        stream.endText()
+    }
+
+    private fun rule(at: Float) {
+        stream.setLineWidth(RULE_WIDTH)
+        stream.moveTo(MARGIN, at)
+        stream.lineTo(right, at)
+        stream.stroke()
+    }
 }
 
 /**

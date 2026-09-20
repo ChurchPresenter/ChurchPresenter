@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,28 +61,18 @@ import org.churchpresenter.calendar.generated.resources.calendar_all_manual
 import org.churchpresenter.calendar.generated.resources.calendar_auto_start_one
 import org.churchpresenter.calendar.generated.resources.calendar_auto_starts
 import org.churchpresenter.calendar.model.rowsForSchedule
-import org.churchpresenter.calendar.model.timerSeconds
 import org.churchpresenter.calendar.model.timingForSchedule
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_all_saved
-import org.churchpresenter.calendar.generated.resources.calendar_cancel
 import org.churchpresenter.calendar.generated.resources.calendar_close
 import org.churchpresenter.calendar.generated.resources.calendar_dismiss
 import org.churchpresenter.calendar.generated.resources.calendar_header_sub_one
 import org.churchpresenter.calendar.generated.resources.calendar_header_sub_other
-import org.churchpresenter.calendar.generated.resources.calendar_load_append
-import org.churchpresenter.calendar.generated.resources.calendar_load_body
 import org.churchpresenter.calendar.generated.resources.calendar_load_into_schedule
-import org.churchpresenter.calendar.generated.resources.calendar_load_replace
-import org.churchpresenter.calendar.generated.resources.calendar_load_title
 import org.churchpresenter.calendar.generated.resources.calendar_lost_body
 import org.churchpresenter.calendar.generated.resources.calendar_lost_title
 import org.churchpresenter.calendar.generated.resources.calendar_recovered_body
 import org.churchpresenter.calendar.generated.resources.calendar_recovered_title
-import org.churchpresenter.calendar.generated.resources.calendar_template_blank
-import org.churchpresenter.calendar.generated.resources.calendar_template_blank_sub
-import org.churchpresenter.calendar.generated.resources.calendar_template_copy_sub
-import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
 import org.churchpresenter.calendar.generated.resources.calendar_title
 import org.churchpresenter.calendar.generated.resources.calendar_today
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -91,13 +81,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_pdf
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
-import org.churchpresenter.core.models.schedule.RowTiming
-import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.calendar.model.sectionItem
-import org.churchpresenter.calendar.model.ServiceRepeat
-import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.monthHeading
-import org.churchpresenter.calendar.model.parseStoredDate
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.time.LocalDate
@@ -177,30 +161,18 @@ fun CalendarApp(
     }
     LaunchedEffect(songFolder) { state.loadSongsAsync(io) }
 
-
-    var editingService by remember { mutableStateOf<PlannedService?>(null) }
-    var creatingService by remember { mutableStateOf(false) }
-    var addingItem by remember { mutableStateOf(false) }
-    // The run-of-show row the picker is about to replace, or null when it is appending.
-    var replacing by remember { mutableStateOf<ScheduleItem?>(null) }
-    var loadConfirmFor by remember { mutableStateOf<PlannedService?>(null) }
-    var settingsOpen by remember { mutableStateOf(false) }
-    var settingsTab by remember { mutableStateOf(SettingsTab.SECTIONS) }
-    // The service Copy or Template was pressed on, or null while that sheet is closed.
-    var copyFrom by remember { mutableStateOf<PlannedService?>(null) }
-    var templateFrom by remember { mutableStateOf<PlannedService?>(null) }
-
+    val dialogs = remember { CalendarDialogState() }
     // Fetched when the picker is first opened, not up front and not per recomposition. The host's
     // CalendarHost is rebuilt by the app on every recomposition, so keying an effect on it would
     // re-walk every chapter of every book each time; and at first composition the Bible may not be
     // loaded yet, so doing it eagerly can produce an empty list that never refills.
-    LaunchedEffect(addingItem) {
-        if (addingItem && state.bibleBooks.isEmpty()) state.loadBibleBooks(host.bibleBooks())
+    LaunchedEffect(dialogs.addingItem) {
+        if (dialogs.addingItem && state.bibleBooks.isEmpty()) state.loadBibleBooks(host.bibleBooks())
     }
     // Presets are written by the app's tabs while this window may be open, so re-read them each
     // time something that offers them opens rather than once at load.
-    LaunchedEffect(addingItem, settingsOpen) {
-        if (addingItem || settingsOpen) state.reloadPresets(io)
+    LaunchedEffect(dialogs.addingItem, dialogs.settingsOpen) {
+        if (dialogs.addingItem || dialogs.settingsOpen) state.reloadPresets(io)
     }
     val scope = rememberCoroutineScope()
 
@@ -226,334 +198,154 @@ fun CalendarApp(
     CompositionLocalProvider(LocalUse24HourClock provides state.document.preferences.use24HourClock) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize()) {
-                Header(
-                    monthLabel = monthHeading(state.visibleMonth),
-                    plannedThisMonth = state.servicesInVisibleMonth().size,
-                    onToday = state::goToToday,
+                CalendarBody(
+                    state = state,
+                    host = host,
+                    dialogs = dialogs,
+                    clock = clock,
+                    today = today,
                     onExport = exportAction(state, host, io, scope),
-                    onSettings = { settingsTab = SettingsTab.SECTIONS; settingsOpen = true },
+                    onClose = onClose,
+                    modifier = Modifier.fillMaxSize(),
                 )
-                HorizontalDivider()
-                RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
-
-                Row(Modifier.fillMaxSize().weight(1f)) {
-                    val service = state.selectedService
-                    MonthPane(
-                        month = state.visibleMonth,
-                        selected = state.selectedDate,
-                        today = today,
-                        servicesOn = state::servicesOn,
-                        onSelect = state::select,
-                        onPreviousMonth = state::showPreviousMonth,
-                        onNextMonth = state::showNextMonth,
-                        modifier = Modifier
-                            .widthIn(min = CalendarMetrics.monthPaneMin, max = CalendarMetrics.monthPaneMax)
-                            .fillMaxHeight(),
+                if (toast != null) {
+                    CueToast(
+                        event = toast,
+                        onDismiss = { dismissedToast = toast.key },
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(TOAST_MARGIN),
                     )
-                    VerticalDivider()
-                    Column(Modifier.weight(1f).fillMaxHeight()) {
-                        DayPane(
-                            date = state.selectedDate,
-                            services = state.servicesOnSelectedDate,
-                            selectedServiceId = state.selectedService?.id,
-                            onSelectService = state::selectService,
-                            onAddService = { creatingService = true },
-                            onEditService = { editingService = it },
-                        )
-                        HorizontalDivider()
-                        if (service == null) {
-                            NoServicesPane(
-                                dayLabel = shortDate(state.selectedDate),
-                                copyLabel = state.mostRecentServiceBefore()?.name,
-                                onAddService = { creatingService = true },
-                                onCopyLast = { creatingService = true },
-                                modifier = Modifier.weight(1f),
-                            )
-                            HorizontalDivider()
-                            // The footer is the window's own bar, not the run of show's: Close
-                            // lives here, so it cannot disappear with the day's only service.
-                            Footer(status = "", onLoad = null, onClose = onClose)
-                        } else {
-                            RunOfShowPane(
-                                service = service,
-                                now = clock.now,
-                                previewing = clock.previewing,
-                                header = RunOfShowHeaderActions(
-                                    onClockStep = clock.step,
-                                    onClockReset = clock.reset,
-                                    onArmed = { state.setArmed(service.id, it) },
-                                    onLayOutTimes = { state.layOutTimes(service.id) },
-                                    onCopy = { copyFrom = service },
-                                    onSaveTemplate = { templateFrom = service },
-                                ),
-                                onAddItem = { replacing = null; addingItem = true },
-                                onChangeItem = { replacing = it; addingItem = true },
-                                onRemove = { state.removeItem(service.id, it) },
-                                onMove = { from, to -> state.moveItem(service.id, from, to) },
-                                onPlannedSecondsChange = { itemId, seconds ->
-                                    state.setPlannedSeconds(service.id, itemId, seconds)
-                                },
-                                onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
-                                onFireCue = { cue ->
-                                    fireCue(host, service.rowsForSchedule(), cue, startTime = service.startTime)
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
-                            HorizontalDivider()
-                            Footer(
-                                status = service.name + " · " + when (val count = service.autoStartCount()) {
-                                    0 -> stringResource(Res.string.calendar_all_manual)
-                                    1 -> stringResource(Res.string.calendar_auto_start_one)
-                                    else -> stringResource(Res.string.calendar_auto_starts, count)
-                                },
-                                onClose = onClose,
-                                onLoad = {
-                                    // Only ask when replacing would actually discard something.
-                                    if (host.currentSchedule().isEmpty()) {
-                                        host.loadIntoSchedule(
-                                            service.rowsForSchedule(), service.timingForSchedule(), true, service.armed,
-                                        )
-                                        // The run of show is in the Schedule tab now, which is
-                                        // where the next thing happens -- so get out of the way.
-                                        onClose?.invoke()
-                                    } else {
-                                        loadConfirmFor = service
-                                    }
-                                },
-                            )
-                        }
-                    }
                 }
             }
-            if (toast != null) {
-                CueToast(
-                    event = toast,
-                    onDismiss = { dismissedToast = toast.key },
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(TOAST_MARGIN),
-                )
-            }
-            }
         }
-
-        if (settingsOpen) {
-            CalendarSettingsDialog(
-                preferences = state.document.preferences,
-                templates = state.document.templates,
-                presets = state.presets,
-                initialTab = settingsTab,
-                canInsertSection = openService != null,
-                onPreferencesChange = state::updatePreferences,
-                onAddSection = state::addSection,
-                onRenameSection = state::renameSection,
-                onSectionColor = state::setSectionColor,
-                onRemoveSection = state::removeSection,
-                colorPicker = colorPicker,
-                onInsertSection = { section ->
-                    openService?.let { service ->
-                        state.addItems(service.id, listOf(sectionItem(section.name, section.colorHex)))
-                    }
-                },
-                onRemoveTemplate = state::deleteTemplate,
-                onRemovePreset = state::deletePreset,
-                onDismiss = { settingsOpen = false },
-            )
-        }
-
         CalendarDialogs(
             state = state,
             host = host,
+            dialogs = dialogs,
+            colorPicker = colorPicker,
             songEditor = songEditor,
-            replacing = replacing,
-            creatingService = creatingService,
-            editingService = editingService,
-            addingItem = addingItem,
-            loadConfirmFor = loadConfirmFor,
             onLoaded = { onClose?.invoke() },
-            copyFrom = copyFrom,
-            templateFrom = templateFrom,
-            onServiceSheetClosed = { creatingService = false; editingService = null },
-            onAddingItemClosed = { addingItem = false; replacing = null },
-            onLoadConfirmClosed = { loadConfirmFor = null },
-            onCopySheetClosed = { copyFrom = null },
-            onTemplateSheetClosed = { templateFrom = null },
         )
     }
 }
 
-/**
- * The window's dialogs, lifted out of [CalendarApp].
- *
- * Only so that [CalendarApp] stays under the `LongMethod` threshold and reads as the layout it is;
- * every one of these is driven entirely by the flags passed in, and none of them holds state.
- */
+/** The window itself -- header, banner, month, day and the open service -- without its dialogs. */
 @Composable
-private fun CalendarDialogs(
+private fun CalendarBody(
     state: CalendarState,
     host: CalendarHost,
-    songEditor: (@Composable (SongEditRequest) -> Unit)?,
-    replacing: ScheduleItem?,
-    creatingService: Boolean,
-    editingService: PlannedService?,
-    addingItem: Boolean,
-    loadConfirmFor: PlannedService?,
-    /** Called once a run of show has been put into the Schedule -- the window closes behind it. */
-    onLoaded: () -> Unit,
-    copyFrom: PlannedService?,
-    templateFrom: PlannedService?,
-    onServiceSheetClosed: () -> Unit,
-    onAddingItemClosed: () -> Unit,
-    onLoadConfirmClosed: () -> Unit,
-    onCopySheetClosed: () -> Unit,
-    onTemplateSheetClosed: () -> Unit,
+    dialogs: CalendarDialogState,
+    clock: RunClockState,
+    today: LocalDate,
+    onExport: (() -> Unit)?,
+    onClose: (() -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
-    val dialogScope = rememberCoroutineScope()
-    if (creatingService || editingService != null) {
-        val existing = editingService
-        ServiceSheet(
-            existing = existing,
-            defaultStartTime = state.document.preferences.defaultStartTime,
-            date = state.selectedDate,
-            seriesSize = existing?.let { state.document.servicesInSeries(it.seriesId).size } ?: 0,
-            templates = state.templateOptions(),
-            templateLabel = { templateLabel(it) },
-            onSave = { form ->
-                if (existing == null) {
-                    state.addService(form.name, form.startTime, form.kind, form.template)
-                } else {
-                    state.updateService(
-                        existing.copy(name = form.name, startTime = form.startTime, kind = form.kind.id),
-                        wholeSeries = form.wholeSeries,
+    Column(modifier) {
+        Header(
+            monthLabel = monthHeading(state.visibleMonth),
+            plannedThisMonth = state.servicesInVisibleMonth().size,
+            onToday = state::goToToday,
+            onExport = onExport,
+            onSettings = dialogs::openSettings,
+        )
+        HorizontalDivider()
+        RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
+
+        Row(Modifier.fillMaxSize().weight(1f)) {
+            val service = state.selectedService
+            MonthPane(
+                month = state.visibleMonth,
+                selected = state.selectedDate,
+                today = today,
+                servicesOn = state::servicesOn,
+                onSelect = state::select,
+                onPreviousMonth = state::showPreviousMonth,
+                onNextMonth = state::showNextMonth,
+                modifier = Modifier
+                    .widthIn(min = CalendarMetrics.monthPaneMin, max = CalendarMetrics.monthPaneMax)
+                    .fillMaxHeight(),
+            )
+            VerticalDivider()
+            Column(Modifier.weight(1f).fillMaxHeight()) {
+                DayPane(
+                    date = state.selectedDate,
+                    services = state.servicesOnSelectedDate,
+                    selectedServiceId = service?.id,
+                    onSelectService = state::selectService,
+                    onAddService = { dialogs.creatingService = true },
+                    onEditService = { dialogs.editingService = it },
+                )
+                HorizontalDivider()
+                if (service == null) {
+                    NoServicesPane(
+                        dayLabel = shortDate(state.selectedDate),
+                        copyLabel = state.mostRecentServiceBefore()?.name,
+                        onAddService = { dialogs.creatingService = true },
+                        onCopyLast = { dialogs.creatingService = true },
+                        modifier = Modifier.weight(1f),
                     )
-                }
-                onServiceSheetClosed()
-            },
-            onDelete = existing?.let {
-                { wholeSeries ->
-                    state.deleteService(it.id, wholeSeries)
-                    onServiceSheetClosed()
-                }
-            },
-            onDismiss = onServiceSheetClosed,
-        )
-    }
-
-    val addTarget = state.selectedService
-    if (addingItem && addTarget != null) {
-        AddItemSheet(
-            songs = state.songs,
-            songsLoaded = state.songsLoaded,
-            presets = state.presets,
-            sections = state.document.preferences.sections,
-            bibleBooks = state.bibleBooks,
-            serviceName = addTarget.name,
-            serviceStartTime = addTarget.startTime,
-            replacing = replacing,
-            songbooks = state.songbooks(),
-            songEditor = songEditor,
-            onSaveSong = { original, edited -> state.saveSong(original, edited) },
-            timing = replacing?.let { addTarget.timingOf(it.id) } ?: RowTiming.DEFAULT,
-            plannedSeconds = replacing?.let { addTarget.plannedSeconds[it.id] },
-            previewSources = host.preview,
-            onTimingChange = { timing, seconds ->
-                replacing?.let { row ->
-                    state.setTiming(addTarget.id, row.id, timing)
-                    state.setPlannedSeconds(addTarget.id, row.id, seconds)
-                }
-            },
-            onAdd = { items, plannedSeconds, timing ->
-                if (replacing != null) {
-                    state.replaceItem(addTarget.id, replacing.id, items)
+                    HorizontalDivider()
+                    // The footer is the window's own bar, not the run of show's: Close
+                    // lives here, so it cannot disappear with the day's only service.
+                    Footer(status = "", onLoad = null, onClose = onClose)
                 } else {
-                    state.addItems(addTarget.id, items)
+                    OpenServicePane(state, host, dialogs, service, clock, onClose)
                 }
-                // The panel's length and timing apply to what was just added; a countdown's own
-                // length is its planned length whether or not one was typed.
-                items.forEach { item ->
-                    (plannedSeconds ?: item.timerSeconds())?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
-                    // A clip knows how long it is, and a picture folder is its count times the
-                    // slideshow interval; nobody should have to type either in. Only for a row
-                    // that arrived without a length, and off the composing thread.
-                    if (plannedSeconds == null) {
-                        dialogScope.launch {
-                            host.itemRunSeconds(item)?.let { state.setPlannedSeconds(addTarget.id, item.id, it) }
-                        }
-                    }
-                    if (!timing.isDefault() && item !is ScheduleItem.LabelItem) {
-                        state.setTiming(addTarget.id, item.id, timing)
-                    }
-                }
-                onAddingItemClosed()
-            },
-            onDismiss = onAddingItemClosed,
-        )
-    }
-
-    copyFrom?.let { service ->
-        CopySheet(
-            service = service,
-            date = state.selectedDate,
-            hasServices = state::hasServices,
-            onCopy = { dates, includeRunOfShow, includeCues, repeat ->
-                state.copyService(service, dates, includeRunOfShow, includeCues, repeat)
-                // A single paste is a jump to where it landed; a series is visible as the dots.
-                if (repeat == ServiceRepeat.NONE) dates.firstOrNull()?.let(state::select)
-                onCopySheetClosed()
-            },
-            onDismiss = onCopySheetClosed,
-        )
-    }
-
-    templateFrom?.let { service ->
-        TemplateSheet(
-            service = service,
-            date = state.selectedDate,
-            existing = state.document.templates,
-            onSave = { name, sections, items, cues ->
-                state.saveTemplate(service, name, sections, items, cues)
-                onTemplateSheetClosed()
-            },
-            onDismiss = onTemplateSheetClosed,
-        )
-    }
-
-    loadConfirmFor?.let { service ->
-        LoadServiceConfirm(
-            currentCount = host.currentSchedule().size,
-            onReplace = {
-                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
-                onLoadConfirmClosed()
-                onLoaded()
-            },
-            onAppend = {
-                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), false, service.armed)
-                onLoadConfirmClosed()
-                onLoaded()
-            },
-            onDismiss = onLoadConfirmClosed,
-        )
+            }
+        }
     }
 }
 
-/** A `Start from` option's two lines. */
+/** The run of show of [service] and the footer under it, filling the rest of the day column. */
 @Composable
-private fun templateLabel(option: ServiceTemplate): Pair<String, String> = when (option) {
-    ServiceTemplate.Blank -> stringResource(Res.string.calendar_template_blank) to
-        stringResource(Res.string.calendar_template_blank_sub)
-
-    is ServiceTemplate.CopyOf -> {
-        val date = parseStoredDate(option.service.date)?.let(::shortDate).orEmpty()
-        option.service.name to stringResource(
-            Res.string.calendar_template_copy_sub,
-            date,
-            option.service.contentItems().size,
-        )
-    }
-
-    is ServiceTemplate.Saved -> option.template.name to stringResource(
-        Res.string.calendar_template_saved_sub,
-        option.template.startTime,
-        option.template.contentItems().size,
+private fun ColumnScope.OpenServicePane(
+    state: CalendarState,
+    host: CalendarHost,
+    dialogs: CalendarDialogState,
+    service: PlannedService,
+    clock: RunClockState,
+    onClose: (() -> Unit)?,
+) {
+    RunOfShowPane(
+        service = service,
+        now = clock.now,
+        previewing = clock.previewing,
+        header = RunOfShowHeaderActions(
+            onClockStep = clock.step,
+            onClockReset = clock.reset,
+            onArmed = { state.setArmed(service.id, it) },
+            onLayOutTimes = { state.layOutTimes(service.id) },
+            onCopy = { dialogs.copyFrom = service },
+            onSaveTemplate = { dialogs.templateFrom = service },
+        ),
+        onAddItem = { dialogs.openPicker(null) },
+        onChangeItem = { dialogs.openPicker(it) },
+        onRemove = { state.removeItem(service.id, it) },
+        onMove = { from, to -> state.moveItem(service.id, from, to) },
+        onPlannedSecondsChange = { itemId, seconds -> state.setPlannedSeconds(service.id, itemId, seconds) },
+        onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
+        onFireCue = { cue -> fireCue(host, service.rowsForSchedule(), cue, startTime = service.startTime) },
+        modifier = Modifier.weight(1f),
+    )
+    HorizontalDivider()
+    Footer(
+        status = service.name + " · " + when (val count = service.autoStartCount()) {
+            0 -> stringResource(Res.string.calendar_all_manual)
+            1 -> stringResource(Res.string.calendar_auto_start_one)
+            else -> stringResource(Res.string.calendar_auto_starts, count)
+        },
+        onClose = onClose,
+        onLoad = {
+            // Only ask when replacing would actually discard something.
+            if (host.currentSchedule().isEmpty()) {
+                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
+                // The run of show is in the Schedule tab now, which is where the next thing
+                // happens -- so get out of the way.
+                onClose?.invoke()
+            } else {
+                dialogs.loadConfirmFor = service
+            }
+        },
     )
 }
 
@@ -819,29 +611,6 @@ private fun RecoveryBanner(source: CalendarSource, onDismiss: () -> Unit) {
         }
         TextButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_dismiss)) }
     }
-}
-
-@Composable
-private fun LoadServiceConfirm(
-    currentCount: Int,
-    onReplace: () -> Unit,
-    onAppend: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.calendar_load_title)) },
-        text = { Text(stringResource(Res.string.calendar_load_body, currentCount)) },
-        confirmButton = {
-            TextButton(onClick = onReplace) { Text(stringResource(Res.string.calendar_load_replace)) }
-        },
-        dismissButton = {
-            Row {
-                TextButton(onClick = onAppend) { Text(stringResource(Res.string.calendar_load_append)) }
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_cancel)) }
-            }
-        },
-    )
 }
 
 private val HEADER_HEIGHT = 52.dp

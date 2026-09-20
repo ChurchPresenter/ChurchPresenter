@@ -66,10 +66,6 @@ data class CalendarDocument(
         deletedServices = deletedServices + (id to at.toString()),
     )
 
-    /** Adds every service in [added] at once, so a whole series is one write rather than one per week. */
-    fun withServices(added: List<PlannedService>): CalendarDocument =
-        added.fold(this) { document, service -> document.withService(service) }
-
     /** Every occurrence of the series [seriesId], in date order. Empty for a blank id. */
     fun servicesInSeries(seriesId: String): List<PlannedService> =
         if (seriesId.isEmpty()) emptyList() else services.filter { it.seriesId == seriesId }.sortedBy { it.date }
@@ -127,6 +123,10 @@ data class CalendarDocument(
         )
     }
 }
+
+/** Adds every service in [added] at once, so a whole series is one write rather than one per week. */
+fun CalendarDocument.withServices(added: List<PlannedService>): CalendarDocument =
+    added.fold(this) { document, service -> document.withService(service) }
 
 /**
  * How long a deletion is remembered.

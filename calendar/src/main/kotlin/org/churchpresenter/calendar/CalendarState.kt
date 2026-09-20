@@ -26,6 +26,7 @@ import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.stampingChanged
 import org.churchpresenter.calendar.model.storedDate
 import org.churchpresenter.calendar.model.ServiceTemplate
+import org.churchpresenter.calendar.model.withServices
 import org.churchpresenter.calendar.model.withUniqueRowIds
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem

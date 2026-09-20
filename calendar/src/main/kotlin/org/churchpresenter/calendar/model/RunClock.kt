@@ -3,20 +3,6 @@ package org.churchpresenter.calendar.model
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import java.time.LocalTime
-
-/** A run-of-show row's clock time, and whether it can be trusted. */
-data class RowClock(
-    /** The wall-clock time; the caller formats it, as the clock format is a preference. */
-    val time: LocalTime,
-    /**
-     * False once some earlier row has no planned length.
-     *
-     * The clock still advances — a plan with three of its ten rows estimated is still worth showing
-     * times for — but the caller draws an approximate time dimmed, so nobody reads it as a promise.
-     */
-    val exact: Boolean,
-)
 
 /**
  * What time each row of [service] is expected to start, keyed by row id.
