@@ -50,10 +50,10 @@ fun preflight(
         }
         is ScheduleItem.PresentationItem -> if (fileExists(item.filePath)) null else PreflightProblem.MISSING_FILE
         is ScheduleItem.PictureItem -> if (folderExists(item.folderPath)) null else PreflightProblem.MISSING_FOLDER
-        is ScheduleItem.SongItem -> if (songs.isEmpty() || songIds.contains(item.songId) || songs.any { it.matches(item) }) {
-            null
-        } else {
-            PreflightProblem.SONG_NOT_IN_LIBRARY
+        is ScheduleItem.SongItem -> when {
+            songs.isEmpty() -> null
+            item.songId in songIds || songs.any { it.matches(item) } -> null
+            else -> PreflightProblem.SONG_NOT_IN_LIBRARY
         }
         is ScheduleItem.BibleVerseItem -> if (books.isEmpty()) null else verseProblem(item, books, resolveBook)
         is ScheduleItem.CueItem -> item.payload?.let(::check)
@@ -137,9 +137,9 @@ fun ScheduleItem.relocatedTo(target: File, imageCount: Int = 0): ScheduleItem? =
     is ScheduleItem.MediaItem -> copy(mediaUrl = target.absolutePath)
     is ScheduleItem.PresentationItem -> copy(
         filePath = target.absolutePath,
-        fileName = target.name,
+        fileName = target.nameWithoutExtension,
         fileType = target.extension.lowercase(),
-        displayText = "${target.name} ($slideCount slides)",
+        displayText = "${target.nameWithoutExtension} ($slideCount slides)",
     )
     is ScheduleItem.PictureItem -> copy(
         folderPath = target.absolutePath,

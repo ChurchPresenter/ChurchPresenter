@@ -25,7 +25,7 @@ class ServiceAutoLoaderTest {
         var accepting = true
 
         fun host(): CalendarHost = CalendarHost(
-            loadIntoSchedule = { items, _, replace, _ ->
+            loadIntoSchedule = { items, _, replace, _, _ ->
                 loads++
                 if (!accepting) return@CalendarHost
                 rows = if (replace) items else rows + items
@@ -75,6 +75,21 @@ class ServiceAutoLoaderTest {
         loader.tick()
         assertEquals(1, schedule.loads)
         assertEquals(listOf("m-1"), schedule.rows.map { it.id })
+    }
+
+    @Test
+    fun `last week's service is replaced, but rows built by hand are kept and the service goes under them`() = runTest {
+        val lastWeek = service("old", "10:00")
+        val today = service("svc", "10:00")
+        val schedule = FakeSchedule().apply { rows = lastWeek.items }
+
+        loader(document(lastWeek, today), schedule, { at(9, 56) }).tick()
+        assertEquals(today.items, schedule.rows, "a planned leftover is replaced")
+
+        val byHand = song("built-by-hand")
+        val fresh = FakeSchedule().apply { rows = listOf(byHand) }
+        loader(document(today), fresh, { at(9, 56) }).tick()
+        assertEquals(listOf(byHand) + today.items, fresh.rows, "the operator's row stays, the service follows it")
     }
 
     @Test

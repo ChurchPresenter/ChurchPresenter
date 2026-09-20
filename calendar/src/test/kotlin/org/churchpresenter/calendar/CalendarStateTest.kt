@@ -3,6 +3,7 @@ package org.churchpresenter.calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.PreflightProblem
 import org.churchpresenter.calendar.model.ServiceKind
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
@@ -327,5 +328,71 @@ class CalendarStateTest {
 
         state.acknowledgeSource()
         assertEquals(CalendarSource.FILE, state.source, "dismissed, and nothing more to report")
+    }
+
+    // ── Measured lengths and pre-flight ────────────────────────────────────────────────────────
+
+    @Test
+    fun `a row can be corrected in place, keeping its plan`() {
+        val state = state()
+        val service = state.addSunday()
+        val clip = ScheduleItem.MediaItem("m", "/old/clip.mp4", "Welcome", "local")
+        state.addItems(service.id, listOf(clip))
+        state.setPlannedSeconds(service.id, "m", 240)
+        state.setTiming(service.id, "m", RowTiming(repeats = 2))
+
+        state.updateItem(service.id, clip.copy(mediaUrl = "/new/clip.mp4"))
+
+        val saved = CalendarStore(folder).load().document.serviceById(service.id)!!
+        assertEquals("/new/clip.mp4", (saved.items.single() as ScheduleItem.MediaItem).mediaUrl)
+        assertEquals(240, saved.plannedSeconds["m"], "the same row, so its length stays")
+        assertEquals(2, saved.timingOf("m").repeats)
+
+        state.updateItem(service.id, clip.copy(id = "nobody"))
+        assertEquals(1, state.document.serviceById(service.id)!!.items.size, "an unknown id changes nothing")
+    }
+
+    @Test
+    fun `measuring a service asks once per content row and keeps what answered`() = runTest {
+        val state = state()
+        val service = state.addSunday()
+        state.addItems(service.id, listOf(song("a", "Measured"), song("b", "Silent")))
+        val asked = mutableListOf<String>()
+
+        state.measureService(state.document.serviceById(service.id)!!) { row ->
+            asked += row.id
+            if (row.id == "a") 312 else null
+        }
+
+        assertEquals(listOf("a", "b"), asked)
+        assertEquals(mapOf("a" to 312), state.measuredSeconds)
+    }
+
+    @Test
+    fun `checking a service resolves typed books through the host and reports what is missing`() = runTest {
+        val state = state()
+        val service = state.addSunday()
+        state.loadBibleBooks(listOf(CalendarBibleBook(19, "Псалтирь", listOf(6, 12))))
+        state.addItems(
+            service.id,
+            listOf(
+                ScheduleItem.BibleVerseItem("typed", "Psalm", 2, 1, "", bookId = 0),
+                ScheduleItem.BibleVerseItem("gone", "Nowhere", 1, 1, "", bookId = 0),
+                ScheduleItem.MediaItem("m", "/definitely/not/here.mp4", "clip", "local"),
+            ),
+        )
+        val resolved = mutableListOf<String>()
+
+        state.checkService(
+            state.document.serviceById(service.id)!!,
+            resolveBook = { name -> resolved += name; if (name == "Psalm") 19 else null },
+            io = Dispatchers.Unconfined,
+        )
+
+        assertEquals(setOf("Psalm", "Nowhere"), resolved.toSet(), "each typed name, once")
+        assertEquals(
+            mapOf("gone" to PreflightProblem.BOOK_NOT_IN_BIBLE, "m" to PreflightProblem.MISSING_FILE),
+            state.preflight,
+        )
     }
 }

@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,9 +66,10 @@ internal fun ScheduleRowTitleLine(
     isSelected: Boolean,
     timing: RowTiming,
     clock: RowClock?,
-    drift: PlanDrift? = null,
 ) {
-        val titleColor = MaterialTheme.colorScheme.onSurface
+    val titleColor = MaterialTheme.colorScheme.onSurface
+    // Provided around the live row only -- see LocalLiveDrift.
+    val drift = LocalLiveDrift.current
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         if (item is ScheduleItem.SongItem && item.songNumber > 0) {
@@ -120,6 +123,15 @@ internal fun ScheduleRowTitleLine(
 }
 
 /**
+ * How far the service is from its plan, for the row that is live -- see `planDrift`.
+ *
+ * The Schedule tab provides it around the live row alone, so [ScheduleRowTitleLine] draws the
+ * badge there and nowhere else. A local rather than a parameter because the row composable's
+ * signature is what its baselined size is keyed on, and the badge is one line of it.
+ */
+val LocalLiveDrift = compositionLocalOf<PlanDrift?> { null }
+
+/**
  * `3:40 behind` on the live row -- the one number a service leader wants during a service.
  *
  * Red once behind by more than [DRIFT_SLACK_SECONDS], the plan's own tertiary when ahead by as
@@ -132,8 +144,10 @@ private fun PlanDriftBadge(drift: PlanDrift) {
     val scheme = MaterialTheme.colorScheme
     val magnitude = formatDuration(kotlin.math.abs(drift.seconds))
     val (text, tone) = when {
-        drift.seconds > DRIFT_SLACK_SECONDS -> stringResource(Res.string.schedule_behind_plan, magnitude) to scheme.error
-        drift.seconds < -DRIFT_SLACK_SECONDS -> stringResource(Res.string.schedule_ahead_of_plan, magnitude) to scheme.tertiary
+        drift.seconds > DRIFT_SLACK_SECONDS ->
+            stringResource(Res.string.schedule_behind_plan, magnitude) to scheme.error
+        drift.seconds < -DRIFT_SLACK_SECONDS ->
+            stringResource(Res.string.schedule_ahead_of_plan, magnitude) to scheme.tertiary
         else -> stringResource(Res.string.schedule_on_plan) to scheme.onSurfaceVariant
     }
     Text(
@@ -257,34 +271,39 @@ internal fun ScheduleRowDetailLine(item: ScheduleItem, density: ScheduleDensity)
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        is ScheduleItem.CueItem -> {
-            // `Fired 9:45 AM` once the engine -- or a hand -- has set it off this session; or
-            // `Skipped 9:45 AM` when it was due while the operator was live with something else.
-            val fired by CueFeed.fired.collectAsState()
-            val event = fired.firstOrNull { it.row.id == item.id }
-            val detail = scheduleItemDetailText(item).orEmpty()
-            Text(
-                text = if (event == null) {
-                    detail
-                } else {
-                    val at = clockText(event.at, localeUses24HourClock())
-                    detail + " · " + stringResource(
-                        if (event.skipped) Res.string.schedule_cue_skipped else Res.string.schedule_cue_fired,
-                        at,
-                    )
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = when {
-                    event == null -> detailColor
-                    event.skipped -> MaterialTheme.colorScheme.error
-                    else -> MaterialTheme.colorScheme.tertiary
-                },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        is ScheduleItem.CueItem -> CueDetailLine(item, detailColor)
         is ScheduleItem.LabelItem, is ScheduleItem.SceneItem -> {  }
     }
+}
+
+/**
+ * A cue's detail, with `Fired 9:45 AM` once the engine -- or a hand -- has set it off this
+ * session, or `Skipped 9:45 AM` when it was due while the operator was live with something else.
+ */
+@Composable
+private fun CueDetailLine(item: ScheduleItem.CueItem, detailColor: Color) {
+    val fired by CueFeed.fired.collectAsState()
+    val event = fired.firstOrNull { it.row.id == item.id }
+    val detail = scheduleItemDetailText(item).orEmpty()
+    Text(
+        text = if (event == null) {
+            detail
+        } else {
+            val at = clockText(event.at, localeUses24HourClock())
+            detail + " · " + stringResource(
+                if (event.skipped) Res.string.schedule_cue_skipped else Res.string.schedule_cue_fired,
+                at,
+            )
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = when {
+            event == null -> detailColor
+            event.skipped -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.tertiary
+        },
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 /** At the roomiest density: what kind of row this is, and the file behind it. */

@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.core.models.schedule.RowTiming
-import org.churchpresenter.calendar.model.PlanDrift
 import org.churchpresenter.calendar.model.RowClock
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -224,8 +223,6 @@ internal fun ScheduleItemRow(
     timing: RowTiming = RowTiming.DEFAULT,
     /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
     clock: RowClock? = null,
-    /** How far the service is from its plan -- on the live row only; see `planDrift`. */
-    drift: PlanDrift? = null,
     dragHandleModifier: Modifier = Modifier,
     density: ScheduleDensity,
     /** Legacy layout: buttons on their own line under the title instead of the hover overlay. */
@@ -363,7 +360,6 @@ internal fun ScheduleItemRow(
                                 isSelected = isSelected,
                                 timing = timing,
                                 clock = clock,
-                                drift = drift,
                             )
                         }
 
@@ -658,10 +654,8 @@ internal fun ScheduleItemContent(
     timing: RowTiming = RowTiming.DEFAULT,
     /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
     clock: RowClock? = null,
-    /** How far the service is from its plan -- on the live row only; see `planDrift`. */
-    drift: PlanDrift? = null,
 ) {
-    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock, drift = drift)
+    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock)
 
     if (!scheduleShowDetailLine(density.percent)) return
 

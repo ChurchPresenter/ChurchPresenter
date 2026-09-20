@@ -582,7 +582,12 @@ class PicturesViewModel(
         presenterManager.setPresentingMode(Presenting.PICTURES)
         presenterManager.setShowPresenterWindow(true)
         val row = getScheduleData()?.let { (folderPath, folderName, imageCount) ->
-            ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount)
+            ScheduleItem.PictureItem(
+                id = java.util.UUID.randomUUID().toString(),
+                folderPath = folderPath,
+                folderName = folderName,
+                imageCount = imageCount,
+            )
         }
         if (row != null) {
             onWentLive?.invoke(row)

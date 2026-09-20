@@ -262,28 +262,6 @@ private fun SongRow(
 }
 
 @Composable
-private fun DurationCell(seconds: Int?) {
-    val scheme = MaterialTheme.colorScheme
-    Box(
-        Modifier.width(DURATION_WIDTH).height(LibraryMetrics.rowHeight).padding(horizontal = 8.dp),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        Text(
-            seconds?.let(::durationText).orEmpty(),
-            style = LibraryType.body,
-            color = scheme.onSurface,
-            maxLines = 1,
-        )
-    }
-}
-
-/** `4:32` -- minutes and seconds, the way a song's length is said. */
-internal fun durationText(seconds: Int): String =
-    "%d:%02d".format(seconds / SECONDS_PER_MINUTE, seconds % SECONDS_PER_MINUTE)
-
-private const val SECONDS_PER_MINUTE = 60
-
-@Composable
 private fun RowAction(icon: ImageVector, description: String, tint: Color, onClick: () -> Unit) {
     Box(
         Modifier.size(26.dp).clip(RoundedCornerShape(7.dp)).clickable(onClick = onClick),
@@ -360,9 +338,5 @@ internal fun SongField.width(): Dp = when (this) {
 }
 
 internal val TICK_WIDTH = 36.dp
-
-/** The measured Duration column, and what it adds to the table's width when shown. */
-internal val DURATION_WIDTH = 96.dp
-internal fun durationColumnWidth(shown: Boolean): Dp = if (shown) DURATION_WIDTH + 1.dp else 0.dp
 
 internal val ACTIONS_WIDTH = 68.dp

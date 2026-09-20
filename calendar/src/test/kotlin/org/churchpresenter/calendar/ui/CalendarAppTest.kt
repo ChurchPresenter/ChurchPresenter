@@ -56,7 +56,7 @@ class CalendarAppTest {
     fun `the footer loads the service into the schedule`() {
         val loaded = mutableListOf<List<ScheduleItem>>()
         val host = CalendarHost(
-            loadIntoSchedule = { items, _, _, _ -> loaded += items },
+            loadIntoSchedule = { items, _, _, _, _ -> loaded += items },
             currentSchedule = { emptyList() },
         )
 

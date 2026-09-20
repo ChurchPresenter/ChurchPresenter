@@ -1,6 +1,16 @@
 package org.churchpresenter.calendar.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_fix_locate_file
 import org.churchpresenter.calendar.generated.resources.calendar_fix_locate_folder
@@ -42,4 +52,26 @@ internal fun problemHint(problem: PreflightProblem, fixable: Boolean): String {
         }
     )
     return "$what — $how"
+}
+
+/**
+ * The warning beside a row that will not go on screen on the day: what is wrong as its hint, and
+ * the fix as its click -- a file dialog for a moved file, the picker for a song or a verse. With
+ * no [onFix] it only explains.
+ */
+@Composable
+internal fun ProblemMark(problem: PreflightProblem, onFix: (() -> Unit)? = null) {
+    val hint = problemHint(problem, fixable = onFix != null)
+    Hint(hint) {
+        Icon(
+            Icons.Filled.Warning,
+            contentDescription = hint,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier
+                .size(16.dp)
+                .clip(CalendarMetrics.smallRadius)
+                .then(if (onFix != null) Modifier.clickable(onClick = onFix) else Modifier)
+                .padding(2.dp),
+        )
+    }
 }

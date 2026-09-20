@@ -25,7 +25,7 @@ class FireCueTest {
         val loaded = mutableListOf<List<ScheduleItem>>()
 
         fun host() = CalendarHost(
-            loadIntoSchedule = { items, _, replace, armed ->
+            loadIntoSchedule = { items, _, replace, armed, _ ->
                 loaded += items
                 done += "load:${items.size}:replace=$replace:armed=$armed"
             },
@@ -175,7 +175,7 @@ class FireCueTest {
         // A cue's own rows are already pinned by `rowsForSchedule`; the timing map is the
         // service's, which a bare cue has no access to.
         var timing: Map<String, RowTiming>? = null
-        val host = CalendarHost(loadIntoSchedule = { _, rowTiming, _, _ -> timing = rowTiming })
+        val host = CalendarHost(loadIntoSchedule = { _, rowTiming, _, _, _ -> timing = rowTiming })
 
         fireCue(host, listOf(song("a")), cue(CueAction.GO_LIVE), at = LocalTime.NOON)
 

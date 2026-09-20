@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar
 
+import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -37,13 +38,87 @@ class CueRunnerTest {
         outputs: Outputs,
         now: () -> LocalDateTime,
         armed: Boolean = true,
+        operatorLive: () -> Boolean = { false },
     ) = CueRunner(
         items = { rows },
         armed = { armed },
         host = outputs.host(),
         timing = { timing },
         now = now,
+        operatorLive = operatorLive,
     )
+
+    private fun cue(id: String, minute: Int) = ScheduleItem.CueItem(
+        id = id, action = CueAction.BLANK, absoluteTime = "10:%02d".format(minute),
+    )
+
+    @Test
+    fun `a due row and cue are skipped, not fired, while the operator is live`() {
+        val rows = listOf(song("a"), cue("c", 0))
+        val timing = mapOf("a" to RowTiming(startAt = "10:00", runSeconds = 60, atEnd = RowEnd.NEXT))
+        val outputs = Outputs()
+        val runner = runner(rows, timing, outputs, { at(10, 0) }, operatorLive = { true })
+
+        runner.tick()
+
+        assertTrue(outputs.done.isEmpty(), "nothing fired over the operator")
+        val skipped = CueFeed.fired.value.filter { it.skipped }.map { it.row.id }
+        assertTrue("a" in skipped && "c" in skipped, "both reported skipped: $skipped")
+    }
+
+    @Test
+    fun `a skipped row stays skipped once the operator clears, and its end never runs`() {
+        val rows = listOf(song("a"), song("b"))
+        val timing = mapOf("a" to RowTiming(startAt = "10:00", runSeconds = 60, atEnd = RowEnd.NEXT))
+        val outputs = Outputs()
+        var busy = true
+        var clock = at(10, 0)
+        val runner = runner(rows, timing, outputs, { clock }, operatorLive = { busy })
+
+        runner.tick()
+        busy = false
+        clock = at(10, 0, 30)
+        runner.tick()
+        clock = at(10, 2)
+        runner.tick()
+
+        assertTrue(outputs.done.isEmpty(), "a moment that passed does not come back: ${outputs.done}")
+    }
+
+    @Test
+    fun `an item finishing says nothing about a row that is no longer live`() {
+        val rows = listOf(song("a"), song("b"), song("c"))
+        val timing = mapOf(
+            "a" to RowTiming(startAt = "10:00", atEnd = RowEnd.NEXT),
+            "c" to RowTiming(startAt = "10:01"),
+        )
+        val outputs = Outputs()
+        var clock = at(10, 0)
+        val runner = runner(rows, timing, outputs, { clock })
+
+        runner.tick()
+        clock = at(10, 1)
+        runner.tick()
+        runner.liveItemFinished()
+
+        assertEquals(listOf("project:ax1", "project:cx1"), outputs.done, "a's own-length end must not fire b over c")
+    }
+
+    @Test
+    fun `the engine's own picture is not in its way`() {
+        val rows = listOf(song("a"), cue("c", 1))
+        val timing = mapOf("a" to RowTiming(startAt = "10:00"))
+        val outputs = Outputs()
+        var clock = at(10, 0)
+        // What the app answers once the engine has projected: the screen shows the engine's row.
+        val runner = runner(rows, timing, outputs, { clock }, operatorLive = { false })
+
+        runner.tick()
+        clock = at(10, 1)
+        runner.tick()
+
+        assertEquals(listOf("project:ax1", "blank"), outputs.done)
+    }
 
     @Test
     fun `a pinned row fires at its time and hands on when its run is up`() {

@@ -37,7 +37,7 @@ class RunLoopsTest {
         fun host(): CalendarHost = CalendarHost(
             projectItem = { item, plays -> done += "project:${item.id}x$plays" },
             blankOutputs = { done += "blank" },
-            loadIntoSchedule = { items, _, _, _ ->
+            loadIntoSchedule = { items, _, _, _, _ ->
                 loads++
                 rows = items
             },

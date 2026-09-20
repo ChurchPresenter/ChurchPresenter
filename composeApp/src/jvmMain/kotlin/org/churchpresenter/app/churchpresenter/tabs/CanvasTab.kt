@@ -10,6 +10,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -169,8 +170,6 @@ fun CanvasTab(
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     /** Save preset, to the left of Add to Schedule: the same scene, kept for the Calendar Manager. */
     onSavePreset: ((sceneId: String, sceneName: String) -> Unit)? = null,
-    /** The scene as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
-    onWentLive: ((ScheduleItem) -> Unit)? = null,
     dialogDismissSignal: Int = 0,
     /** The cameras the source panel offers, or null to ask this machine — a test pins it. */
     cameraDevices: List<CameraDevice>? = null,
@@ -235,6 +234,7 @@ fun CanvasTab(
     }
 
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
 
     Row(
         modifier = modifier
@@ -870,7 +870,7 @@ fun CanvasTab(
                                 presenterManager.setActiveScene(currentScene)
                                 presenterManager.setPresentingMode(Presenting.CANVAS)
                                 presenterManager.setShowPresenterWindow(true)
-                                onWentLive?.invoke(
+                                wentLive(
                                     ScheduleItem.SceneItem(
                                         id = java.util.UUID.randomUUID().toString(),
                                         sceneId = currentScene.id,

@@ -52,6 +52,24 @@ class ExportAndIdentityTest {
     }
 
     @Test
+    fun `font bytes that are not a font fall back, and Cyrillic is replaced rather than crashing`() {
+        val target = File(folder, "cyrillic.pdf")
+        val cyrillic = service(
+            items = listOf(
+                ScheduleItem.LabelItem("h", "Прославление", "#FFFFFF", "#5B9DF5"),
+                song("a", "Великий Бог"),
+                song("b", ""),
+            ),
+            planned = mapOf("a" to 300),
+        ).copy(name = "Утреннее служение")
+
+        exportRunOfShowPdf(cyrillic, target, dateLabel = "Воскресенье", font = { byteArrayOf(1, 2, 3) })
+
+        assertTrue(target.isFile)
+        assertTrue(target.length() > 0)
+    }
+
+    @Test
     fun `an empty run of show still exports`() {
         val target = File(folder, "empty.pdf")
 

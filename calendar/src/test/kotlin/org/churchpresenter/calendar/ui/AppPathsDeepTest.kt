@@ -32,7 +32,7 @@ class AppPathsDeepTest {
     fun `loading into an empty schedule asks nothing and just loads`() {
         val loaded = mutableListOf<Boolean>()
         val host = CalendarHost(
-            loadIntoSchedule = { _, _, replace, _ -> loaded += replace },
+            loadIntoSchedule = { _, _, replace, _, _ -> loaded += replace },
             currentSchedule = { emptyList() },
         )
 
@@ -49,7 +49,7 @@ class AppPathsDeepTest {
     fun `loading over a schedule in use offers to replace it or add to it`() {
         val loaded = mutableListOf<Boolean>()
         val host = CalendarHost(
-            loadIntoSchedule = { _, _, replace, _ -> loaded += replace },
+            loadIntoSchedule = { _, _, replace, _, _ -> loaded += replace },
             currentSchedule = { List(3) { song("live$it", "Already live") } },
         )
 
@@ -70,7 +70,7 @@ class AppPathsDeepTest {
     fun `replacing is the other answer`() {
         val loaded = mutableListOf<Boolean>()
         val host = CalendarHost(
-            loadIntoSchedule = { _, _, replace, _ -> loaded += replace },
+            loadIntoSchedule = { _, _, replace, _, _ -> loaded += replace },
             currentSchedule = { List(2) { song("live$it", "Already live") } },
         )
 
@@ -90,7 +90,7 @@ class AppPathsDeepTest {
         var rows: List<ScheduleItem>? = null
         var timing: Map<String, RowTiming>? = null
         val host = CalendarHost(
-            loadIntoSchedule = { items, rowTiming, _, _ -> rows = items; timing = rowTiming },
+            loadIntoSchedule = { items, rowTiming, _, _, _ -> rows = items; timing = rowTiming },
             currentSchedule = { emptyList() },
         )
         val plan = service(

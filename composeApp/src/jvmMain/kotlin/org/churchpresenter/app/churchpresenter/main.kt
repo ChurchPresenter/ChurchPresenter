@@ -981,6 +981,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                         LocalMediaViewModel provides mediaViewModel,
                         LocalMainWindowState provides state,
                         LocalOpenCalendar provides { showCalendarWindow = true },
+                        LocalWentLive provides { item -> liveDurationLog.wentLive(item) },
                         LocalShortcuts provides remember(appSettings.keyboardShortcutSettings) {
                             ShortcutMap.from(appSettings.keyboardShortcutSettings)
                         }
@@ -2005,7 +2006,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             FileChooser.platformInstance.chooseSingle(
                                                 path = missing.parentFile?.toPath()?.takeIf { Files.isDirectory(it) },
                                                 filters = emptyList(),
-                                                title = getString(Res.string.calendar_locate_folder_title, missing.name),
+                                                title = getString(
+                                                    Res.string.calendar_locate_folder_title, missing.name,
+                                                ),
                                                 selectDirectory = true,
                                             )?.toFile()
                                         },

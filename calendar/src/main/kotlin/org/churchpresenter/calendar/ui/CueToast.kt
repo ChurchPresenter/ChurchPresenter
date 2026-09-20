@@ -101,7 +101,11 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                 ) {
                     Text(
                         text = stringResource(
-                            if (event.skipped) Res.string.calendar_cue_skipped_title else Res.string.calendar_cue_fired_title
+                            if (event.skipped) {
+                                Res.string.calendar_cue_skipped_title
+                            } else {
+                                Res.string.calendar_cue_fired_title
+                            }
                         ).uppercase(),
                         style = overlineStyle().copy(fontSize = 9.sp),
                         color = tone,

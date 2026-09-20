@@ -166,6 +166,24 @@ class CopyAndTemplateDeepTest {
         }
 
     @Test
+    fun `with sections, items and cues all left out there is nothing to save`() =
+        withCalendar(documentWith(service())) { folder ->
+            openTemplate()
+
+            sheetButton("Sections", anchor = "Save as template")
+            sheetButton("Items", anchor = "Save as template")
+            sheetButton("Automation cues", anchor = "Save as template")
+            clickLast("Save template")
+
+            assertTrue(stored(folder).templates.isEmpty(), "the button does nothing with nothing ticked")
+
+            sheetButton("Automation cues", anchor = "Save as template")
+            sheetButton("Sections", anchor = "Save as template")
+            clickLast("Save template")
+            assertTrue(stored(folder).templates.single().items.all { it is ScheduleItem.LabelItem })
+        }
+
+    @Test
     fun `saving over a name that exists says it will replace`() = withCalendar(documentWith(service())) { folder ->
         openTemplate()
         clickLast("Save template")

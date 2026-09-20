@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -516,11 +517,11 @@ fun ScheduleTab(
                             .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
                             .reorderGesture(index, requireShift = true)
                     ) {
+                        CompositionLocalProvider(LocalLiveDrift provides drift.takeIf { item.id == liveRowId }) {
                         ScheduleItemRow(
                             item = item,
                             timing = viewModel.timingFor(item.id),
                             clock = rowClocks[item.id],
-                            drift = if (item.id == liveRowId) drift else null,
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,
@@ -560,6 +561,7 @@ fun ScheduleTab(
                             },
                             onNoteChanged = { viewModel.setNote(item.id, it) }
                         )
+                        }
                     }
                 }
             }

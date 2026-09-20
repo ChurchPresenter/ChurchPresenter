@@ -18,6 +18,7 @@ import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedCl
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
@@ -174,8 +175,6 @@ fun PicturesTab(
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same folder, kept for the Calendar Manager. */
     onSavePreset: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
-    /** The folder as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
-    onWentLive: ((ScheduleItem) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. See
      *  PicturesViewModel.goLive for why this always sends the whole folder via PROJECT. */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
@@ -253,6 +252,7 @@ fun PicturesTab(
     // (shared with Presentation/Bible/Songs).
     val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -359,7 +359,7 @@ fun PicturesTab(
             }
             if (presenterManager != null) {
                 GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, onWentLive) },
+                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive) },
                     enabled = viewModel.images.isNotEmpty(),
                     tooltipText = stringResource(Res.string.go_live)
                 )
@@ -903,7 +903,9 @@ fun PicturesTab(
                                     onDoubleClick = {
                                         if (!isDragActive) {
                                             viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                            if (presenterManager != null) viewModel.goLive(presenterManager, onInstanceLinkSendProject, onWentLive)
+                                            if (presenterManager != null) {
+                                                viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive)
+                                            }
                                         }
                                     }
                                 )

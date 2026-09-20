@@ -104,6 +104,34 @@ class SettingsDeepTest {
     }
 
     @Test
+    fun `a start time or a sermon length that cannot be read is refused too`() =
+        withCalendar(documentWith(service())) { folder ->
+            val before = preferences(folder)
+            openSettings(tab = "Defaults")
+
+            clearFieldAt(index = 0)
+            typeIntoFieldAt(index = 0, text = "ten")
+            commitByLeavingField(focus = 1)
+            clearFieldAt(index = 2)
+            typeIntoFieldAt(index = 2, text = "long")
+            commitByLeavingField(focus = 0)
+
+            assertEquals(before.defaultStartTime, preferences(folder).defaultStartTime)
+            assertEquals(before.defaultSermonSeconds, preferences(folder).defaultSermonSeconds)
+        }
+
+    @Test
+    fun `a sermon length is typed in place`() = withCalendar(documentWith(service())) { folder ->
+        openSettings(tab = "Defaults")
+
+        clearFieldAt(index = 2)
+        typeIntoFieldAt(index = 2, text = "35:00")
+        commitByLeavingField(focus = 0)
+
+        assertEquals(2100, preferences(folder).defaultSermonSeconds)
+    }
+
+    @Test
     fun `a default that cannot be read is put back as it was`() = withCalendar(documentWith(service())) { folder ->
         val before = preferences(folder).defaultItemSeconds
         openSettings(tab = "Defaults")

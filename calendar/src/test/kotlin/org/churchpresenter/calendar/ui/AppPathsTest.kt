@@ -71,7 +71,7 @@ class AppPathsTest {
     fun `replacing loads the service in place of what was there`() {
         val loads = mutableListOf<Boolean>()
         val host = CalendarHost(
-            loadIntoSchedule = { _, _, replace, _ -> loads += replace },
+            loadIntoSchedule = { _, _, replace, _, _ -> loads += replace },
             currentSchedule = { listOf(ScheduleItem.SongItem("live", 1, "Already live", "", "")) },
         )
 
@@ -91,7 +91,7 @@ class AppPathsTest {
     fun `adding keeps what was already in the schedule`() {
         val loads = mutableListOf<Boolean>()
         val host = CalendarHost(
-            loadIntoSchedule = { _, _, replace, _ -> loads += replace },
+            loadIntoSchedule = { _, _, replace, _, _ -> loads += replace },
             currentSchedule = { listOf(ScheduleItem.SongItem("live", 1, "Already live", "", "")) },
         )
 

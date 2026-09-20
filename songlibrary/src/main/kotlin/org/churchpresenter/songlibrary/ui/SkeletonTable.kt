@@ -77,7 +77,10 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
                 offset += cell + 1.dp
             }
             if (state.showDuration) {
-                Box(Modifier.width(DURATION_WIDTH).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {
+                Box(
+                    Modifier.width(DURATION_WIDTH).padding(horizontal = 9.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
                     SkeletonBar(DURATION_BAR, sweep, offset + 9.dp, width)
                 }
                 Box(
