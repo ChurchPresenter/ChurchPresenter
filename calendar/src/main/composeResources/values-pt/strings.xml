@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue ignorado</string>
     <string name="calendar_cue_skipped_reason">Outra coisa estava no ar — dispare manualmente se ainda deve ir</string>
     <string name="calendar_cue_skipped_at">Ignorado %1$s</string>
+    <string name="calendar_pick_ministry">Participação</string>
+    <string name="calendar_ministry_hint">Uma música, violino por Jake, o coral, um testemunho…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violino</string>
+    <string name="calendar_ministry_add">Pressione Adicionar, ou Enter</string>
+    <string name="calendar_ministry_new">Não aparece nas saídas — apenas planejado e cronometrado</string>
+    <string name="calendar_ministry_empty_hint">Digite o que acontece à frente — uma música, violino por Jake, um instrumental, o coral, um testemunho. Vai para o plano e a impressão, nunca para a tela.</string>
+    <string name="calendar_ministry_no_timing">Uma participação acontece à frente, não na tela — dê a ela uma duração na linha; não há nada a automatizar</string>
+    <string name="calendar_ministry_what">O que acontece</string>
+    <string name="calendar_ministry_who">Quem, ou uma nota</string>
 </resources>

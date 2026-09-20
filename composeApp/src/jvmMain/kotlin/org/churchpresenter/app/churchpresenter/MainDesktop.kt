@@ -1315,7 +1315,8 @@ fun MainDesktop(
                                     dictionaryViewModel.selectByNumber(item.number)
                                 }
 
-                                is ScheduleItem.CueItem -> Unit
+                                // Planned time that never goes on screen; nothing to open.
+                                is ScheduleItem.CueItem, is ScheduleItem.MinistryItem -> Unit
                             }
                         },
                         onEditLabel = { labelItem ->

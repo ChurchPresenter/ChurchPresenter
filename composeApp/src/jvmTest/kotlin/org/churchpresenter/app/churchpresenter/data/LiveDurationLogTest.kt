@@ -7,6 +7,7 @@ import org.junit.rules.TemporaryFolder
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -161,7 +162,7 @@ class LiveDurationLogTest {
     @Test
     fun `identity is what the item is, never its row`() {
         val key = LiveDurationLog::durationKey
-        assertEquals("song:Hymns:1:Hymns::1", key(song()))
+        assertEquals("song:Hymns:1:Hymns::1:song 1", key(song()))
         assertEquals(
             "media:/clips/welcome.mp4",
             key(
@@ -196,10 +197,51 @@ class LiveDurationLogTest {
     }
 
     @Test
+    fun `three songs sharing a number in one book are three songs`() {
+        val key = LiveDurationLog::durationKey
+        val a = song(1).copy(title = "Great Is Thy Faithfulness")
+        val b = song(1).copy(title = "Silent Night")
+        assertTrue(key(a) != key(b), "the number alone is not an identity")
+        val spaced = a.copy(id = "other-row", title = "  great is thy faithfulness ")
+        assertEquals(key(a), key(spaced), "but case and spacing are")
+    }
+
+    @Test
+    fun `the same thing sent again keeps its reading running`() {
+        val log = log()
+        val hymn = song(3)
+        log.wentLive(hymn, start)
+        // A section clicked, the row re-sent: the same song, still on screen.
+        log.wentLive(hymn.copy(id = "another-row"), start.plusSeconds(20))
+        log.wentLive(hymn.copy(id = "third-row"), start.plusSeconds(40))
+        log.wentBlank(start.plusSeconds(90))
+
+        assertEquals(90, log.median(hymn), "one reading of ninety seconds, not three too short to keep")
+    }
+
+    @Test
+    fun `it can say whether a given thing is what is on screen`() {
+        val log = log()
+        val hymn = song(4)
+        assertFalse(log.showing(hymn), "nothing is, yet")
+        log.wentLive(hymn, start)
+        assertTrue(log.showing(hymn.copy(id = "a-row-of-it")))
+        assertFalse(log.showing(song(5)))
+        // A verse has no duration key, but it is still distinguishable from the hymn before it.
+        val verse = ScheduleItem.BibleVerseItem("v", "John", 3, 16, "For God so loved")
+        log.wentLive(verse, start.plusSeconds(60))
+        assertTrue(log.showing(verse))
+        assertFalse(log.showing(hymn))
+        log.wentBlank(start.plusSeconds(120))
+        assertFalse(log.showing(verse))
+    }
+
+    @Test
     fun `a library song is measured as the row that identifies it`() {
         val row = SongItem(number = "7", title = "Amazing Grace", songbook = "Hymns").asDurationRow()
 
-        assertEquals(LiveDurationLog.durationKey(song(7)), LiveDurationLog.durationKey(row))
+        val library = song(7).copy(title = "Amazing Grace")
+        assertEquals(LiveDurationLog.durationKey(library), LiveDurationLog.durationKey(row))
         assertEquals(0, SongItem(number = "n/a", title = "Untitled", songbook = "Hymns").asDurationRow().songNumber)
     }
 }

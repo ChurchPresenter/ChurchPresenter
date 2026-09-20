@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue dilewati</string>
     <string name="calendar_cue_skipped_reason">Ada hal lain yang sedang tayang — jalankan manual jika masih perlu</string>
     <string name="calendar_cue_skipped_at">Dilewati %1$s</string>
+    <string name="calendar_pick_ministry">Pelayanan</string>
+    <string name="calendar_ministry_hint">Sebuah lagu, biola oleh Jake, paduan suara, kesaksian…</string>
+    <string name="calendar_ministry_detail_hint">Anna, biola</string>
+    <string name="calendar_ministry_add">Tekan Tambah, atau Enter</string>
+    <string name="calendar_ministry_new">Tidak ditampilkan di keluaran — hanya direncanakan dan dihitung waktunya</string>
+    <string name="calendar_ministry_empty_hint">Ketik apa yang terjadi di depan — sebuah lagu, biola oleh Jake, instrumental, paduan suara, kesaksian. Masuk ke rencana dan cetakan, tidak pernah ke layar.</string>
+    <string name="calendar_ministry_no_timing">Pelayanan terjadi di depan, bukan di layar — beri durasi di baris; tidak ada yang diotomatiskan</string>
+    <string name="calendar_ministry_what">Apa yang terjadi</string>
+    <string name="calendar_ministry_who">Siapa, atau catatan</string>
 </resources>

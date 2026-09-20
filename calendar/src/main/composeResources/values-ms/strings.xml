@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue dilangkau</string>
     <string name="calendar_cue_skipped_reason">Ada perkara lain sedang disiarkan — cetuskan secara manual jika masih perlu</string>
     <string name="calendar_cue_skipped_at">Dilangkau %1$s</string>
+    <string name="calendar_pick_ministry">Pelayanan</string>
+    <string name="calendar_ministry_hint">Sebuah lagu, biola oleh Jake, koir, kesaksian…</string>
+    <string name="calendar_ministry_detail_hint">Anna, biola</string>
+    <string name="calendar_ministry_add">Tekan Tambah, atau Enter</string>
+    <string name="calendar_ministry_new">Tidak dipaparkan pada output — hanya dirancang dan dimasa</string>
+    <string name="calendar_ministry_empty_hint">Taip apa yang berlaku di hadapan — sebuah lagu, biola oleh Jake, instrumental, koir, kesaksian. Ia masuk ke rancangan dan cetakan, bukan ke skrin.</string>
+    <string name="calendar_ministry_no_timing">Pelayanan berlaku di hadapan, bukan di skrin — beri tempoh pada baris; tiada apa untuk diautomasikan</string>
+    <string name="calendar_ministry_what">Apa yang berlaku</string>
+    <string name="calendar_ministry_who">Siapa, atau nota</string>
 </resources>

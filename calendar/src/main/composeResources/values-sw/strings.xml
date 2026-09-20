@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Kiashiria kimerukwa</string>
     <string name="calendar_cue_skipped_reason">Kitu kingine kilikuwa hewani — kianzishe kwa mkono ikiwa bado kinapaswa kwenda</string>
     <string name="calendar_cue_skipped_at">Kimerukwa %1$s</string>
+    <string name="calendar_pick_ministry">Huduma</string>
+    <string name="calendar_ministry_hint">Wimbo, violin na Jake, kwaya, ushuhuda…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violin</string>
+    <string name="calendar_ministry_add">Bonyeza Ongeza, au Enter</string>
+    <string name="calendar_ministry_new">Haionyeshwi kwenye matokeo — inapangwa na kupimwa muda tu</string>
+    <string name="calendar_ministry_empty_hint">Andika kinachotokea mbele — wimbo, violin na Jake, muziki wa ala, kwaya, ushuhuda. Kinaingia kwenye mpango na nakala ya kuchapishwa, kamwe si skrini.</string>
+    <string name="calendar_ministry_no_timing">Huduma hufanyika mbele, si kwenye skrini — ipe urefu kwenye safu; hakuna cha kufanya kiotomatiki</string>
+    <string name="calendar_ministry_what">Kinachotokea</string>
+    <string name="calendar_ministry_who">Nani, au maelezo</string>
 </resources>

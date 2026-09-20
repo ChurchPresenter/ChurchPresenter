@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue atlandı</string>
     <string name="calendar_cue_skipped_reason">Yayında başka bir şey vardı — yine de gitmesi gerekiyorsa elle tetikleyin</string>
     <string name="calendar_cue_skipped_at">Atlandı %1$s</string>
+    <string name="calendar_pick_ministry">Katkı</string>
+    <string name="calendar_ministry_hint">Bir ilahi, Jake'ten keman, koro, bir tanıklık…</string>
+    <string name="calendar_ministry_detail_hint">Anna, keman</string>
+    <string name="calendar_ministry_add">Ekle'ye ya da Enter'a basın</string>
+    <string name="calendar_ministry_new">Çıkışlarda gösterilmez — yalnızca planlanır ve süresi tutulur</string>
+    <string name="calendar_ministry_empty_hint">Önde ne olduğunu yazın — bir ilahi, Jake'ten keman, bir enstrümantal, koro, bir tanıklık. Plana ve çıktıya girer, ekrana asla.</string>
+    <string name="calendar_ministry_no_timing">Bir katkı önde olur, ekranda değil — satırda bir süre verin; otomatikleştirilecek bir şey yok</string>
+    <string name="calendar_ministry_what">Ne oluyor</string>
+    <string name="calendar_ministry_who">Kim ya da bir not</string>
 </resources>

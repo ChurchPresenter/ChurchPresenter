@@ -2823,4 +2823,5 @@
     <string name="schedule_behind_plan">%1$s huli</string>
     <string name="schedule_ahead_of_plan">%1$s maaga</string>
     <string name="schedule_on_plan">ayon sa plano</string>
+    <string name="schedule_kind_ministry">Ministeryo</string>
 </resources>

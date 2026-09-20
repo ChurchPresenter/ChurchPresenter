@@ -51,7 +51,13 @@ private const val AUTOSAVE_INTERVAL_MS = 60_000L
 private const val MAX_UNDO_DEPTH = 50
 
 class ScheduleViewModel(
-    private val onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
+    private val onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
+    /**
+     * The wall clock the live row is timed against -- see [markLive] and `planDrift`. Defaulted
+     * so the app never passes it; a test or a screenshot pins it, since a "3:40 behind" reckoned
+     * from the real time is a different picture every second.
+     */
+    val clock: () -> LocalTime = { LocalTime.now() },
 ) {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
@@ -225,7 +231,7 @@ class ScheduleViewModel(
     val liveSince: LocalTime? get() = _liveSince.value
 
     /** Records that [id] went live at [at]. Presenting the same row again restarts its clock. */
-    fun markLive(id: String, at: LocalTime = LocalTime.now()) {
+    fun markLive(id: String, at: LocalTime = clock()) {
         _liveRowId.value = id
         _liveSince.value = at
     }
@@ -819,6 +825,7 @@ class ScheduleViewModel(
             is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
             is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
             is ScheduleItem.CueItem -> onPresentCue?.invoke(item)
+            is ScheduleItem.MinistryItem -> { /* happens up front, never on screen */ }
         }
     }
 

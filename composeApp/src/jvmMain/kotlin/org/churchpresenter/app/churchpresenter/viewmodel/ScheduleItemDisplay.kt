@@ -8,6 +8,7 @@ import churchpresenter.composeapp.generated.resources.media_tab_title
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.schedule_kind_cue
+import churchpresenter.composeapp.generated.resources.schedule_kind_ministry
 import churchpresenter.composeapp.generated.resources.schedule_kind_lower_third
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.tab_canvas
@@ -42,6 +43,7 @@ internal fun scheduleItemGlyph(item: ScheduleItem): String = when (item) {
     is ScheduleItem.SceneItem -> "🎬"
     is ScheduleItem.DictionaryItem -> "📖"
     is ScheduleItem.CueItem -> "⚡"
+    is ScheduleItem.MinistryItem -> "🎤"
 }
 
 /**
@@ -84,6 +86,7 @@ internal fun scheduleItemPaletteIndex(item: ScheduleItem): Int = when (item) {
     is ScheduleItem.DictionaryItem -> 1
     is ScheduleItem.LabelItem -> 0
     is ScheduleItem.CueItem -> 2
+    is ScheduleItem.MinistryItem -> 0
 }
 
 /** The row's type name, shown as a small uppercase chip at the Detailed density. */
@@ -100,6 +103,7 @@ internal fun scheduleItemKindLabel(item: ScheduleItem): StringResource = when (i
     is ScheduleItem.DictionaryItem -> Res.string.tab_dictionary
     is ScheduleItem.LabelItem -> Res.string.songs // unused — LabelItem renders as a section header
     is ScheduleItem.CueItem -> Res.string.schedule_kind_cue
+    is ScheduleItem.MinistryItem -> Res.string.schedule_kind_ministry
 }
 
 /**

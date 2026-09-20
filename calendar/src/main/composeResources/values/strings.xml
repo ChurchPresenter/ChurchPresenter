@@ -55,6 +55,15 @@
     <string name="calendar_pick_section">Section</string>
     <string name="calendar_pick_schedule">Schedule tab</string>
     <string name="calendar_pick_presets">Presets</string>
+    <string name="calendar_pick_ministry">Ministry</string>
+    <string name="calendar_ministry_what">What happens</string>
+    <string name="calendar_ministry_who">Who, or a note</string>
+    <string name="calendar_ministry_hint">A song, violin by Jake, the choir, a testimony…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violin</string>
+    <string name="calendar_ministry_add">Press Add, or Enter</string>
+    <string name="calendar_ministry_new">Not shown on the outputs — planned and timed only</string>
+    <string name="calendar_ministry_empty_hint">Type what happens up front — a song, violin by Jake, an instrumental, the choir, a testimony. It goes on the plan and the printout, never on the screen.</string>
+    <string name="calendar_ministry_no_timing">A ministry item happens up front, not on screen — give it a length on the row; there is nothing to automate</string>
     <string name="calendar_presets_empty">No presets yet</string>
     <string name="calendar_presets_empty_sub">Save one with Save preset, beside Add to Schedule on the Pictures, Presentation, Media, Announcements and Canvas tabs.</string>
     <string name="calendar_presets_note">Presets are picked up under Presets when you add an item, and under Item when a cue shows one.</string>

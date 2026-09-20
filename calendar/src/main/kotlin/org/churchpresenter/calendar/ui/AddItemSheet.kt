@@ -41,6 +41,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_pick_adds_to
 import org.churchpresenter.calendar.generated.resources.calendar_pick_add_range
 import org.churchpresenter.calendar.generated.resources.calendar_pick_replace_with
 import org.churchpresenter.calendar.generated.resources.calendar_pick_bible
+import org.churchpresenter.calendar.generated.resources.calendar_pick_ministry
 import org.churchpresenter.calendar.generated.resources.calendar_pick_presets
 import org.churchpresenter.calendar.generated.resources.calendar_cue_filter_presets
 import org.churchpresenter.calendar.generated.resources.calendar_pick_search
@@ -51,6 +52,7 @@ import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.generated.resources.calendar_settings_done
 import org.churchpresenter.calendar.generated.resources.calendar_saved_as_you_change
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_no_timing
 import org.churchpresenter.calendar.generated.resources.calendar_section_no_timing
 import org.churchpresenter.calendar.generated.resources.calendar_editing_row
 import androidx.compose.material3.HorizontalDivider
@@ -110,7 +112,7 @@ fun AddItemSheet(
     // Editing a row, the picker opens on that row -- its kind, and its book, chapter and verses
     // or its title -- so a replacement is one step away. Rebuilt if the Bible arrives after the
     // sheet opened, since the verse row cannot be found in an empty book list.
-    val picker = remember(replacing, bibleBooks.isEmpty()) { pickerFor(replacing, bibleBooks) }
+    val picker = remember(replacing, bibleBooks.isEmpty()) { pickerFor(replacing, bibleBooks, plannedSeconds) }
     val use24Hour = LocalUse24HourClock.current
     var draft by remember(replacing) { mutableStateOf(TimingDraft.of(timing, plannedSeconds, use24Hour)) }
     // Editing a row, a change lands on it at once; adding, it waits for the pick.
@@ -119,11 +121,17 @@ fun AddItemSheet(
         if (replacing != null) onTimingChange(next.toTiming(), next.runSeconds())
     }
 
-    val planned = draft.runSeconds()
+    // The length a pick goes on with: the timing panel's, or -- on the ministry tab, where the
+    // panel is off -- the form's own duration field.
+    val planned = if (picker.kind == PickKind.MINISTRY) picker.ministrySeconds() else draft.runSeconds()
     val add: (List<ScheduleItem>) -> Unit = { items -> onAdd(items, planned, draft.toTiming()) }
     // A section heading is structure, not something that goes on screen: nothing about it starts,
     // runs or ends, so the timing panel is shown for what it is -- inert -- and the footer says why.
+    // A ministry item happens up front and never on screen, so the same: its length is typed on
+    // the row, and there is nothing for the engine to start, repeat or end.
     val isSection = replacing is ScheduleItem.LabelItem || picker.kind == PickKind.SECTION
+    val isMinistry = replacing is ScheduleItem.MinistryItem || picker.kind == PickKind.MINISTRY
+    val noTiming = isSection || isMinistry
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
@@ -141,11 +149,15 @@ fun AddItemSheet(
                     // What the panel says, read back; and where a pick lands while adding.
                     summary = when {
                         isSection -> stringResource(Res.string.calendar_section_no_timing)
+                        isMinistry -> stringResource(Res.string.calendar_ministry_no_timing)
                         replacing == null ->
                             timingSummary(draft) + " · " + stringResource(Res.string.calendar_pick_adds_to, serviceName)
                         else -> timingSummary(draft)
                     },
-                    pending = picker.pendingVerses,
+                    // What the footer offers to add: the verse range built on the Bible tab, or
+                    // the ministry item typed on its tab -- the two tabs where the pick is
+                    // assembled rather than clicked.
+                    pending = picker.pendingVerses ?: picker.pendingMinistry,
                     onDone = if (replacing != null) onDismiss else null,
                     onAddPending = {
                         add(listOf(it))
@@ -178,7 +190,7 @@ fun AddItemSheet(
                 draft = draft,
                 serviceStartTime = serviceStartTime,
                 onChange = ::changeTiming,
-                enabled = !isSection,
+                enabled = !noTiming,
                 measuredSeconds = measuredSeconds,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             )
@@ -206,9 +218,9 @@ fun AddItemSheet(
 @Composable
 private fun RowScope.PickerFooter(
     summary: String,
-    pending: ScheduleItem.BibleVerseItem?,
+    pending: ScheduleItem?,
     onDone: (() -> Unit)?,
-    onAddPending: (ScheduleItem.BibleVerseItem) -> Unit,
+    onAddPending: (ScheduleItem) -> Unit,
     /** True while a row is being edited: the built range then *replaces* it, and the button says so. */
     replacing: Boolean = false,
 ) {
@@ -246,7 +258,8 @@ private fun PickerHead(
         verticalArrangement = Arrangement.spacedBy(9.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp),
     ) {
-        CompactTextField(
+        // The ministry tab has nothing to search: its fields are the item, and live in the body.
+        if (picker.kind != PickKind.MINISTRY) CompactTextField(
             value = picker.query,
             onValueChange = { picker.query = it },
             placeholder = searchPlaceholder(picker.kind),
@@ -320,6 +333,15 @@ private fun PickerBody(
             onAdd = onAdd,
         )
         PickKind.SECTION -> SectionResults(sections, picker.query, onAdd)
+        PickKind.MINISTRY -> MinistryResults(
+            title = picker.query,
+            onTitle = { picker.query = it },
+            detail = picker.detail,
+            onDetail = { picker.detail = it },
+            duration = picker.duration,
+            onDuration = { picker.duration = it },
+            onAdd = onAdd,
+        )
         PickKind.PRESETS -> PresetResults(presets, picker.presetKind, picker.query, previewSources, onAdd)
     }
 }
@@ -351,6 +373,8 @@ private fun searchPlaceholder(kind: PickKind): String = when (kind) {
     PickKind.SONGS -> stringResource(Res.string.calendar_pick_search)
     PickKind.BIBLE -> stringResource(Res.string.calendar_bible_hint_short)
     PickKind.SECTION -> stringResource(Res.string.calendar_section_hint)
+    // The ministry tab draws no search field; its own fields carry their own hints.
+    PickKind.MINISTRY -> ""
     PickKind.PRESETS -> stringResource(Res.string.calendar_cue_filter_presets)
 }
 
@@ -360,6 +384,7 @@ private fun pickKindLabel(kind: PickKind): String = stringResource(
         PickKind.SONGS -> Res.string.calendar_pick_songs
         PickKind.BIBLE -> Res.string.calendar_pick_bible
         PickKind.SECTION -> Res.string.calendar_pick_section
+        PickKind.MINISTRY -> Res.string.calendar_pick_ministry
         PickKind.PRESETS -> Res.string.calendar_pick_presets
     }
 )

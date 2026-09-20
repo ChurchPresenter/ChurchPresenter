@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">فرمان رد شد</string>
     <string name="calendar_cue_skipped_reason">چیز دیگری روی صفحه بود — اگر باید اجرا شود، دستی اجرایش کنید</string>
     <string name="calendar_cue_skipped_at">رد شد %1$s</string>
+    <string name="calendar_pick_ministry">خدمت</string>
+    <string name="calendar_ministry_hint">یک سرود، ویولن جیک، گروه کر، یک شهادت…</string>
+    <string name="calendar_ministry_detail_hint">آنا، ویولن</string>
+    <string name="calendar_ministry_add">افزودن یا Enter را بزنید</string>
+    <string name="calendar_ministry_new">روی خروجی‌ها نمایش داده نمی‌شود — فقط برنامه‌ریزی و زمان‌بندی می‌شود</string>
+    <string name="calendar_ministry_empty_hint">بنویسید جلو چه اتفاقی می‌افتد — یک سرود، ویولن جیک، قطعهٔ بی‌کلام، گروه کر، یک شهادت. وارد برنامه و نسخهٔ چاپی می‌شود، هرگز روی صفحه نه.</string>
+    <string name="calendar_ministry_no_timing">خدمت جلو انجام می‌شود، نه روی صفحه — در ردیف مدتی به آن بدهید؛ چیزی برای خودکارسازی نیست</string>
+    <string name="calendar_ministry_what">چه اتفاقی می‌افتد</string>
+    <string name="calendar_ministry_who">چه کسی، یا یادداشت</string>
 </resources>

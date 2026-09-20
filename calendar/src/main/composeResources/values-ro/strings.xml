@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue omis</string>
     <string name="calendar_cue_skipped_reason">Altceva era în direct — declanșează-l manual dacă tot trebuie să ruleze</string>
     <string name="calendar_cue_skipped_at">Omis %1$s</string>
+    <string name="calendar_pick_ministry">Slujire</string>
+    <string name="calendar_ministry_hint">O cântare, vioară de Jake, corul, o mărturie…</string>
+    <string name="calendar_ministry_detail_hint">Anna, vioară</string>
+    <string name="calendar_ministry_add">Apasă Adaugă, sau Enter</string>
+    <string name="calendar_ministry_new">Nu apare pe ieșiri — doar planificat și cronometrat</string>
+    <string name="calendar_ministry_empty_hint">Scrie ce se întâmplă în față — o cântare, vioară de Jake, un instrumental, corul, o mărturie. Ajunge în plan și pe hârtie, niciodată pe ecran.</string>
+    <string name="calendar_ministry_no_timing">O slujire se întâmplă în față, nu pe ecran — dă-i o durată pe rând; nu este nimic de automatizat</string>
+    <string name="calendar_ministry_what">Ce se întâmplă</string>
+    <string name="calendar_ministry_who">Cine, sau o notă</string>
 </resources>

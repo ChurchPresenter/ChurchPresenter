@@ -184,6 +184,24 @@ sealed class ScheduleItem {
     ) : ScheduleItem()
 
     /**
+     * Something in the order of service that does not go on screen -- a poem read, a violin
+     * solo, a prayer, a word of welcome. Planned and timed like any other row, so the run of
+     * show's clock and its printed order carry it; **never loaded into the Schedule tab**, which
+     * holds only what the outputs can show. The kind of row a musician or reader adds from a
+     * phone so their slot is on the plan.
+     *
+     * [detail] is who, or how -- `Anna, violin`.
+     */
+    @Serializable
+    @SerialName("org.churchpresenter.app.churchpresenter.models.ScheduleItem.MinistryItem")
+    data class MinistryItem(
+        override val id: String,
+        val title: String,
+        val detail: String = "",
+        override val displayText: String = title
+    ) : ScheduleItem()
+
+    /**
      * A timed action: at [absoluteTime] -- or [offsetMinutes] from the service's start until it is
      * pinned -- do [action], with [payload] as what it puts on screen where the action shows
      * something. A row like any other, so a planned service and the live schedule carry their

@@ -67,6 +67,23 @@ class PickerStateTest {
     }
 
     @Test
+    fun `a ministry row opens with all three of its lines, and offers itself once named`() {
+        val row = ScheduleItem.MinistryItem("m", "Violin", "Jake")
+        val picker = pickerFor(row, BIBLE_BOOKS, plannedSeconds = 210)
+        assertEquals(PickKind.MINISTRY, picker.kind)
+        assertEquals("Violin", picker.query)
+        assertEquals("Jake", picker.detail)
+        assertEquals("3:30", picker.duration)
+        assertEquals(210, picker.ministrySeconds())
+        assertEquals("Violin", picker.pendingMinistry?.title)
+
+        picker.query = "  "
+        assertNull(picker.pendingMinistry, "nothing to add without a name")
+        picker.duration = "soon"
+        assertNull(picker.ministrySeconds())
+    }
+
+    @Test
     fun `a song row opens with its title in the search, and nothing opens on songs`() {
         val song = pickerFor(song("a", "Amazing Grace"), BIBLE_BOOKS)
         assertEquals(PickKind.SONGS, song.kind)

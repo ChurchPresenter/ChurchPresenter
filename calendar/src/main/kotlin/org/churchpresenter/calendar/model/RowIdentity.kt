@@ -25,6 +25,7 @@ fun ScheduleItem.withNewId(): ScheduleItem {
         is ScheduleItem.WebsiteItem -> copy(id = fresh)
         is ScheduleItem.SceneItem -> copy(id = fresh)
         is ScheduleItem.DictionaryItem -> copy(id = fresh)
+    is ScheduleItem.MinistryItem -> copy(id = fresh)
         is ScheduleItem.CueItem -> copy(id = fresh, payload = payload?.withNewId())
     }
 }
@@ -49,6 +50,7 @@ internal fun ScheduleItem.renamed(text: String): ScheduleItem = when (this) {
     is ScheduleItem.WebsiteItem -> copy(displayText = text)
     is ScheduleItem.SceneItem -> copy(displayText = text)
     is ScheduleItem.DictionaryItem -> copy(displayText = text)
+    is ScheduleItem.MinistryItem -> copy(displayText = text)
     is ScheduleItem.CueItem -> copy(displayText = text)
 }
 

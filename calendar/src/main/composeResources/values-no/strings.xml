@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue hoppet over</string>
     <string name="calendar_cue_skipped_reason">Noe annet var live — utløs den manuelt hvis den fortsatt skal gå</string>
     <string name="calendar_cue_skipped_at">Hoppet over %1$s</string>
+    <string name="calendar_pick_ministry">Innslag</string>
+    <string name="calendar_ministry_hint">En sang, fiolin ved Jake, koret, et vitnesbyrd…</string>
+    <string name="calendar_ministry_detail_hint">Anna, fiolin</string>
+    <string name="calendar_ministry_add">Trykk Legg til, eller Enter</string>
+    <string name="calendar_ministry_new">Vises ikke på utgangene — bare planlagt og tidsatt</string>
+    <string name="calendar_ministry_empty_hint">Skriv hva som skjer der framme — en sang, fiolin ved Jake, et instrumentalstykke, koret, et vitnesbyrd. Det havner i planen og utskriften, aldri på skjermen.</string>
+    <string name="calendar_ministry_no_timing">Et innslag skjer der framme, ikke på skjermen — gi det en lengde på raden; det er ingenting å automatisere</string>
+    <string name="calendar_ministry_what">Hva som skjer</string>
+    <string name="calendar_ministry_who">Hvem, eller et notat</string>
 </resources>

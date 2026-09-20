@@ -2,6 +2,9 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasSetTextAction
@@ -135,7 +138,8 @@ class PreflightAndMeasuredTest {
             onAllNodesWithContentDescription("File not found", substring = true).onFirst().performClick()
             waitForIdle()
 
-            assertEquals("/gone/clip.mp4", (stored(folder).services.single().items.first() as ScheduleItem.MediaItem).mediaUrl)
+            val row = stored(folder).services.single().items.first() as ScheduleItem.MediaItem
+            assertEquals("/gone/clip.mp4", row.mediaUrl)
             assertTrue(shows("1 row needs attention"))
         }
 
@@ -164,14 +168,17 @@ class PreflightAndMeasuredTest {
                 service(
                     items = listOf(
                         clip("m", "/gone/a.mp4"),
-                        ScheduleItem.CueItem("c", CueAction.PROJECT, label = "Play", payload = clip("p", "/gone/b.mp4")),
+                        ScheduleItem.CueItem(
+                            "c", CueAction.PROJECT, label = "Play", payload = clip("p", "/gone/b.mp4"),
+                        ),
                     ),
                     planned = emptyMap(),
                 )
             ),
         ) {
             awaitText("2 rows need attention")
-            assertEquals(2, onAllNodesWithContentDescription("File not found", substring = true).fetchSemanticsNodes().size)
+            val marks = onAllNodesWithContentDescription("File not found", substring = true).fetchSemanticsNodes()
+            assertEquals(2, marks.size)
         }
 
     @Test
@@ -251,10 +258,13 @@ class PreflightAndMeasuredTest {
             }
         }
         waitForIdle()
-        listOf("File not found", "Folder not found", "Not in the song library", "Book not in", "Chapter not in", "Verse not in")
-            .forEach {
-                assertTrue(onAllNodesWithContentDescription(it, substring = true).fetchSemanticsNodes().isNotEmpty(), it)
-            }
+        listOf(
+            "File not found", "Folder not found", "Not in the song library",
+            "Book not in", "Chapter not in", "Verse not in",
+        ).forEach {
+            val marked = onAllNodesWithContentDescription(it, substring = true).fetchSemanticsNodes()
+            assertTrue(marked.isNotEmpty(), it)
+        }
         assertEquals(
             7,
             onAllNodesWithContentDescription("not", substring = true, ignoreCase = true).fetchSemanticsNodes().size,
@@ -272,6 +282,64 @@ class PreflightAndMeasuredTest {
         waitForIdle()
     }
 
+    // ── Off-screen rows ───────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `something that happens up front is added from its own tab, edited in place, and never loaded`() {
+        var loaded: List<ScheduleItem> = emptyList()
+        withCalendar(
+            documentWith(service(items = listOf(song("a", "Amazing Grace")), planned = mapOf("a" to 300))),
+            host = CalendarHost(loadIntoSchedule = { items, _, _, _, _ -> loaded = items }),
+        ) { folder ->
+            awaitText("Amazing Grace")
+            clickFirst("Add song, verse or section")
+            awaitText("Songs")
+            clickFirst("Ministry")
+            assertTrue(shows("nothing to automate"), "the timing panel is off for a ministry item")
+            // The form's three fields come first in the sheet; the timing panel's own follow them.
+            typeIntoFieldAt(index = 0, text = "A poem")
+            typeIntoFieldAt(index = 1, text = "Anna")
+            typeIntoFieldAt(index = 2, text = "3:30")
+            awaitText("Add A poem")
+            clickLast("Add A poem")
+            waitForIdle()
+
+            val service = stored(folder).services.single()
+            val row = service.items.last() as ScheduleItem.MinistryItem
+            assertEquals("A poem", row.title)
+            assertEquals("Anna", row.detail)
+            assertEquals(210, service.plannedSeconds[row.id], "the form's duration is the planned length")
+            assertTrue(shows("Anna"), "who, under the title")
+
+            // Editing opens on the row with both lines filled in.
+            clickFirst("A poem")
+            awaitText("Editing")
+            assertTrue(showsInSheet("Anna", anchor = "Editing"))
+            clickInSheet("Done", anchor = "Editing")
+            waitForIdle()
+
+            clickFirst("Load into Schedule")
+            waitForIdle()
+            assertEquals(listOf("a"), loaded.map { it.id }, "the poem stays on the plan")
+        }
+    }
+
+    @Test
+    fun `Enter in the ministry field adds what was typed`() =
+        withCalendar(documentWith(service(items = emptyList(), planned = emptyMap()))) { folder ->
+            awaitText("Sunday Morning")
+            clickFirst("Add song, verse or section")
+            awaitText("Songs")
+            clickFirst("Ministry")
+            typeIntoFieldAt(index = 0, text = "Testimony")
+            onAllNodes(hasSetTextAction()).onFirst().performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+
+            val row = stored(folder).services.single().items.single() as ScheduleItem.MinistryItem
+            assertEquals("Testimony", row.title)
+            assertEquals("", row.detail)
+        }
+
     // ── Skipped cues ──────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -279,7 +347,8 @@ class PreflightAndMeasuredTest {
         val cue = ScheduleItem.CueItem("c", CueAction.BLANK, label = "Blank at the end", absoluteTime = "09:45")
         setContent {
             AppThemeWrapper(theme = ThemeMode.LIGHT) {
-                CueToast(event = FiredCue(cue, LocalTime.of(9, 45), skipped = true), onDismiss = {}, modifier = Modifier)
+                val skipped = FiredCue(cue, LocalTime.of(9, 45), skipped = true)
+                CueToast(event = skipped, onDismiss = {}, modifier = Modifier)
             }
         }
         waitForIdle()

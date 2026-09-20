@@ -64,7 +64,8 @@ class PreflightTest {
 
     @Test
     fun `a deck and a folder that are there are not reported`() {
-        assertTrue(check(deck("d", "/here.pptx"), pictures("p", "/here"), present = setOf("/here.pptx", "/here")).isEmpty())
+        val present = setOf("/here.pptx", "/here")
+        assertTrue(check(deck("d", "/here.pptx"), pictures("p", "/here"), present = present).isEmpty())
     }
 
     @Test

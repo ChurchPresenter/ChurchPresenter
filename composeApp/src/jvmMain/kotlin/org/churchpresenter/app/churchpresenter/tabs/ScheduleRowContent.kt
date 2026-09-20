@@ -272,6 +272,13 @@ internal fun ScheduleRowDetailLine(item: ScheduleItem, density: ScheduleDensity)
             overflow = TextOverflow.Ellipsis,
         )
         is ScheduleItem.CueItem -> CueDetailLine(item, detailColor)
+        is ScheduleItem.MinistryItem -> Text(
+            text = item.detail,
+            style = MaterialTheme.typography.bodySmall,
+            color = detailColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         is ScheduleItem.LabelItem, is ScheduleItem.SceneItem -> {  }
     }
 }

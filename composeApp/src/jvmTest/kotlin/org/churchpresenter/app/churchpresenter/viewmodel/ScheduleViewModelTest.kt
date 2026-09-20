@@ -489,4 +489,49 @@ class ScheduleViewModelTest {
 
         assertEquals(before, vm.scheduleItems)
     }
+
+    // ── The live row, and the service start ─────────────────────────────────────
+
+    @Test
+    fun `presenting a row marks it live, with the time, and the automation's select does too`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha", "Beta")
+        val (alpha, beta) = vm.scheduleItems
+        assertNull(vm.liveRowId)
+
+        val at = java.time.LocalTime.of(10, 2)
+        vm.markLive(alpha.id, at)
+        assertEquals(alpha.id, vm.liveRowId)
+        assertEquals(at, vm.liveSince)
+
+        vm.presentItem(item = beta, onPresenting = {})
+        assertEquals(beta.id, vm.liveRowId, "every present path marks the row")
+
+        vm.selectOnly(alpha.id)
+        assertEquals(alpha.id, vm.liveRowId, "the engine's select is a go-live too")
+        assertEquals(alpha.id, vm.selectedItemId)
+
+        vm.presentItem(item = ScheduleItem.LabelItem("h", "Worship", "#FFF", "#000"), onPresenting = {})
+        assertEquals(alpha.id, vm.liveRowId, "a heading cannot be live")
+
+        vm.presentItem(item = ScheduleItem.MinistryItem("o", "A poem"), onPresenting = {})
+        assertEquals("o", vm.liveRowId, "an off-screen slot is what is happening, even with nothing on screen")
+    }
+
+    @Test
+    fun `the service start is kept with the rows and cleared with them`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha")
+        vm.markLive(vm.scheduleItems.single().id)
+        vm.setServiceStart("10:00")
+        assertEquals("10:00", vm.serviceStartTime)
+
+        vm.clearSchedule()
+        assertNull(vm.serviceStartTime)
+        assertNull(vm.liveRowId)
+        assertNull(vm.liveSince)
+
+        vm.setServiceStart(null)
+        assertNull(vm.serviceStartTime)
+    }
 }

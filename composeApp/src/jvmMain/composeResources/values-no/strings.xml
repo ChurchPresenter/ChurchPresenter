@@ -2823,4 +2823,5 @@
     <string name="schedule_behind_plan">%1$s bak</string>
     <string name="schedule_ahead_of_plan">%1$s foran</string>
     <string name="schedule_on_plan">etter planen</string>
+    <string name="schedule_kind_ministry">Innslag</string>
 </resources>

@@ -5,18 +5,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.model.bibleVerseItem
+import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.lastVerse
+import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 
 /** Which source the picker is showing. */
-internal enum class PickKind { SONGS, BIBLE, SECTION, PRESETS }
+internal enum class PickKind { SONGS, BIBLE, SECTION, MINISTRY, PRESETS }
 
 /** The tab a row of this kind would have come from. */
 internal fun pickKindOf(item: ScheduleItem): PickKind = when (item) {
     is ScheduleItem.SongItem -> PickKind.SONGS
     is ScheduleItem.BibleVerseItem -> PickKind.BIBLE
     is ScheduleItem.LabelItem -> PickKind.SECTION
+    is ScheduleItem.MinistryItem -> PickKind.MINISTRY
     else -> PickKind.PRESETS
 }
 
@@ -25,10 +28,15 @@ internal fun pickKindOf(item: ScheduleItem): PickKind = when (item) {
  * step rather than starting over -- on the row itself. A verse row opens on its book and chapter
  * with its range selected; a song row opens with its title in the search. With no row, on songs.
  */
-internal fun pickerFor(row: ScheduleItem?, books: List<CalendarBibleBook>): PickerState {
+internal fun pickerFor(row: ScheduleItem?, books: List<CalendarBibleBook>, plannedSeconds: Int? = null): PickerState {
     val picker = PickerState(row?.let(::pickKindOf) ?: PickKind.SONGS)
     when (row) {
         is ScheduleItem.SongItem -> picker.query = row.title
+        is ScheduleItem.MinistryItem -> {
+            picker.query = row.title
+            picker.detail = row.detail
+            picker.duration = plannedSeconds?.let(::formatDuration).orEmpty()
+        }
         is ScheduleItem.BibleVerseItem -> {
             val book = if (row.bookId != 0) {
                 books.firstOrNull { it.bookId == row.bookId }
@@ -48,6 +56,10 @@ internal fun pickerFor(row: ScheduleItem?, books: List<CalendarBibleBook>): Pick
 internal class PickerState(initialKind: PickKind) {
     var kind by mutableStateOf(initialKind)
     var query by mutableStateOf("")
+    /** The ministry tab's second line -- who, or a note -- typed beside the title in [query]. */
+    var detail by mutableStateOf("")
+    /** The ministry tab's length, as typed -- `4:30`; its planned seconds once it parses. */
+    var duration by mutableStateOf("")
     var songBook by mutableStateOf<String?>(null)
     /** Which kind of preset the Presets tab is narrowed to, or null for all of them. */
     var presetKind by mutableStateOf<PresetKind?>(null)
@@ -71,6 +83,13 @@ internal class PickerState(initialKind: PickKind) {
         }
 
     /** Opens on a book, a chapter and a run of verses at once -- the row being edited, as it is. */
+    /** The ministry item typed on its tab, offered by the footer and by Enter; null until it has a name. */
+    val pendingMinistry: ScheduleItem.MinistryItem?
+        get() = if (kind == PickKind.MINISTRY && query.isNotBlank()) ministryItem(query.trim(), detail.trim()) else null
+
+    /** The ministry tab's length in seconds, or null while blank or unreadable. */
+    fun ministrySeconds(): Int? = parseDuration(duration)
+
     fun showVerses(book: CalendarBibleBook, chapter: Int, first: Int, last: Int) {
         kind = PickKind.BIBLE
         this.book = book

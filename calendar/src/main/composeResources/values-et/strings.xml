@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue jäeti vahele</string>
     <string name="calendar_cue_skipped_reason">Midagi muud oli eetris — käivita käsitsi, kui see peab siiski minema</string>
     <string name="calendar_cue_skipped_at">Vahele jäetud %1$s</string>
+    <string name="calendar_pick_ministry">Osalus</string>
+    <string name="calendar_ministry_hint">Laul, viiul — Jake, koor, tunnistus…</string>
+    <string name="calendar_ministry_detail_hint">Anna, viiul</string>
+    <string name="calendar_ministry_add">Vajuta Lisa või Enter</string>
+    <string name="calendar_ministry_new">Ei näidata väljunditel — ainult plaanitud ja ajastatud</string>
+    <string name="calendar_ministry_empty_hint">Kirjuta, mis ees toimub — laul, viiul (Jake), instrumentaal, koor, tunnistus. See läheb kavasse ja väljatrükki, mitte kunagi ekraanile.</string>
+    <string name="calendar_ministry_no_timing">Osalus toimub ees, mitte ekraanil — anna sellele reas pikkus; automatiseerida pole midagi</string>
+    <string name="calendar_ministry_what">Mis toimub</string>
+    <string name="calendar_ministry_who">Kes või märkus</string>
 </resources>

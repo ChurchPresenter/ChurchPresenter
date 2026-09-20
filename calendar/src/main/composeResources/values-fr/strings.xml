@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue ignoré</string>
     <string name="calendar_cue_skipped_reason">Autre chose était à l'antenne — déclenchez-le à la main s'il doit encore passer</string>
     <string name="calendar_cue_skipped_at">Ignoré %1$s</string>
+    <string name="calendar_pick_ministry">Intervention</string>
+    <string name="calendar_ministry_hint">Un chant, violon par Jake, la chorale, un témoignage…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violon</string>
+    <string name="calendar_ministry_add">Appuyez sur Ajouter, ou Entrée</string>
+    <string name="calendar_ministry_new">Pas affiché sur les sorties — seulement planifié et minuté</string>
+    <string name="calendar_ministry_empty_hint">Saisissez ce qui se passe à l'avant — un chant, violon par Jake, un instrumental, la chorale, un témoignage. Cela figure dans le plan et l'impression, jamais à l'écran.</string>
+    <string name="calendar_ministry_no_timing">Une intervention se passe à l'avant, pas à l'écran — donnez-lui une durée sur la ligne ; rien à automatiser</string>
+    <string name="calendar_ministry_what">Ce qui se passe</string>
+    <string name="calendar_ministry_who">Qui, ou une note</string>
 </resources>

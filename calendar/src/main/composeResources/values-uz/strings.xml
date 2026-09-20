@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Buyruq o‘tkazib yuborildi</string>
     <string name="calendar_cue_skipped_reason">Efirda boshqa narsa bor edi — kerak bo‘lsa qo‘lda ishga tushiring</string>
     <string name="calendar_cue_skipped_at">O‘tkazib yuborildi %1$s</string>
+    <string name="calendar_pick_ministry">Xizmat</string>
+    <string name="calendar_ministry_hint">Qo‘shiq, skripka — Jeyk, xor, guvohlik…</string>
+    <string name="calendar_ministry_detail_hint">Anna, skripka</string>
+    <string name="calendar_ministry_add">Qo‘shish yoki Enter ni bosing</string>
+    <string name="calendar_ministry_new">Chiqishlarda ko‘rsatilmaydi — faqat rejalashtiriladi va vaqti o‘lchanadi</string>
+    <string name="calendar_ministry_empty_hint">Oldinda nima bo‘lishini yozing — qo‘shiq, skripka (Jeyk), cholg‘u asari, xor, guvohlik. U rejaga va chop etishga tushadi, ekranga emas.</string>
+    <string name="calendar_ministry_no_timing">Xizmat oldinda bo‘ladi, ekranda emas — qatorda davomiylik bering; avtomatlashtiradigan narsa yo‘q</string>
+    <string name="calendar_ministry_what">Nima bo‘ladi</string>
+    <string name="calendar_ministry_who">Kim yoki izoh</string>
 </resources>

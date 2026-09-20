@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">キューをスキップしました</string>
     <string name="calendar_cue_skipped_reason">別のものが表示中でした — 必要なら手動で実行してください</string>
     <string name="calendar_cue_skipped_at">スキップ %1$s</string>
+    <string name="calendar_pick_ministry">奉仕</string>
+    <string name="calendar_ministry_hint">賛美、ジェイクのバイオリン、聖歌隊、証し…</string>
+    <string name="calendar_ministry_detail_hint">アンナ、バイオリン</string>
+    <string name="calendar_ministry_add">「追加」を押すか Enter</string>
+    <string name="calendar_ministry_new">出力には表示されません — 計画と時間管理のみ</string>
+    <string name="calendar_ministry_empty_hint">前で行うことを入力してください — 賛美、ジェイクのバイオリン、器楽、聖歌隊、証し。計画と印刷物には載りますが、画面には出ません。</string>
+    <string name="calendar_ministry_no_timing">奉仕は前で行われ、画面には出ません — 行で長さを指定してください。自動化するものはありません</string>
+    <string name="calendar_ministry_what">何をするか</string>
+    <string name="calendar_ministry_who">誰が、またはメモ</string>
 </resources>

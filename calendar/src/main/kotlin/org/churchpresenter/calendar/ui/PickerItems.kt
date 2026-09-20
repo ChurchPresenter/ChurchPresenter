@@ -42,3 +42,7 @@ internal fun SongItem.toScheduleItem(): ScheduleItem.SongItem = ScheduleItem.Son
     songbook = songbook,
     songId = songId,
 )
+
+/** A row that happens up front and never on screen -- see [ScheduleItem.MinistryItem]. */
+internal fun ministryItem(title: String, detail: String): ScheduleItem.MinistryItem =
+    ScheduleItem.MinistryItem(id = UUID.randomUUID().toString(), title = title, detail = detail)

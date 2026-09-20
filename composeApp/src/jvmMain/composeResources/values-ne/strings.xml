@@ -2823,4 +2823,5 @@
     <string name="schedule_behind_plan">%1$s पछाडि</string>
     <string name="schedule_ahead_of_plan">%1$s अगाडि</string>
     <string name="schedule_on_plan">योजनाअनुसार</string>
+    <string name="schedule_kind_ministry">सेवा</string>
 </resources>

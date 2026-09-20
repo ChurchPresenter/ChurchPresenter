@@ -2829,4 +2829,5 @@
     <string name="schedule_behind_plan">%1$s பின்தங்கி</string>
     <string name="schedule_ahead_of_plan">%1$s முன்னதாக</string>
     <string name="schedule_on_plan">திட்டப்படி</string>
+    <string name="schedule_kind_ministry">ஊழியம்</string>
 </resources>

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue přeskočen</string>
     <string name="calendar_cue_skipped_reason">Živě bylo něco jiného — v případě potřeby spusťte ručně</string>
     <string name="calendar_cue_skipped_at">Přeskočeno %1$s</string>
+    <string name="calendar_pick_ministry">Služba</string>
+    <string name="calendar_ministry_hint">Píseň, housle – Jake, sbor, svědectví…</string>
+    <string name="calendar_ministry_detail_hint">Anna, housle</string>
+    <string name="calendar_ministry_add">Stiskněte Přidat nebo Enter</string>
+    <string name="calendar_ministry_new">Nezobrazuje se na výstupech — jen plánováno a načasováno</string>
+    <string name="calendar_ministry_empty_hint">Napište, co se děje vpředu — píseň, housle (Jake), instrumentálka, sbor, svědectví. Dostane se do plánu a na výtisk, nikdy na obrazovku.</string>
+    <string name="calendar_ministry_no_timing">Služba se děje vpředu, ne na obrazovce — dejte jí délku v řádku; není co automatizovat</string>
+    <string name="calendar_ministry_what">Co se děje</string>
+    <string name="calendar_ministry_who">Kdo nebo poznámka</string>
 </resources>

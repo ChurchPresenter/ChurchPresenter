@@ -64,13 +64,13 @@ class LiveDurationLog(private val file: File) {
      */
     fun wentLive(item: ScheduleItem, at: Instant = Instant.now()) {
         val key = durationKey(item)
-        liveIdentity = identityOf(item)
         // The same thing again -- a section clicked, a row re-sent -- is still the same thing on
         // screen: the reading keeps running rather than being cut into pieces too short to keep.
         if (key != null && key == liveKey) return
         close(at)
         liveKey = key
         liveSince = at
+        liveIdentity = identityOf(item)
     }
 
     /** The outputs went black, or the live content stopped being a schedule row. */

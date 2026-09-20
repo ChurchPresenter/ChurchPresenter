@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Slideshow
 import androidx.compose.material.icons.filled.Translate
@@ -50,6 +51,9 @@ fun lookFor(item: ScheduleItem): ItemLook {
         is ScheduleItem.WebsiteItem -> ItemLook(Icons.Filled.Language, semantic.info)
         is ScheduleItem.SceneItem -> ItemLook(Icons.Filled.Layers, semantic.info)
         is ScheduleItem.DictionaryItem -> ItemLook(Icons.Filled.Translate, semantic.greek)
+        // Off screen: a person at the front, in the outline role the section heading uses -- it
+        // is on the plan but never on the outputs, so no content color fits it.
+        is ScheduleItem.MinistryItem -> ItemLook(Icons.Filled.Person, scheme.outline)
         // A label is a section heading here, which is the one row that is structure rather than
         // content — so it takes the outline role and not a content color.
         is ScheduleItem.LabelItem -> ItemLook(Icons.AutoMirrored.Filled.Label, scheme.outline)
@@ -73,6 +77,7 @@ fun ScheduleItem.subtitle(): String = when (this) {
     is ScheduleItem.WebsiteItem -> url
     is ScheduleItem.SceneItem -> sceneName
     is ScheduleItem.DictionaryItem -> transliteration
+    is ScheduleItem.MinistryItem -> detail
     is ScheduleItem.LabelItem -> ""
     is ScheduleItem.CueItem -> payload?.displayText ?: action
 }

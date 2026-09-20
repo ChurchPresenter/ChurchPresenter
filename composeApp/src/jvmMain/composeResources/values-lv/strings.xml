@@ -2823,4 +2823,5 @@
     <string name="schedule_behind_plan">%1$s atpaliek</string>
     <string name="schedule_ahead_of_plan">%1$s apsteidz</string>
     <string name="schedule_on_plan">pēc plāna</string>
+    <string name="schedule_kind_ministry">Kalpošana</string>
 </resources>

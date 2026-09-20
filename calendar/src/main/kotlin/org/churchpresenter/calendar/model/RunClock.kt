@@ -118,6 +118,9 @@ fun scheduleClocks(
     var exact = true
     return rows.associate { row ->
         val plan = timing[row.id] ?: RowTiming.DEFAULT
+        // Off-screen time before the row -- see RowTiming.leadSeconds -- unless the row is pinned,
+        // in which case the pin says when.
+        clock = clock.plusSeconds(plan.leadSeconds.toLong())
         parseStoredTime(plan.startAt)?.let {
             clock = it
             exact = true

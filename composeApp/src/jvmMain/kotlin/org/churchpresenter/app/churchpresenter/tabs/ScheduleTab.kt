@@ -69,7 +69,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
 import org.churchpresenter.calendar.model.planDrift
 import kotlinx.coroutines.delay
-import java.time.LocalTime
 import org.churchpresenter.calendar.model.scheduleClocks
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -336,10 +335,10 @@ fun ScheduleTab(
         // ticks. Null when nothing is live or the plan has no time for it.
         val liveRowId = viewModel.liveRowId
         val liveSince = viewModel.liveSince
-        var driftNow by remember { mutableStateOf(LocalTime.now()) }
+        var driftNow by remember { mutableStateOf(viewModel.clock()) }
         LaunchedEffect(liveRowId, liveSince) {
             while (liveRowId != null) {
-                driftNow = LocalTime.now()
+                driftNow = viewModel.clock()
                 delay(DRIFT_TICK_MS)
             }
         }

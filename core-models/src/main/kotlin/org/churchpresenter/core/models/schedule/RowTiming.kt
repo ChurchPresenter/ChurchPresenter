@@ -30,6 +30,12 @@ data class RowTiming(
     val repeats: Int = 1,
     /** A [RowEnd] constant: what happens when the run is over. */
     val atEnd: String = RowEnd.HOLD,
+    /**
+     * Seconds spent off screen just before this row -- a poem, a solo, a prayer -- that the plan
+     * counts and the Schedule never sees, because [ScheduleItem.MinistryItem]s are not loaded.
+     * Written in as a service is loaded, so the Schedule's clock column agrees with the calendar's.
+     */
+    val leadSeconds: Int = 0,
 ) {
     fun startsOnItsOwn(): Boolean = startAt.isNotEmpty()
 

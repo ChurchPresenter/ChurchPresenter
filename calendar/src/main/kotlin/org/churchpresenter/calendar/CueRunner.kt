@@ -245,6 +245,14 @@ object CueFeed {
     fun post(event: FiredCue) {
         log.update { (listOf(event) + it).take(LOG_LIMIT) }
     }
+
+    /**
+     * Forgets everything. For a test or a screenshot that posts to this process-wide feed: the
+     * marks and the toast read from it, so a firing left behind would show up in the next one.
+     */
+    fun clear() {
+        log.value = emptyList()
+    }
 }
 
 /** Ten seconds: close enough that a cue lands within its minute, cheap enough to run all day. */

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Команда өткізіп жіберілді</string>
     <string name="calendar_cue_skipped_reason">Эфирде басқа нәрсе болды — қажет болса қолмен іске қосыңыз</string>
     <string name="calendar_cue_skipped_at">Өткізіп жіберілді %1$s</string>
+    <string name="calendar_pick_ministry">Қызмет</string>
+    <string name="calendar_ministry_hint">Ән, скрипка — Джейк, хор, куәлік…</string>
+    <string name="calendar_ministry_detail_hint">Анна, скрипка</string>
+    <string name="calendar_ministry_add">Қосу түймесін немесе Enter басыңыз</string>
+    <string name="calendar_ministry_new">Шығыстарда көрсетілмейді — тек жоспарланады және уақыты өлшенеді</string>
+    <string name="calendar_ministry_empty_hint">Алдыңғы жақта не болатынын теріңіз — ән, скрипка (Джейк), аспаптық шығарма, хор, куәлік. Ол жоспар мен басып шығаруға түседі, экранға емес.</string>
+    <string name="calendar_ministry_no_timing">Қызмет алдыңғы жақта өтеді, экранда емес — жолда ұзақтығын беріңіз; автоматтандыратын ештеңе жоқ</string>
+    <string name="calendar_ministry_what">Не болады</string>
+    <string name="calendar_ministry_who">Кім немесе ескертпе</string>
 </resources>

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Nilaktawan ang cue</string>
     <string name="calendar_cue_skipped_reason">May ibang nakalabas — patakbuhin nang mano-mano kung kailangan pa</string>
     <string name="calendar_cue_skipped_at">Nilaktawan %1$s</string>
+    <string name="calendar_pick_ministry">Ministeryo</string>
+    <string name="calendar_ministry_hint">Isang awit, violin ni Jake, ang koro, isang patotoo…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violin</string>
+    <string name="calendar_ministry_add">Pindutin ang Idagdag, o Enter</string>
+    <string name="calendar_ministry_new">Hindi ipinapakita sa mga output — pinaplano at tinatakdaan lang ng oras</string>
+    <string name="calendar_ministry_empty_hint">I-type kung ano ang mangyayari sa harap — isang awit, violin ni Jake, instrumental, ang koro, isang patotoo. Papasok ito sa plano at printout, hindi kailanman sa screen.</string>
+    <string name="calendar_ministry_no_timing">Ang ministeryo ay nangyayari sa harap, hindi sa screen — bigyan ito ng tagal sa row; walang dapat i-automate</string>
+    <string name="calendar_ministry_what">Ano ang mangyayari</string>
+    <string name="calendar_ministry_who">Sino, o tala</string>
 </resources>

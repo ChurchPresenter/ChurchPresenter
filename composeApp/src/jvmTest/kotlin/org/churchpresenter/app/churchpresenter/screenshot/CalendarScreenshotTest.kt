@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.FiredCue
+import org.churchpresenter.calendar.CueFeed
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
@@ -95,6 +97,28 @@ class CalendarScreenshotTest {
         repeat(2) { clickIcon("Run clock") }
     }
 
+    /** What each song has actually taken, offered beside the plan where it differs. */
+    @Test
+    fun `measured lengths offered beside the plan`() = shoot("measured_lengths", measured = true)
+
+    @Test
+    fun `a row opened for editing, with its measured length among the choices`() =
+        shoot("row_editor_measured", rootIndex = 1, trim = true, measured = true) {
+            clickText("Amazing Grace")
+        }
+
+    /** Every file moved and a verse the Bible does not have: the marks, and the header's count. */
+    @Test
+    fun `the pre-flight marks`() = shoot("preflight_marks", document = documentWith(withEverythingMissing()))
+
+    /** A cue that was due while the operator was live: the toast, and the mark on its row. */
+    @Test
+    fun `a cue the engine skipped`() = shoot("cue_skipped") {
+        val cue = CalendarScreenshotTest.sunday().items.first { it is ScheduleItem.CueItem }
+        CueFeed.post(FiredCue(cue, LocalTime.of(9, 58), skipped = true))
+        waitForIdle()
+    }
+
     @Test
     fun `loading a service that would replace a schedule already in use`() =
         shoot("load_confirm", rootIndex = 1, trim = true, scheduleInUse = true) {
@@ -134,6 +158,17 @@ class CalendarScreenshotTest {
         // Exactly "Section", and inside the sheet: the row that opened it reads "Add song, verse
         // or section", which a substring match would find first and click shut again.
         clickInSheet("Section", anchor = "Songs")
+    }
+
+    /** The ministry tab: what happens up front and never on screen, as three fields on one row. */
+    @Test
+    fun `the picker's ministry tab, filled in`() = sheet("picker_ministry") {
+        openPicker()
+        clickInSheet("Ministry", anchor = "Songs")
+        onAllNodes(hasSetTextAction())[0].performTextInput("Violin")
+        onAllNodes(hasSetTextAction())[1].performTextInput("Jake")
+        onAllNodes(hasSetTextAction())[2].performTextInput("3:30")
+        waitForIdle()
     }
 
     @Test
@@ -267,11 +302,15 @@ class CalendarScreenshotTest {
         trim: Boolean = false,
         corrupt: Boolean = false,
         scheduleInUse: Boolean = false,
+        /** Whether the host answers how long each row usually runs -- the `usually` chips. */
+        measured: Boolean = false,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name, trim) { mode, file ->
         val folder = Files.createTempDirectory("calendar-shot").toFile()
         val songs = Files.createTempDirectory("calendar-shot-songs").toFile()
         try {
+            // A feed left over from another shot would mark this one's cues.
+            CueFeed.clear()
             seed(folder, document, corrupt)
             SongLibrary(songs).let { library -> STOCK_SONGS.forEach { library.writeNew(it) } }
             runDesktopComposeUiTest(width = WINDOW_WIDTH, height = WINDOW_HEIGHT) {
@@ -281,7 +320,7 @@ class CalendarScreenshotTest {
                             CalendarApp(
                                 storeFolder = folder,
                                 songFolder = songs,
-                                host = host(scheduleInUse),
+                                host = host(scheduleInUse, measured),
                                 onClose = {},
                                 today = TODAY,
                                 // Pinned: the run of show draws the clock and marks which cues
@@ -322,11 +361,14 @@ class CalendarScreenshotTest {
         PresetStore(folder).save(PresetDocument(presets = STOCK_PRESETS))
     }
 
-    private fun host(scheduleInUse: Boolean) = CalendarHost(
+    private fun host(scheduleInUse: Boolean, measured: Boolean) = CalendarHost(
         bibleBooks = { BIBLE_BOOKS },
         currentSchedule = {
             if (scheduleInUse) List(4) { index -> song("s$index", 100 + index, "In the schedule") } else emptyList()
         },
+        // What a song has usually taken here: twelve seconds over what is planned, so every song
+        // row -- and the row editor -- offers the measured length beside the plan.
+        measuredSeconds = { row -> if (measured && row is ScheduleItem.SongItem) 312 else null },
     )
 
     private companion object {
@@ -351,7 +393,9 @@ class CalendarScreenshotTest {
 
         val BIBLE_BOOKS = listOf(
             CalendarBibleBook(bookId = 1, name = "Genesis", verseCounts = listOf(31, 25, 24)),
-            CalendarBibleBook(bookId = 19, name = "Psalms", verseCounts = listOf(6, 12, 8)),
+            // A hundred chapters, so the fixture's Psalm 100 passes the pre-flight check: the
+            // check reads this list, and a verse the stub cannot find would mark every shot.
+            CalendarBibleBook(bookId = 19, name = "Psalms", verseCounts = List(99) { 8 } + 5),
             CalendarBibleBook(bookId = 43, name = "John", verseCounts = listOf(51, 25, 36)),
             CalendarBibleBook(bookId = 45, name = "Romans", verseCounts = listOf(32, 29, 31)),
         )
@@ -367,6 +411,38 @@ class CalendarScreenshotTest {
          * A service with one row of every kind, which is what makes this suite worth having: the
          * icons, the colors and the second lines are each a `when` over the whole row hierarchy.
          */
+        /**
+         * The files the fixture's rows point at, on disk, so the pre-flight check finds them and
+         * the default shots carry no warning marks -- those are a state of their own, shot over
+         * [withEverythingMissing]. Made once per JVM and removed with it.
+         */
+        val ASSETS: File by lazy {
+            Files.createTempDirectory("calendar-shot-assets").toFile().also { root ->
+                root.deleteOnExit()
+                File(root, "photos/welcome").mkdirs()
+                File(root, "photos/welcome/one.png").writeText("png")
+                File(root, "decks").mkdirs()
+                File(root, "decks/sermon.pptx").writeText("pptx")
+                File(root, "clips").mkdirs()
+                File(root, "clips/testimony.mp4").writeText("mp4")
+            }
+        }
+
+        /** [sunday] with every file gone and a verse the Bible does not have: the pre-flight marks. */
+        fun withEverythingMissing(): PlannedService = sunday().let { service ->
+            service.copy(
+                items = service.items.map { row ->
+                    when (row) {
+                        is ScheduleItem.PictureItem -> row.copy(folderPath = "/gone/photos")
+                        is ScheduleItem.PresentationItem -> row.copy(filePath = "/gone/sermon.pptx")
+                        is ScheduleItem.MediaItem -> row.copy(mediaUrl = "/gone/testimony.mp4")
+                        is ScheduleItem.BibleVerseItem -> row.copy(bookName = "Nowhere", bookId = 0)
+                        else -> row
+                    }
+                },
+            )
+        }
+
         fun sunday() = PlannedService(
             id = "sunday",
             date = TODAY.toString(),
@@ -375,7 +451,7 @@ class CalendarScreenshotTest {
             kind = ServiceKind.SUNDAY.id,
             items = listOf(
                 heading("h1", "Pre-Service", "#4FD3E8"),
-                ScheduleItem.PictureItem("pics", "/photos/welcome", "Welcome loop", 24),
+                ScheduleItem.PictureItem("pics", File(ASSETS, "photos/welcome").path, "Welcome loop", 24),
                 ScheduleItem.CueItem(
                     id = "cue", action = CueAction.GO_LIVE, label = "Go live", absoluteTime = "09:58",
                 ),
@@ -387,8 +463,9 @@ class CalendarScreenshotTest {
                     verseText = "Make a joyful noise unto the LORD, all ye lands.", verseRange = "1-5",
                 ),
                 heading("h3", "Word", "#E8A33D"),
-                ScheduleItem.PresentationItem("deck", "/decks/sermon.pptx", "Sermon", 18, "pptx"),
-                ScheduleItem.MediaItem("clip", "/clips/testimony.mp4", "Testimony", "local"),
+                ScheduleItem.PresentationItem("deck", File(ASSETS, "decks/sermon.pptx").path, "Sermon", 18, "pptx"),
+                ScheduleItem.MediaItem("clip", File(ASSETS, "clips/testimony.mp4").path, "Testimony", "local"),
+                ScheduleItem.MinistryItem("solo", "Violin", "Jake"),
                 heading("h4", "Response", "#6FD8A8"),
                 ScheduleItem.SceneItem("scene", "scene-1", "Bible with Background"),
                 ScheduleItem.AnnouncementItem("ann", "Fellowship lunch after the service"),
@@ -398,7 +475,7 @@ class CalendarScreenshotTest {
             ),
             plannedSeconds = mapOf(
                 "pics" to 600, "a" to 300, "b" to 270, "v" to 120, "deck" to 1920, "clip" to 240,
-                "scene" to 180, "ann" to 90,
+                "solo" to 210, "scene" to 180, "ann" to 90,
             ),
             timing = mapOf(
                 "pics" to RowTiming(startAt = "09:45", repeats = 0, atEnd = RowEnd.NEXT),

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">ຂ້າມຄິວ</string>
     <string name="calendar_cue_skipped_reason">ມີສິ່ງອື່ນກຳລັງສະແດງຢູ່ — ຖ້າຍັງຕ້ອງການ ໃຫ້ສັ່ງດ້ວຍຕົນເອງ</string>
     <string name="calendar_cue_skipped_at">ຂ້າມແລ້ວ %1$s</string>
+    <string name="calendar_pick_ministry">ການຮັບໃຊ້</string>
+    <string name="calendar_ministry_hint">ເພງ, ໄວໂອລິນໂດຍ Jake, ຄະນະຮ້ອງ, ຄຳພະຍານ…</string>
+    <string name="calendar_ministry_detail_hint">ອານນາ, ໄວໂອລິນ</string>
+    <string name="calendar_ministry_add">ກົດ ເພີ່ມ ຫຼື Enter</string>
+    <string name="calendar_ministry_new">ບໍ່ສະແດງໃນຜົນອອກ — ພຽງແຕ່ວາງແຜນ ແລະ ຈັບເວລາ</string>
+    <string name="calendar_ministry_empty_hint">ພິມສິ່ງທີ່ເກີດຂຶ້ນຢູ່ທາງໜ້າ — ເພງ, ໄວໂອລິນໂດຍ Jake, ດົນຕີບັນເລງ, ຄະນະຮ້ອງ, ຄຳພະຍານ. ມັນຈະຢູ່ໃນແຜນ ແລະ ເອກະສານພິມ, ບໍ່ເຄີຍຂຶ້ນຈໍ.</string>
+    <string name="calendar_ministry_no_timing">ການຮັບໃຊ້ເກີດຂຶ້ນຢູ່ທາງໜ້າ ບໍ່ແມ່ນຢູ່ຈໍ — ກຳນົດຄວາມຍາວໃນແຖວ; ບໍ່ມີຫຍັງໃຫ້ອັດຕະໂນມັດ</string>
+    <string name="calendar_ministry_what">ມີຫຍັງເກີດຂຶ້ນ</string>
+    <string name="calendar_ministry_who">ໃຜ ຫຼື ໝາຍເຫດ</string>
 </resources>

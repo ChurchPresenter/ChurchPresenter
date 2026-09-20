@@ -2808,4 +2808,5 @@
     <string name="schedule_behind_plan">%1$s întârziere</string>
     <string name="schedule_ahead_of_plan">%1$s în avans</string>
     <string name="schedule_on_plan">conform planului</string>
+    <string name="schedule_kind_ministry">Slujire</string>
 </resources>

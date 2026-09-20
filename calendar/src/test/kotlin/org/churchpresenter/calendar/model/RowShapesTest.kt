@@ -95,10 +95,10 @@ class RowShapesTest {
     // ── What a cue may point at ─────────────────────────────────────────────────
 
     @Test
-    fun `structure and a lower third are not things a cue can project`() {
+    fun `structure, a lower third and an off-screen slot are not things a cue can project`() {
         val notProjectable = EVERY_KIND.filterNot { it.isProjectableByCue() }.map { it::class.simpleName }
 
-        assertEquals(setOf("LabelItem", "LowerThirdItem", "CueItem"), notProjectable.toSet())
+        assertEquals(setOf("LabelItem", "LowerThirdItem", "CueItem", "MinistryItem"), notProjectable.toSet())
     }
 
     @Test
@@ -232,6 +232,7 @@ class RowShapesTest {
             scene(),
             ScheduleItem.DictionaryItem("t", "G26", "agape", "agapē", "love"),
             ScheduleItem.CueItem("c", CueAction.BLANK),
+            ScheduleItem.MinistryItem("o", "A poem", "Anna"),
         )
     }
 }

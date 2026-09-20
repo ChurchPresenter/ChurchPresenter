@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">تم تخطي الإشارة</string>
     <string name="calendar_cue_skipped_reason">كان هناك شيء آخر على الهواء — شغّلها يدويًا إن كان يجب أن تعمل</string>
     <string name="calendar_cue_skipped_at">تم التخطي %1$s</string>
+    <string name="calendar_pick_ministry">خدمة</string>
+    <string name="calendar_ministry_hint">ترنيمة، كمان بعزف جيك، الجوقة، شهادة…</string>
+    <string name="calendar_ministry_detail_hint">آنا، كمان</string>
+    <string name="calendar_ministry_add">اضغط إضافة أو Enter</string>
+    <string name="calendar_ministry_new">لا يُعرض على المخرجات — مخطط ومؤقت فقط</string>
+    <string name="calendar_ministry_empty_hint">اكتب ما يحدث في المقدمة — ترنيمة، كمان بعزف جيك، مقطوعة آلية، الجوقة، شهادة. يدخل الخطة والمطبوعة، ولا يظهر على الشاشة أبدًا.</string>
+    <string name="calendar_ministry_no_timing">الخدمة تحدث في المقدمة لا على الشاشة — أعطها مدة في الصف؛ لا شيء لأتمتته</string>
+    <string name="calendar_ministry_what">ما يحدث</string>
+    <string name="calendar_ministry_who">مَن، أو ملاحظة</string>
 </resources>

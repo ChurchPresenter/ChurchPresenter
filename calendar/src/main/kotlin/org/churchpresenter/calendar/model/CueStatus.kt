@@ -58,19 +58,33 @@ fun PlannedService.cueStatuses(now: LocalTime?, skippedIds: Set<String> = emptyS
  * against this service's start. Relative on the calendar, so moving the service moves them; fixed
  * once live, because the Schedule has no start time to be relative to.
  */
-fun PlannedService.rowsForSchedule(): List<ScheduleItem> =
-    items.map { if (it is ScheduleItem.CueItem) it.pinnedTo(startTime) else it }
+fun PlannedService.rowsForSchedule(): List<ScheduleItem> = items
+    // An off-screen row is planned time, not something the outputs can show: it stays here.
+    .filterNot { it is ScheduleItem.MinistryItem }
+    .map { if (it is ScheduleItem.CueItem) it.pinnedTo(startTime) else it }
 
 /**
  * Each row's timing as it goes into the live schedule: the planned length written in as the run
  * length, so the Schedule -- which has no estimates of its own -- knows how long a row that starts
- * on its own runs before its end action.
+ * on its own runs before its end action; and the off-screen time just before the row, so the
+ * Schedule's clock column still adds up to the calendar's when a poem sits between two songs.
  */
-fun PlannedService.timingForSchedule(): Map<String, RowTiming> = items.mapNotNull { item ->
-    val planned = timingOf(item.id)
-    val timing = if (planned.runSeconds == null) planned.copy(runSeconds = plannedSeconds[item.id]) else planned
-    if (timing.isDefault()) null else item.id to timing
-}.toMap()
+fun PlannedService.timingForSchedule(): Map<String, RowTiming> {
+    var lead = 0
+    return items.mapNotNull { item ->
+        if (item is ScheduleItem.MinistryItem) {
+            lead += plannedSeconds[item.id] ?: 0
+            return@mapNotNull null
+        }
+        val planned = timingOf(item.id)
+        var timing = if (planned.runSeconds == null) planned.copy(runSeconds = plannedSeconds[item.id]) else planned
+        if (item !is ScheduleItem.LabelItem && item !is ScheduleItem.CueItem) {
+            timing = timing.copy(leadSeconds = lead)
+            lead = 0
+        }
+        if (timing.isDefault()) null else item.id to timing
+    }.toMap()
+}
 
 /** How many of the service's cues will fire on their own -- ticked, and the service armed. */
 fun PlannedService.activeCueCount(): Int = if (armed) cueRows().count { it.enabled } else 0

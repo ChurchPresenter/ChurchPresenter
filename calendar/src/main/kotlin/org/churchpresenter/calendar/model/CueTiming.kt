@@ -82,6 +82,8 @@ fun ScheduleItem.canPlayRepeatedly(): Boolean = when (this) {
  * shows nothing.
  */
 fun ScheduleItem.isProjectableByCue(): Boolean = when (this) {
-    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem, is ScheduleItem.CueItem -> false
+    is ScheduleItem.LabelItem, is ScheduleItem.LowerThirdItem, is ScheduleItem.CueItem,
+    is ScheduleItem.MinistryItem,
+    -> false
     else -> true
 }

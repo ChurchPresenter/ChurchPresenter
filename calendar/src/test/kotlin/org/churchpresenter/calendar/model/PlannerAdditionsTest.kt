@@ -31,7 +31,8 @@ class PlannerAdditionsTest {
         assertEquals(19, settled.bookId)
         assertEquals("Псалтирь 91:1-4", settled.displayText)
         assertEquals("v", settled.id)
-        assertEquals("Псалтирь 3:16", typed.copy(chapter = 3, verseNumber = 16, verseRange = "").withBook(19, "Псалтирь").displayText)
+        val single = typed.copy(chapter = 3, verseNumber = 16, verseRange = "")
+        assertEquals("Псалтирь 3:16", single.withBook(19, "Псалтирь").displayText)
     }
 
     @Test
@@ -60,7 +61,9 @@ class PlannerAdditionsTest {
     fun `a skipped cue is past its time but not fired`() {
         val cue = ScheduleItem.CueItem("c", CueAction.BLANK, offsetMinutes = 5)
         val later = ScheduleItem.CueItem("d", CueAction.BLANK, offsetMinutes = 30)
-        val statuses = cueStatuses(listOf(cue, later), "10:00", armed = true, now = LocalTime.of(10, 10), skippedIds = setOf("c"))
+        val statuses = cueStatuses(
+            listOf(cue, later), "10:00", armed = true, now = LocalTime.of(10, 10), skippedIds = setOf("c"),
+        )
         val skipped = statuses.getValue("c")
         assertTrue(skipped.skipped)
         assertFalse(skipped.fired)
@@ -99,6 +102,49 @@ class PlannerAdditionsTest {
         assertEquals(LocalTime.of(12, 30), parseClockText("12:30 PM", en))
         assertEquals(LocalTime.of(18, 5), parseClockText("6:05pm", en))
         assertNull(parseClockText("half past", en))
+    }
+
+    // ── Off-screen rows ─────────────────────────────────────────────────────────────────────────
+
+    private fun poem(id: String) = ScheduleItem.MinistryItem(id, "A poem", "Anna")
+
+    @Test
+    fun `an off-screen row is planned time the Schedule never receives`() {
+        val service = PlannedService(
+            "svc", "2026-09-20", "Sunday", "10:00",
+            items = listOf(song("a"), poem("p"), song("b"), poem("q"), poem("r"), song("c")),
+            plannedSeconds = mapOf("a" to 300, "p" to 180, "b" to 300, "q" to 60, "r" to 60),
+        )
+        assertEquals(listOf("a", "b", "c"), service.rowsForSchedule().map { it.id })
+
+        val timing = service.timingForSchedule()
+        assertEquals(0, timing.getValue("a").leadSeconds)
+        assertEquals(180, timing.getValue("b").leadSeconds, "the poem's three minutes sit before b")
+        assertEquals(120, timing.getValue("c").leadSeconds, "and two short slots add up before c")
+        assertEquals(300, timing.getValue("b").runSeconds)
+
+        // The calendar's own clock counts it as a row; the Schedule's clock counts it as a lead.
+        val planned = runClocks(service)
+        val loaded = scheduleClocks(service.rowsForSchedule(), timing, service.startTime)
+        assertEquals(planned.getValue("b").time, loaded.getValue("b").time)
+        assertEquals(planned.getValue("c").time, loaded.getValue("c").time)
+        assertEquals(LocalTime.of(10, 8), loaded.getValue("b").time)
+    }
+
+    @Test
+    fun `a pinned row is not moved by the lead before it`() {
+        val rows = listOf(song("a"), song("b"))
+        val timing = mapOf("b" to RowTiming(startAt = "10:30", leadSeconds = 600))
+        assertEquals(LocalTime.of(10, 30), scheduleClocks(rows, timing, "10:00").getValue("b").time)
+    }
+
+    @Test
+    fun `an off-screen row is content, has a look, and cannot be fired by a cue`() {
+        val service = PlannedService("svc", "2026-09-20", "Sunday", "10:00", items = listOf(poem("p"), song("a")))
+        assertEquals(2, service.contentItems().size)
+        assertFalse(poem("p").isProjectableByCue())
+        val copy = poem("p").withNewId()
+        assertTrue(copy is ScheduleItem.MinistryItem && copy.id != "p" && copy.title == "A poem")
     }
 
     @Test

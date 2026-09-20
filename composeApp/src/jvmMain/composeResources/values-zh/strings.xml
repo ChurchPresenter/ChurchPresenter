@@ -2823,4 +2823,5 @@
     <string name="schedule_behind_plan">落后 %1$s</string>
     <string name="schedule_ahead_of_plan">提前 %1$s</string>
     <string name="schedule_on_plan">按计划</string>
+    <string name="schedule_kind_ministry">事奉</string>
 </resources>

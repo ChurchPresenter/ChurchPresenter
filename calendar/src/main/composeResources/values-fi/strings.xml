@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue ohitettiin</string>
     <string name="calendar_cue_skipped_reason">Jokin muu oli esillä — laukaise käsin, jos sen pitää silti mennä</string>
     <string name="calendar_cue_skipped_at">Ohitettiin %1$s</string>
+    <string name="calendar_pick_ministry">Osuus</string>
+    <string name="calendar_ministry_hint">Laulu, viulu — Jake, kuoro, todistus…</string>
+    <string name="calendar_ministry_detail_hint">Anna, viulu</string>
+    <string name="calendar_ministry_add">Paina Lisää tai Enter</string>
+    <string name="calendar_ministry_new">Ei näytetä ulostuloissa — vain suunniteltu ja ajastettu</string>
+    <string name="calendar_ministry_empty_hint">Kirjoita, mitä edessä tapahtuu — laulu, viulu (Jake), instrumentaali, kuoro, todistus. Se menee suunnitelmaan ja tulosteeseen, ei koskaan näytölle.</string>
+    <string name="calendar_ministry_no_timing">Osuus tapahtuu edessä, ei näytöllä — anna sille pituus rivillä; automatisoitavaa ei ole</string>
+    <string name="calendar_ministry_what">Mitä tapahtuu</string>
+    <string name="calendar_ministry_who">Kuka tai huomautus</string>
 </resources>

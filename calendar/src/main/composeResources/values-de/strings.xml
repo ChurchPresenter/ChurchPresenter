@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue übersprungen</string>
     <string name="calendar_cue_skipped_reason">Etwas anderes war live — bei Bedarf von Hand auslösen</string>
     <string name="calendar_cue_skipped_at">Übersprungen %1$s</string>
+    <string name="calendar_pick_ministry">Beitrag</string>
+    <string name="calendar_ministry_hint">Ein Lied, Violine von Jake, der Chor, ein Zeugnis…</string>
+    <string name="calendar_ministry_detail_hint">Anna, Violine</string>
+    <string name="calendar_ministry_add">Hinzufügen drücken, oder Enter</string>
+    <string name="calendar_ministry_new">Nicht auf den Ausgängen — nur geplant und getaktet</string>
+    <string name="calendar_ministry_empty_hint">Tippe ein, was vorne passiert — ein Lied, Violine von Jake, ein Instrumentalstück, der Chor, ein Zeugnis. Es kommt in den Plan und den Ausdruck, nie auf die Leinwand.</string>
+    <string name="calendar_ministry_no_timing">Ein Beitrag findet vorne statt, nicht auf dem Bildschirm — gib ihm eine Länge in der Zeile; es gibt nichts zu automatisieren</string>
+    <string name="calendar_ministry_what">Was passiert</string>
+    <string name="calendar_ministry_who">Wer, oder eine Notiz</string>
 </resources>

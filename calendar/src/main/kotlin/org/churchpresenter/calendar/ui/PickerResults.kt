@@ -6,11 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.Key
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.items
@@ -44,6 +50,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_no_results
+import org.churchpresenter.calendar.generated.resources.calendar_duration_hint
+import org.churchpresenter.calendar.generated.resources.calendar_duration
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_hint
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_who
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_what
+import org.churchpresenter.calendar.generated.resources.calendar_pick_ministry
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_new
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_empty_hint
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_detail_hint
+import org.churchpresenter.calendar.generated.resources.calendar_ministry_add
 import org.churchpresenter.calendar.generated.resources.calendar_pick_add_tip
 import org.churchpresenter.calendar.generated.resources.calendar_pick_empty_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_reference
@@ -57,6 +73,7 @@ import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.calendar.model.sectionItem
 import org.churchpresenter.calendar.model.toScheduleItem
 import org.churchpresenter.calendar.model.asRow
+import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
@@ -150,6 +167,83 @@ internal fun SectionResults(sections: List<SectionStyle>, query: String, onAdd: 
                     onClick = { onAdd(listOf(sectionItem(trimmed, DEFAULT_SECTION_COLOR))) },
                 )
             }
+        }
+    }
+}
+
+/**
+ * Something that happens up front and never on the outputs -- a poem, a solo, a prayer. The
+ * search field holds what it is; [detail] is who, or a note; and the one result row adds it.
+ * Nothing to search, because there is nothing to search in: the row is whatever was typed.
+ */
+@Composable
+internal fun MinistryResults(
+    title: String,
+    onTitle: (String) -> Unit,
+    detail: String,
+    onDetail: (String) -> Unit,
+    duration: String,
+    onDuration: (String) -> Unit,
+    onAdd: (List<ScheduleItem>) -> Unit,
+) {
+    val trimmed = title.trim()
+    // Enter in any field adds what was typed, once there is a name -- the same as the footer.
+    val enterAdds = Modifier.onPreviewKeyEvent { event ->
+        val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+        if (trimmed.isNotEmpty() && event.type == KeyEventType.KeyDown && isEnter) {
+            onAdd(listOf(ministryItem(trimmed, detail.trim())))
+            true
+        } else {
+            false
+        }
+    }
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // One row: what, who, and how long -- the three things a slot on the plan is.
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.weight(WHAT_WEIGHT), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FieldLabel(stringResource(Res.string.calendar_ministry_what))
+                CompactTextField(
+                    value = title,
+                    onValueChange = onTitle,
+                    placeholder = stringResource(Res.string.calendar_ministry_hint),
+                    focused = true,
+                    modifier = Modifier.fillMaxWidth().then(enterAdds),
+                )
+            }
+            Column(Modifier.weight(WHO_WEIGHT), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FieldLabel(stringResource(Res.string.calendar_ministry_who))
+                CompactTextField(
+                    value = detail,
+                    onValueChange = onDetail,
+                    placeholder = stringResource(Res.string.calendar_ministry_detail_hint),
+                    modifier = Modifier.fillMaxWidth().then(enterAdds),
+                )
+            }
+            Column(Modifier.width(DURATION_FIELD), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FieldLabel(stringResource(Res.string.calendar_duration))
+                CompactTextField(
+                    value = duration,
+                    onValueChange = onDuration,
+                    placeholder = stringResource(Res.string.calendar_duration_hint),
+                    errorBorder = duration.isNotBlank() && parseDuration(duration) == null,
+                    modifier = Modifier.fillMaxWidth().then(enterAdds),
+                )
+            }
+        }
+        if (trimmed.isEmpty()) {
+            EmptyBody(
+                stringResource(Res.string.calendar_pick_ministry),
+                stringResource(Res.string.calendar_ministry_empty_hint),
+            )
+        } else {
+            // A preview of the row as it will look; the footer's Add -- or Enter -- puts it on.
+            ResultRow(
+                title = trimmed,
+                subtitle = detail.trim().ifEmpty { stringResource(Res.string.calendar_ministry_new) },
+                badge = stringResource(Res.string.calendar_ministry_add),
+                color = MaterialTheme.colorScheme.outline,
+                onClick = { onAdd(listOf(ministryItem(trimmed, detail.trim()))) },
+            )
         }
     }
 }
@@ -333,3 +427,7 @@ internal fun ResultRow(
         }
     }
 }
+
+private const val WHAT_WEIGHT = 2f
+private const val WHO_WEIGHT = 1.4f
+private val DURATION_FIELD = 92.dp

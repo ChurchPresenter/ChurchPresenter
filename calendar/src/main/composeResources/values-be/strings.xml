@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Каманда прапушчана</string>
     <string name="calendar_cue_skipped_reason">У эфіры было іншае — пры неабходнасці запусціце ўручную</string>
     <string name="calendar_cue_skipped_at">Прапушчана %1$s</string>
+    <string name="calendar_pick_ministry">Праслаўленне</string>
+    <string name="calendar_ministry_hint">Песня, скрыпка — Якаў, хор, сведчанне…</string>
+    <string name="calendar_ministry_detail_hint">Ганна, скрыпка</string>
+    <string name="calendar_ministry_add">Націсніце «Дадаць» або Enter</string>
+    <string name="calendar_ministry_new">Не паказваецца на выхадах — толькі плануецца і хранаметруецца</string>
+    <string name="calendar_ministry_empty_hint">Увядзіце, што адбываецца спераду — песня, скрыпка (Якаў), інструментал, хор, сведчанне. Гэта трапіць у план і раздрукоўку, але не на экран.</string>
+    <string name="calendar_ministry_no_timing">Праслаўленне адбываецца спераду, а не на экране — задайце працягласць у радку; аўтаматызаваць няма чаго</string>
+    <string name="calendar_ministry_what">Што адбываецца</string>
+    <string name="calendar_ministry_who">Хто або нататка</string>
 </resources>

@@ -2778,4 +2778,5 @@
     <string name="schedule_behind_plan">відставання %1$s</string>
     <string name="schedule_ahead_of_plan">випередження %1$s</string>
     <string name="schedule_on_plan">за планом</string>
+    <string name="schedule_kind_ministry">Прославлення</string>
 </resources>

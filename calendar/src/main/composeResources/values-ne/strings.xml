@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">क्यू छोडियो</string>
     <string name="calendar_cue_skipped_reason">अरू केही लाइभ थियो — अझै चलाउनुपर्छ भने हातैले चलाउनुहोस्</string>
     <string name="calendar_cue_skipped_at">छोडियो %1$s</string>
+    <string name="calendar_pick_ministry">सेवा</string>
+    <string name="calendar_ministry_hint">गीत, जेकको भायोलिन, गायक मण्डली, गवाही…</string>
+    <string name="calendar_ministry_detail_hint">अन्ना, भायोलिन</string>
+    <string name="calendar_ministry_add">थप्नुहोस् थिच्नुहोस्, वा Enter</string>
+    <string name="calendar_ministry_new">आउटपुटमा देखाइँदैन — योजना र समय मात्र</string>
+    <string name="calendar_ministry_empty_hint">अगाडि के हुन्छ लेख्नुहोस् — गीत, जेकको भायोलिन, वाद्य संगीत, गायक मण्डली, गवाही। यो योजना र प्रिन्टमा जान्छ, स्क्रिनमा कहिल्यै होइन।</string>
+    <string name="calendar_ministry_no_timing">सेवा अगाडि हुन्छ, स्क्रिनमा होइन — पङ्क्तिमा अवधि दिनुहोस्; स्वचालित गर्ने केही छैन</string>
+    <string name="calendar_ministry_what">के हुन्छ</string>
+    <string name="calendar_ministry_who">को, वा टिप्पणी</string>
 </resources>

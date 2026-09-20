@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue preskočen</string>
     <string name="calendar_cue_skipped_reason">Uživo je bilo nešto drugo — pokrenite ručno ako i dalje treba</string>
     <string name="calendar_cue_skipped_at">Preskočeno %1$s</string>
+    <string name="calendar_pick_ministry">Služba</string>
+    <string name="calendar_ministry_hint">Pjesma, violina – Jake, zbor, svjedočanstvo…</string>
+    <string name="calendar_ministry_detail_hint">Anna, violina</string>
+    <string name="calendar_ministry_add">Pritisnite Dodaj ili Enter</string>
+    <string name="calendar_ministry_new">Ne prikazuje se na izlazima — samo planirano i tempirano</string>
+    <string name="calendar_ministry_empty_hint">Upišite što se događa sprijeda — pjesma, violina (Jake), instrumental, zbor, svjedočanstvo. Ide u plan i ispis, nikad na zaslon.</string>
+    <string name="calendar_ministry_no_timing">Služba se događa sprijeda, ne na zaslonu — dajte joj trajanje u retku; nema što automatizirati</string>
+    <string name="calendar_ministry_what">Što se događa</string>
+    <string name="calendar_ministry_who">Tko ili bilješka</string>
 </resources>

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">க்யூ தவிர்க்கப்பட்டது</string>
     <string name="calendar_cue_skipped_reason">வேறு ஏதோ நேரலையில் இருந்தது — இன்னும் ஓட வேண்டுமெனில் கைமுறையாக இயக்கவும்</string>
     <string name="calendar_cue_skipped_at">தவிர்க்கப்பட்டது %1$s</string>
+    <string name="calendar_pick_ministry">ஊழியம்</string>
+    <string name="calendar_ministry_hint">ஒரு பாடல், ஜேக்கின் வயலின், பாடகர் குழு, ஒரு சாட்சி…</string>
+    <string name="calendar_ministry_detail_hint">அன்னா, வயலின்</string>
+    <string name="calendar_ministry_add">சேர் அழுத்தவும், அல்லது Enter</string>
+    <string name="calendar_ministry_new">வெளியீடுகளில் காட்டப்படாது — திட்டமிட்டு நேரம் மட்டும்</string>
+    <string name="calendar_ministry_empty_hint">முன்னால் என்ன நடக்கிறது என்று தட்டச்சு செய்யவும் — ஒரு பாடல், ஜேக்கின் வயலின், ஒரு இசைக்கருவி இசை, பாடகர் குழு, ஒரு சாட்சி. இது திட்டத்திலும் அச்சிலும் செல்லும், திரையில் ஒருபோதும் இல்லை.</string>
+    <string name="calendar_ministry_no_timing">ஊழியம் முன்னால் நடக்கிறது, திரையில் அல்ல — வரிசையில் நேரம் கொடுங்கள்; தானியக்கமாக்க எதுவும் இல்லை</string>
+    <string name="calendar_ministry_what">என்ன நடக்கிறது</string>
+    <string name="calendar_ministry_who">யார், அல்லது குறிப்பு</string>
 </resources>

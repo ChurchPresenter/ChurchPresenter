@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">ข้ามคิว</string>
     <string name="calendar_cue_skipped_reason">มีอย่างอื่นกำลังแสดงอยู่ — หากยังต้องการให้ทำงาน ให้สั่งด้วยตนเอง</string>
     <string name="calendar_cue_skipped_at">ข้ามแล้ว %1$s</string>
+    <string name="calendar_pick_ministry">การรับใช้</string>
+    <string name="calendar_ministry_hint">เพลง ไวโอลินโดยเจค คณะนักร้อง คำพยาน…</string>
+    <string name="calendar_ministry_detail_hint">แอนนา, ไวโอลิน</string>
+    <string name="calendar_ministry_add">กดเพิ่ม หรือ Enter</string>
+    <string name="calendar_ministry_new">ไม่แสดงบนเอาต์พุต — วางแผนและจับเวลาเท่านั้น</string>
+    <string name="calendar_ministry_empty_hint">พิมพ์สิ่งที่เกิดขึ้นด้านหน้า — เพลง ไวโอลินโดยเจค ดนตรีบรรเลง คณะนักร้อง คำพยาน จะอยู่ในแผนและเอกสารพิมพ์ แต่ไม่ขึ้นจอ</string>
+    <string name="calendar_ministry_no_timing">การรับใช้เกิดขึ้นด้านหน้า ไม่ใช่บนจอ — กำหนดความยาวในแถว ไม่มีอะไรให้ทำอัตโนมัติ</string>
+    <string name="calendar_ministry_what">เกิดอะไรขึ้น</string>
+    <string name="calendar_ministry_who">ใคร หรือหมายเหตุ</string>
 </resources>

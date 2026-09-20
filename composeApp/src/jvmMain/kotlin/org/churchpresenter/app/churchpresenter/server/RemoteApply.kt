@@ -335,6 +335,7 @@ internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (
     is ScheduleItem.SceneItem -> item.sceneName to "Scene"
     is ScheduleItem.DictionaryItem -> item.word to item.number
     is ScheduleItem.CueItem -> item.displayText to item.absoluteTime
+    is ScheduleItem.MinistryItem -> item.title to item.detail
 }
 
 /**

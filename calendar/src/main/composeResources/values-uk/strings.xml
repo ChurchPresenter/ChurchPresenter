@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Команду пропущено</string>
     <string name="calendar_cue_skipped_reason">В ефірі було інше — за потреби запустіть вручну</string>
     <string name="calendar_cue_skipped_at">Пропущено %1$s</string>
+    <string name="calendar_pick_ministry">Прославлення</string>
+    <string name="calendar_ministry_hint">Пісня, скрипка — Яків, хор, свідчення…</string>
+    <string name="calendar_ministry_detail_hint">Анна, скрипка</string>
+    <string name="calendar_ministry_add">Натисніть «Додати» або Enter</string>
+    <string name="calendar_ministry_new">Не показується на виходах — лише планується й хронометрується</string>
+    <string name="calendar_ministry_empty_hint">Введіть, що відбувається спереду — пісня, скрипка (Яків), інструментал, хор, свідчення. Це потрапить у план і роздруківку, але не на екран.</string>
+    <string name="calendar_ministry_no_timing">Прославлення відбувається спереду, а не на екрані — задайте тривалість у рядку; автоматизувати нічого</string>
+    <string name="calendar_ministry_what">Що відбувається</string>
+    <string name="calendar_ministry_who">Хто або примітка</string>
 </resources>

@@ -319,4 +319,13 @@
     <string name="calendar_cue_skipped_title">Cue izlaists</string>
     <string name="calendar_cue_skipped_reason">Ēterā bija kas cits — ja tomēr jāizpilda, palaidiet manuāli</string>
     <string name="calendar_cue_skipped_at">Izlaists %1$s</string>
+    <string name="calendar_pick_ministry">Kalpošana</string>
+    <string name="calendar_ministry_hint">Dziesma, vijole — Jake, koris, liecība…</string>
+    <string name="calendar_ministry_detail_hint">Anna, vijole</string>
+    <string name="calendar_ministry_add">Nospiediet Pievienot vai Enter</string>
+    <string name="calendar_ministry_new">Netiek rādīts izejās — tikai plānots un hronometrēts</string>
+    <string name="calendar_ministry_empty_hint">Ierakstiet, kas notiek priekšā — dziesma, vijole (Jake), instrumentāls skaņdarbs, koris, liecība. Tas nonāk plānā un izdrukā, nekad uz ekrāna.</string>
+    <string name="calendar_ministry_no_timing">Kalpošana notiek priekšā, nevis uz ekrāna — norādiet tai ilgumu rindā; nav ko automatizēt</string>
+    <string name="calendar_ministry_what">Kas notiek</string>
+    <string name="calendar_ministry_who">Kurš vai piezīme</string>
 </resources>
