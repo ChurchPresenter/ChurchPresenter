@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.schedule.RowTiming
 
 /**
  * The schedule is the spine of a service: every item the operator will present, in order, with
@@ -417,5 +418,75 @@ class ScheduleViewModelTest {
 
         vm.addSong(1, "Local again", "Hymnal")
         assertEquals(listOf("Local again"), vm.titles)
+    }
+
+    // ── Planned rows ────────────────────────────────────────────────────────────
+
+    private fun plannedSong(id: String = "planned-1") =
+        ScheduleItem.SongItem(id = id, songNumber = 1, title = "Planned", songbook = "Hymnal", songId = "Hymnal::1")
+
+    @Test
+    fun `a planned row is added whole with its timing`() {
+        val vm = newViewModel()
+        val timing = RowTiming(startAt = "09:45")
+
+        vm.addRow(plannedSong(), timing)
+
+        assertEquals("planned-1", vm.scheduleItems.single().id, "the id is kept so the timing still points at it")
+        assertEquals(timing, vm.timingFor("planned-1"))
+        assertTrue(vm.canUndo)
+    }
+
+    @Test
+    fun `default timing is not stored`() {
+        val vm = newViewModel()
+
+        vm.addRow(plannedSong("a"), RowTiming())
+        vm.addRow(plannedSong("b"), null)
+
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("a"))
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("b"))
+        assertTrue(vm.timing.isEmpty())
+    }
+
+    @Test
+    fun `a planned row is pushed to the primary while following one`() {
+        val vm = newViewModel()
+        val pushed = mutableListOf<ScheduleItem>()
+        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.applyRemoteSchedule(emptyList())
+
+        vm.addRow(plannedSong(), RowTiming(startAt = "09:45"))
+
+        assertEquals(listOf("planned-1"), pushed.map { it.id })
+        assertTrue(vm.scheduleItems.isEmpty(), "the primary's schedule comes back as a broadcast")
+    }
+
+    @Test
+    fun `a cue row can be ticked off and back on in place`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        vm.addRow(ScheduleItem.CueItem(id = "cue", action = "blank"), null)
+
+        vm.setCueEnabled("cue", enabled = false)
+
+        val cue = vm.scheduleItems[1] as ScheduleItem.CueItem
+        assertFalse(cue.enabled)
+        assertEquals(listOf("song", "cue"), vm.scheduleItems.map { it.id }, "in place, not moved")
+
+        vm.undo()
+        assertTrue((vm.scheduleItems[1] as ScheduleItem.CueItem).enabled)
+    }
+
+    @Test
+    fun `ticking something that is not a cue does nothing`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        val before = vm.scheduleItems.toList()
+
+        vm.setCueEnabled("song", enabled = false)
+        vm.setCueEnabled("missing", enabled = false)
+
+        assertEquals(before, vm.scheduleItems)
     }
 }

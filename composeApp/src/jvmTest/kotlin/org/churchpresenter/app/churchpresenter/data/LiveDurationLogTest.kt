@@ -1,12 +1,14 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class LiveDurationLogTest {
 
@@ -133,5 +135,71 @@ class LiveDurationLogTest {
         assertNull(LiveDurationLog.medianOf(null))
         assertEquals(5, LiveDurationLog.medianOf(listOf(5)))
         assertEquals(5, LiveDurationLog.medianOf(listOf(5, 9)), "the lower of the middle two")
+    }
+
+    @Test
+    fun `blanking with nothing live records nothing`() {
+        val log = log()
+
+        log.wentBlank(start)
+        log.wentBlank(start.plusSeconds(600))
+
+        assertNull(log.median(song()))
+    }
+
+    @Test
+    fun `a file that cannot be read starts empty rather than failing`() {
+        val file = temp.root.resolve("durations.json").apply { writeText("{ not json") }
+
+        val log = LiveDurationLog(file)
+        log.record(song(), 200L)
+
+        assertEquals(200, log.median(song()))
+        assertTrue(file.readText().contains("song:Hymns:1"), "the corrupt file is replaced by a good one")
+    }
+
+    @Test
+    fun `identity is what the item is, never its row`() {
+        val key = LiveDurationLog::durationKey
+        assertEquals("song:Hymns:1:Hymns::1", key(song()))
+        assertEquals(
+            "media:/clips/welcome.mp4",
+            key(
+                ScheduleItem.MediaItem(
+                    id = "a", mediaUrl = "/clips/welcome.mp4", mediaTitle = "Welcome", mediaType = "video",
+                ),
+            ),
+        )
+        assertEquals(
+            "pictures:/photos/camp",
+            key(ScheduleItem.PictureItem(id = "b", folderPath = "/photos/camp", folderName = "camp", imageCount = 20)),
+        )
+        assertEquals(
+            "deck:/decks/sermon.pptx",
+            key(
+                ScheduleItem.PresentationItem(
+                    id = "c", filePath = "/decks/sermon.pptx", fileName = "sermon.pptx",
+                    slideCount = 9, fileType = "pptx",
+                ),
+            ),
+        )
+        assertEquals("scene:s1", key(ScheduleItem.SceneItem(id = "d", sceneId = "s1", sceneName = "Opener")))
+        assertEquals("web:https://example.org", key(ScheduleItem.WebsiteItem(id = "e", url = "https://example.org")))
+        assertEquals(
+            "lower:lt1",
+            key(
+                ScheduleItem.LowerThirdItem(
+                    id = "f", presetId = "lt1", presetLabel = "Name", pauseAtFrame = false, pauseDurationMs = 0L,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `a library song is measured as the row that identifies it`() {
+        val row = SongItem(number = "7", title = "Amazing Grace", songbook = "Hymns").asDurationRow()
+
+        assertEquals(LiveDurationLog.durationKey(song(7)), LiveDurationLog.durationKey(row))
+        assertEquals(0, SongItem(number = "n/a", title = "Untitled", songbook = "Hymns").asDurationRow().songNumber)
     }
 }

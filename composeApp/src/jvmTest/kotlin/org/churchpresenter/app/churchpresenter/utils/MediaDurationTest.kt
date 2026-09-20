@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.junit.Assume
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -9,6 +13,11 @@ import kotlin.test.assertNull
  * clip, and arithmetic for a slideshow.
  */
 class MediaDurationTest {
+
+    @get:Rule
+    val temp = TemporaryFolder()
+
+    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     private val report = """
         Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/clips/welcome.mp4':
@@ -60,5 +69,33 @@ class MediaDurationTest {
     @Test
     fun `a slideshow always takes some time`() {
         assertEquals(1, slideshowSeconds(1, 0.4f), "never zero -- that would claim it is instant")
+    }
+
+    // ── Asking ffmpeg ───────────────────────────────────────────────────────────
+
+    @Test
+    fun `a file that is not there has no duration`() {
+        assertNull(mediaDurationSeconds(File(temp.root, "missing.mp4").path, ffmpeg = "ffmpeg"))
+        assertNull(mediaDurationSeconds(temp.root.path, ffmpeg = "ffmpeg"), "a folder is not a clip")
+    }
+
+    @Test
+    fun `an ffmpeg that cannot be run is not an error, just no duration`() {
+        val clip = temp.newFile("clip.mp4")
+        assertNull(mediaDurationSeconds(clip.path, ffmpeg = File(temp.root, "no-such-ffmpeg").path))
+    }
+
+    @Test
+    fun `reads what the probe prints`() {
+        Assume.assumeTrue("needs a shell script to stand in for ffmpeg", !isWindows)
+        val clip = temp.newFile("clip.mp4")
+        val probe = temp.newFile("ffmpeg").apply {
+            writeText(
+                "#!/bin/sh\necho 'Input #0, mov, from clip.mp4:'\necho '  Duration: 00:00:04.50, start: 0.0'\nexit 1\n",
+            )
+            setExecutable(true)
+        }
+
+        assertEquals(5, mediaDurationSeconds(clip.path, ffmpeg = probe.path), "4.5s occupies 5s")
     }
 }
