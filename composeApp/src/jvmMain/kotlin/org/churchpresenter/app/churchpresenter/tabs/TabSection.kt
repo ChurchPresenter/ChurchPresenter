@@ -2,14 +2,28 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.Slideshow
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -27,8 +41,12 @@ import churchpresenter.composeapp.generated.resources.tab_stt
 import churchpresenter.composeapp.generated.resources.crossword_tab
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_companion_surface
+import org.churchpresenter.app.churchpresenter.composables.LABELED_TAB_MIN_WIDTH
+import org.churchpresenter.app.churchpresenter.composables.LabeledTab
+import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
+import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -36,6 +54,7 @@ fun TabSection(
     modifier: Modifier = Modifier,
     visibleTabs: List<Tabs> = Tabs.entries,
     selectedTabIndex: Int = 0,
+    labelStyle: TabLabelStyle = TabLabelStyle.TEXT,
     onTabSelected: (Int) -> Unit,
 ) {
     val scrollState = remember { ScrollState(0) }
@@ -53,27 +72,25 @@ fun TabSection(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
+            minTabWidth = LABELED_TAB_MIN_WIDTH,
+            indicator = { LabeledTabIndicator(selectedTabIndex) },
             divider = {},
         ) {
             visibleTabs.forEachIndexed { index, tab ->
-                Tab(
-                    selected = selectedTabIndex == index,
+                val selected = selectedTabIndex == index
+                LabeledTab(
+                    name = getStringName(tab),
+                    icon = tabIcon(tab),
+                    selected = selected,
+                    labelStyle = labelStyle,
                     onClick = { onTabSelected.invoke(index) },
-                    text = {
-                        Text(
-                            style = if (selectedTabIndex == index)
-                                MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
-                            else
-                                MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
-                            color = if (selectedTabIndex == index)
-                                MaterialTheme.colorScheme.onSurface
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.52f),
-                            text = getStringName(tab),
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                    }
+                    textStyle = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                    ),
+                    color = if (selected)
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.52f),
                 )
             }
         }
@@ -100,4 +117,21 @@ internal fun getStringName(tabs: Tabs): String {
         Tabs.DICTIONARY -> stringResource(Res.string.tab_dictionary)
         Tabs.COMPANION_SURFACE -> stringResource(Res.string.tab_companion_surface)
     }
+}
+
+internal fun tabIcon(tab: Tabs): ImageVector = when (tab) {
+    Tabs.BIBLE -> Icons.Filled.MenuBook
+    Tabs.SONGS -> Icons.Filled.MusicNote
+    Tabs.PICTURES -> Icons.Filled.Image
+    Tabs.PRESENTATION -> Icons.Filled.Slideshow
+    Tabs.MEDIA -> Icons.Filled.Movie
+    Tabs.LOWER_THIRD -> Icons.Filled.Subtitles
+    Tabs.ANNOUNCEMENTS -> Icons.Filled.Campaign
+    Tabs.WEB -> Icons.Filled.Language
+    Tabs.CANVAS -> Icons.Filled.Dashboard
+    Tabs.QA -> Icons.Filled.QuestionAnswer
+    Tabs.STT -> Icons.Filled.Mic
+    Tabs.CROSSWORD -> Icons.Filled.GridOn
+    Tabs.DICTIONARY -> Icons.Filled.Book
+    Tabs.COMPANION_SURFACE -> Icons.Filled.Apps
 }

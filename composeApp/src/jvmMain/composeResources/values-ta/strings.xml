@@ -1664,6 +1664,11 @@
     <string name="system_storage_status_needs_converting">%1$d மாற்ற வேண்டும்</string>
     <string name="system_manage_settings">அமைப்புகளை நிர்வகி</string>
     <string name="analytics_reporting_hint">சிக்கல்களை விரைவாகக் கண்டறிய உதவுகிறது. உள்ளடக்கமோ பாடல் வரிகளோ ஒருபோதும் அனுப்பப்படுவதில்லை.</string>
+    <string name="tab_label_style">தாவல் லேபிள்கள்</string>
+    <string name="tab_label_style_hint">சாளரத்தின் மேலே உள்ள தாவல்கள் எவ்வாறு லேபிளிடப்படுகின்றன.</string>
+    <string name="tab_label_style_text">உரை மட்டும்</string>
+    <string name="tab_label_style_icons_and_text">ஐகான்களும் உரையும்</string>
+    <string name="tab_label_style_icons">ஐகான்கள் மட்டும்</string>
     <string name="file_not_supported_short">ஆதரிக்கப்படவில்லை</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -1120,6 +1120,11 @@
     <string name="system_storage_status_needs_converting">%1$d патрабуе канвертацыі</string>
     <string name="system_manage_settings">Кіраванне наладамі</string>
     <string name="analytics_reporting_hint">Дапамагае нам хутчэй знаходзіць праблемы. Змест і тэксты песень ніколі не адпраўляюцца.</string>
+    <string name="tab_label_style">Подпісы ўкладак</string>
+    <string name="tab_label_style_hint">Як падпісваюцца ўкладкі ўверсе акна.</string>
+    <string name="tab_label_style_text">Толькі тэкст</string>
+    <string name="tab_label_style_icons_and_text">Значкі і тэкст</string>
+    <string name="tab_label_style_icons">Толькі значкі</string>
     <string name="file_not_supported_short">не падтрымліваецца</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

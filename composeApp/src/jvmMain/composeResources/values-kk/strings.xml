@@ -1120,6 +1120,11 @@
     <string name="system_storage_status_needs_converting">%1$d түрлендіруді қажет етеді</string>
     <string name="system_manage_settings">Параметрлерді басқару</string>
     <string name="analytics_reporting_hint">Мәселелерді тезірек табуға көмектеседі. Мазмұн мен ән мәтіндері ешқашан жіберілмейді.</string>
+    <string name="tab_label_style">Қойынды белгілері</string>
+    <string name="tab_label_style_hint">Терезенің жоғарғы жағындағы қойындылардың белгіленуі.</string>
+    <string name="tab_label_style_text">Тек мәтін</string>
+    <string name="tab_label_style_icons_and_text">Белгішелер мен мәтін</string>
+    <string name="tab_label_style_icons">Тек белгішелер</string>
     <string name="file_not_supported_short">қолданылмайды</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

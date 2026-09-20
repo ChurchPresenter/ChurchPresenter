@@ -9,7 +9,9 @@ import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -29,10 +31,10 @@ class AppPreviewSettingsScreenshotTest {
     @AfterTest
     fun unpinRecentColors() = recents.restore()
 
-    private fun settingsTab(name: String, tab: Int) {
+    private fun settingsTab(name: String, tab: Int, settings: AppSettings = library()) {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
-        val appSettings = library()
+        val appSettings = settings
         THEMES.forEach { (suffix, mode) ->
             runSkikoComposeUiTest(size = Size(1400f, 900f), density = Density(1f)) {
                 setContent {
@@ -96,5 +98,16 @@ class AppPreviewSettingsScreenshotTest {
 
     @Test
     fun `companion satellite`() = settingsTab("companion_satellite", 9)
+
+    // The dialog's own tab row follows the General → Tab labels setting, so it is shot in the two
+    // styles the System tab does not open with, on the System tab where the dropdown that picks
+    // them is in the same picture.
+
+    @Test
+    fun `tabs as icons and text`() =
+        settingsTab("tabs_icons_and_text", 0, library().copy(tabLabelStyle = TabLabelStyle.ICONS_AND_TEXT))
+
+    @Test
+    fun `tabs as icons`() = settingsTab("tabs_icons", 0, library().copy(tabLabelStyle = TabLabelStyle.ICONS))
 
 }

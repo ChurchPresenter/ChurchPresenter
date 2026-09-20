@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d jākonvertē</string>
     <string name="system_manage_settings">Pārvaldīt iestatījumus</string>
     <string name="analytics_reporting_hint">Palīdz mums ātrāk atrast problēmas. Saturs un dziesmu vārdi nekad netiek nosūtīti.</string>
+    <string name="tab_label_style">Ciļņu etiķetes</string>
+    <string name="tab_label_style_hint">Kā tiek apzīmētas cilnes loga augšdaļā.</string>
+    <string name="tab_label_style_text">Tikai teksts</string>
+    <string name="tab_label_style_icons_and_text">Ikonas un teksts</string>
+    <string name="tab_label_style_icons">Tikai ikonas</string>
     <string name="file_not_supported_short">netiek atbalstīts</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
