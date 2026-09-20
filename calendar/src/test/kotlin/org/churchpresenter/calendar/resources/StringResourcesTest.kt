@@ -1,5 +1,7 @@
 package org.churchpresenter.calendar.resources
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.allDrawableResources
@@ -7,7 +9,9 @@ import org.churchpresenter.calendar.generated.resources.allFontResources
 import org.churchpresenter.calendar.generated.resources.allPluralStringResources
 import org.churchpresenter.calendar.generated.resources.allStringArrayResources
 import org.churchpresenter.calendar.generated.resources.allStringResources
+import org.jetbrains.compose.resources.ResourceEnvironment
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.rememberResourceEnvironment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,10 +34,24 @@ class StringResourcesTest {
     }
 
     @Test
-    fun `every declared string resolves to text`() = runBlocking {
-        val blank = strings.filter { (_, resource) -> getString(resource).isBlank() }.keys
+    fun `every declared string resolves to text`() {
+        // The environment a composition resolves strings in, not the system one: the latter reads
+        // the screen's DPI from AWT and throws HeadlessException on a runner with no display.
+        val environment = composedEnvironment()
+
+        val blank = runBlocking { strings.filter { (_, resource) -> getString(environment, resource).isBlank() }.keys }
 
         assertEquals(emptySet(), blank, "keys that resolve to nothing")
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun composedEnvironment(): ResourceEnvironment {
+        lateinit var environment: ResourceEnvironment
+        runComposeUiTest {
+            setContent { environment = rememberResourceEnvironment() }
+            waitForIdle()
+        }
+        return environment
     }
 
     @Test

@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -296,10 +297,17 @@ private fun EndRow(draft: TimingDraft, onChange: (TimingDraft) -> Unit) {
     }
 }
 
-/** Takes every pointer event, so a dimmed panel's chips cannot be pressed. */
+/**
+ * Takes every pointer event, so a dimmed panel's chips cannot be pressed.
+ *
+ * In the initial pass, and consumed: the main pass reaches the chips first, so merely watching
+ * the events there let every click through to them.
+ */
 private fun Modifier.swallowClicks(): Modifier = pointerInput(Unit) {
     awaitPointerEventScope {
-        while (true) awaitPointerEvent()
+        while (true) {
+            awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+        }
     }
 }
 

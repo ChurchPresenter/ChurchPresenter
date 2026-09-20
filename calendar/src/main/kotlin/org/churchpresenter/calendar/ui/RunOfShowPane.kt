@@ -549,8 +549,13 @@ private fun DurationControl(seconds: Int?, onChange: (Int?) -> Unit) {
     val focusRequester = remember { FocusRequester() }
     var text by remember { mutableStateOf(seconds?.let { formatDuration(it) } ?: "") }
     var everFocused by remember { mutableStateOf(false) }
+    // Closing the cell takes the focus with it, and losing focus is itself a commit -- so Escape
+    // would discard the text and then save it on the way out. The first call to finish decides.
+    var finished by remember { mutableStateOf(false) }
 
     fun finish(commit: Boolean) {
+        if (finished) return
+        finished = true
         if (commit) onChange(if (text.isBlank()) null else parseDuration(text))
         editing = false
     }

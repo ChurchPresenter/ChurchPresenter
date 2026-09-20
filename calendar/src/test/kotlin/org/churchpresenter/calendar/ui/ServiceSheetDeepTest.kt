@@ -100,8 +100,8 @@ class ServiceSheetDeepTest {
             clickFirst("Add service")
             awaitText("Start from")
 
-            clickFirst("Last Sunday")
-            waitForIdle()
+            // In the sheet, not the month grid behind it, which draws the same name on the 13th.
+            clickInSheet("Last Sunday", anchor = "New service")
             clickInSheet("Add service", anchor = "New service")
 
             val added = stored(folder).services.first { it.date == TODAY.toString() }

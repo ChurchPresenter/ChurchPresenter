@@ -84,7 +84,8 @@ class CalendarFileWatcher(
         }
     }
 
-    private suspend fun report(
+    /** What one batch of events means; the loop above hands it what the watch delivered. */
+    internal suspend fun report(
         events: List<WatchEvent<*>>,
         onChanged: suspend () -> Unit,
         onPresetsChanged: suspend () -> Unit,
