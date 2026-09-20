@@ -12,6 +12,8 @@ import org.churchpresenter.calendar.model.CopiedRows
 import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PresetDocument
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.PreflightProblem
+import org.churchpresenter.calendar.model.preflight
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
@@ -95,6 +97,17 @@ class CalendarState(
     /** The primary Bible's books, as the host supplies them. Read once — see [loadBibleBooks]. */
     var bibleBooks by mutableStateOf<List<CalendarBibleBook>>(emptyList())
         private set
+
+    /**
+     * What each row of the open service has actually taken on screen, by row id -- the host's
+     * measured length, fetched by [measureService] and shown where it differs from the plan.
+     */
+    var measuredSeconds by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+
+    /** The open service's rows that will not go on screen on the day, by row id -- see [checkService]. */
+    var preflight by mutableStateOf<Map<String, PreflightProblem>>(emptyMap())
+        private set
     /** Recomputed when the document or the selection changes, not on every read — the run of show
      *  reads this once per row per frame. */
     private val servicesOnDay by derivedStateOf {
@@ -166,6 +179,21 @@ class CalendarState(
      * Once, because building it walks every chapter of every book to count verses — cheap, but not
      * something to repeat on each recomposition of the picker.
      */
+    /** Asks [measure] what every row of [service] has taken on screen, and keeps the answers. */
+    suspend fun measureService(service: PlannedService, measure: suspend (ScheduleItem) -> Int?) {
+        measuredSeconds = service.contentItems().mapNotNull { row -> measure(row)?.let { row.id to it } }.toMap()
+    }
+
+    /**
+     * Checks every row of [service] against the disk, the song library and the primary Bible --
+     * see [preflight]. Off the composing thread, as it touches the file system.
+     */
+    suspend fun checkService(service: PlannedService, io: CoroutineDispatcher = Dispatchers.IO) {
+        val songsNow = songs
+        val booksNow = bibleBooks
+        preflight = withContext(io) { preflight(service.items, songsNow, booksNow) }
+    }
+
     fun loadBibleBooks(books: List<CalendarBibleBook>) {
         if (bibleBooks.isEmpty()) bibleBooks = books
     }

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -47,6 +48,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_armed
 import org.churchpresenter.calendar.generated.resources.calendar_armed_off
 import org.churchpresenter.calendar.generated.resources.calendar_copy_service_tip
 import org.churchpresenter.calendar.generated.resources.calendar_lay_out_times_tip
+import org.churchpresenter.calendar.generated.resources.calendar_needs_attention
+import org.churchpresenter.calendar.generated.resources.calendar_needs_attention_one
+import org.churchpresenter.calendar.generated.resources.calendar_needs_attention_tip
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock_reset
 import org.churchpresenter.calendar.generated.resources.calendar_run_clock_tip
@@ -74,6 +78,8 @@ internal fun RunOfShowHeader(
     now: LocalTime?,
     previewing: Boolean,
     actions: RunOfShowHeaderActions,
+    /** How many rows will not go on screen on the day -- see `preflight`. Zero draws nothing. */
+    problemCount: Int = 0,
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(
@@ -91,6 +97,7 @@ internal fun RunOfShowHeader(
             maxLines = 1,
             modifier = Modifier.weight(1f),
         )
+        if (problemCount > 0) AttentionChip(count = problemCount)
         ClockChip(
             now = now,
             previewing = previewing,
@@ -261,6 +268,37 @@ private fun runMeta(service: PlannedService): String {
         clockText(start.plusSeconds(total.toLong()), use24Hour),
         total / SECONDS_PER_MINUTE,
     ) + " · " + auto
+}
+
+/** `2 rows need attention` -- the count of rows the pre-flight check marked, in the plan's own red. */
+@Composable
+private fun AttentionChip(count: Int) {
+    val scheme = MaterialTheme.colorScheme
+    Hint(stringResource(Res.string.calendar_needs_attention_tip)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .height(HEADER_ACTION_HEIGHT)
+                .clip(RoundedCornerShape(CalendarMetrics.chipRadius))
+                .background(scheme.error.copy(alpha = CLOCK_TINT))
+                .padding(horizontal = 7.dp),
+        ) {
+            Icon(Icons.Filled.Warning, contentDescription = null, tint = scheme.error, modifier = Modifier.size(10.dp))
+            Text(
+                text = if (count == 1) {
+                    stringResource(Res.string.calendar_needs_attention_one)
+                } else {
+                    stringResource(Res.string.calendar_needs_attention, count)
+                },
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp),
+                fontWeight = FontWeight.Bold,
+                color = scheme.error,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+    }
 }
 
 private const val ROW_ALPHA = 0.45f

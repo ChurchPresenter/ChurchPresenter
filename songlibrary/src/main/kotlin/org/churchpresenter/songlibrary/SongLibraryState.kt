@@ -52,7 +52,16 @@ val OPTIONAL_COLUMNS: List<SongField> = listOf(
 // One function per thing the window can do to the library, which is what keeps each of them a
 // couple of lines. Splitting the class would split the state they all read.
 @Suppress("TooManyFunctions")
-class SongLibraryState(private val root: File) {
+class SongLibraryState(
+    private val root: File,
+    /**
+     * How long a song usually stays on screen, in seconds, or null until it has been measured.
+     *
+     * The app answers it from what it has timed; standalone nothing can, and the column stays
+     * blank. Read once per song per load -- see [durations] -- not per row per frame.
+     */
+    private val typicalSeconds: (SongItem) -> Int? = { null },
+) {
 
     private val library = SongLibrary(root)
     private var edits = SongEdits(emptyList())
@@ -63,6 +72,13 @@ class SongLibraryState(private val root: File) {
     var selected by mutableStateOf<Set<String>>(emptySet())
         private set
     var hiddenColumns by mutableStateOf<Set<SongField>>(emptySet())
+        private set
+
+    /**
+     * Whether the measured **Duration** column is shown. Beside [hiddenColumns] rather than in it:
+     * that set is of [SongField]s, the columns a person can type into, and this one is read only.
+     */
+    var showDuration by mutableStateOf(true)
         private set
 
     /**
@@ -90,7 +106,11 @@ class SongLibraryState(private val root: File) {
         private set
     var lastOutcome by mutableStateOf<SaveOutcome?>(null)
 
-    val rows: List<SongItem> by derivedStateOf { SongGrid.rows(songs, view) }
+    /** Each song's measured length by source file, for the songs that have one. */
+    val durations: Map<String, Int> by derivedStateOf {
+        songs.mapNotNull { song -> typicalSeconds(song)?.let { song.sourceFile to it } }.toMap()
+    }
+    val rows: List<SongItem> by derivedStateOf { SongGrid.rows(songs, view) { durations[it.sourceFile] } }
     val songbooks: List<String> by derivedStateOf { library.songbooks(songs) }
     val counts: Map<String, Int> by derivedStateOf { SongGrid.countsBySongbook(songs) }
     val visibleColumns: List<SongField> by derivedStateOf {
@@ -162,8 +182,13 @@ class SongLibraryState(private val root: File) {
         hiddenColumns = if (field in hiddenColumns) hiddenColumns - field else hiddenColumns + field
     }
 
+    fun toggleDuration() {
+        showDuration = !showDuration
+    }
+
     fun showAllColumns() {
         hiddenColumns = emptySet()
+        showDuration = true
     }
 
     // ── Sorting ───────────────────────────────────────────────────────────────

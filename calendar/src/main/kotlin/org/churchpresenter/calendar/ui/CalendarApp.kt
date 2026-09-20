@@ -188,6 +188,16 @@ fun CalendarApp(
                 host.itemRunSeconds(row)?.let { state.setPlannedSeconds(service.id, row.id, it) }
             }
     }
+    // What each row has actually taken here, and which rows will not go on screen on the day.
+    // Both re-read as the rows change -- a song swapped in has a history of its own, a file just
+    // pointed at may or may not be there -- and the check again once the library has been read,
+    // since a song cannot be missing from a library nobody has opened yet.
+    LaunchedEffect(openService?.id, openService?.items, state.songsLoaded) {
+        val service = openService ?: return@LaunchedEffect
+        if (state.bibleBooks.isEmpty()) state.loadBibleBooks(host.bibleBooks())
+        state.measureService(service, host.measuredSeconds)
+        state.checkService(service, io)
+    }
     val clock = rememberRunClock(openService, today, now)
     // The latest fired cue, until dismissed. Keyed by firing, so the same cue going off again --
     // fired by hand, or on another day -- shows again.
@@ -318,6 +328,8 @@ private fun ColumnScope.OpenServicePane(
             onCopy = { dialogs.copyFrom = service },
             onSaveTemplate = { dialogs.templateFrom = service },
         ),
+        measuredSeconds = state.measuredSeconds,
+        problems = state.preflight,
         onAddItem = { dialogs.openPicker(null) },
         onChangeItem = { dialogs.openPicker(it) },
         onRemove = { state.removeItem(service.id, it) },

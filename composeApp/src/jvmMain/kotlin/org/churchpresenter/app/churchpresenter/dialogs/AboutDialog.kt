@@ -66,6 +66,7 @@ import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerDialog
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.calendar.ui.CalendarApp
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import org.churchpresenter.converter.ui.ConverterTab
@@ -333,7 +334,13 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
  * once the window is gone, which is where the app rescans.
  */
 @Composable
-fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: () -> Unit) {
+fun SongLibraryWindow(
+    theme: ThemeMode,
+    songStorageDirectory: String,
+    /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
+    onClose: () -> Unit,
+) {
     // No locale plumbing here: the window's strings are Compose resources now, and the app already
     // sets the JVM default locale when the language changes — which is what picks values-xx.
     Window(
@@ -346,6 +353,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
                 onClose = onClose,
+                typicalSeconds = typicalSongSeconds,
                 // The row's Edit opens the app's own editor, so a song is edited in one place
                 // whether it was reached from the Songs tab or from here.
                 songEditor = { editing ->
@@ -355,6 +363,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
                         songbooks = editing.songbooks,
                         existingSongs = editing.allSongs,
                         theme = theme,
+                        typicalSeconds = typicalSongSeconds(editing.song),
                         onDismiss = editing.onDismiss,
                         onSave = { edited, _ -> editing.onSave(edited) },
                     )
@@ -381,6 +390,8 @@ fun CalendarWindow(
     appDataDirectory: File,
     songStorageDirectory: String,
     host: CalendarHost,
+    /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
     onClose: () -> Unit,
 ) {
     Window(
@@ -414,6 +425,7 @@ fun CalendarWindow(
                         songbooks = editing.songbooks,
                         existingSongs = editing.allSongs,
                         theme = theme,
+                        typicalSeconds = typicalSongSeconds(editing.song),
                         onDismiss = editing.onDismiss,
                         onSave = { edited, _ -> editing.onSave(edited) },
                     )

@@ -68,6 +68,7 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
 import org.churchpresenter.settings.withBundledBible
 import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
+import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -814,7 +815,15 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     val remoteSelectPresentationFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
     // How long each thing actually stays on screen, kept beside the calendar it informs.
-    val liveDurationLog = remember { LiveDurationLog(File(AppDataDir.resolve(), "durations.json")) }
+    val liveDurationLog = remember {
+        LiveDurationLog(File(AppDataDir.resolve(), "durations.json")).also { log ->
+            // A reading is written when it closes -- the next row going live, or the outputs
+            // clearing -- so the last song of a session had been dying with the process. The
+            // app exits by System.exit from two menus and a window close, and a hook covers all
+            // three (and a kill) without each of them having to remember.
+            Runtime.getRuntime().addShutdownHook(Thread { log.wentBlank() })
+        }
+    }
     val remoteSelectMediaFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 8) }
     var dialogDismissSignal by remember { mutableStateOf(0) }
@@ -1890,6 +1899,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 SongLibraryWindow(
                                     theme = theme,
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
+                                    typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
                                     // What it writes lands in the songs folder, which SongsViewModel
                                     // already watches -- so the list behind this window reloads on
                                     // its own rather than on close.
@@ -1901,6 +1911,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     theme = theme,
                                     appDataDirectory = calendarFolder,
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
+                                    typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
                                     host = CalendarHost(
                                         // How long a row runs by itself, so a plan does not have
                                         // to be timed by hand: a clip's own duration, read from
@@ -1925,6 +1936,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 } ?: liveDurationLog.median(item)
                                             }
                                         },
+                                        // Only what has actually happened -- the run of show
+                                        // shows it beside a plan that says otherwise.
+                                        measuredSeconds = { item -> liveDurationLog.median(item) },
                                         // The run-of-show PDF embeds this. OpenSans covers Cyrillic,
                                         // which PDFBox's built-in Helvetica does not — and this app's
                                         // song libraries routinely are Cyrillic.

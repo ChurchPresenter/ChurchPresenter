@@ -227,6 +227,10 @@ fun SongsTab(
                     songbook = song.songbook,
                     author = song.author
                 )
+                // The start of the song's measurement, under the same guard as the statistics:
+                // every way of going live from this tab ends up here, and a section change on a
+                // song already up is not a new song.
+                onSongWentLive(song)
                 // Bilingual worship actually happening, rather than merely being configured. Sits
                 // under the same "different song went live" guard so a service counts songs, not
                 // section changes.
@@ -584,12 +588,7 @@ fun SongsTab(
             onFavoritesExpandedChange = { favoritesExpanded = it },
             onFavPanelHeightChange = { favPanelHeightPx = it },
             onAddToSchedule = onAddToSchedule,
-            onPresenting = { mode ->
-                // Going live from here is the start of the measurement: what is timed is the song
-                // on screen, not a row somebody clicked.
-                if (mode == Presenting.LYRICS) filteredSongs.getOrNull(selectedSongIndex)?.let(onSongWentLive)
-                onPresenting(mode)
-            },
+            onPresenting = onPresenting,
             sendToPresenter = ::sendToPresenter,
         )
 

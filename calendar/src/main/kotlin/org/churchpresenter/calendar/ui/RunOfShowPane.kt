@@ -72,7 +72,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_remove_row
 import org.churchpresenter.calendar.generated.resources.calendar_timing_follows
 import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_hint
 import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_stranded
+import org.churchpresenter.calendar.generated.resources.calendar_usually
+import org.churchpresenter.calendar.generated.resources.calendar_usually_tip
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.PreflightProblem
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.cueStatuses
@@ -92,6 +95,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Warning
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
 
@@ -130,6 +135,10 @@ internal fun RunOfShowPane(
     /** Whether [now] is a stepped preview clock -- the header offers to put it back. */
     previewing: Boolean,
     header: RunOfShowHeaderActions,
+    /** What each row has actually taken on screen, by row id -- offered where it differs from the plan. */
+    measuredSeconds: Map<String, Int>,
+    /** The rows that will not go on screen on the day, by row id -- see `preflight`. */
+    problems: Map<String, PreflightProblem>,
     onAddItem: () -> Unit,
     onChangeItem: (ScheduleItem) -> Unit,
     onRemove: (itemId: String) -> Unit,
@@ -162,7 +171,13 @@ internal fun RunOfShowPane(
     )
     val lastIndex = service.items.lastIndex
     Column(modifier.fillMaxSize()) {
-        RunOfShowHeader(service = service, now = now, previewing = previewing, actions = header)
+        RunOfShowHeader(
+            service = service,
+            now = now,
+            previewing = previewing,
+            actions = header,
+            problemCount = problems.size,
+        )
         ScrollableList(
             state = listState,
             modifier = Modifier.fillMaxSize().padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 12.dp),
@@ -195,6 +210,8 @@ internal fun RunOfShowPane(
                         serviceStartTime = service.startTime,
                         stranded = item.id in stranded,
                         plannedSeconds = service.plannedSeconds[item.id],
+                        measuredSeconds = measuredSeconds[item.id],
+                        problem = problems[item.id],
                         isFirst = index == 0,
                         isLast = index == lastIndex,
                         reorder = reorder,
@@ -222,6 +239,10 @@ private fun RunRow(
     /** True when this row waits for a turn nothing hands it -- drawn as a warning, not a plan. */
     stranded: Boolean = false,
     plannedSeconds: Int?,
+    /** What the row has actually taken here, or null until it has been shown enough to say. */
+    measuredSeconds: Int?,
+    /** Why the row will not go on screen on the day, or null when nothing is wrong with it. */
+    problem: PreflightProblem?,
     isFirst: Boolean,
     isLast: Boolean,
     reorder: ReorderState,
@@ -276,12 +297,16 @@ private fun RunRow(
             Icon(look.icon, contentDescription = null, tint = look.color, modifier = Modifier.size(12.dp))
         }
         Column(Modifier.weight(1f).padding(vertical = 1.dp)) {
-            Text(
-                text = item.displayText,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (problem != null) ProblemMark(problem)
+                Text(
+                    text = item.displayText,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+                    color = if (problem == null) scheme.onSurface else scheme.error,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             val subtitle = item.subtitle()
             if (subtitle.isNotBlank()) {
                 Text(
@@ -299,6 +324,19 @@ private fun RunRow(
             stranded = stranded,
             onOpen = onChange,
         )
+        // What it has actually taken, where that is not what is planned: one click adopts it. Not
+        // shown once the plan agrees -- the chip is a suggestion, and a suggestion already taken
+        // is noise.
+        if (measuredSeconds != null && measuredSeconds != plannedSeconds) {
+            Hint(stringResource(Res.string.calendar_usually_tip, formatDuration(measuredSeconds))) {
+                RowChip(
+                    text = stringResource(Res.string.calendar_usually, formatDuration(measuredSeconds)),
+                    icon = Icons.Filled.History,
+                    tone = scheme.secondary,
+                    onClick = { onPlannedSecondsChange(measuredSeconds) },
+                )
+            }
+        }
         DurationControl(seconds = plannedSeconds, onChange = onPlannedSecondsChange)
         RowAction(Icons.Filled.ArrowUpward, stringResource(Res.string.calendar_move_up), !isFirst, onMoveUp)
         RowAction(Icons.Filled.ArrowDownward, stringResource(Res.string.calendar_move_down), !isLast, onMoveDown)
@@ -388,6 +426,19 @@ private fun RowChip(text: String, icon: ImageVector?, tone: Color, onClick: () -
             color = tone,
             maxLines = 1,
             softWrap = false,
+        )
+    }
+}
+
+/** The warning beside a row that will not go on screen on the day, with what is wrong as its hint. */
+@Composable
+private fun ProblemMark(problem: PreflightProblem) {
+    Hint(problemText(problem)) {
+        Icon(
+            Icons.Filled.Warning,
+            contentDescription = problemText(problem),
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(12.dp),
         )
     }
 }

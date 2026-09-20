@@ -46,8 +46,12 @@ class LiveDurationLog(private val file: File) {
      * what is measured is what the congregation saw, not what any one of them did.
      */
     fun wentLive(item: ScheduleItem, at: Instant = Instant.now()) {
+        val key = durationKey(item)
+        // The same thing again -- a section clicked, a row re-sent -- is still the same thing on
+        // screen: the reading keeps running rather than being cut into pieces too short to keep.
+        if (key != null && key == liveKey) return
         close(at)
-        liveKey = durationKey(item)
+        liveKey = key
         liveSince = at
     }
 
@@ -95,12 +99,19 @@ class LiveDurationLog(private val file: File) {
         /**
          * What an item is, for the purpose of "how long does this usually take".
          *
-         * Identity rather than row id, and deliberately not [ScheduleItem.displayText]: a song
-         * renamed or a folder with another picture in it is still the same thing. Null for what
-         * has no stable identity to learn about -- a heading, a cue, a one-off verse range.
+         * Identity rather than row id, and deliberately not [ScheduleItem.displayText]: a folder
+         * with another picture in it is still the same thing. Null for what has no stable
+         * identity to learn about -- a heading, a cue, a one-off verse range.
+         *
+         * A song is its book, its number *and its title*. The number alone is not an identity:
+         * a real library repeats a number within one book (this developer's does, six times),
+         * and `songId` is built from the number, so without the title three different songs
+         * shared one reading. The cost is that renaming a song starts its history over, which
+         * is rarer than the collision and recovers by itself after a few Sundays.
          */
         fun durationKey(item: ScheduleItem): String? = when (item) {
-            is ScheduleItem.SongItem -> "song:${item.songbook}:${item.songNumber}:${item.songId}"
+            is ScheduleItem.SongItem ->
+                "song:${item.songbook}:${item.songNumber}:${item.songId}:${item.title.trim().lowercase()}"
             is ScheduleItem.MediaItem -> "media:${item.mediaUrl}"
             is ScheduleItem.PictureItem -> "pictures:${item.folderPath}"
             is ScheduleItem.PresentationItem -> "deck:${item.filePath}"

@@ -181,6 +181,7 @@ private fun AddItemDialog(
         onSaveSong = { original, edited -> state.saveSong(original, edited) },
         timing = replacing?.let { target.timingOf(it.id) } ?: RowTiming.DEFAULT,
         plannedSeconds = replacing?.let { target.plannedSeconds[it.id] },
+        measuredSeconds = replacing?.let { state.measuredSeconds[it.id] },
         previewSources = host.preview,
         onTimingChange = { timing, seconds ->
             replacing?.let { row ->
@@ -198,12 +199,15 @@ private fun AddItemDialog(
             // length is its planned length whether or not one was typed.
             items.forEach { item ->
                 (plannedSeconds ?: item.timerSeconds())?.let { state.setPlannedSeconds(target.id, item.id, it) }
-                // A clip knows how long it is, and a picture folder is its count times the
-                // slideshow interval; nobody should have to type either in. Only for a row
-                // that arrived without a length, and off the composing thread.
-                if (plannedSeconds == null) {
+                // A song has usually been sung here before, a clip knows how long it is, and a
+                // picture folder is its count times the slideshow interval; nobody should have
+                // to type any of them in. Failing all of those, the preferences' default for
+                // its kind. Only for a row that arrived without a length, and off the composing
+                // thread.
+                if (plannedSeconds == null && item.timerSeconds() == null) {
+                    val fallback = state.document.preferences.defaultLengthFor(item)
                     dialogScope.launch {
-                        host.itemRunSeconds(item)?.let { state.setPlannedSeconds(target.id, item.id, it) }
+                        (host.itemRunSeconds(item) ?: fallback)?.let { state.setPlannedSeconds(target.id, item.id, it) }
                     }
                 }
                 if (!timing.isDefault() && item !is ScheduleItem.LabelItem) {

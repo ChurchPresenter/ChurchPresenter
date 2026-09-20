@@ -99,6 +99,8 @@ fun AddItemSheet(
     plannedSeconds: Int? = null,
     /** A timing change on [replacing], applied as it is made -- the row is saved as you change it. */
     onTimingChange: (timing: RowTiming, plannedSeconds: Int?) -> Unit = { _, _ -> },
+    /** What [replacing] has actually taken on screen, offered in the timing panel; null when unknown. */
+    measuredSeconds: Int? = null,
     /** What a preset's preview can draw with; see [PreviewSources]. */
     previewSources: PreviewSources = PreviewSources(),
 ) {
@@ -173,6 +175,7 @@ fun AddItemSheet(
                 serviceStartTime = serviceStartTime,
                 onChange = ::changeTiming,
                 enabled = !isSection,
+                measuredSeconds = measuredSeconds,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             )
         }

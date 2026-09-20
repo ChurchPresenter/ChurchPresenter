@@ -375,6 +375,18 @@ data class CalendarPreferences(
 ) {
     /** The lead as the loader uses it, whatever the file says. */
     fun autoLoadLead(): Int = autoLoadLeadMinutes.coerceIn(AUTO_LOAD_LEAD_MIN, AUTO_LOAD_LEAD_MAX)
+
+    /**
+     * The length a newly added [item] is planned at when nothing better is known -- no measured
+     * run, no clip header, nothing typed. A song takes [defaultItemSeconds] and a deck
+     * [defaultSermonSeconds]; anything else starts blank, since a guess at a verse or a website
+     * would be no better than no plan.
+     */
+    fun defaultLengthFor(item: ScheduleItem): Int? = when (item) {
+        is ScheduleItem.SongItem -> defaultItemSeconds
+        is ScheduleItem.PresentationItem -> defaultSermonSeconds
+        else -> null
+    }
 }
 
 /** 4:30 — the length of a fairly ordinary worship song. */

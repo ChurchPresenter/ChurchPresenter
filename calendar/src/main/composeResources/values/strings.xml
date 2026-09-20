@@ -309,4 +309,16 @@
     <string name="calendar_preview_video_unavailable">Video preview needs the app’s player</string>
     <string name="calendar_preview_scene_unavailable">Scene preview needs the app’s canvas</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">usually %1$s</string>
+    <string name="calendar_usually_tip">Usually runs %1$s here, measured over the services it was shown in — click to plan that</string>
+    <string name="calendar_timing_usually_hint">How long it has actually run here — the middle of the last few times it was shown</string>
+    <string name="calendar_needs_attention_one">1 row needs attention</string>
+    <string name="calendar_needs_attention">%1$d rows need attention</string>
+    <string name="calendar_needs_attention_tip">Something these rows point at is gone — a file moved, a song removed, a verse the Bible does not have. Hover a marked row to see which.</string>
+    <string name="calendar_problem_missing_file">File not found — moved or renamed since it was planned</string>
+    <string name="calendar_problem_missing_folder">Folder not found — moved or renamed since it was planned</string>
+    <string name="calendar_problem_song_missing">Not in the song library any more</string>
+    <string name="calendar_problem_book_missing">Book not in the primary Bible</string>
+    <string name="calendar_problem_chapter">Chapter not in this book</string>
+    <string name="calendar_problem_verse">Verse not in this chapter</string>
 </resources>

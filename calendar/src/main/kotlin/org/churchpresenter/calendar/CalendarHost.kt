@@ -97,6 +97,19 @@ data class CalendarHost(
      */
     val itemRunSeconds: suspend (item: ScheduleItem) -> Int? = { null },
 
+    /**
+     * How long [ScheduleItem] has actually stayed on screen here, in whole seconds, or null until
+     * it has been seen enough to say.
+     *
+     * Distinct from [itemRunSeconds], which answers "how long is it" from the clip's own header
+     * and falls back to this. This one is only ever what happened -- a song's four minutes and
+     * fifty seconds, measured across the Sundays it was sung -- which is what the run of show
+     * shows beside a planned length that differs from it, and offers to plan instead.
+     *
+     * `suspend` for the same reason as its sibling: the app reads it off a log it may have to open.
+     */
+    val measuredSeconds: suspend (item: ScheduleItem) -> Int? = { null },
+
     /** What the picker's preset previews can draw with -- the app's video player and deck rasterizer. */
     val preview: PreviewSources = PreviewSources(),
 )

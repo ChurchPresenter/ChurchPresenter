@@ -56,6 +56,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_timing_repeats
 import org.churchpresenter.calendar.generated.resources.calendar_timing_runs
 import org.churchpresenter.calendar.generated.resources.calendar_timing_starts
 import org.churchpresenter.calendar.generated.resources.calendar_timing_times_hint
+import org.churchpresenter.calendar.generated.resources.calendar_timing_usually_hint
+import org.churchpresenter.calendar.generated.resources.calendar_usually
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.formatDuration
 import org.churchpresenter.calendar.model.parseStoredTime
@@ -95,6 +97,8 @@ fun TimingPanel(
     modifier: Modifier = Modifier,
     /** False for a row that has no timing -- a section heading: drawn dimmed and inert. */
     enabled: Boolean = true,
+    /** What the row has actually taken on screen, offered as a **Runs** choice; null when unknown. */
+    measuredSeconds: Int? = null,
 ) {
     val use24Hour = LocalUse24HourClock.current
     val start = parseStoredTime(serviceStartTime)
@@ -107,7 +111,7 @@ fun TimingPanel(
             .then(if (enabled) Modifier else Modifier.swallowClicks()),
     ) {
         StartRows(draft = draft, start = start, pickedStart = pickedStart, use24Hour = use24Hour, onChange = onChange)
-        RunRows(draft = draft, onChange = onChange)
+        RunRows(draft = draft, measuredSeconds = measuredSeconds, onChange = onChange)
         RepeatRows(draft = draft, onChange = onChange)
         EndRow(draft = draft, onChange = onChange)
     }
@@ -199,7 +203,7 @@ private fun StartRows(
 }
 
 @Composable
-private fun RunRows(draft: TimingDraft, onChange: (TimingDraft) -> Unit) {
+private fun RunRows(draft: TimingDraft, measuredSeconds: Int?, onChange: (TimingDraft) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TimingRow(label = stringResource(Res.string.calendar_timing_runs)) {
             TimingChip(
@@ -208,6 +212,17 @@ private fun RunRows(draft: TimingDraft, onChange: (TimingDraft) -> Unit) {
                 selected = draft.durationText.isBlank(),
                 onClick = { onChange(draft.copy(durationText = "")) },
             )
+            // What it has actually taken here, first among the choices: the one length that is
+            // about this row rather than a round number.
+            if (measuredSeconds != null) {
+                TimingChip(
+                    label = stringResource(Res.string.calendar_usually, formatDuration(measuredSeconds)),
+                    hint = stringResource(Res.string.calendar_timing_usually_hint),
+                    selected = draft.runSeconds() == measuredSeconds,
+                    accent = true,
+                    onClick = { onChange(draft.copy(durationText = formatDuration(measuredSeconds))) },
+                )
+            }
             RUN_CHOICES.forEach { seconds ->
                 TimingChip(
                     label = runChipLabel(seconds),
