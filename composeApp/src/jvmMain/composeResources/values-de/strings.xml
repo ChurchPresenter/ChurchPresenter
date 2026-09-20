@@ -2812,4 +2812,5 @@
     <string name="use_default_directory">Standard verwenden</string>
     <string name="song_background_category_cameras">Kameras</string>
     <string name="song_background_camera_live">Live-Kamera</string>
+    <string name="schedule_cue_skipped">Übersprungen %1$s — etwas anderes war live</string>
 </resources>

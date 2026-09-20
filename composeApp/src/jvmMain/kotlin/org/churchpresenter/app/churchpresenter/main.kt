@@ -819,6 +819,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
     val remoteSelectPresentationFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
+    // What the automation engine last put on screen, or null once it blanked. The engine yields
+    // to a hand on the controls: if the outputs show something other than this -- a Schedule row
+    // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
+    // operator. See CueRunner.operatorLive and LiveDurationLog.showing.
+    var engineLiveItem by remember { mutableStateOf<ScheduleItem?>(null) }
     // How long each thing actually stays on screen, kept beside the calendar it informs.
     val liveDurationLog = remember {
         LiveDurationLog(File(AppDataDir.resolve(), "durations.json")).also { log ->
@@ -1160,6 +1165,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 // Select it as a click would, so the Schedule shows what is live.
                                 currentScheduleActions.selectItem(item.id)
                                 liveDurationLog.wentLive(item)
+                                engineLiveItem = item
                                 when (item) {
                                     // Scenes are driven by MainDesktop's own ViewModel; the bridge is
                                     // the one way there. Everything else is what a phone can project.
@@ -1219,6 +1225,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 blankOutputs = {
                                     presenterManager.requestClearDisplay()
                                     liveDurationLog.wentBlank()
+                                    engineLiveItem = null
                                 },
                             )
                             val fireScheduleCue: (ScheduleItem.CueItem) -> Unit = { cue ->
@@ -1233,6 +1240,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     timing = { currentScheduleActions.currentTiming() },
                                     armed = { automationArmed },
                                     host = cueHost,
+                                    operatorLive = {
+                                        presenterManager.presentingMode.value != Presenting.NONE &&
+                                            engineLiveItem?.let { liveDurationLog.showing(it) } != true
+                                    },
                                 )
                             }
                             LaunchedEffect(Unit) { cueRunner.run() }
@@ -1241,7 +1252,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             // timed -- see LiveDurationLog.
                             val liveMode = presenterManager.presentingMode.value
                             LaunchedEffect(liveMode) {
-                                if (liveMode == Presenting.NONE) liveDurationLog.wentBlank()
+                                if (liveMode == Presenting.NONE) {
+                                    liveDurationLog.wentBlank()
+                                    engineLiveItem = null
+                                }
                             }
 
                             // A row set to run for its *own* length has no number for the engine to

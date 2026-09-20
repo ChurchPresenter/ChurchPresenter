@@ -36,6 +36,23 @@ class LiveDurationLog(private val file: File) {
     private var liveKey: String? = null
     private var liveSince: Instant? = null
 
+    /**
+     * What is on screen, for telling one thing from another -- see [showing]. The duration key
+     * where there is one, else the row's own text, so a verse or a timer is still distinguishable
+     * from the picture folder that was up before it.
+     */
+    private var liveIdentity: String? = null
+
+    /**
+     * Whether [item] is what is on screen now, whichever path put it there.
+     *
+     * The automation engine asks this to know whether the operator has taken over: it remembers
+     * what it last projected, and if the screen now shows something else, a hand did that. Judged
+     * by identity rather than row id because the engine's song cue is presented by the Songs tab
+     * as a library song, not as the schedule row it came from.
+     */
+    fun showing(item: ScheduleItem): Boolean = liveIdentity != null && liveIdentity == identityOf(item)
+
     /** The median of what [item] has taken, in seconds, or null until it has been seen enough. */
     fun median(item: ScheduleItem): Int? = medianOf(readings[durationKey(item) ?: return null])
 
@@ -47,6 +64,7 @@ class LiveDurationLog(private val file: File) {
      */
     fun wentLive(item: ScheduleItem, at: Instant = Instant.now()) {
         val key = durationKey(item)
+        liveIdentity = identityOf(item)
         // The same thing again -- a section clicked, a row re-sent -- is still the same thing on
         // screen: the reading keeps running rather than being cut into pieces too short to keep.
         if (key != null && key == liveKey) return
@@ -65,6 +83,7 @@ class LiveDurationLog(private val file: File) {
         val since = liveSince
         liveKey = null
         liveSince = null
+        liveIdentity = null
         if (key == null || since == null) return
         val seconds = (at.epochSecond - since.epochSecond).toInt()
         if (seconds < MIN_SECONDS || seconds > MAX_SECONDS) return
@@ -120,6 +139,9 @@ class LiveDurationLog(private val file: File) {
             is ScheduleItem.LowerThirdItem -> "lower:${item.presetId}"
             else -> null
         }
+
+        /** [durationKey] where there is one, else the row's text -- see [LiveDurationLog.showing]. */
+        fun identityOf(item: ScheduleItem): String = durationKey(item) ?: "text:${item.displayText}"
 
         /** The middle reading, or the lower of the middle two. Null until there is one to give. */
         fun medianOf(readings: List<Int>?): Int? {

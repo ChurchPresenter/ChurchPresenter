@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">使用默认</string>
     <string name="song_background_category_cameras">摄像头</string>
     <string name="song_background_camera_live">实时摄像头</string>
+    <string name="schedule_cue_skipped">已跳过 %1$s — 当时正在显示其他内容</string>
 </resources>

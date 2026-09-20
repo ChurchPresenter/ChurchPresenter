@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">klik untuk mencari folder</string>
     <string name="calendar_fix_pick_again">klik untuk memilih yang lain</string>
     <string name="calendar_pick_replace_with">Ganti dengan %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue dilewati</string>
+    <string name="calendar_cue_skipped_reason">Ada hal lain yang sedang tayang — jalankan manual jika masih perlu</string>
 </resources>

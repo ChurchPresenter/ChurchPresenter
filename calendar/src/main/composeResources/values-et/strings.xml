@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">klõpsa kausta leidmiseks</string>
     <string name="calendar_fix_pick_again">klõpsa teise valimiseks</string>
     <string name="calendar_pick_replace_with">Asenda: %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue jäeti vahele</string>
+    <string name="calendar_cue_skipped_reason">Midagi muud oli eetris — käivita käsitsi, kui see peab siiski minema</string>
 </resources>

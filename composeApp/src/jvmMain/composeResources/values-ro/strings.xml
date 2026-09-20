@@ -2841,4 +2841,5 @@
     <string name="use_default_directory">Folosește implicit</string>
     <string name="song_background_category_cameras">Camere</string>
     <string name="song_background_camera_live">cameră live</string>
+    <string name="schedule_cue_skipped">Omis %1$s — altceva era în direct</string>
 </resources>

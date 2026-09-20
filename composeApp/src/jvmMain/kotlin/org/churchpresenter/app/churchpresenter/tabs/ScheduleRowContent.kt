@@ -15,6 +15,7 @@ import org.churchpresenter.calendar.model.storedTime
 import org.churchpresenter.calendar.model.localeUses24HourClock
 import androidx.compose.runtime.collectAsState
 import churchpresenter.composeapp.generated.resources.schedule_cue_fired
+import churchpresenter.composeapp.generated.resources.schedule_cue_skipped
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
@@ -215,19 +216,27 @@ internal fun ScheduleRowDetailLine(item: ScheduleItem, density: ScheduleDensity)
             overflow = TextOverflow.Ellipsis,
         )
         is ScheduleItem.CueItem -> {
-            // `Fired 9:45 AM` once the engine -- or a hand -- has set it off this session.
+            // `Fired 9:45 AM` once the engine -- or a hand -- has set it off this session; or
+            // `Skipped 9:45 AM` when it was due while the operator was live with something else.
             val fired by CueFeed.fired.collectAsState()
-            val firedAt = fired.firstOrNull { it.row.id == item.id }?.at
+            val event = fired.firstOrNull { it.row.id == item.id }
             val detail = scheduleItemDetailText(item).orEmpty()
             Text(
-                text = if (firedAt == null) {
+                text = if (event == null) {
                     detail
                 } else {
-                    val at = clockText(firedAt, localeUses24HourClock())
-                    detail + " · " + stringResource(Res.string.schedule_cue_fired, at)
+                    val at = clockText(event.at, localeUses24HourClock())
+                    detail + " · " + stringResource(
+                        if (event.skipped) Res.string.schedule_cue_skipped else Res.string.schedule_cue_fired,
+                        at,
+                    )
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = if (firedAt == null) detailColor else MaterialTheme.colorScheme.tertiary,
+                color = when {
+                    event == null -> detailColor
+                    event.skipped -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.tertiary
+                },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

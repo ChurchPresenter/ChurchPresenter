@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">คลิกเพื่อค้นหาโฟลเดอร์</string>
     <string name="calendar_fix_pick_again">คลิกเพื่อเลือกรายการอื่น</string>
     <string name="calendar_pick_replace_with">แทนที่ด้วย %1$s</string>
+    <string name="calendar_cue_skipped_title">ข้ามคิว</string>
+    <string name="calendar_cue_skipped_reason">มีอย่างอื่นกำลังแสดงอยู่ — หากยังต้องการให้ทำงาน ให้สั่งด้วยตนเอง</string>
 </resources>

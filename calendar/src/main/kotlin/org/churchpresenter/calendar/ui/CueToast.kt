@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.FiredCue
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_cue_fired_title
+import org.churchpresenter.calendar.generated.resources.calendar_cue_skipped_reason
+import org.churchpresenter.calendar.generated.resources.calendar_cue_skipped_title
 import org.churchpresenter.calendar.generated.resources.calendar_cue_loops
 import org.churchpresenter.calendar.generated.resources.calendar_cue_times
 import org.churchpresenter.calendar.generated.resources.calendar_cue_toast_close
@@ -61,6 +63,8 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
     val row = event.row
     val cue = row as? ScheduleItem.CueItem
     val payload = cue?.payload
+    // A skipped cue is a warning, not a report: the plan said go and the engine stood aside.
+    val tone = if (event.skipped) scheme.error else scheme.tertiary
     Row(
         modifier = modifier
             .width(TOAST_WIDTH)
@@ -68,9 +72,9 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
             .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(11.dp))
             .background(scheme.surfaceContainerHigh)
-            .border(1.dp, scheme.tertiary.copy(alpha = TOAST_BORDER), RoundedCornerShape(11.dp)),
+            .border(1.dp, tone.copy(alpha = TOAST_BORDER), RoundedCornerShape(11.dp)),
     ) {
-        Box(Modifier.width(TOAST_ACCENT).fillMaxHeight().background(scheme.tertiary))
+        Box(Modifier.width(TOAST_ACCENT).fillMaxHeight().background(tone))
         Row(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -80,13 +84,13 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                 Modifier
                     .size(TOAST_ICON)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(scheme.tertiary.copy(alpha = TOAST_TINT)),
+                    .background(tone.copy(alpha = TOAST_TINT)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     Icons.Filled.Bolt,
                     contentDescription = null,
-                    tint = scheme.tertiary,
+                    tint = tone,
                     modifier = Modifier.size(13.dp),
                 )
             }
@@ -96,9 +100,11 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = stringResource(Res.string.calendar_cue_fired_title).uppercase(),
+                        text = stringResource(
+                            if (event.skipped) Res.string.calendar_cue_skipped_title else Res.string.calendar_cue_fired_title
+                        ).uppercase(),
                         style = overlineStyle().copy(fontSize = 9.sp),
-                        color = scheme.tertiary,
+                        color = tone,
                         maxLines = 1,
                     )
                     Text(
@@ -116,6 +122,15 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (payload != null && cue != null) ToastTarget(payload, cue.plays)
+                if (event.skipped) {
+                    Text(
+                        text = stringResource(Res.string.calendar_cue_skipped_reason),
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                        color = scheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Box(
                 Modifier

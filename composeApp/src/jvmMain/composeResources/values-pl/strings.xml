@@ -2811,4 +2811,5 @@
     <string name="use_default_directory">Użyj domyślnego</string>
     <string name="song_background_category_cameras">Kamery</string>
     <string name="song_background_camera_live">kamera na żywo</string>
+    <string name="schedule_cue_skipped">Pominięto %1$s — na żywo było coś innego</string>
 </resources>

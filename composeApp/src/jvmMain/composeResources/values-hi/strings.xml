@@ -2819,4 +2819,5 @@
     <string name="song_background_category_cameras">कैमरे</string>
     <string name="song_background_camera_live">लाइव कैमरा</string>
     <string name="customize_tooltip_separator">, </string>
+    <string name="schedule_cue_skipped">छोड़ा गया %1$s — कुछ और लाइव था</string>
 </resources>

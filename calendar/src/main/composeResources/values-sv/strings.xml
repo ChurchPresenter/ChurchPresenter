@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">klicka för att hitta mappen</string>
     <string name="calendar_fix_pick_again">klicka för att välja en annan</string>
     <string name="calendar_pick_replace_with">Ersätt med %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue hoppades över</string>
+    <string name="calendar_cue_skipped_reason">Något annat var live — utlös den för hand om den ändå ska gå</string>
 </resources>

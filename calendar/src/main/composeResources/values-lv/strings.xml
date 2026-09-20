@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">noklikšķiniet, lai atrastu mapi</string>
     <string name="calendar_fix_pick_again">noklikšķiniet, lai izvēlētos citu</string>
     <string name="calendar_pick_replace_with">Aizstāt ar %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue izlaists</string>
+    <string name="calendar_cue_skipped_reason">Ēterā bija kas cits — ja tomēr jāizpilda, palaidiet manuāli</string>
 </resources>

@@ -2819,4 +2819,5 @@
     <string name="song_background_category_cameras">กล้อง</string>
     <string name="song_background_camera_live">กล้องสด</string>
     <string name="customize_tooltip_separator">, </string>
+    <string name="schedule_cue_skipped">ข้ามแล้ว %1$s — มีอย่างอื่นกำลังแสดงอยู่</string>
 </resources>

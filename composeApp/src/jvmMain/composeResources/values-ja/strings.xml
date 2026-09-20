@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">デフォルトを使用</string>
     <string name="song_background_category_cameras">カメラ</string>
     <string name="song_background_camera_live">ライブカメラ</string>
+    <string name="schedule_cue_skipped">スキップ %1$s — 別のものが表示中でした</string>
 </resources>

@@ -2819,4 +2819,5 @@
     <string name="song_background_category_cameras">Kamera</string>
     <string name="song_background_camera_live">kamera langsung</string>
     <string name="customize_tooltip_separator">, </string>
+    <string name="schedule_cue_skipped">Dilangkau %1$s — ada perkara lain sedang disiarkan</string>
 </resources>

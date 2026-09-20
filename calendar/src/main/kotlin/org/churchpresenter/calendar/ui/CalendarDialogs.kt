@@ -28,6 +28,8 @@ import org.churchpresenter.calendar.model.sectionItem
 import org.churchpresenter.calendar.model.timerSeconds
 import org.churchpresenter.calendar.model.timingForSchedule
 import org.churchpresenter.core.models.schedule.RowTiming
+import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.calendar.model.withBook
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
 
@@ -189,7 +191,10 @@ private fun AddItemDialog(
                 state.setPlannedSeconds(target.id, row.id, seconds)
             }
         },
-        onAdd = { items, plannedSeconds, timing ->
+        onAdd = { picked, plannedSeconds, timing -> dialogScope.launch {
+            // A typed reference knows only the name it was typed as; settle its book now, the
+            // way go-live would, so the row carries the id and the Bible's own spelling.
+            val items = picked.map { it.withBookResolved(state.bibleBooks, host.resolveBookId) }
             if (replacing != null) {
                 state.replaceItem(target.id, replacing.id, items)
             } else {
@@ -215,7 +220,7 @@ private fun AddItemDialog(
                 }
             }
             onClose()
-        },
+        } },
         onDismiss = onClose,
     )
 }
@@ -263,4 +268,16 @@ private fun LoadServiceConfirm(
             }
         },
     )
+}
+
+/** [this] with a typed book settled -- see `withBook`; anything else, or an unrecognised name, as it was. */
+private suspend fun ScheduleItem.withBookResolved(
+    books: List<CalendarBibleBook>,
+    resolve: suspend (String) -> Int?,
+): ScheduleItem {
+    if (this !is ScheduleItem.BibleVerseItem || bookId != 0 || books.isEmpty()) return this
+    val book = books.firstOrNull { it.name.equals(bookName.trim(), ignoreCase = true) }
+        ?: resolve(bookName)?.let { id -> books.firstOrNull { it.bookId == id } }
+        ?: return this
+    return withBook(book.bookId, book.name)
 }

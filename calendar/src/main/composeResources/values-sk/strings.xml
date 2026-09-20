@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">kliknutím nájdete priečinok</string>
     <string name="calendar_fix_pick_again">kliknutím vyberiete iné</string>
     <string name="calendar_pick_replace_with">Nahradiť za %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue preskočený</string>
+    <string name="calendar_cue_skipped_reason">Naživo bolo niečo iné — v prípade potreby spustite ručne</string>
 </resources>

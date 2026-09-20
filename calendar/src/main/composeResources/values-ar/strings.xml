@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">انقر للعثور على المجلد</string>
     <string name="calendar_fix_pick_again">انقر لاختيار غيره</string>
     <string name="calendar_pick_replace_with">استبدال بـ %1$s</string>
+    <string name="calendar_cue_skipped_title">تم تخطي الإشارة</string>
+    <string name="calendar_cue_skipped_reason">كان هناك شيء آخر على الهواء — شغّلها يدويًا إن كان يجب أن تعمل</string>
 </resources>

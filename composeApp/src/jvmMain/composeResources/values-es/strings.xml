@@ -2839,4 +2839,5 @@
     <string name="use_default_directory">Usar predeterminada</string>
     <string name="song_background_category_cameras">Cámaras</string>
     <string name="song_background_camera_live">cámara en directo</string>
+    <string name="schedule_cue_skipped">Omitido %1$s — había otra cosa en directo</string>
 </resources>

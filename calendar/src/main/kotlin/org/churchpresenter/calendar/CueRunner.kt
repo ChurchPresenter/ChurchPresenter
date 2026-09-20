@@ -37,6 +37,16 @@ class CueRunner(
     private val host: CalendarHost,
     private val timing: () -> Map<String, RowTiming> = { emptyMap() },
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
+    /**
+     * True while the outputs show something the operator put there by hand -- a row clicked in
+     * the Schedule, a song sent from the Songs tab -- rather than something this engine fired.
+     *
+     * The engine yields to a hand on the controls: a cue that is due while the operator is live
+     * with something else is **skipped**, not fired over them, and is posted to [CueFeed] as
+     * skipped so it can be fired by hand if it should still go. Blank outputs, or a picture this
+     * engine put up itself, are not in the way.
+     */
+    private val operatorLive: () -> Boolean = { false },
 ) {
     private val fired = HashSet<String>()
     private var firedDate = ""
@@ -85,8 +95,15 @@ class CueRunner(
         val rows = items()
         val timings = timing()
         val isArmed = armed()
+        // Read once per tick: what is on screen is a fact about this moment, and a cue and the
+        // row after it should be judged against the same one.
+        val yielding = operatorLive()
         dueRows(rows, timings, isArmed, at, fired).forEach { row ->
             fired += row.id
+            if (yielding) {
+                CueFeed.post(FiredCue(row, at.toLocalTime(), skipped = true))
+                return@forEach
+            }
             val plan = timings[row.id] ?: RowTiming.DEFAULT
             liveRow = row.id
             runCatching { host.projectItem(row, plan.repeats) }
@@ -95,6 +112,10 @@ class CueRunner(
         }
         dueCues(rows, isArmed, at, fired).forEach { cue ->
             fired += cue.id
+            if (yielding) {
+                CueFeed.post(FiredCue(cue, at.toLocalTime(), skipped = true))
+                return@forEach
+            }
             // The rows are the live schedule already, so a go-live cue has nothing to load.
             runCatching { fireCue(host, rows, cue, at.toLocalTime(), loadRows = false) }
         }
@@ -197,8 +218,14 @@ fun fireCue(
     CueFeed.post(FiredCue(cue, at))
 }
 
-/** One row that went off on its own — a cue, or a row that starts by itself — and when. */
-data class FiredCue(val row: ScheduleItem, val at: LocalTime) {
+/**
+ * One row that went off on its own — a cue, or a row that starts by itself — and when.
+ *
+ * [skipped] is a row that was due but held back, because the operator was live with something
+ * else at the time -- see `CueRunner.operatorLive`. It is in the feed so the window can say so,
+ * and so the Schedule can mark it, rather than the cue silently never happening.
+ */
+data class FiredCue(val row: ScheduleItem, val at: LocalTime, val skipped: Boolean = false) {
     /** Distinct per firing, so the window can tell a repeat of the same row from the one it dismissed. */
     val key: String get() = row.id + "|" + at.toSecondOfDay()
 }

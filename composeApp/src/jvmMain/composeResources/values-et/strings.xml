@@ -2844,4 +2844,5 @@
     <string name="use_default_directory">Kasuta vaikimisi</string>
     <string name="song_background_category_cameras">Kaamerad</string>
     <string name="song_background_camera_live">otsekaamera</string>
+    <string name="schedule_cue_skipped">Vahele jäetud %1$s — midagi muud oli eetris</string>
 </resources>

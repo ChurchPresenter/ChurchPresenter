@@ -231,6 +231,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_footer_cues">%1$s · %2$d of %3$d cues will fire automatically</string>
     <string name="calendar_cue_fired_title">Cue fired</string>
+    <string name="calendar_cue_skipped_title">Cue skipped</string>
+    <string name="calendar_cue_skipped_reason">Something else was live — fire it by hand if it should still go</string>
     <string name="calendar_cue_toast_close">Dismiss</string>
     <!-- The Presets tab's kind chips -->
     <string name="calendar_preset_kind_all">All</string>

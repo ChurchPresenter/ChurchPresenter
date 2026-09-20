@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">फोल्डर खोज्न क्लिक गर्नुहोस्</string>
     <string name="calendar_fix_pick_again">अर्को रोज्न क्लिक गर्नुहोस्</string>
     <string name="calendar_pick_replace_with">%1$s ले बदल्नुहोस्</string>
+    <string name="calendar_cue_skipped_title">क्यू छोडियो</string>
+    <string name="calendar_cue_skipped_reason">अरू केही लाइभ थियो — अझै चलाउनुपर्छ भने हातैले चलाउनुहोस्</string>
 </resources>

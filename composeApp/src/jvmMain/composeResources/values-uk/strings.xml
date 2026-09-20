@@ -2811,4 +2811,5 @@
     <string name="use_default_directory">За замовчуванням</string>
     <string name="song_background_category_cameras">Камери</string>
     <string name="song_background_camera_live">жива камера</string>
+    <string name="schedule_cue_skipped">Пропущено %1$s — в ефірі було інше</string>
 </resources>

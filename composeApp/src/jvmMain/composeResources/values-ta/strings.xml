@@ -2825,4 +2825,5 @@
     <string name="song_background_category_cameras">கேமராக்கள்</string>
     <string name="song_background_camera_live">நேரலைக் கேமரா</string>
     <string name="browser_source_name_tooltip">இந்த வெளியீட்டிற்கு ஒரு பெயர் கொடுங்கள் — சபை, மேடை, பாடகர் குழு, கார்டுகள்…</string>
+    <string name="schedule_cue_skipped">தவிர்க்கப்பட்டது %1$s — வேறு ஏதோ நேரலையில் இருந்தது</string>
 </resources>

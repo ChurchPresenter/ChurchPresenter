@@ -2814,4 +2814,5 @@
     <string name="use_default_directory">По умолчанию</string>
     <string name="song_background_category_cameras">Камеры</string>
     <string name="song_background_camera_live">живая камера</string>
+    <string name="schedule_cue_skipped">Пропущена %1$s — в эфире было другое</string>
 </resources>

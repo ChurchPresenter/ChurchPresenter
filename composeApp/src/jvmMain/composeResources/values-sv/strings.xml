@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">Använd standard</string>
     <string name="song_background_category_cameras">Kameror</string>
     <string name="song_background_camera_live">livekamera</string>
+    <string name="schedule_cue_skipped">Hoppades över %1$s — något annat var live</string>
 </resources>

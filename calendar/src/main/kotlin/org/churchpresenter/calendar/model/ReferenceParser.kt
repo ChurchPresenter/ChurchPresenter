@@ -102,3 +102,20 @@ fun bibleVerseItem(
         displayText = if (range.isEmpty()) "$bookName $chapter:$from" else "$bookName $chapter:$range",
     )
 }
+
+/**
+ * This row with its book settled: the canonical [bookId], and the primary Bible's own [bookName]
+ * for it. What a typed reference becomes once `CalendarHost.resolveBookId` has said what its
+ * book means -- so `Psalm 91:1-4` planned against a Russian Bible is stored as book 19 and shown
+ * as that Bible spells it, and is looked up by id from then on rather than by name at every
+ * go-live.
+ */
+fun ScheduleItem.BibleVerseItem.withBook(bookId: Int, bookName: String): ScheduleItem.BibleVerseItem = copy(
+    bookId = bookId,
+    bookName = bookName,
+    displayText = if (verseRange.isEmpty()) "$bookName $chapter:$verseNumber" else "$bookName $chapter:$verseRange",
+)
+
+/** The highest verse the row shows: the end of its range, or the one verse it has. */
+fun ScheduleItem.BibleVerseItem.lastVerse(): Int =
+    Regex("\\d+").findAll(verseRange).mapNotNull { it.value.toIntOrNull() }.maxOrNull() ?: verseNumber

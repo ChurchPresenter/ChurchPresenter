@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">націсніце, каб знайсці папку</string>
     <string name="calendar_fix_pick_again">націсніце, каб абраць іншае</string>
     <string name="calendar_pick_replace_with">Замяніць на %1$s</string>
+    <string name="calendar_cue_skipped_title">Каманда прапушчана</string>
+    <string name="calendar_cue_skipped_reason">У эфіры было іншае — пры неабходнасці запусціце ўручную</string>
 </resources>

@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">برای یافتن پوشه کلیک کنید</string>
     <string name="calendar_fix_pick_again">برای انتخاب دیگری کلیک کنید</string>
     <string name="calendar_pick_replace_with">جایگزینی با %1$s</string>
+    <string name="calendar_cue_skipped_title">فرمان رد شد</string>
+    <string name="calendar_cue_skipped_reason">چیز دیگری روی صفحه بود — اگر باید اجرا شود، دستی اجرایش کنید</string>
 </resources>

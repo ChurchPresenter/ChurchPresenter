@@ -2819,4 +2819,5 @@
     <string name="song_background_category_cameras">Kamera</string>
     <string name="song_background_camera_live">kamera ya moja kwa moja</string>
     <string name="customize_tooltip_separator">, </string>
+    <string name="schedule_cue_skipped">Kimerukwa %1$s — kitu kingine kilikuwa hewani</string>
 </resources>

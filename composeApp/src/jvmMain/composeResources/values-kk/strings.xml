@@ -2812,4 +2812,5 @@
     <string name="use_default_directory">Әдепкіні қолдану</string>
     <string name="song_background_category_cameras">Камералар</string>
     <string name="song_background_camera_live">тікелей камера</string>
+    <string name="schedule_cue_skipped">Өткізіп жіберілді %1$s — эфирде басқа нәрсе болды</string>
 </resources>

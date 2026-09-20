@@ -2841,4 +2841,5 @@
     <string name="use_default_directory">Použiť predvolený</string>
     <string name="song_background_category_cameras">Kamery</string>
     <string name="song_background_camera_live">živá kamera</string>
+    <string name="schedule_cue_skipped">Preskočené %1$s — naživo bolo niečo iné</string>
 </resources>

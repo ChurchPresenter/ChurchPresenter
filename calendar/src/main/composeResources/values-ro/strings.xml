@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">dă clic pentru a găsi dosarul</string>
     <string name="calendar_fix_pick_again">dă clic pentru a alege altul</string>
     <string name="calendar_pick_replace_with">Înlocuiește cu %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue omis</string>
+    <string name="calendar_cue_skipped_reason">Altceva era în direct — declanșează-l manual dacă tot trebuie să ruleze</string>
 </resources>

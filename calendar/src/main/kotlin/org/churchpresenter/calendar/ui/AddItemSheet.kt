@@ -107,8 +107,10 @@ fun AddItemSheet(
 ) {
     val scope = rememberCoroutineScope()
     var editingSong by remember { mutableStateOf<SongItem?>(null) }
-    // Editing a row, the picker opens on that row's kind, so a replacement is one click away.
-    val picker = remember(replacing) { PickerState(replacing?.let(::pickKindOf) ?: PickKind.SONGS) }
+    // Editing a row, the picker opens on that row -- its kind, and its book, chapter and verses
+    // or its title -- so a replacement is one step away. Rebuilt if the Bible arrives after the
+    // sheet opened, since the verse row cannot be found in an empty book list.
+    val picker = remember(replacing, bibleBooks.isEmpty()) { pickerFor(replacing, bibleBooks) }
     val use24Hour = LocalUse24HourClock.current
     var draft by remember(replacing) { mutableStateOf(TimingDraft.of(timing, plannedSeconds, use24Hour)) }
     // Editing a row, a change lands on it at once; adding, it waits for the pick.

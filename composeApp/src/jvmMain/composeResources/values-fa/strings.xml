@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">استفاده از پیش‌فرض</string>
     <string name="song_background_category_cameras">دوربین‌ها</string>
     <string name="song_background_camera_live">دوربین زنده</string>
+    <string name="schedule_cue_skipped">رد شد %1$s — چیز دیگری روی صفحه بود</string>
 </resources>

@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">Käytä oletusta</string>
     <string name="song_background_category_cameras">Kamerat</string>
     <string name="song_background_camera_live">livekamera</string>
+    <string name="schedule_cue_skipped">Ohitettiin %1$s — jokin muu oli esillä</string>
 </resources>

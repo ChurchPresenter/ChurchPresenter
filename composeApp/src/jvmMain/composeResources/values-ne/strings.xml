@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">पूर्वनिर्धारित प्रयोग गर्नुहोस्</string>
     <string name="song_background_category_cameras">क्यामेराहरू</string>
     <string name="song_background_camera_live">लाइभ क्यामेरा</string>
+    <string name="schedule_cue_skipped">छोडियो %1$s — अरू केही लाइभ थियो</string>
 </resources>

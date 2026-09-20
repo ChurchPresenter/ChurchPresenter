@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">Izmantot noklusējumu</string>
     <string name="song_background_category_cameras">Kameras</string>
     <string name="song_background_camera_live">tiešraides kamera</string>
+    <string name="schedule_cue_skipped">Izlaists %1$s — ēterā bija kas cits</string>
 </resources>

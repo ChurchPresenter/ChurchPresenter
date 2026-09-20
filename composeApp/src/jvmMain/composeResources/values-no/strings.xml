@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">Bruk standard</string>
     <string name="song_background_category_cameras">Kameraer</string>
     <string name="song_background_camera_live">direktekamera</string>
+    <string name="schedule_cue_skipped">Hoppet over %1$s — noe annet var live</string>
 </resources>

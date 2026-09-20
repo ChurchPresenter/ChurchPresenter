@@ -2819,4 +2819,5 @@
     <string name="use_default_directory">Varsayılanı Kullan</string>
     <string name="song_background_category_cameras">Kameralar</string>
     <string name="song_background_camera_live">canlı kamera</string>
+    <string name="schedule_cue_skipped">Atlandı %1$s — yayında başka bir şey vardı</string>
 </resources>

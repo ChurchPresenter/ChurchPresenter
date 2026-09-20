@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">қалтаны табу үшін басыңыз</string>
     <string name="calendar_fix_pick_again">басқасын таңдау үшін басыңыз</string>
     <string name="calendar_pick_replace_with">%1$s деп ауыстыру</string>
+    <string name="calendar_cue_skipped_title">Команда өткізіп жіберілді</string>
+    <string name="calendar_cue_skipped_reason">Эфирде басқа нәрсе болды — қажет болса қолмен іске қосыңыз</string>
 </resources>

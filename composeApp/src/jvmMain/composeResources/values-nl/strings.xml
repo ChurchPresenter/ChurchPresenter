@@ -2839,4 +2839,5 @@
     <string name="use_default_directory">Standaard gebruiken</string>
     <string name="song_background_category_cameras">Camera's</string>
     <string name="song_background_camera_live">livecamera</string>
+    <string name="schedule_cue_skipped">Overgeslagen %1$s — er was iets anders live</string>
 </resources>

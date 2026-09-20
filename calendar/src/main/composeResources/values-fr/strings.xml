@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">cliquez pour retrouver le dossier</string>
     <string name="calendar_fix_pick_again">cliquez pour en choisir un autre</string>
     <string name="calendar_pick_replace_with">Remplacer par %1$s</string>
+    <string name="calendar_cue_skipped_title">Cue ignoré</string>
+    <string name="calendar_cue_skipped_reason">Autre chose était à l'antenne — déclenchez-le à la main s'il doit encore passer</string>
 </resources>

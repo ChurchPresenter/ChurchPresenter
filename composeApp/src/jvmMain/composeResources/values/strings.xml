@@ -745,6 +745,7 @@
     <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="schedule_kind_cue">Cue</string>
     <string name="schedule_cue_fired">Fired %1$s</string>
+    <string name="schedule_cue_skipped">Skipped %1$s — something else was live</string>
     <string name="schedule_timing_loop">Loops</string>
     <string name="schedule_timing_times">Plays %1$d×</string>
     <string name="schedule_timing_next">then next item</string>

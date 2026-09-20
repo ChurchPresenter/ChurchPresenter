@@ -316,4 +316,6 @@
     <string name="calendar_fix_locate_folder">ກົດເພື່ອຊອກຫາໂຟນເດີ</string>
     <string name="calendar_fix_pick_again">ກົດເພື່ອເລືອກອັນອື່ນ</string>
     <string name="calendar_pick_replace_with">ແທນທີ່ດ້ວຍ %1$s</string>
+    <string name="calendar_cue_skipped_title">ຂ້າມຄິວ</string>
+    <string name="calendar_cue_skipped_reason">ມີສິ່ງອື່ນກຳລັງສະແດງຢູ່ — ຖ້າຍັງຕ້ອງການ ໃຫ້ສັ່ງດ້ວຍຕົນເອງ</string>
 </resources>

@@ -91,13 +91,9 @@ private fun verseProblem(
             ?: resolveBook(item.bookName)?.let { id -> books.firstOrNull { it.bookId == id } }
     } ?: return PreflightProblem.BOOK_NOT_IN_BIBLE
     if (item.chapter !in 1..book.chapterCount) return PreflightProblem.CHAPTER_OUT_OF_RANGE
-    val last = lastVerseOf(item)
+    val last = item.lastVerse()
     return if (last in 1..book.verseCount(item.chapter)) null else PreflightProblem.VERSE_OUT_OF_RANGE
 }
-
-/** The highest verse the row shows: the end of its range, or the one verse it has. */
-private fun lastVerseOf(item: ScheduleItem.BibleVerseItem): Int =
-    Regex("\\d+").findAll(item.verseRange).mapNotNull { it.value.toIntOrNull() }.maxOrNull() ?: item.verseNumber
 
 /** What can be done about a [PreflightProblem] from the row itself. */
 enum class ProblemFix {
