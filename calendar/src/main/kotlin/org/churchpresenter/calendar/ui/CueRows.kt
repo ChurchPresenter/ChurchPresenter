@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_cue_fire_now
 import org.churchpresenter.calendar.generated.resources.calendar_cue_fired_at
+import org.churchpresenter.calendar.generated.resources.calendar_cue_skipped_at
 import org.churchpresenter.calendar.generated.resources.calendar_cue_next_in
 import org.churchpresenter.calendar.generated.resources.calendar_cue_skip_tip
 import org.churchpresenter.calendar.model.CueStatus
@@ -57,13 +58,17 @@ private val CUE_ACCENT = 2.dp
 /** `Fired 9:45 AM` once the clock has passed a cue, `Next · in 12 min` on the one coming up. */
 @Composable
 internal fun CueStatusChip(status: CueStatus, cue: ScheduleItem.CueItem, startTime: String?) {
-    if (!status.fired && !status.isNext) return
+    if (!status.fired && !status.isNext && !status.skipped) return
     val scheme = MaterialTheme.colorScheme
-    val color = if (status.fired) scheme.tertiary else scheme.primary
-    val text = if (status.fired) {
-        stringResource(Res.string.calendar_cue_fired_at, cueTimeText(cue, startTime))
-    } else {
-        stringResource(Res.string.calendar_cue_next_in, status.minutesUntil)
+    val color = when {
+        status.skipped -> scheme.error
+        status.fired -> scheme.tertiary
+        else -> scheme.primary
+    }
+    val text = when {
+        status.skipped -> stringResource(Res.string.calendar_cue_skipped_at, cueTimeText(cue, startTime))
+        status.fired -> stringResource(Res.string.calendar_cue_fired_at, cueTimeText(cue, startTime))
+        else -> stringResource(Res.string.calendar_cue_next_in, status.minutesUntil)
     }
     Text(
         text = text,

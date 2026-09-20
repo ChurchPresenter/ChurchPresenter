@@ -141,23 +141,6 @@
     <string name="shortcut_description_play_pause">Prehrať / pozastaviť</string>
     <string name="shortcut_description_prev_slide">Predchádzajúci snímok</string>
     <string name="shortcut_description_next_slide">Nasledujúci snímok</string>
-    <string name="shortcut_description_media_mute">Stlmiť / Zrušiť stlmenie (kláves M)</string>
-    <string name="shortcut_description_spacebar">Prehrať / pozastaviť (medzerník)</string>
-    <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
-    <string name="shortcut_key_ctrl_o">Ctrl+O</string>
-    <string name="shortcut_key_ctrl_s">Ctrl+S</string>
-    <string name="shortcut_key_ctrl_w">Ctrl+W</string>
-    <string name="shortcut_key_ctrl_q">Ctrl+Q</string>
-    <string name="shortcut_key_ctrl_t">Ctrl+T</string>
-    <string name="shortcut_key_f2">F2</string>
-    <string name="shortcut_key_f1">F1</string>
-    <string name="shortcut_key_f6">F6</string>
-    <string name="shortcut_key_f7">F7</string>
-    <string name="shortcut_key_f8">F8</string>
-    <string name="shortcut_key_f9">F9</string>
-    <string name="shortcut_key_f10">F10</string>
-    <string name="shortcut_key_f11">F11</string>
-    <string name="shortcut_key_f12">F12</string>
     <string name="shortcut_category_tab_switching">Prepínanie záložiek</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Otvoriť klávesové skratky</string>
     <string name="shortcut_description_f6_bible">Prepnúť na záložku Biblia</string>
@@ -167,20 +150,7 @@
     <string name="shortcut_description_f10_media">Prepnúť na záložku Médiá</string>
     <string name="shortcut_description_f11_lower_third">Prepnúť na záložku Lower Third</string>
     <string name="shortcut_description_f12_announcements">Prepnúť na záložku Oznamy</string>
-    <string name="shortcut_key_delete">Delete</string>
-    <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Double-click</string>
-    <string name="shortcut_key_up">↑</string>
-    <string name="shortcut_key_down">↓</string>
-    <string name="shortcut_key_left">←</string>
-    <string name="shortcut_key_right">→</string>
-    <string name="shortcut_key_up_left">← / ↑</string>
-    <string name="shortcut_key_down_right">→ / ↓</string>
-    <string name="shortcut_key_up_left_song">← / ↑ (zoznam piesní)</string>
-    <string name="shortcut_key_down_right_song">→ / ↓ (zoznam piesní)</string>
-    <string name="shortcut_key_space">Space</string>
-    <string name="shortcut_key_m">M</string>
-    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
     <string name="shortcut_category_canvas">Záložka Canvas</string>
     <string name="shortcut_description_delete_source">Odstrániť vybraný zdroj</string>
     <string name="shortcut_key_right_click">Right-click</string>
@@ -457,7 +427,6 @@
     <string name="projection_web_go_live_tooltip">Vyžaduje bežný displej (nie DeckLink) s povoleným Webom v nastaveniach projekcie</string>
 
     <!-- Bible Tab -->
-    <string name="bible_multi_select_help">Ctrl+klik na prepínanie veršov, Shift+klik pre rozsah</string>
 
     <!-- Crash Recovery -->
     <string name="crash_video_bg_disabled">Videá na pozadí zakázané po %1$d po sebe nasledujúcich zlyhaní.  [Znova povoliť]  [Zavrieť]</string>
@@ -504,8 +473,8 @@
     <string name="tooltip_new_schedule">Nový program</string>
     <string name="tooltip_open_schedule">Otvoriť program</string>
     <string name="tooltip_save_schedule">Uložiť program</string>
-    <string name="tooltip_undo">Späť (Ctrl+Z)</string>
-    <string name="tooltip_redo">Znovu (Ctrl+Shift+Z)</string>
+    <string name="tooltip_undo">Späť (%1$s)</string>
+    <string name="tooltip_redo">Znovu (%1$s)</string>
     <string name="tooltip_note">Poznámka</string>
     <string name="tooltip_note_done">Uložiť poznámku</string>
     <string name="tooltip_note_clear">Vymazať poznámku</string>
@@ -584,8 +553,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Nastavenia</string>
     <string name="images_suffix">obrázkov</string>
-    <string name="pictures_arrow_key_hint">← → nasledujúci/predchádzajúci obrázok  ·  ↑ ↓ navigácia v riadkoch</string>
-    <string name="presentation_arrow_key_hint">← → ďalšia/predchádzajúca snímka</string>
+    <string name="pictures_arrow_key_hint">%1$s nasledujúci/predchádzajúci obrázok  ·  %2$s navigácia v riadkoch</string>
+    <string name="presentation_arrow_key_hint">%1$s — predchádzajúci/ďalší krok a snímka  ·  %2$s — prehrať/pozastaviť  ·  %3$s — prázdna obrazovka</string>
     <string name="pictures_reorder_hint">Shift+ťahanie na zmenu poradia miniatúr</string>
     <string name="slideshow_settings">Nastavenia prezentácie médií</string>
     <string name="transition_settings">Nastavenia prechodu</string>
@@ -1201,7 +1170,7 @@
     <string name="multi_verse">Viacero veršov</string>
     <string name="new_song">Nová pieseň</string>
     <string name="back_to_live">Späť na naživo</string>
-    <string name="line_navigation_hint">Použite ← → na navigáciu riadkov, ↑ ↓ pre verše</string>
+    <string name="line_navigation_hint">Použite %1$s na navigáciu riadkov, %2$s pre verše</string>
 
     <!-- Statistics -->
     <string name="statistics">Štatistiky</string>
@@ -1310,10 +1279,6 @@
     <string name="add_song_samples">Pridať ukážkové piesne</string>
     <string name="sps_file_not_supported">%1$s (nie je podporované)</string>
     <string name="folder_overwrite_confirm">Priečinok "%1$s" už existuje. Prepíšu sa existujúce súbory piesní.\nPokračovať?</string>
-    <string name="bible_samples">Ukážkové Biblie</string>
-    <string name="bible_samples_overwrite_confirm">V tomto priečinku už existuje priložený súbor Biblie. Týmto ho prepíšete.\nPokračovať?</string>
-    <string name="bible_samples_copied">Skopírovaných %1$d ukážkových Biblií a nastavených ako primárna Biblia.</string>
-    <string name="add_bible_samples">Pridať ukážkové Biblie (KJV)</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Stiahnuť Biblie…</string>
@@ -2046,8 +2011,6 @@
     <string name="bible_search_mode_reference">Odkaz</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Klepnutím prepnete — Auto: skok na odkaz, hľadanie ostatného. Odkaz: len navigácia. Text: vždy hľadať v texte verša.</string>
-    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
-    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA piesne</string>
     <string name="projection_content_song_la_tooltip">Náhľad piesne</string>
     <string name="projection_content_chords_tooltip">Zobraziť pieseň s akordmi ako akordový zápis, akordy nad textom</string>

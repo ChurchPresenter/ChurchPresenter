@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">替换为 %1$s</string>
     <string name="calendar_cue_skipped_title">已跳过标记</string>
     <string name="calendar_cue_skipped_reason">当时正在显示其他内容 — 如仍需执行，请手动触发</string>
+    <string name="calendar_cue_skipped_at">已跳过 %1$s</string>
 </resources>

@@ -301,6 +301,20 @@ class ScheduleViewModel(
 
     fun timingFor(itemId: String): RowTiming = _timing[itemId] ?: RowTiming.DEFAULT
 
+    /**
+     * The `HH:mm` start of the planned service this schedule was loaded from, or null.
+     *
+     * The anchor the clock column falls back to when no row is pinned -- see `scheduleClocks`.
+     * Not saved with the schedule: it is a fact about the service that was loaded, and a file
+     * reopened next month is not that service. Cleared with the rows.
+     */
+    private val _serviceStartTime = mutableStateOf<String?>(null)
+    val serviceStartTime: String? get() = _serviceStartTime.value
+
+    fun setServiceStart(startTime: String?) {
+        _serviceStartTime.value = startTime
+    }
+
     /** Adds a planned row whole -- its id kept, so [timing] and any cue payload still point at it. */
     fun addRow(item: ScheduleItem, timing: RowTiming?) {
         if (_isFollowingRemote.value) {
@@ -720,6 +734,7 @@ class ScheduleViewModel(
         _scheduleItems.clear()
         _notes.clear()
         _timing.clear()
+        _serviceStartTime.value = null
         notifyChanged()
     }
 

@@ -317,7 +317,7 @@
     <string name="please_select_file_first">Najpierw wybierz plik z listy.</string>
     <string name="no_file_selected_title">Nie wybrano pliku</string>
     <string name="confirm_delete">Potwierdź usunięcie</string>
-    <string name="confirm_delete_file">Czy na pewno chcesz usunąć '%s'?</string>
+    <string name="confirm_delete_file">Czy na pewno chcesz usunąć „%1$s”?</string>
     <string name="import_error">Błąd importu</string>
     <string name="delete_error">Błąd usuwania</string>
 
@@ -376,10 +376,10 @@
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Katalog docelowy nie istnieje: %s</string>
-    <string name="error_copying_file">Błąd kopiowania %s: %s</string>
+    <string name="error_target_directory_not_exist">Katalog docelowy nie istnieje: %1$s</string>
+    <string name="error_copying_file">Błąd kopiowania %1$s: %2$s</string>
     <string name="error_failed_delete">Nie udało się usunąć pliku</string>
-    <string name="error_deleting_file">Błąd usuwania pliku: %s</string>
+    <string name="error_deleting_file">Błąd usuwania pliku: %1$s</string>
     <string name="warning">Ostrzeżenie</string>
 
     <!-- Edit Song Dialog -->
@@ -395,8 +395,8 @@
     <string name="tooltip_new_schedule">Nowy program</string>
     <string name="tooltip_open_schedule">Otwórz program</string>
     <string name="tooltip_save_schedule">Zapisz program</string>
-    <string name="tooltip_undo">Cofnij (Ctrl+Z)</string>
-    <string name="tooltip_redo">Ponów (Ctrl+Shift+Z)</string>
+    <string name="tooltip_undo">Cofnij (%1$s)</string>
+    <string name="tooltip_redo">Ponów (%1$s)</string>
     <string name="tooltip_note">Notatka</string>
     <string name="tooltip_note_done">Zapisz notatkę</string>
     <string name="tooltip_note_clear">Wyczyść notatkę</string>
@@ -454,8 +454,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Ustawienia</string>
     <string name="images_suffix">obrazów</string>
-    <string name="pictures_arrow_key_hint">← → ↑ ↓ przełączaj między obrazami</string>
-    <string name="presentation_arrow_key_hint">← → następny/poprzedni slajd</string>
+    <string name="pictures_arrow_key_hint">%1$s następny/poprzedni obraz  ·  %2$s nawigacja po wierszach</string>
+    <string name="presentation_arrow_key_hint">%1$s — poprzedni/następny krok i slajd  ·  %2$s — odtwórz/pauza  ·  %3$s — pusty ekran</string>
     <string name="pictures_reorder_hint">Shift+przeciągnij aby zmienić kolejność</string>
     <string name="slideshow_settings">Ustawienia pokazu slajdów</string>
     <string name="transition_settings">Ustawienia przejścia</string>
@@ -642,8 +642,6 @@
     <string name="shortcut_description_play_pause">Odtwórz / Pauza</string>
     <string name="shortcut_description_prev_slide">Poprzedni slajd</string>
     <string name="shortcut_description_next_slide">Następny slajd</string>
-    <string name="shortcut_description_media_mute">Wycisz / Włącz dźwięk (M)</string>
-    <string name="shortcut_description_spacebar">Odtwórz / Pauza (Spacja)</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Otwórz skróty klawiszowe</string>
     <string name="shortcut_description_f6_bible">Zakładka Biblia</string>
     <string name="shortcut_description_f7_songs">Zakładka Pieśni</string>
@@ -652,35 +650,7 @@
     <string name="shortcut_description_f10_media">Zakładka Media</string>
     <string name="shortcut_description_f11_lower_third">Zakładka Dolna trzecia</string>
     <string name="shortcut_description_f12_announcements">Zakładka Ogłoszenia</string>
-    <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
-    <string name="shortcut_key_ctrl_o">Ctrl+O</string>
-    <string name="shortcut_key_ctrl_s">Ctrl+S</string>
-    <string name="shortcut_key_ctrl_w">Ctrl+W</string>
-    <string name="shortcut_key_ctrl_q">Ctrl+Q</string>
-    <string name="shortcut_key_ctrl_t">Ctrl+T</string>
-    <string name="shortcut_key_f1">F1</string>
-    <string name="shortcut_key_f2">F2</string>
-    <string name="shortcut_key_f6">F6</string>
-    <string name="shortcut_key_f7">F7</string>
-    <string name="shortcut_key_f8">F8</string>
-    <string name="shortcut_key_f9">F9</string>
-    <string name="shortcut_key_f10">F10</string>
-    <string name="shortcut_key_f11">F11</string>
-    <string name="shortcut_key_f12">F12</string>
-    <string name="shortcut_key_delete">Delete</string>
-    <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Podwójne kliknięcie</string>
-    <string name="shortcut_key_up">↑</string>
-    <string name="shortcut_key_down">↓</string>
-    <string name="shortcut_key_left">←</string>
-    <string name="shortcut_key_right">→</string>
-    <string name="shortcut_key_up_left">← / ↑</string>
-    <string name="shortcut_key_down_right">→ / ↓</string>
-    <string name="shortcut_key_up_left_song">← / ↑ (lista pieśni)</string>
-    <string name="shortcut_key_down_right_song">→ / ↓ (lista pieśni)</string>
-    <string name="shortcut_key_space">Spacja</string>
-    <string name="shortcut_key_m">M</string>
-    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
     <string name="shortcut_category_canvas">Zakładka Płótno</string>
     <string name="shortcut_description_delete_source">Usuń wybrany zasób</string>
     <string name="shortcut_key_right_click">Prawy przycisk</string>
@@ -951,7 +921,7 @@
     <string name="website_url_label">URL</string>
     <string name="new_song">Nowa pieśń</string>
     <string name="back_to_live">Wróć do transmisji</string>
-    <string name="line_navigation_hint">← → nawigacja po wierszach, ↑ ↓ po zwrotkach</string>
+    <string name="line_navigation_hint">%1$s nawigacja po wierszach, %2$s po zwrotkach</string>
     <string name="multi_verse">Wiele wersetów</string>
 
     <!-- Statistics -->
@@ -1061,10 +1031,6 @@
     <string name="add_song_samples">Dodaj przykładowe piosenki</string>
     <string name="sps_file_not_supported">%1$s (nieobsługiwany)</string>
     <string name="folder_overwrite_confirm">Folder \"%1$s\" już istnieje. Spowoduje to nadpisanie istniejących plików piosenek.\nKontynuować?</string>
-    <string name="bible_samples">Przykładowe Biblie</string>
-    <string name="bible_samples_overwrite_confirm">W tym folderze już istnieje dołączony plik Biblii. Zostanie on nadpisany.\nKontynuować?</string>
-    <string name="bible_samples_copied">Skopiowano %1$d przykładową(e) Biblię(e) i ustawiono jako główną Biblię.</string>
-    <string name="add_bible_samples">Dodaj przykładowe Biblie (KJV)</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Pobierz Biblie…</string>
@@ -1705,7 +1671,6 @@
     <string name="song_columns">Filtruj kolumny</string>
     <string name="api_key_qr_title">Kod QR klucza API</string>
     <string name="background_follow_default_option">Zgodnie z domyślnymi</string>
-    <string name="bible_multi_select_help">Ctrl+Click wybiera wersety, Shift+Click zaznacza zakres</string>
     <string name="bible_no_primary_title">Brak skonfigurowanej głównej Biblii</string>
     <string name="bible_no_primary_hint">Otwórz ⚙ Ustawienia i przejdź do zakładki Biblia, a następnie:</string>
     <string name="bible_no_primary_step1">1. Ustaw katalog z Biblią</string>
@@ -2024,8 +1989,6 @@
     <string name="bible_search_mode_reference">Odwołanie</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Dotknij, aby przełączyć — Auto: skocz do odwołań, szukaj reszty. Odwołanie: tylko nawigacja. Tekst: zawsze szukaj w tekście wersetu.</string>
-    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
-    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA piosenki</string>
     <string name="projection_content_song_la_tooltip">Podgląd piosenki</string>
     <string name="projection_content_chords_tooltip">Pokaż pieśń z akordami jako zapis akordowy, akordy nad tekstem</string>

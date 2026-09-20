@@ -164,23 +164,6 @@
     <string name="shortcut_description_play_pause">Redă / Pauză</string>
     <string name="shortcut_description_prev_slide">Slide-ul Anterior</string>
     <string name="shortcut_description_next_slide">Slide-ul Următor</string>
-    <string name="shortcut_description_media_mute">Silențios / Activează Sunet (tasta M)</string>
-    <string name="shortcut_description_spacebar">Redă / Pauză (Bara de Spațiu)</string>
-    <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
-    <string name="shortcut_key_ctrl_o">Ctrl+O</string>
-    <string name="shortcut_key_ctrl_s">Ctrl+S</string>
-    <string name="shortcut_key_ctrl_w">Ctrl+W</string>
-    <string name="shortcut_key_ctrl_q">Ctrl+Q</string>
-    <string name="shortcut_key_ctrl_t">Ctrl+T</string>
-    <string name="shortcut_key_f2">F2</string>
-    <string name="shortcut_key_f1">F1</string>
-    <string name="shortcut_key_f6">F6</string>
-    <string name="shortcut_key_f7">F7</string>
-    <string name="shortcut_key_f8">F8</string>
-    <string name="shortcut_key_f9">F9</string>
-    <string name="shortcut_key_f10">F10</string>
-    <string name="shortcut_key_f11">F11</string>
-    <string name="shortcut_key_f12">F12</string>
     <string name="shortcut_category_tab_switching">Comutare File</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Deschide Scurtăturile de Tastatură</string>
     <string name="shortcut_description_f6_bible">Comută la Fila Biblie</string>
@@ -190,20 +173,7 @@
     <string name="shortcut_description_f10_media">Comută la Fila Media</string>
     <string name="shortcut_description_f11_lower_third">Comută la Fila Lower Third</string>
     <string name="shortcut_description_f12_announcements">Comută la Fila Anunțuri</string>
-    <string name="shortcut_key_delete">Delete</string>
-    <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Dublu clic</string>
-    <string name="shortcut_key_up">↑</string>
-    <string name="shortcut_key_down">↓</string>
-    <string name="shortcut_key_left">←</string>
-    <string name="shortcut_key_right">→</string>
-    <string name="shortcut_key_up_left">← / ↑</string>
-    <string name="shortcut_key_down_right">→ / ↓</string>
-    <string name="shortcut_key_up_left_song">← / ↑ (lista cântări)</string>
-    <string name="shortcut_key_down_right_song">→ / ↓ (lista cântări)</string>
-    <string name="shortcut_key_space">Spațiu</string>
-    <string name="shortcut_key_m">M</string>
-    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
     <string name="shortcut_category_canvas">Fila Canvas</string>
     <string name="shortcut_description_delete_source">Șterge Sursa Selectată</string>
     <string name="shortcut_key_right_click">Clic dreapta</string>
@@ -487,7 +457,6 @@
     <string name="projection_web_go_live_tooltip">Necesită un ecran obișnuit (non-DeckLink) cu Web activat în setările de proiecție</string>
 
     <!-- Bible Tab -->
-    <string name="bible_multi_select_help">Ctrl+Clic pentru a comuta versete, Shift+Clic pentru interval</string>
 
     <!-- Crash Recovery -->
     <string name="crash_video_bg_disabled">Fundalurile video dezactivate după %1$d blocări consecutive.  [Reactivează]  [Închide]</string>
@@ -534,8 +503,8 @@
     <string name="tooltip_new_schedule">Program Nou</string>
     <string name="tooltip_open_schedule">Deschide Program</string>
     <string name="tooltip_save_schedule">Salvează Program</string>
-    <string name="tooltip_undo">Anulare (Ctrl+Z)</string>
-    <string name="tooltip_redo">Refacere (Ctrl+Shift+Z)</string>
+    <string name="tooltip_undo">Anulare (%1$s)</string>
+    <string name="tooltip_redo">Refacere (%1$s)</string>
     <string name="tooltip_note">Notă</string>
     <string name="tooltip_note_done">Salvează nota</string>
     <string name="tooltip_note_clear">Șterge nota</string>
@@ -615,8 +584,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Setări</string>
     <string name="images_suffix">imagini</string>
-    <string name="pictures_arrow_key_hint">← → imaginea următoare/anterioară  ·  ↑ ↓ navigare rânduri</string>
-    <string name="presentation_arrow_key_hint">← → slide următor/anterior</string>
+    <string name="pictures_arrow_key_hint">%1$s imaginea următoare/anterioară  ·  %2$s navigare rânduri</string>
+    <string name="presentation_arrow_key_hint">%1$s — pasul și slide-ul anterior/următor  ·  %2$s — redare/pauză  ·  %3$s — ecran gol</string>
     <string name="pictures_reorder_hint">Shift+glisare miniaturi pentru reordonare</string>
     <string name="slideshow_settings">Setări Prezentare Media</string>
     <string name="transition_settings">Setări Tranziție</string>
@@ -1242,7 +1211,7 @@
     <string name="multi_verse">Versete Multiple</string>
     <string name="new_song">Cântare Nouă</string>
     <string name="back_to_live">Înapoi la Live</string>
-    <string name="line_navigation_hint">Folosiți ← → pentru navigarea liniilor, ↑ ↓ pentru versete</string>
+    <string name="line_navigation_hint">Folosiți %1$s pentru navigarea liniilor, %2$s pentru versete</string>
 
     <!-- Statistics -->
     <string name="statistics">Statistici</string>
@@ -1351,10 +1320,6 @@
     <string name="add_song_samples">Adaugă Mostre de Cântări</string>
     <string name="sps_file_not_supported">%1$s (nesuportat)</string>
     <string name="folder_overwrite_confirm">Dosarul „%1$s" există deja. Aceasta va suprascrie fișierele de cântări existente.\nContinuați?</string>
-    <string name="bible_samples">Biblii Mostră</string>
-    <string name="bible_samples_overwrite_confirm">Există deja un fișier Biblie inclus în acest folder. Aceasta îl va suprascrie.\nContinuați?</string>
-    <string name="bible_samples_copied">S-au copiat %1$d Biblii mostră și au fost setate ca Biblie principală.</string>
-    <string name="add_bible_samples">Adaugă Biblii Mostră (KJV)</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Descarcă Biblii…</string>
@@ -2054,8 +2019,6 @@
     <string name="bible_search_mode_reference">Referință</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Atingeți pentru a schimba — Auto: salt la referințe, căutați restul. Referință: numai navigare. Text: căutați întotdeauna în textul versetului.</string>
-    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
-    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA cântec</string>
     <string name="projection_content_song_la_tooltip">Previzualizare cântec</string>
     <string name="projection_content_chords_tooltip">Afișează un cântec cu acorduri ca grilă de acorduri, acordurile deasupra versurilor</string>

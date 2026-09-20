@@ -222,6 +222,7 @@
     <string name="calendar_cue_auto_tip">%1$s · runs on its own at %2$s — click to fire now</string>
     <string name="calendar_cue_fire_now">Fire this cue now</string>
     <string name="calendar_cue_fired_at">Fired %1$s</string>
+    <string name="calendar_cue_skipped_at">Skipped %1$s</string>
     <string name="calendar_cue_next_in">Next · in %1$d min</string>
     <string name="calendar_run_clock">Run clock</string>
     <string name="calendar_lay_out_times_tip">Time every row from the first — each one starts when the one before it ends</string>

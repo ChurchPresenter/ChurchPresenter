@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Заменить на %1$s</string>
     <string name="calendar_cue_skipped_title">Команда пропущена</string>
     <string name="calendar_cue_skipped_reason">В эфире было другое — при необходимости запустите вручную</string>
+    <string name="calendar_cue_skipped_at">Пропущена %1$s</string>
 </resources>

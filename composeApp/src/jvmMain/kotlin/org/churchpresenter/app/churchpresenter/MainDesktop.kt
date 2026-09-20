@@ -1359,6 +1359,7 @@ fun MainDesktop(
                                     addRow = actions.addRow,
                                     selectItem = actions.selectItem,
                                     currentTiming = actions.currentTiming,
+                                    setServiceStart = actions.setServiceStart,
                                     addLabel = actions.addLabel,
                                     addLowerThird = actions.addLowerThird,
                                     presentScene = { sceneId ->

@@ -205,7 +205,7 @@ fun fireCue(
     when (cue.action) {
         CueAction.COUNTDOWN -> (cue.payload ?: countdownItem(startTime))?.let { host.projectItem(it, ONCE) }
         CueAction.GO_LIVE -> {
-            if (loadRows) host.loadIntoSchedule(rows, emptyMap(), true, true)
+            if (loadRows) host.loadIntoSchedule(rows, emptyMap(), true, true, startTime)
             val first = cue.payload ?: rows.firstOrNull { it.isProjectableByCue() }
             first?.takeIf { it.isProjectableByCue() }?.let { host.projectItem(it, cue.plays) }
         }

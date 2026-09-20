@@ -113,12 +113,16 @@ internal fun CalendarDialogs(
         LoadServiceConfirm(
             currentCount = host.currentSchedule().size,
             onReplace = {
-                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
+                host.loadIntoSchedule(
+                    service.rowsForSchedule(), service.timingForSchedule(), true, service.armed, service.startTime,
+                )
                 dialogs.loadConfirmFor = null
                 onLoaded()
             },
             onAppend = {
-                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), false, service.armed)
+                host.loadIntoSchedule(
+                    service.rowsForSchedule(), service.timingForSchedule(), false, service.armed, service.startTime,
+                )
                 dialogs.loadConfirmFor = null
                 onLoaded()
             },

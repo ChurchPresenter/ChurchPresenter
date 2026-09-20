@@ -141,23 +141,6 @@
     <string name="shortcut_description_play_pause">Reproduzir / Pausar</string>
     <string name="shortcut_description_prev_slide">Slide Anterior</string>
     <string name="shortcut_description_next_slide">Próximo Slide</string>
-    <string name="shortcut_description_media_mute">Silenciar / Ativar Som (tecla M)</string>
-    <string name="shortcut_description_spacebar">Reproduzir / Pausar (Barra de Espaço)</string>
-    <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
-    <string name="shortcut_key_ctrl_o">Ctrl+O</string>
-    <string name="shortcut_key_ctrl_s">Ctrl+S</string>
-    <string name="shortcut_key_ctrl_w">Ctrl+W</string>
-    <string name="shortcut_key_ctrl_q">Ctrl+Q</string>
-    <string name="shortcut_key_ctrl_t">Ctrl+T</string>
-    <string name="shortcut_key_f2">F2</string>
-    <string name="shortcut_key_f1">F1</string>
-    <string name="shortcut_key_f6">F6</string>
-    <string name="shortcut_key_f7">F7</string>
-    <string name="shortcut_key_f8">F8</string>
-    <string name="shortcut_key_f9">F9</string>
-    <string name="shortcut_key_f10">F10</string>
-    <string name="shortcut_key_f11">F11</string>
-    <string name="shortcut_key_f12">F12</string>
     <string name="shortcut_category_tab_switching">Alternância de Abas</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Abrir Atalhos de Teclado</string>
     <string name="shortcut_description_f6_bible">Ir para Aba Bíblia</string>
@@ -167,20 +150,7 @@
     <string name="shortcut_description_f10_media">Ir para Aba Mídia</string>
     <string name="shortcut_description_f11_lower_third">Ir para Aba Lower Third</string>
     <string name="shortcut_description_f12_announcements">Ir para Aba Anúncios</string>
-    <string name="shortcut_key_delete">Delete</string>
-    <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Duplo clique</string>
-    <string name="shortcut_key_up">↑</string>
-    <string name="shortcut_key_down">↓</string>
-    <string name="shortcut_key_left">←</string>
-    <string name="shortcut_key_right">→</string>
-    <string name="shortcut_key_up_left">← / ↑</string>
-    <string name="shortcut_key_down_right">→ / ↓</string>
-    <string name="shortcut_key_up_left_song">← / ↑ (lista de músicas)</string>
-    <string name="shortcut_key_down_right_song">→ / ↓ (lista de músicas)</string>
-    <string name="shortcut_key_space">Espaço</string>
-    <string name="shortcut_key_m">M</string>
-    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
     <string name="shortcut_category_canvas">Aba Canvas</string>
     <string name="shortcut_description_delete_source">Excluir Fonte Selecionada</string>
     <string name="shortcut_key_right_click">Clique direito</string>
@@ -457,7 +427,6 @@
     <string name="projection_web_go_live_tooltip">Requer um monitor comum (não DeckLink) com Web habilitado nas configurações de projeção</string>
 
     <!-- Bible Tab -->
-    <string name="bible_multi_select_help">Ctrl+Clique para alternar versículos, Shift+Clique para intervalo</string>
 
     <!-- Crash Recovery -->
     <string name="crash_video_bg_disabled">Fundos de vídeo desabilitados após %1$d falhas consecutivas.  [Reativar]  [Dispensar]</string>
@@ -504,8 +473,8 @@
     <string name="tooltip_new_schedule">Novo Roteiro</string>
     <string name="tooltip_open_schedule">Abrir Roteiro</string>
     <string name="tooltip_save_schedule">Salvar Roteiro</string>
-    <string name="tooltip_undo">Desfazer (Ctrl+Z)</string>
-    <string name="tooltip_redo">Refazer (Ctrl+Shift+Z)</string>
+    <string name="tooltip_undo">Desfazer (%1$s)</string>
+    <string name="tooltip_redo">Refazer (%1$s)</string>
     <string name="tooltip_note">Nota</string>
     <string name="tooltip_note_done">Guardar nota</string>
     <string name="tooltip_note_clear">Limpar nota</string>
@@ -584,8 +553,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Configurações</string>
     <string name="images_suffix">imagens</string>
-    <string name="pictures_arrow_key_hint">← → próxima/anterior imagem  ·  ↑ ↓ navegar linhas</string>
-    <string name="presentation_arrow_key_hint">← → próximo/anterior slide</string>
+    <string name="pictures_arrow_key_hint">%1$s próxima/anterior imagem  ·  %2$s navegar linhas</string>
+    <string name="presentation_arrow_key_hint">%1$s — passo e slide anterior/próximo  ·  %2$s — reproduzir/pausar  ·  %3$s — tela em branco</string>
     <string name="pictures_reorder_hint">Shift+arrastar miniaturas para reordenar</string>
     <string name="slideshow_settings">Configurações de Slideshow de Mídia</string>
     <string name="transition_settings">Configurações de Transição</string>
@@ -1201,7 +1170,7 @@
     <string name="multi_verse">Múltiplos Versículos</string>
     <string name="new_song">Nova Música</string>
     <string name="back_to_live">Voltar ao Vivo</string>
-    <string name="line_navigation_hint">Use ← → para navegar entre linhas, ↑ ↓ para versículos</string>
+    <string name="line_navigation_hint">Use %1$s para navegar entre linhas, %2$s para versículos</string>
 
     <!-- Statistics -->
     <string name="statistics">Estatísticas</string>
@@ -1310,10 +1279,6 @@
     <string name="add_song_samples">Adicionar Amostras de Músicas</string>
     <string name="sps_file_not_supported">%1$s (não suportado)</string>
     <string name="folder_overwrite_confirm">A pasta "%1$s" já existe. Isso substituirá os arquivos de música existentes.\nContinuar?</string>
-    <string name="bible_samples">Bíblias de Amostra</string>
-    <string name="bible_samples_overwrite_confirm">Já existe um arquivo de Bíblia incluído nesta pasta. Isso irá sobrescrevê-lo.\nContinuar?</string>
-    <string name="bible_samples_copied">%1$d Bíblia(s) de amostra copiada(s) e definida(s) como Bíblia principal.</string>
-    <string name="add_bible_samples">Adicionar Bíblias de Amostra (KJV)</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Baixar Bíblias…</string>
@@ -2046,8 +2011,6 @@
     <string name="bible_search_mode_reference">Referência</string>
     <string name="bible_search_mode_text">Texto</string>
     <string name="bible_search_mode_tooltip">Toque para alternar — Auto: ir para referências, pesquisar o restante. Referência: apenas navegar. Texto: sempre pesquisar no texto do versículo.</string>
-    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
-    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA cântico</string>
     <string name="projection_content_song_la_tooltip">Visualização antecipada do cântico</string>
     <string name="projection_content_chords_tooltip">Mostrar uma música com acordes como cifra, com os acordes acima da letra</string>

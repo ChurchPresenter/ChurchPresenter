@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">%1$s ஆக மாற்று</string>
     <string name="calendar_cue_skipped_title">க்யூ தவிர்க்கப்பட்டது</string>
     <string name="calendar_cue_skipped_reason">வேறு ஏதோ நேரலையில் இருந்தது — இன்னும் ஓட வேண்டுமெனில் கைமுறையாக இயக்கவும்</string>
+    <string name="calendar_cue_skipped_at">தவிர்க்கப்பட்டது %1$s</string>
 </resources>

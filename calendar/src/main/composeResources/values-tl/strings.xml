@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Palitan ng %1$s</string>
     <string name="calendar_cue_skipped_title">Nilaktawan ang cue</string>
     <string name="calendar_cue_skipped_reason">May ibang nakalabas — patakbuhin nang mano-mano kung kailangan pa</string>
+    <string name="calendar_cue_skipped_at">Nilaktawan %1$s</string>
 </resources>

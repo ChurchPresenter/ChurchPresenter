@@ -365,7 +365,9 @@ private fun ColumnScope.OpenServicePane(
         onLoad = {
             // Only ask when replacing would actually discard something.
             if (host.currentSchedule().isEmpty()) {
-                host.loadIntoSchedule(service.rowsForSchedule(), service.timingForSchedule(), true, service.armed)
+                host.loadIntoSchedule(
+                    service.rowsForSchedule(), service.timingForSchedule(), true, service.armed, service.startTime,
+                )
                 // The run of show is in the Schedule tab now, which is where the next thing
                 // happens -- so get out of the way.
                 onClose?.invoke()

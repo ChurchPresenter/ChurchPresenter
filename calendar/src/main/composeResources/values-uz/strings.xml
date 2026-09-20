@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">%1$s bilan almashtirish</string>
     <string name="calendar_cue_skipped_title">Buyruq o‘tkazib yuborildi</string>
     <string name="calendar_cue_skipped_reason">Efirda boshqa narsa bor edi — kerak bo‘lsa qo‘lda ishga tushiring</string>
+    <string name="calendar_cue_skipped_at">O‘tkazib yuborildi %1$s</string>
 </resources>

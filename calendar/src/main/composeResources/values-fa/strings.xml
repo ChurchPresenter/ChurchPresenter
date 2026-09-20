@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">جایگزینی با %1$s</string>
     <string name="calendar_cue_skipped_title">فرمان رد شد</string>
     <string name="calendar_cue_skipped_reason">چیز دیگری روی صفحه بود — اگر باید اجرا شود، دستی اجرایش کنید</string>
+    <string name="calendar_cue_skipped_at">رد شد %1$s</string>
 </resources>

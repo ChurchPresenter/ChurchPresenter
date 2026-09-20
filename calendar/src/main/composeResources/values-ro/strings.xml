@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Înlocuiește cu %1$s</string>
     <string name="calendar_cue_skipped_title">Cue omis</string>
     <string name="calendar_cue_skipped_reason">Altceva era în direct — declanșează-l manual dacă tot trebuie să ruleze</string>
+    <string name="calendar_cue_skipped_at">Omis %1$s</string>
 </resources>

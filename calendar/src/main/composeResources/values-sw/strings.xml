@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Badilisha na %1$s</string>
     <string name="calendar_cue_skipped_title">Kiashiria kimerukwa</string>
     <string name="calendar_cue_skipped_reason">Kitu kingine kilikuwa hewani — kianzishe kwa mkono ikiwa bado kinapaswa kwenda</string>
+    <string name="calendar_cue_skipped_at">Kimerukwa %1$s</string>
 </resources>

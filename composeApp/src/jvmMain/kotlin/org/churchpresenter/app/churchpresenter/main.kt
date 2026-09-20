@@ -1205,9 +1205,14 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 }
                             }
                             val loadFromCalendar: (
-                                List<ScheduleItem>, Map<String, RowTiming>, Boolean, Boolean,
-                            ) -> Unit = { items, timing, replace, armed ->
+                                List<ScheduleItem>, Map<String, RowTiming>, Boolean, Boolean, String?,
+                            ) -> Unit = { items, timing, replace, armed, startTime ->
+                                // The service's start anchors the Schedule's clock column where
+                                // no row is pinned. Appending to a schedule keeps the start it
+                                // already runs from; appending to an empty one adopts this one's.
+                                val wasEmpty = currentScheduleItems.isEmpty()
                                 if (replace) currentScheduleActions.clearSchedule()
+                                if (replace || wasEmpty) currentScheduleActions.setServiceStart(startTime)
                                 // Rows go in whole, ids and all: a plan's headings, lower thirds,
                                 // scenes and cues survive the trip, and each row's timing lands on it.
                                 items.forEach { item ->

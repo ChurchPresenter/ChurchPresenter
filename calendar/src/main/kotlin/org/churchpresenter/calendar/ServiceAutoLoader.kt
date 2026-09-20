@@ -79,7 +79,7 @@ class ServiceAutoLoader(
             // arrived from one that called into a no-op while last week's schedule sat there.
             service.isInSchedule(host.currentSchedule()) -> landed += key
             else -> host.loadIntoSchedule(
-                service.rowsForSchedule(), service.timingForSchedule(), true, service.armed,
+                service.rowsForSchedule(), service.timingForSchedule(), true, service.armed, service.startTime,
             )
         }
     }

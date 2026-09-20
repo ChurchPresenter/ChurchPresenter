@@ -140,6 +140,8 @@ data class ScheduleTabActions(
     /** Selects a row, so the Schedule shows what the automation has just put on screen. */
     val selectItem: (id: String) -> Unit = {},
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
+    /** The loaded service's `HH:mm` start, the clock column's anchor where no row is pinned. */
+    val setServiceStart: (startTime: String?) -> Unit = {},
 )
 
 private const val ZOOM_DEFAULT = 100
@@ -276,6 +278,7 @@ fun ScheduleTab(
                 addCue           = { item -> viewModel.addCue(item) },
                 addRow           = { item, timing -> viewModel.addRow(item, timing) },
                 selectItem       = { id -> viewModel.selectOnly(id) },
+                setServiceStart  = { viewModel.setServiceStart(it) },
                 currentTiming    = { viewModel.timing.toMap() },
             )
         )
@@ -318,8 +321,8 @@ fun ScheduleTab(
 
         // When each row is expected to go live, reckoned from the first pinned row across the
         // whole schedule -- so every row shows a time, not only the ones carrying a pin.
-        val rowClocks = remember(scheduleItems, viewModel.timing) {
-            scheduleClocks(scheduleItems, viewModel.timing)
+        val rowClocks = remember(scheduleItems, viewModel.timing, viewModel.serviceStartTime) {
+            scheduleClocks(scheduleItems, viewModel.timing, viewModel.serviceStartTime)
         }
 
         val viewModelState = rememberUpdatedState(viewModel)

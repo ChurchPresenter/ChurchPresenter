@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">%1$s ile değiştir</string>
     <string name="calendar_cue_skipped_title">Cue atlandı</string>
     <string name="calendar_cue_skipped_reason">Yayında başka bir şey vardı — yine de gitmesi gerekiyorsa elle tetikleyin</string>
+    <string name="calendar_cue_skipped_at">Atlandı %1$s</string>
 </resources>

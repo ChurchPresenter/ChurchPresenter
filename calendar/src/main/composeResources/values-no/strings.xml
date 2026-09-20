@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Erstatt med %1$s</string>
     <string name="calendar_cue_skipped_title">Cue hoppet over</string>
     <string name="calendar_cue_skipped_reason">Noe annet var live — utløs den manuelt hvis den fortsatt skal gå</string>
+    <string name="calendar_cue_skipped_at">Hoppet over %1$s</string>
 </resources>

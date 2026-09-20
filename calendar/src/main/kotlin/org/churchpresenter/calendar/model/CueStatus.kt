@@ -5,19 +5,33 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.time.Duration
 import java.time.LocalTime
 
-/** Where one cue stands against the clock: already fired, the next to fire, or neither. */
-data class CueStatus(val fired: Boolean, val isNext: Boolean, val minutesUntil: Long)
+/**
+ * Where one cue stands against the clock: already fired, the next to fire, or neither.
+ *
+ * [skipped] is a cue whose time came while the operator was live with something else, so the
+ * engine stood aside -- see `CueRunner.operatorLive`. Its time is past, but it did not fire, and
+ * the run of show must not say it did.
+ */
+data class CueStatus(
+    val fired: Boolean,
+    val isNext: Boolean,
+    val minutesUntil: Long,
+    val skipped: Boolean = false,
+)
 
 /**
  * Each cue row's [CueStatus] at [now], keyed by row id -- empty when there is no clock to stand
- * against (a service on another day). A cue that is skipped, or disarmed with the rest, is never
- * fired and never next. [startTime] resolves the rows that are not pinned.
+ * against (a service on another day). A cue that is unticked, or disarmed with the rest, is never
+ * fired and never next. [startTime] resolves the rows that are not pinned. [skippedIds] are the
+ * cues the engine reported as skipped this session, from the feed: the clock alone would call
+ * them fired.
  */
 fun cueStatuses(
     items: List<ScheduleItem>,
     startTime: String?,
     armed: Boolean,
     now: LocalTime?,
+    skippedIds: Set<String> = emptySet(),
 ): Map<String, CueStatus> {
     if (now == null || !armed) return emptyMap()
     val live = items.filterIsInstance<ScheduleItem.CueItem>()
@@ -25,15 +39,19 @@ fun cueStatuses(
         .mapNotNull { cue -> cueFireTime(cue, startTime)?.let { cue to it } }
     val upcoming = live.filter { (_, at) -> at.isAfter(now) }.minByOrNull { (_, at) -> at }?.first
     return live.associate { (cue, at) ->
+        val past = !at.isAfter(now)
+        val skipped = past && cue.id in skippedIds
         cue.id to CueStatus(
-            fired = !at.isAfter(now),
+            fired = past && !skipped,
             isNext = cue.id == upcoming?.id,
             minutesUntil = Duration.between(now, at).toMinutes(),
+            skipped = skipped,
         )
     }
 }
 
-fun PlannedService.cueStatuses(now: LocalTime?): Map<String, CueStatus> = cueStatuses(items, startTime, armed, now)
+fun PlannedService.cueStatuses(now: LocalTime?, skippedIds: Set<String> = emptySet()): Map<String, CueStatus> =
+    cueStatuses(items, startTime, armed, now, skippedIds)
 
 /**
  * The rows as they go into the live schedule: the same list, with every cue's time written down

@@ -24,14 +24,17 @@ data class CalendarHost(
      * which, and only when there is something to lose — see `LoadServiceConfirm`. [armed] is the
      * service's own switch, carried over so what was armed on the calendar is armed in the
      * Schedule, where the cues actually fire from. [timing] is how each row runs -- start, length,
-     * repeats, end -- keyed by row id, for the rows that have one.
+     * repeats, end -- keyed by row id, for the rows that have one. [startTime] is the service's
+     * `HH:mm` start, which the Schedule reckons its clock times from when no row is pinned --
+     * null when the load has no service behind it.
      */
     val loadIntoSchedule: (
         items: List<ScheduleItem>,
         timing: Map<String, RowTiming>,
         replace: Boolean,
         armed: Boolean,
-    ) -> Unit = { _, _, _, _ -> },
+        startTime: String?,
+    ) -> Unit = { _, _, _, _, _ -> },
 
     /**
      * Puts one item on screen, the way a tap on it in the Schedule tab would, and plays it

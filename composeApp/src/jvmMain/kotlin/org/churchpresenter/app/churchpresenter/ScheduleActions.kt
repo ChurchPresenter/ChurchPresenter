@@ -33,6 +33,11 @@ data class ScheduleActions(
     /** How each row of the schedule runs on its own -- what the automation engine reads each tick. */
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
     /**
+     * The `HH:mm` start of the service the schedule was loaded from, or null to forget it. What
+     * the Schedule's clock times are reckoned from when no row carries a pin.
+     */
+    val setServiceStart: (startTime: String?) -> Unit = {},
+    /**
      * The two structural rows, added for the Calendar Manager.
      *
      * A planned run of show carries its section headings as [ScheduleItem.LabelItem]s, so loading a

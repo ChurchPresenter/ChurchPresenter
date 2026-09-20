@@ -74,6 +74,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_
 import org.churchpresenter.calendar.generated.resources.calendar_timing_follows_stranded
 import org.churchpresenter.calendar.generated.resources.calendar_usually
 import org.churchpresenter.calendar.generated.resources.calendar_usually_tip
+import org.churchpresenter.calendar.CueFeed
+import androidx.compose.runtime.collectAsState
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.PreflightProblem
 import org.churchpresenter.calendar.model.RowClock
@@ -153,7 +155,11 @@ internal fun RunOfShowPane(
     val clocks = remember(service) { runClocks(service) }
     // Rows that wait for a turn nothing gives them -- see followsWithoutHandoff.
     val stranded = remember(service) { service.followsWithoutHandoff() }
-    val statuses = remember(service, now) { service.cueStatuses(now) }
+    // What the engine reported skipped this session: past its time, but not fired -- the clock
+    // alone cannot tell the two apart.
+    val feed by CueFeed.fired.collectAsState()
+    val skippedIds = remember(feed) { feed.filter { it.skipped }.mapTo(HashSet()) { it.row.id } }
+    val statuses = remember(service, now, skippedIds) { service.cueStatuses(now, skippedIds) }
     val listState = rememberLazyListState()
     // A drop lands on an item or a section, never on a cue; the keys are the rows' ids, and the
     // position each stands for is looked up here rather than assumed from the list.

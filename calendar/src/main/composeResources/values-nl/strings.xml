@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Vervangen door %1$s</string>
     <string name="calendar_cue_skipped_title">Cue overgeslagen</string>
     <string name="calendar_cue_skipped_reason">Er was iets anders live — vuur hem handmatig af als hij alsnog moet</string>
+    <string name="calendar_cue_skipped_at">Overgeslagen %1$s</string>
 </resources>

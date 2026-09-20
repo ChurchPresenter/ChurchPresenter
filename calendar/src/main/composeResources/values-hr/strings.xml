@@ -318,4 +318,5 @@
     <string name="calendar_pick_replace_with">Zamijeni s %1$s</string>
     <string name="calendar_cue_skipped_title">Cue preskočen</string>
     <string name="calendar_cue_skipped_reason">Uživo je bilo nešto drugo — pokrenite ručno ako i dalje treba</string>
+    <string name="calendar_cue_skipped_at">Preskočeno %1$s</string>
 </resources>

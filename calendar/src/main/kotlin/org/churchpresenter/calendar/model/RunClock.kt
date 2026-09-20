@@ -99,15 +99,22 @@ fun PlannedService.followsWithoutHandoff(): Set<String> {
  *
  * The Schedule tab is where a service actually runs, and until this it could only show a time on a
  * row that carried a pin: everything between two pinned rows sat blank, though the plan says
- * exactly when each one lands. Anchored on the first pinned row, because a schedule has no start
- * time of its own; with no pinned row there is nothing to reckon from and the map is empty.
+ * exactly when each one lands. Anchored on the first pinned row, else on [startTime] -- the start
+ * of the service the schedule was loaded from, which is what a plan with no pins at all runs
+ * from. With neither there is nothing to reckon from and the map is empty.
  *
  * [RowClock.exact] goes false once a row of unknown length has been passed -- every time after it
  * is a guess, and the caller draws it as one.
  */
-fun scheduleClocks(items: List<ScheduleItem>, timing: Map<String, RowTiming>): Map<String, RowClock> {
+fun scheduleClocks(
+    items: List<ScheduleItem>,
+    timing: Map<String, RowTiming>,
+    startTime: String? = null,
+): Map<String, RowClock> {
     val rows = items.filter { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
-    var clock = rows.firstNotNullOfOrNull { parseStoredTime(timing[it.id]?.startAt.orEmpty()) } ?: return emptyMap()
+    var clock = rows.firstNotNullOfOrNull { parseStoredTime(timing[it.id]?.startAt.orEmpty()) }
+        ?: parseStoredTime(startTime.orEmpty())
+        ?: return emptyMap()
     var exact = true
     return rows.associate { row ->
         val plan = timing[row.id] ?: RowTiming.DEFAULT

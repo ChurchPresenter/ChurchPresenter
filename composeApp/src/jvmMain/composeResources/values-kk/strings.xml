@@ -317,7 +317,7 @@
     <string name="please_select_file_first">Алдымен тізімнен файлды таңдаңыз.</string>
     <string name="no_file_selected_title">Файл таңдалмаған</string>
     <string name="confirm_delete">Жоюды растау</string>
-    <string name="confirm_delete_file">'%s' жоюға сенімдісіз бе?</string>
+    <string name="confirm_delete_file">«%1$s» жоюға сенімдісіз бе?</string>
     <string name="import_error">Импорттау қатесі</string>
     <string name="delete_error">Жою қатесі</string>
 
@@ -376,10 +376,10 @@
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Мақсатты қалта жоқ: %s</string>
-    <string name="error_copying_file">%s көшіру қатесі: %s</string>
+    <string name="error_target_directory_not_exist">Мақсатты қалта жоқ: %1$s</string>
+    <string name="error_copying_file">%1$s көшіру қатесі: %2$s</string>
     <string name="error_failed_delete">Файлды жою мүмкін болмады</string>
-    <string name="error_deleting_file">Файлды жою қатесі: %s</string>
+    <string name="error_deleting_file">Файлды жою қатесі: %1$s</string>
     <string name="warning">Ескерту</string>
 
     <!-- Edit Song Dialog -->
@@ -395,8 +395,8 @@
     <string name="tooltip_new_schedule">Жаңа бағдарлама</string>
     <string name="tooltip_open_schedule">Бағдарламаны ашу</string>
     <string name="tooltip_save_schedule">Бағдарламаны сақтау</string>
-    <string name="tooltip_undo">Болдырмау (Ctrl+Z)</string>
-    <string name="tooltip_redo">Қайталау (Ctrl+Shift+Z)</string>
+    <string name="tooltip_undo">Болдырмау (%1$s)</string>
+    <string name="tooltip_redo">Қайталау (%1$s)</string>
     <string name="tooltip_note">Ескертпе</string>
     <string name="tooltip_note_done">Ескертпені сақтау</string>
     <string name="tooltip_note_clear">Ескертпені тазалау</string>
@@ -454,8 +454,8 @@
     <string name="milliseconds_suffix">мс</string>
     <string name="settings">Параметрлер</string>
     <string name="images_suffix">сурет</string>
-    <string name="pictures_arrow_key_hint">← → ↑ ↓ суреттер арасында ауысу</string>
-    <string name="presentation_arrow_key_hint">← → келесі/алдыңғы слайд</string>
+    <string name="pictures_arrow_key_hint">%1$s келесі/алдыңғы сурет  ·  %2$s жолдар бойынша</string>
+    <string name="presentation_arrow_key_hint">%1$s — алдыңғы/келесі қадам және слайд  ·  %2$s — ойнату/кідірту  ·  %3$s — қара экран</string>
     <string name="pictures_reorder_hint">Shift+сүйреу арқылы ретін өзгерту</string>
     <string name="slideshow_settings">Слайдшоу параметрлері</string>
     <string name="transition_settings">Өту параметрлері</string>
@@ -642,8 +642,6 @@
     <string name="shortcut_description_play_pause">Ойнату / Үзіліс</string>
     <string name="shortcut_description_prev_slide">Алдыңғы слайд</string>
     <string name="shortcut_description_next_slide">Келесі слайд</string>
-    <string name="shortcut_description_media_mute">Дыбысты өшіру (M)</string>
-    <string name="shortcut_description_spacebar">Ойнату / Үзіліс (Бос орын)</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Пернелер тіркесімдерін ашу</string>
     <string name="shortcut_description_f6_bible">Киелі кітап қойындысы</string>
     <string name="shortcut_description_f7_songs">Әндер қойындысы</string>
@@ -652,35 +650,7 @@
     <string name="shortcut_description_f10_media">Медиа қойындысы</string>
     <string name="shortcut_description_f11_lower_third">Төменгі үштен бір қойындысы</string>
     <string name="shortcut_description_f12_announcements">Хабарландырулар қойындысы</string>
-    <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
-    <string name="shortcut_key_ctrl_o">Ctrl+O</string>
-    <string name="shortcut_key_ctrl_s">Ctrl+S</string>
-    <string name="shortcut_key_ctrl_w">Ctrl+W</string>
-    <string name="shortcut_key_ctrl_q">Ctrl+Q</string>
-    <string name="shortcut_key_ctrl_t">Ctrl+T</string>
-    <string name="shortcut_key_f1">F1</string>
-    <string name="shortcut_key_f2">F2</string>
-    <string name="shortcut_key_f6">F6</string>
-    <string name="shortcut_key_f7">F7</string>
-    <string name="shortcut_key_f8">F8</string>
-    <string name="shortcut_key_f9">F9</string>
-    <string name="shortcut_key_f10">F10</string>
-    <string name="shortcut_key_f11">F11</string>
-    <string name="shortcut_key_f12">F12</string>
-    <string name="shortcut_key_delete">Delete</string>
-    <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Екі рет басу</string>
-    <string name="shortcut_key_up">↑</string>
-    <string name="shortcut_key_down">↓</string>
-    <string name="shortcut_key_left">←</string>
-    <string name="shortcut_key_right">→</string>
-    <string name="shortcut_key_up_left">← / ↑</string>
-    <string name="shortcut_key_down_right">→ / ↓</string>
-    <string name="shortcut_key_up_left_song">← / ↑ (әндер тізімі)</string>
-    <string name="shortcut_key_down_right_song">→ / ↓ (әндер тізімі)</string>
-    <string name="shortcut_key_space">Бос орын</string>
-    <string name="shortcut_key_m">M</string>
-    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
     <string name="shortcut_category_canvas">Кенеп қойындысы</string>
     <string name="shortcut_description_delete_source">Таңдалған дереккөзді жою</string>
     <string name="shortcut_key_right_click">Оң жақ шерту</string>
@@ -952,7 +922,7 @@
     <string name="website_url_label">URL</string>
     <string name="new_song">Жаңа ән</string>
     <string name="back_to_live">Тікелей эфірге оралу</string>
-    <string name="line_navigation_hint">← → жолдар бойынша, ↑ ↓ шумақтар бойынша</string>
+    <string name="line_navigation_hint">%1$s жолдар бойынша, %2$s шумақтар бойынша</string>
     <string name="multi_verse">Бірнеше аят</string>
 
     <!-- Statistics -->
@@ -1062,10 +1032,6 @@
     <string name="add_song_samples">Ән үлгілерін қосу</string>
     <string name="sps_file_not_supported">%1$s (қолданылмайды)</string>
     <string name="folder_overwrite_confirm">\"%1$s\" қалтасы бар. Бұл бар ән файлдарын қайта жазады.\nЖалғастыру ма?</string>
-    <string name="bible_samples">Библия үлгілері</string>
-    <string name="bible_samples_overwrite_confirm">Бұл қалтада қосымшамен бірге келетін Библия файлы бұрыннан бар. Ол қайта жазылады.\nЖалғастыру керек пе?</string>
-    <string name="bible_samples_copied">%1$d Библия үлгісі көшірілді және негізгі Библия ретінде орнатылды.</string>
-    <string name="add_bible_samples">Библия үлгілерін қосу (KJV)</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Киелі Кітаптарды жүктеп алу…</string>
@@ -1705,7 +1671,6 @@
     <string name="song_columns">Бағандарды сүзу</string>
     <string name="api_key_qr_title">API кілтінің QR коды</string>
     <string name="background_follow_default_option">Әдепкіге сай</string>
-    <string name="bible_multi_select_help">Ctrl+Click – дарақ аяттар, Shift+Click – ауқым</string>
     <string name="bible_no_primary_title">Негізгі Ізгі хабар баптандырылмаған</string>
     <string name="bible_no_primary_hint">⚙ Параметрлерді ашып, «Ізгі хабар» қойындысына өтіңіз, содан кейін:</string>
     <string name="bible_no_primary_step1">1. Ізгі хабар қалтасын көрсетіңіз</string>
@@ -2024,8 +1989,6 @@
     <string name="bible_search_mode_reference">Сілтеме</string>
     <string name="bible_search_mode_text">Мәтін</string>
     <string name="bible_search_mode_tooltip">Ауыстыру үшін түртіңіз — Авто: сілтемелерге өту, қалғанын іздеу. Сілтеме: тек шарлау. Мәтін: аятта мәтінді әрдайым іздеу.</string>
-    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
-    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">Ән LA</string>
     <string name="projection_content_song_la_tooltip">Ән алдын ала қарау</string>
     <string name="projection_content_chords_tooltip">Аккордтары бар әнді аккорд кестесі ретінде көрсету, аккордтар сөздердің үстінде</string>
