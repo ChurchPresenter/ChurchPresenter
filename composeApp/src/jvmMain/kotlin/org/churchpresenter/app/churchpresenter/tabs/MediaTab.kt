@@ -179,6 +179,8 @@ fun MediaTab(
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same media, kept for the Calendar Manager. */
     onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    /** The clip as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
+    onWentLive: ((ScheduleItem) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -443,6 +445,14 @@ fun MediaTab(
                             presenterManager.setShowPresenterWindow(true)
                             presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
                             viewModel.play()
+                            onWentLive?.invoke(
+                                ScheduleItem.MediaItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    mediaUrl = viewModel.mediaUrl,
+                                    mediaTitle = viewModel.mediaTitle,
+                                    mediaType = viewModel.mediaType,
+                                )
+                            )
                             onInstanceLinkSendProject?.invoke(
                                 ScheduleItem.MediaItem(
                                     id = java.util.UUID.randomUUID().toString(),

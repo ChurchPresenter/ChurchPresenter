@@ -1619,6 +1619,7 @@ fun MainDesktop(
                                 onInstanceLinkSendNextPicture = instanceLinkSendNextPicture,
                                 onInstanceLinkSendPreviousPicture = instanceLinkSendPreviousPicture,
                                 instanceLinkFetchPictureImageBytes = instanceLinkFetchPictureImageBytes,
+                                onWentLive = onRowWentLive,
                                 selectedPictureItem = selectedPictureItem,
                                 selectedPictureItemVersion = selectedPictureItemVersion,
                                 presenterManager = presenterManager,
@@ -1642,6 +1643,7 @@ fun MainDesktop(
                                 onInstanceLinkSendNextSlide = instanceLinkSendNextSlide,
                                 onInstanceLinkSendPreviousSlide = instanceLinkSendPreviousSlide,
                                 instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
+                                onWentLive = onRowWentLive,
                                 selectedPresentationItem = selectedPresentationItem,
                                 selectedPresentationItemVersion = selectedPresentationItemVersion,
                                 presenterManager = presenterManager,
@@ -1672,6 +1674,7 @@ fun MainDesktop(
                                         UUID.randomUUID().toString(), mediaUrl, mediaTitle, mediaType,
                                     )
                                 },
+                                onWentLive = onRowWentLive,
                                 selectedMediaItem = selectedMediaItem,
                                 selectedMediaItemVersion = selectedMediaItemVersion,
                                 presenterManager = presenterManager,
@@ -1761,6 +1764,7 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
                                 sceneViewModel = sceneViewModel,
+                                onWentLive = onRowWentLive,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)
                                 },

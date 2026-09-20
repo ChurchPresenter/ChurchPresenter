@@ -2803,4 +2803,7 @@
     <string name="song_background_category_cameras">Cámaras</string>
     <string name="song_background_camera_live">cámara en directo</string>
     <string name="schedule_cue_skipped">Omitido %1$s — había otra cosa en directo</string>
+    <string name="schedule_behind_plan">%1$s de retraso</string>
+    <string name="schedule_ahead_of_plan">%1$s de adelanto</string>
+    <string name="schedule_on_plan">según lo previsto</string>
 </resources>

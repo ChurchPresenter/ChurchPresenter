@@ -106,6 +106,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -168,6 +169,8 @@ fun CanvasTab(
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     /** Save preset, to the left of Add to Schedule: the same scene, kept for the Calendar Manager. */
     onSavePreset: ((sceneId: String, sceneName: String) -> Unit)? = null,
+    /** The scene as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
+    onWentLive: ((ScheduleItem) -> Unit)? = null,
     dialogDismissSignal: Int = 0,
     /** The cameras the source panel offers, or null to ask this machine — a test pins it. */
     cameraDevices: List<CameraDevice>? = null,
@@ -867,6 +870,13 @@ fun CanvasTab(
                                 presenterManager.setActiveScene(currentScene)
                                 presenterManager.setPresentingMode(Presenting.CANVAS)
                                 presenterManager.setShowPresenterWindow(true)
+                                onWentLive?.invoke(
+                                    ScheduleItem.SceneItem(
+                                        id = java.util.UUID.randomUUID().toString(),
+                                        sceneId = currentScene.id,
+                                        sceneName = currentScene.name,
+                                    )
+                                )
                             },
                             tooltipText = stringResource(Res.string.go_live)
                         )

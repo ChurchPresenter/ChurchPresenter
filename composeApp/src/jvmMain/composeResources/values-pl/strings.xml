@@ -2775,4 +2775,7 @@
     <string name="song_background_category_cameras">Kamery</string>
     <string name="song_background_camera_live">kamera na żywo</string>
     <string name="schedule_cue_skipped">Pominięto %1$s — na żywo było coś innego</string>
+    <string name="schedule_behind_plan">%1$s opóźnienia</string>
+    <string name="schedule_ahead_of_plan">%1$s przed czasem</string>
+    <string name="schedule_on_plan">zgodnie z planem</string>
 </resources>

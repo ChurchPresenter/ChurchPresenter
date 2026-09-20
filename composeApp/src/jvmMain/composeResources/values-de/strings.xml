@@ -2776,4 +2776,7 @@
     <string name="song_background_category_cameras">Kameras</string>
     <string name="song_background_camera_live">Live-Kamera</string>
     <string name="schedule_cue_skipped">Übersprungen %1$s — etwas anderes war live</string>
+    <string name="schedule_behind_plan">%1$s zurück</string>
+    <string name="schedule_ahead_of_plan">%1$s voraus</string>
+    <string name="schedule_on_plan">im Plan</string>
 </resources>

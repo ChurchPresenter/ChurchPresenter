@@ -8,6 +8,7 @@ import churchpresenter.composeapp.generated.resources.schedule_timing_blank
 import churchpresenter.composeapp.generated.resources.schedule_timing_loop
 import churchpresenter.composeapp.generated.resources.schedule_timing_next
 import churchpresenter.composeapp.generated.resources.schedule_timing_times
+import org.churchpresenter.calendar.model.PlanDrift
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.formatDuration
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
+import churchpresenter.composeapp.generated.resources.schedule_ahead_of_plan
+import churchpresenter.composeapp.generated.resources.schedule_behind_plan
+import churchpresenter.composeapp.generated.resources.schedule_on_plan
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.churchpresenter.app.churchpresenter.utils.scheduleShowKindDetails
@@ -59,6 +64,7 @@ internal fun ScheduleRowTitleLine(
     isSelected: Boolean,
     timing: RowTiming,
     clock: RowClock?,
+    drift: PlanDrift? = null,
 ) {
         val titleColor = MaterialTheme.colorScheme.onSurface
 
@@ -109,8 +115,44 @@ internal fun ScheduleRowTitleLine(
                 softWrap = false,
             )
         }
+        if (drift != null) PlanDriftBadge(drift)
     }
 }
+
+/**
+ * `3:40 behind` on the live row -- the one number a service leader wants during a service.
+ *
+ * Red once behind by more than [DRIFT_SLACK_SECONDS], the plan's own tertiary when ahead by as
+ * much, and quietly `on plan` in between: a service is never exactly on time, and a badge that
+ * flickered between the two on every row change would be read as noise. Dimmed when the plan it
+ * is measured against is itself a guess -- see [PlanDrift.exact].
+ */
+@Composable
+private fun PlanDriftBadge(drift: PlanDrift) {
+    val scheme = MaterialTheme.colorScheme
+    val magnitude = formatDuration(kotlin.math.abs(drift.seconds))
+    val (text, tone) = when {
+        drift.seconds > DRIFT_SLACK_SECONDS -> stringResource(Res.string.schedule_behind_plan, magnitude) to scheme.error
+        drift.seconds < -DRIFT_SLACK_SECONDS -> stringResource(Res.string.schedule_ahead_of_plan, magnitude) to scheme.tertiary
+        else -> stringResource(Res.string.schedule_on_plan) to scheme.onSurfaceVariant
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = tone.copy(alpha = if (drift.exact) 1f else ESTIMATE_ALPHA),
+        maxLines = 1,
+        softWrap = false,
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(tone.copy(alpha = DRIFT_TINT))
+            .padding(horizontal = 5.dp, vertical = 1.dp),
+    )
+}
+
+/** Within half a minute either way, a service is on plan. */
+private const val DRIFT_SLACK_SECONDS = 30
+private const val DRIFT_TINT = 0.14f
 
 /** `Loop · then next` -- what the row does around its run, under the title. */
 @Composable

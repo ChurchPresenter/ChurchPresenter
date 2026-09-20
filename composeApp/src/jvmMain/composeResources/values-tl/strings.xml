@@ -2820,4 +2820,7 @@
     <string name="song_background_camera_live">live na camera</string>
     <string name="customize_tooltip_separator">, </string>
     <string name="schedule_cue_skipped">Nilaktawan %1$s — may ibang nakalabas</string>
+    <string name="schedule_behind_plan">%1$s huli</string>
+    <string name="schedule_ahead_of_plan">%1$s maaga</string>
+    <string name="schedule_on_plan">ayon sa plano</string>
 </resources>

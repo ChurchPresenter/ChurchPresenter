@@ -569,17 +569,24 @@ class PicturesViewModel(
      * generates a fresh id rather than preserving one a client sent, a Controller has no reliable way
      * to predict it, so every go-live goes through the schedule-add-and-present path instead.
      */
-    fun goLive(presenterManager: PresenterManager, onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null) {
+    fun goLive(
+        presenterManager: PresenterManager,
+        onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+        /** The folder as a schedule row, reported as it goes on screen -- see `LiveDurationLog`. */
+        onWentLive: ((ScheduleItem) -> Unit)? = null,
+    ) {
         val currentImage = getCurrentImageFile() ?: return
         presenterManager.setSelectedImagePath(currentImage.absolutePath)
         val nextIndex = _selectedImageIndex.value + 1
         presenterManager.setNextImagePath(_images.getOrNull(nextIndex)?.absolutePath)
         presenterManager.setPresentingMode(Presenting.PICTURES)
         presenterManager.setShowPresenterWindow(true)
-        onInstanceLinkSendProject?.let { send ->
-            getScheduleData()?.let { (folderPath, folderName, imageCount) ->
-                send(ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
-            }
+        val row = getScheduleData()?.let { (folderPath, folderName, imageCount) ->
+            ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount)
+        }
+        if (row != null) {
+            onWentLive?.invoke(row)
+            onInstanceLinkSendProject?.invoke(row)
         }
     }
 

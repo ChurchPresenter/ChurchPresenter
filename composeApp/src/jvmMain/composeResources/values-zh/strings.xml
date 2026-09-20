@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">摄像头</string>
     <string name="song_background_camera_live">实时摄像头</string>
     <string name="schedule_cue_skipped">已跳过 %1$s — 当时正在显示其他内容</string>
+    <string name="schedule_behind_plan">落后 %1$s</string>
+    <string name="schedule_ahead_of_plan">提前 %1$s</string>
+    <string name="schedule_on_plan">按计划</string>
 </resources>

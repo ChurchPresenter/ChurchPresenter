@@ -1,5 +1,7 @@
 package org.churchpresenter.calendar.model
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
+
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -70,3 +72,20 @@ fun PlannedService.isDueToLoad(at: LocalDateTime, lead: Int = AUTO_LOAD_LEAD_MIN
 /** How long a service with nothing estimated is assumed to run, for the end of the window above. */
 private const val ASSUMED_RUN_MINUTES = 120
 private const val SECONDS_PER_MINUTE = 60
+
+/**
+ * Whether [schedule] holds nothing but rows that came from this calendar -- a planned service
+ * loaded earlier, still sitting there -- or nothing at all.
+ *
+ * What decides whether an automatic load may *replace* the Schedule. Rows loaded from a plan keep
+ * their ids, so a leftover service is recognisable by them and can go; a row with an id this
+ * calendar has never seen was built by hand in the Schedule tab, and a load that wiped it five
+ * minutes before the service would be doing the opposite of helping -- that load appends.
+ */
+fun CalendarDocument.holdsOnlyPlannedRows(schedule: List<ScheduleItem>): Boolean {
+    if (schedule.isEmpty()) return true
+    val planned = HashSet<String>()
+    services.forEach { service -> service.items.mapTo(planned) { it.id } }
+    templates.forEach { template -> template.items.mapTo(planned) { it.id } }
+    return schedule.all { it.id in planned }
+}

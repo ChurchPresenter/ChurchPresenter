@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">क्यामेराहरू</string>
     <string name="song_background_camera_live">लाइभ क्यामेरा</string>
     <string name="schedule_cue_skipped">छोडियो %1$s — अरू केही लाइभ थियो</string>
+    <string name="schedule_behind_plan">%1$s पछाडि</string>
+    <string name="schedule_ahead_of_plan">%1$s अगाडि</string>
+    <string name="schedule_on_plan">योजनाअनुसार</string>
 </resources>

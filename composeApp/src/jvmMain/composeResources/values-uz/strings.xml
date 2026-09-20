@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">Kameralar</string>
     <string name="song_background_camera_live">jonli kamera</string>
     <string name="schedule_cue_skipped">O‘tkazib yuborildi %1$s — efirda boshqa narsa bor edi</string>
+    <string name="schedule_behind_plan">%1$s orqada</string>
+    <string name="schedule_ahead_of_plan">%1$s oldinda</string>
+    <string name="schedule_on_plan">reja bo‘yicha</string>
 </resources>

@@ -22,6 +22,7 @@ import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.security.SecureRandom
 import java.time.LocalDate
+import java.time.LocalTime
 import java.util.Base64
 import java.util.Calendar
 import java.util.UUID
@@ -211,6 +212,23 @@ class ScheduleViewModel(
 
     private val _selectedItemId = mutableStateOf<String?>(null)
     val selectedItemId get() = _selectedItemId.value
+
+    /**
+     * The row most recently put on screen, and when -- what "behind plan" is reckoned from.
+     *
+     * Not the selection: a row can be selected without going live, and the automation puts rows
+     * live without a click. Set by every path that presents a row, cleared with the schedule.
+     */
+    private val _liveRowId = mutableStateOf<String?>(null)
+    val liveRowId: String? get() = _liveRowId.value
+    private val _liveSince = mutableStateOf<LocalTime?>(null)
+    val liveSince: LocalTime? get() = _liveSince.value
+
+    /** Records that [id] went live at [at]. Presenting the same row again restarts its clock. */
+    fun markLive(id: String, at: LocalTime = LocalTime.now()) {
+        _liveRowId.value = id
+        _liveSince.value = at
+    }
 
     private val json = Json { prettyPrint = true; encodeDefaults = true }
     private var currentFilePath: String? = null
@@ -735,6 +753,8 @@ class ScheduleViewModel(
         _notes.clear()
         _timing.clear()
         _serviceStartTime.value = null
+        _liveRowId.value = null
+        _liveSince.value = null
         notifyChanged()
     }
 
@@ -751,6 +771,7 @@ class ScheduleViewModel(
      */
     fun selectOnly(id: String) {
         _selectedItemId.value = id
+        markLive(id)
     }
 
     fun clearSelection() {
@@ -784,6 +805,7 @@ class ScheduleViewModel(
         onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
     ) {
         onItemPresented?.invoke(item)
+        if (item !is ScheduleItem.LabelItem) markLive(item.id)
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
             is ScheduleItem.BibleVerseItem -> onPresentBible?.invoke(item) ?: onPresenting(Presenting.BIBLE)

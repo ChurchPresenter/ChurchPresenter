@@ -3,6 +3,7 @@ package org.churchpresenter.calendar
 import kotlinx.coroutines.delay
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.holdsOnlyPlannedRows
 import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.serviceToAutoLoad
 import org.churchpresenter.calendar.model.storedDate
@@ -17,12 +18,15 @@ import java.time.LocalDateTime
  * planner's state, so it works with the Calendar Manager closed -- which is the point: the machine
  * is switched on, the operator opens the app, and the morning's run of show is already there.
  *
- * **It clears the Schedule and puts the service in its place.** That is deliberate and was asked
- * for: the tab is meant to hold the service that is about to run, so whatever is left over from
- * last week goes. It happens **once** per plan, though: once the rows have been seen in the
- * Schedule, an operator who then clears it meant to, and putting the service back a minute later
- * would be the opposite of helping. Editing the plan makes it a different plan -- see [loadKey] --
- * and that one loads.
+ * **It clears the Schedule and puts the service in its place -- when what is there came from the
+ * calendar.** That is deliberate and was asked for: the tab is meant to hold the service that is
+ * about to run, so whatever is left over from last week goes. Rows built by hand in the Schedule
+ * tab are another matter: a load that wiped an operator's morning work five minutes before the
+ * service would be the opposite of helping, so with any of those present the service is
+ * **appended** instead -- see `holdsOnlyPlannedRows`. It happens **once** per plan, either way:
+ * once the rows have been seen in the Schedule, an operator who then clears it meant to, and
+ * putting the service back a minute later would be no better. Editing the plan makes it a
+ * different plan -- see [loadKey] -- and that one loads.
  */
 class ServiceAutoLoader(
     private val document: suspend () -> CalendarDocument,
@@ -71,16 +75,21 @@ class ServiceAutoLoader(
         }
         val service = calendar.serviceToAutoLoad(at, calendar.preferences.autoLoadLead()) ?: return
         val key = service.loadKey()
+        val current = host.currentSchedule()
         when {
             key in landed -> Unit
             // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
             // alone from here, whatever the operator does to it. Asking whether *these* rows are
             // there, rather than whether the Schedule holds anything, is what tells a load that
             // arrived from one that called into a no-op while last week's schedule sat there.
-            service.isInSchedule(host.currentSchedule()) -> landed += key
-            else -> host.loadIntoSchedule(
-                service.rowsForSchedule(), service.timingForSchedule(), true, service.armed, service.startTime,
-            )
+            service.isInSchedule(current) -> landed += key
+            else -> {
+                // Last week's service goes; the operator's own rows stay, and this goes under them.
+                val replace = calendar.holdsOnlyPlannedRows(current)
+                host.loadIntoSchedule(
+                    service.rowsForSchedule(), service.timingForSchedule(), replace, service.armed, service.startTime,
+                )
+            }
         }
     }
 }

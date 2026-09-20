@@ -2803,4 +2803,7 @@
     <string name="song_background_category_cameras">Camera's</string>
     <string name="song_background_camera_live">livecamera</string>
     <string name="schedule_cue_skipped">Overgeslagen %1$s — er was iets anders live</string>
+    <string name="schedule_behind_plan">%1$s achter</string>
+    <string name="schedule_ahead_of_plan">%1$s voor</string>
+    <string name="schedule_on_plan">op schema</string>
 </resources>

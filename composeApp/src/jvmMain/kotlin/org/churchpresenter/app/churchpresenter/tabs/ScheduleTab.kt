@@ -66,6 +66,9 @@ import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
+import org.churchpresenter.calendar.model.planDrift
+import kotlinx.coroutines.delay
+import java.time.LocalTime
 import org.churchpresenter.calendar.model.scheduleClocks
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -93,6 +96,9 @@ import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
+
+/** How often the live row's behind/ahead badge is re-reckoned. */
+private const val DRIFT_TICK_MS = 1_000L
 
 private const val FALLBACK_DRAG_ITEM_HEIGHT = 50f
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -324,6 +330,25 @@ fun ScheduleTab(
         val rowClocks = remember(scheduleItems, viewModel.timing, viewModel.serviceStartTime) {
             scheduleClocks(scheduleItems, viewModel.timing, viewModel.serviceStartTime)
         }
+        // How far the service is from its plan, on the row that is live: reckoned from when it
+        // went live against when the plan said, and growing once it overruns its length -- so it
+        // ticks. Null when nothing is live or the plan has no time for it.
+        val liveRowId = viewModel.liveRowId
+        val liveSince = viewModel.liveSince
+        var driftNow by remember { mutableStateOf(LocalTime.now()) }
+        LaunchedEffect(liveRowId, liveSince) {
+            while (liveRowId != null) {
+                driftNow = LocalTime.now()
+                delay(DRIFT_TICK_MS)
+            }
+        }
+        val drift = remember(liveRowId, liveSince, driftNow, rowClocks, viewModel.timing) {
+            if (liveRowId == null || liveSince == null) {
+                null
+            } else {
+                planDrift(liveRowId, liveSince, driftNow, rowClocks, viewModel.timing)
+            }
+        }
 
         val viewModelState = rememberUpdatedState(viewModel)
         var listHeightPx by remember { mutableStateOf(0) }
@@ -495,6 +520,7 @@ fun ScheduleTab(
                             item = item,
                             timing = viewModel.timingFor(item.id),
                             clock = rowClocks[item.id],
+                            drift = if (item.id == liveRowId) drift else null,
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,

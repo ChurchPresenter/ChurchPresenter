@@ -2805,4 +2805,7 @@
     <string name="song_background_category_cameras">Kamery</string>
     <string name="song_background_camera_live">živá kamera</string>
     <string name="schedule_cue_skipped">Preskočené %1$s — naživo bolo niečo iné</string>
+    <string name="schedule_behind_plan">%1$s meškanie</string>
+    <string name="schedule_ahead_of_plan">%1$s vopred</string>
+    <string name="schedule_on_plan">podľa plánu</string>
 </resources>

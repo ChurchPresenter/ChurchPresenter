@@ -222,6 +222,8 @@ fun PresentationTab(
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same file, kept for the Calendar Manager. */
     onSavePreset: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
+    /** The deck as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
+    onWentLive: ((ScheduleItem) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Every go-live
      *  (including slide navigation) sends via PROJECT rather than the narrower SELECT_SLIDE: the
      *  primary only has slide bytes cached for a presentation it has itself loaded/added to its own
@@ -595,6 +597,7 @@ fun PresentationTab(
                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
                         viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
                         presenterManager.setShowPresenterWindow(true)
+                        viewModel.selectedPresentation?.let { f -> onWentLive?.invoke(presentationRow(f, viewModel.slideFiles.size)) }
                         viewModel.selectedPresentation?.let { f ->
                             onInstanceLinkSendProject?.invoke(
                                 ScheduleItem.PresentationItem(
@@ -1059,6 +1062,9 @@ fun PresentationTab(
                                         viewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
                                         presenterManager.setShowPresenterWindow(true)
                                         viewModel.selectedPresentation?.let { f ->
+                                            onWentLive?.invoke(presentationRow(f, viewModel.slideFiles.size))
+                                        }
+                                        viewModel.selectedPresentation?.let { f ->
                                             onInstanceLinkSendProject?.invoke(
                                                 ScheduleItem.PresentationItem(
                                                     id = java.util.UUID.randomUUID().toString(),
@@ -1264,3 +1270,13 @@ private fun SlideThumbnail(
         }
     }
 }
+
+/** The open deck as the schedule row that identifies it -- the same shape Add to Schedule and Save Preset build. */
+private fun presentationRow(file: java.io.File, slideCount: Int): ScheduleItem.PresentationItem =
+    ScheduleItem.PresentationItem(
+        id = java.util.UUID.randomUUID().toString(),
+        filePath = file.absolutePath,
+        fileName = file.nameWithoutExtension,
+        slideCount = slideCount,
+        fileType = file.extension.lowercase(),
+    )

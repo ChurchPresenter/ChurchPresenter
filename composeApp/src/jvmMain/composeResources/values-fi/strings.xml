@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">Kamerat</string>
     <string name="song_background_camera_live">livekamera</string>
     <string name="schedule_cue_skipped">Ohitettiin %1$s — jokin muu oli esillä</string>
+    <string name="schedule_behind_plan">%1$s jäljessä</string>
+    <string name="schedule_ahead_of_plan">%1$s edellä</string>
+    <string name="schedule_on_plan">aikataulussa</string>
 </resources>

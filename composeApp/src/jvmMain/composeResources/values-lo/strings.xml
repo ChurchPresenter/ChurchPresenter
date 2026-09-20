@@ -2820,4 +2820,7 @@
     <string name="song_background_camera_live">ກ້ອງສົດ</string>
     <string name="customize_tooltip_separator">, </string>
     <string name="schedule_cue_skipped">ຂ້າມແລ້ວ %1$s — ມີສິ່ງອື່ນກຳລັງສະແດງຢູ່</string>
+    <string name="schedule_behind_plan">ຊ້າກວ່າແຜນ %1$s</string>
+    <string name="schedule_ahead_of_plan">ໄວກວ່າແຜນ %1$s</string>
+    <string name="schedule_on_plan">ຕາມແຜນ</string>
 </resources>

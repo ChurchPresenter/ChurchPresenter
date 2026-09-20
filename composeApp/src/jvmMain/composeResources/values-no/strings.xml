@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">Kameraer</string>
     <string name="song_background_camera_live">direktekamera</string>
     <string name="schedule_cue_skipped">Hoppet over %1$s — noe annet var live</string>
+    <string name="schedule_behind_plan">%1$s bak</string>
+    <string name="schedule_ahead_of_plan">%1$s foran</string>
+    <string name="schedule_on_plan">etter planen</string>
 </resources>

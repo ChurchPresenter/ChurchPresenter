@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">دوربین‌ها</string>
     <string name="song_background_camera_live">دوربین زنده</string>
     <string name="schedule_cue_skipped">رد شد %1$s — چیز دیگری روی صفحه بود</string>
+    <string name="schedule_behind_plan">%1$s عقب</string>
+    <string name="schedule_ahead_of_plan">%1$s جلو</string>
+    <string name="schedule_on_plan">طبق برنامه</string>
 </resources>

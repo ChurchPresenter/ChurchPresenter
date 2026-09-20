@@ -2776,4 +2776,7 @@
     <string name="song_background_category_cameras">Камералар</string>
     <string name="song_background_camera_live">тікелей камера</string>
     <string name="schedule_cue_skipped">Өткізіп жіберілді %1$s — эфирде басқа нәрсе болды</string>
+    <string name="schedule_behind_plan">%1$s артта</string>
+    <string name="schedule_ahead_of_plan">%1$s алда</string>
+    <string name="schedule_on_plan">жоспар бойынша</string>
 </resources>

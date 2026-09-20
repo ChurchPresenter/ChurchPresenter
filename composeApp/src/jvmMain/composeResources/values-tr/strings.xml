@@ -2820,4 +2820,7 @@
     <string name="song_background_category_cameras">Kameralar</string>
     <string name="song_background_camera_live">canlı kamera</string>
     <string name="schedule_cue_skipped">Atlandı %1$s — yayında başka bir şey vardı</string>
+    <string name="schedule_behind_plan">%1$s geride</string>
+    <string name="schedule_ahead_of_plan">%1$s ileride</string>
+    <string name="schedule_on_plan">planda</string>
 </resources>

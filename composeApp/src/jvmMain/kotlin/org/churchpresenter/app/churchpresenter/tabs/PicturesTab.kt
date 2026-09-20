@@ -174,6 +174,8 @@ fun PicturesTab(
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same folder, kept for the Calendar Manager. */
     onSavePreset: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
+    /** The folder as a schedule row, each time it goes live from here -- what is timed and what the automation yields to. */
+    onWentLive: ((ScheduleItem) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. See
      *  PicturesViewModel.goLive for why this always sends the whole folder via PROJECT. */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
@@ -357,7 +359,7 @@ fun PicturesTab(
             }
             if (presenterManager != null) {
                 GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject) },
+                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, onWentLive) },
                     enabled = viewModel.images.isNotEmpty(),
                     tooltipText = stringResource(Res.string.go_live)
                 )
@@ -901,7 +903,7 @@ fun PicturesTab(
                                     onDoubleClick = {
                                         if (!isDragActive) {
                                             viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                            if (presenterManager != null) viewModel.goLive(presenterManager, onInstanceLinkSendProject)
+                                            if (presenterManager != null) viewModel.goLive(presenterManager, onInstanceLinkSendProject, onWentLive)
                                         }
                                     }
                                 )

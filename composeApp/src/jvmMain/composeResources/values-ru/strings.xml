@@ -2778,4 +2778,7 @@
     <string name="song_background_category_cameras">Камеры</string>
     <string name="song_background_camera_live">живая камера</string>
     <string name="schedule_cue_skipped">Пропущена %1$s — в эфире было другое</string>
+    <string name="schedule_behind_plan">отставание %1$s</string>
+    <string name="schedule_ahead_of_plan">опережение %1$s</string>
+    <string name="schedule_on_plan">по плану</string>
 </resources>
