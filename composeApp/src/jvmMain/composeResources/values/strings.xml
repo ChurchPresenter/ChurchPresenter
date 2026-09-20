@@ -1987,6 +1987,11 @@
     <string name="system_manage_settings">Manage settings</string>
     <string name="file_not_supported_short">not supported</string>
     <string name="analytics_reporting_hint">Helps us find issues faster. No content or lyrics are ever sent.</string>
+    <string name="tab_label_style">Tab labels</string>
+    <string name="tab_label_style_hint">How the tabs across the top of the window are labelled.</string>
+    <string name="tab_label_style_text">Text only</string>
+    <string name="tab_label_style_icons_and_text">Icons and text</string>
+    <string name="tab_label_style_icons">Icons only</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>

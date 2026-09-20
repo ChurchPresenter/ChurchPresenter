@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
@@ -29,6 +30,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import java.io.File
@@ -154,6 +156,41 @@ class SystemSettingsTabTest {
      * queueing an empty task behind it and waiting for that is exact — no polling, no timeout.
      */
     private fun flushEventQueue() = SwingUtilities.invokeAndWait { }
+
+    // ── Tab labels ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `picking a tab label style stores it through the callback`() = runComposeUiTest {
+        var applied: AppSettings? = null
+        val initial = AppSettings()
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(
+                    settings = initial,
+                    onSettingsChange = { transform -> applied = transform(initial) },
+                )
+            }
+        }
+
+        onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
+        waitForIdle()
+        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
+        waitForIdle()
+
+        assertEquals(TabLabelStyle.ICONS_AND_TEXT, applied?.tabLabelStyle)
+    }
+
+    @Test
+    fun `the tab label dropdown shows the stored style`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
+            }
+        }
+
+        onNode(hasText("Icons only") and hasClickAction()).assertExists()
+        onNode(hasText("Text only") and hasClickAction()).assertDoesNotExist()
+    }
 
     // ── Switches ──────────────────────────────────────────────────────────────
 

@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d نیاز به تبدیل دارد</string>
     <string name="system_manage_settings">مدیریت تنظیمات</string>
     <string name="analytics_reporting_hint">به ما کمک می‌کند مشکلات را سریع‌تر پیدا کنیم. هیچ محتوا یا متن ترانه‌ای هرگز ارسال نمی‌شود.</string>
+    <string name="tab_label_style">برچسب زبانه‌ها</string>
+    <string name="tab_label_style_hint">نحوه برچسب‌گذاری زبانه‌های بالای پنجره.</string>
+    <string name="tab_label_style_text">فقط متن</string>
+    <string name="tab_label_style_icons_and_text">نماد و متن</string>
+    <string name="tab_label_style_icons">فقط نماد</string>
     <string name="file_not_supported_short">پشتیبانی نمی‌شود</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -3,19 +3,24 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.TabLabelStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,6 +46,7 @@ class TabSectionTest {
         visibleTabs: List<Tabs> = Tabs.entries,
         selectedTabIndex: Int = 0,
         width: Int = 2_000,
+        labelStyle: TabLabelStyle = TabLabelStyle.TEXT,
         onTabSelected: (Int) -> Unit = {},
     ) {
         setContent {
@@ -48,12 +54,21 @@ class TabSectionTest {
                 TabSection(
                     visibleTabs = visibleTabs,
                     selectedTabIndex = selectedTabIndex,
+                    labelStyle = labelStyle,
                     onTabSelected = onTabSelected,
                 )
             }
         }
         waitForIdle()
     }
+
+    /** The icon-only tabs, in row order: selectable (the arrows are not) and named by their icon. */
+    private fun ComposeUiTest.iconTabs() =
+        onAllNodes(isSelectable() and SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription))
+
+    private fun ComposeUiTest.iconTabNames(): List<String> =
+        iconTabs().fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .mapNotNull { it.config.getOrNull(SemanticsProperties.ContentDescription)?.joinToString("") }
 
     /**
      * The overflow arrows: clickable, and the only clickable nodes here carrying no text (every tab
@@ -93,6 +108,96 @@ class TabSectionTest {
 
             assertEquals(2, renderedText().size, "hidden tabs must not be rendered at all")
         }
+    }
+
+    // ── Label styles ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `icons and text keeps every label`() {
+        runComposeUiTest {
+            tabBar(labelStyle = TabLabelStyle.ICONS_AND_TEXT)
+
+            assertEquals(Tabs.entries.size, renderedText().size)
+            assertEquals(0, iconTabNames().size, "the name is drawn, so the icon must not repeat it")
+        }
+    }
+
+    @Test
+    fun `icons only draws no text and names every tab by its icon`() {
+        runComposeUiTest {
+            tabBar(labelStyle = TabLabelStyle.ICONS)
+
+            assertEquals(emptyList(), renderedText())
+            val names = iconTabNames()
+            assertEquals(Tabs.entries.size, names.size, "one named icon per tab — saw $names")
+            assertEquals(names.size, names.toSet().size, "every icon needs a distinct name: $names")
+        }
+    }
+
+    @Test
+    fun `an icon-only tab is named the same as its text label`() {
+        runComposeUiTest {
+            setContent {
+                Column(Modifier.width(2_000.dp)) {
+                    TabSection(visibleTabs = Tabs.entries, onTabSelected = {})
+                    TabSection(visibleTabs = Tabs.entries, labelStyle = TabLabelStyle.ICONS, onTabSelected = {})
+                }
+            }
+            waitForIdle()
+
+            assertEquals(renderedText(), iconTabNames())
+        }
+    }
+
+    @Test
+    fun `clicking an icon-only tab reports its position`() {
+        runComposeUiTest {
+            val picked = mutableListOf<Int>()
+            tabBar(
+                visibleTabs = listOf(Tabs.BIBLE, Tabs.SONGS, Tabs.MEDIA),
+                labelStyle = TabLabelStyle.ICONS,
+                onTabSelected = { picked.add(it) },
+            )
+
+            iconTabs()[2].performClick()
+            iconTabs()[0].performClick()
+
+            assertEquals(listOf(2, 0), picked)
+        }
+    }
+
+    @Test
+    fun `the selected icon-only tab is the one marked selected`() {
+        runComposeUiTest {
+            tabBar(
+                visibleTabs = listOf(Tabs.BIBLE, Tabs.SONGS),
+                selectedTabIndex = 1,
+                labelStyle = TabLabelStyle.ICONS,
+            )
+
+            iconTabs()[1].assertIsSelected()
+            iconTabs()[0].assertIsNotSelected()
+        }
+    }
+
+    @Test
+    fun `hovering an icon-only tab shows its name`() {
+        runComposeUiTest {
+            tabBar(visibleTabs = listOf(Tabs.BIBLE, Tabs.SONGS), labelStyle = TabLabelStyle.ICONS)
+            assertEquals(emptyList(), renderedText(), "nothing is written until the pointer rests on a tab")
+
+            iconTabs()[1].performMouseInput { moveTo(center) }
+            mainClock.advanceTimeBy(TOOLTIP_DELAY_MS)
+            waitForIdle()
+
+            assertEquals(listOf(iconTabNames()[1]), renderedText())
+        }
+    }
+
+    @Test
+    fun `every tab has an icon of its own`() {
+        val icons = Tabs.entries.map { tabIcon(it) }
+        assertEquals(icons.size, icons.toSet().size, "two tabs sharing an icon are indistinguishable as icons")
     }
 
     // ── Selection ───────────────────────────────────────────────────────────────
@@ -178,5 +283,10 @@ class TabSectionTest {
 
             waitUntil("the back arrow to appear once the row has scrolled") { arrowCount() == 2 }
         }
+    }
+
+    private companion object {
+        /** Past `TooltipArea`'s 500ms rest before it shows. */
+        const val TOOLTIP_DELAY_MS = 1_000L
     }
 }

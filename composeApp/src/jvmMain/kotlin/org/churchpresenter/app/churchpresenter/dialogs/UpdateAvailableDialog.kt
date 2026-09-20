@@ -535,7 +535,8 @@ internal fun UpdateAvailableContent(
             if (updateInfo != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.update_dialog_dismiss))
@@ -576,7 +577,8 @@ internal fun UpdateAvailableContent(
             } else {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
                         modifier = Modifier.weight(1f),

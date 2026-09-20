@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d dönüştürülmeli</string>
     <string name="system_manage_settings">Ayarları yönet</string>
     <string name="analytics_reporting_hint">Sorunları daha hızlı bulmamıza yardımcı olur. İçerik veya şarkı sözleri asla gönderilmez.</string>
+    <string name="tab_label_style">Sekme etiketleri</string>
+    <string name="tab_label_style_hint">Pencerenin üst kısmındaki sekmelerin nasıl etiketleneceği.</string>
+    <string name="tab_label_style_text">Yalnızca metin</string>
+    <string name="tab_label_style_icons_and_text">Simgeler ve metin</string>
+    <string name="tab_label_style_icons">Yalnızca simgeler</string>
     <string name="file_not_supported_short">desteklenmiyor</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

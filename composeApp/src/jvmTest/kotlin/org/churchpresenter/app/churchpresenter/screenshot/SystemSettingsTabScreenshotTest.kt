@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
@@ -89,6 +90,13 @@ class SystemSettingsTabScreenshotTest {
 
     @Test
     fun `stacked, scrolled to the bottom`() = narrow("narrow_bottom", RESET)
+
+    // ── Tab labels ──────────────────────────────────────────────────────────────────────────────
+
+    /** The dropdown showing a non-default style; the open list is `settingsFields/`' business. */
+    @Test
+    fun `with the tabs set to icons only`() =
+        shoot("tab_labels_icons", settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
 
     // ── Folder states ───────────────────────────────────────────────────────────────────────────
 

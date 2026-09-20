@@ -61,6 +61,7 @@ data class AppSettings(
     val windowX: Int = -1,
     val windowY: Int = -1,
     val hiddenTabs: Set<String> = setOf("QA", "STT"),
+    val tabLabelStyle: TabLabelStyle = TabLabelStyle.TEXT,
     val crosswordUnlockedLevel: Int = 0,
     val crosswordProgress: Map<Int, String> = emptyMap(),
     val obsSettings: OBSSettings = OBSSettings(),

@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d को बदलना है</string>
     <string name="system_manage_settings">सेटिंग्स प्रबंधित करें</string>
     <string name="analytics_reporting_hint">समस्याएँ तेज़ी से खोजने में हमारी मदद करता है। कोई सामग्री या गीत कभी नहीं भेजे जाते।</string>
+    <string name="tab_label_style">टैब लेबल</string>
+    <string name="tab_label_style_hint">विंडो के ऊपर के टैब कैसे लेबल किए जाते हैं।</string>
+    <string name="tab_label_style_text">केवल टेक्स्ट</string>
+    <string name="tab_label_style_icons_and_text">आइकन और टेक्स्ट</string>
+    <string name="tab_label_style_icons">केवल आइकन</string>
     <string name="file_not_supported_short">समर्थित नहीं</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -1660,6 +1660,11 @@
     <string name="system_manage_settings">管理设置</string>
     <string name="file_not_supported_short">不支持</string>
     <string name="analytics_reporting_hint">帮助我们更快发现问题。绝不会发送任何内容或歌词。</string>
+    <string name="tab_label_style">标签页标签</string>
+    <string name="tab_label_style_hint">窗口顶部标签页的显示方式。</string>
+    <string name="tab_label_style_text">仅文字</string>
+    <string name="tab_label_style_icons_and_text">图标和文字</string>
+    <string name="tab_label_style_icons">仅图标</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">编号在标题之前</string>

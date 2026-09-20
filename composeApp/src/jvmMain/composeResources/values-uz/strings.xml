@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d konvertatsiya qilinishi kerak</string>
     <string name="system_manage_settings">Sozlamalarni boshqarish</string>
     <string name="analytics_reporting_hint">Muammolarni tezroq topishimizga yordam beradi. Kontent va qo'shiq matnlari hech qachon yuborilmaydi.</string>
+    <string name="tab_label_style">Boʻlim yorliqlari</string>
+    <string name="tab_label_style_hint">Oyna yuqorisidagi boʻlimlar qanday belgilanadi.</string>
+    <string name="tab_label_style_text">Faqat matn</string>
+    <string name="tab_label_style_icons_and_text">Belgilar va matn</string>
+    <string name="tab_label_style_icons">Faqat belgilar</string>
     <string name="file_not_supported_short">qoʻllab-quvvatlanmaydi</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

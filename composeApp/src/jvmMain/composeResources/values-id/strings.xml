@@ -1659,6 +1659,11 @@
     <string name="system_storage_status_needs_converting">%1$d perlu dikonversi</string>
     <string name="system_manage_settings">Kelola pengaturan</string>
     <string name="analytics_reporting_hint">Membantu kami menemukan masalah lebih cepat. Konten atau lirik tidak pernah dikirim.</string>
+    <string name="tab_label_style">Label Tab</string>
+    <string name="tab_label_style_hint">Cara tab di bagian atas jendela diberi label.</string>
+    <string name="tab_label_style_text">Teks saja</string>
+    <string name="tab_label_style_icons_and_text">Ikon dan teks</string>
+    <string name="tab_label_style_icons">Ikon saja</string>
     <string name="file_not_supported_short">tidak didukung</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
