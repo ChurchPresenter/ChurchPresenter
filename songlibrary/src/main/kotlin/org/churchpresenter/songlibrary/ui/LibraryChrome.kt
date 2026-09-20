@@ -41,6 +41,7 @@ import org.churchpresenter.songlibrary.generated.resources.Res
 import org.churchpresenter.songlibrary.generated.resources.all_song_books
 import org.churchpresenter.songlibrary.generated.resources.batch_edit_menu
 import org.churchpresenter.songlibrary.generated.resources.clear
+import org.churchpresenter.songlibrary.generated.resources.column_duration
 import org.churchpresenter.songlibrary.generated.resources.columns
 import org.churchpresenter.songlibrary.generated.resources.columns_always
 import org.churchpresenter.songlibrary.generated.resources.columns_show_all
@@ -274,7 +275,7 @@ private fun ColumnsMenu(state: SongLibraryState) {
     val scheme = MaterialTheme.colorScheme
     LibraryDropdown(
         label = stringResource(Res.string.columns),
-        highlighted = state.hiddenColumns.isNotEmpty(),
+        highlighted = state.hiddenColumns.isNotEmpty() || !state.showDuration,
         menuWidth = 224.dp,
         leading = {
             Icon(Icons.Default.ViewColumn, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
@@ -301,5 +302,9 @@ private fun ColumnsMenu(state: SongLibraryState) {
                 leading = { LibraryCheckbox(checked = field !in state.hiddenColumns) },
             ) { state.toggleColumn(field) }
         }
+        MenuRow(
+            label = stringResource(Res.string.column_duration),
+            leading = { LibraryCheckbox(checked = state.showDuration) },
+        ) { state.toggleDuration() }
     }
 }

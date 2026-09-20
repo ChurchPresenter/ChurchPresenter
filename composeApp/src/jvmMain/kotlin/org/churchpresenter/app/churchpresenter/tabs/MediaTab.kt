@@ -80,6 +80,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
@@ -129,7 +130,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -175,6 +178,8 @@ fun MediaTab(
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    /** Save preset, to the left of Add to Schedule: the same media, kept for the Calendar Manager. */
+    onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -266,6 +271,7 @@ fun MediaTab(
     }
 
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
 
     Column(
         modifier = modifier
@@ -418,6 +424,13 @@ fun MediaTab(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+                if (onSavePreset != null) {
+                    SavePresetButton(
+                        onClick = { onSavePreset(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.save_preset)
+                    )
+                }
                 if (onAddToSchedule != null) {
                     AddToScheduleButton(
                         onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
@@ -432,6 +445,14 @@ fun MediaTab(
                             presenterManager.setShowPresenterWindow(true)
                             presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
                             viewModel.play()
+                            wentLive(
+                                ScheduleItem.MediaItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    mediaUrl = viewModel.mediaUrl,
+                                    mediaTitle = viewModel.mediaTitle,
+                                    mediaType = viewModel.mediaType,
+                                )
+                            )
                             onInstanceLinkSendProject?.invoke(
                                 ScheduleItem.MediaItem(
                                     id = java.util.UUID.randomUUID().toString(),

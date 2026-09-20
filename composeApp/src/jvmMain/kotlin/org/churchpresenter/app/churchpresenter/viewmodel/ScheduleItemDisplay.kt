@@ -7,11 +7,15 @@ import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.media_tab_title
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
+import churchpresenter.composeapp.generated.resources.schedule_kind_cue
+import churchpresenter.composeapp.generated.resources.schedule_kind_ministry
 import churchpresenter.composeapp.generated.resources.schedule_kind_lower_third
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_web
+import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.calendar.model.localeUses24HourClock
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.StringResource
@@ -38,6 +42,8 @@ internal fun scheduleItemGlyph(item: ScheduleItem): String = when (item) {
     is ScheduleItem.WebsiteItem -> "🌐"
     is ScheduleItem.SceneItem -> "🎬"
     is ScheduleItem.DictionaryItem -> "📖"
+    is ScheduleItem.CueItem -> "⚡"
+    is ScheduleItem.MinistryItem -> "🎤"
 }
 
 /**
@@ -53,6 +59,11 @@ internal fun scheduleItemDetailText(item: ScheduleItem): String? = when (item) {
     is ScheduleItem.PictureItem -> item.folderPath
     is ScheduleItem.PresentationItem -> "${item.fileType.uppercase()} - ${item.filePath}"
     is ScheduleItem.MediaItem -> "${item.mediaType.uppercase()} - ${item.mediaUrl}"
+    // `9:45 AM · Announcement loop`: when it fires, and what it puts on screen if anything.
+    is ScheduleItem.CueItem -> listOfNotNull(
+        item.absoluteTime.ifBlank { null }?.let { clockText(it, localeUses24HourClock()) },
+        item.payload?.displayText,
+    ).joinToString(" · ")
     else -> null
 }
 
@@ -74,6 +85,8 @@ internal fun scheduleItemPaletteIndex(item: ScheduleItem): Int = when (item) {
     is ScheduleItem.SceneItem -> 0
     is ScheduleItem.DictionaryItem -> 1
     is ScheduleItem.LabelItem -> 0
+    is ScheduleItem.CueItem -> 2
+    is ScheduleItem.MinistryItem -> 0
 }
 
 /** The row's type name, shown as a small uppercase chip at the Detailed density. */
@@ -89,6 +102,8 @@ internal fun scheduleItemKindLabel(item: ScheduleItem): StringResource = when (i
     is ScheduleItem.SceneItem -> Res.string.tab_canvas
     is ScheduleItem.DictionaryItem -> Res.string.tab_dictionary
     is ScheduleItem.LabelItem -> Res.string.songs // unused — LabelItem renders as a section header
+    is ScheduleItem.CueItem -> Res.string.schedule_kind_cue
+    is ScheduleItem.MinistryItem -> Res.string.schedule_kind_ministry
 }
 
 /**

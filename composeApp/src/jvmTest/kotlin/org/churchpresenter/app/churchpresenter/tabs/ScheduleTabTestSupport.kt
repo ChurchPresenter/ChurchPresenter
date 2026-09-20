@@ -32,6 +32,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
 import java.nio.file.Files
+import java.time.LocalTime
 
 /**
  * Harness and fixtures shared by the `ScheduleTab` test classes.
@@ -107,13 +108,15 @@ internal fun scheduleTab(
      * [DEFAULT_TEST_WINDOW], which is the size the other branch gets for free.
      */
     density: Float? = null,
+    /** The clock the live row's behind/ahead badge is reckoned from; pinned by the shot that shows it. */
+    clock: () -> LocalTime = { LocalTime.now() },
     block: ComposeUiTest.(vm: ScheduleViewModel, reports: ScheduleReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
     val realHome = System.getProperty("user.home")
     val tempHome: File = Files.createTempDirectory("cp-schedule-tab").toFile()
     System.setProperty("user.home", tempHome.absolutePath)
-    val vm = ScheduleViewModel()
+    val vm = ScheduleViewModel(clock = clock)
     try {
         vm.seed()
         val reports = ScheduleReports()

@@ -30,9 +30,10 @@ class EmitRemoteTabSelectionTest {
     private val songs = MutableSharedFlow<ScheduleItem.SongItem>(replay = 1)
     private val pictures = MutableSharedFlow<ScheduleItem.PictureItem>(replay = 1)
     private val presentations = MutableSharedFlow<ScheduleItem.PresentationItem>(replay = 1)
+    private val media = MutableSharedFlow<ScheduleItem.MediaItem>(replay = 1)
 
     private fun emit(item: ScheduleItem): Boolean =
-        runBlocking { emitRemoteTabSelection(item, songs, pictures, presentations) }
+        runBlocking { emitRemoteTabSelection(item, songs, pictures, presentations, media) }
 
     private fun song() = ScheduleItem.SongItem(
         id = "s", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal", songId = "sid",
@@ -45,11 +46,30 @@ class EmitRemoteTabSelectionTest {
         id = "p", filePath = "/decks/sunday.pdf", fileName = "sunday", slideCount = 4, fileType = "pdf",
     )
 
+    private fun clip() = ScheduleItem.MediaItem(
+        id = "m", mediaUrl = "/clips/welcome.mp4", mediaTitle = "welcome", mediaType = "local",
+    )
+
     /** Every emission that landed, as (flow name -> item), so a test can assert nothing else fired. */
     private fun emitted(): Map<String, Any> = buildMap {
         songs.replayCache.firstOrNull()?.let { put("songs", it) }
         pictures.replayCache.firstOrNull()?.let { put("pictures", it) }
         presentations.replayCache.firstOrNull()?.let { put("presentations", it) }
+        media.replayCache.firstOrNull()?.let { put("media", it) }
+    }
+
+    /**
+     * A clip must reach the Media tab, which is the only thing that can load and play it.
+     *
+     * It was the one type missing from this dispatch: projecting a video set the presenter to
+     * MEDIA mode with no file loaded, so a cue -- or a phone -- put a black screen up instead of
+     * the clip.
+     */
+    @Test
+    fun `a clip is handed to the media tab`() {
+        val item = clip()
+        assertTrue(emit(item))
+        assertEquals(mapOf("media" to item), emitted())
     }
 
     // ── Each type reaches its own tab ───────────────────────────────────────────
@@ -103,7 +123,6 @@ class EmitRemoteTabSelectionTest {
                 id = "d", number = "G5485", word = "charis", transliteration = "charis", definition = "grace",
             ),
             ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "#FFFFFF", backgroundColor = "#000000"),
-            ScheduleItem.MediaItem(id = "m", mediaUrl = "/clips/w.mp4", mediaTitle = "Welcome", mediaType = "local"),
         )
 
         others.forEach { assertFalse(emit(it), "$it should not drive a tab load") }
@@ -113,9 +132,9 @@ class EmitRemoteTabSelectionTest {
     // ── The property that makes a drift visible ─────────────────────────────────
 
     @Test
-    fun `exactly the three content-owning types report a tab load`() {
+    fun `exactly the four content-owning types report a tab load`() {
         val reporting = listOf<ScheduleItem>(
-            song(), picture(), presentation(),
+            song(), picture(), presentation(), clip(),
             ScheduleItem.AnnouncementItem(id = "a", text = "x"),
             ScheduleItem.WebsiteItem(id = "w", url = "https://example.org"),
             ScheduleItem.LabelItem(id = "l", text = "x", textColor = "#FFFFFF", backgroundColor = "#000000"),
@@ -126,8 +145,10 @@ class EmitRemoteTabSelectionTest {
                 ScheduleItem.SongItem::class.java,
                 ScheduleItem.PictureItem::class.java,
                 ScheduleItem.PresentationItem::class.java,
+                ScheduleItem.MediaItem::class.java,
             ),
             reporting.map { it.javaClass },
+            "a type whose tab owns the content -- and only those -- is handed over",
         )
     }
 }

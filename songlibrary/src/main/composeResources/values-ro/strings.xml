@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Ștergi „%1$s”?</string>
     <string name="delete_confirm_action">Șterge</string>
     <string name="song_count">%1$s cântări</string>
+    <string name="no_song_folder">Niciun dosar de cântări nu este setat încă — alege unul în Setări → Cântări și aici se vor putea adăuga cântări.</string>
+    <string name="column_duration">Durată</string>
 </resources>

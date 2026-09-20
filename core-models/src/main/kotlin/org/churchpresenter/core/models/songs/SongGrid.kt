@@ -1,7 +1,7 @@
 package org.churchpresenter.core.models.songs
 
-/** Which column the grid is ordered by. */
-enum class SortColumn { NUMBER, TITLE, SECONDARY_TITLE, SONGBOOK, AUTHOR, COMPOSER, TUNE, CCLI }
+/** Which column the grid is ordered by. [DURATION] is measured, not a field of the song -- see [SongGrid.rows]. */
+enum class SortColumn { NUMBER, TITLE, SECONDARY_TITLE, SONGBOOK, AUTHOR, COMPOSER, TUNE, CCLI, DURATION }
 
 /** How the grid is filtered and ordered: what the search box, the book filter and a header say. */
 data class GridView(
@@ -23,9 +23,15 @@ data class GridView(
  */
 object SongGrid {
 
-    /** The songs [view] asks for, in the order it asks for them. */
-    fun rows(songs: List<SongItem>, view: GridView): List<SongItem> =
-        sort(songs.filter { it.matches(view.query) && it.inSongbook(view.songbook) }, view)
+    /**
+     * The songs [view] asks for, in the order it asks for them.
+     *
+     * [durationOf] is how long a song usually runs, in seconds, or null when nobody has measured
+     * it -- not a field of the song, so it comes from the caller rather than the row. Only the
+     * [SortColumn.DURATION] order reads it.
+     */
+    fun rows(songs: List<SongItem>, view: GridView, durationOf: (SongItem) -> Int? = { null }): List<SongItem> =
+        sort(songs.filter { it.matches(view.query) && it.inSongbook(view.songbook) }, view, durationOf)
 
     /**
      * Whether the song answers to [query], which is matched against the fields a person searches by.
@@ -48,7 +54,7 @@ object SongGrid {
         else -> songbook == selected || songbook.startsWith("$selected/")
     }
 
-    private fun sort(songs: List<SongItem>, view: GridView): List<SongItem> {
+    private fun sort(songs: List<SongItem>, view: GridView, durationOf: (SongItem) -> Int?): List<SongItem> {
         val ordered = when (view.sortBy) {
             // Numbers sort as numbers: by string, song 10 comes before song 2.
             SortColumn.NUMBER -> songs.sortedWith(
@@ -60,6 +66,10 @@ object SongGrid {
             SortColumn.COMPOSER -> songs.byText { it.composer }
             SortColumn.TUNE -> songs.byText { it.tune }
             SortColumn.CCLI -> songs.byText { it.ccliNumber }
+            // Unmeasured songs last, as blanks are everywhere else in this grid.
+            SortColumn.DURATION -> songs.sortedWith(
+                compareBy({ durationOf(it) == null }, { durationOf(it) ?: 0 }, { it.title.lowercase() })
+            )
             // Within a songbook the number is the order the book itself is in.
             SortColumn.SONGBOOK -> songs.sortedWith(
                 compareBy(

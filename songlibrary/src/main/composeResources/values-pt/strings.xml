@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Excluir “%1$s”?</string>
     <string name="delete_confirm_action">Excluir</string>
     <string name="song_count">%1$s músicas</string>
+    <string name="no_song_folder">Nenhuma pasta de músicas foi definida ainda — escolha uma em Configurações → Músicas e as músicas poderão ser adicionadas aqui.</string>
+    <string name="column_duration">Duração</string>
 </resources>

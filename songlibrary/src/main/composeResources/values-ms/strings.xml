@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Padam “%1$s”?</string>
     <string name="delete_confirm_action">Padam</string>
     <string name="song_count">%1$s lagu</string>
+    <string name="no_song_folder">Folder lagu belum ditetapkan — pilih satu di Tetapan → Lagu, dan lagu boleh ditambah di sini.</string>
+    <string name="column_duration">Tempoh</string>
 </resources>

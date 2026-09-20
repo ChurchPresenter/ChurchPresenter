@@ -153,4 +153,11 @@ class CellsTest {
 
         assertTrue(asked)
     }
+
+    @Test
+    fun `a duration reads as minutes and seconds`() {
+        assertEquals("4:32", durationText(272))
+        assertEquals("0:05", durationText(5))
+        assertEquals("12:00", durationText(720))
+    }
 }

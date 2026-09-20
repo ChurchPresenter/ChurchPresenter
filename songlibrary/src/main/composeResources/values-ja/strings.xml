@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">「%1$s」を削除しますか?</string>
     <string name="delete_confirm_action">削除</string>
     <string name="song_count">%1$s 曲</string>
+    <string name="no_song_folder">曲フォルダーがまだ設定されていません。「設定 → 賛美歌」で選択すると、ここに曲を追加できます。</string>
+    <string name="column_duration">長さ</string>
 </resources>

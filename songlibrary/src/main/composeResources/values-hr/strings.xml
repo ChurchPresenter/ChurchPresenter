@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Izbrisati „%1$s“?</string>
     <string name="delete_confirm_action">Izbriši</string>
     <string name="song_count">%1$s pjesama</string>
+    <string name="no_song_folder">Mapa pjesama još nije postavljena — odaberite je u Postavke → Pjesme i ovdje će se moći dodavati pjesme.</string>
+    <string name="column_duration">Trajanje</string>
 </resources>

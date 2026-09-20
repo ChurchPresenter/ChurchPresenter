@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.recent_pin
@@ -148,8 +149,10 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
@@ -218,6 +221,8 @@ fun PresentationTab(
     hostWindow: AwtWindow? = null,
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
+    /** Save preset, to the left of Add to Schedule: the same file, kept for the Calendar Manager. */
+    onSavePreset: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Every go-live
      *  (including slide navigation) sends via PROJECT rather than the narrower SELECT_SLIDE: the
      *  primary only has slide bytes cached for a presentation it has itself loaded/added to its own
@@ -285,6 +290,7 @@ fun PresentationTab(
         active = viewModel.slideFiles.isNotEmpty(),
     )
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
 
     LaunchedEffect(selectedPresentationItem, selectedPresentationItemVersion) {
         selectedPresentationItem?.let { item ->
@@ -536,6 +542,21 @@ fun PresentationTab(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             )
+            if (onSavePreset != null) {
+                SavePresetButton(
+                    onClick = {
+                        val f = viewModel.selectedPresentation ?: return@SavePresetButton
+                        onSavePreset(
+                            f.absolutePath,
+                            f.nameWithoutExtension,
+                            viewModel.slideFiles.size,
+                            f.extension.lowercase(),
+                        )
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    tooltipText = stringResource(Res.string.save_preset)
+                )
+            }
             if (onAddToSchedule != null) {
                 AddToScheduleButton(
                     onClick = {
@@ -576,6 +597,9 @@ fun PresentationTab(
                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
                         viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
                         presenterManager.setShowPresenterWindow(true)
+                        viewModel.selectedPresentation?.let { f ->
+                            wentLive(presentationRow(f, viewModel.slideFiles.size))
+                        }
                         viewModel.selectedPresentation?.let { f ->
                             onInstanceLinkSendProject?.invoke(
                                 ScheduleItem.PresentationItem(
@@ -1040,6 +1064,9 @@ fun PresentationTab(
                                         viewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
                                         presenterManager.setShowPresenterWindow(true)
                                         viewModel.selectedPresentation?.let { f ->
+                                            wentLive(presentationRow(f, viewModel.slideFiles.size))
+                                        }
+                                        viewModel.selectedPresentation?.let { f ->
                                             onInstanceLinkSendProject?.invoke(
                                                 ScheduleItem.PresentationItem(
                                                     id = java.util.UUID.randomUUID().toString(),
@@ -1245,3 +1272,13 @@ private fun SlideThumbnail(
         }
     }
 }
+
+/** The open deck as the schedule row that identifies it -- the same shape Add to Schedule and Save Preset build. */
+private fun presentationRow(file: java.io.File, slideCount: Int): ScheduleItem.PresentationItem =
+    ScheduleItem.PresentationItem(
+        id = java.util.UUID.randomUUID().toString(),
+        filePath = file.absolutePath,
+        fileName = file.nameWithoutExtension,
+        slideCount = slideCount,
+        fileType = file.extension.lowercase(),
+    )

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">ลบ “%1$s” หรือไม่</string>
     <string name="delete_confirm_action">ลบ</string>
     <string name="song_count">%1$s เพลง</string>
+    <string name="no_song_folder">ยังไม่ได้ตั้งค่าโฟลเดอร์เพลง — เลือกได้ที่ การตั้งค่า → เพลง แล้วจะเพิ่มเพลงที่นี่ได้</string>
+    <string name="column_duration">ความยาว</string>
 </resources>

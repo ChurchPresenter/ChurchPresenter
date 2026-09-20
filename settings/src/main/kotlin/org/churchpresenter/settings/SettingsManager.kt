@@ -29,6 +29,9 @@ private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 private const val VERSION_HIDDEN_TABS = 5
 private const val VERSION_SCREEN_ASSIGNMENTS = 6
 
+/** The Schedule toolbar gained a Calendar button that starts hidden. */
+private const val VERSION_CALENDAR_BUTTON = 11
+
 /** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
 private val CompanionSurfacePlacementPrefixes = listOf("tab", "leftSidebar", "rightSidebar")
@@ -163,6 +166,13 @@ class SettingsManager {
         }
         var settings = jsonFormat.decodeFromString<AppSettings>(migrated)
         if (fromVersion < VERSION_HIDDEN_TABS) settings = migrateHiddenTabs(settings, raw)
+        if (fromVersion < VERSION_CALENDAR_BUTTON) {
+            // The Schedule toolbar's Calendar button is new and starts hidden -- see
+            // AppSettings.hiddenScheduleButtons. A file written before it existed has an explicit
+            // list that cannot mention it, so without this every existing install would open with
+            // a button nobody asked for.
+            settings = settings.copy(hiddenScheduleButtons = settings.hiddenScheduleButtons + "CALENDAR")
+        }
         if (fromVersion < VERSION_SCREEN_ASSIGNMENTS) {
             // The primary/secondary bible pair became an ordered list of any length. Typed rather
             // than raw, because the conversion is a field-by-field restructure the data class

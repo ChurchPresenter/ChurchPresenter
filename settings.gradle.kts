@@ -88,3 +88,9 @@ include(":song-chords")
 
 // The Bible itself: the loaded translation, its books, verses and search.
 include(":bible")
+
+// The Calendar Manager: the planner window that holds every planned service — the month grid, each
+// day's services and their run of show — and writes them to `calendar.json` of its own, separate
+// from settings and from any `.schedule` file. Depended on by :composeApp, which opens it from the
+// Help menu beside the Song Library Manager and loads a planned service into the Schedule tab.
+include(":calendar")

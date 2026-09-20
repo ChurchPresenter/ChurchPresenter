@@ -42,6 +42,12 @@ fun SongLibraryApp(
      */
     songEditor: (@Composable (editing: SongEditorRequest) -> Unit)? = null,
     /**
+     * How long a song usually stays on screen, in seconds, or null until it has been measured --
+     * the grid's **Duration** column. The app answers it from what it has timed; standalone
+     * there is nothing to answer from and the column is blank.
+     */
+    typicalSeconds: (SongItem) -> Int? = { null },
+    /**
      * The dispatcher every read and write of the folder runs on.
      *
      * Defaulted, and the app never passes it. It is here so the window can be driven on a
@@ -50,7 +56,7 @@ fun SongLibraryApp(
      */
     io: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
+    val state = remember(libraryFolder) { SongLibraryState(libraryFolder, typicalSeconds) }
     LaunchedEffect(libraryFolder) { state.reloadAsync(io) }
     // Writing a song, a songbook or a deletion goes to disk, which is why those calls suspend. They
     // are started from here rather than awaited: the dialog closes at once and the grid keeps

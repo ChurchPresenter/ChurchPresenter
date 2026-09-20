@@ -102,6 +102,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
 import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
@@ -156,6 +157,10 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.app.churchpresenter.dialogs.SavePresetDialog
+import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
@@ -167,6 +172,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ThemeMode
 
 import java.io.File
+import java.util.UUID
 import org.churchpresenter.app.churchpresenter.viewmodel.clearDetectedReferences
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.invalidateInstanceLinkBibleCache
@@ -195,6 +201,8 @@ fun MainDesktop(
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
     verseSequenceLog: VerseSequenceLog? = null,
+    /** Fires a cue row of the Schedule by hand -- the same path the automation engine takes. */
+    onPresentCue: (ScheduleItem.CueItem) -> Unit = {},
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -234,6 +242,12 @@ fun MainDesktop(
      *  composable to actually load the real content into the corresponding ViewModel. */
     remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
+    /** A projected video, handed to the Media tab so it actually loads and plays it. */
+    remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
+    /** A row the operator put on screen from the Schedule -- timed, so its length can be learnt. */
+    onRowWentLive: (ScheduleItem) -> Unit = {},
+    /** How long a song usually runs here, measured -- shown in the song editor. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
     /** Instance Link Controller-mode navigation — advance/retreat whatever the primary currently has
      *  live (no id needed, see Constants.WS_CMD_NEXT_PICTURE and siblings). Received on the primary
      *  side; sent from the Controller side via [instanceLinkSendNextPicture] and siblings below. */
@@ -389,6 +403,9 @@ fun MainDesktop(
         selectedTabIndex = resolveTabSelection(tab, visibleTabs, selectedTabIndex)
     }
     var showAddLabelDialog by remember { mutableStateOf(false) }
+    // The item a tab's Save preset is naming, or null while that dialog is closed.
+    var presetToSave by remember { mutableStateOf<ScheduleItem?>(null) }
+    val presetStore = remember(appSettings.calendarStorageDirectory) { PresetStore(appSettings.calendarFolder()) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
@@ -803,6 +820,20 @@ fun MainDesktop(
     // Load a presentation file uploaded by a mobile client (POST /api/presentations/upload).
     // addPresentation renders the slides and triggers onSlidesLoaded → companionServer.updatePresentation,
     // which broadcasts WS_EVENT_PRESENTATION_UPDATED so the mobile's GET /api/presentations finds it.
+    LaunchedEffect(scheduleViewModel) {
+        scheduleViewModel.onItemPresented = onRowWentLive
+    }
+
+    // A clip a cue started belongs on the live output: being handed the row cleared it, and
+    // nothing else will push it back. See MediaViewModel.onCuePlaybackStarted.
+    LaunchedEffect(mediaViewModel, presenterManager) {
+        mediaViewModel?.onCuePlaybackStarted = { url, type ->
+            presenterManager.setCurrentMedia(url, type)
+            presenterManager.setPresentingMode(Presenting.MEDIA)
+            presenterManager.setShowPresenterWindow(true)
+        }
+    }
+
     RemoteCommandEffects(
         appSettings = appSettings,
         picturesViewModel = picturesViewModel,
@@ -815,6 +846,7 @@ fun MainDesktop(
         onSongItemSelected = { selectedSongItem = it },
         onPictureItemSelected = { selectedPictureItem = it; selectedPictureItemVersion++ },
         onPresentationItemSelected = { selectedPresentationItem = it; selectedPresentationItemVersion++ },
+        onMediaItemSelected = { selectedMediaItem = it; selectedMediaItemVersion++ },
         onSelectTab = ::selectTab,
         pushCurrentSlideIfLive = ::pushCurrentSlideIfLive,
         remotePresentationPlayPauseFlow = remotePresentationPlayPauseFlow,
@@ -830,6 +862,7 @@ fun MainDesktop(
         remoteSelectSongFlow = remoteSelectSongFlow,
         remoteSelectPictureFlow = remoteSelectPictureFlow,
         remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+        remoteSelectMediaFlow = remoteSelectMediaFlow,
         uploadPresentationFlow = uploadPresentationFlow,
     )
 
@@ -1219,6 +1252,7 @@ fun MainDesktop(
                             presenterManager.setShowPresenterWindow(true)
                             presenting(Presenting.ANNOUNCEMENTS)
                         },
+                        onPresentCue = onPresentCue,
                         onPresentScene = { item ->
                             sceneViewModel.selectScene(item.sceneId)
                             val scene = sceneViewModel.scenes.find { it.id == item.sceneId }
@@ -1280,6 +1314,9 @@ fun MainDesktop(
                                 is ScheduleItem.DictionaryItem -> {
                                     dictionaryViewModel.selectByNumber(item.number)
                                 }
+
+                                // Planned time that never goes on screen; nothing to open.
+                                is ScheduleItem.CueItem, is ScheduleItem.MinistryItem -> Unit
                             }
                         },
                         onEditLabel = { labelItem ->
@@ -1318,7 +1355,31 @@ fun MainDesktop(
                                             item.backdrop, item.outline,
                                         )
                                     },
-                                    addWebsite = actions.addWebsite
+                                    addWebsite = actions.addWebsite,
+                                    addCue = actions.addCue,
+                                    addRow = actions.addRow,
+                                    selectItem = actions.selectItem,
+                                    currentTiming = actions.currentTiming,
+                                    setServiceStart = actions.setServiceStart,
+                                    addLabel = actions.addLabel,
+                                    addLowerThird = actions.addLowerThird,
+                                    presentScene = { sceneId ->
+                                        sceneViewModel.selectScene(sceneId)
+                                        presenterManager.setActiveScene(sceneViewModel.scenes.find { it.id == sceneId })
+                                        selectTab(Tabs.CANVAS)
+                                        presenting(Presenting.CANVAS)
+                                    },
+                                    playSlideshow = { item, plays ->
+                                        when (item) {
+                                            is ScheduleItem.MediaItem ->
+                                                mediaViewModel?.requestPlayback(plays, item.mediaUrl)
+                                            is ScheduleItem.PictureItem ->
+                                                picturesViewModel.requestPlayback(plays, item.folderPath)
+                                            is ScheduleItem.PresentationItem ->
+                                                presentationViewModel.requestPlayback(plays, item.filePath)
+                                            else -> Unit
+                                        }
+                                    },
                                 )
                             )
                         },
@@ -1522,6 +1583,9 @@ fun MainDesktop(
                                 hostWindow = hostWindow,
                                 viewModel = songsViewModel,
                                 appSettings = appSettings,
+                                typicalSongSeconds = typicalSongSeconds,
+                                onSongWentLive = { song -> onRowWentLive(song.asDurationRow()) },
+                               
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
                                     currentScheduleActions.addSong(songNumber, title, songbook, songId)
@@ -1548,6 +1612,11 @@ fun MainDesktop(
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
+                                onSavePreset = { folderPath, folderName, imageCount ->
+                                    presetToSave = ScheduleItem.PictureItem(
+                                        UUID.randomUUID().toString(), folderPath, folderName, imageCount,
+                                    )
+                                },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
                                 onInstanceLinkSendNextPicture = instanceLinkSendNextPicture,
                                 onInstanceLinkSendPreviousPicture = instanceLinkSendPreviousPicture,
@@ -1565,6 +1634,11 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
+                                },
+                                onSavePreset = { filePath, fileName, slideCount, fileType ->
+                                    presetToSave = ScheduleItem.PresentationItem(
+                                        UUID.randomUUID().toString(), filePath, fileName, slideCount, fileType,
+                                    )
                                 },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
                                 onInstanceLinkSendNextSlide = instanceLinkSendNextSlide,
@@ -1594,6 +1668,11 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
+                                },
+                                onSavePreset = { mediaUrl, mediaTitle, mediaType ->
+                                    presetToSave = ScheduleItem.MediaItem(
+                                        UUID.randomUUID().toString(), mediaUrl, mediaTitle, mediaType,
+                                    )
                                 },
                                 selectedMediaItem = selectedMediaItem,
                                 selectedMediaItemVersion = selectedMediaItemVersion,
@@ -1659,7 +1738,8 @@ fun MainDesktop(
                                         settings.backdrop,
                                         settings.outline,
                                     )
-                                }
+                                },
+                                onSavePreset = { settings -> presetToSave = announcementPresetItem(settings) }
                             )
 
                             Tabs.WEB -> WebTab(
@@ -1685,6 +1765,13 @@ fun MainDesktop(
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)
+                                },
+                                onSavePreset = { sceneId, sceneName ->
+                                    presetToSave = ScheduleItem.SceneItem(
+                                        id = UUID.randomUUID().toString(),
+                                        sceneId = sceneId,
+                                        sceneName = sceneName,
+                                    )
                                 },
                                 dialogDismissSignal = dialogDismissSignal
                             )
@@ -1817,6 +1904,15 @@ fun MainDesktop(
             } // end Box (available-width measurement)
         }
     }
+
+    SavePresetDialog(
+        item = presetToSave,
+        existingNames = remember(presetToSave) {
+            if (presetToSave == null) emptyList() else presetStore.load().presets.map { it.name }
+        },
+        onConfirm = { name -> presetToSave?.let { presetStore.add(name, it) } },
+        onDismiss = { presetToSave = null },
+    )
 
     AddLabelDialog(
         isVisible = showAddLabelDialog,

@@ -76,6 +76,19 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
                 )
                 offset += cell + 1.dp
             }
+            if (state.showDuration) {
+                Box(
+                    Modifier.width(DURATION_WIDTH).padding(horizontal = 9.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    SkeletonBar(DURATION_BAR, sweep, offset + 9.dp, width)
+                }
+                Box(
+                    Modifier.width(1.dp)
+                        .height(LibraryMetrics.rowHeight)
+                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
+                )
+            }
             Spacer(Modifier.width(ACTIONS_WIDTH))
         }
         Hairline()
@@ -120,6 +133,8 @@ private fun barFraction(row: Int, column: Int): Float =
         ((row * SKELETON_ROW_STRIDE + column * SKELETON_COLUMN_STRIDE) % SKELETON_FILL_STEPS) * SKELETON_FILL_STEP
 
 private const val SKELETON_ROWS = 10
+/** A `4:32`-sized bar, standing in for the Duration column while the folder is read. */
+private val DURATION_BAR = 34.dp
 private const val SKELETON_SWEEP_MS = 1400
 private const val SKELETON_BAND = 0.35f
 private const val SKELETON_MIN_FILL = 0.42f

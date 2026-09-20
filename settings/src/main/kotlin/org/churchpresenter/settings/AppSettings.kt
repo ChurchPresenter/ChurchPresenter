@@ -34,6 +34,12 @@ data class AppSettings(
     val keyboardShortcutSettings: KeyboardShortcutSettings = KeyboardShortcutSettings(),
     val presentationStorageDirectory: String = "",
     val mediaStorageDirectory: String = "",
+    /**
+     * Where `calendar.json` and `presets.json` are kept. Blank means the app data folder, which is
+     * where they have always been; a path is what makes two computers share one calendar -- point
+     * both at the same synced folder. Resolved by [calendarFolder].
+     */
+    val calendarStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
     val schedulePanelCollapsed: Boolean = false,
     val scheduleItemZoomPercent: Int = 100,
@@ -45,8 +51,13 @@ data class AppSettings(
     /**
      * Schedule toolbar buttons the operator has turned off, by `ScheduleToolbarButton` name — the
      * same shape as [hiddenTabs], so an unknown name from a newer build is simply ignored.
+     *
+     * `CALENDAR` starts here: opening the planner is not part of running a service, and a toolbar
+     * that grows a button per window would become a place to hunt rather than a place to work.
+     * Turned on from the panel's own options menu, and once on it stays on. Existing settings are
+     * brought to the same starting point by the migration to schema 11.
      */
-    val hiddenScheduleButtons: Set<String> = emptySet(),
+    val hiddenScheduleButtons: Set<String> = setOf("CALENDAR"),
     val previewPanelWidthDp: Int = 280,
     val previewPanelCollapsed: Boolean = false,
     val maximizedLayout: WindowLayoutSettings = WindowLayoutSettings(),
@@ -105,6 +116,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 10
+        const val CURRENT_SETTINGS_VERSION = 11
     }
 }

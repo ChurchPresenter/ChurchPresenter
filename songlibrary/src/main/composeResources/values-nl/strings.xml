@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">“%1$s” verwijderen?</string>
     <string name="delete_confirm_action">Verwijderen</string>
     <string name="song_count">%1$s liederen</string>
+    <string name="no_song_folder">Er is nog geen liederenmap ingesteld — kies er een bij Instellingen → Liederen, dan kunnen hier liederen worden toegevoegd.</string>
+    <string name="column_duration">Duur</string>
 </resources>

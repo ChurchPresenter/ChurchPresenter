@@ -477,4 +477,6 @@ internal fun tabForScheduleItem(item: ScheduleItem): Tabs? = when (item) {
     is ScheduleItem.WebsiteItem -> Tabs.WEB
     is ScheduleItem.SceneItem -> Tabs.CANVAS
     is ScheduleItem.DictionaryItem -> Tabs.DICTIONARY
+    // A cue fires from where it is; there is no tab to go to. An off-screen row never goes anywhere.
+    is ScheduleItem.CueItem, is ScheduleItem.MinistryItem -> null
 }

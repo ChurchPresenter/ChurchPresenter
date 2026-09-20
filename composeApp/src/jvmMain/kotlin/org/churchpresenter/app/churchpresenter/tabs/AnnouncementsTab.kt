@@ -4,6 +4,7 @@ import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
@@ -95,6 +96,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_send_to_stage_monitor
 import churchpresenter.composeapp.generated.resources.tooltip_hide_from_stage_monitor
@@ -195,7 +197,9 @@ fun AnnouncementsTab(
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     presenterManager: PresenterManager? = null,
-    onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)? = null
+    onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)? = null,
+    /** Save preset, to the left of Add to Schedule: the same text or timer, kept for the Calendar Manager. */
+    onSavePreset: ((settings: AnnouncementsSettings) -> Unit)? = null
 ) {
     val viewModel = remember { AnnouncementsViewModel() }
 
@@ -383,6 +387,26 @@ fun AnnouncementsTab(
                         contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+            if (onSavePreset != null) {
+                SavePresetButton(
+                    onClick = {
+                        // A saved announcement is the text and its look; the timer fields
+                        // belong to a timer preset, not to this one.
+                        onSavePreset.invoke(
+                            viewModel.buildSettings().copy(
+                                timerHours = 0,
+                                timerMinutes = 0,
+                                timerSeconds = 0,
+                                timerTextColor = "#FFFFFF",
+                                timerExpiredText = "",
+                                timerMode = Constants.TIMER_MODE_DURATION,
+                            )
+                        )
+                    },
+                    enabled = viewModel.text.isNotBlank(),
+                    tooltipText = stringResource(Res.string.save_preset)
+                )
             }
             if (onAddToSchedule != null) {
                 AddToScheduleButton(
@@ -809,6 +833,13 @@ fun AnnouncementsTab(
                                     icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
                                     containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                                     contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            if (onSavePreset != null) {
+                                SavePresetButton(
+                                    onClick = { onSavePreset.invoke(viewModel.buildSettings()) },
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    tooltipText = stringResource(Res.string.save_preset)
                                 )
                             }
                             if (onAddToSchedule != null) {

@@ -161,4 +161,10 @@ internal fun ScheduleItem.toDto(): ScheduleItemDto = when (this) {
         id = id, type = "dictionary", displayText = displayText,
         text = "$word ($transliteration): $definition"
     )
+    is ScheduleItem.CueItem -> ScheduleItemDto(
+        id = id, type = "cue", displayText = displayText, text = absoluteTime
+    )
+    is ScheduleItem.MinistryItem -> ScheduleItemDto(
+        id = id, type = "ministry", displayText = displayText, text = detail
+    )
 }

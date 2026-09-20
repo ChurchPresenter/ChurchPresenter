@@ -10,6 +10,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -84,6 +86,7 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.canvas_create_scene
 import churchpresenter.composeapp.generated.resources.canvas_new_scene
 import churchpresenter.composeapp.generated.resources.canvas_no_scene_selected
@@ -104,6 +107,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -164,6 +168,8 @@ fun CanvasTab(
     presenterManager: PresenterManager,
     sceneViewModel: SceneViewModel,
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
+    /** Save preset, to the left of Add to Schedule: the same scene, kept for the Calendar Manager. */
+    onSavePreset: ((sceneId: String, sceneName: String) -> Unit)? = null,
     dialogDismissSignal: Int = 0,
     /** The cameras the source panel offers, or null to ask this machine — a test pins it. */
     cameraDevices: List<CameraDevice>? = null,
@@ -228,6 +234,7 @@ fun CanvasTab(
     }
 
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
 
     Row(
         modifier = modifier
@@ -845,6 +852,12 @@ fun CanvasTab(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (onSavePreset != null) {
+                            SavePresetButton(
+                                onClick = { onSavePreset(currentScene.id, currentScene.name) },
+                                tooltipText = stringResource(Res.string.save_preset)
+                            )
+                        }
                         // Add to Schedule
                         AddToScheduleButton(
                             onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
@@ -857,6 +870,13 @@ fun CanvasTab(
                                 presenterManager.setActiveScene(currentScene)
                                 presenterManager.setPresentingMode(Presenting.CANVAS)
                                 presenterManager.setShowPresenterWindow(true)
+                                wentLive(
+                                    ScheduleItem.SceneItem(
+                                        id = java.util.UUID.randomUUID().toString(),
+                                        sceneId = currentScene.id,
+                                        sceneName = currentScene.name,
+                                    )
+                                )
                             },
                             tooltipText = stringResource(Res.string.go_live)
                         )

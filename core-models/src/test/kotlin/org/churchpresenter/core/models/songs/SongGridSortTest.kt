@@ -59,4 +59,16 @@ class SongGridSortTest {
     fun `descending is the same order turned around`() {
         assertEquals(titlesSortedBy(SortColumn.TITLE).reversed(), titlesSortedBy(SortColumn.TITLE, ascending = false))
     }
+
+    @Test
+    fun `the measured duration orders by seconds, unmeasured songs last`() {
+        val seconds = mapOf("Alpha" to 300, "Bravo" to 240)
+        val byDuration = GridView(sortBy = SortColumn.DURATION)
+        val rows = SongGrid.rows(songs, byDuration) { seconds[it.title] }.map { it.title }
+        assertEquals(listOf("Bravo", "Alpha", "Charlie"), rows)
+        val reversed = SongGrid.rows(songs, byDuration.copy(ascending = false)) { seconds[it.title] }
+        assertEquals("Charlie", reversed.first().title, "descending simply reverses, unmeasured first")
+        val unmeasured = titlesSortedBy(SortColumn.DURATION)
+        assertEquals(listOf("Alpha", "Bravo", "Charlie"), unmeasured, "nothing measured: by title")
+    }
 }
