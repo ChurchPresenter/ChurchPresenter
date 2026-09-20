@@ -58,6 +58,22 @@ class SongLibraryScreenshotTest {
     fun `the library as it opens`() = shoot("library")
 
     /** Only reachable because the load can be held: the grid is in it for as long as the disk takes. */
+    /**
+     * The Duration column filled from what the songs have actually taken on screen. It is the
+     * last column, past the right edge of a full-width grid at this window size, so the wide
+     * text columns are turned off first to bring it into view.
+     */
+    @Test
+    fun `measured durations in the grid`() = shoot(
+        "durations_measured",
+        typicalSeconds = { song -> MEASURED[song.title] },
+    ) {
+        onNodeWithText(COLUMNS).performClick()
+        listOf("Secondary Title", "Author", "Composer", "Tune").forEach { onNodeWithText(it).performClick() }
+        dismissPopup()
+        waitForIdle()
+    }
+
     @Test
     fun `the skeleton shown while the folder is being read`() = shoot("loading", hold = true)
 
@@ -156,6 +172,8 @@ class SongLibraryScreenshotTest {
         rootIndex: Int = 0,
         trim: Boolean = false,
         hold: Boolean = false,
+        /** How long a song has usually stayed on screen -- the Duration column; nothing measured by default. */
+        typicalSeconds: (SongItem) -> Int? = { null },
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name, trim) { mode, file ->
         val folder = Files.createTempDirectory("songlibrary-shot").toFile()
@@ -170,6 +188,7 @@ class SongLibraryScreenshotTest {
                             SongLibraryApp(
                                 libraryFolder = folder,
                                 onClose = {},
+                                typicalSeconds = typicalSeconds,
                                 io = if (hold) gate else Dispatchers.IO,
                             )
                         }
@@ -199,8 +218,14 @@ class SongLibraryScreenshotTest {
     }
 
     /** Closes an open menu by clicking its anchor again, so the grid behind it is what is shot. */
+    /**
+     * Closes the columns panel by clicking outside it -- on the search field. Pressing the
+     * Columns button again does not close it: the panel opens over its own anchor, so that click
+     * lands on "Show all" and quietly restores every column just turned off (the app test
+     * `pressing Columns again lands on Show all` pins that), which is what this used to do.
+     */
     private fun ComposeUiTest.dismissPopup() {
-        onAllNodesWithText(COLUMNS)[0].performClick()
+        onAllNodes(hasSetTextAction())[0].performClick()
         waitForIdle()
     }
 
@@ -236,6 +261,9 @@ class SongLibraryScreenshotTest {
          * filed loose in the root, and fields that are filled in for some songs and not others —
          * so the grid is shot with both its populated and its empty cells.
          */
+        /** What three of the stock songs have taken, in seconds; the rest stay blank. */
+        val MEASURED = mapOf("Amazing Grace" to 272, "Be Thou My Vision" to 318, "Silent Night" to 195)
+
         val STOCK = listOf(
             song(
                 "001", "Amazing Grace", "Hymnal",

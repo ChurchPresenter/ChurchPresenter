@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Futa “%1$s”?</string>
     <string name="delete_confirm_action">Futa</string>
     <string name="song_count">Nyimbo %1$s</string>
+    <string name="no_song_folder">Folda ya nyimbo bado haijawekwa — chagua moja katika Mipangilio → Nyimbo, na nyimbo zitaweza kuongezwa hapa.</string>
+    <string name="column_duration">Muda</string>
 </resources>

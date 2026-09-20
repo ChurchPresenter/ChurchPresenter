@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Burahin ang “%1$s”?</string>
     <string name="delete_confirm_action">Burahin</string>
     <string name="song_count">%1$s awit</string>
+    <string name="no_song_folder">Wala pang nakatakdang folder ng mga awit — pumili ng isa sa Mga Setting → Mga Awit, at maaaring magdagdag ng mga awit dito.</string>
+    <string name="column_duration">Tagal</string>
 </resources>

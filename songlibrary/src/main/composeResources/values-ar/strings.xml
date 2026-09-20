@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">حذف «%1$s»؟</string>
     <string name="delete_confirm_action">حذف</string>
     <string name="song_count">%1$s ترنيمة</string>
+    <string name="no_song_folder">لم يتم تعيين مجلد ترانيم بعد — اختر واحدًا في الإعدادات ← الترانيم، ويمكن إضافة الترانيم هنا.</string>
+    <string name="column_duration">المدة</string>
 </resources>

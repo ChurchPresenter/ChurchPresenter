@@ -182,7 +182,91 @@ sealed class ScheduleItem {
         val definition: String,
         override val displayText: String = "$word ($number)"
     ) : ScheduleItem()
+
+    /**
+     * Something in the order of service that does not go on screen -- a poem read, a violin
+     * solo, a prayer, a word of welcome. Planned and timed like any other row, so the run of
+     * show's clock and its printed order carry it; **never loaded into the Schedule tab**, which
+     * holds only what the outputs can show. The kind of row a musician or reader adds from a
+     * phone so their slot is on the plan.
+     *
+     * [detail] is who, or how -- `Anna, violin`.
+     */
+    @Serializable
+    @SerialName("org.churchpresenter.app.churchpresenter.models.ScheduleItem.MinistryItem")
+    data class MinistryItem(
+        override val id: String,
+        val title: String,
+        val detail: String = "",
+        override val displayText: String = title
+    ) : ScheduleItem()
+
+    /**
+     * A timed action: at [absoluteTime] -- or [offsetMinutes] from the service's start until it is
+     * pinned -- do [action], with [payload] as what it puts on screen where the action shows
+     * something. A row like any other, so a planned service and the live schedule carry their
+     * automation in the same list as their songs, and loading one into the other is a copy.
+     *
+     * [payload] is a copy of the row it was chosen from, not a reference: a cue keeps firing what
+     * it was set to even if that row is later replaced.
+     */
+    @Serializable
+    @SerialName("org.churchpresenter.app.churchpresenter.models.ScheduleItem.CueItem")
+    data class CueItem(
+        override val id: String,
+        /** A [CueAction] constant. Strings rather than an enum so a file written by a later version still opens. */
+        val action: String,
+        val label: String = "",
+        /** Minutes relative to the service start; negative is before it. Ignored once [absoluteTime] is set. */
+        val offsetMinutes: Int = 0,
+        /** `09:45` on the wall clock. Set when pinned by hand, and when the row is loaded into the live schedule. */
+        val absoluteTime: String = "",
+        val payload: ScheduleItem? = null,
+        /** How many times a shown item plays through: 1 once, 0 until something else goes live, N that many. */
+        val plays: Int = 1,
+        /** Off is "skip this one" -- the row stays, greyed, and fires again once re-ticked. */
+        val enabled: Boolean = true,
+        override val displayText: String = label.ifBlank { action }
+    ) : ScheduleItem() {
+        fun isPinned(): Boolean = absoluteTime.isNotEmpty()
+    }
 }
+
+/**
+ * What a [ScheduleItem.CueItem] does. An unknown action is simply never fired.
+ */
+object CueAction {
+    /**
+     * Puts [ScheduleItem.CueItem.payload] -- a slideshow, a deck, a clip -- on screen, and plays it
+     * [ScheduleItem.CueItem.plays] times.
+     */
+    const val PROJECT = "project"
+    /** Starts a countdown: the payload if it is a timer, otherwise one counting to the service's start. */
+    const val COUNTDOWN = "countdown"
+    /**
+     * Loads the run of show into the Schedule and puts an item on screen -- the payload, else the
+     * first row that can be projected.
+     */
+    const val GO_LIVE = "goLive"
+    /** Puts a canvas scene -- the payload, a scene item -- on screen. */
+    const val SCENE = "scene"
+    /** Clears every output. */
+    const val BLANK = "blank"
+    const val OBS_SCENE = "obsScene"
+    const val ATEM_KEY = "atemKey"
+
+    /** The actions offered in the cue sheet, in the design's order. */
+    val offered: List<String> = listOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE, BLANK)
+
+    /** The actions that point at an item, and so show a target list. */
+    val withTarget: Set<String> = setOf(COUNTDOWN, PROJECT, GO_LIVE, SCENE)
+
+    /** The actions whose item has a run to play, and so take a play count. */
+    val withPlays: Set<String> = setOf(PROJECT, GO_LIVE)
+}
+
+/** The [ScheduleItem.CueItem.plays] value that means "keep going". */
+const val LOOP_FOREVER: Int = 0
 
 /**
  * The schedule row's label for a website, truncated so a long page title cannot push the row out of

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Usunąć „%1$s”?</string>
     <string name="delete_confirm_action">Usuń</string>
     <string name="song_count">%1$s pieśni</string>
+    <string name="no_song_folder">Nie ustawiono jeszcze folderu pieśni — wybierz go w Ustawienia → Pieśni, a tutaj będzie można dodawać pieśni.</string>
+    <string name="column_duration">Czas trwania</string>
 </resources>

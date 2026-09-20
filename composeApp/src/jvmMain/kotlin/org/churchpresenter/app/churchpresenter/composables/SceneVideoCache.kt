@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.diagnostics.CrashReporter
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import uk.co.caprica.vlcj.player.base.MediaPlayer
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
+import uk.co.caprica.vlcj.media.TrackType
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
@@ -26,6 +29,8 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.File
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -42,6 +47,12 @@ private const val BYTES_PER_PIXEL = 4
 // vararg, so a spread copies the array on every call.
 private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
 private const val VLC_OPT_LOOP = ":input-repeat=65535"
+
+// Software decoding, as VideoPlayer forces it and for the same reason: on macOS libvlc's hardware
+// path hands the callback surface CVPX buffers it cannot read, and the layer stays grey while the
+// sound plays on -- an iPhone HEVC .MOV is the file that shows it every time.
+private const val VLC_OPT_SOFTWARE_CODEC = ":codec=avcodec"
+private const val VLC_OPT_FAST_DECODE = ":avcodec-fast"
 
 /**
  * Which decode two layers must agree on to share one.
@@ -255,17 +266,47 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
     }
     player.videoSurface().set(factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true))
 
+    // The volume the layers last asked for. A volume set before libvlc has built its audio output
+    // is dropped on the floor -- which is how a "silent" background was heard -- so it is applied
+    // again the moment playback actually starts, and zero is a real mute rather than a level.
+    // `playing` alone is not enough: the audio output is built when the audio track is selected,
+    // which can be after that event, so it is applied again then and on the first clock tick.
+    val wantedPercent = AtomicInteger(VOLUME_PERCENT_SCALE)
+    fun applyVolume() {
+        val percent = wantedPercent.get()
+        try {
+            player.audio().isMute = percent == 0
+            player.audio().setVolume(percent)
+        } catch (_: Throwable) { }
+    }
+    player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
+        private val firstTick = AtomicBoolean(true)
+        override fun playing(mediaPlayer: MediaPlayer) = applyVolume()
+        override fun elementaryStreamSelected(mediaPlayer: MediaPlayer, type: TrackType, id: Int) {
+            if (type == TrackType.AUDIO) applyVolume()
+        }
+        override fun timeChanged(mediaPlayer: MediaPlayer, newTime: Long) {
+            if (firstTick.compareAndSet(true, false)) applyVolume()
+        }
+    })
+
     Thread.sleep(PLAYER_SETTLE_MS)
     try {
-        if (spec.loop) player.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK, VLC_OPT_LOOP)
-        else player.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK)
+        if (spec.loop) {
+            player.media().play(
+                file.absolutePath, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_LOOP,
+            )
+        } else {
+            player.media().play(file.absolutePath, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
+        }
     } catch (_: Throwable) { }
 
     return object : SceneVideoHandle {
         override val frameVersion: Long get() = version.get()
         override val frame: BufferedImage? get() = holder.get()
         override fun setVolume(percent: Int) {
-            try { player.audio().setVolume(percent) } catch (_: Throwable) { }
+            wantedPercent.set(percent)
+            applyVolume()
         }
         override fun close() {
             try {

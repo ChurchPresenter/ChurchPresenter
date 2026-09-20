@@ -430,4 +430,65 @@ class MediaViewModelTest {
         val vm = MediaViewModel()
         assertEquals("0:01", vm.formatTime(1_999), "1.999s is still in its first second")
     }
+
+    // ── A cue's play request ────────────────────────────────────────────────────
+
+    @Test
+    fun `a request for a clip not yet loaded waits for it`() {
+        val vm = MediaViewModel()
+        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        assertFalse(vm.isPlaying, "nothing to play yet")
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.isPlaying)
+        assertFalse(vm.isLooping, "once is once")
+        assertEquals(0, vm.loopCount)
+    }
+
+    @Test
+    fun `a request for one clip does not start another`() {
+        val vm = loaded("/media/last-week.mp4")
+        vm.requestPlayback(plays = 1, url = "/media/this-week.mp4")
+        assertFalse(vm.isPlaying, "last week's clip was loaded, not the one asked for")
+
+        vm.loadMediaFromSchedule("/media/this-week.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.isPlaying)
+    }
+
+    @Test
+    fun `a request on a loaded clip plays it at once and tells the app`() {
+        val started = mutableListOf<Pair<String, String>>()
+        val vm = loaded("/media/clip.mp4")
+        vm.onCuePlaybackStarted = { url, type -> started.add(url to type) }
+
+        vm.requestPlayback(plays = 3, url = "/media/clip.mp4")
+
+        assertTrue(vm.isPlaying)
+        assertTrue(vm.isLooping)
+        assertEquals(2, vm.loopCount, "three plays is the first plus two repeats")
+        assertEquals(listOf("/media/clip.mp4" to Constants.MEDIA_TYPE_LOCAL), started)
+    }
+
+    @Test
+    fun `zero plays loops until something else goes live`() {
+        val vm = loaded("/media/clip.mp4")
+
+        vm.requestPlayback(plays = 0, url = "/media/clip.mp4")
+
+        assertTrue(vm.isLooping)
+        assertEquals(0, vm.loopCount, "no count means for ever")
+    }
+
+    @Test
+    fun `a request is spent once carried out`() {
+        val vm = loaded("/media/clip.mp4")
+        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        vm.pause()
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertFalse(vm.isPlaying, "reloading the same clip by hand must not replay the cue")
+    }
 }

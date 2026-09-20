@@ -41,6 +41,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.use_default_directory
+import churchpresenter.composeapp.generated.resources.ic_storage_calendar
+import churchpresenter.composeapp.generated.resources.calendar_storage_status_default
+import churchpresenter.composeapp.generated.resources.calendar_storage
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.ic_storage_bible
@@ -74,6 +78,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -190,13 +195,27 @@ internal class StorageFolder(
     val icon: DrawableResource,
     val tint: Color,
     val path: String,
+    /** Whether [path] is the default rather than a choice -- only meaningful with [onUseDefault]. */
+    val isDefault: Boolean = false,
+    /**
+     * For a folder that has a default rather than "not set": what clears the choice, drawn as
+     * *Use Default* where the other rows have *Set All*, and disabled while the default is in use.
+     * Null for the content folders, which have nothing to fall back to.
+     */
+    val onUseDefault: (() -> Unit)? = null,
     val onPathChange: (String) -> Unit,
 )
 
 /** The line under a folder's name — what the folder is, rather than where it is. */
 internal class StorageStatusLine(val text: String, val color: Color)
 
-/** The six folders, in the order the pane lists them. */
+/**
+ * The seven folders, in the order the pane lists them. The calendar is last and the odd one out:
+ * blank means the app data folder, which is shown as the path in use rather than as "not set",
+ * because it is set -- it is the default. *Set All* leaves it alone in both directions: it is
+ * where the plan lives, not a content folder, and the reason to point it anywhere else is to share
+ * it with another computer.
+ */
 @Composable
 private fun storageFolders(
     settings: AppSettings,
@@ -226,6 +245,13 @@ private fun storageFolders(
         stringResource(Res.string.media), Res.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
         settings.mediaStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(mediaStorageDirectory = dir) } },
+    StorageFolder(
+        stringResource(Res.string.calendar_storage), Res.drawable.ic_storage_calendar,
+        MaterialTheme.semantic.contentCalendar,
+        remember(settings.calendarStorageDirectory) { settings.calendarFolder().absolutePath },
+        isDefault = settings.calendarStorageDirectory.isBlank(),
+        onUseDefault = { onSettingsChange { s -> s.copy(calendarStorageDirectory = "") } },
+    ) { dir -> onSettingsChange { s -> s.copy(calendarStorageDirectory = dir) } },
 )
 
 /**
@@ -281,6 +307,14 @@ internal fun SystemStorageCard(
                         MaterialTheme.semantic.warning,
                     )
                 }
+                CALENDAR_ROW -> if (folder.isDefault) {
+                    StorageStatusLine(
+                        stringResource(Res.string.calendar_storage_status_default),
+                        MaterialTheme.semantic.success,
+                    )
+                } else {
+                    null
+                }
                 else -> null
             }
             StorageRow(
@@ -303,6 +337,7 @@ internal fun SystemStorageCard(
 
 private const val BIBLE_ROW = 0
 private const val SONGS_ROW = 1
+private const val CALENDAR_ROW = 6
 private const val ROW_LINE_ALPHA = 0.5f
 private const val ICON_TILE_ALPHA = 0.16f
 
@@ -401,20 +436,44 @@ private fun StorageRow(
         ) {
             Text(text = stringResource(Res.string.browse_directory), style = MaterialTheme.typography.labelMedium)
         }
-        Button(
-            onClick = { if (folder.path.isNotEmpty()) onSetAll(folder.path) },
-            enabled = folder.path.isNotEmpty(),
-            modifier = Modifier.height(CONTROL_HEIGHT),
-            // Green while the folder is usable: the button copies *this* path over the other five,
-            // so its colour is the same "this one is good" the row's dot and status line report.
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.semantic.successContainer,
-                contentColor = MaterialTheme.semantic.onSuccessContainer,
-            ),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 13.dp),
-        ) {
-            Text(text = stringResource(Res.string.set_all_directories), style = MaterialTheme.typography.labelMedium)
+        val useDefault = folder.onUseDefault
+        if (useDefault != null) {
+            Button(
+                onClick = useDefault,
+                enabled = !folder.isDefault,
+                modifier = Modifier.height(CONTROL_HEIGHT),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.semantic.successContainer,
+                    contentColor = MaterialTheme.semantic.onSuccessContainer,
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 13.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.use_default_directory),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        } else {
+            Button(
+                onClick = { if (folder.path.isNotEmpty()) onSetAll(folder.path) },
+                enabled = folder.path.isNotEmpty(),
+                modifier = Modifier.height(CONTROL_HEIGHT),
+                // Green while the folder is usable: the button copies *this* path over the other
+                // content folders, so its colour is the same "this one is good" the row's dot and
+                // status line report.
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.semantic.successContainer,
+                    contentColor = MaterialTheme.semantic.onSuccessContainer,
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 13.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.set_all_directories),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
     }
 }

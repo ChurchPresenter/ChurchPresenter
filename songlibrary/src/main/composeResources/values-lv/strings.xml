@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Vai dzēst “%1$s”?</string>
     <string name="delete_confirm_action">Dzēst</string>
     <string name="song_count">%1$s dziesmas</string>
+    <string name="no_song_folder">Dziesmu mape vēl nav iestatīta — izvēlieties to sadaļā Iestatījumi → Dziesmas, un šeit varēs pievienot dziesmas.</string>
+    <string name="column_duration">Ilgums</string>
 </resources>

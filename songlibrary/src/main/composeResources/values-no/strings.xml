@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Slette «%1$s»?</string>
     <string name="delete_confirm_action">Slett</string>
     <string name="song_count">%1$s sanger</string>
+    <string name="no_song_folder">Ingen sangmappe er satt ennå — velg en under Innstillinger → Sanger, så kan sanger legges til her.</string>
+    <string name="column_duration">Varighet</string>
 </resources>

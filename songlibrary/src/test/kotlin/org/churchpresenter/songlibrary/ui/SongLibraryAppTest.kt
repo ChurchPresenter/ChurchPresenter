@@ -6,7 +6,13 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.runComposeUiTest
+import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.core.models.songs.SongLibrary
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import java.io.File
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -76,6 +82,69 @@ class SongLibraryAppTest {
             click(Text.SHOW_ALL)
             assertTrue(isShowing("John Newton"), "and came back")
         }
+
+    @Test
+    fun `the duration column shows a measured song's length and can be hidden like the rest`() {
+        val folder = Files.createTempDirectory("songlibrary-duration").toFile()
+        try {
+            val library = SongLibrary(folder)
+            STOCK.forEach { library.writeNew(it) }
+            runComposeUiTest {
+                setContent {
+                    AppThemeWrapper(theme = ThemeMode.LIGHT) {
+                        SongLibraryApp(
+                            libraryFolder = folder,
+                            onClose = {},
+                            typicalSeconds = { if (it.title == STOCK.first().title) 272 else null },
+                            io = Dispatchers.Unconfined,
+                        )
+                    }
+                }
+                awaitRow(STOCK.first().title)
+                assertTrue(isShowingText("4:32"), "the measured length, as minutes and seconds")
+                assertTrue(isShowingText("DURATION"))
+
+                click(Text.COLUMNS)
+                clickLast("Duration")
+                assertFalse(isShowingText("4:32"), "hidden with its cells")
+                click(Text.SHOW_ALL)
+                assertTrue(isShowingText("4:32"))
+            }
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `the duration heading sorts by it, and a second press turns the order round`() = withLibrary { _ ->
+        clickFirst("DURATION")
+        assertEquals(STOCK.size, rowTitles().size, "sorting by an unmeasured column drops nothing")
+        clickFirst("DURATION")
+        assertEquals(STOCK.size, rowTitles().size, "nor does turning the order round")
+    }
+
+    @Test
+    fun `the songs filed under no book, and the whole library, are filters of their own`() = withLibrary { _ ->
+        click(Text.ALL_BOOKS)
+        clickLast("No Song Book")
+        assertEquals(listOf("Doxology"), rowTitles(), "the one song filed in the root")
+        assertTrue(isShowing("No Song Book"), "which the filter button now says")
+
+        clickFirst("No Song Book")
+        clickLast(Text.ALL_BOOKS)
+        assertEquals(STOCK.size, rowTitles().size)
+    }
+
+    @Test
+    fun `a book with a filter and no matching search says so, and resets both`() = withLibrary { _ ->
+        click(Text.ALL_BOOKS)
+        clickLast("Chorus Book")
+        typeSearch("bagpipes")
+
+        assertTrue(isShowing(Text.NO_MATCHES))
+        click(Text.RESET_FILTERS)
+        assertEquals(STOCK.size, rowTitles().size, "the book filter went with the search")
+    }
 
     /**
      * The columns panel opens over the button that opens it, so the button cannot be used to close

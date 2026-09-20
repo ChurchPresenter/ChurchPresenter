@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Kas kustutada „%1$s“?</string>
     <string name="delete_confirm_action">Kustuta</string>
     <string name="song_count">%1$s laulu</string>
+    <string name="no_song_folder">Laulude kausta pole veel määratud — vali see Seaded → Laulud alt ja siia saab laule lisada.</string>
+    <string name="column_duration">Kestus</string>
 </resources>

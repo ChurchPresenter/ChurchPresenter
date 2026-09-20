@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">„%1$s“ löschen?</string>
     <string name="delete_confirm_action">Löschen</string>
     <string name="song_count">%1$s Lieder</string>
+    <string name="no_song_folder">Es ist noch kein Liederordner festgelegt — wähle einen unter Einstellungen → Lieder, dann können hier Lieder hinzugefügt werden.</string>
+    <string name="column_duration">Dauer</string>
 </resources>

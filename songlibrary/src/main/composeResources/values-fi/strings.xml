@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Poistetaanko ”%1$s”?</string>
     <string name="delete_confirm_action">Poista</string>
     <string name="song_count">%1$s laulua</string>
+    <string name="no_song_folder">Laulukansiota ei ole vielä asetettu — valitse se kohdasta Asetukset → Laulut, niin lauluja voi lisätä täällä.</string>
+    <string name="column_duration">Kesto</string>
 </resources>

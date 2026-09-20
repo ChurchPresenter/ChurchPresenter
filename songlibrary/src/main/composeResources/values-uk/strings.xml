@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Видалити «%1$s»?</string>
     <string name="delete_confirm_action">Видалити</string>
     <string name="song_count">%1$s пісень</string>
+    <string name="no_song_folder">Теку пісень ще не задано — виберіть її в Налаштуваннях → Пісні, і тут можна буде додавати пісні.</string>
+    <string name="column_duration">Тривалість</string>
 </resources>

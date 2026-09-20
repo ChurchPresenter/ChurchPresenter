@@ -392,4 +392,32 @@ class SongLibraryStateTest {
 
     private fun SongLibraryState.createSongbookNow(name: String, assignSelected: Boolean): Boolean =
         runBlocking { createSongbook(name, assignSelected, Dispatchers.Unconfined) }
+
+    // ── The measured Duration column ──────────────────────────────────────────
+
+    @Test
+    fun `durations are read once per song from whoever measures them`() {
+        val asked = mutableListOf<String>()
+        val measured = SongLibraryState(root) { song -> asked += song.title; if (song.title == "Rise") 272 else null }
+        runBlocking { measured.reloadAsync(Dispatchers.Unconfined) }
+
+        assertEquals(mapOf(fileOf("Rise") to 272).keys, measured.durations.keys)
+        assertEquals(272, measured.durations[measured.songs.first { it.title == "Rise" }.sourceFile])
+        assertEquals(4, asked.size, "every song, once")
+
+        measured.sortBy(SortColumn.DURATION)
+        assertEquals("Rise", measured.rows.first().title, "the one measured song leads the duration order")
+    }
+
+    @Test
+    fun `the duration column is shown, can be hidden, and Show all brings it back`() {
+        assertTrue(state.showDuration)
+        state.toggleDuration()
+        assertFalse(state.showDuration)
+        state.toggleDuration()
+        assertTrue(state.showDuration)
+        state.toggleDuration()
+        state.showAllColumns()
+        assertTrue(state.showDuration)
+    }
 }

@@ -25,6 +25,7 @@
     <string name="column_composer">Composer</string>
     <string name="column_tune">Tune</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_duration">Duration</string>
     <string name="edit_song">Edit song</string>
     <string name="delete_song">Delete song</string>
     <string name="empty_title">No songs match your filters</string>

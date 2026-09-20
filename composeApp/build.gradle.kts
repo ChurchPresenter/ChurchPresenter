@@ -330,6 +330,10 @@ kotlin {
             implementation(projects.bible)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
+            // The Calendar Manager: the planner window, opened from the Help menu beside it. Holds
+            // its own calendar.json; a planned run of show is a List<ScheduleItem> the Schedule tab
+            // loads as-is.
+            implementation(projects.calendar)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.

@@ -105,6 +105,8 @@ import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
 import churchpresenter.composeapp.generated.resources.song_stats
+import churchpresenter.composeapp.generated.resources.song_typical_live
+import org.churchpresenter.calendar.model.formatDuration
 import churchpresenter.composeapp.generated.resources.song_syntax
 import churchpresenter.composeapp.generated.resources.song_syntax_chord_hint
 import churchpresenter.composeapp.generated.resources.song_tempo
@@ -121,6 +123,7 @@ import org.churchpresenter.app.churchpresenter.composables.SongChordPreview
 import org.churchpresenter.app.churchpresenter.composables.SongSectionKind
 import org.churchpresenter.app.churchpresenter.composables.buildPreviewSections
 import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
+import org.churchpresenter.app.churchpresenter.composables.SongStats
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
@@ -155,6 +158,13 @@ fun EditSongDialog(
     tuning: SongTuning = SongTuning(),
     showTuningFields: Boolean = false,
     chordsVisible: Boolean = true,
+    /**
+     * How long this song usually stays on screen here, in seconds, or null until it is known.
+     *
+     * Measured rather than typed -- see `LiveDurationLog`. Shown beside the section and word
+     * counts because that is where somebody editing a song asks "how long does this one run".
+     */
+    typicalSeconds: Int? = null,
     onChordsVisibleChange: (Boolean) -> Unit = {},
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
                                   lowerThirdBackground: SongBackground) -> Unit)? = null,
@@ -183,6 +193,7 @@ fun EditSongDialog(
             tuning = tuning,
             showTuningFields = showTuningFields,
             chordsVisible = chordsVisible,
+            typicalSeconds = typicalSeconds,
             onChordsVisibleChange = onChordsVisibleChange,
             isVisible = isVisible,
             onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
@@ -249,6 +260,8 @@ internal fun EditSongContent(
     tuning: SongTuning = SongTuning(),
     showTuningFields: Boolean = false,
     chordsVisible: Boolean = true,
+    /** How long this song usually runs here -- measured, see [EditSongDialog]. */
+    typicalSeconds: Int? = null,
     onChordsVisibleChange: (Boolean) -> Unit = {},
     isVisible: Boolean = true,
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
@@ -550,64 +563,41 @@ internal fun EditSongContent(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // ── Footer ─────────────────────────────────────────────────────────────────
-                val stats = remember(paneValue.text) {
-                    songStatsOf(buildPreviewSections(paneValue.text, showChords = false))
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                        .height(58.dp)
-                        .padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.song_stats, stats.sections, stats.lines, stats.words),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
-                        Text(stringResource(Res.string.cancel))
-                    }
-                    Button(
-                        shape = RoundedCornerShape(9.dp),
-                        enabled = !isDuplicate && (!isNewSong || (editedSongbook.isNotBlank() && editedTitle.isNotBlank())),
-                        onClick = {
-                            val updatedSong = SongItem(
-                                number = editedNumber,
-                                title = editedTitle,
-                                songbook = editedSongbook,
-                                tune = editedTune,
-                                author = editedAuthor,
-                                composer = editedComposer,
-                                lyrics = editedLyrics.text.split("\n"),
-                                secondaryTitle = editedSecondaryTitle,
-                                secondaryLyrics = editedSecondaryLyrics.text.split("\n").let {
-                                    if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList() else it
-                                },
-                                sourceFile = song.sourceFile,
-                                ccliNumber = editedCcli,
-                                background = editedBackground,
-                                lowerThirdBackground = editedLowerThirdBackground
-                            )
-                            onSave(
-                                updatedSong,
-                                SongTuning(
-                                    bpm = editedBpm.toIntOrNull()?.coerceIn(0, MAX_BPM) ?: 0,
-                                    capo = editedCapo.toIntOrNull()?.coerceIn(0, MAX_CAPO) ?: 0,
-                                ),
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                EditSongFooter(
+                    stats = songStatsOf(buildPreviewSections(paneValue.text, showChords = false)),
+                    typicalSeconds = typicalSeconds,
+                    saveEnabled = !isDuplicate &&
+                        (!isNewSong || (editedSongbook.isNotBlank() && editedTitle.isNotBlank())),
+                    onDismiss = onDismiss,
+                    onSave = {
+                        val updatedSong = SongItem(
+                            number = editedNumber,
+                            title = editedTitle,
+                            songbook = editedSongbook,
+                            tune = editedTune,
+                            author = editedAuthor,
+                            composer = editedComposer,
+                            lyrics = editedLyrics.text.split("\n"),
+                            secondaryTitle = editedSecondaryTitle,
+                            secondaryLyrics = editedSecondaryLyrics.text.split("\n").let { linesOf ->
+                                // A translation that is only section headings is no translation.
+                                val empty = linesOf.all { it.isBlank() || it.trim().startsWith("[") }
+                                if (empty) emptyList() else linesOf
+                            },
+                            sourceFile = song.sourceFile,
+                            ccliNumber = editedCcli,
+                            background = editedBackground,
+                            lowerThirdBackground = editedLowerThirdBackground,
                         )
-                    ) {
-                        Text(stringResource(Res.string.save))
-                    }
-                }
+                        onSave(
+                            updatedSong,
+                            SongTuning(
+                                bpm = editedBpm.toIntOrNull()?.coerceIn(0, MAX_BPM) ?: 0,
+                                capo = editedCapo.toIntOrNull()?.coerceIn(0, MAX_CAPO) ?: 0,
+                            ),
+                        )
+                    },
+                )
 
             }
         }
@@ -641,6 +631,53 @@ private val CardShape = RoundedCornerShape(9.dp)
  * read across: a value inheriting a taller line box than its neighbours — which is what happens
  * when a card puts its value next to an icon or a unit — sits visibly off the line they share.
  */
+
+/**
+ * The dialog's footer: what the song adds up to, and the two buttons.
+ *
+ * [typicalSeconds] is how long this song usually stays on screen, measured from the times it has
+ * been presented — absent until there are enough readings to mean anything, and then shown beside
+ * the counts so a planner can time a service by what actually happens rather than by a guess.
+ */
+@Composable
+private fun EditSongFooter(
+    stats: SongStats,
+    typicalSeconds: Int?,
+    saveEnabled: Boolean,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .height(58.dp)
+            .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        val counts = stringResource(Res.string.song_stats, stats.sections, stats.lines, stats.words)
+        val typical = typicalSeconds?.let { stringResource(Res.string.song_typical_live, formatDuration(it)) }
+        Text(
+            text = listOfNotNull(counts, typical).joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
+            Text(stringResource(Res.string.cancel))
+        }
+        Button(
+            shape = RoundedCornerShape(9.dp),
+            enabled = saveEnabled,
+            onClick = onSave,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        ) {
+            Text(stringResource(Res.string.save))
+        }
+    }
+}
+
 @Composable
 private fun FieldValueStyle(emphasis: Boolean = false) = MaterialTheme.typography.bodyMedium.copy(
     color = MaterialTheme.colorScheme.onSurface,
