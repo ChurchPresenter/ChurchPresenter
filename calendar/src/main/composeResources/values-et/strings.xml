@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Video eelvaade vajab rakenduse mängijat</string>
     <string name="calendar_preview_scene_unavailable">Stseeni eelvaade vajab rakenduse lõuendit</string>
     <string name="calendar_preview_stream">Voog · %1$s</string>
+    <string name="calendar_usually">tavaliselt %1$s</string>
+    <string name="calendar_usually_tip">Kestab siin tavaliselt %1$s, mõõdetuna teenistustel, kus seda näidati — klõpsa, et see planeerida</string>
+    <string name="calendar_timing_usually_hint">Kui kaua see siin tegelikult kestnud on — viimaste kordade mediaan</string>
+    <string name="calendar_needs_attention_one">1 rida vajab tähelepanu</string>
+    <string name="calendar_needs_attention">%1$d rida vajab tähelepanu</string>
+    <string name="calendar_needs_attention_tip">Miski, millele need read viitavad, on kadunud — teisaldatud fail, eemaldatud laul, salm, mida Piiblis pole. Hoia kursorit märgitud real, et näha, mis.</string>
+    <string name="calendar_problem_missing_file">Faili ei leitud — pärast planeerimist teisaldatud või ümber nimetatud</string>
+    <string name="calendar_problem_missing_folder">Kausta ei leitud — pärast planeerimist teisaldatud või ümber nimetatud</string>
+    <string name="calendar_problem_song_missing">Pole enam laulukogus</string>
+    <string name="calendar_problem_book_missing">Raamatut pole põhipiiblis</string>
+    <string name="calendar_problem_chapter">Peatükki pole selles raamatus</string>
+    <string name="calendar_problem_verse">Salmi pole selles peatükis</string>
+    <string name="calendar_fix_locate_file">klõpsa faili leidmiseks</string>
+    <string name="calendar_fix_locate_folder">klõpsa kausta leidmiseks</string>
+    <string name="calendar_fix_pick_again">klõpsa teise valimiseks</string>
+    <string name="calendar_pick_replace_with">Asenda: %1$s</string>
 </resources>

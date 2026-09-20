@@ -85,6 +85,29 @@ data class CalendarHost(
     val chooseExportFile: suspend (suggestedName: String) -> File? = { null },
 
     /**
+     * Where a row's file has gone, or null if the user gave up looking. The pre-flight check's
+     * one-click fix for a clip or a deck that was moved: [missing] is the path the row still
+     * holds, which is where the dialog opens -- the file is usually a folder away.
+     *
+     * `suspend` for the same reason as [chooseExportFile].
+     */
+    val locateFile: suspend (missing: File) -> File? = { null },
+
+    /** As [locateFile], for a picture folder. */
+    val locateFolder: suspend (missing: File) -> File? = { null },
+
+    /**
+     * The canonical book id (1–66) a typed book name means, or null when nothing recognises it.
+     *
+     * A reference typed into the picker -- `Psalm 91:1-4` -- stores its book as text, in whatever
+     * language it was typed, and the primary Bible may name its books in another. The app
+     * resolves that at go-live from its abbreviation tables (the display language, then English),
+     * and the pre-flight check has to judge a row by the same rule or it flags scripture that
+     * would have shown perfectly well. `suspend` because those tables are Compose resources.
+     */
+    val resolveBookId: suspend (name: String) -> Int? = { null },
+
+    /**
      * How long [ScheduleItem] runs by itself, in whole seconds, or null when nothing can say.
      *
      * The app answers it because the answer is the app's: a clip's duration comes from ffmpeg,

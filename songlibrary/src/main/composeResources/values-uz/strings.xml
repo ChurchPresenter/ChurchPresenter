@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">«%1$s» oʻchirilsinmi?</string>
     <string name="delete_confirm_action">Oʻchirish</string>
     <string name="song_count">%1$s qoʻshiq</string>
+    <string name="no_song_folder">Qo‘shiqlar jildi hali o‘rnatilmagan — uni Sozlamalar → Qo‘shiqlar bo‘limidan tanlang, shunda bu yerga qo‘shiqlar qo‘shish mumkin bo‘ladi.</string>
+    <string name="column_duration">Davomiyligi</string>
 </resources>

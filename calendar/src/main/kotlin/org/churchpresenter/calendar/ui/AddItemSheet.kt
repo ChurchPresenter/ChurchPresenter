@@ -39,6 +39,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_bible_hint_shor
 import org.churchpresenter.calendar.generated.resources.calendar_section_hint
 import org.churchpresenter.calendar.generated.resources.calendar_pick_adds_to
 import org.churchpresenter.calendar.generated.resources.calendar_pick_add_range
+import org.churchpresenter.calendar.generated.resources.calendar_pick_replace_with
 import org.churchpresenter.calendar.generated.resources.calendar_pick_bible
 import org.churchpresenter.calendar.generated.resources.calendar_pick_presets
 import org.churchpresenter.calendar.generated.resources.calendar_cue_filter_presets
@@ -148,6 +149,7 @@ fun AddItemSheet(
                         add(listOf(it))
                         picker.clearVerses()
                     },
+                    replacing = replacing != null,
                 )
             },
         ) {
@@ -205,6 +207,8 @@ private fun RowScope.PickerFooter(
     pending: ScheduleItem.BibleVerseItem?,
     onDone: (() -> Unit)?,
     onAddPending: (ScheduleItem.BibleVerseItem) -> Unit,
+    /** True while a row is being edited: the built range then *replaces* it, and the button says so. */
+    replacing: Boolean = false,
 ) {
     Text(
         text = summary,
@@ -219,7 +223,10 @@ private fun RowScope.PickerFooter(
     }
     if (pending != null) {
         PrimaryButton(
-            label = stringResource(Res.string.calendar_pick_add_range, pending.displayText),
+            label = stringResource(
+                if (replacing) Res.string.calendar_pick_replace_with else Res.string.calendar_pick_add_range,
+                pending.displayText,
+            ),
             onClick = { onAddPending(pending) },
         )
     }

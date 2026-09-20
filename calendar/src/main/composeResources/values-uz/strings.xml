@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Videoni ko‘rib chiqish uchun ilova pleyeri kerak</string>
     <string name="calendar_preview_scene_unavailable">Sahnani ko‘rib chiqish uchun ilova kanvasi kerak</string>
     <string name="calendar_preview_stream">Oqim · %1$s</string>
+    <string name="calendar_usually">odatda %1$s</string>
+    <string name="calendar_usually_tip">Bu yerda odatda %1$s davom etadi — ko‘rsatilgan xizmatlar bo‘yicha o‘lchangan. Shuncha rejalashtirish uchun bosing</string>
+    <string name="calendar_timing_usually_hint">Bu yerda aslida qancha davom etgani — oxirgi bir necha ko‘rsatuvning medianasi</string>
+    <string name="calendar_needs_attention_one">1 qator e’tibor talab qiladi</string>
+    <string name="calendar_needs_attention">E’tibor talab qiladigan qatorlar: %1$d</string>
+    <string name="calendar_needs_attention_tip">Bu qatorlar ko‘rsatayotgan narsa yo‘qolgan — fayl ko‘chirilgan, qo‘shiq o‘chirilgan, Bibliyada yo‘q oyat. Nima ekanini ko‘rish uchun belgilangan qator ustiga kursorni olib boring.</string>
+    <string name="calendar_problem_missing_file">Fayl topilmadi — rejalashtirilgandan keyin ko‘chirilgan yoki nomi o‘zgartirilgan</string>
+    <string name="calendar_problem_missing_folder">Jild topilmadi — rejalashtirilgandan keyin ko‘chirilgan yoki nomi o‘zgartirilgan</string>
+    <string name="calendar_problem_song_missing">Qo‘shiqlar kutubxonasida endi yo‘q</string>
+    <string name="calendar_problem_book_missing">Kitob asosiy Bibliyada yo‘q</string>
+    <string name="calendar_problem_chapter">Bu kitobda bunday bob yo‘q</string>
+    <string name="calendar_problem_verse">Bu bobda bunday oyat yo‘q</string>
+    <string name="calendar_fix_locate_file">faylni topish uchun bosing</string>
+    <string name="calendar_fix_locate_folder">jildni topish uchun bosing</string>
+    <string name="calendar_fix_pick_again">boshqasini tanlash uchun bosing</string>
+    <string name="calendar_pick_replace_with">%1$s bilan almashtirish</string>
 </resources>

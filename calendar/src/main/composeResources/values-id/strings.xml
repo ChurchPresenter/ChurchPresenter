@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Pratinjau video memerlukan pemutar aplikasi</string>
     <string name="calendar_preview_scene_unavailable">Pratinjau adegan memerlukan kanvas aplikasi</string>
     <string name="calendar_preview_stream">Aliran · %1$s</string>
+    <string name="calendar_usually">biasanya %1$s</string>
+    <string name="calendar_usually_tip">Biasanya berlangsung %1$s di sini, diukur dari kebaktian-kebaktian tempat item ini ditayangkan — klik untuk merencanakan sesuai itu</string>
+    <string name="calendar_timing_usually_hint">Berapa lama sebenarnya item ini berlangsung di sini — nilai tengah dari beberapa penayangan terakhir</string>
+    <string name="calendar_needs_attention_one">1 baris perlu perhatian</string>
+    <string name="calendar_needs_attention">%1$d baris perlu perhatian</string>
+    <string name="calendar_needs_attention_tip">Sesuatu yang dirujuk baris-baris ini sudah hilang — file dipindahkan, lagu dihapus, ayat yang tidak ada di Alkitab. Arahkan kursor ke baris bertanda untuk melihat yang mana.</string>
+    <string name="calendar_problem_missing_file">File tidak ditemukan — dipindahkan atau diganti namanya sejak direncanakan</string>
+    <string name="calendar_problem_missing_folder">Folder tidak ditemukan — dipindahkan atau diganti namanya sejak direncanakan</string>
+    <string name="calendar_problem_song_missing">Sudah tidak ada di pustaka lagu</string>
+    <string name="calendar_problem_book_missing">Kitab tidak ada di Alkitab utama</string>
+    <string name="calendar_problem_chapter">Pasal tidak ada di kitab ini</string>
+    <string name="calendar_problem_verse">Ayat tidak ada di pasal ini</string>
+    <string name="calendar_fix_locate_file">klik untuk mencari file</string>
+    <string name="calendar_fix_locate_folder">klik untuk mencari folder</string>
+    <string name="calendar_fix_pick_again">klik untuk memilih yang lain</string>
+    <string name="calendar_pick_replace_with">Ganti dengan %1$s</string>
 </resources>

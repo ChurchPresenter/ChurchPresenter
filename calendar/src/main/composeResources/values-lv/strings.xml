@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Video priekšskatījumam nepieciešams lietotnes atskaņotājs</string>
     <string name="calendar_preview_scene_unavailable">Ainas priekšskatījumam nepieciešams lietotnes audekls</string>
     <string name="calendar_preview_stream">Straume · %1$s</string>
+    <string name="calendar_usually">parasti %1$s</string>
+    <string name="calendar_usually_tip">Šeit parasti ilgst %1$s, izmērīts dievkalpojumos, kuros tas tika rādīts — noklikšķiniet, lai to ieplānotu</string>
+    <string name="calendar_timing_usually_hint">Cik ilgi tas šeit patiesībā ilga — pēdējo reižu mediāna</string>
+    <string name="calendar_needs_attention_one">1 rindai nepieciešama uzmanība</string>
+    <string name="calendar_needs_attention">%1$d rindām nepieciešama uzmanība</string>
+    <string name="calendar_needs_attention_tip">Kaut kas, uz ko šīs rindas norāda, ir pazudis — pārvietots fails, izdzēsta dziesma, pants, kura Bībelē nav. Turiet kursoru virs atzīmētas rindas, lai redzētu, kas.</string>
+    <string name="calendar_problem_missing_file">Fails nav atrasts — pēc ieplānošanas pārvietots vai pārdēvēts</string>
+    <string name="calendar_problem_missing_folder">Mape nav atrasta — pēc ieplānošanas pārvietota vai pārdēvēta</string>
+    <string name="calendar_problem_song_missing">Vairs nav dziesmu bibliotēkā</string>
+    <string name="calendar_problem_book_missing">Grāmatas nav galvenajā Bībelē</string>
+    <string name="calendar_problem_chapter">Nodaļas nav šajā grāmatā</string>
+    <string name="calendar_problem_verse">Panta nav šajā nodaļā</string>
+    <string name="calendar_fix_locate_file">noklikšķiniet, lai atrastu failu</string>
+    <string name="calendar_fix_locate_folder">noklikšķiniet, lai atrastu mapi</string>
+    <string name="calendar_fix_pick_again">noklikšķiniet, lai izvēlētos citu</string>
+    <string name="calendar_pick_replace_with">Aizstāt ar %1$s</string>
 </resources>

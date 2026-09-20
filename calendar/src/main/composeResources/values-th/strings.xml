@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">การดูตัวอย่างวิดีโอต้องใช้ตัวเล่นของแอป</string>
     <string name="calendar_preview_scene_unavailable">การดูตัวอย่างฉากต้องใช้ผืนผ้าใบของแอป</string>
     <string name="calendar_preview_stream">สตรีม · %1$s</string>
+    <string name="calendar_usually">ปกติ %1$s</string>
+    <string name="calendar_usually_tip">ปกติใช้เวลา %1$s ตรงนี้ วัดจากรอบนมัสการที่เคยแสดง — คลิกเพื่อวางแผนตามนั้น</string>
+    <string name="calendar_timing_usually_hint">เวลาที่ใช้จริงตรงนี้ — ค่ากลางของการแสดงไม่กี่ครั้งล่าสุด</string>
+    <string name="calendar_needs_attention_one">1 แถวต้องตรวจสอบ</string>
+    <string name="calendar_needs_attention">%1$d แถวต้องตรวจสอบ</string>
+    <string name="calendar_needs_attention_tip">สิ่งที่แถวเหล่านี้อ้างถึงหายไปแล้ว — ไฟล์ถูกย้าย เพลงถูกลบ หรือข้อพระคัมภีร์ที่ไม่มีในพระคัมภีร์ วางเมาส์บนแถวที่มีเครื่องหมายเพื่อดูว่าเป็นอะไร</string>
+    <string name="calendar_problem_missing_file">ไม่พบไฟล์ — ถูกย้ายหรือเปลี่ยนชื่อหลังจากวางแผนไว้</string>
+    <string name="calendar_problem_missing_folder">ไม่พบโฟลเดอร์ — ถูกย้ายหรือเปลี่ยนชื่อหลังจากวางแผนไว้</string>
+    <string name="calendar_problem_song_missing">ไม่มีในคลังเพลงอีกแล้ว</string>
+    <string name="calendar_problem_book_missing">ไม่มีหนังสือเล่มนี้ในพระคัมภีร์หลัก</string>
+    <string name="calendar_problem_chapter">ไม่มีบทนี้ในหนังสือเล่มนี้</string>
+    <string name="calendar_problem_verse">ไม่มีข้อนี้ในบทนี้</string>
+    <string name="calendar_fix_locate_file">คลิกเพื่อค้นหาไฟล์</string>
+    <string name="calendar_fix_locate_folder">คลิกเพื่อค้นหาโฟลเดอร์</string>
+    <string name="calendar_fix_pick_again">คลิกเพื่อเลือกรายการอื่น</string>
+    <string name="calendar_pick_replace_with">แทนที่ด้วย %1$s</string>
 </resources>

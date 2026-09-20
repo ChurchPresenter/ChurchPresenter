@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Náhľad videa vyžaduje prehrávač aplikácie</string>
     <string name="calendar_preview_scene_unavailable">Náhľad scény vyžaduje plátno aplikácie</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">zvyčajne %1$s</string>
+    <string name="calendar_usually_tip">Zvyčajne tu trvá %1$s, zmerané na bohoslužbách, kde sa to premietalo — kliknutím to naplánujete</string>
+    <string name="calendar_timing_usually_hint">Ako dlho to tu skutočne trvalo — medián z posledných premietaní</string>
+    <string name="calendar_needs_attention_one">1 riadok vyžaduje pozornosť</string>
+    <string name="calendar_needs_attention">Riadkov vyžadujúcich pozornosť: %1$d</string>
+    <string name="calendar_needs_attention_tip">Niečo, na čo tieto riadky odkazujú, zmizlo — presunutý súbor, odstránená pieseň, verš, ktorý Biblia nemá. Prejdite myšou na označený riadok a uvidíte čo.</string>
+    <string name="calendar_problem_missing_file">Súbor sa nenašiel — od naplánovania presunutý alebo premenovaný</string>
+    <string name="calendar_problem_missing_folder">Priečinok sa nenašiel — od naplánovania presunutý alebo premenovaný</string>
+    <string name="calendar_problem_song_missing">Už nie je v knižnici piesní</string>
+    <string name="calendar_problem_book_missing">Kniha nie je v hlavnej Biblii</string>
+    <string name="calendar_problem_chapter">Kapitola nie je v tejto knihe</string>
+    <string name="calendar_problem_verse">Verš nie je v tejto kapitole</string>
+    <string name="calendar_fix_locate_file">kliknutím nájdete súbor</string>
+    <string name="calendar_fix_locate_folder">kliknutím nájdete priečinok</string>
+    <string name="calendar_fix_pick_again">kliknutím vyberiete iné</string>
+    <string name="calendar_pick_replace_with">Nahradiť za %1$s</string>
 </resources>

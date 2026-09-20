@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">動画のプレビューにはアプリのプレーヤーが必要です</string>
     <string name="calendar_preview_scene_unavailable">シーンのプレビューにはアプリのキャンバスが必要です</string>
     <string name="calendar_preview_stream">ストリーム · %1$s</string>
+    <string name="calendar_usually">通常 %1$s</string>
+    <string name="calendar_usually_tip">ここでは通常 %1$s 続きます — 表示された礼拝での実測値です。クリックするとその長さで計画します</string>
+    <string name="calendar_timing_usually_hint">ここで実際にかかった時間 — 直近数回の表示時間の中央値</string>
+    <string name="calendar_needs_attention_one">1 行に注意が必要です</string>
+    <string name="calendar_needs_attention">%1$d 行に注意が必要です</string>
+    <string name="calendar_needs_attention_tip">これらの行が指しているものが見つかりません — ファイルの移動、曲の削除、聖書にない節など。マークされた行にカーソルを合わせると詳細が表示されます。</string>
+    <string name="calendar_problem_missing_file">ファイルが見つかりません — 計画後に移動または名前変更されました</string>
+    <string name="calendar_problem_missing_folder">フォルダーが見つかりません — 計画後に移動または名前変更されました</string>
+    <string name="calendar_problem_song_missing">曲ライブラリにはもうありません</string>
+    <string name="calendar_problem_book_missing">主聖書にこの書がありません</string>
+    <string name="calendar_problem_chapter">この書にこの章はありません</string>
+    <string name="calendar_problem_verse">この章にこの節はありません</string>
+    <string name="calendar_fix_locate_file">クリックしてファイルを探す</string>
+    <string name="calendar_fix_locate_folder">クリックしてフォルダーを探す</string>
+    <string name="calendar_fix_pick_again">クリックして別のものを選ぶ</string>
+    <string name="calendar_pick_replace_with">%1$s に置き換える</string>
 </resources>

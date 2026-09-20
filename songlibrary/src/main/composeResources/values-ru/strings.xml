@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Удалить «%1$s»?</string>
     <string name="delete_confirm_action">Удалить</string>
     <string name="song_count">%1$s песен</string>
+    <string name="no_song_folder">Папка песен ещё не задана — выберите её в Настройках → Песни, и здесь можно будет добавлять песни.</string>
+    <string name="column_duration">Длительность</string>
 </resources>

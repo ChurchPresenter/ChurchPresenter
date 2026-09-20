@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">视频预览需要应用的播放器</string>
     <string name="calendar_preview_scene_unavailable">场景预览需要应用的画布</string>
     <string name="calendar_preview_stream">流 · %1$s</string>
+    <string name="calendar_usually">通常 %1$s</string>
+    <string name="calendar_usually_tip">在这里通常持续 %1$s，根据它出现过的聚会实际测得 — 点击按此时长计划</string>
+    <string name="calendar_timing_usually_hint">它在这里实际持续的时间 — 最近几次显示时长的中位数</string>
+    <string name="calendar_needs_attention_one">1 行需要处理</string>
+    <string name="calendar_needs_attention">%1$d 行需要处理</string>
+    <string name="calendar_needs_attention_tip">这些行指向的内容已不存在 — 文件被移动、歌曲被删除，或圣经中没有这节经文。将鼠标悬停在标记的行上可查看具体原因。</string>
+    <string name="calendar_problem_missing_file">找不到文件 — 计划后被移动或重命名</string>
+    <string name="calendar_problem_missing_folder">找不到文件夹 — 计划后被移动或重命名</string>
+    <string name="calendar_problem_song_missing">歌曲库中已没有这首歌</string>
+    <string name="calendar_problem_book_missing">主圣经中没有这卷书</string>
+    <string name="calendar_problem_chapter">这卷书中没有这一章</string>
+    <string name="calendar_problem_verse">这一章中没有这一节</string>
+    <string name="calendar_fix_locate_file">点击查找文件</string>
+    <string name="calendar_fix_locate_folder">点击查找文件夹</string>
+    <string name="calendar_fix_pick_again">点击另选一个</string>
+    <string name="calendar_pick_replace_with">替换为 %1$s</string>
 </resources>

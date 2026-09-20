@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">پیش‌نمایش ویدیو به پخش‌کنندهٔ برنامه نیاز دارد</string>
     <string name="calendar_preview_scene_unavailable">پیش‌نمایش صحنه به بوم برنامه نیاز دارد</string>
     <string name="calendar_preview_stream">پخش · %1$s</string>
+    <string name="calendar_usually">معمولاً %1$s</string>
+    <string name="calendar_usually_tip">معمولاً اینجا %1$s طول می‌کشد، اندازه‌گیری‌شده در جلساتی که نمایش داده شده — برای برنامه‌ریزی همین مقدار کلیک کنید</string>
+    <string name="calendar_timing_usually_hint">واقعاً چقدر اینجا طول کشیده — میانهٔ چند بار آخر نمایش</string>
+    <string name="calendar_needs_attention_one">۱ ردیف نیاز به توجه دارد</string>
+    <string name="calendar_needs_attention">%1$d ردیف نیاز به توجه دارند</string>
+    <string name="calendar_needs_attention_tip">چیزی که این ردیف‌ها به آن اشاره می‌کنند از بین رفته — فایلی جابه‌جا شده، سرودی حذف شده، آیه‌ای که در کتاب مقدس نیست. برای دیدن کدام، نشانگر را روی ردیف علامت‌خورده نگه دارید.</string>
+    <string name="calendar_problem_missing_file">فایل پیدا نشد — از زمان برنامه‌ریزی جابه‌جا یا تغییرنام داده شده</string>
+    <string name="calendar_problem_missing_folder">پوشه پیدا نشد — از زمان برنامه‌ریزی جابه‌جا یا تغییرنام داده شده</string>
+    <string name="calendar_problem_song_missing">دیگر در کتابخانهٔ سرودها نیست</string>
+    <string name="calendar_problem_book_missing">کتاب در کتاب مقدس اصلی نیست</string>
+    <string name="calendar_problem_chapter">باب در این کتاب نیست</string>
+    <string name="calendar_problem_verse">آیه در این باب نیست</string>
+    <string name="calendar_fix_locate_file">برای یافتن فایل کلیک کنید</string>
+    <string name="calendar_fix_locate_folder">برای یافتن پوشه کلیک کنید</string>
+    <string name="calendar_fix_pick_again">برای انتخاب دیگری کلیک کنید</string>
+    <string name="calendar_pick_replace_with">جایگزینی با %1$s</string>
 </resources>

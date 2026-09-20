@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">«%1$s» حذف شود؟</string>
     <string name="delete_confirm_action">حذف</string>
     <string name="song_count">%1$s سرود</string>
+    <string name="no_song_folder">هنوز پوشهٔ سرودی تنظیم نشده — یکی را در تنظیمات ← سرودها انتخاب کنید تا بتوان اینجا سرود اضافه کرد.</string>
+    <string name="column_duration">مدت</string>
 </resources>

@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">L'aperçu vidéo nécessite le lecteur de l'application</string>
     <string name="calendar_preview_scene_unavailable">L'aperçu de scène nécessite le canevas de l'application</string>
     <string name="calendar_preview_stream">Flux · %1$s</string>
+    <string name="calendar_usually">généralement %1$s</string>
+    <string name="calendar_usually_tip">Dure généralement %1$s ici, mesuré sur les cultes où cela a été affiché — cliquez pour prévoir cette durée</string>
+    <string name="calendar_timing_usually_hint">Combien de temps cela a réellement duré ici — la médiane des dernières fois</string>
+    <string name="calendar_needs_attention_one">1 ligne demande votre attention</string>
+    <string name="calendar_needs_attention">%1$d lignes demandent votre attention</string>
+    <string name="calendar_needs_attention_tip">Quelque chose vers quoi pointent ces lignes a disparu — un fichier déplacé, une chanson supprimée, un verset absent de la Bible. Survolez une ligne marquée pour voir lequel.</string>
+    <string name="calendar_problem_missing_file">Fichier introuvable — déplacé ou renommé depuis la planification</string>
+    <string name="calendar_problem_missing_folder">Dossier introuvable — déplacé ou renommé depuis la planification</string>
+    <string name="calendar_problem_song_missing">N'est plus dans la bibliothèque de chansons</string>
+    <string name="calendar_problem_book_missing">Livre absent de la Bible principale</string>
+    <string name="calendar_problem_chapter">Chapitre absent de ce livre</string>
+    <string name="calendar_problem_verse">Verset absent de ce chapitre</string>
+    <string name="calendar_fix_locate_file">cliquez pour retrouver le fichier</string>
+    <string name="calendar_fix_locate_folder">cliquez pour retrouver le dossier</string>
+    <string name="calendar_fix_pick_again">cliquez pour en choisir un autre</string>
+    <string name="calendar_pick_replace_with">Remplacer par %1$s</string>
 </resources>

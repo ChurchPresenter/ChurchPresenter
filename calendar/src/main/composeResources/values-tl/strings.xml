@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Kailangan ng player ng app ang preview ng video</string>
     <string name="calendar_preview_scene_unavailable">Kailangan ng canvas ng app ang preview ng eksena</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">karaniwang %1$s</string>
+    <string name="calendar_usually_tip">Karaniwang tumatagal nang %1$s dito, batay sa mga serbisyong ipinakita ito — i-click para planuhin iyon</string>
+    <string name="calendar_timing_usually_hint">Kung gaano ito aktuwal na tumagal dito — ang gitna ng ilang huling beses na ipinakita ito</string>
+    <string name="calendar_needs_attention_one">1 row ang nangangailangan ng atensyon</string>
+    <string name="calendar_needs_attention">%1$d row ang nangangailangan ng atensyon</string>
+    <string name="calendar_needs_attention_tip">Wala na ang tinutukoy ng mga row na ito — nailipat na file, inalis na awit, talatang wala sa Bibliya. I-hover ang may markang row para makita kung alin.</string>
+    <string name="calendar_problem_missing_file">Hindi nahanap ang file — nailipat o napalitan ng pangalan mula nang planuhin</string>
+    <string name="calendar_problem_missing_folder">Hindi nahanap ang folder — nailipat o napalitan ng pangalan mula nang planuhin</string>
+    <string name="calendar_problem_song_missing">Wala na sa song library</string>
+    <string name="calendar_problem_book_missing">Wala ang aklat sa pangunahing Bibliya</string>
+    <string name="calendar_problem_chapter">Wala ang kabanata sa aklat na ito</string>
+    <string name="calendar_problem_verse">Wala ang talata sa kabanatang ito</string>
+    <string name="calendar_fix_locate_file">i-click para hanapin ang file</string>
+    <string name="calendar_fix_locate_folder">i-click para hanapin ang folder</string>
+    <string name="calendar_fix_pick_again">i-click para pumili ng iba</string>
+    <string name="calendar_pick_replace_with">Palitan ng %1$s</string>
 </resources>

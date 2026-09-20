@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Videon esikatselu vaatii sovelluksen soittimen</string>
     <string name="calendar_preview_scene_unavailable">Kohtauksen esikatselu vaatii sovelluksen kanvaksen</string>
     <string name="calendar_preview_stream">Lähete · %1$s</string>
+    <string name="calendar_usually">yleensä %1$s</string>
+    <string name="calendar_usually_tip">Kestää täällä yleensä %1$s, mitattuna niistä tilaisuuksista, joissa se on näytetty — napsauta suunnitellaksesi sen</string>
+    <string name="calendar_timing_usually_hint">Kuinka kauan se on täällä todella kestänyt — viime kertojen mediaani</string>
+    <string name="calendar_needs_attention_one">1 rivi vaatii huomiota</string>
+    <string name="calendar_needs_attention">%1$d riviä vaatii huomiota</string>
+    <string name="calendar_needs_attention_tip">Jotain, mihin nämä rivit viittaavat, on poissa — siirretty tiedosto, poistettu laulu, jae jota Raamatussa ei ole. Vie hiiri merkityn rivin päälle nähdäksesi mikä.</string>
+    <string name="calendar_problem_missing_file">Tiedostoa ei löydy — siirretty tai nimetty uudelleen suunnittelun jälkeen</string>
+    <string name="calendar_problem_missing_folder">Kansiota ei löydy — siirretty tai nimetty uudelleen suunnittelun jälkeen</string>
+    <string name="calendar_problem_song_missing">Ei ole enää laulukirjastossa</string>
+    <string name="calendar_problem_book_missing">Kirjaa ei ole ensisijaisessa Raamatussa</string>
+    <string name="calendar_problem_chapter">Lukua ei ole tässä kirjassa</string>
+    <string name="calendar_problem_verse">Jaetta ei ole tässä luvussa</string>
+    <string name="calendar_fix_locate_file">napsauta etsiäksesi tiedoston</string>
+    <string name="calendar_fix_locate_folder">napsauta etsiäksesi kansion</string>
+    <string name="calendar_fix_pick_again">napsauta valitaksesi toisen</string>
+    <string name="calendar_pick_replace_with">Korvaa: %1$s</string>
 </resources>

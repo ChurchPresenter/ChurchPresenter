@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">“%1$s” मेट्ने?</string>
     <string name="delete_confirm_action">मेट्नुहोस्</string>
     <string name="song_count">%1$s गीत</string>
+    <string name="no_song_folder">अहिलेसम्म कुनै गीत फोल्डर सेट गरिएको छैन — सेटिङ → गीतहरूमा एउटा रोज्नुहोस्, अनि यहाँ गीत थप्न सकिन्छ।</string>
+    <string name="column_duration">अवधि</string>
 </resources>

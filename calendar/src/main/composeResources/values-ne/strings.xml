@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">भिडियो पूर्वावलोकनका लागि एपको प्लेयर चाहिन्छ</string>
     <string name="calendar_preview_scene_unavailable">दृश्य पूर्वावलोकनका लागि एपको क्यानभास चाहिन्छ</string>
     <string name="calendar_preview_stream">स्ट्रिम · %1$s</string>
+    <string name="calendar_usually">प्रायः %1$s</string>
+    <string name="calendar_usually_tip">यहाँ प्रायः %1$s चल्छ, यो देखाइएका सेवाहरूमा मापन गरिएको — त्यही समय योजना गर्न क्लिक गर्नुहोस्</string>
+    <string name="calendar_timing_usually_hint">यहाँ यो वास्तवमा कति समय चलेको छ — पछिल्ला केही पटक देखाइँदाको मध्य मान</string>
+    <string name="calendar_needs_attention_one">१ पङ्क्तिमा ध्यान दिनुपर्छ</string>
+    <string name="calendar_needs_attention">%1$d पङ्क्तिमा ध्यान दिनुपर्छ</string>
+    <string name="calendar_needs_attention_tip">यी पङ्क्तिहरूले देखाउने कुरा अब छैन — फाइल सारियो, गीत हटाइयो, वा बाइबलमा नभएको पद। कुन हो भनी हेर्न चिह्न लगाइएको पङ्क्तिमा माउस राख्नुहोस्।</string>
+    <string name="calendar_problem_missing_file">फाइल भेटिएन — योजना बनाएपछि सारियो वा नाम बदलियो</string>
+    <string name="calendar_problem_missing_folder">फोल्डर भेटिएन — योजना बनाएपछि सारियो वा नाम बदलियो</string>
+    <string name="calendar_problem_song_missing">अब गीत पुस्तकालयमा छैन</string>
+    <string name="calendar_problem_book_missing">पुस्तक प्राथमिक बाइबलमा छैन</string>
+    <string name="calendar_problem_chapter">अध्याय यो पुस्तकमा छैन</string>
+    <string name="calendar_problem_verse">पद यो अध्यायमा छैन</string>
+    <string name="calendar_fix_locate_file">फाइल खोज्न क्लिक गर्नुहोस्</string>
+    <string name="calendar_fix_locate_folder">फोल्डर खोज्न क्लिक गर्नुहोस्</string>
+    <string name="calendar_fix_pick_again">अर्को रोज्न क्लिक गर्नुहोस्</string>
+    <string name="calendar_pick_replace_with">%1$s ले बदल्नुहोस्</string>
 </resources>

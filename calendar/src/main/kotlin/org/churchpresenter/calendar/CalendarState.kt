@@ -14,6 +14,7 @@ import org.churchpresenter.calendar.model.PresetDocument
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.PreflightProblem
 import org.churchpresenter.calendar.model.preflight
+import org.churchpresenter.calendar.model.typedBookNames
 import org.churchpresenter.calendar.model.SavedTemplate
 import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
@@ -188,10 +189,17 @@ class CalendarState(
      * Checks every row of [service] against the disk, the song library and the primary Bible --
      * see [preflight]. Off the composing thread, as it touches the file system.
      */
-    suspend fun checkService(service: PlannedService, io: CoroutineDispatcher = Dispatchers.IO) {
+    suspend fun checkService(
+        service: PlannedService,
+        resolveBook: suspend (name: String) -> Int? = { null },
+        io: CoroutineDispatcher = Dispatchers.IO,
+    ) {
         val songsNow = songs
         val booksNow = bibleBooks
-        preflight = withContext(io) { preflight(service.items, songsNow, booksNow) }
+        // Resolved up front, once per distinct name: the resolver suspends, and the check itself
+        // is a plain function that must not.
+        val resolved = typedBookNames(service.items).associateWith { resolveBook(it) }
+        preflight = withContext(io) { preflight(service.items, songsNow, booksNow, resolveBook = { resolved[it] }) }
     }
 
     fun loadBibleBooks(books: List<CalendarBibleBook>) {
@@ -473,6 +481,17 @@ class CalendarState(
                 service.copy(items = next, plannedSeconds = service.plannedSeconds - itemId)
             )
         )
+    }
+
+    /**
+     * Swaps one row for [item], which carries the same id -- a row pointed at a file that moved.
+     * Unlike [replaceItem], the planned length and timing stay: it is the same row, corrected.
+     */
+    fun updateItem(serviceId: String, item: ScheduleItem) {
+        val service = document.serviceById(serviceId) ?: return
+        val index = service.items.indexOfFirst { it.id == item.id }
+        if (index < 0) return
+        commit(document.withService(service.copy(items = service.items.toMutableList().also { it[index] = item })))
     }
 
     fun removeItem(serviceId: String, itemId: String) {

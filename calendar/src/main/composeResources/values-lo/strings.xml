@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">ການເບິ່ງຕົວຢ່າງວິດີໂອຕ້ອງໃຊ້ຕົວຫຼິ້ນຂອງແອັບ</string>
     <string name="calendar_preview_scene_unavailable">ການເບິ່ງຕົວຢ່າງສາກຕ້ອງໃຊ້ຜ້າໃບຂອງແອັບ</string>
     <string name="calendar_preview_stream">ສະຕຣີມ · %1$s</string>
+    <string name="calendar_usually">ປົກກະຕິ %1$s</string>
+    <string name="calendar_usually_tip">ປົກກະຕິໃຊ້ເວລາ %1$s ຢູ່ນີ້ ວັດຈາກພິທີທີ່ມັນຖືກສະແດງ — ກົດເພື່ອວາງແຜນຕາມນັ້ນ</string>
+    <string name="calendar_timing_usually_hint">ເວລາທີ່ມັນໃຊ້ຈິງຢູ່ນີ້ — ຄ່າກາງຂອງສອງສາມຄັ້ງຫລ້າສຸດທີ່ຖືກສະແດງ</string>
+    <string name="calendar_needs_attention_one">1 ແຖວຕ້ອງກວດເບິ່ງ</string>
+    <string name="calendar_needs_attention">%1$d ແຖວຕ້ອງກວດເບິ່ງ</string>
+    <string name="calendar_needs_attention_tip">ສິ່ງທີ່ແຖວເຫລົ່ານີ້ຊີ້ໄປຫາບໍ່ມີແລ້ວ — ໄຟລ໌ຖືກຍ້າຍ, ເພງຖືກລຶບ, ຂໍ້ທີ່ບໍ່ມີໃນພຣະຄຳພີ. ວາງເມົ້າເທິງແຖວທີ່ມີເຄື່ອງໝາຍເພື່ອເບິ່ງວ່າອັນໃດ.</string>
+    <string name="calendar_problem_missing_file">ບໍ່ພົບໄຟລ໌ — ຖືກຍ້າຍ ຫລື ປ່ຽນຊື່ຫລັງຈາກວາງແຜນ</string>
+    <string name="calendar_problem_missing_folder">ບໍ່ພົບໂຟນເດີ — ຖືກຍ້າຍ ຫລື ປ່ຽນຊື່ຫລັງຈາກວາງແຜນ</string>
+    <string name="calendar_problem_song_missing">ບໍ່ມີໃນຄັງເພງແລ້ວ</string>
+    <string name="calendar_problem_book_missing">ບໍ່ມີພຣະທຳນີ້ໃນພຣະຄຳພີຫລັກ</string>
+    <string name="calendar_problem_chapter">ບໍ່ມີບົດນີ້ໃນພຣະທຳນີ້</string>
+    <string name="calendar_problem_verse">ບໍ່ມີຂໍ້ນີ້ໃນບົດນີ້</string>
+    <string name="calendar_fix_locate_file">ກົດເພື່ອຊອກຫາໄຟລ໌</string>
+    <string name="calendar_fix_locate_folder">ກົດເພື່ອຊອກຫາໂຟນເດີ</string>
+    <string name="calendar_fix_pick_again">ກົດເພື່ອເລືອກອັນອື່ນ</string>
+    <string name="calendar_pick_replace_with">ແທນທີ່ດ້ວຍ %1$s</string>
 </resources>

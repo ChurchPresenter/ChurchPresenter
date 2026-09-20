@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Для прагляду відэа патрэбны прайгравальнік праграмы</string>
     <string name="calendar_preview_scene_unavailable">Для прагляду сцэны патрэбна палатно праграмы</string>
     <string name="calendar_preview_stream">Паток · %1$s</string>
+    <string name="calendar_usually">звычайна %1$s</string>
+    <string name="calendar_usually_tip">Звычайна доўжыцца тут %1$s — вымерана па набажэнствах, дзе гэта паказвалі. Націсніце, каб запланаваць столькі</string>
+    <string name="calendar_timing_usually_hint">Колькі гэта доўжылася тут насамрэч — медыяна апошніх паказаў</string>
+    <string name="calendar_needs_attention_one">1 радок патрабуе ўвагі</string>
+    <string name="calendar_needs_attention">Радкоў патрабуюць увагі: %1$d</string>
+    <string name="calendar_needs_attention_tip">Тое, на што паказваюць гэтыя радкі, знікла — файл перамешчаны, песня выдалена, верша няма ў Бібліі. Навядзіце на пазначаны радок, каб убачыць, што менавіта.</string>
+    <string name="calendar_problem_missing_file">Файл не знойдзены — перамешчаны або перайменаваны пасля планавання</string>
+    <string name="calendar_problem_missing_folder">Папка не знойдзена — перамешчана або перайменавана пасля планавання</string>
+    <string name="calendar_problem_song_missing">Больш няма ў бібліятэцы песень</string>
+    <string name="calendar_problem_book_missing">Кнігі няма ў асноўнай Бібліі</string>
+    <string name="calendar_problem_chapter">Такога раздзела няма ў гэтай кнізе</string>
+    <string name="calendar_problem_verse">Такога верша няма ў гэтым раздзеле</string>
+    <string name="calendar_fix_locate_file">націсніце, каб знайсці файл</string>
+    <string name="calendar_fix_locate_folder">націсніце, каб знайсці папку</string>
+    <string name="calendar_fix_pick_again">націсніце, каб абраць іншае</string>
+    <string name="calendar_pick_replace_with">Замяніць на %1$s</string>
 </resources>

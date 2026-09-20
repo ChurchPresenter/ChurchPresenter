@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.collectAsState
 import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.CalendarSource
 import org.churchpresenter.calendar.CalendarState
 import org.churchpresenter.calendar.CalendarStore
@@ -81,6 +82,11 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_pdf
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.countImages
+import org.churchpresenter.calendar.model.relocatedTo
+import org.churchpresenter.calendar.model.pointedPath
+import org.churchpresenter.calendar.model.fix
+import org.churchpresenter.calendar.model.ProblemFix
 import org.churchpresenter.calendar.model.monthHeading
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -196,7 +202,7 @@ fun CalendarApp(
         val service = openService ?: return@LaunchedEffect
         if (state.bibleBooks.isEmpty()) state.loadBibleBooks(host.bibleBooks())
         state.measureService(service, host.measuredSeconds)
-        state.checkService(service, io)
+        state.checkService(service, host.resolveBookId, io)
     }
     val clock = rememberRunClock(openService, today, now)
     // The latest fired cue, until dismissed. Keyed by firing, so the same cue going off again --
@@ -316,6 +322,7 @@ private fun ColumnScope.OpenServicePane(
     clock: RunClockState,
     onClose: (() -> Unit)?,
 ) {
+    val fixScope = rememberCoroutineScope()
     RunOfShowPane(
         service = service,
         now = clock.now,
@@ -337,6 +344,14 @@ private fun ColumnScope.OpenServicePane(
         onPlannedSecondsChange = { itemId, seconds -> state.setPlannedSeconds(service.id, itemId, seconds) },
         onCueEnabled = { cueId, enabled -> state.setCueEnabled(service.id, cueId, enabled) },
         onFireCue = { cue -> fireCue(host, service.rowsForSchedule(), cue, startTime = service.startTime) },
+        onFixProblem = { item, problem ->
+            when (problem.fix) {
+                ProblemFix.PICK_AGAIN -> dialogs.openPicker(item)
+                ProblemFix.LOCATE_FILE, ProblemFix.LOCATE_FOLDER -> fixScope.launch {
+                    relocate(item, problem.fix, host)?.let { state.updateItem(service.id, it) }
+                }
+            }
+        },
         modifier = Modifier.weight(1f),
     )
     HorizontalDivider()
@@ -359,6 +374,22 @@ private fun ColumnScope.OpenServicePane(
             }
         },
     )
+}
+
+/**
+ * [item] pointing at wherever the user says its file or folder went, or null if they gave up.
+ *
+ * The dialog opens on the path the row still holds, since a moved file is usually one folder
+ * away. A folder is re-counted on the way in, off the composing thread.
+ */
+private suspend fun relocate(item: ScheduleItem, fix: ProblemFix, host: CalendarHost): ScheduleItem? {
+    val missing = item.pointedPath() ?: return null
+    return if (fix == ProblemFix.LOCATE_FOLDER) {
+        val folder = host.locateFolder(missing) ?: return null
+        item.relocatedTo(folder, imageCount = withContext(Dispatchers.IO) { countImages(folder) })
+    } else {
+        host.locateFile(missing)?.let { item.relocatedTo(it) }
+    }
 }
 
 /**

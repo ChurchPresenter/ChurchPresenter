@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Videoforhåndsvisning krever appens spiller</string>
     <string name="calendar_preview_scene_unavailable">Sceneforhåndsvisning krever appens lerret</string>
     <string name="calendar_preview_stream">Strøm · %1$s</string>
+    <string name="calendar_usually">vanligvis %1$s</string>
+    <string name="calendar_usually_tip">Varer vanligvis %1$s her, målt over gudstjenestene der det ble vist — klikk for å planlegge det</string>
+    <string name="calendar_timing_usually_hint">Hvor lenge det faktisk har vart her — medianen av de siste gangene det ble vist</string>
+    <string name="calendar_needs_attention_one">1 rad trenger oppmerksomhet</string>
+    <string name="calendar_needs_attention">%1$d rader trenger oppmerksomhet</string>
+    <string name="calendar_needs_attention_tip">Noe disse radene peker på er borte — en flyttet fil, en fjernet sang, et vers Bibelen ikke har. Hold pekeren over en merket rad for å se hvilket.</string>
+    <string name="calendar_problem_missing_file">Filen ble ikke funnet — flyttet eller omdøpt siden den ble planlagt</string>
+    <string name="calendar_problem_missing_folder">Mappen ble ikke funnet — flyttet eller omdøpt siden den ble planlagt</string>
+    <string name="calendar_problem_song_missing">Finnes ikke lenger i sangbiblioteket</string>
+    <string name="calendar_problem_book_missing">Boken finnes ikke i hovedbibelen</string>
+    <string name="calendar_problem_chapter">Kapittelet finnes ikke i denne boken</string>
+    <string name="calendar_problem_verse">Verset finnes ikke i dette kapittelet</string>
+    <string name="calendar_fix_locate_file">klikk for å finne filen</string>
+    <string name="calendar_fix_locate_folder">klikk for å finne mappen</string>
+    <string name="calendar_fix_pick_again">klikk for å velge en annen</string>
+    <string name="calendar_pick_replace_with">Erstatt med %1$s</string>
 </resources>

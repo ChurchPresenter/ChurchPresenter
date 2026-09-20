@@ -35,6 +35,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_fired_at
 import org.churchpresenter.calendar.generated.resources.calendar_cue_next_in
 import org.churchpresenter.calendar.generated.resources.calendar_cue_skip_tip
 import org.churchpresenter.calendar.model.CueStatus
+import org.churchpresenter.calendar.model.PreflightProblem
+import org.churchpresenter.calendar.model.ProblemFix
+import org.churchpresenter.calendar.model.fix
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
 
@@ -155,6 +158,10 @@ internal fun CueRow(
     onToggle: () -> Unit,
     onFire: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Why the cue's payload will not go on screen, or null -- see `preflight`. */
+    problem: PreflightProblem? = null,
+    /** The fix for [problem]; a cue has no editor, so only a moved file can be found from here. */
+    onFixProblem: () -> Unit = {},
 ) {
     val scheme = MaterialTheme.colorScheme
     val on = cue.enabled && armed
@@ -209,14 +216,21 @@ internal fun CueRow(
             )
         }
         Column(Modifier.weight(1f)) {
-            Text(
-                text = cue.label.ifBlank { cueActionLabel(cue.action) },
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
-                fontWeight = FontWeight.SemiBold,
-                color = scheme.onSurface.copy(alpha = ink),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (problem != null) {
+                    // A cue's song or verse is chosen on the row it was copied from, so only a
+                    // moved file is fixable from here; the mark still says what is wrong.
+                    ProblemMark(problem, onFix = onFixProblem.takeIf { problem.fix != ProblemFix.PICK_AGAIN })
+                }
+                Text(
+                    text = cue.label.ifBlank { cueActionLabel(cue.action) },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (problem == null) scheme.onSurface.copy(alpha = ink) else scheme.error,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Text(
                 text = cueSubtitle(cue),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),

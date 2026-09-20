@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Podgląd wideo wymaga odtwarzacza aplikacji</string>
     <string name="calendar_preview_scene_unavailable">Podgląd sceny wymaga płótna aplikacji</string>
     <string name="calendar_preview_stream">Strumień · %1$s</string>
+    <string name="calendar_usually">zwykle %1$s</string>
+    <string name="calendar_usually_tip">Zwykle trwa tu %1$s, zmierzone na nabożeństwach, na których to pokazano — kliknij, aby tyle zaplanować</string>
+    <string name="calendar_timing_usually_hint">Ile to naprawdę trwało tutaj — mediana z ostatnich kilku razy</string>
+    <string name="calendar_needs_attention_one">1 wiersz wymaga uwagi</string>
+    <string name="calendar_needs_attention">Wiersze wymagające uwagi: %1$d</string>
+    <string name="calendar_needs_attention_tip">Coś, na co wskazują te wiersze, zniknęło — przeniesiony plik, usunięta pieśń, werset, którego nie ma w Biblii. Najedź na oznaczony wiersz, aby zobaczyć co.</string>
+    <string name="calendar_problem_missing_file">Nie znaleziono pliku — przeniesiony lub zmieniono nazwę od czasu planowania</string>
+    <string name="calendar_problem_missing_folder">Nie znaleziono folderu — przeniesiony lub zmieniono nazwę od czasu planowania</string>
+    <string name="calendar_problem_song_missing">Nie ma już w bibliotece pieśni</string>
+    <string name="calendar_problem_book_missing">Księgi nie ma w głównej Biblii</string>
+    <string name="calendar_problem_chapter">Rozdziału nie ma w tej księdze</string>
+    <string name="calendar_problem_verse">Wersetu nie ma w tym rozdziale</string>
+    <string name="calendar_fix_locate_file">kliknij, aby znaleźć plik</string>
+    <string name="calendar_fix_locate_folder">kliknij, aby znaleźć folder</string>
+    <string name="calendar_fix_pick_again">kliknij, aby wybrać inny</string>
+    <string name="calendar_pick_replace_with">Zastąp przez %1$s</string>
 </resources>

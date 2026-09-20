@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Die Videovorschau braucht den Player der App</string>
     <string name="calendar_preview_scene_unavailable">Die Szenenvorschau braucht die Leinwand der App</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">meist %1$s</string>
+    <string name="calendar_usually_tip">Läuft hier meist %1$s, gemessen über die Gottesdienste, in denen es gezeigt wurde — klicken, um das zu planen</string>
+    <string name="calendar_timing_usually_hint">Wie lange es hier tatsächlich lief — der Mittelwert der letzten Male</string>
+    <string name="calendar_needs_attention_one">1 Zeile braucht Aufmerksamkeit</string>
+    <string name="calendar_needs_attention">%1$d Zeilen brauchen Aufmerksamkeit</string>
+    <string name="calendar_needs_attention_tip">Etwas, worauf diese Zeilen verweisen, ist weg — eine verschobene Datei, ein entferntes Lied, ein Vers, den die Bibel nicht hat. Fahre über eine markierte Zeile, um zu sehen, was.</string>
+    <string name="calendar_problem_missing_file">Datei nicht gefunden — seit der Planung verschoben oder umbenannt</string>
+    <string name="calendar_problem_missing_folder">Ordner nicht gefunden — seit der Planung verschoben oder umbenannt</string>
+    <string name="calendar_problem_song_missing">Nicht mehr in der Liedbibliothek</string>
+    <string name="calendar_problem_book_missing">Buch nicht in der primären Bibel</string>
+    <string name="calendar_problem_chapter">Kapitel nicht in diesem Buch</string>
+    <string name="calendar_problem_verse">Vers nicht in diesem Kapitel</string>
+    <string name="calendar_fix_locate_file">klicken, um die Datei zu suchen</string>
+    <string name="calendar_fix_locate_folder">klicken, um den Ordner zu suchen</string>
+    <string name="calendar_fix_pick_again">klicken, um ein anderes zu wählen</string>
+    <string name="calendar_pick_replace_with">Ersetzen durch %1$s</string>
 </resources>

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Supprimer « %1$s » ?</string>
     <string name="delete_confirm_action">Supprimer</string>
     <string name="song_count">%1$s cantiques</string>
+    <string name="no_song_folder">Aucun dossier de chansons n'est encore défini — choisissez-en un dans Réglages → Chansons, et des chansons pourront être ajoutées ici.</string>
+    <string name="column_duration">Durée</string>
 </resources>

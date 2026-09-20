@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Odstrániť „%1$s“?</string>
     <string name="delete_confirm_action">Odstrániť</string>
     <string name="song_count">%1$s piesní</string>
+    <string name="no_song_folder">Priečinok piesní ešte nie je nastavený — vyberte ho v Nastavenia → Piesne a tu potom pôjde pridávať piesne.</string>
+    <string name="column_duration">Dĺžka</string>
 </resources>

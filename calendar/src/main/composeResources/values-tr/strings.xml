@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Video önizlemesi uygulamanın oynatıcısını gerektirir</string>
     <string name="calendar_preview_scene_unavailable">Sahne önizlemesi uygulamanın tuvalini gerektirir</string>
     <string name="calendar_preview_stream">Akış · %1$s</string>
+    <string name="calendar_usually">genellikle %1$s</string>
+    <string name="calendar_usually_tip">Burada genellikle %1$s sürer; gösterildiği ibadetler üzerinden ölçüldü — bunu planlamak için tıklayın</string>
+    <string name="calendar_timing_usually_hint">Burada gerçekte ne kadar sürdüğü — son birkaç gösterimin ortancası</string>
+    <string name="calendar_needs_attention_one">1 satır ilgi bekliyor</string>
+    <string name="calendar_needs_attention">%1$d satır ilgi bekliyor</string>
+    <string name="calendar_needs_attention_tip">Bu satırların işaret ettiği bir şey kayıp — taşınmış bir dosya, kaldırılmış bir şarkı, Kutsal Kitap'ta olmayan bir ayet. Hangisi olduğunu görmek için işaretli satırın üzerine gelin.</string>
+    <string name="calendar_problem_missing_file">Dosya bulunamadı — planlandığından beri taşınmış ya da yeniden adlandırılmış</string>
+    <string name="calendar_problem_missing_folder">Klasör bulunamadı — planlandığından beri taşınmış ya da yeniden adlandırılmış</string>
+    <string name="calendar_problem_song_missing">Artık şarkı kitaplığında değil</string>
+    <string name="calendar_problem_book_missing">Kitap birincil Kutsal Kitap'ta yok</string>
+    <string name="calendar_problem_chapter">Bölüm bu kitapta yok</string>
+    <string name="calendar_problem_verse">Ayet bu bölümde yok</string>
+    <string name="calendar_fix_locate_file">dosyayı bulmak için tıklayın</string>
+    <string name="calendar_fix_locate_folder">klasörü bulmak için tıklayın</string>
+    <string name="calendar_fix_pick_again">başka birini seçmek için tıklayın</string>
+    <string name="calendar_pick_replace_with">%1$s ile değiştir</string>
 </resources>

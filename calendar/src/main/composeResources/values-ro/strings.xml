@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Previzualizarea video necesită playerul aplicației</string>
     <string name="calendar_preview_scene_unavailable">Previzualizarea scenei necesită pânza aplicației</string>
     <string name="calendar_preview_stream">Flux · %1$s</string>
+    <string name="calendar_usually">de obicei %1$s</string>
+    <string name="calendar_usually_tip">Durează de obicei %1$s aici, măsurat la serviciile în care a fost afișat — dă clic pentru a planifica atât</string>
+    <string name="calendar_timing_usually_hint">Cât a durat cu adevărat aici — mediana ultimelor afișări</string>
+    <string name="calendar_needs_attention_one">1 rând necesită atenție</string>
+    <string name="calendar_needs_attention">%1$d rânduri necesită atenție</string>
+    <string name="calendar_needs_attention_tip">Ceva la care indică aceste rânduri a dispărut — un fișier mutat, o cântare ștearsă, un verset pe care Biblia nu îl are. Trece cu mouse-ul peste un rând marcat ca să vezi care.</string>
+    <string name="calendar_problem_missing_file">Fișierul nu a fost găsit — mutat sau redenumit de la planificare</string>
+    <string name="calendar_problem_missing_folder">Dosarul nu a fost găsit — mutat sau redenumit de la planificare</string>
+    <string name="calendar_problem_song_missing">Nu mai este în biblioteca de cântări</string>
+    <string name="calendar_problem_book_missing">Cartea nu este în Biblia principală</string>
+    <string name="calendar_problem_chapter">Capitolul nu este în această carte</string>
+    <string name="calendar_problem_verse">Versetul nu este în acest capitol</string>
+    <string name="calendar_fix_locate_file">dă clic pentru a găsi fișierul</string>
+    <string name="calendar_fix_locate_folder">dă clic pentru a găsi dosarul</string>
+    <string name="calendar_fix_pick_again">dă clic pentru a alege altul</string>
+    <string name="calendar_pick_replace_with">Înlocuiește cu %1$s</string>
 </resources>

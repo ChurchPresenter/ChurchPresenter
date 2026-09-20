@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Pratonton video memerlukan pemain aplikasi</string>
     <string name="calendar_preview_scene_unavailable">Pratonton adegan memerlukan kanvas aplikasi</string>
     <string name="calendar_preview_stream">Strim · %1$s</string>
+    <string name="calendar_usually">biasanya %1$s</string>
+    <string name="calendar_usually_tip">Biasanya berjalan %1$s di sini, diukur daripada perkhidmatan yang memaparkannya — klik untuk merancang mengikut itu</string>
+    <string name="calendar_timing_usually_hint">Berapa lama ia sebenarnya berjalan di sini — nilai tengah beberapa kali terakhir ia dipaparkan</string>
+    <string name="calendar_needs_attention_one">1 baris perlu perhatian</string>
+    <string name="calendar_needs_attention">%1$d baris perlu perhatian</string>
+    <string name="calendar_needs_attention_tip">Sesuatu yang dirujuk baris ini sudah tiada — fail dipindahkan, lagu dibuang, ayat yang tiada dalam Alkitab. Tuding pada baris bertanda untuk melihat yang mana.</string>
+    <string name="calendar_problem_missing_file">Fail tidak ditemui — dipindahkan atau dinamakan semula sejak dirancang</string>
+    <string name="calendar_problem_missing_folder">Folder tidak ditemui — dipindahkan atau dinamakan semula sejak dirancang</string>
+    <string name="calendar_problem_song_missing">Tiada lagi dalam pustaka lagu</string>
+    <string name="calendar_problem_book_missing">Kitab tiada dalam Alkitab utama</string>
+    <string name="calendar_problem_chapter">Bab tiada dalam kitab ini</string>
+    <string name="calendar_problem_verse">Ayat tiada dalam bab ini</string>
+    <string name="calendar_fix_locate_file">klik untuk mencari fail</string>
+    <string name="calendar_fix_locate_folder">klik untuk mencari folder</string>
+    <string name="calendar_fix_pick_again">klik untuk memilih yang lain</string>
+    <string name="calendar_pick_replace_with">Ganti dengan %1$s</string>
 </resources>

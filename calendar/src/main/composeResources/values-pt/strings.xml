@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">A pré-visualização de vídeo precisa do leitor da aplicação</string>
     <string name="calendar_preview_scene_unavailable">A pré-visualização de cena precisa da tela da aplicação</string>
     <string name="calendar_preview_stream">Transmissão · %1$s</string>
+    <string name="calendar_usually">geralmente %1$s</string>
+    <string name="calendar_usually_tip">Geralmente dura %1$s aqui, medido nos cultos em que foi exibido — clique para planejar isso</string>
+    <string name="calendar_timing_usually_hint">Quanto tempo realmente durou aqui — a mediana das últimas vezes em que foi exibido</string>
+    <string name="calendar_needs_attention_one">1 linha precisa de atenção</string>
+    <string name="calendar_needs_attention">%1$d linhas precisam de atenção</string>
+    <string name="calendar_needs_attention_tip">Algo para o qual estas linhas apontam sumiu — um arquivo movido, uma música removida, um versículo que a Bíblia não tem. Passe o mouse sobre uma linha marcada para ver qual.</string>
+    <string name="calendar_problem_missing_file">Arquivo não encontrado — movido ou renomeado desde que foi planejado</string>
+    <string name="calendar_problem_missing_folder">Pasta não encontrada — movida ou renomeada desde que foi planejada</string>
+    <string name="calendar_problem_song_missing">Não está mais na biblioteca de músicas</string>
+    <string name="calendar_problem_book_missing">Livro não está na Bíblia principal</string>
+    <string name="calendar_problem_chapter">Capítulo não está neste livro</string>
+    <string name="calendar_problem_verse">Versículo não está neste capítulo</string>
+    <string name="calendar_fix_locate_file">clique para localizar o arquivo</string>
+    <string name="calendar_fix_locate_folder">clique para localizar a pasta</string>
+    <string name="calendar_fix_pick_again">clique para escolher outro</string>
+    <string name="calendar_pick_replace_with">Substituir por %1$s</string>
 </resources>

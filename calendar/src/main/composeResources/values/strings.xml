@@ -211,6 +211,7 @@
     <string name="calendar_bible_hint_short">Filter books, or type a reference</string>
     <string name="calendar_pick_add_tip">Add to the run of show</string>
     <string name="calendar_pick_add_range">Add %1$s</string>
+    <string name="calendar_pick_replace_with">Replace with %1$s</string>
     <string name="calendar_pick_verse_hint">Tap a verse, then tap another for a range</string>
     <string name="calendar_pick_clear">Clear</string>
     <string name="calendar_edit_song">Edit this song</string>
@@ -321,4 +322,7 @@
     <string name="calendar_problem_book_missing">Book not in the primary Bible</string>
     <string name="calendar_problem_chapter">Chapter not in this book</string>
     <string name="calendar_problem_verse">Verse not in this chapter</string>
+    <string name="calendar_fix_locate_file">click to find the file</string>
+    <string name="calendar_fix_locate_folder">click to find the folder</string>
+    <string name="calendar_fix_pick_again">click to pick another</string>
 </resources>

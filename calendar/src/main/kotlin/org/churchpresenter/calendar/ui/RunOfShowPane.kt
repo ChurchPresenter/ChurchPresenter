@@ -146,6 +146,8 @@ internal fun RunOfShowPane(
     onPlannedSecondsChange: (itemId: String, seconds: Int?) -> Unit,
     onCueEnabled: (cueId: String, enabled: Boolean) -> Unit,
     onFireCue: (ScheduleItem.CueItem) -> Unit,
+    /** The one-click fix for a row's problem -- locate the file, or pick again. See `ProblemFix`. */
+    onFixProblem: (item: ScheduleItem, problem: PreflightProblem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val clocks = remember(service) { runClocks(service) }
@@ -199,8 +201,10 @@ internal fun RunOfShowPane(
                         startTime = service.startTime,
                         armed = service.armed,
                         status = statuses[item.id],
+                        problem = problems[item.id],
                         onToggle = { onCueEnabled(item.id, !item.enabled) },
                         onFire = { onFireCue(item) },
+                        onFixProblem = { problems[item.id]?.let { onFixProblem(item, it) } },
                         modifier = Modifier.animateItem(),
                     )
                     else -> RunRow(
@@ -220,6 +224,7 @@ internal fun RunOfShowPane(
                         onMoveDown = { onMove(index, index + 1) },
                         onRemove = { onRemove(item.id) },
                         onPlannedSecondsChange = { onPlannedSecondsChange(item.id, it) },
+                        onFixProblem = { problems[item.id]?.let { onFixProblem(item, it) } },
                         modifier = Modifier.animateItem(),
                     )
                 }
@@ -251,6 +256,7 @@ private fun RunRow(
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
     onPlannedSecondsChange: (Int?) -> Unit,
+    onFixProblem: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -298,7 +304,7 @@ private fun RunRow(
         }
         Column(Modifier.weight(1f).padding(vertical = 1.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (problem != null) ProblemMark(problem)
+                if (problem != null) ProblemMark(problem, onFix = onFixProblem)
                 Text(
                     text = item.displayText,
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
@@ -430,15 +436,24 @@ private fun RowChip(text: String, icon: ImageVector?, tone: Color, onClick: () -
     }
 }
 
-/** The warning beside a row that will not go on screen on the day, with what is wrong as its hint. */
+/**
+ * The warning beside a row that will not go on screen on the day: what is wrong as its hint, and
+ * the fix as its click -- a file dialog for a moved file, the picker for a song or a verse. With
+ * no [onFix] it only explains.
+ */
 @Composable
-private fun ProblemMark(problem: PreflightProblem) {
-    Hint(problemText(problem)) {
+internal fun ProblemMark(problem: PreflightProblem, onFix: (() -> Unit)? = null) {
+    val hint = problemHint(problem, fixable = onFix != null)
+    Hint(hint) {
         Icon(
             Icons.Filled.Warning,
-            contentDescription = problemText(problem),
+            contentDescription = hint,
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(16.dp)
+                .clip(CalendarMetrics.smallRadius)
+                .then(if (onFix != null) Modifier.clickable(onClick = onFix) else Modifier)
+                .padding(2.dp),
         )
     }
 }

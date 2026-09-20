@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">La vista previa de vídeo necesita el reproductor de la app</string>
     <string name="calendar_preview_scene_unavailable">La vista previa de escena necesita el lienzo de la app</string>
     <string name="calendar_preview_stream">Emisión · %1$s</string>
+    <string name="calendar_usually">normalmente %1$s</string>
+    <string name="calendar_usually_tip">Normalmente dura %1$s aquí, medido en los cultos en que se mostró — haz clic para planificar eso</string>
+    <string name="calendar_timing_usually_hint">Cuánto ha durado realmente aquí — la mediana de las últimas veces que se mostró</string>
+    <string name="calendar_needs_attention_one">1 fila necesita atención</string>
+    <string name="calendar_needs_attention">%1$d filas necesitan atención</string>
+    <string name="calendar_needs_attention_tip">Algo a lo que apuntan estas filas ya no está — un archivo movido, una canción eliminada, un versículo que la Biblia no tiene. Pasa el cursor por una fila marcada para ver cuál.</string>
+    <string name="calendar_problem_missing_file">Archivo no encontrado — movido o renombrado desde que se planificó</string>
+    <string name="calendar_problem_missing_folder">Carpeta no encontrada — movida o renombrada desde que se planificó</string>
+    <string name="calendar_problem_song_missing">Ya no está en la biblioteca de canciones</string>
+    <string name="calendar_problem_book_missing">El libro no está en la Biblia principal</string>
+    <string name="calendar_problem_chapter">El capítulo no está en este libro</string>
+    <string name="calendar_problem_verse">El versículo no está en este capítulo</string>
+    <string name="calendar_fix_locate_file">haz clic para buscar el archivo</string>
+    <string name="calendar_fix_locate_folder">haz clic para buscar la carpeta</string>
+    <string name="calendar_fix_pick_again">haz clic para elegir otro</string>
+    <string name="calendar_pick_replace_with">Reemplazar por %1$s</string>
 </resources>

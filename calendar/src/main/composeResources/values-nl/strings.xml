@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Het videovoorbeeld heeft de speler van de app nodig</string>
     <string name="calendar_preview_scene_unavailable">Het scènevoorbeeld heeft het canvas van de app nodig</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">meestal %1$s</string>
+    <string name="calendar_usually_tip">Duurt hier meestal %1$s, gemeten over de diensten waarin het is getoond — klik om dat in te plannen</string>
+    <string name="calendar_timing_usually_hint">Hoe lang het hier werkelijk duurde — de mediaan van de laatste keren</string>
+    <string name="calendar_needs_attention_one">1 rij heeft aandacht nodig</string>
+    <string name="calendar_needs_attention">%1$d rijen hebben aandacht nodig</string>
+    <string name="calendar_needs_attention_tip">Iets waar deze rijen naar verwijzen is weg — een verplaatst bestand, een verwijderd lied, een vers dat de Bijbel niet heeft. Beweeg over een gemarkeerde rij om te zien wat.</string>
+    <string name="calendar_problem_missing_file">Bestand niet gevonden — verplaatst of hernoemd sinds de planning</string>
+    <string name="calendar_problem_missing_folder">Map niet gevonden — verplaatst of hernoemd sinds de planning</string>
+    <string name="calendar_problem_song_missing">Staat niet meer in de liedbibliotheek</string>
+    <string name="calendar_problem_book_missing">Boek staat niet in de primaire Bijbel</string>
+    <string name="calendar_problem_chapter">Hoofdstuk staat niet in dit boek</string>
+    <string name="calendar_problem_verse">Vers staat niet in dit hoofdstuk</string>
+    <string name="calendar_fix_locate_file">klik om het bestand te zoeken</string>
+    <string name="calendar_fix_locate_folder">klik om de map te zoeken</string>
+    <string name="calendar_fix_pick_again">klik om een ander te kiezen</string>
+    <string name="calendar_pick_replace_with">Vervangen door %1$s</string>
 </resources>

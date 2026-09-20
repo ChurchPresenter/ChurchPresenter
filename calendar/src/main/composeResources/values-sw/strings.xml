@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Hakikisho la video linahitaji kicheza cha programu</string>
     <string name="calendar_preview_scene_unavailable">Hakikisho la mandhari linahitaji turubai ya programu</string>
     <string name="calendar_preview_stream">Mtiririko · %1$s</string>
+    <string name="calendar_usually">kwa kawaida %1$s</string>
+    <string name="calendar_usually_tip">Kwa kawaida huchukua %1$s hapa, kulingana na ibada ilizoonyeshwa — bofya ili kupanga hivyo</string>
+    <string name="calendar_timing_usually_hint">Muda ambao kwa kweli imechukua hapa — thamani ya kati ya mara chache za mwisho ilipoonyeshwa</string>
+    <string name="calendar_needs_attention_one">Safu 1 inahitaji kuangaliwa</string>
+    <string name="calendar_needs_attention">Safu %1$d zinahitaji kuangaliwa</string>
+    <string name="calendar_needs_attention_tip">Kitu ambacho safu hizi zinaelekeza hakipo tena — faili imehamishwa, wimbo umeondolewa, mstari ambao Biblia haina. Elea juu ya safu iliyowekwa alama ili kuona kipi.</string>
+    <string name="calendar_problem_missing_file">Faili haikupatikana — imehamishwa au kubadilishwa jina tangu ilipopangwa</string>
+    <string name="calendar_problem_missing_folder">Folda haikupatikana — imehamishwa au kubadilishwa jina tangu ilipopangwa</string>
+    <string name="calendar_problem_song_missing">Haupo tena kwenye maktaba ya nyimbo</string>
+    <string name="calendar_problem_book_missing">Kitabu hakipo kwenye Biblia kuu</string>
+    <string name="calendar_problem_chapter">Sura haipo kwenye kitabu hiki</string>
+    <string name="calendar_problem_verse">Mstari haupo kwenye sura hii</string>
+    <string name="calendar_fix_locate_file">bofya ili kutafuta faili</string>
+    <string name="calendar_fix_locate_folder">bofya ili kutafuta folda</string>
+    <string name="calendar_fix_pick_again">bofya ili kuchagua nyingine</string>
+    <string name="calendar_pick_replace_with">Badilisha na %1$s</string>
 </resources>

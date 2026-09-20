@@ -67,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
 import org.churchpresenter.settings.withBundledBible
+import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
@@ -83,6 +84,8 @@ import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import churchpresenter.composeapp.generated.resources.bible_font
+import churchpresenter.composeapp.generated.resources.calendar_locate_folder_title
+import churchpresenter.composeapp.generated.resources.calendar_locate_file_title
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
@@ -165,6 +168,7 @@ import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -190,6 +194,7 @@ import org.churchpresenter.app.churchpresenter.server.withAnnouncement
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import java.nio.file.Files
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val OPTIONS_TAB_BACKGROUND = 3
@@ -1963,6 +1968,27 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                     )
                                                 }
                                             }.orEmpty()
+                                        },
+                                        // The pre-flight check's fix for a moved file: the app's own
+                                        // chooser, opened where the row still thinks the file is.
+                                        locateFile = { missing ->
+                                            FileChooser.platformInstance.chooseSingle(
+                                                path = missing.parentFile?.toPath()?.takeIf { Files.isDirectory(it) },
+                                                filters = emptyList(),
+                                                title = getString(Res.string.calendar_locate_file_title, missing.name),
+                                                selectDirectory = false,
+                                            )?.toFile()
+                                        },
+                                        // A typed reference's book, resolved the way go-live resolves
+                                        // it -- so "Psalm" against a Russian Bible is not flagged.
+                                        resolveBookId = { name -> BibleBookAbbreviations.resolveBookId(name) },
+                                        locateFolder = { missing ->
+                                            FileChooser.platformInstance.chooseSingle(
+                                                path = missing.parentFile?.toPath()?.takeIf { Files.isDirectory(it) },
+                                                filters = emptyList(),
+                                                title = getString(Res.string.calendar_locate_folder_title, missing.name),
+                                                selectDirectory = true,
+                                            )?.toFile()
                                         },
                                         chooseExportFile = { suggested ->
                                             FileChooser.platformInstance.save(

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Выдаліць «%1$s»?</string>
     <string name="delete_confirm_action">Выдаліць</string>
     <string name="song_count">%1$s песень</string>
+    <string name="no_song_folder">Папка песень яшчэ не зададзена — абярыце яе ў Наладах → Песні, і тут можна будзе дадаваць песні.</string>
+    <string name="column_duration">Працягласць</string>
 </resources>

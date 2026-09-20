@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">वीडियो पूर्वावलोकन के लिए ऐप का प्लेयर चाहिए</string>
     <string name="calendar_preview_scene_unavailable">दृश्य पूर्वावलोकन के लिए ऐप का कैनवस चाहिए</string>
     <string name="calendar_preview_stream">स्ट्रीम · %1$s</string>
+    <string name="calendar_usually">आमतौर पर %1$s</string>
+    <string name="calendar_usually_tip">यहाँ आमतौर पर %1$s चलता है, उन सेवाओं में मापा गया जिनमें यह दिखाया गया — इतना ही समय रखने के लिए क्लिक करें</string>
+    <string name="calendar_timing_usually_hint">यह यहाँ वास्तव में कितनी देर चला है — पिछली कुछ बार दिखाए जाने का मध्यमान</string>
+    <string name="calendar_needs_attention_one">1 पंक्ति पर ध्यान देना ज़रूरी है</string>
+    <string name="calendar_needs_attention">%1$d पंक्तियों पर ध्यान देना ज़रूरी है</string>
+    <string name="calendar_needs_attention_tip">ये पंक्तियाँ जिस चीज़ की ओर इशारा करती हैं, वह अब नहीं है — कोई फ़ाइल हट गई, गीत हटा दिया गया, या ऐसा पद जो बाइबल में नहीं है। कौन-सी, यह देखने के लिए चिह्नित पंक्ति पर माउस रखें।</string>
+    <string name="calendar_problem_missing_file">फ़ाइल नहीं मिली — योजना बनाने के बाद हटाई या नाम बदला गया</string>
+    <string name="calendar_problem_missing_folder">फ़ोल्डर नहीं मिला — योजना बनाने के बाद हटाया या नाम बदला गया</string>
+    <string name="calendar_problem_song_missing">अब गीत लाइब्रेरी में नहीं है</string>
+    <string name="calendar_problem_book_missing">पुस्तक प्राथमिक बाइबल में नहीं है</string>
+    <string name="calendar_problem_chapter">अध्याय इस पुस्तक में नहीं है</string>
+    <string name="calendar_problem_verse">पद इस अध्याय में नहीं है</string>
+    <string name="calendar_fix_locate_file">फ़ाइल खोजने के लिए क्लिक करें</string>
+    <string name="calendar_fix_locate_folder">फ़ोल्डर खोजने के लिए क्लिक करें</string>
+    <string name="calendar_fix_pick_again">दूसरा चुनने के लिए क्लिक करें</string>
+    <string name="calendar_pick_replace_with">%1$s से बदलें</string>
 </resources>

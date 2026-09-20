@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Бейнені алдын ала қарау үшін қолданба ойнатқышы қажет</string>
     <string name="calendar_preview_scene_unavailable">Сахнаны алдын ала қарау үшін қолданба кенебі қажет</string>
     <string name="calendar_preview_stream">Ағын · %1$s</string>
+    <string name="calendar_usually">әдетте %1$s</string>
+    <string name="calendar_usually_tip">Мұнда әдетте %1$s созылады — көрсетілген қызметтер бойынша өлшенген. Сонша жоспарлау үшін басыңыз</string>
+    <string name="calendar_timing_usually_hint">Мұнда іс жүзінде қанша созылды — соңғы бірнеше көрсетілімнің медианасы</string>
+    <string name="calendar_needs_attention_one">1 жол назар аударуды қажет етеді</string>
+    <string name="calendar_needs_attention">Назар аударуды қажет ететін жолдар: %1$d</string>
+    <string name="calendar_needs_attention_tip">Осы жолдар сілтейтін нәрсе жоғалды — файл жылжытылған, ән жойылған, Киелі кітапта жоқ аят. Не екенін көру үшін белгіленген жолға меңзерді апарыңыз.</string>
+    <string name="calendar_problem_missing_file">Файл табылмады — жоспарлағаннан кейін жылжытылған немесе атауы өзгертілген</string>
+    <string name="calendar_problem_missing_folder">Қалта табылмады — жоспарлағаннан кейін жылжытылған немесе атауы өзгертілген</string>
+    <string name="calendar_problem_song_missing">Ән кітапханасында енді жоқ</string>
+    <string name="calendar_problem_book_missing">Кітап негізгі Киелі кітапта жоқ</string>
+    <string name="calendar_problem_chapter">Бұл кітапта мұндай тарау жоқ</string>
+    <string name="calendar_problem_verse">Бұл тарауда мұндай аят жоқ</string>
+    <string name="calendar_fix_locate_file">файлды табу үшін басыңыз</string>
+    <string name="calendar_fix_locate_folder">қалтаны табу үшін басыңыз</string>
+    <string name="calendar_fix_pick_again">басқасын таңдау үшін басыңыз</string>
+    <string name="calendar_pick_replace_with">%1$s деп ауыстыру</string>
 </resources>

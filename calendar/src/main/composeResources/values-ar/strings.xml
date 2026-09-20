@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">تحتاج معاينة الفيديو إلى مشغّل التطبيق</string>
     <string name="calendar_preview_scene_unavailable">تحتاج معاينة المشهد إلى لوحة التطبيق</string>
     <string name="calendar_preview_stream">بث · %1$s</string>
+    <string name="calendar_usually">عادةً %1$s</string>
+    <string name="calendar_usually_tip">يستغرق عادةً %1$s هنا، مقيسًا عبر الخدمات التي عُرض فيها — انقر لتخطيط ذلك</string>
+    <string name="calendar_timing_usually_hint">كم استغرق فعليًا هنا — وسيط آخر مرات عُرض فيها</string>
+    <string name="calendar_needs_attention_one">صف واحد يحتاج إلى انتباه</string>
+    <string name="calendar_needs_attention">%1$d صفوف تحتاج إلى انتباه</string>
+    <string name="calendar_needs_attention_tip">شيء تشير إليه هذه الصفوف قد اختفى — ملف نُقل، ترنيمة أُزيلت، آية ليست في الكتاب المقدس. مرّر المؤشر فوق صف مُعلَّم لمعرفة أيها.</string>
+    <string name="calendar_problem_missing_file">الملف غير موجود — نُقل أو أُعيدت تسميته منذ التخطيط</string>
+    <string name="calendar_problem_missing_folder">المجلد غير موجود — نُقل أو أُعيدت تسميته منذ التخطيط</string>
+    <string name="calendar_problem_song_missing">لم تعد في مكتبة الترانيم</string>
+    <string name="calendar_problem_book_missing">السفر ليس في الكتاب المقدس الأساسي</string>
+    <string name="calendar_problem_chapter">الأصحاح ليس في هذا السفر</string>
+    <string name="calendar_problem_verse">الآية ليست في هذا الأصحاح</string>
+    <string name="calendar_fix_locate_file">انقر للعثور على الملف</string>
+    <string name="calendar_fix_locate_folder">انقر للعثور على المجلد</string>
+    <string name="calendar_fix_pick_again">انقر لاختيار غيره</string>
+    <string name="calendar_pick_replace_with">استبدال بـ %1$s</string>
 </resources>

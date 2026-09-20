@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">வீடியோ முன்னோட்டத்திற்கு பயன்பாட்டின் பிளேயர் தேவை</string>
     <string name="calendar_preview_scene_unavailable">காட்சி முன்னோட்டத்திற்கு பயன்பாட்டின் கேன்வாஸ் தேவை</string>
     <string name="calendar_preview_stream">ஸ்ட்ரீம் · %1$s</string>
+    <string name="calendar_usually">பொதுவாக %1$s</string>
+    <string name="calendar_usually_tip">இங்கு பொதுவாக %1$s ஓடும்; இது காட்டப்பட்ட ஆராதனைகளில் அளவிடப்பட்டது — அதையே திட்டமிட கிளிக் செய்யவும்</string>
+    <string name="calendar_timing_usually_hint">இங்கு இது உண்மையில் எவ்வளவு நேரம் ஓடியது — கடந்த சில முறை காட்டப்பட்டதன் நடு மதிப்பு</string>
+    <string name="calendar_needs_attention_one">1 வரிசைக்குக் கவனம் தேவை</string>
+    <string name="calendar_needs_attention">%1$d வரிசைகளுக்குக் கவனம் தேவை</string>
+    <string name="calendar_needs_attention_tip">இந்த வரிசைகள் சுட்டுவது இப்போது இல்லை — கோப்பு நகர்த்தப்பட்டது, பாடல் நீக்கப்பட்டது, அல்லது வேதாகமத்தில் இல்லாத வசனம். எது என்று காண, குறியிட்ட வரிசையின் மேல் சுட்டியை வைக்கவும்.</string>
+    <string name="calendar_problem_missing_file">கோப்பு கிடைக்கவில்லை — திட்டமிட்ட பிறகு நகர்த்தப்பட்டது அல்லது பெயர் மாற்றப்பட்டது</string>
+    <string name="calendar_problem_missing_folder">கோப்புறை கிடைக்கவில்லை — திட்டமிட்ட பிறகு நகர்த்தப்பட்டது அல்லது பெயர் மாற்றப்பட்டது</string>
+    <string name="calendar_problem_song_missing">இப்போது பாடல் நூலகத்தில் இல்லை</string>
+    <string name="calendar_problem_book_missing">இந்தப் புத்தகம் முதன்மை வேதாகமத்தில் இல்லை</string>
+    <string name="calendar_problem_chapter">இந்த அதிகாரம் இந்தப் புத்தகத்தில் இல்லை</string>
+    <string name="calendar_problem_verse">இந்த வசனம் இந்த அதிகாரத்தில் இல்லை</string>
+    <string name="calendar_fix_locate_file">கோப்பைக் கண்டறிய கிளிக் செய்யவும்</string>
+    <string name="calendar_fix_locate_folder">கோப்புறையைக் கண்டறிய கிளிக் செய்யவும்</string>
+    <string name="calendar_fix_pick_again">வேறொன்றைத் தேர்ந்தெடுக்க கிளிக் செய்யவும்</string>
+    <string name="calendar_pick_replace_with">%1$s ஆக மாற்று</string>
 </resources>

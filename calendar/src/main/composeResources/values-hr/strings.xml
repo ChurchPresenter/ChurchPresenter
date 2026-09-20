@@ -300,4 +300,20 @@
     <string name="calendar_preview_video_unavailable">Pregled videa zahtijeva reproduktor aplikacije</string>
     <string name="calendar_preview_scene_unavailable">Pregled scene zahtijeva platno aplikacije</string>
     <string name="calendar_preview_stream">Stream · %1$s</string>
+    <string name="calendar_usually">obično %1$s</string>
+    <string name="calendar_usually_tip">Obično ovdje traje %1$s, izmjereno na službama na kojima je prikazano — kliknite da to isplanirate</string>
+    <string name="calendar_timing_usually_hint">Koliko je ovdje stvarno trajalo — medijan zadnjih nekoliko prikazivanja</string>
+    <string name="calendar_needs_attention_one">1 redak treba pozornost</string>
+    <string name="calendar_needs_attention">Redaka koji trebaju pozornost: %1$d</string>
+    <string name="calendar_needs_attention_tip">Nešto na što ovi redci upućuju nestalo je — premještena datoteka, uklonjena pjesma, redak kojeg Biblija nema. Zadržite pokazivač na označenom retku da vidite što.</string>
+    <string name="calendar_problem_missing_file">Datoteka nije pronađena — premještena ili preimenovana od planiranja</string>
+    <string name="calendar_problem_missing_folder">Mapa nije pronađena — premještena ili preimenovana od planiranja</string>
+    <string name="calendar_problem_song_missing">Više nije u knjižnici pjesama</string>
+    <string name="calendar_problem_book_missing">Knjiga nije u glavnoj Bibliji</string>
+    <string name="calendar_problem_chapter">Poglavlje nije u ovoj knjizi</string>
+    <string name="calendar_problem_verse">Redak nije u ovom poglavlju</string>
+    <string name="calendar_fix_locate_file">kliknite da pronađete datoteku</string>
+    <string name="calendar_fix_locate_folder">kliknite da pronađete mapu</string>
+    <string name="calendar_fix_pick_again">kliknite da odaberete drugo</string>
+    <string name="calendar_pick_replace_with">Zamijeni s %1$s</string>
 </resources>

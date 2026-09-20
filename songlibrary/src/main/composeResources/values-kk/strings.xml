@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">«%1$s» жою керек пе?</string>
     <string name="delete_confirm_action">Жою</string>
     <string name="song_count">%1$s ән</string>
+    <string name="no_song_folder">Әндер қалтасы әлі орнатылмаған — оны Баптаулар → Әндер бөлімінен таңдаңыз, сонда мұнда әндер қосуға болады.</string>
+    <string name="column_duration">Ұзақтығы</string>
 </resources>
