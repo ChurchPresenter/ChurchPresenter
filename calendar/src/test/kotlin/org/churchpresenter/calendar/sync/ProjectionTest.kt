@@ -8,7 +8,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class ProjectionTest {
@@ -23,7 +22,7 @@ class ProjectionTest {
         items = listOf(
             ScheduleItem.LabelItem("r1", "Worship", "#FFFFFF", "#5B9DF5"),
             ScheduleItem.SongItem("r2", 42, "Here I Am", "Hymnal", songId = "Hymnal::42"),
-            ScheduleItem.BibleVerseItem("r3", "Psalms", 100, 1, "Make a joyful noise", verseRange = "1-5"),
+            ScheduleItem.BibleVerseItem("r3", "Psalms", 100, 1, "Make a joyful noise", verseRange = "1-5", bookId = 19),
             ScheduleItem.MinistryItem("r4", "Violin", "Jake"),
             ScheduleItem.PictureItem("r5", "/Users/x/Pictures/welcome", "Welcome loop", 24),
             ScheduleItem.WebsiteItem("r6", "https://example.org/secret", "Site"),
@@ -40,7 +39,7 @@ class ProjectionTest {
         assertEquals(7, rows.size)
         assertEquals(RemoteRow.Section("r1", "Worship", "#5B9DF5"), rows[0])
         assertEquals(RemoteRow.Song("r2", "Here I Am", "Hymnal::42", "Hymnal", "42"), rows[1])
-        assertIs<RemoteRow.Bible>(rows[2])
+        assertEquals(RemoteRow.Bible("r3", "Psalms 100:1-5", bookId = 19), rows[2])
         assertEquals(RemoteRow.Ministry("r4", "Violin", "Jake"), rows[3])
         assertEquals(RemoteRow.Ref("r5", "Welcome loop (24 images)", RemoteKind.PICTURES), rows[4])
         assertEquals(RemoteKind.WEBSITE, (rows[5] as RemoteRow.Ref).kind)

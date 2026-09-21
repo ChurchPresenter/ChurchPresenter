@@ -82,6 +82,22 @@ class ResolverTest {
     }
 
     @Test
+    fun `a book number from the phone makes the reference language-proof, a bad one is ignored`() {
+        val resolved = resolver.resolve(remote(
+            RemoteRow.Bible("a", "Иоанна 3:16", bookId = 43),
+            RemoteRow.Bible("b", "John 3:16", bookId = 0),
+            RemoteRow.Bible("c", "John 3:16", bookId = 999),
+        ), local = null)!!
+
+        val russian = assertIs<ScheduleItem.BibleVerseItem>(resolved.service.items[0])
+        assertEquals(43, russian.bookId)
+        assertEquals("Иоанна", russian.bookName)
+        assertEquals("Иоанна 3:16", russian.displayText)
+        assertEquals(0, assertIs<ScheduleItem.BibleVerseItem>(resolved.service.items[1]).bookId)
+        assertEquals(0, assertIs<ScheduleItem.BibleVerseItem>(resolved.service.items[2]).bookId)
+    }
+
+    @Test
     fun `a preset reference is expanded from the local preset, never from the wire`() {
         val resolved = resolver.resolve(remote(
             RemoteRow.Preset("a", "Anything", presetId = "p1"),

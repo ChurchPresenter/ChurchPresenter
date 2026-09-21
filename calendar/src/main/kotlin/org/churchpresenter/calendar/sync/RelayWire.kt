@@ -31,7 +31,13 @@ sealed class RemoteRow {
     /** `Psalms 100:1-5` — the reference alone; this desktop looks the text up. */
     @Serializable
     @SerialName("bible")
-    data class Bible(override val id: String, override val title: String, val preview: String = "") : RemoteRow()
+    data class Bible(
+        override val id: String,
+        override val title: String,
+        val preview: String = "",
+        /** The canonical book number, 1..66, the same in every translation; 0 when only the name is known. */
+        val bookId: Int = 0,
+    ) : RemoteRow()
 
     @Serializable
     @SerialName("ministry")

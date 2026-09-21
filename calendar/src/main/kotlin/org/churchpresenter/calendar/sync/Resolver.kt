@@ -131,7 +131,12 @@ class Resolver(
     private fun resolveBible(row: RemoteRow.Bible, unresolved: MutableMap<String, String>): ScheduleItem {
         val text = Sanitize.cleanText(row.title, WireLimits.TITLE_CHARS)
         val parsed = parseReference(text)
-        if (parsed != null) return parsed.toScheduleItem().withId(row.id)
+        if (parsed != null) {
+            // A book number travels with the name when the phone knew it, so the reference resolves
+            // whatever language either side's Bible is in; the name alone is matched by text later.
+            val bookId = row.bookId.takeIf { it in 1..BOOKS_IN_BIBLE } ?: 0
+            return parsed.toScheduleItem().copy(bookId = bookId).withId(row.id)
+        }
         unresolved[row.id] = UNRESOLVED_REFERENCE
         // Kept as something that never goes on screen, so the planner sees what was meant.
         return ScheduleItem.MinistryItem(id = row.id, title = text.ifEmpty { DEFAULT_REFERENCE })
@@ -169,6 +174,7 @@ class Resolver(
         const val UNRESOLVED_SONG = "song"
         const val UNRESOLVED_REFERENCE = "reference"
         const val UNRESOLVED_PRESET = "preset"
+        private const val BOOKS_IN_BIBLE = 66
         private const val DEFAULT_NAME = "Service"
         private const val DEFAULT_SECTION = "Section"
         private const val DEFAULT_SONG = "Song"

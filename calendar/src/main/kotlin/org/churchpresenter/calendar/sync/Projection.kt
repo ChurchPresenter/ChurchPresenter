@@ -57,7 +57,7 @@ object Projection {
             songbook = item.songbook,
             number = if (item.songNumber > 0) item.songNumber.toString() else "",
         )
-        is ScheduleItem.BibleVerseItem -> RemoteRow.Bible(item.id, item.displayText)
+        is ScheduleItem.BibleVerseItem -> RemoteRow.Bible(item.id, item.displayText, bookId = item.bookId)
         is ScheduleItem.MinistryItem -> RemoteRow.Ministry(item.id, item.title, item.detail)
         else -> RemoteRow.Ref(id = item.id, title = item.displayText, kind = kindOf(item))
     }
