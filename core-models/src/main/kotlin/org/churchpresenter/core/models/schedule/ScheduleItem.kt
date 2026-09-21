@@ -89,7 +89,8 @@ sealed class ScheduleItem {
         val mediaUrl: String,       // local path or URL
         val mediaTitle: String,
         val mediaType: String,      // "local", "youtube", "vimeo"
-        override val displayText: String = "🎬 $mediaTitle"
+        override val displayText: String = "🎬 $mediaTitle",
+        val subtitleUrl: String = "" // external subtitle file, blank for none
     ) : ScheduleItem()
 
     @Serializable

@@ -1666,8 +1666,8 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
-                                onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
-                                    currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
+                                onAddToSchedule = { mediaUrl, mediaTitle, mediaType, subtitleUrl ->
+                                    currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType, subtitleUrl)
                                 },
                                 onSavePreset = { mediaUrl, mediaTitle, mediaType ->
                                     presetToSave = ScheduleItem.MediaItem(
