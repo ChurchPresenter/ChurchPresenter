@@ -436,7 +436,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         }
     }
 
-    val presenterManager = remember { PresenterManager() }
+    // Decided at construction so hidden outputs never open and then close again.
+    val presenterManager = remember {
+        PresenterManager(showPresenterWindowInitially = !appSettings.projectionSettings.startOutputsHidden)
+    }
     LaunchedEffect(appSettings.atemSettings) {
         presenterManager.setAtemRenderSettings(appSettings.atemSettings)
     }

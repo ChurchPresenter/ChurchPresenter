@@ -53,6 +53,8 @@ import churchpresenter.composeapp.generated.resources.send_test_event
 import churchpresenter.composeapp.generated.resources.settings_export_failed
 import churchpresenter.composeapp.generated.resources.settings_exported
 import churchpresenter.composeapp.generated.resources.settings_import_failed
+import churchpresenter.composeapp.generated.resources.start_outputs_hidden
+import churchpresenter.composeapp.generated.resources.start_outputs_hidden_hint
 import churchpresenter.composeapp.generated.resources.system_manage_settings
 import churchpresenter.composeapp.generated.resources.tab_label_style
 import churchpresenter.composeapp.generated.resources.tab_label_style_hint
@@ -242,6 +244,17 @@ private fun GeneralCard(
                     scope.launch {
                         val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
                         if (ok) autoStartEnabled = enabled
+                    }
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.start_outputs_hidden),
+                hint = stringResource(Res.string.start_outputs_hidden_hint),
+                checked = settings.projectionSettings.startOutputsHidden,
+                onCheckedChange = { hidden ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(startOutputsHidden = hidden))
                     }
                 }
             )
