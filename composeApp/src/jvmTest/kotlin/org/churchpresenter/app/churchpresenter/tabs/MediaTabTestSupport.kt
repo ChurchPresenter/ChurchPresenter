@@ -80,7 +80,7 @@ internal fun mediaTab(
                     appSettings = appSettings,
                     selectedMediaItem = selectedMediaItem,
                     presenterManager = presenterManager,
-                    onAddToSchedule = { url, title, type -> reports.scheduled += Triple(url, title, type) },
+                    onAddToSchedule = { url, title, type, _ -> reports.scheduled += Triple(url, title, type) },
                     vlcAvailable = vlcAvailable,
                     vlcArchMismatch = vlcArchMismatch,
                     vlcLoadFailed = vlcLoadFailed,

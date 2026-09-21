@@ -32,7 +32,7 @@ internal class ScheduleActionsRecorder {
         },
         addPicture = { path, name, count -> added += "picture:$path:$name:$count" },
         addPresentation = { path, name, slides, type -> added += "presentation:$path:$name:$slides:$type" },
-        addMedia = { url, title, type -> added += "media:$url:$title:$type" },
+        addMedia = { url, title, type, _ -> added += "media:$url:$title:$type" },
         addScene = { id, name -> added += "scene:$id:$name" },
         addDictionary = { number, word, translit, definition ->
             added += "dictionary:$number:$word:$translit:$definition"

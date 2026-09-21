@@ -4,6 +4,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.utils.Constants
 
+/** One subtitle track VLC found in the loaded media: [id] is VLC's own, [name] is what it calls it. */
+data class SubtitleTrack(val id: Int, val name: String)
+
 class MediaViewModel {
 
     // Media source
@@ -124,8 +127,52 @@ class MediaViewModel {
         _loopsPlayed.intValue = 0
     }
 
+    // Subtitles
+    /** An external subtitle file handed to VLC alongside the media; blank when there is none. */
+    private val _subtitleUrl = mutableStateOf("")
+    val subtitleUrl: String get() = _subtitleUrl.value
+
+    /** The tracks VLC reports for the loaded media, external file included. Filled by the player. */
+    private val _subtitleTracks = mutableStateOf<List<SubtitleTrack>>(emptyList())
+    val subtitleTracks: List<SubtitleTrack> get() = _subtitleTracks.value
+
+    /**
+     * The VLC track id being shown, [SUBTITLES_OFF] for none, or [SUBTITLES_UNDECIDED] until the
+     * tracks are known.
+     */
+    private val _selectedSubtitleTrack = mutableIntStateOf(SUBTITLES_UNDECIDED)
+    val selectedSubtitleTrack: Int get() = _selectedSubtitleTrack.intValue
+
+    /**
+     * Points the media at an external subtitle file. Blank clears it. The media has to be loaded
+     * again for VLC to pick the file up, which the player does when this value changes.
+     */
+    fun setSubtitleFile(path: String) {
+        _subtitleUrl.value = path
+        _subtitleTracks.value = emptyList()
+        _selectedSubtitleTrack.intValue = SUBTITLES_UNDECIDED
+    }
+
+    /** Called by the player once VLC has listed the tracks; [SUBTITLES_UNDECIDED] resolves here. */
+    fun setSubtitleTracks(tracks: List<SubtitleTrack>) {
+        _subtitleTracks.value = tracks
+        val selected = _selectedSubtitleTrack.intValue
+        val stillValid = selected == SUBTITLES_OFF || tracks.any { it.id == selected }
+        _selectedSubtitleTrack.intValue = when {
+            selected != SUBTITLES_UNDECIDED && stillValid -> selected
+            // A file the operator chose is the one they want to see; embedded tracks start hidden.
+            _subtitleUrl.value.isNotBlank() -> tracks.lastOrNull()?.id ?: SUBTITLES_OFF
+            else -> SUBTITLES_OFF
+        }
+    }
+
+    fun selectSubtitleTrack(id: Int) {
+        _selectedSubtitleTrack.intValue = id
+    }
+
 
     fun loadMedia(url: String, type: String) {
+        setSubtitleFile("")
         _mediaUrl.value = url
         _mediaType.value = type
         _mediaTitle.value = deriveTitleFromUrl(url)
@@ -179,7 +226,8 @@ class MediaViewModel {
         onCuePlaybackStarted?.invoke(_mediaUrl.value, _mediaType.value)
     }
 
-    fun loadMediaFromSchedule(url: String, title: String, type: String) {
+    fun loadMediaFromSchedule(url: String, title: String, type: String, subtitleUrl: String = "") {
+        setSubtitleFile(subtitleUrl)
         _mediaUrl.value = url
         _mediaTitle.value = title
         _mediaType.value = type
@@ -221,6 +269,7 @@ class MediaViewModel {
     }
 
     fun unload() {
+        setSubtitleFile("")
         _isPlaying.value = false
         _mediaUrl.value = ""
         _mediaTitle.value = ""
@@ -271,6 +320,11 @@ class MediaViewModel {
     /** Called by VideoPlayer to keep the progress in sync (does NOT bump seekVersion). */
     fun setCurrentPosition(ms: Long) {
         _currentPosition.value = ms
+    }
+
+    companion object {
+        const val SUBTITLES_OFF = -1
+        const val SUBTITLES_UNDECIDED = -2
     }
 
     internal fun deriveTitleFromUrl(url: String): String {

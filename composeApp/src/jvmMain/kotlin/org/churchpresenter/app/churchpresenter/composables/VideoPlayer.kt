@@ -16,9 +16,11 @@ import javafx.embed.swing.JFXPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
+import uk.co.caprica.vlcj.media.TrackType
 import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
@@ -54,6 +56,17 @@ private const val VLC_OPT_SOFTWARE_CODEC = ":codec=avcodec"
 private const val VLC_OPT_FAST_DECODE = ":avcodec-fast"
 private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
 private const val VLC_OPT_NO_AUDIO = ":no-audio"
+private const val VLC_OPT_SUB_FILE = ":sub-file="
+
+/** The media option that hands VLC an external subtitle file, or nothing when there is none. */
+internal fun subtitleMediaOptions(subtitleUrl: String): Array<String> =
+    if (subtitleUrl.isBlank()) emptyArray() else arrayOf(VLC_OPT_SUB_FILE + subtitleUrl)
+
+/** The subtitle tracks VLC lists for the playing media, without its own "Disable" entry (id -1). */
+private fun MediaPlayer.subtitleTracks(): List<SubtitleTrack> =
+    subpictures().trackDescriptions()
+        .filter { it.id() >= 0 }
+        .map { SubtitleTrack(it.id(), it.description()) }
 
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
@@ -677,6 +690,17 @@ private fun softwarePlayerEvents(
         if (newLength > 0) viewModel.setDuration(newLength)
     }
 
+    // The tracks are the same for a mirror, so only the decoder that owns the end of the file
+    // reports them; the mirror just applies whichever one the view model has selected.
+    override fun mediaPlayerReady(mediaPlayer: MediaPlayer) {
+        if (reportsPlaybackEnd) viewModel.setSubtitleTracks(mediaPlayer.subtitleTracks())
+    }
+
+    // An external file is added to the player after the media is ready, so it arrives here.
+    override fun elementaryStreamAdded(mediaPlayer: MediaPlayer, type: TrackType, id: Int) {
+        if (reportsPlaybackEnd && type == TrackType.TEXT) viewModel.setSubtitleTracks(mediaPlayer.subtitleTracks())
+    }
+
     override fun playing(mediaPlayer: MediaPlayer) {
         if (viewModel.isPlaying) return
         if (!firstFrameCaptured.value) {
@@ -700,6 +724,35 @@ private fun softwarePlayerEvents(
     override fun error(mediaPlayer: MediaPlayer) {
         System.err.println("VLCJ (software): Playback error for: ${viewModel.mediaUrl}")
         SwingUtilities.invokeLater { viewModel.pause() }
+    }
+}
+
+/** The media options the software player loads [subtitleUrl] and its audio setting with. */
+internal fun softwarePlayOptions(audioEnabled: Boolean, subtitleUrl: String): Array<String> {
+    val base = if (audioEnabled) {
+        arrayOf(VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
+    } else {
+        arrayOf(VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_NO_AUDIO)
+    }
+    return base + subtitleMediaOptions(subtitleUrl)
+}
+
+private fun MediaPlayer.playSoftware(mrl: String, audioEnabled: Boolean, subtitleUrl: String) {
+    val options = softwarePlayOptions(audioEnabled, subtitleUrl)
+    // media().play takes its options as a vararg; this is the one call that spreads them.
+    @Suppress("SpreadOperator")
+    media().play(mrl, *options)
+}
+
+/** Applies the view model's chosen subtitle track live, without reloading the media. */
+@Composable
+private fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate: PlayerReleaseGate) {
+    // Nothing is sent until the player has listed the tracks and the choice has been resolved.
+    LaunchedEffect(viewModel.selectedSubtitleTrack, viewModel.subtitleTracks) {
+        val track = viewModel.selectedSubtitleTrack
+        if (track != MediaViewModel.SUBTITLES_UNDECIDED) {
+            SwingUtilities.invokeLater { gate.ifLive { mp.subpictures().setTrack(track) } }
+        }
     }
 }
 
@@ -782,7 +835,7 @@ fun SoftwareVideoPlayer(
 
     // Load media when the URL changes, and again on every loop restart: once VLC has reached the
     // end of a file it is in the Ended state, where setTime()/play() alone will not start it over.
-    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion) {
+    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.subtitleUrl) {
         val url = viewModel.mediaUrl
         firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
         SharedVideoOutput.frame.value = null  // clear stale frame while new media loads
@@ -809,13 +862,11 @@ fun SoftwareVideoPlayer(
         // disables the audio track outright — volume-0 alone can still leak a brief pop
         // because libvlc's audio output is created asynchronously as playback starts, so
         // the gain isn't guaranteed to apply before the very first samples flow.
-        if (!audioEnabled) {
-            mp.media().play(mrl, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_NO_AUDIO)
-        } else {
-            mp.media().play(mrl, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
-        }
+        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl)
         // Auto-pause is handled by the playing() event listener above.
     }
+
+    SubtitleTrackSync(viewModel, mp, gate)
 
     // Play / pause sync
     // We always send the command unconditionally: mp.status().isPlaying() can return a stale

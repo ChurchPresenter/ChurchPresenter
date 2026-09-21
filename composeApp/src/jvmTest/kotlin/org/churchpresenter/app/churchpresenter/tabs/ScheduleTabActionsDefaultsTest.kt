@@ -33,7 +33,7 @@ class ScheduleTabActionsDefaultsTest {
         actions.addSong(1, "title", "songbook", "songId")
         actions.addPicture("path", "name", 1)
         actions.addPresentation("path", "name", 1, "pptx")
-        actions.addMedia("url", "title", "local")
+        actions.addMedia("url", "title", "local", "")
         actions.addLowerThird("presetId", "label", true, 1_000L)
         actions.addAnnouncement(
             "text", "#FFFFFF", "#000000", 48, "Arial",

@@ -542,8 +542,16 @@ class ScheduleViewModel(
         addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
     }
 
-    fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
-        addOrPush(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
+    fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String = "") {
+        addOrPush(
+            ScheduleItem.MediaItem(
+                id = UUID.randomUUID().toString(),
+                mediaUrl = mediaUrl,
+                mediaTitle = mediaTitle,
+                mediaType = mediaType,
+                subtitleUrl = subtitleUrl
+            )
+        )
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {

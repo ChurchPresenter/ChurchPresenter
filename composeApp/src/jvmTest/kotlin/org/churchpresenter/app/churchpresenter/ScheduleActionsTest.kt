@@ -33,7 +33,7 @@ class ScheduleActionsTest {
         actions.addBibleVerse("book", 1, 1, "text", "range", 1)
         actions.addPicture("path", "name", 1)
         actions.addPresentation("path", "name", 1, "pptx")
-        actions.addMedia("url", "title", "video")
+        actions.addMedia("url", "title", "video", "")
         actions.addScene("id", "name")
         actions.addDictionary("1", "word", "translit", "def")
         actions.addAnnouncement(ScheduleItem.AnnouncementItem(id = "1", text = "text"))
@@ -126,10 +126,10 @@ class ScheduleActionsTest {
     fun `addMedia passes url, title and type in order`() {
         var received: List<Any>? = null
         val actions = ScheduleActions(
-            addMedia = { url, title, type -> received = listOf(url, title, type) },
+            addMedia = { url, title, type, _ -> received = listOf(url, title, type) },
         )
 
-        actions.addMedia("https://example.org/clip.mp4", "Clip", "video")
+        actions.addMedia("https://example.org/clip.mp4", "Clip", "video", "")
 
         assertEquals(listOf("https://example.org/clip.mp4", "Clip", "video"), received)
     }
