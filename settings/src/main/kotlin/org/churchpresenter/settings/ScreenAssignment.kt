@@ -244,6 +244,8 @@ fun songLanguageSelection(songMode: String, songTranslations: List<Int>, availab
         songTranslations.isNotEmpty() -> songTranslations
         songMode == Constants.SONG_LANG_PRIMARY -> listOf(0)
         songMode == Constants.SONG_LANG_SECONDARY -> listOf(1)
+        songMode == Constants.SONG_LANG_THIRD -> listOf(2)
+        songMode == Constants.SONG_LANG_FOURTH -> listOf(3)
         // "both" reaching past two is deliberate: an output left on the default should show a
         // four-language song's four languages, not silently drop two of them.
         else -> List(available) { it }

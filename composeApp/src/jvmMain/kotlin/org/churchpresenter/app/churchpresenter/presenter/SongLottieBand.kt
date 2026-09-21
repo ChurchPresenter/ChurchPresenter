@@ -122,6 +122,11 @@ internal fun songBandSlots(
             text1 = secondary.ifEmpty { primary }
             text2 = emptyList()
         }
+        Constants.SONG_LANG_THIRD, Constants.SONG_LANG_FOURTH -> {
+            val index = if (language == Constants.SONG_LANG_THIRD) 2 else 3
+            text1 = pick(section.allLanguageLines().getOrElse(index) { emptyList() }).ifEmpty { primary }
+            text2 = emptyList()
+        }
         Constants.SONG_LANG_BOTH -> if (hasSecondSlot) {
             text1 = primary
             text2 = secondary

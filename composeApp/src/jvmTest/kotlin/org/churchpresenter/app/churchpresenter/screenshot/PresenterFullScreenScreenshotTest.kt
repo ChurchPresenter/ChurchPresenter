@@ -253,6 +253,55 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
+    // ── Songs: four languages ───────────────────────────────────────────────────────────────────
+
+    /** The song in all four of its languages, the primary first. */
+    private fun fourLanguageSong() = song().copy(
+        translations = listOf(
+            SectionTranslation(lines = SECONDARY_LINES),
+            SectionTranslation(lines = THIRD_LINES),
+            SectionTranslation(lines = FOURTH_LINES),
+        ),
+    )
+
+    @Test
+    fun `all four languages, side by side`() = shoot("song_four_languages_side_by_side") {
+        SongPresenter(
+            lyricSection = fourLanguageSong(),
+            appSettings = songSettings(
+                fullscreenLanguageDisplay = Constants.SONG_LANG_BOTH,
+                bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE,
+            ),
+        )
+    }
+
+    @Test
+    fun `all four languages, stacked`() = shoot("song_four_languages_stacked") {
+        SongPresenter(
+            lyricSection = fourLanguageSong(),
+            appSettings = songSettings(
+                fullscreenLanguageDisplay = Constants.SONG_LANG_BOTH,
+                bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM,
+            ),
+        )
+    }
+
+    @Test
+    fun `the third language alone`() = shoot("song_third_only") {
+        SongPresenter(
+            lyricSection = fourLanguageSong(),
+            appSettings = songSettings(fullscreenLanguageDisplay = Constants.SONG_LANG_THIRD),
+        )
+    }
+
+    @Test
+    fun `the fourth language alone`() = shoot("song_fourth_only") {
+        SongPresenter(
+            lyricSection = fourLanguageSong(),
+            appSettings = songSettings(fullscreenLanguageDisplay = Constants.SONG_LANG_FOURTH),
+        )
+    }
+
     // ── Songs: how it is typeset ────────────────────────────────────────────────────────────────
 
     @Test
@@ -1249,6 +1298,16 @@ class PresenterFullScreenScreenshotTest {
         val SECONDARY_LINES = listOf(
             "О благодать, спасён тобой",
             "Я из пучины бед",
+        )
+
+        val THIRD_LINES = listOf(
+            "Grâce infinie, quel doux son",
+            "Qui a sauvé un pécheur",
+        )
+
+        val FOURTH_LINES = listOf(
+            "Oore-ofe, ohun didun yi",
+            "Ti gba elese la",
         )
 
         val LONG_VERSE = listOf(

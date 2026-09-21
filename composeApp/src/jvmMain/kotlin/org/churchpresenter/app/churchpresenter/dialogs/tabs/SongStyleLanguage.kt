@@ -1,8 +1,21 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.runtime.Composable
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.song_fourth_language
+import churchpresenter.composeapp.generated.resources.song_language_fourth
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.song_language_third
+import churchpresenter.composeapp.generated.resources.song_primary_language
+import churchpresenter.composeapp.generated.resources.song_secondary_language
+import churchpresenter.composeapp.generated.resources.song_third_language
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.translationSettings
 import org.churchpresenter.settings.withTranslationSettings
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Which language of a bilingual song the tab is styling.
@@ -13,11 +26,48 @@ import org.churchpresenter.settings.withTranslationSettings
  *
  * The lyrics and the title have a second profile each -- both are text the song carries twice. The
  * number, the look-ahead and the credits do not: they are drawn once whatever language the words
- * are in, so [SECONDARY] narrows the element strip to the two that can answer it.
+ * are in, so a translation narrows the element strip to the two that can answer it.
  */
-internal enum class SongStyleLanguage(val translation: Int) { PRIMARY(0), SECONDARY(1) }
+internal enum class SongStyleLanguage(val translation: Int) { PRIMARY(0), SECONDARY(1), THIRD(2), FOURTH(3) }
 
-internal val SongStyleLanguage.isSecondary: Boolean get() = this == SongStyleLanguage.SECONDARY
+/** True for every language beside the first, each of which has a look of its own to edit. */
+internal val SongStyleLanguage.isTranslation: Boolean get() = translation > 0
+
+/** The switch's label on the global tab, which numbers the languages. */
+@Composable
+internal fun SongStyleLanguage.ordinalLabel(): String = stringResource(
+    when (this) {
+        SongStyleLanguage.PRIMARY -> Res.string.song_primary_language
+        SongStyleLanguage.SECONDARY -> Res.string.song_secondary_language
+        SongStyleLanguage.THIRD -> Res.string.song_third_language
+        SongStyleLanguage.FOURTH -> Res.string.song_fourth_language
+    },
+)
+
+/** The switch's label in the per-output dialog, which names them. */
+@Composable
+internal fun SongStyleLanguage.nameLabel(): String = stringResource(
+    when (this) {
+        SongStyleLanguage.PRIMARY -> Res.string.song_language_primary
+        SongStyleLanguage.SECONDARY -> Res.string.song_language_secondary
+        SongStyleLanguage.THIRD -> Res.string.song_language_third
+        SongStyleLanguage.FOURTH -> Res.string.song_language_fourth
+    },
+)
+
+/**
+ * The languages an output offers to style, given what it has been told to show.
+ *
+ * Read through the same [songLanguageSelection] the presenter draws by, so the switch can never
+ * offer a language the output does not show, or miss one it does.
+ */
+internal fun styleLanguagesFor(songMode: String, selection: List<Int>): List<SongStyleLanguage> =
+    songLanguageSelection(songMode, selection, MAX_SONG_TRANSLATIONS)
+        .mapNotNull { index -> SongStyleLanguage.entries.firstOrNull { it.translation == index } }
+        .ifEmpty { listOf(SongStyleLanguage.PRIMARY) }
+
+/** Every language the global tab can style -- it speaks for all outputs, so it offers them all. */
+internal fun songStyleLanguages(): List<SongStyleLanguage> = SongStyleLanguage.entries
 
 /**
  * [element] on [target] as the panel should show it for [language].
@@ -45,7 +95,7 @@ internal fun SongSettings.withElementStyle(
     language: SongStyleLanguage,
     style: SongElementStyle,
 ): SongSettings {
-    if (!language.isSecondary || element.translationElement == null) return withElementStyle(element, target, style)
+    if (!language.isTranslation || element.translationElement == null) return withElementStyle(element, target, style)
     return withOwnLook(language).withElementStyle(element, target, language.translation, style)
 }
 
@@ -60,7 +110,7 @@ internal fun SongSettings.withElementReset(
     target: SongStyleTarget,
     language: SongStyleLanguage,
 ): SongSettings {
-    if (!language.isSecondary || element.translationElement == null) {
+    if (!language.isTranslation || element.translationElement == null) {
         return withElementStyle(element, target, defaultSongElementStyle(element, target))
     }
     return withTranslationSettings(language.translation - 1) { it.copy(overrideStyle = false) }
