@@ -1,5 +1,7 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.settings.utils.Constants
+
 /**
  * The Browser Source and NDI output lists, read and written.
  *
@@ -44,6 +46,7 @@ fun ProjectionSettings.addBrowserSourceOutput(): ProjectionSettings =
 /** Removes the Browser Source output at [index], renumbering the ones after it. */
 fun ProjectionSettings.removeBrowserSourceOutput(index: Int): ProjectionSettings =
     copy(browserSourceOutputs = browserSourceOutputs.filterIndexed { i, _ -> i != index })
+        .shiftPreviewMembers(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, index)
 
 /** The NDI output at [index], or a default one for a slot never configured. */
 fun ProjectionSettings.getNdiOutput(index: Int): ScreenAssignment =
@@ -60,3 +63,4 @@ fun ProjectionSettings.addNdiOutput(): ProjectionSettings =
 /** Removes the NDI output at [index], renumbering the ones after it. */
 fun ProjectionSettings.removeNdiOutput(index: Int): ProjectionSettings =
     copy(ndiOutputs = ndiOutputs.filterIndexed { i, _ -> i != index })
+        .shiftPreviewMembers(Constants.PREVIEW_OUTPUT_NDI, index)
