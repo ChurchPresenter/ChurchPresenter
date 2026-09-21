@@ -52,8 +52,8 @@ fun exportRunOfShowPdf(
 ) {
     PDDocument().use { document ->
         val faces = Faces(
-            regular = loadFont(document, font(false), PDType1Font.HELVETICA),
-            bold = loadFont(document, font(true), PDType1Font.HELVETICA_BOLD),
+            regular = loadFont(document, font(false)) { PDType1Font.HELVETICA },
+            bold = loadFont(document, font(true)) { PDType1Font.HELVETICA_BOLD },
         )
         drawSheet(document, faces, service, headingMeta(service, dateLabel, use24Hour), use24Hour)
         document.save(target)
@@ -86,8 +86,17 @@ private fun drawSheet(
     }
 }
 
-private fun loadFont(document: PDDocument, bytes: ByteArray?, fallback: PDFont): PDFont =
-    bytes?.let { runCatching { PDType0Font.load(document, ByteArrayInputStream(it), true) }.getOrNull() } ?: fallback
+/**
+ * The embedded face made from [bytes], or [fallback]'s built-in one.
+ *
+ * [fallback] is a lambda because merely *naming* `PDType1Font.HELVETICA` runs PDFBox's static
+ * initializer, which builds its font mapper and scans every font installed on the machine — seconds
+ * on a large Windows font folder, and a failure on any machine with a font it cannot parse. An
+ * export that embeds its own face never needs the built-in one, so it must never pay for it.
+ */
+private fun loadFont(document: PDDocument, bytes: ByteArray?, fallback: () -> PDFont): PDFont =
+    bytes?.let { runCatching { PDType0Font.load(document, ByteArrayInputStream(it), true) }.getOrNull() }
+        ?: fallback()
 
 /** The line under the title: the date, the start time and, once anything is estimated, the planned length. */
 private fun headingMeta(service: PlannedService, dateLabel: String, use24Hour: Boolean): String = buildString {

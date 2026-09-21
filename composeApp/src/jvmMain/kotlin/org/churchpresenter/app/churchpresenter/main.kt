@@ -2015,6 +2015,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 selectDirectory = true,
                                             )?.toFile()
                                         },
+                                        reportError = { context, error ->
+                                            CrashReporter.reportException(error, context = context)
+                                        },
                                         chooseExportFile = { suggested ->
                                             FileChooser.platformInstance.save(
                                                 location = null,
