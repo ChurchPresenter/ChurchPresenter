@@ -108,6 +108,18 @@ class CompanionServerCalendarEnrollTest {
     }
 
     @Test
+    fun `one open request per device, so a phone cannot pile up prompts`() = runBlocking<Unit> {
+        val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
+        val first = async { enroll("phone-5", """{"deviceName":"x","code":"123456"}""") }
+        val request = pending.await()
+
+        assertEquals(HttpStatusCode.TooManyRequests, enroll("phone-5", """{"deviceName":"x","code":"123456"}""").status)
+
+        request.decision.complete(CalendarEnrollDecision.Denied)
+        assertEquals(HttpStatusCode.Forbidden, first.await().status)
+    }
+
+    @Test
     fun `a missing or malformed device id never reaches the operator`() = runBlocking<Unit> {
         assertEquals(HttpStatusCode.BadRequest, enroll(null, """{"deviceName":"x","code":"123456"}""").status)
         assertEquals(HttpStatusCode.BadRequest, enroll("x' OR 1=1", """{"deviceName":"x","code":"123456"}""").status)

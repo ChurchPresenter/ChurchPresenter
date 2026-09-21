@@ -18,6 +18,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.Locale
 
 /** The card that enrolls phones to this computer's calendar and says how the sync is doing. */
 @Composable
@@ -71,7 +73,38 @@ internal fun CalendarSyncCard(
     val scope = rememberCoroutineScope()
     val status by sync.status.collectAsState()
     val devices by sync.devices.collectAsState()
+    CalendarSyncCardContent(
+        settings = settings,
+        onSettingsChange = onSettingsChange,
+        status = status,
+        devices = devices,
+        labelFor = labelFor,
+        onSyncNow = { scope.launch { sync.syncNow() } },
+        onUnpair = sync::unpair,
+        onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
+    )
+}
+
+/**
+ * The card as drawn from what it shows -- the status, the devices -- and what its buttons do.
+ * [zone] and [locale] are how the times are written; the defaults are the machine's, and a test
+ * pins both so the picture does not depend on where it was taken.
+ */
+@Composable
+internal fun CalendarSyncCardContent(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    status: CalendarSyncStatus,
+    devices: List<PairedDevice>,
+    labelFor: (String) -> String,
+    onSyncNow: () -> Unit,
+    onUnpair: () -> Unit,
+    onRevoke: (String) -> Unit,
+    zone: ZoneId = ZoneId.systemDefault(),
+    locale: Locale = Locale.getDefault(),
+) {
     val current = settings.calendarSync
+    val clock = remember(zone, locale) { LocalTimeText(zone, locale) }
 
     SettingsSection(title = stringResource(Res.string.calendar_sync_title)) {
         Text(
@@ -94,7 +127,7 @@ internal fun CalendarSyncCard(
             Text(stringResource(Res.string.calendar_sync_enable), style = MaterialTheme.typography.bodyMedium)
         }
         if (current.enabled) {
-            StatusLine(status)
+            StatusLine(status, clock)
             Text(
                 text = stringResource(Res.string.calendar_sync_enroll_hint),
                 style = MaterialTheme.typography.bodySmall,
@@ -108,7 +141,7 @@ internal fun CalendarSyncCard(
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        onClick = { scope.launch { sync.syncNow() } },
+                        onClick = onSyncNow,
                     ) {
                         Text(
                             stringResource(Res.string.calendar_sync_sync_now),
@@ -116,7 +149,7 @@ internal fun CalendarSyncCard(
                         )
                     }
                     TextButton(
-                        onClick = { sync.unpair() },
+                        onClick = onUnpair,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
                         Text(
@@ -127,11 +160,7 @@ internal fun CalendarSyncCard(
                 }
             }
             if (current.isPaired) {
-                DevicesList(
-                    devices = devices,
-                    labelFor = labelFor,
-                    onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
-                )
+                DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
                 Text(
                     text = "${stringResource(Res.string.calendar_sync_relay_url)}: ${current.relayUrl} · " +
                         "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
@@ -144,14 +173,14 @@ internal fun CalendarSyncCard(
 }
 
 @Composable
-private fun StatusLine(status: CalendarSyncStatus) {
+private fun StatusLine(status: CalendarSyncStatus, clock: LocalTimeText) {
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
     val (text, color) = when (status) {
         CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off) to quiet
         CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired) to quiet
         CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing) to quiet
-        is CalendarSyncStatus.Synced -> syncedText(status) to MaterialTheme.colorScheme.primary
+        is CalendarSyncStatus.Synced -> syncedText(status, clock) to MaterialTheme.colorScheme.primary
         is CalendarSyncStatus.Failed -> stringResource(Res.string.calendar_sync_status_failed, status.message) to error
         CalendarSyncStatus.TimedOut -> stringResource(Res.string.calendar_sync_status_timed_out) to error
         CalendarSyncStatus.Unauthorized -> stringResource(Res.string.calendar_sync_status_unauthorized) to error
@@ -168,8 +197,8 @@ private fun StatusLine(status: CalendarSyncStatus) {
 }
 
 @Composable
-private fun syncedText(status: CalendarSyncStatus.Synced): String {
-    val at = localTime(status.at)
+private fun syncedText(status: CalendarSyncStatus.Synced, clock: LocalTimeText): String {
+    val at = clock.format(status.at)
     val changes = status.outcome.phoneChanges
     return if (changes > 0) {
         stringResource(Res.string.calendar_sync_status_synced_changes, at, changes)
@@ -179,7 +208,12 @@ private fun syncedText(status: CalendarSyncStatus.Synced): String {
 }
 
 @Composable
-private fun DevicesList(devices: List<PairedDevice>, labelFor: (String) -> String, onRevoke: (String) -> Unit) {
+private fun DevicesList(
+    devices: List<PairedDevice>,
+    labelFor: (String) -> String,
+    clock: LocalTimeText,
+    onRevoke: (String) -> Unit,
+) {
     Spacer(Modifier.height(4.dp))
     Text(
         text = stringResource(Res.string.calendar_sync_devices),
@@ -209,7 +243,7 @@ private fun DevicesList(devices: List<PairedDevice>, labelFor: (String) -> Strin
                 Text(shown, style = MaterialTheme.typography.bodyMedium)
                 if (device.lastSeen.isNotBlank()) {
                     Text(
-                        localTime(device.lastSeen),
+                        clock.format(device.lastSeen),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -223,6 +257,10 @@ private fun DevicesList(devices: List<PairedDevice>, labelFor: (String) -> Strin
     }
 }
 
-private fun localTime(iso: String): String = runCatching {
-    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(Instant.parse(iso).atZone(ZoneId.systemDefault()))
-}.getOrDefault(iso)
+/** An ISO instant as a short local time, or the text itself when it is not one. */
+private class LocalTimeText(private val zone: ZoneId, locale: Locale) {
+    private val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+
+    fun format(iso: String): String =
+        runCatching { formatter.format(Instant.parse(iso).atZone(zone)) }.getOrDefault(iso)
+}

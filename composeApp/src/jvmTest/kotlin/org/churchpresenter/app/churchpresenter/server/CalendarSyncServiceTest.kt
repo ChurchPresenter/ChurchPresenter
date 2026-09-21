@@ -40,10 +40,18 @@ class CalendarSyncServiceTest {
         var clientKey = "key-1"
         var refuseKeyOnce = false
         var relayDown = false
+        var otherInstall = ""
+        var slowMs = 0L
+
+        private val devicesJson: String
+            get() = enrolled.keys.joinToString(",", "[", "]") {
+                """{"id":"$it","nameBox":"","pairedAt":"2026-09-20T00:00:00Z","lastSeen":""}"""
+            }
 
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
             calls += "$method $url"
             if (relayDown) throw IOException("relay down")
+            if (slowMs > 0) Thread.sleep(slowMs)
             if (url == CalendarSyncSettings.CLIENT_KEY_URL) return RelayReply(200, """{"clientKey":"$clientKey"}""")
             if (headers["X-Client-Key"] != clientKey || refuseKeyOnce) {
                 refuseKeyOnce = false
@@ -59,7 +67,8 @@ class CalendarSyncServiceTest {
                 headers["Authorization"] != "Bearer tok" -> RelayReply(401, """{"error":"unauthorized"}""")
                 path == "changes" -> RelayReply(
                     200,
-                    """{"rev":$rev,"records":[],"tombstones":[],"devices":[],"lastDesktopInstall":""}""",
+                    """{"rev":$rev,"records":[],"tombstones":[],"devices":$devicesJson,""" +
+                        """"lastDesktopInstall":"$otherInstall"}""",
                 )
                 path == "state" -> { rev += 1; RelayReply(200, """{"rev":$rev}""") }
                 path.startsWith("devices/") && method == "PUT" -> {
@@ -212,6 +221,58 @@ class CalendarSyncServiceTest {
         relay.registered = false
         assertTrue(service.syncOnStartup())
         assertTrue(settings.instanceKey != firstKey)
+    }
+
+    @Test
+    fun `a phone can be revoked, and the relay refusing that is reported`() = runBlocking<Unit> {
+        val service = service()
+        service.enroll("phone-1", "")
+        service.enroll("phone-2", "Ben")
+        assertTrue(service.syncNow())
+        assertEquals(setOf("phone-1", "phone-2"), service.devices.value.map { it.id }.toSet())
+
+        service.revokeDevice("phone-1")
+        assertEquals(listOf("phone-2"), service.devices.value.map { it.id })
+        assertFalse("phone-1" in relay.enrolled)
+
+        settings = settings.copy(desktopToken = "stale")
+        service.revokeDevice("phone-2")
+        assertEquals(CalendarSyncStatus.Unauthorized, service.status.value)
+        assertTrue("phone-2" in relay.enrolled)
+    }
+
+    @Test
+    fun `another desktop pushing to the same instance stops this one and says so`() = runBlocking<Unit> {
+        service().syncOnStartup()
+        relay.otherInstall = "install-B"
+        val service = service()
+        val pushesBefore = relay.calls.count { it.startsWith("PUT") && it.endsWith("/state") }
+
+        assertTrue(service.syncNow())
+
+        assertEquals(CalendarSyncStatus.OtherDesktop("install-B"), service.status.value)
+        assertEquals(pushesBefore, relay.calls.count { it.startsWith("PUT") && it.endsWith("/state") })
+    }
+
+    @Test
+    fun `a relay too slow at startup is reported as timed out and the app goes on`() = runBlocking<Unit> {
+        relay.slowMs = 200
+        val service = service()
+
+        assertFalse(service.syncOnStartup(timeoutMs = 50))
+
+        assertEquals(CalendarSyncStatus.TimedOut, service.status.value)
+    }
+
+    @Test
+    fun `an install id is minted once and then kept`() = runBlocking<Unit> {
+        settings = settings.copy(installId = "")
+        service().syncOnStartup()
+        val minted = settings.installId
+        assertTrue(minted.isNotBlank())
+        service().syncNow()
+        assertEquals(minted, settings.installId)
+        assertTrue(relay.calls.isNotEmpty())
     }
 
     @Test
