@@ -42,7 +42,8 @@ internal fun Route.calendarSyncRoutes(server: CompanionServer, json: Json) {
             return@post
         }
         val body = call.receiveText().take(MAX_BODY_CHARS)
-        val parsed = runCatching { json.decodeFromString(CalendarEnrollBody.serializer(), body) }.getOrDefault(CalendarEnrollBody())
+        val parsed = runCatching { json.decodeFromString(CalendarEnrollBody.serializer(), body) }
+            .getOrDefault(CalendarEnrollBody())
         val code = parsed.code.filter { it.isDigit() }.take(CODE_DIGITS)
         if (code.length != CODE_DIGITS) {
             call.respondText("code required", status = HttpStatusCode.BadRequest)

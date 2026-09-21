@@ -19,7 +19,8 @@ data class CalendarSyncSettings(
     val cursor: Long = 0L,
     /** ISO instant of the last successful sync, for the settings screen. */
     val lastSyncAt: String = "",
-    /** The relay's shared client key, fetched from the website and cached; refreshed when the relay stops accepting it. */
+    /** The relay's shared client key, fetched from the website and cached;
+     *  refreshed when the relay stops accepting it. */
     val clientKey: String = "",
 ) {
     val isPaired: Boolean get() = instanceId.isNotBlank() && desktopToken.isNotBlank() && instanceKey.isNotBlank()

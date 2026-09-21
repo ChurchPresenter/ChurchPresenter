@@ -43,7 +43,7 @@ class HttpRelayTransport(
 }
 
 /** Why a call did not succeed, as the caller has to tell them apart. */
-sealed class RelayFailure(message: String) : Exception(message) {
+sealed class RelayFailure(message: String, cause: Throwable? = null) : Exception(message, cause) {
     /** The desktop token was refused: this instance no longer knows us. Stop and ask to re-pair. */
     class Unauthorized : RelayFailure("relay refused the desktop token")
 
@@ -56,7 +56,8 @@ sealed class RelayFailure(message: String) : Exception(message) {
     /** The relay moved on since our cursor; pull again before pushing. */
     class Conflict : RelayFailure("relay state changed since last pull")
 
-    class Rejected(status: Int, detail: String) : RelayFailure("relay rejected the request ($status): $detail")
+    class Rejected(status: Int, detail: String, cause: Throwable? = null) :
+        RelayFailure("relay rejected the request ($status): $detail", cause)
 
     class Unreachable(cause: Throwable) : RelayFailure("relay unreachable: ${cause.message}")
 }
@@ -118,28 +119,33 @@ class RelayClient(
         if (clientKey.isNotEmpty()) headers["X-Client-Key"] = clientKey
         if (body != null) headers["Content-Type"] = "application/json"
         if (token != null) headers["Authorization"] = "Bearer $token"
-        val reply = try {
-            transport.send(method, url, headers, body)
-        } catch (e: IOException) {
-            throw RelayFailure.Unreachable(e)
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
-            throw RelayFailure.Unreachable(e)
-        }
-        return when (reply.status) {
-            in HTTP_OK_RANGE -> reply
-            HTTP_UNAUTHORIZED -> if (reply.body.contains(CLIENT_KEY_ERROR)) throw RelayFailure.ClientKey() else throw RelayFailure.Unauthorized()
-            HTTP_FORBIDDEN -> throw RelayFailure.Unauthorized()
-            HTTP_CONFLICT -> if (token == null) throw RelayFailure.Taken() else throw RelayFailure.Conflict()
-            HTTP_PRECONDITION_FAILED -> throw RelayFailure.Conflict()
-            else -> throw RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
-        }
+        val reply = send(method, url, headers, body)
+        return reply.takeIf { it.status in HTTP_OK_RANGE } ?: throw failureFor(reply, registering = token == null)
+    }
+
+    private fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply = try {
+        transport.send(method, url, headers, body)
+    } catch (e: IOException) {
+        throw RelayFailure.Unreachable(e)
+    } catch (e: InterruptedException) {
+        Thread.currentThread().interrupt()
+        throw RelayFailure.Unreachable(e)
+    }
+
+    /** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
+    private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
+        HTTP_UNAUTHORIZED ->
+            if (reply.body.contains(CLIENT_KEY_ERROR)) RelayFailure.ClientKey() else RelayFailure.Unauthorized()
+        HTTP_FORBIDDEN -> RelayFailure.Unauthorized()
+        HTTP_CONFLICT -> if (registering) RelayFailure.Taken() else RelayFailure.Conflict()
+        HTTP_PRECONDITION_FAILED -> RelayFailure.Conflict()
+        else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
     }
 
     private fun <T> decode(serializer: KSerializer<T>, reply: RelayReply): T = try {
         json.decodeFromString(serializer, reply.body)
     } catch (e: IllegalArgumentException) {
-        throw RelayFailure.Rejected(reply.status, "unreadable reply: ${e.message?.take(MAX_ERROR_CHARS)}")
+        throw RelayFailure.Rejected(reply.status, "unreadable reply: ${e.message?.take(MAX_ERROR_CHARS)}", e)
     }
 
     private companion object {
@@ -162,7 +168,8 @@ fun fetchClientKey(url: String, transport: RelayTransport): String? {
     }
     if (reply.status !in 200..299) return null
     return try {
-        Json { ignoreUnknownKeys = true }.decodeFromString(ClientKeyResponse.serializer(), reply.body).clientKey.takeIf { it.isNotBlank() }
+        val response = Json { ignoreUnknownKeys = true }.decodeFromString(ClientKeyResponse.serializer(), reply.body)
+        response.clientKey.takeIf { it.isNotBlank() }
     } catch (_: IllegalArgumentException) {
         null
     }

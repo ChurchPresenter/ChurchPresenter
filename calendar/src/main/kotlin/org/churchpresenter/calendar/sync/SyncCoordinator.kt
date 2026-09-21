@@ -54,7 +54,9 @@ class SyncCoordinator(
         repeat(MAX_ROUNDS) {
             val changes = client.changes(token, since)
             val merged = absorb(changes)
-            val devices = changes.devices.map { PairedDevice(it.id, sealing.openDeviceName(it), it.pairedAt, it.lastSeen) }
+            val devices = changes.devices.map {
+                PairedDevice(it.id, sealing.openDeviceName(it), it.pairedAt, it.lastSeen)
+            }
             if (changes.lastDesktopInstall.isNotEmpty() && changes.lastDesktopInstall != installId) {
                 return merged.outcome(changes.rev, devices, otherDesktop = changes.lastDesktopInstall)
             }
@@ -70,7 +72,12 @@ class SyncCoordinator(
 
     /** Pushes the local file as it stands; a phone edit in the meantime turns this into a full [sync]. */
     fun pushLocal(token: String, cursor: Long): SyncOutcome = try {
-        SyncOutcome(cursor = push(token, cursor, store.load().document), phoneChanges = 0, unresolvedRows = 0, droppedRows = 0)
+        SyncOutcome(
+            cursor = push(token, cursor, store.load().document),
+            phoneChanges = 0,
+            unresolvedRows = 0,
+            droppedRows = 0,
+        )
     } catch (_: RelayFailure.Conflict) {
         sync(token, cursor)
     }
@@ -107,7 +114,10 @@ class SyncCoordinator(
         }
         val tombstones = changes.tombstones
             .filter { Sanitize.isId(it.id) }
-            .associate { it.id to (runCatching { Instant.parse(it.deletedAt) }.getOrNull()?.let(::storedInstant) ?: storedInstant(now())) }
+            .associate { tombstone ->
+                val deletedAt = runCatching { Instant.parse(tombstone.deletedAt) }.getOrNull() ?: now()
+                tombstone.id to storedInstant(deletedAt)
+            }
         val remote = CalendarDocument(services = services, deletedServices = tombstones)
         val merged = local.mergedWith(remote, now())
         if (merged != local) {

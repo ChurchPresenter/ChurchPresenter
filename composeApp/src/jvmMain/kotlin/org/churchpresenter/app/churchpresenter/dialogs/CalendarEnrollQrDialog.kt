@@ -65,7 +65,12 @@ internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: 
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (bitmap != null) {
-                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(QR_DP), contentScale = ContentScale.Fit)
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    modifier = Modifier.size(QR_DP),
+                    contentScale = ContentScale.Fit,
+                )
             }
             Text(
                 text = stringResource(Res.string.calendar_enroll_qr_body),

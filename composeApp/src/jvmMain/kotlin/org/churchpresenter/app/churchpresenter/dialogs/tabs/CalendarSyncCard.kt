@@ -87,7 +87,9 @@ internal fun CalendarSyncCard(
         ) {
             Switch(
                 checked = current.enabled,
-                onCheckedChange = { on -> onSettingsChange { it.copy(calendarSync = it.calendarSync.copy(enabled = on)) } },
+                onCheckedChange = { on ->
+                    onSettingsChange { it.copy(calendarSync = it.calendarSync.copy(enabled = on)) }
+                },
             )
             Text(stringResource(Res.string.calendar_sync_enable), style = MaterialTheme.typography.bodyMedium)
         }
@@ -99,20 +101,37 @@ internal fun CalendarSyncCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (current.isPaired) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         onClick = { scope.launch { sync.syncNow() } },
-                    ) { Text(stringResource(Res.string.calendar_sync_sync_now), style = MaterialTheme.typography.labelSmall) }
+                    ) {
+                        Text(
+                            stringResource(Res.string.calendar_sync_sync_now),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                     TextButton(
                         onClick = { sync.unpair() },
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    ) { Text(stringResource(Res.string.calendar_sync_unpair), style = MaterialTheme.typography.labelSmall) }
+                    ) {
+                        Text(
+                            stringResource(Res.string.calendar_sync_unpair),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                 }
             }
             if (current.isPaired) {
-                DevicesList(devices = devices, labelFor = labelFor, onRevoke = { id -> scope.launch { sync.revokeDevice(id) } })
+                DevicesList(
+                    devices = devices,
+                    labelFor = labelFor,
+                    onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
+                )
                 Text(
                     text = "${stringResource(Res.string.calendar_sync_relay_url)}: ${current.relayUrl} · " +
                         "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
@@ -126,15 +145,17 @@ internal fun CalendarSyncCard(
 
 @Composable
 private fun StatusLine(status: CalendarSyncStatus) {
+    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
+    val error = MaterialTheme.colorScheme.error
     val (text, color) = when (status) {
-        CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off) to MaterialTheme.colorScheme.onSurfaceVariant
-        CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired) to MaterialTheme.colorScheme.onSurfaceVariant
-        CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing) to MaterialTheme.colorScheme.onSurfaceVariant
+        CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off) to quiet
+        CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired) to quiet
+        CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing) to quiet
         is CalendarSyncStatus.Synced -> syncedText(status) to MaterialTheme.colorScheme.primary
-        is CalendarSyncStatus.Failed -> stringResource(Res.string.calendar_sync_status_failed, status.message) to MaterialTheme.colorScheme.error
-        CalendarSyncStatus.TimedOut -> stringResource(Res.string.calendar_sync_status_timed_out) to MaterialTheme.colorScheme.error
-        CalendarSyncStatus.Unauthorized -> stringResource(Res.string.calendar_sync_status_unauthorized) to MaterialTheme.colorScheme.error
-        is CalendarSyncStatus.OtherDesktop -> stringResource(Res.string.calendar_sync_status_other_desktop) to MaterialTheme.colorScheme.error
+        is CalendarSyncStatus.Failed -> stringResource(Res.string.calendar_sync_status_failed, status.message) to error
+        CalendarSyncStatus.TimedOut -> stringResource(Res.string.calendar_sync_status_timed_out) to error
+        CalendarSyncStatus.Unauthorized -> stringResource(Res.string.calendar_sync_status_unauthorized) to error
+        is CalendarSyncStatus.OtherDesktop -> stringResource(Res.string.calendar_sync_status_other_desktop) to error
     }
     Text(text = text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = color)
     if (status is CalendarSyncStatus.Synced && status.outcome.unresolvedRows > 0) {
@@ -187,7 +208,11 @@ private fun DevicesList(devices: List<PairedDevice>, labelFor: (String) -> Strin
             Column(modifier = Modifier.weight(1f)) {
                 Text(shown, style = MaterialTheme.typography.bodyMedium)
                 if (device.lastSeen.isNotBlank()) {
-                    Text(localTime(device.lastSeen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        localTime(device.lastSeen),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             TextButton(

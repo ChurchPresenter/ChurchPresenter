@@ -19,7 +19,11 @@ class Sealing(private val envelope: Envelope, private val instanceId: String) {
         val bytes = json.encodeToString(RemoteService.serializer(), plain).toByteArray()
         val keepUntil = runCatching { LocalDate.parse(service.date).plusDays(WireLimits.RETENTION_DAYS) }
             .getOrDefault(LocalDate.now().plusDays(WireLimits.RETENTION_DAYS))
-        return SealedRecord(id = service.id, keepUntil = keepUntil.toString(), box = envelope.seal(bytes, instanceId, service.id))
+        return SealedRecord(
+            id = service.id,
+            keepUntil = keepUntil.toString(),
+            box = envelope.seal(bytes, instanceId, service.id),
+        )
     }
 
     fun sealPresets(index: PresetIndex): String {
