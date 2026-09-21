@@ -14,6 +14,7 @@ import org.churchpresenter.app.churchpresenter.data.ConversionResult
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.JOptionPane
+import javax.swing.SwingUtilities
 
 /** The dialogs the sample copy puts up, with their wording resolved while still in composition. */
 internal class SongSamplePrompts(
@@ -94,6 +95,17 @@ internal fun conversionPrompts() = ConversionPrompts(
     completeFormat = stringResource(Res.string.conversion_complete_message),
     errorsFormat = stringResource(Res.string.conversion_complete_with_errors),
 )
+
+/**
+ * Runs [block] on a later turn of the event queue.
+ *
+ * The prompts above are blocking modal dialogs, and they open from a coroutine that Compose is
+ * running inside its own dispatcher's flush. A modal dialog pumps events until it closes, and one
+ * of those events re-enters that same dispatcher mid-run — a continuation resumed with the wrong
+ * state, which surfaced as `ClassCastException: Symbol cannot be cast to Number`
+ * (Sentry CHURCH-PRESENTER-DESKTOP-7E and -29). Deferring lets the flush finish first.
+ */
+internal fun afterDispatch(block: () -> Unit) = SwingUtilities.invokeLater(block)
 
 private const val SONG_SAMPLES_FOLDER = "Song Samples"
 

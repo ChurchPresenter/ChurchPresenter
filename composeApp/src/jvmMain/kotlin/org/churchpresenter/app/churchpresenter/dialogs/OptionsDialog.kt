@@ -87,9 +87,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
-import org.churchpresenter.app.churchpresenter.composables.LABELED_TAB_MIN_WIDTH
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
+import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
@@ -285,7 +285,7 @@ private fun SettingsTabStrip(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
-            minTabWidth = LABELED_TAB_MIN_WIDTH,
+            minTabWidth = labeledTabMinWidth(labelStyle),
             indicator = { LabeledTabIndicator(selectedIndex) },
         ) {
             SettingsTab(
