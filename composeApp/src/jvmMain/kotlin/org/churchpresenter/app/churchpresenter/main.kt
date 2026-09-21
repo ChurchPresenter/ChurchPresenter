@@ -443,7 +443,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
         }
     }
 
-    val presenterManager = remember { PresenterManager() }
+    // Decided at construction so hidden outputs never open and then close again.
+    val presenterManager = remember {
+        PresenterManager(showPresenterWindowInitially = !appSettings.projectionSettings.startOutputsHidden)
+    }
     // The desktop's end of calendar sync with phones. Made here, beside the settings it writes
     // back to, so the startup round and the Settings card talk to the same object.
     val calendarSync = remember(appSettings.calendarStorageDirectory, appSettings.songSettings.storageDirectory) {
@@ -1080,6 +1083,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     }
                                     val enroll: () -> Unit = {
                                         coroutineScope.launch {
+                                            // The phone stopped waiting (or was refused) while this prompt sat in the queue.
+                                            if (pending.decision.isCompleted) return@launch
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
                                             calendarEnrollQr = enrollment
                                             pending.decision.complete(

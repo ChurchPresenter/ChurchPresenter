@@ -136,7 +136,10 @@ data class EnrollRequest(val tokenHash: String, val nameBox: String = "")
 /** `GET /i/{id}/changes?since=` — everything newer than the cursor, and who last pushed as the desktop. */
 @Serializable
 data class ChangesResponse(
+    /** The revision this page is complete up to; the cursor for the next call, whether or not [more]. */
     val rev: Long,
+    /** A full page: call again from [rev] for the rest. A client that ignores this skips rows. */
+    val more: Boolean = false,
     val records: List<SealedRecord> = emptyList(),
     val tombstones: List<RemoteTombstone> = emptyList(),
     val devices: List<RemoteDevice> = emptyList(),

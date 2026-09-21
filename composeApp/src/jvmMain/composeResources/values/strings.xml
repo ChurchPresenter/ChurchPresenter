@@ -1279,6 +1279,10 @@
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
     <string name="media_loop_count">Loops</string>
+    <string name="media_subtitles">Subtitles</string>
+    <string name="media_subtitles_off">Off</string>
+    <string name="media_subtitles_load_file">Load subtitle file…</string>
+    <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
     <string name="media_open_in_browser">Open in Browser</string>
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
@@ -1984,6 +1988,8 @@
     <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>
     <string name="tooltip_directory_not_writable">Cannot write to this directory. Choose a different location or change permissions.</string>
     <string name="launch_on_login">Launch at login</string>
+    <string name="start_outputs_hidden">Start with output screens hidden</string>
+    <string name="start_outputs_hidden_hint">Outputs stay off at launch until you press the display button in the sidebar</string>
     <string name="analytics_reporting">Share anonymous crash &amp; analytics reports</string>
     <string name="send_test_event">Send test event</string>
     <string name="test_event_title">Sentry test event</string>

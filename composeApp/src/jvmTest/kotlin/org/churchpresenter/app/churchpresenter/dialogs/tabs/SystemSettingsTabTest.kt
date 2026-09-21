@@ -226,8 +226,8 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Both switches are off here; analytics is the second one declared, after launch-at-login.
-        onAllNodes(isToggleable())[1].performScrollTo().performClick()
+        // All switches are off here; analytics is the third one declared, after launch-at-login and start-hidden.
+        onAllNodes(isToggleable())[2].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -291,7 +291,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(2)
+        onAllNodes(isToggleable()).assertCountEquals(3)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
