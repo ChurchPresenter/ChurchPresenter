@@ -42,7 +42,7 @@ fun labeledTabMinWidth(style: TabLabelStyle): Dp =
     if (style == TabLabelStyle.ICONS) LABELED_TAB_MIN_WIDTH else 0.dp
 
 /** Space either side of a named tab's content: Material pads 16dp, too much for a strip of a dozen. */
-private val NAMED_TAB_HORIZONTAL_PADDING = 10.dp
+private val NAMED_TAB_HORIZONTAL_PADDING = 6.dp
 private val NAMED_TAB_HEIGHT = 48.dp
 
 @Composable
@@ -64,7 +64,7 @@ fun LabeledTab(
         TabLabelStyle.TEXT -> NamedTab(selected, onClick) { TabName(name, textStyle, color) }
         TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TabIcon(icon, color)
