@@ -98,12 +98,10 @@ object ZefaniaSource : BibleSource {
         retryFloorMs: Long = BibleInstallSupport.DEFAULT_DOWNLOAD_RETRY_FLOOR_MS,
         onProgress: (InstallProgress) -> Unit,
     ): BibleInstallOutcome = withContext(Dispatchers.IO) {
-        if (!BibleInstallSupport.usableDirectory(targetDir)) return@withContext BibleInstallOutcome.NoDirectory
+        val scratch = BibleInstallSupport.prepareInstall(targetDir)
+            ?: return@withContext BibleInstallOutcome.NoDirectory
 
-        val scratch = BibleInstallSupport.scratchIn(targetDir)
         try {
-            scratch.deleteRecursively()
-            if (!scratch.mkdirs() && !scratch.isDirectory) return@withContext BibleInstallOutcome.NoDirectory
             val zipFile = File(scratch, "module.zip")
             val spbPart = File(scratch, module.fileName)
 
