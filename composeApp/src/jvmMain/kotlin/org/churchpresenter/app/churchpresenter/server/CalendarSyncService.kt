@@ -205,6 +205,6 @@ class CalendarSyncService(
     private companion object {
         const val NAME_CHARS = 120
         const val STARTUP_TIMEOUT_MS = 5_000L
-        const val PULL_INTERVAL_MS = 3 * 60 * 1_000L
+        const val PULL_INTERVAL_MS = 5 * 60 * 1_000L
     }
 }
