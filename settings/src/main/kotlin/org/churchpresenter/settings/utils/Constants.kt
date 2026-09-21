@@ -245,6 +245,7 @@ object Constants {
 
     // REST endpoints
     const val ENDPOINT_INFO              = "/api/info"
+    const val ENDPOINT_CALENDAR_ENROLL = "/api/calendar/enroll"
     const val ENDPOINT_STATUS            = "/api/status"
     const val ENDPOINT_SONGS             = "/api/songs"
     const val ENDPOINT_SONG_DETAIL       = "/api/songs/{number}"

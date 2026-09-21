@@ -47,6 +47,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_code
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
@@ -121,6 +122,11 @@ import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.app.churchpresenter.server.CalendarEnrollReply
+import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
+import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
+import org.churchpresenter.app.churchpresenter.dialogs.enrollCodeText
+import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
@@ -181,6 +187,7 @@ import org.churchpresenter.app.churchpresenter.server.remoteAccessDecision
 import org.churchpresenter.app.churchpresenter.server.addScheduleItem
 import org.churchpresenter.app.churchpresenter.server.batchEventSummary
 import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
+import org.churchpresenter.app.churchpresenter.server.RemoteAccess
 import org.churchpresenter.app.churchpresenter.server.RemoteApproval
 import org.churchpresenter.app.churchpresenter.server.remoteApproval
 import org.churchpresenter.app.churchpresenter.server.executeProjectItem
@@ -437,6 +444,19 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     }
 
     val presenterManager = remember { PresenterManager() }
+    // The desktop's end of calendar sync with phones. Made here, beside the settings it writes
+    // back to, so the startup round and the Settings card talk to the same object.
+    val calendarSync = remember(appSettings.calendarStorageDirectory, appSettings.songSettings.storageDirectory) {
+        CalendarSyncService(
+            folder = appSettings.calendarFolder(),
+            songFolder = appSettings.songSettings.storageDirectory.takeIf { it.isNotBlank() }?.let(::File),
+            settings = { appSettings.calendarSync },
+            saveSettings = { sync ->
+                appSettings = appSettings.copy(calendarSync = sync)
+                settingsManager.saveSettings(appSettings)
+            },
+        )
+    }
     LaunchedEffect(appSettings.atemSettings) {
         presenterManager.setAtemRenderSettings(appSettings.atemSettings)
     }
@@ -998,6 +1018,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 remember { mutableStateListOf<String>() }
                             val remoteActivityNotifications =
                                 remember { mutableStateListOf<RemoteActivityNotification>() }
+                            // The QR a just-approved phone scans to get its calendar token and key.
+                            var calendarEnrollQr by remember { mutableStateOf<CalendarEnrollment?>(null) }
 
                             LaunchedEffect(remoteClientManager.blockedClients, sessionBlockedClients.toList()) {
                                 companionServer.blockedClientIds =
@@ -1037,6 +1059,45 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             outcome.event, add, { pending.decision.complete(false) },
                                         ))
                                     }
+                                }
+                            }
+
+                            // A phone asking to plan the calendar through the relay: blocked devices
+                            // are refused, everyone else is asked, and on Allow the desktop shows the
+                            // QR the phone scans to finish.
+                            val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
+                            LaunchedEffect(Unit) {
+                                companionServer.onCalendarEnroll.collect { pending ->
+                                    val clientId = pending.clientId
+                                    val access = remoteAccessDecision(
+                                        clientId,
+                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
+                                        sessionAllowedClients, sessionBlockedClients,
+                                    )
+                                    if (access == RemoteAccess.AUTO_REJECT) {
+                                        pending.decision.complete(null)
+                                        return@collect
+                                    }
+                                    val enroll: () -> Unit = {
+                                        coroutineScope.launch {
+                                            val enrollment = calendarSync.enroll(clientId, pending.deviceName)
+                                            calendarEnrollQr = enrollment
+                                            pending.decision.complete(
+                                                enrollment?.let { CalendarEnrollReply(it.relayUrl, it.instanceId) },
+                                            )
+                                        }
+                                    }
+                                    remoteEventQueue.add(Triple(
+                                        RemoteEvent(
+                                            type = RemoteEventType.CALENDAR_ENROLL,
+                                            title = pending.deviceName,
+                                            detail = enrollCodeText(pending.code, enrollCodeFormat),
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId),
+                                        ),
+                                        enroll,
+                                        { pending.decision.complete(null) },
+                                    ))
                                 }
                             }
 
@@ -1277,10 +1338,14 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             // background thread, so it works with the Calendar window closed.
                             val calendarFolder =
                                 remember(appSettings.calendarStorageDirectory) { appSettings.calendarFolder() }
-                            LaunchedEffect(calendarFolder) {
+                            LaunchedEffect(calendarFolder, appSettings.calendarSync.enabled) {
                                 // A folder chosen in Settings starts from what the app data folder
                                 // holds, once, so the calendar does not vanish on the switch.
                                 withContext(Dispatchers.IO) { seedCalendarFolder(AppDataDir.resolve(), calendarFolder) }
+                                // Phones plan all week; their edits are pulled and merged before the
+                                // auto-loader looks, so it loads this week's plan.
+                                calendarSync.syncOnStartup()
+                                launch { calendarSync.run() }
                                 val store = CalendarStore(calendarFolder)
                                 ServiceAutoLoader(
                                     document = { withContext(Dispatchers.IO) { store.load().document } },
@@ -1810,6 +1875,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager,
                                 presenterManager = presenterManager,
+                                calendarSync = calendarSync,
                                 onDismiss = { showOptionsDialog = false; dialogDismissSignal++ },
                                 onSave = { updated ->
                                     appSettings = updated
@@ -2088,6 +2154,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 },
                                 onDismiss = { pendingUpdateResult = null }
                             )
+
+                            calendarEnrollQr?.let { enrollment ->
+                                CalendarEnrollQrDialog(enrollment = enrollment, onDismiss = { calendarEnrollQr = null })
+                            }
 
                             val currentRemote = remoteEventQueue.firstOrNull()
                             val currentClientId = currentRemote?.first?.clientId ?: ""

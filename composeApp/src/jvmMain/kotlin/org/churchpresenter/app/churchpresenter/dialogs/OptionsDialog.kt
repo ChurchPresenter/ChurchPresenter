@@ -70,6 +70,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
@@ -114,6 +115,7 @@ fun OptionsDialog(
     remoteClientManager: RemoteClientManager,
     presenterManager: PresenterManager,
     onDismiss: () -> Unit,
+    calendarSync: CalendarSyncService? = null,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
@@ -151,6 +153,7 @@ fun OptionsDialog(
             companionServer = companionServer,
             remoteClientManager = remoteClientManager,
             presenterManager = presenterManager,
+            calendarSync = calendarSync,
             onDismiss = onDismiss,
             onSave = onSave,
             onIdentifyScreen = onIdentifyScreen,
@@ -173,6 +176,7 @@ internal fun OptionsDialogContent(
     remoteClientManager: RemoteClientManager,
     presenterManager: PresenterManager,
     onDismiss: () -> Unit,
+    calendarSync: CalendarSyncService? = null,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
@@ -384,7 +388,8 @@ internal fun OptionsDialogContent(
                                     currentSettings = updateFn(currentSettings)
                                 },
                                 companionServer = companionServer,
-                                remoteClientManager = remoteClientManager
+                                remoteClientManager = remoteClientManager,
+                                calendarSync = calendarSync,
                             )
                             TAB_STAGE_MONITOR -> StageMonitorSettingsTab(
                                 settings = currentSettings,

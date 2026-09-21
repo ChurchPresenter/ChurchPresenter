@@ -136,6 +136,7 @@ import org.churchpresenter.settings.AtemSettings
 import java.net.URLEncoder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
@@ -150,7 +151,8 @@ fun ServerSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     companionServer: CompanionServer,
-    remoteClientManager: RemoteClientManager
+    remoteClientManager: RemoteClientManager,
+    calendarSync: CalendarSyncService? = null,
 ) {
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
@@ -582,6 +584,16 @@ fun ServerSettingsTab(
                         }
                     }
                 }
+            }
+
+            // ── Card: Calendar on phones ───────────────────────────────────────
+            if (calendarSync != null) {
+                CalendarSyncCard(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    sync = calendarSync,
+                    labelFor = remoteClientManager::getLabel,
+                )
             }
 
             // ── Card: Lower Third Triggers (Bitfocus Companion) ───────────────

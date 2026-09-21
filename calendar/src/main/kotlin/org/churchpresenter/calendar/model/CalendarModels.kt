@@ -219,6 +219,12 @@ data class PlannedService(
      * since wins over it, which is the right way round.
      */
     val updatedAt: String = "",
+    /**
+     * Rows that arrived from a phone and could not be matched here -- a song title not in the
+     * library, a preset since deleted -- as row id to reason. Beside the list, like
+     * [plannedSeconds], so a row stays a row; the run of show draws these flagged.
+     */
+    val unresolvedRows: Map<String, String> = emptyMap(),
 ) {
     fun isInSeries(): Boolean = seriesId.isNotEmpty()
 
