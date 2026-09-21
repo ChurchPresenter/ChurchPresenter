@@ -1121,6 +1121,9 @@
     <string name="add_ndi_output">Add Output</string>
     <string name="ndi_output_numbered">NDI Output %1$d</string>
     <string name="preview_output">Preview output</string>
+    <string name="preview_output_mode_disabled_warning">This output does not currently show this content.</string>
+    <string name="preview_output_partial_translations_warning">This output does not show every translation in your stack.</string>
+    <string name="preview_output_single_language_warning">This output shows only one language, not both.</string>
     <string name="output_resolution">Resolution</string>
     <string name="output_resolution_custom">Custom…</string>
     <string name="output_resolution_custom_title">Custom resolution</string>

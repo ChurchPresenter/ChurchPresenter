@@ -10,6 +10,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
@@ -39,6 +40,7 @@ class ProjectionCustomizeButtonsTest {
                 OutputCustomizeDialog(
                     screenLabel = "Screen 1",
                     assignment = harness.assignment,
+                    outputKind = OutputKind.SCREEN,
                     globalSettings = AppSettings(songSettings = SongSettings(lyricsFontSize = 61)),
                     onApply = { harness.assignment = it },
                     onDismiss = { harness.dismissed++ },

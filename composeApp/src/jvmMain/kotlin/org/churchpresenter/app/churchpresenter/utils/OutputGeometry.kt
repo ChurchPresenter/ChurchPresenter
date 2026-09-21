@@ -28,8 +28,24 @@ data class OutputSize(val width: Int, val height: Int) {
     val aspectRatio: Float get() = width.toFloat() / height.toFloat()
 }
 
-/** One output a tab could be previewing: its stored identity, what to call it, and how big it is. */
-data class PreviewOutput(val key: String, val label: String, val size: OutputSize)
+/**
+ * One output a tab could be previewing: its stored identity, what to call it, and how big it is.
+ *
+ * [showsMode] is whether this output is actually routing the content being previewed right now --
+ * an output can be picked to preview a shape even when it isn't, which is why this is a flag rather
+ * than a filter; see `outputsShowing`.
+ *
+ * [assignment] is the raw [ScreenAssignment] this was built from -- carried along so a tab with a
+ * narrower question than "is this mode on" can still ask it without re-deriving the assignment from
+ * [key]. The Bible tab's per-output translation subset (`bibleTranslations`) is the first of these.
+ */
+data class PreviewOutput(
+    val key: String,
+    val label: String,
+    val size: OutputSize,
+    val showsMode: Boolean,
+    val assignment: ScreenAssignment,
+)
 
 /** 1920x1080 -- what an output whose size is not known yet is previewed as. */
 val FallbackOutputSize = OutputSize(FALLBACK_OUTPUT_WIDTH, FALLBACK_OUTPUT_HEIGHT)

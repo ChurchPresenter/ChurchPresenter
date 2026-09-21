@@ -37,6 +37,8 @@ import churchpresenter.composeapp.generated.resources.preview
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -83,6 +85,7 @@ internal fun CustomizeBody(
     live: Boolean,
     draft: AppSettings,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     translationIndex: Int,
     onTranslationChange: (Int) -> Unit,
     onElementChange: (CustomizeElement) -> Unit,
@@ -122,7 +125,7 @@ internal fun CustomizeBody(
             }
         }
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        CustomizePreviewColumn(pane, element, live, draft, assignment, onSettingsChange)
+        CustomizePreviewColumn(pane, element, live, draft, assignment, outputKind, onSettingsChange)
     }
 }
 
@@ -134,6 +137,7 @@ private fun CustomizePreviewColumn(
     live: Boolean,
     draft: AppSettings,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     Column(
@@ -170,12 +174,18 @@ private fun CustomizePreviewColumn(
             contentAlignment = Alignment.Center,
         ) {
             // Width only: the stage's own `aspectRatio` sets the height from it.
-            val output = previewOutputSize(draft)
+            // This output's own size, not "whichever output happens to be first" -- the whole
+            // point of a per-output override is that this screen can be a different shape from the
+            // others, and previewing it at another one's aspect ratio defeats that (issue: the
+            // Customize dialog for a second, differently-shaped output showed the first output's
+            // picture).
+            val output = outputSizeOf(assignment, outputKind)
             CustomizeStagePanel(
                 pane = pane,
                 element = element,
                 settings = draft,
                 assignment = assignment,
+                output = output,
                 slot = PreviewSampleSlot.MEDIUM,
                 modifier = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio)),
             )

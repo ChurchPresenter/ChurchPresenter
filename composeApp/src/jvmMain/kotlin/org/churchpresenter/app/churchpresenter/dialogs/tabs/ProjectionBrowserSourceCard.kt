@@ -442,6 +442,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             }
                             CustomizeOutputCell(
                                 assignment = output,
+                                outputKind = OutputKind.BROWSER_SOURCE,
                                 screenLabel = outputLabel,
                                 settings = settings,
                                 onApply = { updated ->

@@ -115,8 +115,26 @@ internal fun backgroundBlurRadius(blurReferencePx: Int, width: Dp): Dp =
 /** The output height every stored size is measured against, as [BACKGROUND_REFERENCE_WIDTH] is. */
 internal const val REFERENCE_HEIGHT = 1080f
 
-/** The range a presenter's scale is held to, so an absurd output cannot produce absurd type. */
-internal const val MIN_PRESENTER_SCALE = 0.5f
+/**
+ * The range a presenter's scale is held to, so an absurd output cannot produce absurd type.
+ *
+ * [MIN_PRESENTER_SCALE] used to be 0.5 -- comfortably below every 16:9-family preset
+ * ([org.churchpresenter.app.churchpresenter.utils.OutputGeometry], 1280x720 up), so nobody noticed it
+ * was also above the ratio a genuinely narrow output computes. `presenterScale` takes the *smaller*
+ * of the width and height ratio against the 1920x1080 reference specifically so a mismatched aspect
+ * ratio is respected; flooring that result at 0.5 threw the answer away for anything narrower than
+ * that, which every vertical/mobile output is. A 720x1280 target computed 0.375 and was floored up to
+ * 0.5 -- 33% larger than the space actually available -- which is what let lyrics overflow a portrait
+ * output while a landscape one of any shipped size never showed the bug.
+ *
+ * 0.15 is chosen against [org.churchpresenter.app.churchpresenter.composables.RESOLUTION_RANGE]'s own
+ * floor of 16: a width or height of 16 against the 1920x1080 reference computes a ratio near 0.008,
+ * far below any legible floor, so a genuinely pathological output (not merely narrow, but tiny) still
+ * needs a floor to keep type from vanishing -- it will still overflow that output, same as it always
+ * has, because there is no scale that both fits 16px and stays readable. Every realistic vertical
+ * preset and custom resolution sits above 0.15, so the floor no longer fires for them.
+ */
+internal const val MIN_PRESENTER_SCALE = 0.15f
 internal const val MAX_PRESENTER_SCALE = 3.0f
 
 /**
