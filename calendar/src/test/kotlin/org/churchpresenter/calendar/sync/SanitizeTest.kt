@@ -58,4 +58,41 @@ class SanitizeTest {
         assertNull(Sanitize.storedTime("9:45 AM"))
         assertNull(Sanitize.storedTime("25:00"))
     }
+
+
+    @Test
+    fun `the zero-width non-joiner stays in Persian text`() {
+        val title = "می\u200Cخواهم"
+
+        assertEquals(title, Sanitize.cleanText(title, 200))
+    }
+
+    @Test
+    fun `the zero-width joiner stays in emoji sequences and Indic conjuncts`() {
+        val family = "👨\u200D👩\u200D👧"
+        val conjunct = "क्\u200Dष"
+
+        assertEquals(family, Sanitize.cleanText(family, 200))
+        assertEquals(conjunct, Sanitize.cleanText(conjunct, 200))
+    }
+
+    @Test
+    fun `bidi overrides, zero-width space, word joiner and BOM are stripped`() {
+        val disguised = "a\u202Eb\u200Bc\u2060d\uFEFFe\u2066f\u200Eg"
+
+        assertEquals("abcdefg", Sanitize.cleanText(disguised, 200))
+    }
+
+    @Test
+    fun `tag characters are stripped without leaving half a surrogate pair`() {
+        val tagged = "x\uDB40\uDC41y"
+
+        assertEquals("xy", Sanitize.cleanText(tagged, 200))
+    }
+
+    @Test
+    fun `control characters go, whitespace collapses, length is capped`() {
+        assertEquals("a b c", Sanitize.cleanText("a\u0000  b\t\n c", 200))
+        assertEquals("abc", Sanitize.cleanText("abcdef", 3))
+    }
 }

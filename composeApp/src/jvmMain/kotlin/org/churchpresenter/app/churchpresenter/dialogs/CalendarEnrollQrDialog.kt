@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_body
 import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_title
 import churchpresenter.composeapp.generated.resources.close
+import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.connectionQrBitmap
@@ -58,6 +60,12 @@ fun CalendarEnrollQrDialog(enrollment: CalendarEnrollment, onDismiss: () -> Unit
 @Composable
 internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: () -> Unit) {
     val bitmap = remember(enrollment) { connectionQrBitmap(enrollment.qrContent, QR_PX) }
+    // The QR carries the phone's token and the calendar key, and this machine is often on a projector
+    // or a stream. It goes away by itself; the phone can ask again.
+    LaunchedEffect(enrollment) {
+        delay(QR_LIFETIME_MS)
+        onDismiss()
+    }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -90,6 +98,7 @@ fun enrollCodeText(code: String, format: String): String = format.format(code.ch
 private const val DARK_LUMINANCE = 0.5f
 private const val CODE_GROUP = 3
 private const val QR_PX = 512
+private const val QR_LIFETIME_MS = 120_000L
 private val QR_DP = 300.dp
 private val DIALOG_WIDTH = 400.dp
 private val DIALOG_HEIGHT = 460.dp

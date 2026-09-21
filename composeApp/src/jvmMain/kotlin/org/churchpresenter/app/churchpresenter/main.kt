@@ -1080,6 +1080,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     }
                                     val enroll: () -> Unit = {
                                         coroutineScope.launch {
+                                            // The phone stopped waiting (or was refused) while this prompt sat in the queue.
+                                            if (pending.decision.isCompleted) return@launch
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
                                             calendarEnrollQr = enrollment
                                             pending.decision.complete(

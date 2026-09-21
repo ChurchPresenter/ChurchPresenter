@@ -7,10 +7,12 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.sync.Sanitize
 import org.churchpresenter.settings.utils.Constants
+import java.util.concurrent.ConcurrentHashMap
 
 private const val MAX_DEVICE_NAME_CHARS = 120
 private const val MAX_BODY_CHARS = 4_096
@@ -53,12 +55,29 @@ internal fun Route.calendarSyncRoutes(server: CompanionServer, json: Json) {
             deviceName = Sanitize.cleanText(parsed.deviceName, MAX_DEVICE_NAME_CHARS),
             code = code,
         )
-        server.onCalendarEnroll.emit(pending)
-        val reply = pending.decision.await()
-        if (reply == null) {
-            call.respondText("""{"error":"enrollment denied"}""", status = HttpStatusCode.Forbidden)
-        } else {
-            call.respond(reply)
+        // One open request per device and a small total: anyone on the church WiFi holding the API key
+        // could otherwise pile up requests, and prompts, for as long as they liked.
+        if (pendingEnrollClients.size >= MAX_PENDING_ENROLLMENTS || !pendingEnrollClients.add(clientId)) {
+            call.respondText("""{"error":"enrollment already pending"}""", status = HttpStatusCode.TooManyRequests)
+            return@post
+        }
+        try {
+            server.onCalendarEnroll.emit(pending)
+            val reply = withTimeoutOrNull(ENROLL_WAIT_MS) { pending.decision.await() }
+            // Unanswered in time: settle it as denied so an Allow clicked later does nothing.
+            val timedOut = !pending.decision.isCompleted
+            if (timedOut) pending.decision.complete(null)
+            when {
+                reply != null -> call.respond(reply)
+                timedOut -> call.respondText("""{"error":"enrollment timed out"}""", status = HttpStatusCode.RequestTimeout)
+                else -> call.respondText("""{"error":"enrollment denied"}""", status = HttpStatusCode.Forbidden)
+            }
+        } finally {
+            pendingEnrollClients.remove(clientId)
         }
     }
 }
+
+private const val ENROLL_WAIT_MS = 120_000L
+private const val MAX_PENDING_ENROLLMENTS = 5
+private val pendingEnrollClients: MutableSet<String> = ConcurrentHashMap.newKeySet()

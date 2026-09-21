@@ -52,8 +52,7 @@ class SyncCoordinator(
     fun sync(token: String, cursor: Long): SyncOutcome {
         var since = cursor
         repeat(MAX_ROUNDS) {
-            val changes = client.changes(token, since)
-            val merged = absorb(changes)
+            val (changes, merged) = pull(token, since)
             val devices = changes.devices.map { PairedDevice(it.id, sealing.openDeviceName(it), it.pairedAt, it.lastSeen) }
             if (changes.lastDesktopInstall.isNotEmpty() && changes.lastDesktopInstall != installId) {
                 return merged.outcome(changes.rev, devices, otherDesktop = changes.lastDesktopInstall)
@@ -66,6 +65,23 @@ class SyncCoordinator(
             }
         }
         throw RelayFailure.Conflict()
+    }
+
+    /**
+     * Every page of what changed since [since], each merged as it arrives. The last page is returned:
+     * its revision is the one to push against, and it carries the device list.
+     */
+    private fun pull(token: String, since: Long): Pair<ChangesResponse, Absorbed> {
+        var changes = client.changes(token, since)
+        var merged = absorb(changes)
+        var pages = 1
+        while (changes.more) {
+            if (pages >= MAX_PAGES) throw RelayFailure.Rejected(0, "relay has more changes than one round will read")
+            changes = client.changes(token, changes.rev)
+            merged = merged.plus(absorb(changes))
+            pages++
+        }
+        return changes to merged
     }
 
     /** Pushes the local file as it stands; a phone edit in the meantime turns this into a full [sync]. */
@@ -126,9 +142,21 @@ class SyncCoordinator(
     ) {
         fun outcome(cursor: Long, devices: List<PairedDevice>, otherDesktop: String = "") =
             SyncOutcome(cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable)
+
+        /** This page's counts added to the earlier ones; the document is the later, fuller merge. */
+        fun plus(next: Absorbed) = Absorbed(
+            next.document,
+            phoneChanges + next.phoneChanges,
+            unresolved + next.unresolved,
+            dropped + next.dropped,
+            unreadable + next.unreadable,
+        )
     }
 
     private companion object {
         const val MAX_ROUNDS = 3
+
+        /** 2,000 rows a page: far beyond the 5,500 the relay holds, so this only stops a runaway. */
+        const val MAX_PAGES = 50
     }
 }
