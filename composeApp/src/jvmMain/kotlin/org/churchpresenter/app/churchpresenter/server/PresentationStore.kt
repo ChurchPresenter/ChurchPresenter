@@ -17,6 +17,7 @@ import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
 import org.churchpresenter.presentationengine.cache.SlideDiskCache
+import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.utils.reportDegradedSlide
 import org.churchpresenter.settings.utils.Constants
 
@@ -169,36 +170,44 @@ internal class PresentationStore(
         val writer = slideDiskCache.beginWrite(file, deck.format, DeckRasterizer.DEFAULT_TARGET_WIDTH_PX)
         var committed = false
         return try {
+            // The supersession is handled inside the trace, not around it: `trace` marks its
+            // transaction failed with whatever escapes the block, so catching outside would still
+            // report a race that is handled (Sentry CHURCH-PRESENTER-DESKTOP-6J).
             val jpegSlides = CrashReporter.trace("server.render", "Server render presentation") {
-                DeckRasterizer(deck, onDegraded = ::reportDegradedSlide).use { rasterizer ->
-                    deck.slides.map { slide ->
-                        val slideFile = writer.putSlide(
-                            index = slide.index,
-                            image = rasterizer.renderFinalFrame(slide.index),
-                            note = slide.notes,
-                            fidelity = slide.fidelity,
-                            hasTimeline = slide.timeline != null
-                        )
-                        slideFile.readBytes()
-                    }
-                }
-            }
+                renderSlidesUnlessSuperseded(deck, writer)
+            } ?: return null
             writer.commit()
             committed = true
             jpegSlides to deck.slides.map { it.notes }
-        } catch (_: SlideCacheSupersededException) {
-            // A tab render took the entry over after this one started; it finishes the job.
-            null
-        } catch (_: FileNotFoundException) {
-            // The same supersession, caught one step later: `putSlide` had already returned this
-            // slide's File when the other writer's `init` deleted the directory out from under it,
-            // so the read that follows sees a missing file instead of SlideCacheSupersededException.
-            // Same race, same outcome — the client's 404-retry path picks it up once the other
-            // writer commits (Sentry CHURCH-PRESENTER-DESKTOP-6J).
-            null
         } finally {
             if (!committed) writer.abort()
         }
+    }
+
+    /**
+     * Every slide of [deck] as JPEG bytes, or null when another writer took the cache entry over.
+     *
+     * Two forms of the same race: [SlideCacheSupersededException] from `putSlide`, and a
+     * `FileNotFoundException` one step later, when `putSlide` had already returned this slide's
+     * File and the other writer's `init` deleted the directory before the read. Either way the
+     * other writer finishes the job and the client's 404-retry path picks it up.
+     */
+    private fun renderSlidesUnlessSuperseded(deck: Deck, writer: SlideDiskCache.Writer): List<ByteArray>? = try {
+        DeckRasterizer(deck, onDegraded = ::reportDegradedSlide).use { rasterizer ->
+            deck.slides.map { slide ->
+                writer.putSlide(
+                    index = slide.index,
+                    image = rasterizer.renderFinalFrame(slide.index),
+                    note = slide.notes,
+                    fidelity = slide.fidelity,
+                    hasTimeline = slide.timeline != null
+                ).readBytes()
+            }
+        }
+    } catch (_: SlideCacheSupersededException) {
+        null
+    } catch (_: FileNotFoundException) {
+        null
     }
 
     internal fun renderPresentationForServer(presentationId: String, filePath: String) {

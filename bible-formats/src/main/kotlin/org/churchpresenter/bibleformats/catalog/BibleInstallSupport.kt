@@ -281,6 +281,27 @@ object BibleInstallSupport {
     fun scratchIn(targetDir: File): File = File(targetDir, ".cp-install")
 
     /**
+     * A fresh, empty scratch folder under [targetDir], or null when the install cannot go ahead
+     * because [targetDir] cannot be written to or the folder beneath it cannot be made.
+     */
+    fun prepareInstall(targetDir: File): File? =
+        scratchIn(targetDir).takeIf { usableDirectory(targetDir) }?.let(::prepareScratch)
+
+    /**
+     * [scratch], emptied and existing as a directory, or null when it cannot be made.
+     *
+     * [usableDirectory] proved the target could be written to a moment ago, but creating the folder
+     * beneath it is a separate act that can still fail (Sentry CHURCH-PRESENTER-DESKTOP-6K reached
+     * the copy with the folder missing). Answering here turns that into a refusal the caller reports
+     * as an unusable directory, instead of an exception three calls deep.
+     */
+    fun prepareScratch(scratch: File): File? {
+        scratch.deleteRecursively()
+        scratch.mkdirs()
+        return scratch.takeIf { it.isDirectory }
+    }
+
+    /**
      * Whether a Bible install can actually write into [targetDir].
      *
      * `exists()`/`isDirectory` alone accept plenty of directories a download will still fail

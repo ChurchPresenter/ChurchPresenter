@@ -171,6 +171,22 @@ internal object JcefInstall {
         return builder.build()
     }
 
+    /**
+     * [build] against [root], and once more after wiping `root/jcef` when the native load fails.
+     *
+     * "The specified procedure could not be found" from `libcef.dll` means the DLLs on disk do not
+     * belong together — an interrupted extraction, or files left by an older build beside newer
+     * ones. No retry against the same files can change that, but a fresh extraction can, and it
+     * costs one download only on a machine that was already unable to browse. A second failure is
+     * a real one and propagates for the next root to try.
+     */
+    internal fun <T> buildRepairing(root: File, build: (File) -> T): T = try {
+        build(root)
+    } catch (_: UnsatisfiedLinkError) {
+        File(root, "jcef").deleteRecursively()
+        build(root)
+    }
+
     /** Installs into the first usable root, with the real candidates and the real probes. */
     fun install(attempt: (File) -> Unit): Outcome = installIntoFirstUsableRoot(
         roots = rootCandidates(),
@@ -380,7 +396,9 @@ object CefManager {
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
-        applyInstallOutcome(JcefInstall.install { root -> cefApp = JcefInstall.buildCefApp(root) })
+        applyInstallOutcome(
+            JcefInstall.install { root -> cefApp = JcefInstall.buildRepairing(root, JcefInstall::buildCefApp) }
+        )
     }
 
     /** Sets the engine's state from [outcome], reporting only a failure that is ours. */

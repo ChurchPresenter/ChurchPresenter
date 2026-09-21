@@ -2,9 +2,11 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -29,6 +31,20 @@ private val TAB_ICON_SIZE = 20.dp
 
 val LABELED_TAB_MIN_WIDTH = 100.dp
 
+/**
+ * The narrowest a tab in a row of [style] may be.
+ *
+ * Only the icon-only tabs need a floor, to stay a comfortable target. A named tab is as wide as its
+ * name asks: a floor there padded short names like Bible and Songs out to the width of the longest,
+ * which is what pushed the last tabs of the strip behind the scroll arrow.
+ */
+fun labeledTabMinWidth(style: TabLabelStyle): Dp =
+    if (style == TabLabelStyle.ICONS) LABELED_TAB_MIN_WIDTH else 0.dp
+
+/** Space either side of a named tab's content: Material pads 16dp, too much for a strip of a dozen. */
+private val NAMED_TAB_HORIZONTAL_PADDING = 6.dp
+private val NAMED_TAB_HEIGHT = 48.dp
+
 @Composable
 fun TabIndicatorScope.LabeledTabIndicator(selectedTabIndex: Int) {
     TabRowDefaults.PrimaryIndicator(Modifier.tabIndicatorOffset(selectedTabIndex), width = Dp.Unspecified)
@@ -45,24 +61,16 @@ fun LabeledTab(
     color: Color = Color.Unspecified,
 ) {
     when (labelStyle) {
-        TabLabelStyle.TEXT -> Tab(
-            selected = selected,
-            onClick = onClick,
-            text = { TabName(name, textStyle, color) },
-        )
-        TabLabelStyle.ICONS_AND_TEXT -> Tab(
-            selected = selected,
-            onClick = onClick,
-            text = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TabIcon(icon, color)
-                    TabName(name, textStyle, color)
-                }
-            },
-        )
+        TabLabelStyle.TEXT -> NamedTab(selected, onClick) { TabName(name, textStyle, color) }
+        TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TabIcon(icon, color)
+                TabName(name, textStyle, color)
+            }
+        }
         TabLabelStyle.ICONS -> TabNameTooltip(name) {
             Tab(
                 selected = selected,
@@ -71,6 +79,20 @@ fun LabeledTab(
                 icon = { TabIcon(icon, color, contentDescription = name) },
             )
         }
+    }
+}
+
+@Composable
+private fun NamedTab(selected: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+    Tab(
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.height(NAMED_TAB_HEIGHT),
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = NAMED_TAB_HORIZONTAL_PADDING),
+            contentAlignment = Alignment.Center,
+        ) { content() }
     }
 }
 

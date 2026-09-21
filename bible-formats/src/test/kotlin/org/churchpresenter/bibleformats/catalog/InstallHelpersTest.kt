@@ -127,6 +127,45 @@ class InstallHelpersTest {
         assertTrue(BibleInstallSupport.extractEntries(notAZip, dir) { true }.isEmpty())
     }
 
+    // ── prepareScratch ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `a scratch folder that does not exist is created`() {
+        val scratch = BibleInstallSupport.scratchIn(dir)
+        assertEquals(scratch, BibleInstallSupport.prepareScratch(scratch))
+        assertTrue(scratch.isDirectory)
+    }
+
+    @Test
+    fun `a scratch folder left over from an earlier install is emptied`() {
+        val scratch = BibleInstallSupport.scratchIn(dir).apply { mkdirs() }
+        File(scratch, "module.zip").writeText("half a download")
+
+        assertEquals(scratch, BibleInstallSupport.prepareScratch(scratch))
+
+        assertTrue(scratch.isDirectory)
+        assertEquals(0, scratch.listFiles()?.size)
+    }
+
+    @Test
+    fun `a scratch folder that cannot be created is refused rather than left to fail later`() {
+        val notADirectory = File(dir, "plain-file").apply { writeText("x") }
+        assertEquals(null, BibleInstallSupport.prepareScratch(File(notADirectory, ".cp-install")))
+    }
+
+    @Test
+    fun `an install into a usable directory gets an empty scratch folder`() {
+        val scratch = BibleInstallSupport.prepareInstall(dir)
+        assertEquals(BibleInstallSupport.scratchIn(dir), scratch)
+        assertTrue(scratch!!.isDirectory)
+    }
+
+    @Test
+    fun `an install into a plain file gets no scratch folder`() {
+        val file = File(dir, "not-a-directory").apply { writeText("x") }
+        assertEquals(null, BibleInstallSupport.prepareInstall(file))
+    }
+
     // ── usableDirectory ─────────────────────────────────────────────────────────
 
     @Test

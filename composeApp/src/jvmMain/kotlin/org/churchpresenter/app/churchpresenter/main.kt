@@ -354,9 +354,6 @@ fun main() {
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
     }
 
-    preWarmJavaFX()
-    CrashReporter.setTag("javafx.available", isJavaFxAvailable().toString())
-
     CefManager.init()
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
     if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
@@ -878,6 +875,15 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
+        // The window comes first. Nothing below is needed to draw it: the server and its preloaded
+        // data serve phones, and the JavaFX toolkit drives nothing the window shows.
+        appReady = true
+        // Off the path to the window, and off the main thread: it costs ~200ms and its only
+        // consumer is the crash tag. An absent tag on a very early report reads as "not yet known".
+        launch(Dispatchers.IO) {
+            preWarmJavaFX()
+            CrashReporter.setTag("javafx.available", isJavaFxAvailable().toString())
+        }
         withContext(Dispatchers.IO) {
             companionServer.preloadData(
                 songStorageDir = appSettings.songSettings.storageDirectory,
@@ -901,7 +907,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 )
             }
         }
-        appReady = true
         val isFirstEverUpdateCheck = isFirstEverUpdateCheck(appSettings.lastUpdateCheckTimestamp)
         if (appSettings.updateCheckInterval.isDueSince(appSettings.lastUpdateCheckTimestamp)) {
             val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
@@ -2014,6 +2019,9 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 ),
                                                 selectDirectory = true,
                                             )?.toFile()
+                                        },
+                                        reportError = { context, error ->
+                                            CrashReporter.reportException(error, context = context)
                                         },
                                         chooseExportFile = { suggested ->
                                             FileChooser.platformInstance.save(
