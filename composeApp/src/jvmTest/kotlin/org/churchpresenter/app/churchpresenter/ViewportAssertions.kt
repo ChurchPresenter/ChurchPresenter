@@ -206,6 +206,30 @@ internal fun ComposeUiTest.horizontalOverflow(probe: ViewportProbe): Dp {
 }
 
 /**
+ * How far past its container's bottom edge the tallest *unreachable* node reaches, in dp; `0` when
+ * nothing does. The vertical counterpart of [horizontalOverflow] -- see its own doc for why the
+ * unscrollable, unclipped fixed box this reads (composed via [FixedViewport]) is what makes an
+ * overflowing node report a position outside its bounds rather than being silently squeezed to fit.
+ */
+internal fun ComposeUiTest.verticalOverflow(probe: ViewportProbe): Dp {
+    val viewport = onNodeWithTag(VIEWPORT_TAG).fetchSemanticsNode()
+    val edge = viewport.positionInRoot.y + viewport.size.height
+
+    var worst = 0f
+    fun walk(node: SemanticsNode) {
+        if (node.config.contains(SemanticsProperties.VerticalScrollAxisRange)) return
+        if (node.config.getOrNull(SemanticsProperties.TestTag) == SETTINGS_PREVIEW_SCALED_TAG) return
+        if (node.size.width > 0 && node.size.height > 0) {
+            worst = maxOf(worst, node.positionInRoot.y + node.size.height - edge)
+        }
+        node.children.forEach(::walk)
+    }
+    viewport.children.forEach(::walk)
+
+    return Dp(worst / probe.density)
+}
+
+/**
  * Asserts the content composed in [Viewport] fits within [declared] — the height its dialog gives it.
  *
  * [tolerance] absorbs the sub-pixel difference between a dp-declared window and a px-measured

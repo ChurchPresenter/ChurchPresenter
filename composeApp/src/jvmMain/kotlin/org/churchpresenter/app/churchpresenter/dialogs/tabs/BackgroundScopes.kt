@@ -67,6 +67,17 @@ internal enum class BackgroundScope(
 }
 
 /**
+ * The content type this surface's preview should be checked against, or `null` for the two
+ * Defaults, which apply to every content type rather than one -- there is nothing to warn about
+ * a Default surface being "off" for, since it is never routed by a single content toggle.
+ */
+internal fun BackgroundScope.previewMode(): Presenting? = when (group) {
+    BackgroundScopeGroup.BIBLE -> Presenting.BIBLE
+    BackgroundScopeGroup.SONGS -> Presenting.LYRICS
+    BackgroundScopeGroup.DEFAULTS -> null
+}
+
+/**
  * The types this surface offers, in the order the segmented control shows them.
  *
  * Gradient reaches only the two content lower thirds, which is the one place a band is drawn over

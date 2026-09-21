@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -64,7 +63,6 @@ import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
@@ -250,8 +248,9 @@ private fun SongStylePane(
         )
     // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
     // one to whichever the tab is styling for its duration, so a hall with a single full-screen
-    // projector can still be shown what its lower third would look like.
-    val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    // projector can still be shown what its lower third would look like. `hasAnyOpenOutput` counts a
+    // single-monitor dev machine's dev-fallback window too -- see its own doc comment.
+    val hasOutputForTarget = hasAnyOpenOutput(settings)
     // What the preview is handed, which is not quite what is stored: an element switched off is
     // turned on while its own tab is selected, so styling it is never styling something invisible.
     // See `shownForPreview`. Everything below still reads `settings` -- this copy is for the
@@ -304,22 +303,16 @@ private fun SongStylePane(
             onShowLookAheadChange = onShowLookAheadChange,
             lookAheadForced = previewLookAhead && !showLookAhead,
         )
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SongPreviewPanel(
-                settings = previewSettings,
-                target = target,
-                showLookAhead = previewLookAhead,
-                showChords = false,
-                sections = sampleSections,
-                titleSlide = titleSlideView,
-                modifier = Modifier.width(
-                    minOf(
-                        maxWidth,
-                        SETTINGS_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio,
-                    ),
-                ),
-            )
-        }
+        SongPreviewWithOutputPicker(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            target = target,
+            bilingual = bilingual,
+            previewSettings = previewSettings,
+            previewLookAhead = previewLookAhead,
+            sampleSections = sampleSections,
+            titleSlideView = titleSlideView,
+        )
         SettingsPreviewSampleRow(
             slot = sampleSlot,
             onSlotChange = { sampleSlot = it },

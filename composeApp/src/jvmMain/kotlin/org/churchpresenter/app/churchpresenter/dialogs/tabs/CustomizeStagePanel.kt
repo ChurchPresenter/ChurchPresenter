@@ -51,6 +51,8 @@ internal fun CustomizeStagePanel(
     element: CustomizeElement?,
     settings: AppSettings,
     assignment: ScreenAssignment,
+    /** This output's own size -- see the caller's note on why it must not be re-derived here. */
+    output: PreviewOutputSize,
     slot: PreviewSampleSlot,
     modifier: Modifier = Modifier,
 ) {
@@ -61,10 +63,10 @@ internal fun CustomizeStagePanel(
     // shaped like the screen it is previewing.
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStage(settings, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, assignment, lowerThird, slot, element)
-            CustomizePane.DICTIONARY -> DictionaryStage(settings)
-            CustomizePane.BACKGROUND -> BackgroundStage(settings, element, lowerThird)
+            CustomizePane.BIBLE -> BibleStage(settings, output, lowerThird, slot)
+            CustomizePane.SONGS -> SongStage(settings, assignment, output, lowerThird, slot, element)
+            CustomizePane.DICTIONARY -> DictionaryStage(settings, output)
+            CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
             // smaller copy of it beside the controls would say nothing the tab does not.
             CustomizePane.STAGE_MONITOR -> NoStage()
@@ -74,7 +76,7 @@ internal fun CustomizeStagePanel(
 
 /** The sample verse, in every translation the stack carries, at [slot]'s length. */
 @Composable
-private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: PreviewSampleSlot) {
+private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerThird: Boolean, slot: PreviewSampleSlot) {
     // A shelf with no translations configured yet still has a Bible *style*, so the preview draws
     // the sample against stock settings rather than reporting "no translations" — the operator is
     // here to see type, and the type is set whether or not a module is installed.
@@ -83,6 +85,7 @@ private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: Preview
     BiblePreviewPanel(
         settings = settings,
         target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN,
+        output = output,
         // No module text: the preview reads no `.spb` here, so every translation falls back to the
         // English sample. What is being previewed is the styling, and the styling does not care
         // which words carry it.
@@ -104,6 +107,7 @@ private fun BibleStage(settings: AppSettings, lowerThird: Boolean, slot: Preview
 private fun SongStage(
     settings: AppSettings,
     assignment: ScreenAssignment,
+    output: PreviewOutputSize,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
     element: CustomizeElement?,
@@ -113,6 +117,7 @@ private fun SongStage(
     SongPreviewPanel(
         settings = settings,
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
+        output = output,
         // Taken from this output's own assignment rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
         // answered whether it carries a look-ahead line. A title slide has none.
@@ -137,9 +142,8 @@ private fun SongStage(
 
 /** A Strong's card, drawn by [DictionaryPresenter] at the output's own size. */
 @Composable
-private fun DictionaryStage(settings: AppSettings) {
-    val output = previewOutputSize(settings)
-    StageFrame(settings) {
+private fun DictionaryStage(settings: AppSettings, output: PreviewOutputSize) {
+    StageFrame(output) {
         ScaledPresenterBox(output) {
             DictionaryPresenter(
                 entry = DICTIONARY_SAMPLE_ENTRY,
@@ -166,10 +170,15 @@ private fun DictionaryStage(settings: AppSettings) {
  * height rather than the taller of the two.
  */
 @Composable
-private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, lowerThird: Boolean) {
+private fun BackgroundStage(
+    settings: AppSettings,
+    output: PreviewOutputSize,
+    element: CustomizeElement?,
+    lowerThird: Boolean,
+) {
     val scope = (element ?: CustomizeElement.BACKGROUND_DEFAULT).backgroundScope(lowerThird)
     val config = settings.backgroundSettings.configFor(scope)
-    StageFrame(settings) {
+    StageFrame(output) {
         if (!scope.lowerThird) {
             BackgroundConfigFill(config, Modifier.fillMaxSize())
             return@StageFrame
@@ -199,8 +208,7 @@ private fun BackgroundStage(settings: AppSettings, element: CustomizeElement?, l
 
 /** The plate the two hand-built stages sit on, matching the two presenter-backed panels' frame. */
 @Composable
-private fun StageFrame(settings: AppSettings, content: @Composable () -> Unit) {
-    val output = previewOutputSize(settings)
+private fun StageFrame(output: PreviewOutputSize, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
