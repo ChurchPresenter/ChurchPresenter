@@ -32,6 +32,49 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class VideoPlayerTest {
 
+    // ── Subtitle media options ─────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `no subtitle file adds no media option`() {
+        assertEquals(emptyList(), subtitleMediaOptions("").toList())
+        assertEquals(emptyList(), subtitleMediaOptions("   ").toList())
+    }
+
+    @Test
+    fun `a subtitle file is handed to VLC as sub-file`() {
+        assertEquals(listOf(":sub-file=/media/en.srt"), subtitleMediaOptions("/media/en.srt").toList())
+    }
+
+    @Test
+    fun `a subtitle path with spaces is passed whole`() {
+        assertEquals(
+            listOf(":sub-file=/My Media/Sunday Sermon.srt"),
+            subtitleMediaOptions("/My Media/Sunday Sermon.srt").toList()
+        )
+    }
+
+    @Test
+    fun `the software player keeps its decoding options with audio on`() {
+        val options = softwarePlayOptions(audioEnabled = true, subtitleUrl = "").toList()
+
+        assertEquals(listOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0"), options)
+    }
+
+    @Test
+    fun `a silent software player turns the audio track off`() {
+        val options = softwarePlayOptions(audioEnabled = false, subtitleUrl = "").toList()
+
+        assertTrue(":no-audio" in options)
+    }
+
+    @Test
+    fun `the subtitle option follows the decoding options`() {
+        val options = softwarePlayOptions(audioEnabled = true, subtitleUrl = "/media/en.srt").toList()
+
+        assertEquals(":sub-file=/media/en.srt", options.last())
+        assertEquals(4, options.size)
+    }
+
     // ── dirContainsVlcLib ──────────────────────────────────────────────────────────────────────
 
     private fun tempDir(): Path = Files.createTempDirectory("cp-vlc-test")

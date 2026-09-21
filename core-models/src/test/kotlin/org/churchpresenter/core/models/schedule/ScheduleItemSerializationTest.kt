@@ -151,6 +151,26 @@ class ScheduleItemSerializationTest {
     }
 
     @Test
+    fun `a media item keeps its subtitle file`() {
+        val item = ScheduleItem.MediaItem(
+            id = "6", mediaUrl = "/media/clip.mp4", mediaTitle = "Clip", mediaType = "local",
+            subtitleUrl = "/media/clip.srt",
+        )
+
+        assertEquals("/media/clip.srt", roundTrip(item).subtitleUrl)
+    }
+
+    @Test
+    fun `a media item saved before subtitles existed still loads with none`() {
+        val old = """{"type":"org.churchpresenter.app.churchpresenter.models.ScheduleItem.MediaItem",""" +
+            """"id":"6","mediaUrl":"/media/clip.mp4","mediaTitle":"Clip","mediaType":"local"}"""
+
+        val item = assertIs<ScheduleItem.MediaItem>(json.decodeFromString(ScheduleItem.serializer(), old))
+
+        assertEquals("", item.subtitleUrl)
+    }
+
+    @Test
     fun `a lower third keeps its pause timing`() {
         val lowerThird = ScheduleItem.LowerThirdItem(
             id = "7", presetId = "preset-9", presetLabel = "Guest speaker",

@@ -45,6 +45,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 internal class MediaReports {
     /** mediaUrl, mediaTitle, mediaType — exactly what the schedule would be given. */
     val scheduled = mutableListOf<Triple<String, String, String>>()
+
+    /** The subtitle file each of those schedule calls carried, in the same order. */
+    val scheduledSubtitles = mutableListOf<String>()
 }
 
 @OptIn(ExperimentalTestApi::class)
@@ -80,7 +83,10 @@ internal fun mediaTab(
                     appSettings = appSettings,
                     selectedMediaItem = selectedMediaItem,
                     presenterManager = presenterManager,
-                    onAddToSchedule = { url, title, type, _ -> reports.scheduled += Triple(url, title, type) },
+                    onAddToSchedule = { url, title, type, subtitle ->
+                        reports.scheduled += Triple(url, title, type)
+                        reports.scheduledSubtitles += subtitle
+                    },
                     vlcAvailable = vlcAvailable,
                     vlcArchMismatch = vlcArchMismatch,
                     vlcLoadFailed = vlcLoadFailed,
@@ -116,6 +122,9 @@ internal object MediaLabel {
     const val UNMUTE = "Unmute"
     const val LOOP_ON = "Loop On"
     const val LOOP_OFF = "Loop Off"
+    const val SUBTITLES = "Subtitles"
+    const val SUBTITLES_OFF = "Off"
+    const val SUBTITLES_LOAD_FILE = "Load subtitle file…"
 
     /** The loop-count field's label, which NumberSettingsTextField renders uppercased. */
     const val LOOP_COUNT = "LOOPS"
