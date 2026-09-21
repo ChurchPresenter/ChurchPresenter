@@ -1932,6 +1932,7 @@
     <string name="bible_catalog_overwrite_confirm">"%1$s" is already in your Bible folder.\nDownload it again and overwrite the existing file?</string>
     <string name="bible_catalog_stale_notice">Showing the Bible list from your last visit — you appear to be offline.</string>
     <string name="bible_catalog_attribution">Each translation carries its own copyright — check it before showing one publicly.</string>
+    <string name="bible_catalog_folder_not_writable">This folder can't be written to, so Bibles can't be downloaded into it. Choose a different Bible storage folder.</string>
     <string name="bible_catalog_no_directory">Choose a Bible storage folder in Appearance settings first.</string>
     <string name="bible_catalog_error_network">Couldn't reach the Bible archive — check your connection</string>
     <string name="bible_catalog_error_rate_limited">GitHub is limiting requests right now. Please try again in a few minutes.</string>

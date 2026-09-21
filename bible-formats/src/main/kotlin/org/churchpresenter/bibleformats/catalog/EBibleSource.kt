@@ -265,7 +265,7 @@ object EBibleSource : BibleSource {
         val scratch = BibleInstallSupport.scratchIn(targetDir)
         try {
             scratch.deleteRecursively()
-            scratch.mkdirs()
+            if (!scratch.mkdirs() && !scratch.isDirectory) return@withContext BibleInstallOutcome.NoDirectory
             val zipFile = File(scratch, "module.zip")
             val spbPart = File(scratch, module.fileName)
 

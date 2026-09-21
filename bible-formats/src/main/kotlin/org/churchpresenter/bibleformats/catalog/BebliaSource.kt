@@ -106,7 +106,7 @@ object BebliaSource : BibleSource {
         val scratch = BibleInstallSupport.scratchIn(targetDir)
         try {
             scratch.deleteRecursively()
-            scratch.mkdirs()
+            if (!scratch.mkdirs() && !scratch.isDirectory) return@withContext BibleInstallOutcome.NoDirectory
             val xmlFile = File(scratch, "module.xml")
             val spbPart = File(scratch, module.fileName)
 
