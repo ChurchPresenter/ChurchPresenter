@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
+import org.freedesktop.dbus.errors.ServiceUnknown
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
@@ -129,6 +130,16 @@ abstract class FileChooser {
     internal var nativeDialogsBroken = false
 
     /**
+     * A desktop with no portal running is the machine, not the app. Latched, so the process asks
+     * once and every later dialog goes straight to Swing — but not reported: there is nothing here
+     * to fix, and the operator already has a working chooser.
+     */
+    private suspend fun <T> portalMissing(fallback: suspend () -> T): T {
+        nativeDialogsBroken = true
+        return fallback()
+    }
+
+    /**
      * Runs [attempt] (the platform dialog) and falls back to [fallback] (the Swing dialog) when the
      * platform one is unavailable.
      *
@@ -159,11 +170,11 @@ abstract class FileChooser {
         } catch (e: CancellationException) {
             throw e
         } catch (_: PortalUnavailableException) {
-            // A desktop with no portal running is the machine, not the app. Still latched, so the
-            // process asks once and every later dialog goes straight to Swing — but not reported:
-            // there is nothing here to fix, and the operator already has a working chooser.
-            nativeDialogsBroken = true
-            return fallback()
+            return portalMissing(fallback)
+        } catch (_: ServiceUnknown) {
+            // The bus is there but nothing owns the portal's name: the same machine state, said by
+            // the bus itself and recognised by type rather than by its (localised) message.
+            return portalMissing(fallback)
         } catch (t: Throwable) {
             CrashReporter.reportWarning(
                 "Native file dialog failed; fell back to the Swing chooser",

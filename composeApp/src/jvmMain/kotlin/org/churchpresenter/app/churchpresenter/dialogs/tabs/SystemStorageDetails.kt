@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_song_samples
 import churchpresenter.composeapp.generated.resources.bible_catalog_button
+import churchpresenter.composeapp.generated.resources.bible_catalog_folder_not_writable
 import churchpresenter.composeapp.generated.resources.convert
 import churchpresenter.composeapp.generated.resources.detected_files_label
 import churchpresenter.composeapp.generated.resources.file_not_supported_short
@@ -55,6 +56,7 @@ import org.churchpresenter.app.churchpresenter.composables.ScanningRow
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withInstalledBible
 import org.churchpresenter.theme.semantic
@@ -197,6 +199,7 @@ internal fun BibleStorageDetail(
             return@StorageDetail
         }
         var showCatalog by remember(directory) { mutableStateOf(false) }
+        var notWritable by remember(directory) { mutableStateOf(false) }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -208,8 +211,18 @@ internal fun BibleStorageDetail(
             // finish, so there must be no doubt about where they are going.
             if (java.io.File(directory).isDirectory) {
                 DetailAction(stringResource(Res.string.bible_catalog_button), Res.drawable.ic_download) {
-                    showCatalog = true
+                    // Probed on click, not on composition: it writes a file, and the answer can
+                    // change while the settings are open (a drive unplugged, permissions fixed).
+                    notWritable = !BibleInstallSupport.usableDirectory(java.io.File(directory))
+                    showCatalog = !notWritable
                 }
+            }
+            if (notWritable) {
+                Text(
+                    text = stringResource(Res.string.bible_catalog_folder_not_writable),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
         if (showCatalog) {
@@ -252,7 +265,7 @@ internal fun SongsStorageDetail(directory: String, scan: SongScan) {
                     samplesScope.launch {
                         val count = withContext(Dispatchers.IO) { copySongSamples(directory) }
                         copyingSamples = false
-                        samplePrompts.reportCopied(count)
+                        afterDispatch { samplePrompts.reportCopied(count) }
                     }
                 }
             }
@@ -320,7 +333,7 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
                             )
                         }
                         converting = false
-                        prompts.report(result)
+                        afterDispatch { prompts.report(result) }
                     }
                 },
                 modifier = Modifier.height(22.dp),

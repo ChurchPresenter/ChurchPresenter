@@ -80,6 +80,15 @@ data class CalendarHost(
     val bibleBooks: () -> List<CalendarBibleBook> = { emptyList() },
 
     /**
+     * Where a failure the calendar recovers from is told to somebody, with what was being attempted.
+     *
+     * Supplied because `:calendar` has no crash reporting of its own. The window carries on either
+     * way; this is what stops an export that quietly wrote nothing from being indistinguishable
+     * from one that worked.
+     */
+    val reportError: (context: String, error: Throwable) -> Unit = { _, _ -> },
+
+    /**
      * Where to save an export, or null if the user cancelled. Shown a suggested file name.
      *
      * `suspend` because the app's own `FileChooser.save` is — a native save dialog is not something

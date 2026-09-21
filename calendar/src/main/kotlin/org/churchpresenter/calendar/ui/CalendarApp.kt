@@ -398,8 +398,8 @@ private suspend fun relocate(item: ScheduleItem, fix: ProblemFix, host: Calendar
  * Writes [service]'s run of show to wherever the host's file chooser points.
  *
  * Nothing happens when the chooser is cancelled, which is the common case for a misclick. A failure
- * to write is swallowed here rather than crashing the window — the export is a convenience, and the
- * plan it was made from is still on screen.
+ * to write is reported through the host rather than crashing the window — the export is a
+ * convenience, and the plan it was made from is still on screen.
  */
 /**
  * The header's Export action, or null when no service is open.
@@ -429,7 +429,10 @@ private suspend fun exportRunOfShow(
 ) {
     val target = host.chooseExportFile("${service.name} - ${service.date}.pdf") ?: return
     // Off the composing thread: this embeds a font and writes a file.
-    withContext(io) { runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont, use24Hour) } }
+    withContext(io) {
+        runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont, use24Hour) }
+            .onFailure { host.reportError("Calendar run-of-show PDF export", it) }
+    }
 }
 
 /**
