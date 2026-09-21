@@ -73,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
+import churchpresenter.composeapp.generated.resources.tooltip_preview_settings
 import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
@@ -90,6 +91,8 @@ import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.app.churchpresenter.composables.quickBackgroundSlotFor
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
@@ -2030,6 +2033,9 @@ private fun PreviewSidebar(
                     buttonSize = 36.dp,
                     iconTint = MaterialTheme.colorScheme.error
                 )
+                PreviewSettingsButton(appSettings.projectionSettings) { updated ->
+                    onSettingsChange { s -> s.copy(projectionSettings = updated) }
+                }
             }
             LivePreviewPanel(
                 presenterManager = presenterManager,
@@ -2138,4 +2144,20 @@ private fun ScheduleSidebarCompanionPanel(
                 }
             }
         }
+}
+
+/** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
+@Composable
+private fun PreviewSettingsButton(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
+    Box {
+        var open by remember { mutableStateOf(false) }
+        TooltipIconButton(
+            painter = painterResource(Res.drawable.ic_settings),
+            text = stringResource(Res.string.tooltip_preview_settings),
+            onClick = { open = true },
+            buttonSize = 36.dp,
+            iconTint = if (open) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        )
+        PreviewGroupsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
+    }
 }

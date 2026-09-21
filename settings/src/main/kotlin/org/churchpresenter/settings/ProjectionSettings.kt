@@ -46,6 +46,16 @@ data class ProjectionSettings(
      */
     val previewOutputSelections: Map<String, String> = emptyMap(),
     /**
+     * How the preview panel arranges its outputs: each group is a grid of previews (see
+     * [PreviewGroup]). Outputs in no group are listed below them, one per row, so an empty list is
+     * the panel as it always was.
+     */
+    val previewGroups: List<PreviewGroup> = emptyList(),
+    /** Whether each preview in the panel carries its output's name. */
+    val showOutputLabels: Boolean = true,
+    /** Whether each preview names its display type -- Full Screen, Lower Third or Stage Monitor. */
+    val showOutputModes: Boolean = true,
+    /**
      * What the operator calls each physical monitor -- "Sanctuary Left", "Foyer TV", "Balcony".
      *
      * Keyed by [screenKey], the monitor's own geometry, rather than by its index in the device list
