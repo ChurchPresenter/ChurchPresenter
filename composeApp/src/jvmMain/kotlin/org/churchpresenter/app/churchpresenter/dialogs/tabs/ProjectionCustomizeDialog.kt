@@ -75,6 +75,7 @@ import churchpresenter.composeapp.generated.resources.tab_dictionary
 import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.settings.backgroundOverrideOf
 import org.churchpresenter.settings.bibleOverrideOf
 import org.churchpresenter.settings.dictionaryOverrideOf
@@ -216,6 +217,7 @@ internal fun CustomizePane.label(): String = when (this) {
 internal fun OutputCustomizeDialog(
     screenLabel: String,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     globalSettings: AppSettings,
     onApply: (ScreenAssignment) -> Unit,
     onDismiss: () -> Unit,
@@ -321,6 +323,7 @@ internal fun OutputCustomizeDialog(
                         live = overridden || !pane.hasOverride,
                         draft = draft,
                         assignment = assignment,
+                        outputKind = outputKind,
                         translationIndex = translationIndex,
                         onTranslationChange = { pickedTranslation = it },
                         onElementChange = { pickedElement = it },
@@ -502,6 +505,7 @@ private fun CustomizeDialogHeader(
 @Composable
 internal fun CustomizeOutputCell(
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     screenLabel: String,
     settings: AppSettings,
     onApply: (ScreenAssignment) -> Unit,
@@ -573,6 +577,7 @@ internal fun CustomizeOutputCell(
         OutputCustomizeDialog(
             screenLabel = screenLabel,
             assignment = assignment,
+            outputKind = outputKind,
             globalSettings = settings,
             onApply = onApply,
             onDismiss = { showDialog = false },

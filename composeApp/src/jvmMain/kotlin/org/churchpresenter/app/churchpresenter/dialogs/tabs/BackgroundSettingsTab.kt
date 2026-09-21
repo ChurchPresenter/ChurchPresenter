@@ -118,10 +118,12 @@ import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_SLOTS
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.newQuickBackground
 import org.churchpresenter.app.churchpresenter.composables.quickBackgroundLabel
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
@@ -181,8 +183,10 @@ fun BackgroundSettingsTab(
     // and Songs carry separate heights, which is why this is asked per surface rather than once.
     val bandFraction = settings.bandFractionFor(scope)
     // The shape of the screen this goes out on. The band is a percentage of that screen's height,
-    // so a preview shaped like some other monitor moves the band and everything inside it.
-    val outputAspect = previewOutputSize(settings).aspectRatio
+    // so a preview shaped like some other monitor moves the band and everything inside it. Which
+    // output that is is the operator's call on a multi-output rig -- see PreviewOutputPicker below.
+    val previewOutput = rememberPreviewOutput(settings, Constants.PREVIEW_TAB_BACKGROUND, scope.previewMode())
+    val outputAspect = previewOutput.size.aspectRatio
     val onConfigChange: (BackgroundConfig) -> Unit = { config ->
         viewModel.updateBackground(scope, config, onSettingsChange)
     }
@@ -219,6 +223,13 @@ fun BackgroundSettingsTab(
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
+                    PreviewOutputPicker(
+                        settings = settings,
+                        tabId = Constants.PREVIEW_TAB_BACKGROUND,
+                        mode = scope.previewMode(),
+                        onSettingsChange = onSettingsChange,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                    )
                     BackgroundStagePreview(
                         config = backgrounds.resolvedConfigFor(scope),
                         // Resolved separately: `resolvedConfigFor` walks the *band's* chain, and

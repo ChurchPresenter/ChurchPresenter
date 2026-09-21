@@ -89,7 +89,6 @@ import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderLi
 import org.churchpresenter.app.churchpresenter.composables.rememberBiblePreviewVerses
 import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -795,8 +794,9 @@ private fun StylePane(
     val sampleVerses = bibleSampleVerses(translations, previewVerses, sampleSlot, moduleTitles)
     // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
     // one to whichever the tab is styling for its duration, so a hall with a single full-screen
-    // projector can still be shown what its lower third would look like.
-    val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    // projector can still be shown what its lower third would look like. `hasAnyOpenOutput` counts a
+    // single-monitor dev machine's dev-fallback window too -- see its own doc comment.
+    val hasOutputForTarget = hasAnyOpenOutput(settings)
     OnScreenPreviewEffect(
         active = previewOnScreen && sampleVerses.isNotEmpty(),
         settings = settings,
@@ -823,20 +823,12 @@ private fun StylePane(
             onTargetChange = onTargetChange,
             moduleTitles = moduleTitles,
         )
-        // Centred and capped rather than filling the pane: see SETTINGS_PREVIEW_MAX_HEIGHT.
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            BiblePreviewPanel(
-                settings = settings,
-                target = target,
-                selectedVerses = sampleVerses,
-                modifier = Modifier.width(
-                    minOf(
-                        maxWidth,
-                        SETTINGS_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio,
-                    ),
-                ),
-            )
-        }
+        BiblePreviewWithOutputPicker(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            target = target,
+            selectedVerses = sampleVerses,
+        )
         SettingsPreviewSampleRow(
             slot = sampleSlot,
             onSlotChange = { sampleSlot = it },

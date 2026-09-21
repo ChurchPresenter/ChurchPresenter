@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -148,6 +149,7 @@ class ProjectionCustomizeTitleSlideTest {
                     OutputCustomizeDialog(
                         screenLabel = "Screen 1",
                         assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+                        outputKind = OutputKind.SCREEN,
                         globalSettings = output(),
                         onApply = {},
                         onDismiss = {},
@@ -163,6 +165,7 @@ class ProjectionCustomizeTitleSlideTest {
                 OutputCustomizeDialog(
                     screenLabel = "Screen 1",
                     assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+                    outputKind = OutputKind.SCREEN,
                     globalSettings = output(),
                     onApply = {},
                     onDismiss = {},

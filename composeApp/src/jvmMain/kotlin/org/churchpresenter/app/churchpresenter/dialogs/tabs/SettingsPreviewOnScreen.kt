@@ -4,9 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.composables.rememberRealWindowCount
+import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -67,6 +71,35 @@ internal fun OnScreenPreviewEffect(
 }
 
 /**
+ * Whether a real window is open for this screen assignment right now.
+ *
+ * Deliberately separate from [isLiveOutput]: that one asks "does an audience see this" -- a dev
+ * fallback window never counts there, on purpose (see `hasAudienceOutput`'s own doc comment). This
+ * one asks "is there a window an operator could actually look at", and a dev window answers yes to
+ * that -- on a single-monitor dev machine, `main.kt` opens one anyway, at a slot whose `targetDisplay`
+ * is auto-resolved to "None" only because there is no real display to assign it to (mirrors the same
+ * exemption `LivePreviewPanel` and `outputsShowing` already make).
+ *
+ * Without this, "Preview on Screen" found no live output to push to on exactly that rig -- the
+ * button stayed disabled, and even a caller that ignored the disabled state would have had its
+ * assignment skipped by [AppSettings.withPreviewOutputs] too.
+ */
+@Composable
+internal fun screenAssignmentIsOpen(index: Int, assignment: ScreenAssignment): Boolean {
+    if (assignment.isLiveOutput()) return true
+    val realWindowCount = rememberRealWindowCount()
+    val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && realWindowCount == 0
+    return devWindowedFallback && index >= realWindowCount
+}
+
+/** Whether the "Preview on Screen" button has anywhere at all to push its sample to. */
+@Composable
+internal fun hasAnyOpenOutput(settings: AppSettings): Boolean =
+    settings.projectionSettings.screenAssignments.withIndex().any { (index, assignment) ->
+        screenAssignmentIsOpen(index, assignment)
+    }
+
+/**
  * What the preview switches describe, in the terms an output is actually configured in.
  *
  * Every one of these is a property of the *output* rather than of the styling: a screen draws the
@@ -95,11 +128,16 @@ internal data class PreviewOutputState(
  * This override lives only as long as the preview: it is folded over the saved settings in main.kt
  * and dropped when the button goes off or the dialog closes, so nothing here is ever written to
  * disk.
+ *
+ * Composable because [screenAssignmentIsOpen] is: a dev-fallback window must be set up too, or a
+ * single-monitor dev rig -- where every configured screen resolves to "None" -- never gets a preview
+ * pushed to it at all.
  */
+@Composable
 internal fun AppSettings.withPreviewOutputs(state: PreviewOutputState): AppSettings = copy(
     projectionSettings = projectionSettings.copy(
-        screenAssignments = projectionSettings.screenAssignments.map { assignment ->
-            if (!assignment.isLiveOutput()) {
+        screenAssignments = projectionSettings.screenAssignments.mapIndexed { index, assignment ->
+            if (!screenAssignmentIsOpen(index, assignment)) {
                 assignment
             } else {
                 assignment.copy(
