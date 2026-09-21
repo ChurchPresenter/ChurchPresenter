@@ -856,6 +856,10 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
             Runtime.getRuntime().addShutdownHook(Thread { log.wentBlank() })
         }
     }
+    // A phone planning a service asks how long each song usually runs here; the log is the answer.
+    LaunchedEffect(liveDurationLog) {
+        companionServer.typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) }
+    }
     val remoteSelectMediaFlow =
         remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 8) }
     var dialogDismissSignal by remember { mutableStateOf(0) }

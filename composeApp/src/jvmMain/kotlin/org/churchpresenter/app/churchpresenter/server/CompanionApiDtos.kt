@@ -54,6 +54,18 @@ data class SongCatalogResponse(
     val total: Int
 )
 
+/**
+ * How long a song typically runs on screen here, measured over past services -- what a phone
+ * plans a service with. Only songs that have been measured are listed. [songId] is the desktop's
+ * own key, `songbook::number`, the one a calendar row names a song by.
+ */
+@Serializable
+data class SongDurationDto(val songbook: String, val songId: String, val title: String, val seconds: Int)
+
+/** Response for GET /api/song-durations. */
+@Serializable
+data class SongDurationsResponse(val durations: List<SongDurationDto>)
+
 @Serializable
 data class SongSectionDto(
     val type: String,           // "verse", "chorus", "other"

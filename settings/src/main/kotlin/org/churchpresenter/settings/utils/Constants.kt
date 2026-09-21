@@ -252,6 +252,7 @@ object Constants {
     const val ENDPOINT_STATUS            = "/api/status"
     const val ENDPOINT_SONGS             = "/api/songs"
     const val ENDPOINT_SONG_DETAIL       = "/api/songs/{number}"
+    const val ENDPOINT_SONG_DURATIONS    = "/api/song-durations"
     const val ENDPOINT_BIBLE             = "/api/bible"
     const val ENDPOINT_BIBLE_SECONDARY   = "/api/bible/secondary"
     const val ENDPOINT_SCHEDULE          = "/api/schedule"

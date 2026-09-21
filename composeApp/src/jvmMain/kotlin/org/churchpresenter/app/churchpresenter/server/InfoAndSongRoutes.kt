@@ -79,6 +79,12 @@ private fun Route.songRoutes(
     json: Json,
     scope: CoroutineScope,
 ) {
+                /** GET /api/song-durations — the songs this desktop has measured, with their typical length. */
+                get(Constants.ENDPOINT_SONG_DURATIONS) {
+                    if (!server.checkApiKey(call)) return@get
+                    call.respond(server.songDurations())
+                }
+
                 get(Constants.ENDPOINT_SONGS) {
                     if (!server.checkApiKey(call)) return@get
                     val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]

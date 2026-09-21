@@ -299,6 +299,19 @@ class CompanionServer {
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile internal var _songs: List<SongItem> = emptyList()
+
+    /**
+     * How long a song typically runs here, from the app's duration log; null for one never measured.
+     * Set by the app once the log exists; the server itself keeps no durations.
+     */
+    @Volatile var typicalSeconds: (SongItem) -> Int? = { null }
+
+    /** Every song that has a measured length, for a phone planning a service. */
+    fun songDurations(): SongDurationsResponse = SongDurationsResponse(
+        _songs.mapNotNull { song ->
+            typicalSeconds(song)?.let { SongDurationDto(song.songbook, song.songId, song.title, it) }
+        },
+    )
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
