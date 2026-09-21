@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +56,12 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/** Test handles for the switches, which carry no text of their own. */
+internal const val TAG_SHOW_LABELS = "preview_show_labels"
+internal const val TAG_SHOW_MODES = "preview_show_modes"
+
+internal fun hideGroupTag(groupId: String) = "preview_hide_$groupId"
+
 private val POPOVER_WIDTH = 340.dp
 
 /** The per-group Hide switch is drawn smaller than the full-size ones so it fits the title line. */
@@ -90,11 +97,13 @@ fun PreviewGroupsPopover(
             SwitchRow(
                 label = stringResource(Res.string.preview_settings_show_labels),
                 checked = proj.showOutputLabels,
+                tag = TAG_SHOW_LABELS,
                 onChange = { onChange(proj.copy(showOutputLabels = it)) },
             )
             SwitchRow(
                 label = stringResource(Res.string.preview_settings_show_modes),
                 checked = proj.showOutputModes,
+                tag = TAG_SHOW_MODES,
                 onChange = { onChange(proj.copy(showOutputModes = it)) },
             )
             HorizontalDivider()
@@ -128,10 +137,10 @@ fun PreviewGroupsPopover(
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
     }
 }
 
@@ -155,7 +164,7 @@ private fun GroupEditor(
             Switch(
                 checked = group.hidden,
                 onCheckedChange = { hide -> onChange(proj.updatePreviewGroup(group.id) { it.copy(hidden = hide) }) },
-                modifier = Modifier.scale(HIDE_SWITCH_SCALE),
+                modifier = Modifier.scale(HIDE_SWITCH_SCALE).testTag(hideGroupTag(group.id)),
             )
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_delete),
