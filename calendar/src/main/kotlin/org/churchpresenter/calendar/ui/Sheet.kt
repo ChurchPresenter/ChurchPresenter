@@ -210,7 +210,8 @@ fun RowScope.CardText(title: String, subtitle: String?) {
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
+                // An explanation is allowed a second line; the title stays on one.
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
         }

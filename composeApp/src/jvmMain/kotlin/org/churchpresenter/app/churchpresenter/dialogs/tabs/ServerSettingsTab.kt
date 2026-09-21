@@ -762,7 +762,12 @@ private fun CompanionTriggersCard(
 
             // Key controls — only when ATEM is configured
             if (atemConfigured) {
-                AtemKeySection(serverUrl = serverUrl, keyTypeParam = keyTypeParam, apiKey = apiKeyOrBlank, copyText = copyText)
+                AtemKeySection(
+                    serverUrl = serverUrl,
+                    keyTypeParam = keyTypeParam,
+                    apiKey = apiKeyOrBlank,
+                    copyText = copyText,
+                )
             }
 
             TakedownSection(serverUrl = serverUrl, apiKey = apiKeyOrBlank, copyText = copyText)

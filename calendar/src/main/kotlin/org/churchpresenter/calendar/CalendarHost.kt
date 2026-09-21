@@ -138,7 +138,16 @@ data class CalendarHost(
 
     /** What the picker's preset previews can draw with -- the app's video player and deck rasterizer. */
     val preview: PreviewSources = PreviewSources(),
+
+    /**
+     * The switch that keeps this calendar in step with the cloud and the phones, or null when the
+     * app offers no such thing. Off, nothing about the calendar leaves this computer.
+     */
+    val cloudSync: CalendarCloudSync? = null,
 )
+
+/** The cloud sync switch as the settings dialog draws it: what it reads, and what a flip does. */
+class CalendarCloudSync(val enabled: () -> Boolean, val setEnabled: (Boolean) -> Unit)
 
 /**
  * One book of the primary Bible, flattened to exactly what the picker draws.

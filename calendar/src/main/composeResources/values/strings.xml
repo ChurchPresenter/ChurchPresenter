@@ -194,6 +194,8 @@
     <string name="calendar_export_failed">The run of show could not be exported.</string>
     <string name="calendar_section_new">New section</string>
     <string name="calendar_section_insert">Insert</string>
+    <string name="calendar_cloud_sync">Sync with the cloud and mobile devices</string>
+    <string name="calendar_cloud_sync_sub">Keeps this calendar in step with phones through the relay. Off, nothing about it leaves this computer</string>
     <string name="calendar_auto_load">Load the service automatically</string>
     <string name="calendar_auto_load_sub">Puts the run of show into the Schedule tab before its first item, clearing whatever is there</string>
     <string name="calendar_auto_load_lead">How far ahead</string>

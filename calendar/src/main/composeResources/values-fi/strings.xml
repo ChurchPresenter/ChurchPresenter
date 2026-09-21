@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Osuus tapahtuu edessä, ei näytöllä — anna sille pituus rivillä; automatisoitavaa ei ole</string>
     <string name="calendar_ministry_what">Mitä tapahtuu</string>
     <string name="calendar_ministry_who">Kuka tai huomautus</string>
+    <string name="calendar_cloud_sync">Synkronoi pilven ja mobiililaitteiden kanssa</string>
+    <string name="calendar_cloud_sync_sub">Pitää tämän kalenterin ajan tasalla puhelinten kanssa välittimen kautta. Pois päältä mikään ei lähde tältä tietokoneelta</string>
 </resources>

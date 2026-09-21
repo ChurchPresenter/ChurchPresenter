@@ -138,6 +138,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.seedCalendarFolder
@@ -1071,6 +1072,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
                             LaunchedEffect(Unit) {
                                 companionServer.onCalendarEnroll.collect { pending ->
+                                    // Sync off means no relay, so there is nothing to enroll into.
+                                    if (!appSettings.calendarSync.enabled) {
+                                        pending.decision.complete(null)
+                                        return@collect
+                                    }
                                     val clientId = pending.clientId
                                     val access = remoteAccessDecision(
                                         clientId,
@@ -1083,7 +1089,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     }
                                     val enroll: () -> Unit = {
                                         coroutineScope.launch {
-                                            // The phone stopped waiting (or was refused) while this prompt sat in the queue.
+                                            // The phone stopped waiting (or was refused) while this prompt
+                                            // sat in the queue.
                                             if (pending.decision.isCompleted) return@launch
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
                                             calendarEnrollQr = enrollment
@@ -2009,6 +2016,17 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
                                     typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
                                     host = CalendarHost(
+                                        // The switch in the calendar's own settings; the same flag the
+                                        // Server tab's card shows, so the two never disagree.
+                                        cloudSync = CalendarCloudSync(
+                                            enabled = { appSettings.calendarSync.enabled },
+                                            setEnabled = { on ->
+                                                appSettings = appSettings.copy(
+                                                    calendarSync = appSettings.calendarSync.copy(enabled = on),
+                                                )
+                                                settingsManager.saveSettings(appSettings)
+                                            },
+                                        ),
                                         // How long a row runs by itself, so a plan does not have
                                         // to be timed by hand: a clip's own duration, read from
                                         // its header, and a slideshow's count times the interval

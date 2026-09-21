@@ -86,10 +86,17 @@ class CalendarSyncServiceTest {
     @Test
     fun `sync off means no network and status Off`() = runBlocking<Unit> {
         settings = settings.copy(enabled = false)
+        val service = service()
 
-        assertFalse(service().syncOnStartup())
+        assertFalse(service.syncOnStartup())
+        assertEquals(CalendarSyncStatus.Off, service.status.value)
 
-        assertEquals(CalendarSyncStatus.Off, service().status.value)
+        // Even a desktop that was paired before the switch went off stays silent.
+        settings = settings.copy(instanceId = "inst", desktopToken = "tok", instanceKey = "k".repeat(43))
+        assertFalse(service.syncNow())
+        assertNull(service.enroll("phone-1", "Anna's iPhone"))
+        service.revokeDevice("phone-1")
+        assertEquals(CalendarSyncStatus.Off, service.status.value)
         assertTrue(relay.calls.isEmpty())
     }
 

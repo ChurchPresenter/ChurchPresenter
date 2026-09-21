@@ -195,307 +195,309 @@ internal fun OptionsDialogContent(
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val tabScrollState = remember { ScrollState(0) }
 
-        AppWindowRoot(theme = theme) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // Tab Row — with the same overflow arrows as the main window's tab strip, since
-                    // a dozen tabs outrun the dialog's width long before the window is narrow.
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TabStripBackArrow(tabScrollState)
-                        PrimaryScrollableTabRow(
-                            selectedTabIndex = safeTabIndex,
-                            modifier = Modifier.weight(1f),
-                            scrollState = tabScrollState,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            edgePadding = 0.dp,
-                            minTabWidth = LABELED_TAB_MIN_WIDTH,
-                            indicator = { LabeledTabIndicator(safeTabIndex) },
-                        ) {
-                            val labelStyle = currentSettings.tabLabelStyle
-                            SettingsTab(
-                                0,
-                                stringResource(Res.string.appearance),
-                                Icons.Filled.Palette,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                1,
-                                stringResource(Res.string.bible),
-                                Icons.Filled.MenuBook,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                2,
-                                stringResource(Res.string.song),
-                                Icons.Filled.MusicNote,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_BACKGROUND,
-                                stringResource(Res.string.background),
-                                Icons.Filled.Wallpaper,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_PROJECTION,
-                                stringResource(Res.string.projection),
-                                Icons.Filled.DesktopWindows,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_SERVER,
-                                stringResource(Res.string.server_settings),
-                                Icons.Filled.Dns,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_STAGE_MONITOR,
-                                stringResource(Res.string.stage_monitor),
-                                Icons.Filled.Tv,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_ATEM,
-                                stringResource(Res.string.atem_settings),
-                                Icons.Filled.SwitchVideo,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            SettingsTab(
-                                TAB_DICTIONARY,
-                                stringResource(Res.string.tab_dictionary),
-                                Icons.Filled.Book,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                            if (obsManager != null) {
-                                SettingsTab(
-                                    TAB_INTEGRATIONS,
-                                    stringResource(Res.string.obs_settings),
-                                    Icons.Filled.Videocam,
-                                    safeTabIndex,
-                                    labelStyle,
-                                ) {
-                                    selectedTabIndex = it
-                                }
-                            }
-                            SettingsTab(
-                                companionSatelliteTabIndex,
-                                stringResource(Res.string.companion_satellite_settings),
-                                Icons.Filled.SettingsRemote,
-                                safeTabIndex,
-                                labelStyle,
-                            ) {
-                                selectedTabIndex = it
-                            }
-                        }
-                        TabStripForwardArrow(tabScrollState)
-                    }
+    // What the Apply button below does, for a nested dialog to offer as well.
+    val applySettings = {
+        settingsManager.saveSettings(currentSettings)
+        onSave(currentSettings)
+    }
 
-                    // Tab Content
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
-                    ) {
-                        // What the Apply button below does, for a nested dialog to offer as well.
-                        val applySettings = {
-                            settingsManager.saveSettings(currentSettings)
-                            onSave(currentSettings)
-                        }
-                        CompositionLocalProvider(LocalApplySettings provides applySettings) {
-                        when (safeTabIndex) {
-                            0 -> SystemSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                companionServer = companionServer
-                            )
-                            1 -> BibleSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                presenterManager = presenterManager,
-                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
-                            )
-                            2 -> SongSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                presenterManager = presenterManager,
-                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
-                            )
-                            TAB_BACKGROUND -> BackgroundSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
-                            )
-                            TAB_PROJECTION -> ProjectionSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                companionServer = companionServer,
-                                onIdentifyScreen = { onIdentifyScreen() },
-                                onIdentifyBrowserSource = { index -> onIdentifyBrowserSource(index) },
-                                onIdentifyNdi = { index -> onIdentifyNdi(index) },
-                                scenes = scenes,
-                                detectScreens = detectScreens
-                            )
-                            TAB_SERVER -> ServerSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                companionServer = companionServer,
-                                remoteClientManager = remoteClientManager,
-                                calendarSync = calendarSync,
-                            )
-                            TAB_STAGE_MONITOR -> StageMonitorSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            TAB_ATEM -> AtemSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            TAB_DICTIONARY -> DictionarySettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            TAB_INTEGRATIONS -> if (obsManager != null) {
-                                OBSSettingsTab(
-                                    settings = currentSettings,
-                                    onSettingsChange = { updateFn ->
-                                        currentSettings = updateFn(currentSettings)
-                                    },
-                                    obsManager = obsManager
-                                )
-                            } else {
-                                CompanionSatelliteSettingsTab(
-                                    settings = currentSettings,
-                                    onSettingsChange = { updateFn ->
-                                        currentSettings = updateFn(currentSettings)
-                                    },
-                                    viewModel = companionSatelliteViewModel
-                                )
-                            }
-                            // Past the OBS tab the numbering depends on whether it is
-                            // present, so this is matched by its computed index rather than by a
-                            // literal that would be right in only one of the two cases.
-                            companionSatelliteTabIndex -> CompanionSatelliteSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                },
-                                viewModel = companionSatelliteViewModel
-                            )
-                        }
-                        }
-                    }
+    AppWindowRoot(theme = theme) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                SettingsTabStrip(
+                    selectedIndex = safeTabIndex,
+                    scrollState = tabScrollState,
+                    labelStyle = currentSettings.tabLabelStyle,
+                    hasObs = obsManager != null,
+                    companionSatelliteTabIndex = companionSatelliteTabIndex,
+                    onSelect = { selectedTabIndex = it },
+                )
 
-                    // Button Row
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = onDismiss,
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Button(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = {
-                                settingsManager.saveSettings(currentSettings)
-                                onSave(currentSettings)
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        ) {
-                            Text(stringResource(Res.string.apply))
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Button(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = {
-                                settingsManager.saveSettings(currentSettings)
-                                onSave(currentSettings)
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.ok)}")
-                        }
+                // Tab Content
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    CompositionLocalProvider(LocalApplySettings provides applySettings) {
+                        SettingsTabContent(
+                            tabIndex = safeTabIndex,
+                            settings = currentSettings,
+                            onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
+                            settingsManager = settingsManager,
+                            companionServer = companionServer,
+                            remoteClientManager = remoteClientManager,
+                            presenterManager = presenterManager,
+                            calendarSync = calendarSync,
+                            onIdentifyScreen = onIdentifyScreen,
+                            onIdentifyBrowserSource = onIdentifyBrowserSource,
+                            onIdentifyNdi = onIdentifyNdi,
+                            scenes = scenes,
+                            obsManager = obsManager,
+                            companionSatelliteViewModel = companionSatelliteViewModel,
+                            companionSatelliteTabIndex = companionSatelliteTabIndex,
+                            detectScreens = detectScreens,
+                        )
                     }
                 }
+
+                SettingsDialogButtons(
+                    onCancel = onDismiss,
+                    onApply = applySettings,
+                    onOk = {
+                        applySettings()
+                        onDismiss()
+                    },
+                )
             }
         }
     }
+}
+
+/**
+ * The tab row — with the same overflow arrows as the main window's tab strip, since a dozen tabs
+ * outrun the dialog's width long before the window is narrow.
+ */
+@Composable
+private fun SettingsTabStrip(
+    selectedIndex: Int,
+    scrollState: ScrollState,
+    labelStyle: TabLabelStyle,
+    hasObs: Boolean,
+    companionSatelliteTabIndex: Int,
+    onSelect: (Int) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TabStripBackArrow(scrollState)
+        PrimaryScrollableTabRow(
+            selectedTabIndex = selectedIndex,
+            modifier = Modifier.weight(1f),
+            scrollState = scrollState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            edgePadding = 0.dp,
+            minTabWidth = LABELED_TAB_MIN_WIDTH,
+            indicator = { LabeledTabIndicator(selectedIndex) },
+        ) {
+            SettingsTab(
+                0,
+                stringResource(Res.string.appearance),
+                Icons.Filled.Palette,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook, selectedIndex, labelStyle, onSelect)
+            SettingsTab(2, stringResource(Res.string.song), Icons.Filled.MusicNote, selectedIndex, labelStyle, onSelect)
+            SettingsTab(
+                TAB_BACKGROUND,
+                stringResource(Res.string.background),
+                Icons.Filled.Wallpaper,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(
+                TAB_PROJECTION,
+                stringResource(Res.string.projection),
+                Icons.Filled.DesktopWindows,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(
+                TAB_SERVER,
+                stringResource(Res.string.server_settings),
+                Icons.Filled.Dns,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(
+                TAB_STAGE_MONITOR,
+                stringResource(Res.string.stage_monitor),
+                Icons.Filled.Tv,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(
+                TAB_ATEM,
+                stringResource(Res.string.atem_settings),
+                Icons.Filled.SwitchVideo,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            SettingsTab(
+                TAB_DICTIONARY,
+                stringResource(Res.string.tab_dictionary),
+                Icons.Filled.Book,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+            if (hasObs) {
+                SettingsTab(
+                    TAB_INTEGRATIONS,
+                    stringResource(Res.string.obs_settings),
+                    Icons.Filled.Videocam,
+                    selectedIndex,
+                    labelStyle,
+                    onSelect,
+                )
+            }
+            SettingsTab(
+                companionSatelliteTabIndex,
+                stringResource(Res.string.companion_satellite_settings),
+                Icons.Filled.SettingsRemote,
+                selectedIndex,
+                labelStyle,
+                onSelect,
+            )
+        }
+        TabStripForwardArrow(scrollState)
+    }
+}
+
+@Composable
+private fun SettingsTabContent(
+    tabIndex: Int,
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    settingsManager: SettingsManager,
+    companionServer: CompanionServer,
+    remoteClientManager: RemoteClientManager,
+    presenterManager: PresenterManager,
+    calendarSync: CalendarSyncService?,
+    onIdentifyScreen: () -> Unit,
+    onIdentifyBrowserSource: (Int) -> Unit,
+    onIdentifyNdi: (Int) -> Unit,
+    scenes: List<Scene>,
+    obsManager: OBSWebSocketManager?,
+    companionSatelliteViewModel: CompanionSatelliteViewModel?,
+    companionSatelliteTabIndex: Int,
+    detectScreens: () -> List<DetectedScreen>,
+) {
+    when (tabIndex) {
+        0 -> SystemSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            companionServer = companionServer
+        )
+        1 -> BibleSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            presenterManager = presenterManager,
+            bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
+        )
+        2 -> SongSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            presenterManager = presenterManager,
+            bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
+        )
+        TAB_BACKGROUND -> BackgroundSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
+        )
+        TAB_PROJECTION -> ProjectionSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            companionServer = companionServer,
+            onIdentifyScreen = { onIdentifyScreen() },
+            onIdentifyBrowserSource = { index -> onIdentifyBrowserSource(index) },
+            onIdentifyNdi = { index -> onIdentifyNdi(index) },
+            scenes = scenes,
+            detectScreens = detectScreens
+        )
+        TAB_SERVER -> ServerSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            companionServer = companionServer,
+            remoteClientManager = remoteClientManager,
+            calendarSync = calendarSync,
+        )
+        TAB_STAGE_MONITOR -> StageMonitorSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
+        TAB_ATEM -> AtemSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
+        TAB_DICTIONARY -> DictionarySettingsTab(settings = settings, onSettingsChange = onSettingsChange)
+        TAB_INTEGRATIONS -> if (obsManager != null) {
+            OBSSettingsTab(settings = settings, onSettingsChange = onSettingsChange, obsManager = obsManager)
+        } else {
+            CompanionSatelliteSettingsTab(
+                settings = settings,
+                onSettingsChange = onSettingsChange,
+                viewModel = companionSatelliteViewModel
+            )
+        }
+        // Past the OBS tab the numbering depends on whether it is
+        // present, so this is matched by its computed index rather than by a
+        // literal that would be right in only one of the two cases.
+        companionSatelliteTabIndex -> CompanionSatelliteSettingsTab(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            viewModel = companionSatelliteViewModel
+        )
+    }
+}
+
+@Composable
+private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onOk: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onCancel,
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Button(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onApply,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        ) {
+            Text(stringResource(Res.string.apply))
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Button(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onOk,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.ok)}")
+        }
+    }
+}
 
 @Composable
 private fun SettingsTab(

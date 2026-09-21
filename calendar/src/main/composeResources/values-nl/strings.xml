@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Een bijdrage gebeurt vooraan, niet op het scherm — geef hem een lengte op de rij; er valt niets te automatiseren</string>
     <string name="calendar_ministry_what">Wat er gebeurt</string>
     <string name="calendar_ministry_who">Wie, of een notitie</string>
+    <string name="calendar_cloud_sync">Synchroniseren met de cloud en mobiele apparaten</string>
+    <string name="calendar_cloud_sync_sub">Houdt deze kalender via de relay gelijk met telefoons. Uit: niets ervan verlaat deze computer</string>
 </resources>

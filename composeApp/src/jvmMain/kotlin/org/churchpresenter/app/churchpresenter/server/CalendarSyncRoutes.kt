@@ -70,7 +70,10 @@ internal fun Route.calendarSyncRoutes(server: CompanionServer, json: Json) {
             if (timedOut) pending.decision.complete(null)
             when {
                 reply != null -> call.respond(reply)
-                timedOut -> call.respondText("""{"error":"enrollment timed out"}""", status = HttpStatusCode.RequestTimeout)
+                timedOut -> call.respondText(
+                    """{"error":"enrollment timed out"}""",
+                    status = HttpStatusCode.RequestTimeout,
+                )
                 else -> call.respondText("""{"error":"enrollment denied"}""", status = HttpStatusCode.Forbidden)
             }
         } finally {

@@ -107,6 +107,7 @@ class CalendarSyncService(
 
     /** Enrolls a phone the operator has just approved, returning what the desktop shows as a QR. */
     suspend fun enroll(deviceId: String, deviceName: String): CalendarEnrollment? = lock.withLock {
+        if (!settings().enabled) return@withLock null
         withContext(io) {
             try {
                 val desktopToken = relay.withClientKey { relay.ensureRegistered() }
@@ -147,6 +148,7 @@ class CalendarSyncService(
     }
 
     suspend fun revokeDevice(deviceId: String) = lock.withLock {
+        if (!settings().enabled) return@withLock
         withContext(io) {
             runCatching { relay.client().revokeDevice(relay.token(), deviceId) }
                 .onSuccess { _devices.value = _devices.value.filterNot { it.id == deviceId } }
@@ -163,6 +165,10 @@ class CalendarSyncService(
     }
 
     private suspend fun round(work: (SyncCoordinator) -> SyncOutcome): Boolean = lock.withLock {
+        if (!settings().enabled) {
+            _status.value = CalendarSyncStatus.Off
+            return@withLock false
+        }
         if (!settings().isPaired) {
             _status.value = CalendarSyncStatus.Unpaired
             return@withLock false
