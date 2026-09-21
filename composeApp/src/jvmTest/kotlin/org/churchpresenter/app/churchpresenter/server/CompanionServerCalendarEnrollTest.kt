@@ -65,7 +65,8 @@ class CompanionServerCalendarEnrollTest {
         assertEquals("phone-1", request.clientId)
         assertEquals("Anna's iPhone", request.deviceName)
         assertEquals("482913", request.code)
-        request.decision.complete(CalendarEnrollReply("https://relay.example", "inst-1"))
+        val reply1 = CalendarEnrollReply("https://relay.example", "inst-1")
+        request.decision.complete(CalendarEnrollDecision.Approved(reply1))
 
         val response = reply.await()
         assertEquals(HttpStatusCode.OK, response.status)
@@ -79,9 +80,31 @@ class CompanionServerCalendarEnrollTest {
         val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
         val reply = async { enroll("phone-2", """{"deviceName":"x","code":"123456"}""") }
 
-        pending.await().decision.complete(null)
+        pending.await().decision.complete(CalendarEnrollDecision.Denied)
 
         assertEquals(HttpStatusCode.Forbidden, reply.await().status)
+    }
+
+    @Test
+    fun `a desktop with sync switched off says so, distinctly from a refusal`() = runBlocking<Unit> {
+        val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
+        val reply = async { enroll("phone-3", """{"deviceName":"x","code":"123456"}""") }
+
+        pending.await().decision.complete(CalendarEnrollDecision.SyncOff)
+
+        val response = reply.await()
+        assertEquals(HttpStatusCode.Conflict, response.status)
+        assertTrue(ENROLL_ERROR_SYNC_OFF in response.bodyAsText())
+    }
+
+    @Test
+    fun `a relay the desktop could not reach is a gateway error, not a refusal`() = runBlocking<Unit> {
+        val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
+        val reply = async { enroll("phone-4", """{"deviceName":"x","code":"123456"}""") }
+
+        pending.await().decision.complete(CalendarEnrollDecision.RelayFailed)
+
+        assertEquals(HttpStatusCode.BadGateway, reply.await().status)
     }
 
     @Test

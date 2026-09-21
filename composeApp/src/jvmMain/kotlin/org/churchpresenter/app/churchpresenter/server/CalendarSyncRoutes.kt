@@ -26,13 +26,31 @@ internal data class CalendarEnrollBody(val deviceName: String = "", val code: St
 @Serializable
 data class CalendarEnrollReply(val relayUrl: String, val instanceId: String)
 
-/** A phone asking to be enrolled with the calendar relay; [decision] is the reply once the operator has decided. */
+/** How a phone's request to be enrolled ended, each answered differently so the phone can say why. */
+sealed class CalendarEnrollDecision {
+    /** The operator allowed it and the desktop is registered: here is where to go. */
+    data class Approved(val reply: CalendarEnrollReply) : CalendarEnrollDecision()
+
+    /** The operator refused, the device is blocked, or nobody answered in time. */
+    data object Denied : CalendarEnrollDecision()
+
+    /** Calendar sync is switched off on the desktop, so there is nothing to enroll into. */
+    data object SyncOff : CalendarEnrollDecision()
+
+    /** Allowed, but the desktop could not register with the relay or enroll the phone. */
+    data object RelayFailed : CalendarEnrollDecision()
+}
+
+/** A phone asking to be enrolled with the calendar relay; [decision] is the answer once the operator has decided. */
 data class PendingCalendarEnroll(
     val clientId: String,
     val deviceName: String,
     val code: String,
-    val decision: CompletableDeferred<CalendarEnrollReply?> = CompletableDeferred(),
+    val decision: CompletableDeferred<CalendarEnrollDecision> = CompletableDeferred(),
 )
+
+/** The body the phone reads when the desktop's sync switch is off. */
+const val ENROLL_ERROR_SYNC_OFF = "sync_off"
 
 /** `POST /api/calendar/enroll` — a phone asking to plan the calendar; the operator approves it by name and code. */
 internal fun Route.calendarSyncRoutes(server: CompanionServer, json: Json) {
@@ -64,17 +82,21 @@ internal fun Route.calendarSyncRoutes(server: CompanionServer, json: Json) {
         }
         try {
             server.onCalendarEnroll.emit(pending)
-            val reply = withTimeoutOrNull(ENROLL_WAIT_MS) { pending.decision.await() }
+            val decision = withTimeoutOrNull(ENROLL_WAIT_MS) { pending.decision.await() }
             // Unanswered in time: settle it as denied so an Allow clicked later does nothing.
-            val timedOut = !pending.decision.isCompleted
-            if (timedOut) pending.decision.complete(null)
-            when {
-                reply != null -> call.respond(reply)
-                timedOut -> call.respondText(
+            if (decision == null) pending.decision.complete(CalendarEnrollDecision.Denied)
+            when (decision) {
+                is CalendarEnrollDecision.Approved -> call.respond(decision.reply)
+                CalendarEnrollDecision.SyncOff ->
+                    call.respondText("""{"error":"$ENROLL_ERROR_SYNC_OFF"}""", status = HttpStatusCode.Conflict)
+                CalendarEnrollDecision.RelayFailed ->
+                    call.respondText("""{"error":"relay unreachable"}""", status = HttpStatusCode.BadGateway)
+                CalendarEnrollDecision.Denied ->
+                    call.respondText("""{"error":"enrollment denied"}""", status = HttpStatusCode.Forbidden)
+                null -> call.respondText(
                     """{"error":"enrollment timed out"}""",
                     status = HttpStatusCode.RequestTimeout,
                 )
-                else -> call.respondText("""{"error":"enrollment denied"}""", status = HttpStatusCode.Forbidden)
             }
         } finally {
             pendingEnrollClients.remove(clientId)

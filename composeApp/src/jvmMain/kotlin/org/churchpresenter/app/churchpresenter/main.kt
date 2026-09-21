@@ -122,6 +122,7 @@ import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollReply
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
@@ -1074,7 +1075,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 companionServer.onCalendarEnroll.collect { pending ->
                                     // Sync off means no relay, so there is nothing to enroll into.
                                     if (!appSettings.calendarSync.enabled) {
-                                        pending.decision.complete(null)
+                                        pending.decision.complete(CalendarEnrollDecision.SyncOff)
                                         return@collect
                                     }
                                     val clientId = pending.clientId
@@ -1084,7 +1085,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                         sessionAllowedClients, sessionBlockedClients,
                                     )
                                     if (access == RemoteAccess.AUTO_REJECT) {
-                                        pending.decision.complete(null)
+                                        pending.decision.complete(CalendarEnrollDecision.Denied)
                                         return@collect
                                     }
                                     val enroll: () -> Unit = {
@@ -1095,7 +1096,13 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
                                             calendarEnrollQr = enrollment
                                             pending.decision.complete(
-                                                enrollment?.let { CalendarEnrollReply(it.relayUrl, it.instanceId) },
+                                                if (enrollment == null) {
+                                                    CalendarEnrollDecision.RelayFailed
+                                                } else {
+                                                    CalendarEnrollDecision.Approved(
+                                                        CalendarEnrollReply(enrollment.relayUrl, enrollment.instanceId),
+                                                    )
+                                                },
                                             )
                                         }
                                     }
@@ -1108,7 +1115,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             clientLabel = remoteClientManager.getLabel(clientId),
                                         ),
                                         enroll,
-                                        { pending.decision.complete(null) },
+                                        { pending.decision.complete(CalendarEnrollDecision.Denied) },
                                     ))
                                 }
                             }
