@@ -141,7 +141,10 @@ fun SongPresenter(
     transitionAlpha: Float = 1f,
     displayLineIndex: Int = -1,
     lookAheadEnabled: Boolean = false,
-    allLyricSections: List<LyricSection> = emptyList(),
+    // Auto-fit gates on this being non-empty (see the remember block below); every real caller
+    // already passes its own list, so this default only matters to one that has just the section
+    // it's showing -- a caller with none used to get no auto-fit at all, silently.
+    allLyricSections: List<LyricSection> = listOf(lyricSection),
     displaySectionIndex: Int = -1,
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
@@ -529,6 +532,11 @@ fun SongPresenter(
             languageOverride,
             appSettings.songSettings,
             appSettings.projectionSettings,
+            // The fit now measures against the real output's own aspect ratio (see referenceBoxWidth/
+            // Height below), so a resize that changes scaleFactor without changing anything else above
+            // must also invalidate this memo -- otherwise a live resize (or a screenshot test moving
+            // between box sizes) would keep the previous size's stale fit.
+            scaleFactor,
         ) {
             if (allLyricSections.isEmpty()) LyricAutoFit()
             else {
@@ -539,16 +547,30 @@ fun SongPresenter(
                 val topBottom = ld == Constants.SONG_LANG_BOTH &&
                         ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM && hasBilingual
 
-                val fullWidth = 1920 - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight -
+                // The real output's own box, in the same reference space the rest of this fit and
+                // scaleFactor's own 1920x1080 assumption are measured in -- not the literal 1920x1080
+                // itself. A narrow/portrait output has a different aspect ratio than 16:9, and
+                // scaleFactor is only ever the *limiting* dimension's ratio, so the reference-space box
+                // implied by dividing back out by it is 1920 wide exactly when width is the constraint
+                // but taller than 1080 when it is not -- which is what lets a portrait output's real
+                // extra headroom reach this search instead of the fit being computed for a box the
+                // output was never actually going to have (issue: lyrics overflowing on vertical
+                // outputs, since the post-hoc scale-down by scaleFactor cannot add back room the fit
+                // never knew it had).
+                val referenceBoxWidth = maxWidth.value / scaleFactor
+                val referenceBoxHeight = maxHeight.value / scaleFactor
+                val fullWidth = referenceBoxWidth.toInt() - appSettings.projectionSettings.windowLeft -
+                        appSettings.projectionSettings.windowRight -
                         appSettings.songSettings.marginLeft - appSettings.songSettings.marginRight
                 // In side-by-side bilingual mode, each column gets half the width
                 val refWidth = if (sideBySide) fullWidth / 2 else fullWidth
                 val fullHeight = if (isLowerThird) {
-                    (1080 * appSettings.songSettings.lowerThirdHeightPercent / 100) -
+                    (referenceBoxHeight * appSettings.songSettings.lowerThirdHeightPercent / 100).toInt() -
                             appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 } else {
-                    1080 - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
+                    referenceBoxHeight.toInt() - appSettings.projectionSettings.windowTop -
+                            appSettings.projectionSettings.windowBottom -
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 }
                 // In top/bottom bilingual mode, each language gets half the height
@@ -730,6 +752,11 @@ fun SongPresenter(
         val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.songSettings.marginRight) * scaleFactor).dp
         val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.songSettings.marginTop) * scaleFactor).dp
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
+        // Captured here, not read from inside the nested Box below: BoxScope and
+        // BoxWithConstraintsScope both carry @LayoutScopeMarker, which hides this outer
+        // BoxWithConstraints' maxWidth/maxHeight from a Box nested inside it.
+        val outputWidth = maxWidth
+        val outputHeight = maxHeight
 
         if (isLowerThird) {
             val lowerThirdFraction = appSettings.songSettings.lowerThirdHeightPercent / 100f
@@ -825,16 +852,44 @@ fun SongPresenter(
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
+                // For a lower third, the padding moves inside the band's own box below instead of
+                // applying here -- see the comment there for why.
+                .then(
+                    if (isLowerThird) Modifier
+                    else Modifier.padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet)
+                ),
             contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
         ) {
-            val innerModifier = if (isLowerThird)
+            val innerModifier = if (isLowerThird) {
+                // Capped at a quarter of the band's own height/width each, so top+bottom (or
+                // left+right) can never consume more than half of it: a shallow band (a low
+                // lowerThirdHeightPercent) combined with the operator's ordinary window/margin
+                // insets can ask for more padding than the band is tall, and an uncapped padding
+                // that exceeds its own box collapses it to zero size -- which is a real
+                // misconfiguration to render as small type crowding the band, not a reason to
+                // report every line at y=0 of the whole screen, which is what a collapsed box does.
+                val bandHeight = outputHeight * (appSettings.songSettings.lowerThirdHeightPercent / 100f)
+                val bandTopOffSet = topOffSet.coerceAtMost(bandHeight / 4)
+                val bandBottomOffSet = bottomOffSet.coerceAtMost(bandHeight / 4)
+                val bandLeftOffSet = leftOffSet.coerceAtMost(outputWidth / 4)
+                val bandRightOffSet = rightOffSet.coerceAtMost(outputWidth / 4)
                 Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(appSettings.songSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
-            else
+                    // Sized and positioned first, against this Box's own full (unpadded) bounds --
+                    // the same bounds the band's background above measures its fraction against --
+                    // and only then padded. Padding used to apply before the fraction was taken, so
+                    // it shrank *and* shifted this box relative to the background: with a window
+                    // inset and a margin on top (32 + 54 by default), the content box's own top
+                    // edge sat ~86px above the background band's, so a title positioned at the top
+                    // of this box -- as "above the verse" always is -- rendered above the visible
+                    // band rather than inside it. Padding here now insets the text within the band
+                    // exactly as it was always meant to, without moving the band itself.
+                    .padding(start = bandLeftOffSet, end = bandRightOffSet, top = bandTopOffSet, bottom = bandBottomOffSet)
+            } else {
                 Modifier
+            }
 
             // Only animate the text content — background is never inside this block
             @Composable

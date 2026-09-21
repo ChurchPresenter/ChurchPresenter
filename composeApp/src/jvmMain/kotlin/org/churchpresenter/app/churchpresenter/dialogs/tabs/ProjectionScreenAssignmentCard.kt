@@ -647,6 +647,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 }
                 CustomizeOutputCell(
                     assignment = assignment,
+                    outputKind = OutputKind.SCREEN,
                     screenLabel = screenLabel,
                     settings = settings,
                     onApply = { updated ->

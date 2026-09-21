@@ -121,10 +121,12 @@ class SettingsPreviewOnScreenTest {
 
     @Test
     fun `the on-screen button is off when every output is switched off`() = runComposeUiTest {
+        // Not a single screen set to "None": in a debug/test build with no real display, main.kt
+        // always opens at least one dev-fallback window regardless of what its assignment says (see
+        // `screenAssignmentIsOpen`), so a "None" screen at index 0 is never actually a demonstration
+        // of "nothing is open" here. An empty list is -- there is no slot at all to fall back into.
         val noOutputs = AppSettings(
-            projectionSettings = ProjectionSettings(
-                screenAssignments = listOf(ScreenAssignment(targetDisplay = Constants.KEY_TARGET_NONE)),
-            ),
+            projectionSettings = ProjectionSettings(screenAssignments = emptyList()),
         )
         setContent {
             Box(Modifier.size(1400.dp, 900.dp)) {

@@ -22,6 +22,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -64,14 +65,26 @@ class PreviewOutputPickerTest {
         return result as T
     }
 
-    private fun outputs(s: AppSettings, mode: Presenting = Presenting.BIBLE): List<PreviewOutput> =
-        composed { outputsShowing(s, mode) }
+    /**
+     * `realWindowCount` defaults to 0 in production too, whenever the JVM is headless (a real build
+     * never is, so this only ever bites tests) -- passed explicitly here for determinism, and bumped
+     * to simulate a real display existing where a case needs the dev-fallback exemption turned off.
+     */
+    private fun outputs(
+        s: AppSettings,
+        mode: Presenting? = Presenting.BIBLE,
+        realWindowCount: Int = 0,
+    ): List<PreviewOutput> = composed { outputsShowing(s, mode, realWindowCount) }
 
-    private fun picked(s: AppSettings, mode: Presenting = Presenting.BIBLE): PreviewOutput =
-        composed { rememberPreviewOutput(s, tab, mode) }
+    private fun picked(
+        s: AppSettings,
+        mode: Presenting? = Presenting.BIBLE,
+        realWindowCount: Int = 0,
+    ): PreviewOutput = composed { rememberPreviewOutput(s, tab, mode, realWindowCount) }
 
     private fun picker(
         initial: AppSettings,
+        realWindowCount: Int = 0,
         block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
     ) = runComposeUiTest {
         var current = initial
@@ -83,6 +96,7 @@ class PreviewOutputPickerTest {
                     tabId = tab,
                     mode = Presenting.BIBLE,
                     onSettingsChange = { transform -> state = transform(state); current = state },
+                    realWindowCount = realWindowCount,
                 )
             }
         }
@@ -97,16 +111,30 @@ class PreviewOutputPickerTest {
         assertEquals(1, listed.size)
         assertEquals("screen:0", listed[0].key)
         assertEquals("Screen 1", listed[0].label)
+        assertTrue(listed[0].showsMode)
     }
 
     @Test
     fun `a screen set to None is not listed`() {
-        assertTrue(outputs(settings(listOf(screen(target = Constants.KEY_TARGET_NONE)))).isEmpty())
+        // realWindowCount = 1: a real display exists, so this is not a dev-fallback slot and "None"
+        // means what it says. Left at the default 0, every slot up to devWindowCount is exempted --
+        // see the doc comment on `outputsShowing`'s `realWindowCount` parameter.
+        val listed = outputs(settings(listOf(screen(target = Constants.KEY_TARGET_NONE))), realWindowCount = 1)
+        assertTrue(listed.isEmpty())
     }
 
     @Test
-    fun `a screen not routed this content is not listed`() {
-        assertTrue(outputs(settings(listOf(screen(shows = false)))).isEmpty())
+    fun `a screen set to None IS listed when it is a dev-fallback slot`() {
+        val listed = outputs(settings(listOf(screen(target = Constants.KEY_TARGET_NONE))))
+        assertEquals(listOf("screen:0"), listed.map { it.key })
+    }
+
+    @Test
+    fun `a screen not routed this content is listed, but marked off`() {
+        val listed = outputs(settings(listOf(screen(shows = false))))
+        assertEquals(1, listed.size)
+        assertEquals("screen:0", listed[0].key)
+        assertFalse(listed[0].showsMode)
     }
 
     @Test
@@ -135,8 +163,17 @@ class PreviewOutputPickerTest {
     }
 
     @Test
-    fun `content nothing is routed leaves the list empty`() {
-        assertTrue(outputs(settings(), mode = Presenting.NONE).isEmpty())
+    fun `content NONE lists the output but marks it off, since nothing routes NONE`() {
+        val listed = outputs(settings(), mode = Presenting.NONE)
+        assertEquals(1, listed.size)
+        assertFalse(listed[0].showsMode)
+    }
+
+    @Test
+    fun `a null mode lists every live output and marks none of them off`() {
+        val listed = outputs(settings(listOf(screen(shows = false))), mode = null)
+        assertEquals(1, listed.size)
+        assertTrue(listed[0].showsMode)
     }
 
     // ── Which one a tab previews ──────────────────────────────────────────────
@@ -172,9 +209,16 @@ class PreviewOutputPickerTest {
 
     @Test
     fun `with no output at all a fallback shape stands in`() {
-        val nothing = picked(settings(listOf(screen(shows = false))))
+        val nothing = picked(settings(listOf(screen(target = Constants.KEY_TARGET_NONE))), realWindowCount = 1)
         assertEquals("", nothing.key)
         assertTrue(nothing.size.width > 0 && nothing.size.height > 0, "something must still be drawn")
+    }
+
+    @Test
+    fun `when nothing shows the content, an off output is still picked over nothing`() {
+        val picked = picked(settings(listOf(screen(shows = false))))
+        assertEquals("screen:0", picked.key)
+        assertFalse(picked.showsMode)
     }
 
     // ── The row itself ────────────────────────────────────────────────────────
@@ -187,9 +231,9 @@ class PreviewOutputPickerTest {
     }
 
     @Test
-    fun `no output at all draws no picker either`() {
+    fun `a single output with content off still draws no picker, since there is still no choice`() {
         picker(settings(listOf(screen(shows = false)))) { _ ->
-            onNodeWithText("Screen 1").assertDoesNotExist()
+            onNodeWithText("Screen 1", substring = true).assertDoesNotExist()
         }
     }
 

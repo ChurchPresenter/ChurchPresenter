@@ -22,6 +22,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OutputCustomizeDialog
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementChipTag
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
@@ -83,6 +84,7 @@ class OutputCustomizeDialogScreenshotTest {
                                         // the moment the switch goes on.
                                         songOverride = if (overridden) JsonObject(emptyMap()) else null,
                                     ),
+                                    outputKind = OutputKind.SCREEN,
                                     globalSettings = AppSettings(songSettings = titleSlideSong()),
                                     onApply = {},
                                     onDismiss = {},

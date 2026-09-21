@@ -586,6 +586,11 @@ fun BiblePresenter(
         val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.bibleSettings.marginRight) * scaleFactor).dp
         val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.bibleSettings.marginTop) * scaleFactor).dp
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.bibleSettings.marginBottom) * scaleFactor).dp
+        // Captured here, not read from inside the nested Box below: BoxScope and
+        // BoxWithConstraintsScope both carry @LayoutScopeMarker, which hides this outer
+        // BoxWithConstraints' maxWidth/maxHeight from a Box nested inside it.
+        val outputWidth = maxWidth
+        val outputHeight = maxHeight
 
         if (isLowerThird) {
             val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / 100f
@@ -682,17 +687,39 @@ fun BiblePresenter(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
+                // For a lower third, the padding moves inside the band's own box below instead of
+                // applying here -- see the comment there for why (SongPresenter carries the same fix).
+                .then(
+                    if (isLowerThird) Modifier
+                    else Modifier.padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet)
+                ),
             contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
         ) {
-            val innerModifier = if (isLowerThird)
+            val innerModifier = if (isLowerThird) {
+                // Capped at a quarter of the band's own height/width each -- see SongPresenter's identical
+                // fix for why: an uncapped padding that exceeds a shallow band's own box collapses
+                // it to zero size, reporting every line at y=0 of the whole screen instead of
+                // rendering small type crowding the band.
+                val bandHeight = outputHeight * (appSettings.bibleSettings.lowerThirdHeightPercent / 100f)
+                val bandTopOffSet = topOffSet.coerceAtMost(bandHeight / 4)
+                val bandBottomOffSet = bottomOffSet.coerceAtMost(bandHeight / 4)
+                val bandLeftOffSet = leftOffSet.coerceAtMost(outputWidth / 4)
+                val bandRightOffSet = rightOffSet.coerceAtMost(outputWidth / 4)
                 Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(appSettings.bibleSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
+                    // Sized and positioned first, against this Box's own full (unpadded) bounds --
+                    // the same bounds the band's background above measures its fraction against --
+                    // and only then padded and clipped. Padding used to apply before the fraction was
+                    // taken, shifting this box's top edge above the background band's by the window
+                    // inset and margin combined (issue: a verse or its reference rendering above the
+                    // visible band rather than inside it).
+                    .padding(start = bandLeftOffSet, end = bandRightOffSet, top = bandTopOffSet, bottom = bandBottomOffSet)
                     .clipToBounds()
-            else
+            } else {
                 Modifier.align(contentAlignment)
+            }
 
             val textMeasurer = rememberTextMeasurer()
 
