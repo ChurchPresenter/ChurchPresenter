@@ -338,7 +338,7 @@ private fun tabLabel(tab: Tabs) = when (tab) {
 }
 
 private fun serviceSchedule(actions: ScheduleActions) {
-    actions.addMedia(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, "Welcome Loop", "video")
+    actions.addMedia(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, "Welcome Loop", "video", "")
     actions.addSong(320, "Come Thou Fount Of Every Blessing", "Hymnal", "song-320")
     actions.addSong(12, "Amazing Grace", "Hymnal", "song-12")
     actions.addBibleVerse("Psalms", 23, 1, "The LORD is my shepherd; I shall not want.", "1-3", 19)

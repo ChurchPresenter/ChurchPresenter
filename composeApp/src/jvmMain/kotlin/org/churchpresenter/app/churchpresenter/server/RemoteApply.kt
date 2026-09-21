@@ -510,7 +510,7 @@ internal fun executeProjectItem(
         }
 
         is ScheduleItem.MediaItem -> {
-            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType, item.subtitleUrl)
             presenterManager.setCurrentMedia(item.mediaUrl, item.mediaType)
             presenterManager.setPresentingMode(Presenting.MEDIA)
             presenterManager.setShowPresenterWindow(true)
@@ -650,7 +650,8 @@ internal fun addScheduleItem(
         is ScheduleItem.MediaItem -> scheduleActions.addMedia(
             item.mediaUrl,
             item.mediaTitle,
-            item.mediaType
+            item.mediaType,
+            item.subtitleUrl
         )
 
         is ScheduleItem.DictionaryItem -> scheduleActions.addDictionary(

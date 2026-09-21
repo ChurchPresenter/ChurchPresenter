@@ -103,6 +103,24 @@ class ScheduleViewModelTest {
         assertTrue(vm.scheduleItems[3] is ScheduleItem.WebsiteItem)
     }
 
+    @Test
+    fun `a media item keeps the subtitle file it was added with`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local", subtitleUrl = "/media/clip.srt")
+
+        assertEquals("/media/clip.srt", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
+    }
+
+    @Test
+    fun `a media item added without a subtitle file has none`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local")
+
+        assertEquals("", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
+    }
+
     // ── Removing ────────────────────────────────────────────────────────────────
 
     @Test

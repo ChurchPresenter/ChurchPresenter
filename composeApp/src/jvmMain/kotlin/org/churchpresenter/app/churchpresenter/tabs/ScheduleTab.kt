@@ -126,7 +126,8 @@ data class ScheduleTabActions(
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
-    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
+        { _, _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     val addAnnouncement: (
         text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String,
@@ -259,7 +260,9 @@ fun ScheduleTab(
                 addSong          = { songNumber, title, songbook, songId -> viewModel.addSong(songNumber, title, songbook, songId) },
                 addPicture       = { folderPath, folderName, imageCount -> viewModel.addPicture(folderPath, folderName, imageCount) },
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
-                addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
+                addMedia         = { mediaUrl, mediaTitle, mediaType, subtitleUrl ->
+                    viewModel.addMedia(mediaUrl, mediaTitle, mediaType, subtitleUrl)
+                },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
                 addAnnouncement  = {
                     text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline,
