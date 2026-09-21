@@ -105,6 +105,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.visibleMembers
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -151,75 +153,26 @@ fun LivePreviewPanel(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        for (i in 0 until displayCount) {
-            val screenAssignment = proj.getAssignment(i)
+        val entries = previewEntries(
+            proj, displayCount, realWindowCount, devWindowedFallback,
+            presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager,
+        )
 
-            // Skip displays the user set to "None" — but never skip dev-fallback slots (i >=
-            // realWindowCount): those are auto-resolved to None only because no hardware exists,
-            // yet main.kt still opens a window for them, so they must appear in the preview too.
-            val isDevFallbackSlot = devWindowedFallback && i >= realWindowCount
-            if (!isDevFallbackSlot && screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
-
-            SingleDisplayPreview(
-                screenIndex = i,
-                screenAssignment = screenAssignment,
-                outputKind = OutputKind.SCREEN,
-                presenterManager = presenterManager,
-                appSettings = appSettings,
-                modifier = Modifier.fillMaxWidth(),
-                serverUrl = serverUrl,
-                qaDisplayUrl = qaDisplayUrl,
-                sttManager = sttManager,
-                locks = presenterManager.screenLocks.value,
-                onToggleLock = { mode -> presenterManager.setScreenLock(i, mode) },
-                // The operator's name for the monitor, falling back to the numbered default. This
-                // panel is the one place they watch all service long, so a booth driving "Foyer TV"
-                // and "Balcony" should not have to remember which of those is Screen 2.
-                label = proj.screenLabelOr(screenAssignment, stringResource(Res.string.screen_number, i + 1)),
-            )
+        // With no group the panel lists every output, one per row. Once groups exist they are the
+        // whole panel: an output no group claims is deliberately left out.
+        val byKey = entries.associateBy { it.key }
+        val placed = mutableSetOf<String>()
+        for (group in proj.previewGroups) {
+            val cells = group.visibleMembers().mapNotNull { key -> byKey[key]?.takeIf { placed.add(key) } }
+            if (!group.hidden && cells.isNotEmpty()) {
+                PreviewGroupGrid(
+                    columns = group.shape.columns,
+                    cells = cells.map { entry -> { m: Modifier -> entry.content(m, true) } },
+                )
+            }
         }
-
-        // Browser Source outputs — virtual, no physical hardware, so they get their own
-        // loop over ProjectionSettings.browserSourceOutputs and their own lock index space.
-        for (i in proj.browserSourceOutputs.indices) {
-            SingleDisplayPreview(
-                screenIndex = i,
-                screenAssignment = proj.browserSourceOutputs[i],
-                outputKind = OutputKind.BROWSER_SOURCE,
-                presenterManager = presenterManager,
-                appSettings = appSettings,
-                modifier = Modifier.fillMaxWidth(),
-                serverUrl = serverUrl,
-                qaDisplayUrl = qaDisplayUrl,
-                sttManager = sttManager,
-                locks = presenterManager.browserSourceLocks.value,
-                onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
-                label = proj.browserSourceOutputs[i]
-                    .browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1)),
-            )
-        }
-
-        // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
-        // get their own loop over ProjectionSettings.ndiOutputs and their own lock index space.
-        // A disabled output is skipped: main.kt renders nothing for it, so a preview would show a
-        // picture the network is not actually receiving.
-        for (i in proj.ndiOutputs.indices) {
-            val output = proj.ndiOutputs[i]
-            if (!output.ndiEnabled) continue
-            SingleDisplayPreview(
-                screenIndex = i,
-                screenAssignment = output,
-                outputKind = OutputKind.NDI,
-                presenterManager = presenterManager,
-                appSettings = appSettings,
-                modifier = Modifier.fillMaxWidth(),
-                serverUrl = serverUrl,
-                qaDisplayUrl = qaDisplayUrl,
-                sttManager = sttManager,
-                locks = presenterManager.ndiLocks.value,
-                onToggleLock = { mode -> presenterManager.setNdiLock(i, mode) },
-                label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1)),
-            )
+        if (proj.previewGroups.isEmpty()) {
+            for (entry in entries) entry.content(Modifier.fillMaxWidth(), false)
         }
 
         // Media controls — visible when presenting and media is loaded.
@@ -240,6 +193,121 @@ fun LivePreviewPanel(
     }
 }
 
+/** Every output the panel can show, in screen, Browser Source, NDI order, each drawn by its own preview. */
+@Composable
+private fun previewEntries(
+    proj: ProjectionSettings,
+    displayCount: Int,
+    realWindowCount: Int,
+    devWindowedFallback: Boolean,
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    serverUrl: String,
+    qaDisplayUrl: String,
+    sttManager: STTManager?,
+): List<PreviewEntry> {
+    val showLabels = proj.showOutputLabels
+    return buildList {
+        for (i in 0 until displayCount) {
+            val screenAssignment = proj.getAssignment(i)
+
+            // Skip displays the user set to "None" — but never skip dev-fallback slots (i >=
+            // realWindowCount): those are auto-resolved to None only because no hardware exists,
+            // yet main.kt still opens a window for them, so they must appear in the preview too.
+            val isDevFallbackSlot = devWindowedFallback && i >= realWindowCount
+            if (!isDevFallbackSlot && screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+
+            // The operator's name for the monitor, falling back to the numbered default. This
+            // panel is the one place they watch all service long, so a booth driving "Foyer TV"
+            // and "Balcony" should not have to remember which of those is Screen 2.
+            val label = proj.screenLabelOr(screenAssignment, stringResource(Res.string.screen_number, i + 1))
+            add(
+                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, i)) { m, grouped ->
+                    SingleDisplayPreview(
+                        screenIndex = i,
+                        screenAssignment = screenAssignment,
+                        outputKind = OutputKind.SCREEN,
+                        presenterManager = presenterManager,
+                        appSettings = appSettings,
+                        modifier = m,
+                        serverUrl = serverUrl,
+                        qaDisplayUrl = qaDisplayUrl,
+                        sttManager = sttManager,
+                        locks = presenterManager.screenLocks.value,
+                        onToggleLock = { mode -> presenterManager.setScreenLock(i, mode) },
+                        label = label,
+                        showLabel = showLabels,
+                        showMode = proj.showOutputModes,
+                            collapsible = !grouped,
+                    )
+                }
+            )
+        }
+
+        // Browser Source outputs — virtual, no physical hardware, so they get their own
+        // loop over ProjectionSettings.browserSourceOutputs and their own lock index space.
+        for (i in proj.browserSourceOutputs.indices) {
+            val output = proj.browserSourceOutputs[i]
+            val label = output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1))
+            add(
+                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i)) { m, grouped ->
+                    SingleDisplayPreview(
+                        screenIndex = i,
+                        screenAssignment = output,
+                        outputKind = OutputKind.BROWSER_SOURCE,
+                        presenterManager = presenterManager,
+                        appSettings = appSettings,
+                        modifier = m,
+                        serverUrl = serverUrl,
+                        qaDisplayUrl = qaDisplayUrl,
+                        sttManager = sttManager,
+                        locks = presenterManager.browserSourceLocks.value,
+                        onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
+                        label = label,
+                        showLabel = showLabels,
+                        showMode = proj.showOutputModes,
+                            collapsible = !grouped,
+                    )
+                }
+            )
+        }
+
+        // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
+        // get their own loop over ProjectionSettings.ndiOutputs and their own lock index space.
+        // A disabled output is skipped: main.kt renders nothing for it, so a preview would show a
+        // picture the network is not actually receiving.
+        for (i in proj.ndiOutputs.indices) {
+            val output = proj.ndiOutputs[i]
+            if (!output.ndiEnabled) continue
+            val label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1))
+            add(
+                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, i)) { m, grouped ->
+                    SingleDisplayPreview(
+                        screenIndex = i,
+                        screenAssignment = output,
+                        outputKind = OutputKind.NDI,
+                        presenterManager = presenterManager,
+                        appSettings = appSettings,
+                        modifier = m,
+                        serverUrl = serverUrl,
+                        qaDisplayUrl = qaDisplayUrl,
+                        sttManager = sttManager,
+                        locks = presenterManager.ndiLocks.value,
+                        onToggleLock = { mode -> presenterManager.setNdiLock(i, mode) },
+                        label = label,
+                        showLabel = showLabels,
+                        showMode = proj.showOutputModes,
+                            collapsible = !grouped,
+                    )
+                }
+            )
+        }
+    }
+}
+
+/** One output's preview, identified by its `Constants.previewOutputKey` so a group can claim it. */
+private class PreviewEntry(val key: String, val content: @Composable (Modifier, Boolean) -> Unit)
+
 @Composable
 private fun SingleDisplayPreview(
     screenIndex: Int,
@@ -254,6 +322,9 @@ private fun SingleDisplayPreview(
     locks: Map<Int, Presenting> = emptyMap(),
     onToggleLock: (Presenting?) -> Unit = {},
     label: String,
+    showLabel: Boolean = true,
+    showMode: Boolean = true,
+    collapsible: Boolean = true,
 ) {
     // This preview must show what the real output shows, so it resolves the same per-output
     // override the presenter window does. Identical to [appSettings] when uncustomized.
@@ -351,13 +422,14 @@ private fun SingleDisplayPreview(
 
     Column(modifier = modifier) {
         PreviewHeader(
-            modeLabel = displayModeChipLabel,
+            modeLabel = if (showMode) displayModeChipLabel else "",
             outputLabel = label,
-            expanded = expanded,
+            expanded = expanded || !collapsible,
+            collapsible = collapsible,
             onToggle = { expanded = !expanded },
         )
 
-        if (expanded) {
+        if (expanded || !collapsible) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -617,16 +689,20 @@ private fun SingleDisplayPreview(
         }
 
         // Screen/output label
-        Text(
-            text = label,
-            color = Color.White.copy(alpha = 0.6f),
-            fontSize = 9.sp,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-                .padding(horizontal = 5.dp, vertical = 2.dp)
-        )
+        if (showLabel) {
+            Text(
+                text = label,
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 9.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
+            )
+        }
 
         // Animated audio indicator — only when presenting and media is playing
         val mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying
@@ -664,18 +740,19 @@ private fun PreviewHeader(
     modeLabel: String,
     outputLabel: String,
     expanded: Boolean,
+    collapsible: Boolean,
     onToggle: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(3.dp))
-            .clickable(onClick = onToggle)
+            .then(if (collapsible) Modifier.clickable(onClick = onToggle) else Modifier)
             .padding(bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Icon(
+        if (collapsible) Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = if (expanded) stringResource(Res.string.collapse_preview)
                                  else stringResource(Res.string.expand_preview),
