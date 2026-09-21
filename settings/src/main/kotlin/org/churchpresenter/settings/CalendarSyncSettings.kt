@@ -19,10 +19,13 @@ data class CalendarSyncSettings(
     val cursor: Long = 0L,
     /** ISO instant of the last successful sync, for the settings screen. */
     val lastSyncAt: String = "",
+    /** The relay's shared client key, fetched from the website and cached; refreshed when the relay stops accepting it. */
+    val clientKey: String = "",
 ) {
     val isPaired: Boolean get() = instanceId.isNotBlank() && desktopToken.isNotBlank() && instanceKey.isNotBlank()
 
     companion object {
         const val DEFAULT_RELAY_URL = "https://sync.churchpresenter.org"
+        const val CLIENT_KEY_URL = "https://churchpresenter.org/api/relay-config"
     }
 }

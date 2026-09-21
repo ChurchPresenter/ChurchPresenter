@@ -1,6 +1,7 @@
 package org.churchpresenter.calendar.sync
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.net.URI
@@ -49,6 +50,9 @@ sealed class RelayFailure(message: String) : Exception(message) {
     /** The instance id is already registered to another desktop. */
     class Taken : RelayFailure("instance id already registered")
 
+    /** The relay did not accept the client key; fetch a fresh one and try again. */
+    class ClientKey : RelayFailure("relay refused the client key")
+
     /** The relay moved on since our cursor; pull again before pushing. */
     class Conflict : RelayFailure("relay state changed since last pull")
 
@@ -63,6 +67,7 @@ class RelayClient(
     private val instanceId: String,
     private val installId: String,
     private val transport: RelayTransport = HttpRelayTransport(),
+    private val clientKey: String = "",
 ) {
     private val base = relayUrl.trimEnd('/') + "/i/" + instanceId
 
@@ -110,6 +115,7 @@ class RelayClient(
         val headers = HashMap<String, String>(extra)
         headers["Accept"] = "application/json"
         headers["X-Install"] = installId
+        if (clientKey.isNotEmpty()) headers["X-Client-Key"] = clientKey
         if (body != null) headers["Content-Type"] = "application/json"
         if (token != null) headers["Authorization"] = "Bearer $token"
         val reply = try {
@@ -122,7 +128,8 @@ class RelayClient(
         }
         return when (reply.status) {
             in HTTP_OK_RANGE -> reply
-            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> throw RelayFailure.Unauthorized()
+            HTTP_UNAUTHORIZED -> if (reply.body.contains(CLIENT_KEY_ERROR)) throw RelayFailure.ClientKey() else throw RelayFailure.Unauthorized()
+            HTTP_FORBIDDEN -> throw RelayFailure.Unauthorized()
             HTTP_CONFLICT -> if (token == null) throw RelayFailure.Taken() else throw RelayFailure.Conflict()
             HTTP_PRECONDITION_FAILED -> throw RelayFailure.Conflict()
             else -> throw RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
@@ -142,5 +149,24 @@ class RelayClient(
         const val HTTP_CONFLICT = 409
         const val HTTP_PRECONDITION_FAILED = 412
         const val MAX_ERROR_CHARS = 200
+        const val CLIENT_KEY_ERROR = "\"client_key\""
     }
 }
+
+/** `GET` of the website's relay-config: the client key the relay currently expects. */
+fun fetchClientKey(url: String, transport: RelayTransport): String? {
+    val reply = try {
+        transport.send("GET", url, mapOf("Accept" to "application/json"), null)
+    } catch (_: IOException) {
+        return null
+    }
+    if (reply.status !in 200..299) return null
+    return try {
+        Json { ignoreUnknownKeys = true }.decodeFromString(ClientKeyResponse.serializer(), reply.body).clientKey.takeIf { it.isNotBlank() }
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+}
+
+@Serializable
+private data class ClientKeyResponse(val clientKey: String = "")

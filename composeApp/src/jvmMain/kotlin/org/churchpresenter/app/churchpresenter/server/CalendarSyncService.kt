@@ -27,6 +27,7 @@ import org.churchpresenter.calendar.sync.Envelope
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
+import org.churchpresenter.calendar.sync.fetchClientKey
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
 import org.churchpresenter.settings.CalendarSyncSettings
@@ -116,7 +117,7 @@ class CalendarSyncService(
     suspend fun enroll(deviceId: String, deviceName: String): CalendarEnrollment? = lock.withLock {
         withContext(io) {
             try {
-                val desktopToken = ensureRegistered()
+                val desktopToken = withClientKey { ensureRegistered() }
                 val current = settings()
                 val deviceToken = Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(TOKEN_BYTES).also(random::nextBytes))
                 val nameBox = sealing().let { s ->
@@ -142,7 +143,7 @@ class CalendarSyncService(
         if (!settings().enabled || settings().isPaired) return@withLock settings().isPaired
         withContext(io) {
             try {
-                ensureRegistered()
+                withClientKey { ensureRegistered() }
                 _status.value = CalendarSyncStatus.Synced(Instant.now().toString(), SyncOutcome(0L, 0, 0, 0))
                 true
             } catch (e: RelayFailure) {
@@ -174,7 +175,7 @@ class CalendarSyncService(
         _status.value = CalendarSyncStatus.Syncing
         withContext(io) {
             try {
-                val outcome = work(coordinator())
+                val outcome = withClientKey { work(coordinator()) }
                 val at = Instant.now().toString()
                 saveSettings(settings().copy(cursor = outcome.cursor, lastSyncAt = at))
                 if (outcome.devices.isNotEmpty() || outcome.phoneChanges > 0) _devices.value = outcome.devices
@@ -191,6 +192,23 @@ class CalendarSyncService(
         }
     }
 
+    /** Runs [block] with a client key, fetching one first if none is cached and once more if the relay refuses it. */
+    private fun <T> withClientKey(block: () -> T): T {
+        if (settings().clientKey.isEmpty()) refreshClientKey()
+        return try {
+            block()
+        } catch (_: RelayFailure.ClientKey) {
+            if (!refreshClientKey()) throw RelayFailure.ClientKey()
+            block()
+        }
+    }
+
+    private fun refreshClientKey(): Boolean {
+        val key = fetchClientKey(CalendarSyncSettings.CLIENT_KEY_URL, transport) ?: return false
+        saveSettings(settings().copy(clientKey = key))
+        return true
+    }
+
     private fun failure(e: RelayFailure): CalendarSyncStatus = when (e) {
         is RelayFailure.Unauthorized -> CalendarSyncStatus.Unauthorized
         else -> CalendarSyncStatus.Failed(e.message.orEmpty())
@@ -205,7 +223,7 @@ class CalendarSyncService(
         val key = Envelope.encodeKey(Envelope.newKey())
         repeat(REGISTER_ATTEMPTS) {
             try {
-                val token = RelayClient(current.relayUrl, instanceId, installId, transport).register()
+                val token = RelayClient(current.relayUrl, instanceId, installId, transport, settings().clientKey).register()
                 saveSettings(
                     current.copy(instanceId = instanceId, desktopToken = token, instanceKey = key, installId = installId, cursor = 0L),
                 )
@@ -219,7 +237,7 @@ class CalendarSyncService(
 
     private fun client(): RelayClient {
         val current = settings()
-        return RelayClient(current.relayUrl, current.instanceId, installId(), transport)
+        return RelayClient(current.relayUrl, current.instanceId, installId(), transport, current.clientKey)
     }
 
     private fun coordinator(): SyncCoordinator = SyncCoordinator(
