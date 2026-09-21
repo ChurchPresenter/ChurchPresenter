@@ -41,9 +41,9 @@ import churchpresenter.composeapp.generated.resources.tab_stt
 import churchpresenter.composeapp.generated.resources.crossword_tab
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_companion_surface
-import org.churchpresenter.app.churchpresenter.composables.LABELED_TAB_MIN_WIDTH
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
+import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.settings.TabLabelStyle
@@ -72,7 +72,7 @@ fun TabSection(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
-            minTabWidth = LABELED_TAB_MIN_WIDTH,
+            minTabWidth = labeledTabMinWidth(labelStyle),
             indicator = { LabeledTabIndicator(selectedTabIndex) },
             divider = {},
         ) {
