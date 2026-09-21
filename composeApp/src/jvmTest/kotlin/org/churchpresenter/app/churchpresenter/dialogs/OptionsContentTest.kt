@@ -224,7 +224,8 @@ class OptionsContentTest {
     @Test
     fun `toggling analytics reporting on the System tab feeds back into saved settings`() = dialog { result ->
         // Ordinal 0 is Launch at Login, which registers a real OS autostart entry — never touch it.
-        onAllNodes(isToggleable())[1].performScrollTo().performClick()
+        // Ordinal 1 is start-hidden; analytics is ordinal 2.
+        onAllNodes(isToggleable())[2].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
         assertEquals(!AppSettings().analyticsReportingEnabled, result.saved?.analyticsReportingEnabled)
