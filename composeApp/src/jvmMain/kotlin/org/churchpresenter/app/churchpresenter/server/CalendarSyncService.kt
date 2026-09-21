@@ -91,14 +91,18 @@ class CalendarSyncService(
         }
     }
 
-    /** Keeps syncing until cancelled: pushes every local save, and pulls on a timer while the app is open. */
-    suspend fun run() = coroutineScope {
+    /**
+     * Keeps syncing until cancelled: pushes every local save, and pulls on a timer while the app is
+     * open. The timer also registers a desktop that could not be registered when sync was switched
+     * on -- the relay unreachable for that first second -- so a bad moment is not permanent.
+     */
+    suspend fun run(pullIntervalMs: Long = PULL_INTERVAL_MS) = coroutineScope {
         if (!settings().enabled) return@coroutineScope
         launch { watcher.run(onChanged = { round { it.pushLocal(relay.token(), relay.cursor()) } }) }
         launch {
             while (coroutineContext.isActive) {
-                delay(PULL_INTERVAL_MS)
-                syncNow()
+                delay(pullIntervalMs)
+                if (registerIfNeeded()) syncNow()
             }
         }
     }

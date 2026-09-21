@@ -1,6 +1,10 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
@@ -9,6 +13,7 @@ import org.churchpresenter.calendar.sync.RelayReply
 import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import java.security.MessageDigest
 import kotlin.test.AfterTest
@@ -34,9 +39,11 @@ class CalendarSyncServiceTest {
         val enrolled = mutableMapOf<String, String>()
         var clientKey = "key-1"
         var refuseKeyOnce = false
+        var relayDown = false
 
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
             calls += "$method $url"
+            if (relayDown) throw IOException("relay down")
             if (url == CalendarSyncSettings.CLIENT_KEY_URL) return RelayReply(200, """{"clientKey":"$clientKey"}""")
             if (headers["X-Client-Key"] != clientKey || refuseKeyOnce) {
                 refuseKeyOnce = false
@@ -117,6 +124,24 @@ class CalendarSyncServiceTest {
         assertTrue(relay.calls.any { it.contains("/register") })
         assertTrue(relay.calls.any { it.startsWith("PUT") && it.contains("/state") })
     }
+
+    @Test
+    fun `a desktop the relay could not register when sync was switched on is registered by the loop`() =
+        runBlocking<Unit> {
+            relay.relayDown = true
+            val service = service()
+            assertFalse(service.syncOnStartup())
+            assertIs<CalendarSyncStatus.Failed>(service.status.value)
+            assertFalse(settings.isPaired)
+
+            relay.relayDown = false
+            val loop = launch { service.run(pullIntervalMs = 5) }
+            withTimeout(5_000) { service.status.first { it is CalendarSyncStatus.Synced } }
+            loop.cancelAndJoin()
+
+            assertTrue(settings.isPaired)
+            assertTrue(relay.calls.any { it.contains("/register") })
+        }
 
     @Test
     fun `a taken instance id is retried with a fresh one`() = runBlocking<Unit> {
