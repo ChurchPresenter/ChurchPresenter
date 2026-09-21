@@ -40,7 +40,7 @@ private const val TICK_INTERVAL_MS = 1000L
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
 
-class PresenterManager {
+class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null
@@ -236,7 +236,7 @@ class PresenterManager {
     private val _transitionDuration = mutableStateOf(500)
     val transitionDuration: State<Int> = _transitionDuration
 
-    private val _showPresenterWindow = mutableStateOf(true)
+    private val _showPresenterWindow = mutableStateOf(showPresenterWindowInitially)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
 
     private val _devWindowAlwaysOnTop = mutableStateOf(false)
