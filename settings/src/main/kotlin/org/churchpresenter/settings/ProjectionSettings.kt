@@ -59,6 +59,9 @@ data class ProjectionSettings(
      * is what makes clearing the field the way to undo a rename.
      */
     val screenNames: Map<String, String> = emptyMap(),
+    // Launch with the output windows hidden; the operator reveals them with the toolbar's display
+    // toggle when ready to present.
+    val startOutputsHidden: Boolean = false,
 ) {
     /** [key]'s name as the operator typed it, or blank for a monitor never renamed. */
     fun screenName(key: String): String = screenNames[key]?.trim().orEmpty()
