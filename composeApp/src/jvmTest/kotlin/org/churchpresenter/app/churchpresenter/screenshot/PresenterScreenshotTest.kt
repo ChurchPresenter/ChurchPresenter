@@ -56,14 +56,18 @@ class PresenterScreenshotTest {
     private val screen = Modifier.size(1920.dp, 1080.dp)
 
     /**
-     * Writes `<name>.png` at the root of [SCREENSHOT_ROOT].
+     * Writes `<name>.png` under this class's own folder of [SCREENSHOT_ROOT].
      *
      * Through the shared constant rather than its own literal: the workflow compares images by their
      * path *relative to* that root, so a capture written somewhere else is not a differing image —
      * it is an image with no counterpart on the other side, and it silently stops being compared.
      */
     private fun ComposeUiTest.capture(name: String) {
-        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$name.png")
+        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+    }
+
+    companion object {
+        private const val SECTION = "presenter"
     }
 
     private fun song(

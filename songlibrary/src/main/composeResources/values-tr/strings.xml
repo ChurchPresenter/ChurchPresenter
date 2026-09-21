@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">“%1$s” silinsin mi?</string>
     <string name="delete_confirm_action">Sil</string>
     <string name="song_count">%1$s şarkı</string>
+    <string name="no_song_folder">Henüz bir şarkı klasörü ayarlanmadı — Ayarlar → Şarkılar'dan bir tane seçin, şarkılar buraya eklenebilsin.</string>
+    <string name="column_duration">Süre</string>
 </resources>

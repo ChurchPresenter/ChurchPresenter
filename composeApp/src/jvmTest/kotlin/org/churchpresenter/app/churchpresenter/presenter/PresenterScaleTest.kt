@@ -31,7 +31,12 @@ class PresenterScaleTest {
 
     @Test
     fun `the range is held at both ends`() {
-        assertEquals(MIN_PRESENTER_SCALE, presenterScale(480.dp, 270.dp))
+        // 480x270 (the same 16:9 shape at a quarter size, ratio 0.25) used to sit here and get
+        // floored up to the old 0.5 -- which was the same bug this file's own presets never showed:
+        // MIN_PRESENTER_SCALE overriding a ratio that was already correct. 96x54 (ratio 0.05) is what
+        // now actually needs the floor; PresenterBackgroundTest covers the floor not over-firing on a
+        // real vertical output, which is the case that regressed.
+        assertEquals(MIN_PRESENTER_SCALE, presenterScale(96.dp, 54.dp))
         assertEquals(MAX_PRESENTER_SCALE, presenterScale(7680.dp, 4320.dp))
     }
 }

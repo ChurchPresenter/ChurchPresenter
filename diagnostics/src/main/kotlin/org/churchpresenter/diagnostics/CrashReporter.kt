@@ -16,6 +16,7 @@ import java.io.StringWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlin.system.exitProcess
 
 private const val FLUSH_TIMEOUT_MS = 3_000L
 private const val SHUTDOWN_FLUSH_TIMEOUT_MS = 5_000L
@@ -23,6 +24,16 @@ private const val DSN_PREFIX_CHARS = 12
 private const val DSN_KEY_VISIBLE_CHARS = 6
 private const val MIN_SCRUBBED_NAME_LENGTH = 3
 private const val RELEASE_SAMPLE_RATE = 0.2
+
+/**
+ * Exit code for a fatal uncaught exception, once it has been logged and flushed to Sentry.
+ *
+ * Distinct from the clean-shutdown `0` (`main.kt`'s "already running" bail-out) so a supervisor or
+ * a developer reading a terminal can tell "the app closed on purpose" from "the app died". `70` is
+ * `EX_SOFTWARE` in the BSD sysexits convention — an internal software error, which is exactly what
+ * an uncaught exception on any thread is by the time it reaches this handler.
+ */
+internal const val EXIT_CODE_FATAL_CRASH = 70
 
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
@@ -155,9 +166,11 @@ object CrashReporter {
      * installed them, so a suite calling [initialize] would leave them behind for every later test
      * in the fork. They are two parameters rather than one so each stays where it always was — the
      * handler before [cleanOldLogs], the shutdown hook last; a test that reordered them would be
-     * testing a different startup. Everything else here — creating the crash directory, the
-     * analytics gate, the crash-escalation arithmetic, the run lock file — is ordinary logic, and a
-     * test drives the real order of it by collecting both and then running them.
+     * testing a different startup. [exit] is the same shape of seam for the same reason: it really
+     * does end the JVM, which a test cannot let happen to itself. Everything else here — creating
+     * the crash directory, the analytics gate, the crash-escalation arithmetic, the run lock file —
+     * is ordinary logic, and a test drives the real order of it by collecting both and then running
+     * them.
      */
     internal fun startUp(
         analyticsReportingEnabled: Boolean,
@@ -166,6 +179,7 @@ object CrashReporter {
         addShutdownHook: (Runnable) -> Unit,
         telemetryOff: Boolean = telemetryDisabled(),
         initTelemetry: () -> Unit = ::initSentry,
+        exit: (Int) -> Unit = ::exitProcess,
     ) {
         build = buildIdentity
         crashDir.mkdirs()
@@ -183,7 +197,6 @@ object CrashReporter {
             setUser(getOrCreateInstallId())
         }
 
-        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         setUncaughtHandler { thread, throwable ->
             // Record what failed before anything else can go wrong: the next run reads this to
             // decide whether the crash-loop guard should blame video backgrounds for it.
@@ -191,7 +204,16 @@ object CrashReporter {
             writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
             // Flush Sentry synchronously so the event is delivered before the JVM exits
             try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
-            defaultHandler?.uncaughtException(thread, throwable)
+            // The JVM's own default (print to stderr) does not end the process, and every output
+            // this app draws — the presenter windows, DeckLink, and the NDI/Browser Source scenes
+            // pumped through ComposeScenePump — shares the one AWT event-dispatch thread with the
+            // main window, by design (see ComposeScenePump's own doc on the ABBA deadlock that
+            // confining them was for). So a fatal exception on that thread used to leave every
+            // audience-facing output frozen rather than ending: "left it for 3 mins, not projecting
+            // anything" (issue #518, Sentry CHURCH-PRESENTER-DESKTOP-62). Once the crash is on
+            // record, end the process instead of leaving it running with a dead event thread.
+            throwable.printStackTrace()
+            exit(EXIT_CODE_FATAL_CRASH)
         }
 
         cleanOldLogs()

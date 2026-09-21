@@ -13,6 +13,13 @@ import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
+import java.time.LocalTime
+import org.churchpresenter.calendar.CueFeed
+import org.churchpresenter.calendar.FiredCue
+import org.churchpresenter.core.models.schedule.CueAction
+import org.churchpresenter.core.models.schedule.RowEnd
+import org.churchpresenter.core.models.schedule.RowTiming
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 
 class ScheduleTabScreenshotTest {
@@ -25,8 +32,11 @@ class ScheduleTabScreenshotTest {
         hiddenToolbarButtons: Set<String> = emptySet(),
         rootIndex: Int = 0,
         seed: ScheduleViewModel.() -> Unit = { everyItemType() },
+        clock: () -> LocalTime = { NOW },
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
+        // A feed left over from another shot would mark this one's cue rows.
+        CueFeed.clear()
         scheduleTab(
             itemZoomPercent = itemZoomPercent,
             width = width,
@@ -34,6 +44,7 @@ class ScheduleTabScreenshotTest {
             hiddenToolbarButtons = hiddenToolbarButtons,
             seed = seed,
             themeMode = mode,
+            clock = clock,
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -85,10 +96,57 @@ class ScheduleTabScreenshotTest {
             transliteration = "chesed",
             definition = "steadfast love",
         )
+        // A ministry item only ever reaches the Schedule from a phone; the row shows what it
+        // is and who, and cannot be presented.
+        addRow(ScheduleItem.MinistryItem("ministry", "Violin", "Jake"), null)
     }
 
     @Test
     fun `every item type`() = shoot("every_item_type")
+
+    /**
+     * A service loaded from the calendar, part-way through: every row carries the time the plan
+     * works out for it, and the live row says how far the service is from that plan.
+     */
+    @Test
+    fun `a loaded service running behind its plan`() = shoot("behind_plan", seed = { loadedService() }) { vm ->
+        // The second song was planned for 10:05 and went live at 10:07: two minutes behind, and
+        // at 10:14 -- past the five it was planned to take -- the overrun has grown it to four.
+        vm.markLive(vm.scheduleItems[2].id, LocalTime.of(10, 7))
+        waitForIdle()
+    }
+
+    /** A cue that was due while the operator was live with something else: marked, not fired. */
+    @Test
+    fun `a cue the engine skipped`() = shoot("cue_skipped", seed = { loadedService() }) { vm ->
+        val cue = vm.scheduleItems.first { it is ScheduleItem.CueItem }
+        CueFeed.post(FiredCue(cue, LocalTime.of(10, 10), skipped = true))
+        waitForIdle()
+    }
+
+    /** What the calendar puts in the Schedule: pinned starts, planned lengths, a cue, a service start. */
+    private fun ScheduleViewModel.loadedService() {
+        setServiceStart("10:00")
+        addLabel("Worship", "#FFFFFF", "#5B9DF5")
+        addRow(
+            ScheduleItem.SongItem("s1", 1, "Amazing Grace", "Hymnal", songId = "Hymnal::1"),
+            RowTiming(startAt = "10:00", runSeconds = 300, atEnd = RowEnd.NEXT),
+        )
+        addRow(
+            ScheduleItem.SongItem("s2", 42, "Here I Am to Worship", "Hymnal", songId = "Hymnal::42"),
+            RowTiming(runSeconds = 300),
+        )
+        addRow(
+            ScheduleItem.CueItem("cue", CueAction.BLANK, label = "Blank before the sermon", absoluteTime = "10:10"),
+            null,
+        )
+        addRow(
+            ScheduleItem.PresentationItem(
+                "deck", "/Users/Shared/ChurchPresenter/Decks/Sermon.pptx", "Sermon.pptx", 24, "pptx",
+            ),
+            RowTiming(runSeconds = 1920),
+        )
+    }
 
     @Test
     fun `every timer mode`() = shoot(
@@ -261,6 +319,9 @@ class ScheduleTabScreenshotTest {
     fun `density extra detailed`() = shoot("density_extra_detailed", itemZoomPercent = 200)
 
     private companion object {
+        /** The wall clock every shot is judged against -- the live row's badge would otherwise tick. */
+        val NOW: LocalTime = LocalTime.of(10, 14)
+
         const val SECTION = "scheduleTab"
     }
 }

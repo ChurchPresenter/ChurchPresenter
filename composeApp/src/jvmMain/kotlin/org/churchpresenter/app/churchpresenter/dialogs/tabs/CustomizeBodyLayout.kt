@@ -1,25 +1,21 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,9 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_hint_off
@@ -40,11 +34,17 @@ import churchpresenter.composeapp.generated.resources.customize_hint_on
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
 import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
 import churchpresenter.composeapp.generated.resources.preview
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.ceil
 
 /**
  * The Customize dialog's two right-hand columns: the element controls, and the picture they change.
@@ -52,7 +52,21 @@ import org.jetbrains.compose.resources.stringResource
  * Split out of `ProjectionCustomizeDialog.kt` alongside `CustomizeRail.kt`; see that file's note.
  */
 
-private val CONTROLS_WIDTH = 430.dp
+/**
+ * The preview column is what gets a fixed width; the controls take everything left over.
+ *
+ * It was the other way round -- controls pinned at 430dp, preview flexible -- and 430dp is not
+ * enough for a row of this form's controls. Every cell here is a fixed-size field or button group,
+ * so the ones that stretch (the spacing sliders, the shadow fields) were left with whatever the
+ * fixed ones did not take, which on several elements was about 90dp each. The picture, meanwhile,
+ * is drawn to an aspect ratio and gains nothing from the extra width: past a point it is simply a
+ * larger copy of the same frame. So the picture is bounded and the form is given the remainder --
+ * about 636dp of a 1240dp dialog.
+ */
+private val PREVIEW_WIDTH = 426.dp
+
+/** How tall the picture may grow, leaving the rest of the column to the settings beneath it. */
+private val STAGE_MAX_HEIGHT = 230.dp
 
 private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
 
@@ -71,10 +85,13 @@ internal fun CustomizeBody(
     live: Boolean,
     draft: AppSettings,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     translationIndex: Int,
     onTranslationChange: (Int) -> Unit,
     onElementChange: (CustomizeElement) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** A change to the screen itself rather than to its styling -- see [SongCustomizePane]. */
+    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     if (pane == CustomizePane.STAGE_MONITOR) {
         DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
@@ -83,7 +100,7 @@ internal fun CustomizeBody(
         return
     }
     Row(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.width(CONTROLS_WIDTH).fillMaxHeight()) {
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             // Bible only, and only with a stack worth choosing from: every other category has one
             // set of settings, so a selector above it would name a choice that does not exist.
             if (pane == CustomizePane.BIBLE) {
@@ -96,11 +113,19 @@ internal fun CustomizeBody(
             CustomizeElementChips(elements, element, onElementChange)
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-                CustomizePaneContent(pane, element, translationIndex, draft, onSettingsChange)
+                CustomizePaneContent(
+                    pane = pane,
+                    element = element,
+                    translationIndex = translationIndex,
+                    draft = draft,
+                    assignment = assignment,
+                    onSettingsChange = onSettingsChange,
+                    onAssignmentChange = onAssignmentChange,
+                )
             }
         }
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        CustomizePreviewColumn(pane, element, live, draft, assignment, onSettingsChange)
+        CustomizePreviewColumn(pane, element, live, draft, assignment, outputKind, onSettingsChange)
     }
 }
 
@@ -112,12 +137,20 @@ private fun CustomizePreviewColumn(
     live: Boolean,
     draft: AppSettings,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .width(PREVIEW_WIDTH)
+            .fillMaxHeight()
+            // `surface`, not `surfaceVariant`. Every boxed field in the app -- the number fields,
+            // the colour swatches, the dropdowns -- fills itself with `surfaceVariant`, so a column
+            // painted that colour is the exact tone of the controls standing on it and they read as
+            // holes in it rather than as fields. `surface` puts a step between the two and keeps
+            // the three layers the dialog is built from distinct: the card the rail and the
+            // controls sit on, the page beneath this column, and the fields on top of it.
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
@@ -134,27 +167,49 @@ private fun CustomizePreviewColumn(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         // Never dimmed with the controls: this is what the screen shows, which is just as true when
         // the category is following the global settings as when it has its own.
+        // The picture takes the height its own aspect ratio asks for and no more, so the settings
+        // below it start directly under it rather than after a band of empty column.
         BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth().weight(1f).padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            // Width only, capped so the stage's own aspect ratio cannot make it taller than the
-            // space between the caption and the strip -- the same shape the settings tabs give
-            // their previews, with a height cap added because this column, unlike theirs, does not
-            // scroll.
-            val output = previewOutputSize(draft)
+            // Width only: the stage's own `aspectRatio` sets the height from it.
+            // This output's own size, not "whichever output happens to be first" -- the whole
+            // point of a per-output override is that this screen can be a different shape from the
+            // others, and previewing it at another one's aspect ratio defeats that (issue: the
+            // Customize dialog for a second, differently-shaped output showed the first output's
+            // picture).
+            val output = outputSizeOf(assignment, outputKind)
             CustomizeStagePanel(
                 pane = pane,
                 element = element,
                 settings = draft,
                 assignment = assignment,
+                output = output,
                 slot = PreviewSampleSlot.MEDIUM,
-                modifier = Modifier.width(minOf(maxWidth, maxHeight * output.aspectRatio)),
+                modifier = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio)),
             )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        DimmedWhenFollowing(live, Modifier.fillMaxWidth()) {
-            CustomizeCategoryStrip(pane, draft, assignment, onSettingsChange)
+        // Scrolls, and takes what the picture left. These rows come and go with the category and
+        // the chip -- Songs on a lyric slide draws five of them, the dictionary one -- so the block
+        // has no height it can be given in advance, and the ones past the fold were simply cut off.
+        //
+        // With the bar every other scrolling surface in the app draws: without it nothing says the
+        // rows continue below the fold, and an operator has no reason to look for them.
+        val stripScroll = rememberScrollState()
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
+                CustomizeCategoryStrip(
+                    pane = pane,
+                    element = element,
+                    settings = draft,
+                    assignment = assignment,
+                    onSettingsChange = onSettingsChange,
+                    modifier = Modifier.verticalScroll(stripScroll),
+                )
+            }
+            SettingsScrollbar(stripScroll)
         }
     }
 }
@@ -170,7 +225,6 @@ private fun CustomizePreviewColumn(
  * opens no `.spb` -- so a translation that has never been given a custom abbreviation falls back to
  * the one derived from its file name, which is what the presenter draws for it anyway.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CustomizeTranslationChips(
     translations: List<BibleTranslationSettings>,
@@ -178,49 +232,24 @@ private fun CustomizeTranslationChips(
     onSelect: (Int) -> Unit,
 ) {
     if (translations.size < 2) return
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(start = 10.dp, end = 10.dp, top = 6.dp)
-            .testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        translations.forEachIndexed { index, translation ->
+    CustomizeSelectorRow(
+        items = translations.mapIndexed { index, translation ->
             val abbreviation = translation.customAbbreviation.ifBlank {
                 defaultTranslationAbbreviation(title = "", fileName = translation.fileName)
             }
-            FilterChip(
-                selected = index == selected,
-                onClick = { onSelect(index) },
-                label = {
-                    Text(
-                        text = "${index + 1} · $abbreviation",
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                shape = RoundedCornerShape(7.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = index == selected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
-                    selectedBorderColor = Color.Transparent,
-                ),
-                modifier = Modifier.height(26.dp).testTag(translationChipTag(index)),
+            SegmentedButtonItem(
+                value = index,
+                label = "${index + 1} · $abbreviation",
+                testTag = translationChipTag(index),
             )
-        }
-    }
+        },
+        selected = selected,
+        onSelect = onSelect,
+        modifier = Modifier.testTag(CUSTOMIZE_TRANSLATION_ROW_TAG),
+    )
 }
 
-/** The chips above the control column — which element of this category is being styled. */
-@OptIn(ExperimentalLayoutApi::class)
+/** The selector above the control column — which element of this category is being styled. */
 @Composable
 private fun CustomizeElementChips(
     elements: List<CustomizeElement>,
@@ -228,43 +257,78 @@ private fun CustomizeElementChips(
     onSelect: (CustomizeElement) -> Unit,
 ) {
     if (elements.isEmpty()) return
-    FlowRow(
-        modifier = Modifier
+    CustomizeSelectorRow(
+        items = elements.map {
+            SegmentedButtonItem(value = it, label = it.label(), testTag = elementChipTag(it.name))
+        },
+        selected = selected ?: elements.first(),
+        onSelect = onSelect,
+        modifier = Modifier.testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
+    )
+}
+
+/**
+ * One segmented control spanning the column, folded onto as many rows as it takes.
+ *
+ * A segmented control rather than the row of filter chips this replaced: these are one choice from
+ * a closed list, which is what a segmented control says and what a row of independent chips does
+ * not -- and the same control the panes below already use for every other such list, so the
+ * selector and the settings under it now read as one form.
+ *
+ * The width is shared evenly so the control ends flush with the column, and the list is broken into
+ * rows of equal length rather than filling one row and leaving a stub: seven song elements across
+ * this column go four and three, not four and three ragged against a full row's width.
+ */
+@Composable
+private fun <T> CustomizeSelectorRow(
+    items: List<SegmentedButtonItem<T>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
-            .testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
-        elements.forEach { entry ->
-            FilterChip(
-                selected = entry == selected,
-                onClick = { onSelect(entry) },
-                label = {
-                    Text(
-                        text = entry.label(),
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+        BoxWithConstraints {
+            val available = maxWidth
+            val perRow = (available / SELECTOR_MIN_SEGMENT).toInt().coerceIn(1, items.size)
+            val rows = ceil(items.size / perRow.toDouble()).toInt().coerceAtLeast(1)
+            val columns = ceil(items.size / rows.toDouble()).toInt().coerceAtLeast(1)
+            // One control per row, each sized to the row it is in, rather than one control at a
+            // single width: a last row holding fewer than the rest was otherwise left short of the
+            // column, so the selector ended ragged where every other control ends flush.
+            Column(verticalArrangement = Arrangement.spacedBy(SELECTOR_ROW_GAP)) {
+                items.chunked(columns).forEach { row ->
+                    SegmentedButton(
+                        items = row,
+                        selectedValue = selected,
+                        onValueChange = onSelect,
+                        buttonWidth = available / row.size,
+                        buttonHeight = SELECTOR_HEIGHT,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        // Two lines, because one of these labels is a sentence: "Reference &
+                        // Transliteration" is 27 characters and was cut off mid-word at any width
+                        // this column can give a third of itself.
+                        maxLines = SELECTOR_MAX_LINES,
                     )
-                },
-                shape = RoundedCornerShape(7.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = entry == selected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
-                    selectedBorderColor = Color.Transparent,
-                ),
-                modifier = Modifier.height(26.dp).testTag(elementChipTag(entry.name)),
-            )
+                }
+            }
         }
     }
 }
+
+/** Narrower than this and a label such as "Next Section" has nowhere to go but off the end. */
+private val SELECTOR_MIN_SEGMENT = 92.dp
+
+/** Tall enough for the two lines below, so a selector does not change height with its longest label. */
+private val SELECTOR_HEIGHT = 36.dp
+
+private val SELECTOR_ROW_GAP = 4.dp
+
+private const val SELECTOR_MAX_LINES = 2
 
 /**
  * [content], dimmed and swallowing input while this category is following the global settings.
@@ -309,7 +373,9 @@ private fun CustomizePaneContent(
     element: CustomizeElement?,
     translationIndex: Int,
     draft: AppSettings,
+    assignment: ScreenAssignment,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onAssignmentChange: (ScreenAssignment) -> Unit,
 ) {
     val shown = element ?: return
     // Keyed on what the column is pointed at. One set of controls stands for many stored profiles,
@@ -320,7 +386,13 @@ private fun CustomizePaneContent(
     key(pane, shown, translationIndex) {
         when (pane) {
             CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
-            CustomizePane.SONGS -> SongCustomizePane(shown, draft, onSettingsChange)
+            CustomizePane.SONGS -> SongCustomizePane(
+                element = shown,
+                settings = draft,
+                onSettingsChange = onSettingsChange,
+                songMode = assignment.songMode,
+                onSongModeChange = { onAssignmentChange(assignment.copy(songMode = it)) },
+            )
             CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
             CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
             // Handled by CustomizeBody, which gives it the whole width instead of this column.

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Smazat „%1$s“?</string>
     <string name="delete_confirm_action">Smazat</string>
     <string name="song_count">%1$s písní</string>
+    <string name="no_song_folder">Složka písní zatím není nastavena — vyberte ji v Nastavení → Písně a zde pak půjde přidávat písně.</string>
+    <string name="column_duration">Délka</string>
 </resources>

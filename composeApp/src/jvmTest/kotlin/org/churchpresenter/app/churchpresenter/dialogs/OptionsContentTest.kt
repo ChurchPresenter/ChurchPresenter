@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -31,6 +32,7 @@ import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_FORWA
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
@@ -80,6 +82,7 @@ class OptionsContentTest {
         // Pinned only by the overflow-arrows test, so that it stays a test of the arrows rather
         // than of how many tabs happen to exist: removing a tab must not silently make it vacuous.
         width: Dp = Dp.Unspecified,
+        initialSettings: AppSettings? = null,
         block: ComposeUiTest.(Result) -> Unit,
     ) {
         val result = Result()
@@ -96,6 +99,7 @@ class OptionsContentTest {
                     onSave = { result.saved = it },
                     obsManager = obsManager,
                     initialTab = initialTab,
+                    initialSettings = initialSettings,
                     detectScreens = { emptyList() },
                 )
               }
@@ -132,6 +136,43 @@ class OptionsContentTest {
         tab("Bible").performClick()
         tab("Bible").assertIsSelected()
         tab("System").assertIsNotSelected()
+    }
+
+    /** The icon-only tab named [label]: the icon carries the name, and only the tab is selectable. */
+    private fun ComposeUiTest.iconTab(label: String) = onNode(hasContentDescription(label) and isSelectable())
+
+    @Test
+    fun `icons-only tabs are opened by their icon`() = dialog(
+        initialSettings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS),
+    ) {
+        tab("Bible").assertDoesNotExist()
+        iconTab("Bible").performClick()
+        iconTab("Bible").assertIsSelected()
+        iconTab("System").assertIsNotSelected()
+        onNodeWithText("Bible Storage Directory", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `icons and text tabs still answer to their label`() = dialog(
+        initialSettings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS_AND_TEXT),
+    ) {
+        tab("Bible").performClick()
+        tab("Bible").assertIsSelected()
+    }
+
+    @Test
+    fun `picking a label style on the System tab restyles the dialog's own tabs before Apply`() = dialog { result ->
+        onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
+        waitForIdle()
+        onNode(hasTextExactly("Icons only") and hasClickAction()).performClick()
+        waitForIdle()
+
+        iconTab("Bible").assertExists()
+        tab("Bible").assertDoesNotExist()
+        assertNull(result.saved, "the dialog previews the style; only Apply or OK stores it")
+
+        onNodeWithText("Apply").performClick()
+        assertEquals(TabLabelStyle.ICONS, result.saved?.tabLabelStyle)
     }
 
     @Test
@@ -183,7 +224,8 @@ class OptionsContentTest {
     @Test
     fun `toggling analytics reporting on the System tab feeds back into saved settings`() = dialog { result ->
         // Ordinal 0 is Launch at Login, which registers a real OS autostart entry — never touch it.
-        onAllNodes(isToggleable())[1].performScrollTo().performClick()
+        // Ordinal 1 is start-hidden; analytics is ordinal 2.
+        onAllNodes(isToggleable())[2].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
         assertEquals(!AppSettings().analyticsReportingEnabled, result.saved?.analyticsReportingEnabled)

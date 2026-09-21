@@ -69,4 +69,13 @@ class BackgroundScopesTest {
             "a Default surface sits behind both bands and takes the taller",
         )
     }
+
+    @Test
+    fun `only the two content bands offer a Lottie band`() {
+        BackgroundScope.entries.forEach {
+            val offers = Constants.BACKGROUND_LOTTIE in it.typeOptions()
+            val isContentBand = it == BackgroundScope.BIBLE_LOWER_THIRD || it == BackgroundScope.SONG_LOWER_THIRD
+            assertEquals(isContentBand, offers, "$it offers Lottie")
+        }
+    }
 }

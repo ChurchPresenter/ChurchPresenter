@@ -51,6 +51,7 @@ import org.churchpresenter.songlibrary.generated.resources.Res
 import org.churchpresenter.songlibrary.generated.resources.column_author
 import org.churchpresenter.songlibrary.generated.resources.column_ccli
 import org.churchpresenter.songlibrary.generated.resources.column_composer
+import org.churchpresenter.songlibrary.generated.resources.column_duration
 import org.churchpresenter.songlibrary.generated.resources.column_number
 import org.churchpresenter.songlibrary.generated.resources.column_secondary_title
 import org.churchpresenter.songlibrary.generated.resources.column_song_book
@@ -79,7 +80,7 @@ internal fun SongTable(
     // whole library per visible row per frame.
     val songbooks = state.songbooks
     val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
-    val width = TICK_WIDTH + columnWidth + ACTIONS_WIDTH
+    val width = TICK_WIDTH + columnWidth + durationColumnWidth(state.showDuration) + ACTIONS_WIDTH
 
     // The scrollbars sit OUTSIDE the horizontally scrolled column, so they stay pinned to the edges
     // of the table rather than sliding away with the columns they are there to move.
@@ -134,38 +135,52 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
                 LibraryCheckbox(checked = all, indeterminate = some, onToggle = { state.toggleAll() })
             }
             state.visibleColumns.forEach { field ->
-                val sort = field.sortColumn()
-                val sorted = state.view.sortBy == sort
-                Row(
-                    Modifier.width(field.width())
-                        .fillMaxHeight()
-                        .clickable { state.sortBy(sort) }
-                        .padding(horizontal = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        columnLabel(field).uppercase(),
-                        style = LibraryType.columnHead,
-                        color = if (sorted) scheme.primary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    if (sorted) {
-                        Icon(
-                            if (state.view.ascending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                            contentDescription = null,
-                            tint = scheme.primary,
-                            modifier = Modifier.size(14.dp),
-                        )
-                    }
-                }
-                Box(Modifier.width(1.dp).fillMaxHeight().background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
+                HeadCell(state, label = columnLabel(field), sort = field.sortColumn(), width = field.width())
+            }
+            if (state.showDuration) {
+                HeadCell(
+                    state,
+                    label = stringResource(Res.string.column_duration),
+                    sort = SortColumn.DURATION,
+                    width = DURATION_WIDTH,
+                )
             }
             Spacer(Modifier.width(ACTIONS_WIDTH))
         }
         Hairline()
     }
+}
+
+/** One column heading: click to sort by it, with the arrow on the one the grid is ordered by. */
+@Composable
+private fun HeadCell(state: SongLibraryState, label: String, sort: SortColumn, width: Dp) {
+    val scheme = MaterialTheme.colorScheme
+    val sorted = state.view.sortBy == sort
+    Row(
+        Modifier.width(width)
+            .fillMaxHeight()
+            .clickable { state.sortBy(sort) }
+            .padding(horizontal = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            label.uppercase(),
+            style = LibraryType.columnHead,
+            color = if (sorted) scheme.primary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        if (sorted) {
+            Icon(
+                if (state.view.ascending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                tint = scheme.primary,
+                modifier = Modifier.size(14.dp),
+            )
+        }
+    }
+    Box(Modifier.width(1.dp).fillMaxHeight().background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
 }
 
 @Composable
@@ -214,6 +229,17 @@ private fun SongRow(
                         )
                     }
                 }
+                Box(
+                    Modifier.width(1.dp)
+                        .height(LibraryMetrics.rowHeight)
+                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
+                )
+            }
+            if (state.showDuration) {
+                // Measured, not typed: how long the song usually stays on screen. Read only --
+                // the number comes from the services it was sung in, and there is nothing to
+                // correct by hand.
+                DurationCell(seconds = state.durations[song.sourceFile])
                 Box(
                     Modifier.width(1.dp)
                         .height(LibraryMetrics.rowHeight)

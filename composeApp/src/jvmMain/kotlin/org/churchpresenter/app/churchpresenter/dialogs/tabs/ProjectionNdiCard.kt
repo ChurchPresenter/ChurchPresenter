@@ -109,7 +109,7 @@ import org.churchpresenter.settings.removeNdiOutput
 import org.churchpresenter.settings.withNdiOutput
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString

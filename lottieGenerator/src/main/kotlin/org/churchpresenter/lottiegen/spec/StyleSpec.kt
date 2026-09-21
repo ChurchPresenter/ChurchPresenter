@@ -116,6 +116,18 @@ enum class VisibilityRule {
     /** !cfg.hideInfo */
     INFO_VISIBLE,
 
+    /** !cfg.hideDetail */
+    DETAIL_VISIBLE,
+
+    /**
+     * cfg.hideDetail — the negation of [DETAIL_VISIBLE]. Exists so a decoration fixed relative to
+     * Info's own line (a rule, an underline) can keep its pre-Detail position exactly when Detail
+     * is off, while a second element positioned relative to `DETAIL_LINE` takes over once it's on
+     * — the two-variant workaround this model needs since visibility rules otherwise only AND
+     * together, with no general negation.
+     */
+    DETAIL_HIDDEN,
+
     /** cfg.borderThickness > 0 */
     BORDER_SET
 }
@@ -184,7 +196,10 @@ enum class LineAnchor {
     NAME_LINE,
 
     /** The info line's text baseline anchor (classic baseline correction applied). */
-    INFO_LINE
+    INFO_LINE,
+
+    /** The detail line's text baseline anchor (classic baseline correction applied). */
+    DETAIL_LINE
 }
 
 @Serializable
@@ -217,7 +232,7 @@ sealed interface SizeSpec {
 }
 
 @Serializable
-enum class TextFieldRef { NAME, INFO }
+enum class TextFieldRef { NAME, INFO, DETAIL }
 
 // ---------------------------------------------------------------------------
 // Paint: color roles only — literal colors never appear in a spec
@@ -270,7 +285,7 @@ sealed interface StrokeWidthSpec {
 }
 
 @Serializable
-enum class ColorRole { NAME, INFO, ACCENT, BG, BORDER }
+enum class ColorRole { NAME, INFO, DETAIL, ACCENT, BG, BORDER }
 
 @Serializable
 sealed interface CornerSpec {
@@ -416,6 +431,9 @@ enum class WidthBasis {
 
     /** The info field's measured width. */
     INFO,
+
+    /** The detail field's measured width. */
+    DETAIL,
 
     /** The widest text line (the TEXT slot's core width). */
     TEXT_BLOCK

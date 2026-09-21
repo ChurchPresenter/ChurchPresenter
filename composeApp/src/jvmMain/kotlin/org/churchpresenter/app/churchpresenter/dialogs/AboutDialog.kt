@@ -44,6 +44,7 @@ import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.converter_window_title
+import churchpresenter.composeapp.generated.resources.open_calendar_manager
 import churchpresenter.composeapp.generated.resources.open_song_library
 import churchpresenter.composeapp.generated.resources.diagnostic_info_save_failed
 import churchpresenter.composeapp.generated.resources.diagnostic_info_saved
@@ -63,11 +64,16 @@ import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.app.churchpresenter.composables.ColorPickerDialog
+import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.calendar.ui.CalendarApp
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
 import org.churchpresenter.lottiegen.App as LottieGenApp
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.editor.StyleEditorApp
 import java.awt.Desktop
 import java.awt.Window as AwtWindow
@@ -328,7 +334,13 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
  * once the window is gone, which is where the app rescans.
  */
 @Composable
-fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: () -> Unit) {
+fun SongLibraryWindow(
+    theme: ThemeMode,
+    songStorageDirectory: String,
+    /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
+    onClose: () -> Unit,
+) {
     // No locale plumbing here: the window's strings are Compose resources now, and the app already
     // sets the JVM default locale when the language changes — which is what picks values-xx.
     Window(
@@ -341,6 +353,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
                 onClose = onClose,
+                typicalSeconds = typicalSongSeconds,
                 // The row's Edit opens the app's own editor, so a song is edited in one place
                 // whether it was reached from the Songs tab or from here.
                 songEditor = { editing ->
@@ -350,6 +363,7 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
                         songbooks = editing.songbooks,
                         existingSongs = editing.allSongs,
                         theme = theme,
+                        typicalSeconds = typicalSongSeconds(editing.song),
                         onDismiss = editing.onDismiss,
                         onSave = { edited, _ -> editing.onSave(edited) },
                     )
@@ -359,8 +373,79 @@ fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: (
     }
 }
 
+/**
+ * The Calendar Manager, in a window of its own beside the Song Library Manager.
+ *
+ * Its own module, and given only two things: the folder to keep `calendar.json` in — the same
+ * `~/.churchpresenter` the rest of what the app persists lives in — and the song folder its
+ * add-item picker reads. Everything it cannot do on its own goes through [CalendarHost]: putting a
+ * planned run of show into the Schedule tab, and seeing what is in it.
+ *
+ * A planned run of show is a `List<ScheduleItem>`, which is what the Schedule tab already holds, so
+ * loading one is a copy rather than a conversion.
+ */
 @Composable
-fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
+fun CalendarWindow(
+    theme: ThemeMode,
+    appDataDirectory: File,
+    songStorageDirectory: String,
+    host: CalendarHost,
+    /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
+    onClose: () -> Unit,
+) {
+    Window(
+        onCloseRequest = onClose,
+        title = stringResource(Res.string.open_calendar_manager),
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(width = 1280.dp, height = 860.dp)
+    ) {
+        AppWindowRoot(theme = theme) {
+            CalendarApp(
+                storeFolder = appDataDirectory,
+                songFolder = File(songStorageDirectory).takeIf { it.isDirectory },
+                host = host,
+                // The app's own picker, so a section's color is chosen exactly the way every other
+                // color in the app is — one control, not a second one living in :calendar.
+                colorPicker = { request ->
+                    ColorPickerDialog(
+                        initialHex = request.initialHex,
+                        onDismiss = request.onDismiss,
+                        onColorSelected = request.onPicked,
+                    )
+                },
+                // The app's own Edit Song dialog, exactly as the Song Library Manager takes it —
+                // one editor for a song, whether it is reached from the Songs tab, that window, or
+                // a run of show being planned here. What it writes lands in the songs folder, which
+                // SongsViewModel already watches.
+                songEditor = { editing ->
+                    EditSongDialog(
+                        isVisible = true,
+                        song = editing.song,
+                        songbooks = editing.songbooks,
+                        existingSongs = editing.allSongs,
+                        theme = theme,
+                        typicalSeconds = typicalSongSeconds(editing.song),
+                        onDismiss = editing.onDismiss,
+                        onSave = { edited, _ -> editing.onSave(edited) },
+                    )
+                },
+                onClose = onClose,
+            )
+        }
+    }
+}
+
+@Composable
+fun LottieGenWindow(
+    theme: ThemeMode,
+    outputDir: File?,
+    onClose: () -> Unit,
+    onFileSaved: (() -> Unit)? = null,
+    canvasWidth: Int? = null,
+    canvasHeight: Int? = null,
+    fontPicker: BandFontPicker? = null,
+) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),
@@ -375,7 +460,8 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
                 onFileSaved = onFileSaved,
                 canvasWidth = canvasWidth,
                 canvasHeight = canvasHeight,
-                embedded = true
+                embedded = true,
+                fontPicker = fontPicker,
             )
         }
     }

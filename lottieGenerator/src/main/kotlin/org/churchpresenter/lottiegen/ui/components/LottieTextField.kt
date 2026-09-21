@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -44,6 +45,7 @@ import org.churchpresenter.lottiegen.ui.Tokens
 /** Disabled text and captions are dimmed rather than hidden. */
 private const val DISABLED_ALPHA = 0.38f
 private const val LABEL_DISABLED_ALPHA = 0.5f
+private const val MULTI_LINE_MIN_LINES = 2
 
 /**
  * The chrome a field draws itself with, computed once by [LottieTextField] and handed to whichever
@@ -136,7 +138,9 @@ private fun LabelledField(
         modifier = Modifier
             .widthIn(min = 60.dp)
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(IntrinsicSize.Max))
-            .height(Tokens.FieldHeight)
+            // A multi-line field grows with its text: a wrapped verse in a one-line box reads as
+            // one line, and nothing says there is more until the caret is moved down into it.
+            .then(if (singleLine) Modifier.height(Tokens.FieldHeight) else Modifier.heightIn(min = Tokens.FieldHeight))
             .clip(Tokens.FieldShape)
             .background(Tokens.FieldBg)
             .border(1.dp, chrome.borderColor, Tokens.FieldShape)
@@ -166,6 +170,7 @@ private fun LabelledField(
                 readOnly = readOnly,
                 singleLine = singleLine,
                 maxLines = maxLines,
+                minLines = if (singleLine) 1 else MULTI_LINE_MIN_LINES,
                 textStyle = chrome.textStyle,
                 cursorBrush = SolidColor(Tokens.Accent),
                 keyboardOptions = keyboardOptions,

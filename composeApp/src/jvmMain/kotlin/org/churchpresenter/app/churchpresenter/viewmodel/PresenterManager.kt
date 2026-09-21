@@ -22,6 +22,9 @@ import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
@@ -37,7 +40,7 @@ private const val TICK_INTERVAL_MS = 1000L
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
 
-class PresenterManager {
+class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null
@@ -81,6 +84,28 @@ class PresenterManager {
 
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
+
+    /**
+     * Where the Lottie lower-third band — Bible or song, whichever is live — is in its entrance /
+     * hold / text change / exit. Driven by `PresenterTransitionEffects`; every output maps it
+     * onto its own template.
+     */
+    private val _lottieBandClock = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    val lottieBandClock: State<BibleBandClock> = _lottieBandClock
+
+    /**
+     * The lyric line the Lottie band shows. Follows [songDisplayLineIndex], but only once the
+     * band has played the old line out, so the text does not change under a running animation.
+     */
+    private val _bandSongLineIndex = mutableStateOf(-1)
+    val bandSongLineIndex: State<Int> = _bandSongLineIndex
+
+    /**
+     * What the Lottie band is crossfading away from while [lottieBandClock] is on a text swap:
+     * the verse or the lyric line it showed before the change. Empty at every other phase.
+     */
+    private val _bandOutgoing = mutableStateOf(BandOutgoing())
+    val bandOutgoing: State<BandOutgoing> = _bandOutgoing
 
     // Previous content for crossfade (both old and new visible simultaneously)
     private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
@@ -211,7 +236,7 @@ class PresenterManager {
     private val _transitionDuration = mutableStateOf(500)
     val transitionDuration: State<Int> = _transitionDuration
 
-    private val _showPresenterWindow = mutableStateOf(true)
+    private val _showPresenterWindow = mutableStateOf(showPresenterWindowInitially)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
 
     private val _devWindowAlwaysOnTop = mutableStateOf(false)
@@ -360,6 +385,18 @@ class PresenterManager {
 
     fun setBibleTransitionAlpha(alpha: Float) {
         _bibleTransitionAlpha.value = alpha
+    }
+
+    fun setLottieBandClock(clock: BibleBandClock) {
+        _lottieBandClock.value = clock
+    }
+
+    fun setBandSongLineIndex(index: Int) {
+        _bandSongLineIndex.value = index
+    }
+
+    fun setBandOutgoing(outgoing: BandOutgoing) {
+        _bandOutgoing.value = outgoing
     }
 
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {
@@ -902,7 +939,11 @@ class PresenterManager {
             _announcementTickerActive.value = false
             _announcementTimerExpired.value = true
             pushAnnouncementTextIfLive(expiredText)
-            setPresentingMode(Presenting.ANNOUNCEMENTS)
+            // Only where the timer is still what is on screen. A countdown row set to advance at
+            // its end hands on at the very second it reaches zero, and this used to drag the
+            // output straight back to the expired message -- the next item appeared for an
+            // instant and then vanished. Same condition the push above is guarded by.
+            if (announcementIsLive()) setPresentingMode(Presenting.ANNOUNCEMENTS)
         }
     }
 
@@ -1003,9 +1044,14 @@ class PresenterManager {
     }
 
     internal fun pushAnnouncementTextIfLive(text: String) {
+        if (announcementIsLive()) setAnnouncementText(text)
+    }
+
+    /** Whether an announcement is what any output is showing -- globally, or on a locked screen. */
+    private fun announcementIsLive(): Boolean {
         val anyScreenOnAnnouncements = _presentingMode.value == Presenting.ANNOUNCEMENTS ||
             _screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
-        if (anyScreenOnAnnouncements && _announcementTickerLive.value) setAnnouncementText(text)
+        return anyScreenOnAnnouncements && _announcementTickerLive.value
     }
 
     // Q&A display state

@@ -73,7 +73,17 @@ class LowerThirdBandBackgroundRenderTest {
         bibleSettings = BibleSettings(lowerThirdHeightPercent = bandPercent),
     )
 
-    private fun render(appSettings: AppSettings, sample: List<Pair<Int, Int>>): List<Color> {
+    private fun render(
+        appSettings: AppSettings,
+        sample: List<Pair<Int, Int>>,
+        /**
+         * A band image decodes on [kotlinx.coroutines.Dispatchers.IO], off the composition thread
+         * (#549), and paints black until it resolves — the same as a missing/undecodable file — so
+         * a test asserting on the *decoded picture* must wait for it rather than capture the instant
+         * `setContent` returns. Null when the test isn't sampling an image background.
+         */
+        awaitPixel: ((Color) -> Boolean)? = null,
+    ): List<Color> {
         lateinit var colors: List<Color>
         runComposeUiTest {
             setContent {
@@ -85,6 +95,12 @@ class LowerThirdBandBackgroundRenderTest {
                             isLowerThird = true,
                         )
                     }
+                }
+            }
+            if (awaitPixel != null) {
+                waitUntil("the band's picture finished loading", timeoutMillis = 5_000L) {
+                    val pixels = onNodeWithTag("output").captureToImage().toPixelMap()
+                    sample.all { (x, y) -> awaitPixel(pixels[x, y]) }
                 }
             }
             val pixels = onNodeWithTag("output").captureToImage().toPixelMap()
@@ -287,7 +303,7 @@ class LowerThirdBandBackgroundRenderTest {
                 ),
             ),
         )
-        val (band) = render(appSettings, listOf(EDGE_X to IN_BAND_Y))
+        val (band) = render(appSettings, listOf(EDGE_X to IN_BAND_Y), awaitPixel = { it.green > 0.9f })
         assertRgb(Color.Green, band, "a band anchored to the bottom would show the last stripe")
     }
 }

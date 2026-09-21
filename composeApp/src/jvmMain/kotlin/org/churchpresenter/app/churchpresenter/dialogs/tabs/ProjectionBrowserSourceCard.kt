@@ -74,7 +74,7 @@ import churchpresenter.composeapp.generated.resources.projection_web_decklink_to
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.app.churchpresenter.utils.OutputKind
@@ -442,6 +442,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             }
                             CustomizeOutputCell(
                                 assignment = output,
+                                outputKind = OutputKind.BROWSER_SOURCE,
                                 screenLabel = outputLabel,
                                 settings = settings,
                                 onApply = { updated ->

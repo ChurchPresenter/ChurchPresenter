@@ -441,6 +441,9 @@ data class SongSettings(
     val lowerThirdLookAheadBackdrop: TextBackdrop = TextBackdrop(),
     val lookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
     val lowerThirdLookAheadNextBackdrop: TextBackdrop = TextBackdrop(),
+
+    /** The outline around each profile's glyphs — see [SongOutlines], which says why it is nested. */
+    val outlines: SongOutlines = SongOutlines(),
 )
 
 /**

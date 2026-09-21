@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -91,6 +93,7 @@ private val SIZE_FIELD_WIDTH = 76.dp
  * No chord colour here. Chords are for the stage monitor, not for what the congregation reads, so
  * neither of the outputs this panel styles ever draws one.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SongTypographyPanel(
     element: SongStyleElement,
@@ -105,27 +108,46 @@ internal fun SongTypographyPanel(
      * changes nothing in the picture.
      */
     onTitleSlide: Boolean = false,
+    /**
+     * This output pins the song number to a corner.
+     *
+     * A corner is an alternative to the row the number otherwise shares with the title, not an
+     * extra setting layered on it: the presenter draws a cornered number over the slide and never
+     * consults its above/below-verse position. `SongNumberCorner` has said so since it was written;
+     * the control was offered anyway, and it was on by default -- the corner defaults to bottom
+     * right -- so the first thing an operator met on the Number element was a control that did
+     * nothing.
+     */
+    numberInCorner: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
+        // Two rows, for the reason the Bible panel's twin is: the colour and the faces, then the
+        // font and its size. All three cells on one flowing row came to more than the pane, so it
+        // wrapped wherever it ran out and stranded the size box away from the font it sizes.
+        SongColorControl(style, onStyleChange)
+        // Flowing rather than a hard row, for the reason the Bible panel's twin is: these cells are
+        // fixed-size, so a row too narrow for them clips the last one instead of shrinking it -- and
+        // a clipped control keeps its semantics, so a click aimed at it lands on nothing at all.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Top,
         ) {
-            SongColorControl(style, onStyleChange)
             SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SongSizeControl(element, style, onStyleChange)
-            Spacer(Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.Bottom,
         ) {
             // Alignment sits here rather than beside Size: with the Auto box in that row as well,
             // the four cells came to more than the pane and it was clipped off the end.
             SongAlignmentControl(style, onStyleChange)
-            if (element.hasPosition && !onTitleSlide) {
+            // A cornered number is drawn over the slide and never in the row this control places.
+            val cornered = element == SongStyleElement.NUMBER && numberInCorner
+            if (element.hasPosition && !onTitleSlide && !cornered) {
                 ControlColumn(stringResource(Res.string.position)) {
                     PositionButtons(
                         selectedPosition = style.position,
@@ -135,6 +157,29 @@ internal fun SongTypographyPanel(
                     )
                 }
             }
+            // Reset rides this row because it is the only one with width to spare: two small button
+            // groups and nothing that stretches. Every other row here is full -- the transform's
+            // four segments are 96dp each, and the shadow fields fill what is left of the column --
+            // so anything parked on one of those was squeezed out of the picture entirely.
+            Spacer(modifier = Modifier.weight(1f))
+            TextButton(
+                onClick = onReset,
+                shape = RoundedCornerShape(6.dp),
+                modifier = Modifier.height(32.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp),
+            ) {
+                Text(stringResource(Res.string.bible_reset_element), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        // The two sliders take a row of their own rather than the tail of the one above. They are
+        // the only controls here that stretch, so in a narrow column -- the per-output Customize
+        // dialog's is 430dp -- everything fixed beside them was measured first and the pair was
+        // left sharing whatever was over, which on most elements was about 90dp each.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            verticalAlignment = Alignment.Top,
+        ) {
             // Explicitly keyed, because the control above them comes and goes with the element. A
             // composable's identity is its call-site position, so without a key of their own the two
             // sliders shift a slot as the position control appears and each inherits the composition
@@ -158,29 +203,11 @@ internal fun SongTypographyPanel(
                 )
             }
         }
-        // Bottom-aligned: the transform and chord cells carry a caption above their controls and the
-        // shadow checkbox does not, so aligning the tops would leave it level with a caption.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            SongTransformControl(style, onStyleChange)
-            // Weighted, and the Reset button unweighted beside it: ShadowDetailRow fills the width
-            // it is given, and given the row's own constraints it took all of it -- Compose measures
-            // unweighted children against the full width first -- which squeezed the Reset button to
-            // zero the moment the shadow checkbox was ticked. The Bible panel already bounds its
-            // copy this way; a Spacer cannot substitute, because the greedy child is measured first.
-            SongShadowControl(style, onStyleChange, Modifier.weight(1f))
-            TextButton(
-                onClick = onReset,
-                shape = RoundedCornerShape(6.dp),
-                modifier = Modifier.height(32.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp),
-            ) {
-                Text(stringResource(Res.string.bible_reset_element), style = MaterialTheme.typography.labelSmall)
-            }
-        }
+        SongTransformControl(style, onStyleChange)
+        // A row of its own. The transform's four segments are 96dp each, so beside them the shadow
+        // cell had nothing left in a narrow column -- the per-output Customize dialog's is 430dp --
+        // and its three fields were crushed to their padding the moment the box was ticked.
+        SongShadowControl(style, onStyleChange, Modifier.fillMaxWidth())
     }
 }
 
@@ -211,6 +238,8 @@ private fun SongColorControl(
             strikethrough = style.strikethrough,
             onStrikethroughChange = { onStyleChange(style.copy(strikethrough = it)) },
             showShadow = false,
+            outline = style.outline,
+            onOutlineChange = { onStyleChange(style.copy(outline = it)) },
             backdrop = style.backdrop,
             onBackdropChange = { onStyleChange(style.copy(backdrop = it)) },
             buttonSize = FACE_BUTTON_SIZE,
@@ -345,10 +374,10 @@ private fun SongShadowControl(
         // at their height whether they are showing or not -- see [ShadowDetailRowHeight].
         modifier = modifier.widthIn(min = SHADOW_ROW_MIN_WIDTH).heightIn(min = ShadowDetailRowHeight),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        // Bottom, not centre. The controls this row sits beside are bottom-aligned, and the row is
-        // held taller than the checkbox by the reservation above -- so centring it left the box
-        // floating nine pixels above the buttons next to it whenever the details were folded away.
-        verticalAlignment = Alignment.Bottom,
+        // Centred. It was bottom-aligned while it shared a row with the text transform, to sit level
+        // with those buttons; on a row of its own that left it hanging below the fields beside it,
+        // which are the full height the reservation holds.
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         LabeledCheckbox(
             checked = style.shadow,

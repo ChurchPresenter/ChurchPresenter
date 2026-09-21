@@ -7,14 +7,22 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalWindowInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
@@ -22,6 +30,8 @@ import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
+import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
+import org.churchpresenter.app.churchpresenter.presenter.REFERENCE_HEIGHT
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.app.churchpresenter.presenter.PERCENT
@@ -70,15 +80,7 @@ fun PresenterScreen(
     val bgBlur = card.blur
     val backgroundColor = if (!showBackground) Color.Black else parseHexColor(card.colorHex)
 
-    val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {
-        if (showBackground && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
-            // Through PictureDecoder, not Skia directly: a background is a file the operator
-            // chose, so it can be a CMYK JPEG, a TIFF, or a HEIC named .jpg — all of which Skia
-            // alone refuses, leaving a black screen on the output with nothing said.
-            val file = File(bgImagePath)
-            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-        } else null
-    }
+    val backgroundImageBitmap = rememberDefaultBackgroundBitmap(bgType, bgImagePath, showBackground)
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isBlurred = showBackground && bgBlur > 0
@@ -104,14 +106,15 @@ fun PresenterScreen(
         } else {
             when (bgType) {
                 Constants.BACKGROUND_IMAGE -> {
-                    if (backgroundImageBitmap != null) {
+                    val bitmap = backgroundImageBitmap
+                    if (bitmap != null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .then(Modifier.background(Color.Black))
                         ) {
                             Image(
-                                painter = BitmapPainter(backgroundImageBitmap),
+                                painter = BitmapPainter(bitmap),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().alpha(bgOpacity)
@@ -163,6 +166,45 @@ fun PresenterScreen(
     }
 }
 
+/**
+ * The Default card's picture, decoded off the composition thread and scaled to this output's own
+ * size. Null while it is blanked or not an image, and briefly null again right after [imagePath]
+ * changes, while the new one decodes.
+ *
+ * A stock/Pexels background is already a small, web-sized download, but an operator's own photo has
+ * no such cap, and decoding one at full native resolution synchronously here froze every output
+ * sharing this thread — the presenter windows, DeckLink, and the NDI/Browser Source scenes are all
+ * confined to it by design (#549).
+ */
+@Composable
+private fun rememberDefaultBackgroundBitmap(
+    bgType: String,
+    imagePath: String,
+    showBackground: Boolean,
+): ImageBitmap? {
+    val containerSize = LocalWindowInfo.current.containerSize
+    val maxWidth = containerSize.width.takeIf { it > 0 } ?: BACKGROUND_REFERENCE_WIDTH.toInt()
+    val maxHeight = containerSize.height.takeIf { it > 0 } ?: REFERENCE_HEIGHT.toInt()
+    var bitmap by remember(bgType, imagePath, showBackground) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(bgType, imagePath, showBackground, maxWidth, maxHeight) {
+        bitmap = if (showBackground && bgType == Constants.BACKGROUND_IMAGE && imagePath.isNotEmpty()) {
+            // Through PictureDecoder, not Skia directly: a background is a file the operator
+            // chose, so it can be a CMYK JPEG, a TIFF, or a HEIC named .jpg — all of which Skia
+            // alone refuses, leaving a black screen on the output with nothing said.
+            val file = File(imagePath)
+            if (file.exists()) {
+                withContext(Dispatchers.IO) {
+                    PictureDecoder.decodeScaledOrNull(file, maxWidth, maxHeight)?.toComposeImageBitmap()
+                }
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+    }
+    return bitmap
+}
 
 /**
  * One of the two Default cards, flattened.

@@ -89,7 +89,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent

@@ -177,6 +177,11 @@ jobs:
               - *shared
               - 'bible/**'
               - 'diagnostics/**'          # implementation(projects.diagnostics)
+            calendar:
+              - *shared
+              - 'calendar/**'
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'theme/**'                # implementation(projects.theme)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -210,6 +215,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
+          :calendar:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -473,6 +479,14 @@ jobs:
         if: always() && steps.modules.outputs.bible == 'true'
         run: ./gradlew :bible:jacocoTestCoverageVerification -x test
 
+      - name: Calendar tests
+        if: always() && steps.modules.outputs.calendar == 'true'
+        run: ./gradlew :calendar:test
+
+      - name: Calendar coverage floor
+        if: always() && steps.modules.outputs.calendar == 'true'
+        run: ./gradlew :calendar:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -506,6 +520,8 @@ jobs:
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
+            bible/build/test-results/**/TEST-*.xml
+            calendar/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -524,8 +540,12 @@ jobs:
             Settings
             Diagnostics
             ATEM client
+            NDI client
             Planning Center
             Bible formats
+            Song chords
+            Bible
+            Calendar
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per

@@ -586,4 +586,108 @@ class PicturesViewModelTest {
         val vm = vm(settings(directory = file.absolutePath))
         assertNull(vm.selectedFolder)
     }
+
+    // ── A cue's play request ────────────────────────────────────────────────────
+
+    @Test
+    fun `a request for a folder not yet open waits for it`() {
+        repeat(2) { image("img${it + 1}.jpg") }
+        val vm = vm()
+        vm.requestPlayback(plays = 1, folderPath = folder.absolutePath)
+        assertFalse(vm.isPlaying, "nothing to show yet")
+
+        vm.selectFolder(folder)
+
+        assertTrue(vm.isPlaying)
+        assertFalse(vm.isLooping, "once is once")
+        assertEquals(0, vm.selectedImageIndex)
+    }
+
+    @Test
+    fun `a request for one folder does not start another`() {
+        val other = Files.createTempDirectory("cp-pictures-other").toFile()
+        try {
+            image("a.jpg", other)
+            val vm = vm().apply { selectFolder(other) }
+
+            vm.requestPlayback(plays = 1, folderPath = folder.absolutePath)
+
+            assertFalse(vm.isPlaying, "the folder open is not the one asked for")
+        } finally {
+            other.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a request on an empty folder waits for pictures`() {
+        val vm = vm().apply { selectFolder(folder) }
+
+        vm.requestPlayback(plays = 1)
+
+        assertFalse(vm.isPlaying)
+    }
+
+    @Test
+    fun `a request with no folder starts whatever is open`() {
+        val vm = loaded(2)
+        vm.selectImage(1)
+
+        vm.requestPlayback(plays = 0)
+
+        assertTrue(vm.isPlaying)
+        assertTrue(vm.isLooping)
+        assertEquals(0, vm.selectedImageIndex, "starts from the first picture")
+    }
+
+    @Test
+    fun `two plays stop after the second pass`() {
+        val vm = loaded(2)
+        vm.requestPlayback(plays = 2, folderPath = folder.absolutePath)
+
+        vm.nextImage() // 1
+        vm.nextImage() // wraps: second pass
+        assertEquals(0, vm.selectedImageIndex)
+        assertTrue(vm.isPlaying)
+        vm.nextImage() // 1
+        vm.nextImage() // the second pass is over
+
+        assertEquals(1, vm.selectedImageIndex, "the last picture stays up")
+        assertFalse(vm.isPlaying)
+    }
+
+    @Test
+    fun `a finished run is not replayed by reopening the folder`() {
+        val vm = loaded(1)
+        vm.requestPlayback(plays = 1, folderPath = folder.absolutePath)
+        vm.nextImage()
+        assertFalse(vm.isPlaying)
+
+        vm.selectFolder(folder)
+
+        assertFalse(vm.isPlaying, "the request was spent by the run ending")
+    }
+
+    @Test
+    fun `the operator taking over ends the request`() {
+        val vm = loaded(2)
+        vm.requestPlayback(plays = 0, folderPath = folder.absolutePath)
+        assertTrue(vm.isPlaying)
+
+        vm.togglePlayPause()
+        assertFalse(vm.isPlaying)
+        vm.selectFolder(folder)
+
+        assertFalse(vm.isPlaying, "re-opening the folder must not restart the cue's run")
+    }
+
+    @Test
+    fun `the tab's own loop toggle never runs out`() {
+        val vm = loaded(2)
+        vm.isLooping = true
+        vm.isPlaying = true
+
+        repeat(5) { vm.nextImage() }
+
+        assertTrue(vm.isPlaying)
+    }
 }

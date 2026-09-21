@@ -562,6 +562,10 @@ internal fun QARemoteContent(
                                 onBackdropChange = { updated ->
                                     onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backdrop = updated)) }
                                 },
+                                outline = qaSettings.outline,
+                                onOutlineChange = { updated ->
+                                    onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(outline = updated)) }
+                                },
                         )
 
                         AnimatedVisibility(visible = qaSettings.shadow) {

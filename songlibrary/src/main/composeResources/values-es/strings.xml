@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">¿Eliminar «%1$s»?</string>
     <string name="delete_confirm_action">Eliminar</string>
     <string name="song_count">%1$s cantos</string>
+    <string name="no_song_folder">Aún no hay carpeta de canciones — elige una en Ajustes → Canciones y podrás añadir canciones aquí.</string>
+    <string name="column_duration">Duración</string>
 </resources>

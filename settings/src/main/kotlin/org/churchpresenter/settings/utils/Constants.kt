@@ -77,6 +77,7 @@ object Constants {
     const val BACKGROUND_TRANSPARENT = "Transparent"
     const val BACKGROUND_GRADIENT = "Gradient"
     const val BACKGROUND_FOLLOW_DEFAULT = "FollowDefault" // Lower third follows the default background
+    const val BACKGROUND_LOTTIE = "Lottie" // Animated Lottie band that carries the text itself
 
     // Position Options
     const val POSITION_ABOVE = "Above"
@@ -206,6 +207,9 @@ object Constants {
     const val PREVIEW_TAB_ANNOUNCEMENTS = "announcements"
     const val PREVIEW_TAB_LOWER_THIRD = "lowerThird"
     const val PREVIEW_TAB_WEB = "web"
+    const val PREVIEW_TAB_SONGS = "songs"
+    const val PREVIEW_TAB_BIBLE = "bible"
+    const val PREVIEW_TAB_BACKGROUND = "background"
 
     const val PREVIEW_OUTPUT_SCREEN = "screen"
     const val PREVIEW_OUTPUT_BROWSER_SOURCE = "browserSource"

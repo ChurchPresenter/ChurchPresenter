@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
@@ -117,9 +117,12 @@ fun DictionaryPresenter(
                 val translitPainter = rememberTextBackdropPainter(ds.referenceBackdrop)
                 val definitionPainter = rememberTextBackdropPainter(ds.definitionBackdrop)
                 if (ds.showReference) {
-                    Text(
+                    OutlinedText(
                         modifier = numberPainter.modifier,
                         onTextLayout = numberPainter::onTextLayout,
+                        outline = ds.referenceOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
                         text = entry.number,
                         color = referenceColor,
                         fontSize = ds.referenceFontSize.sp,
@@ -132,9 +135,12 @@ fun DictionaryPresenter(
 
                 // Original word
                 if (ds.showWord && entry.word.isNotBlank()) {
-                    Text(
+                    OutlinedText(
                         modifier = wordPainter.modifier,
                         onTextLayout = wordPainter::onTextLayout,
+                        outline = ds.wordOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
                         text = entry.word,
                         color = wordColor,
                         fontSize = ds.wordFontSize.sp,
@@ -156,9 +162,12 @@ fun DictionaryPresenter(
                         }
                     }
                     if (translit.isNotBlank()) {
-                        Text(
+                        OutlinedText(
                             modifier = translitPainter.modifier,
                             onTextLayout = translitPainter::onTextLayout,
+                            outline = ds.referenceOutline,
+                            scaleFactor = 1f,
+                            fillWidth = false,
                             text = translit,
                             color = referenceColor,
                             fontSize = (ds.referenceFontSize * 0.85f).sp,
@@ -173,21 +182,28 @@ fun DictionaryPresenter(
                 // Definition
                 if (ds.showDefinition && entry.definition.isNotBlank()) {
                     Spacer(Modifier.height((itemSpacing.value / 2).coerceAtLeast(2f).dp))
-                    Text(
+                    OutlinedText(
                         modifier = definitionPainter.modifier,
                         onTextLayout = definitionPainter::onTextLayout,
+                        outline = ds.definitionOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
                         text = entry.definition,
                         color = definitionColor,
                         fontSize = ds.definitionFontSize.sp,
                         fontFamily = wordFontFamily,
                         textAlign = TextAlign.Center,
                         lineHeight = (ds.definitionFontSize * 1.4f).sp,
+                        style = TextStyle(),
                     )
                 }
 
                 // KJV usage
                 if (ds.showKjvUsage && entry.kjvUsage.isNotBlank()) {
-                    Text(
+                    OutlinedText(
+                        outline = ds.definitionOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
                         text = entry.kjvUsage,
                         color = kjvColor,
                         fontSize = ds.kjvUsageFontSize.sp,
@@ -195,6 +211,7 @@ fun DictionaryPresenter(
                         fontStyle = FontStyle.Italic,
                         textAlign = TextAlign.Center,
                         lineHeight = (ds.kjvUsageFontSize * 1.4f).sp,
+                        style = TextStyle(),
                     )
                 }
             }

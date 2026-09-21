@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener

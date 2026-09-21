@@ -9,11 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.graphics.luminance
-import org.churchpresenter.lottiegen.ui.DarkPalette
-import org.churchpresenter.lottiegen.ui.LightPalette
+import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.ui.LottieGenTheme
 import org.churchpresenter.lottiegen.ui.ProvideLottieGenPalette
+import org.churchpresenter.lottiegen.ui.paletteFrom
 import org.churchpresenter.lottiegen.ui.Tokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,7 +51,9 @@ fun App(
     onFileSaved: (() -> Unit)? = null,
     canvasWidth: Int? = null,
     canvasHeight: Int? = null,
-    embedded: Boolean = outputDir != null
+    embedded: Boolean = outputDir != null,
+    /** The host's own font picker, lent to the generator the same way `BibleLottieGenApp` takes one. */
+    fontPicker: BandFontPicker? = null,
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember(scope) {
@@ -67,7 +68,7 @@ fun App(
             val density = LocalDensity.current
 
             Row(modifier = Modifier.fillMaxSize()) {
-                ControlPanel(viewModel, controlPanelWidth.dp)
+                ControlPanel(viewModel, controlPanelWidth.dp, fontPicker)
 
                 // Draggable divider
                 Box(
@@ -97,11 +98,9 @@ fun App(
     }
 
     if (embedded) {
-        // Inherit the host's MaterialTheme, and follow it: a light host gets the light palette.
-        // `isLight` is read off the host's own surface rather than a flag it would have to pass,
-        // so any theme it applies — including the six accent themes — lands on the right side.
-        val isLight = MaterialTheme.colorScheme.surface.luminance() > 0.5f
-        ProvideLottieGenPalette(if (isLight) LightPalette else DarkPalette) {
+        // Inherit the host's MaterialTheme, and draw the chrome from it: whichever of the app's
+        // themes is on — including the six accent themes — is what the panels come out in.
+        ProvideLottieGenPalette(paletteFrom(MaterialTheme.colorScheme)) {
             content()
         }
     } else {

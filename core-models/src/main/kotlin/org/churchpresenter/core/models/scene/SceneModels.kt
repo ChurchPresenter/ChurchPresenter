@@ -3,6 +3,7 @@ package org.churchpresenter.core.models.scene
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import java.util.UUID
 
 /**
@@ -60,6 +61,8 @@ sealed class SceneSource {
         val strikethrough: Boolean = false,
         /** The band behind each line and the box around the block. */
         val backdrop: TextBackdrop = TextBackdrop(),
+        /** The stroke drawn around the glyphs, under the fill. */
+        val outline: TextOutline = TextOutline(),
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
         val lineSpacing: Int = 100,
@@ -168,6 +171,8 @@ sealed class SceneSource {
         val strikethrough: Boolean = false,
         /** The band behind each line and the box around the block. */
         val backdrop: TextBackdrop = TextBackdrop(),
+        /** The stroke drawn around the glyphs, under the fill. */
+        val outline: TextOutline = TextOutline(),
         /** The length a [ClockModes.COUNTDOWN] counts down from. Not a time of day. */
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
@@ -289,6 +294,9 @@ sealed class SceneSource {
         /** The band and box behind the verse, and behind its reference line. */
         val backdrop: TextBackdrop = TextBackdrop(),
         val referenceBackdrop: TextBackdrop = TextBackdrop(),
+        /** The stroke around the verse's glyphs, and around its reference line's. */
+        val outline: TextOutline = TextOutline(),
+        val referenceOutline: TextOutline = TextOutline(),
         val horizontalAlignment: String = "center",
         val verticalAlignment: String = "center",
         val lineSpacing: Int = 100,

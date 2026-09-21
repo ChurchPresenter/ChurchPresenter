@@ -31,12 +31,16 @@ class CrashReporterStartupTest {
     private var onExit: Runnable? = null
     private val order = mutableListOf<String>()
 
+    /** The exit code the installed handler asked for, or null if it never called [exit]. */
+    private var exitCode: Int? = null
+
     private fun startUp(analyticsReportingEnabled: Boolean, build: BuildIdentity = BuildIdentity()) =
         CrashReporter.startUp(
             analyticsReportingEnabled,
             build,
             setUncaughtHandler = { handler = it; order += "handler" },
             addShutdownHook = { onExit = it; order += "shutdown" },
+            exit = { exitCode = it },
         )
 
     @BeforeTest
@@ -126,6 +130,22 @@ class CrashReporterStartupTest {
         assertFalse(
             CrashReporter.videoBackgroundsDisabled,
             "a GPU driver fault is not video decoding; turning off VLC hides the cause and costs a feature",
+        )
+    }
+
+    @Test
+    fun `re-enabling video backgrounds clears the guard on disk as well as in memory`() {
+        secondCrashPending(kind = null)
+        startUp(analyticsReportingEnabled = false)
+        assertTrue(CrashReporter.videoBackgroundsDisabled, "the fixture has to have tripped the guard")
+
+        CrashReporter.reEnableVideoBackgrounds()
+
+        assertFalse(CrashReporter.videoBackgroundsDisabled, "the override takes effect in this session")
+        assertEquals(
+            "0",
+            crashCountFile.readText().trim(),
+            "the count is what re-arms the guard next launch, so the override has to reset it too",
         )
     }
 
@@ -241,6 +261,19 @@ class CrashReporterStartupTest {
         val text = logs.single().readText()
         assertTrue(text.contains("kaboom"), "the message is the whole point of the log")
         assertTrue(text.contains(Thread.currentThread().name), "which thread died is triage data")
+    }
+
+    @Test
+    fun `the installed handler ends the process once the crash is on record, rather than leaving it running`() {
+        // #518: the JVM's own default handler only prints to stderr, so nothing ended the process —
+        // and because every output window shares one AWT thread with the main window, a crash there
+        // used to freeze the whole app instead of closing it.
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), IllegalStateException("kaboom"))
+
+        assertEquals(EXIT_CODE_FATAL_CRASH, exitCode, "a distinct code from the clean-exit 0")
     }
 
     @Test

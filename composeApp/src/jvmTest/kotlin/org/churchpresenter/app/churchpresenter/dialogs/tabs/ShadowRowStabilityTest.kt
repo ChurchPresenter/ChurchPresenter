@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -38,6 +39,18 @@ class ShadowRowStabilityTest {
     private fun ComposeUiTest.boundsOf(text: String): Rect =
         onNodeWithText(text, substring = true).fetchSemanticsNode().boundsInRoot
 
+    /**
+     * The last cell whose text contains [text], in composition order.
+     *
+     * The shadow's own colour swatch is captioned exactly as the element's is, and the element's is
+     * composed first, so the shadow's is the later of the two.
+     */
+    private fun ComposeUiTest.lastBoundsOf(text: String): Rect =
+        onAllNodesWithText(text, substring = true)
+            .fetchSemanticsNodes()
+            .last()
+            .boundsInRoot
+
     @Test
     fun `the song panel's shadow checkbox does not move when it is ticked`() = runComposeUiTest {
         setContent {
@@ -61,11 +74,12 @@ class ShadowRowStabilityTest {
     }
 
     @Test
-    fun `the song panel's shadow checkbox sits level with the controls beside it`() = runComposeUiTest {
-        // Reserving the row's height fixed the jump and introduced this: centred inside a box held
-        // taller than itself, the checkbox floated nine pixels above its neighbours whenever the
-        // details were folded away. Bottom-aligned it shares their baseline in both states, which is
-        // what the row's own comment has always said it wanted.
+    fun `the song panel's shadow details fold out level with the checkbox`() = runComposeUiTest {
+        // The checkbox no longer shares a row with the text transform -- the transform's four 96dp
+        // segments left the shadow cell nothing in a narrow column, so it was given a row of its
+        // own. There is nothing beside it to sit level with any more, and the property that
+        // replaced that one is this: the details fold out *beside* the box rather than under it, so
+        // the two share a centre line and the row keeps the height it reserved either way.
         setContent {
             Box(Modifier.size(1200.dp, 800.dp)) {
                 var style by remember {
@@ -81,9 +95,19 @@ class ShadowRowStabilityTest {
             }
         }
 
-        assertEquals(boundsOf("Reset").bottom, boundsOf("Shadow").bottom, "with the details folded away")
+        val folded = boundsOf("Shadow")
         onNodeWithText("Shadow", substring = true).performClick()
-        assertEquals(boundsOf("Reset").bottom, boundsOf("Shadow").bottom, "and with them folded out")
+
+        val box = boundsOf("Shadow")
+        assertEquals(folded, box, "the box must not move when its own details appear")
+        // The colour cell is the whole control rather than a caption over a field, so its middle is
+        // the row's middle. The "SIZE (%)" and "INTENSITY (%)" captions sit above their own fields
+        // inside a `ControlColumn` and ride higher by design.
+        assertEquals(
+            box.center.y,
+            lastBoundsOf("COLOR").center.y,
+            "the details must fold out beside the checkbox, not under it",
+        )
     }
 
     @Test

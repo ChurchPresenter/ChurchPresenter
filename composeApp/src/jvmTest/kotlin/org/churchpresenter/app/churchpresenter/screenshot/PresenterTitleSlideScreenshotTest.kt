@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -110,7 +111,7 @@ class PresenterTitleSlideScreenshotTest {
         SongPresenter(
             lyricSection = fullIntroSlide().copy(
                 title = "Great Is Thy Faithfulness, O God My Father",
-                secondaryTitle = "Велика верность Твоя, о Боже, Отец наш",
+                translations = listOf(SectionTranslation(title = "Велика верность Твоя, о Боже, Отец наш")),
             ),
             appSettings = titleSlideSettings(
                 titleSlideVerticalAlignment = Constants.BOTTOM,

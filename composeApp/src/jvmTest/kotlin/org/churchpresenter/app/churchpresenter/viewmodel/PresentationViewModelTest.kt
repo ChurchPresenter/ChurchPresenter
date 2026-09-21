@@ -436,4 +436,59 @@ class PresentationViewModelTest {
         val vm = viewModel().open(pdf(pages = 2))
         assertNotNull(vm.deck, "the parsed deck drives the animated player")
     }
+
+    // ── A cue's play request ────────────────────────────────────────────────────
+
+    @Test
+    fun `a request for a deck not yet rendered waits for its slides`() {
+        val file = pdf(pages = 2)
+        val vm = viewModel()
+        vm.requestPlayback(plays = 1, filePath = file.absolutePath)
+        assertFalse(vm.isPlaying, "no slides yet")
+
+        vm.open(file)
+
+        assertTrue(vm.isPlaying)
+        assertFalse(vm.isLooping, "once is once")
+        assertEquals(0, vm.selectedSlideIndex)
+    }
+
+    @Test
+    fun `a request for one deck does not start another`() {
+        val vm = viewModel().open(pdf(pages = 2))
+
+        vm.requestPlayback(plays = 1, filePath = File(dir, "other.pdf").absolutePath)
+
+        assertFalse(vm.isPlaying, "the deck open is not the one asked for")
+    }
+
+    @Test
+    fun `two plays stop after the second pass`() {
+        val vm = viewModel().open(pdf(pages = 2))
+        vm.selectSlide(1)
+
+        vm.requestPlayback(plays = 2)
+        assertTrue(vm.isPlaying)
+        assertTrue(vm.isLooping)
+        assertEquals(0, vm.selectedSlideIndex, "starts from the first slide")
+
+        vm.nextSlide() // 1
+        vm.nextSlide() // wraps: second pass
+        assertEquals(0, vm.selectedSlideIndex)
+        vm.nextSlide() // 1
+        vm.nextSlide() // the second pass is over
+
+        assertEquals(1, vm.selectedSlideIndex, "the last slide stays up")
+        assertFalse(vm.isPlaying)
+    }
+
+    @Test
+    fun `zero plays never runs out`() {
+        val vm = viewModel().open(pdf(pages = 2))
+        vm.requestPlayback(plays = 0)
+
+        repeat(5) { vm.nextSlide() }
+
+        assertTrue(vm.isPlaying)
+    }
 }

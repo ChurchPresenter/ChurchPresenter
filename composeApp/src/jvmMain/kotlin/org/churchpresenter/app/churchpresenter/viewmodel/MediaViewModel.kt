@@ -4,6 +4,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.utils.Constants
 
+/** One subtitle track VLC found in the loaded media: [id] is VLC's own, [name] is what it calls it. */
+data class SubtitleTrack(val id: Int, val name: String)
+
 class MediaViewModel {
 
     // Media source
@@ -113,13 +116,63 @@ class MediaViewModel {
         _loopsPlayed.intValue = 0
     }
 
+    /** Sets looping outright — a calendar cue's Once / Loop / N times, rather than the tab's toggle. */
+    fun setLooping(looping: Boolean) {
+        _isLooping.value = looping
+        _loopsPlayed.intValue = 0
+    }
+
     fun setLoopCount(count: Int) {
         _loopCount.intValue = count.coerceAtLeast(0)
         _loopsPlayed.intValue = 0
     }
 
+    // Subtitles
+    /** An external subtitle file handed to VLC alongside the media; blank when there is none. */
+    private val _subtitleUrl = mutableStateOf("")
+    val subtitleUrl: String get() = _subtitleUrl.value
+
+    /** The tracks VLC reports for the loaded media, external file included. Filled by the player. */
+    private val _subtitleTracks = mutableStateOf<List<SubtitleTrack>>(emptyList())
+    val subtitleTracks: List<SubtitleTrack> get() = _subtitleTracks.value
+
+    /**
+     * The VLC track id being shown, [SUBTITLES_OFF] for none, or [SUBTITLES_UNDECIDED] until the
+     * tracks are known.
+     */
+    private val _selectedSubtitleTrack = mutableIntStateOf(SUBTITLES_UNDECIDED)
+    val selectedSubtitleTrack: Int get() = _selectedSubtitleTrack.intValue
+
+    /**
+     * Points the media at an external subtitle file. Blank clears it. The media has to be loaded
+     * again for VLC to pick the file up, which the player does when this value changes.
+     */
+    fun setSubtitleFile(path: String) {
+        _subtitleUrl.value = path
+        _subtitleTracks.value = emptyList()
+        _selectedSubtitleTrack.intValue = SUBTITLES_UNDECIDED
+    }
+
+    /** Called by the player once VLC has listed the tracks; [SUBTITLES_UNDECIDED] resolves here. */
+    fun setSubtitleTracks(tracks: List<SubtitleTrack>) {
+        _subtitleTracks.value = tracks
+        val selected = _selectedSubtitleTrack.intValue
+        val stillValid = selected == SUBTITLES_OFF || tracks.any { it.id == selected }
+        _selectedSubtitleTrack.intValue = when {
+            selected != SUBTITLES_UNDECIDED && stillValid -> selected
+            // A file the operator chose is the one they want to see; embedded tracks start hidden.
+            _subtitleUrl.value.isNotBlank() -> tracks.lastOrNull()?.id ?: SUBTITLES_OFF
+            else -> SUBTITLES_OFF
+        }
+    }
+
+    fun selectSubtitleTrack(id: Int) {
+        _selectedSubtitleTrack.intValue = id
+    }
+
 
     fun loadMedia(url: String, type: String) {
+        setSubtitleFile("")
         _mediaUrl.value = url
         _mediaType.value = type
         _mediaTitle.value = deriveTitleFromUrl(url)
@@ -133,7 +186,48 @@ class MediaViewModel {
         _playbackGeneration.intValue++
     }
 
-    fun loadMediaFromSchedule(url: String, title: String, type: String) {
+    /**
+     * A cue asking this clip to play, kept until the clip it names has finished loading.
+     *
+     * The load is what the Media tab does when it is handed a row, and it deliberately leaves the
+     * clip paused -- an operator going live by hand presses play. Automation has nobody to press
+     * it, so a row that fired on its own sat on a blank output. The url is part of the request so
+     * it cannot start whatever clip happened to be loaded a moment earlier.
+     */
+    fun requestPlayback(plays: Int, url: String) {
+        pendingPlayUrl = url
+        pendingPlays = plays
+        applyPendingPlayback()
+    }
+
+    private var pendingPlayUrl: String? = null
+    private var pendingPlays: Int = 1
+
+    /**
+     * Told when a cue's clip actually starts, so the app can put it back on the live output.
+     *
+     * A lambda rather than a reference to the presenter: this class must not hold one (see
+     * `AGENT.md` on passing view models around). It is needed because being handed a row *clears*
+     * the live output -- the Media tab asks for that, so the previous clip fades rather than cuts
+     * -- and going live by hand undoes it by pushing the new clip. A cue has nobody to push, so
+     * without this the clip played in the preview over a black output.
+     */
+    var onCuePlaybackStarted: ((url: String, type: String) -> Unit)? = null
+
+    private fun applyPendingPlayback() {
+        val wanted = pendingPlayUrl ?: return
+        if (_mediaUrl.value != wanted || !_isLoaded.value) return
+        pendingPlayUrl = null
+        // 1 once, 0 for ever, N times -- the same counting the row's `repeats` uses.
+        _isLooping.value = pendingPlays != 1
+        _loopCount.intValue = if (pendingPlays == 0) 0 else pendingPlays - 1
+        _loopsPlayed.intValue = 0
+        play()
+        onCuePlaybackStarted?.invoke(_mediaUrl.value, _mediaType.value)
+    }
+
+    fun loadMediaFromSchedule(url: String, title: String, type: String, subtitleUrl: String = "") {
+        setSubtitleFile(subtitleUrl)
         _mediaUrl.value = url
         _mediaTitle.value = title
         _mediaType.value = type
@@ -145,6 +239,8 @@ class MediaViewModel {
             url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
         _loopsPlayed.intValue = 0
         _playbackGeneration.intValue++
+        // Loaded is the moment a cue's request can be carried out; before it there is nothing to play.
+        applyPendingPlayback()
     }
 
     fun togglePlayPause() {
@@ -173,6 +269,7 @@ class MediaViewModel {
     }
 
     fun unload() {
+        setSubtitleFile("")
         _isPlaying.value = false
         _mediaUrl.value = ""
         _mediaTitle.value = ""
@@ -223,6 +320,11 @@ class MediaViewModel {
     /** Called by VideoPlayer to keep the progress in sync (does NOT bump seekVersion). */
     fun setCurrentPosition(ms: Long) {
         _currentPosition.value = ms
+    }
+
+    companion object {
+        const val SUBTITLES_OFF = -1
+        const val SUBTITLES_UNDECIDED = -2
     }
 
     internal fun deriveTitleFromUrl(url: String): String {

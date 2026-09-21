@@ -216,9 +216,18 @@ internal class SpecBuild(
                 weight = cfg.infoWeight
                 caseTransform = cfg.infoTransform
             }
+            TextFieldRef.DETAIL -> {
+                text = cfg.detailText
+                sizePx = layout.detailSizePx
+                weight = cfg.detailWeight
+                caseTransform = cfg.detailTransform
+            }
         }
-        val paintRole = element.colorRole
-            ?: if (element.field == TextFieldRef.NAME) ColorRole.NAME else ColorRole.INFO
+        val paintRole = element.colorRole ?: when (element.field) {
+            TextFieldRef.NAME -> ColorRole.NAME
+            TextFieldRef.INFO -> ColorRole.INFO
+            TextFieldRef.DETAIL -> ColorRole.DETAIL
+        }
         alpha = layout.paint.roleAlpha(paintRole)
         color = layout.paint.roleColor(paintRole)
         val (w, h) = layout.resolveSize(element)

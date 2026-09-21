@@ -32,6 +32,13 @@ private const val BORDER_THICKNESS_FACTOR = 0.1
 private const val UPPER_LINE_FACTOR = 0.1
 private const val LOWER_LINE_FACTOR = 0.9
 
+/**
+ * How far below info's own row the detail row sits, as a fraction of info's size — the same
+ * shape `SpecLayoutContext` uses for the spec-based styles' third line, so a compiled style and
+ * a spec style read the same way once Detail is on.
+ */
+private const val DETAIL_ROW_GAP_FACTOR = 0.15
+
 /** The accent bar and the gaps around it, in em. */
 private const val BAR_WIDTH_EM = 0.3
 private const val BAR_HEIGHT_EM = 3.5
@@ -60,6 +67,7 @@ private const val LOGO_HOLD_PCT = 55.0
 private const val NAME_START_CENTRE_PCT = 50.0
 private const val NAME_START_PCT = 45.0
 private const val INFO_START_PCT = 50.0
+private const val DETAIL_START_PCT = 55.0
 private const val BAR_START_PCT = 23.0
 private const val BAR_OPAQUE_PCT = 50.0
 private const val BAR_SETTLED_PCT = 75.0
@@ -85,15 +93,26 @@ private class BarGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val baseSize = cfg.baseSize.toDouble()
     val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
     val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
+    val detailSizePx = emToPx(cfg.detailSize.toDouble(), baseSize)
     val nameM = TextMeasurer.measure(
         cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform,
     )
     val infoM = TextMeasurer.measure(
         cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform,
     )
+    val detailM = TextMeasurer.measure(
+        cfg.detailText, cfg.fontFamily, detailSizePx.toFloat(), cfg.detailWeight, cfg.detailTransform,
+    )
+
+    /** Zero when Detail is hidden, so a preset with it off renders byte-identically to before. */
+    private val detailExtraEm = if (!cfg.hideDetail) {
+        cfg.lineSpacing + cfg.infoSize * DETAIL_ROW_GAP_FACTOR + cfg.detailSize
+    } else {
+        0.0
+    }
 
     val barWidth = emToPx(BAR_WIDTH_EM, baseSize)
-    val barHeight = emToPx(BAR_HEIGHT_EM, baseSize)
+    val barHeight = emToPx(BAR_HEIGHT_EM + detailExtraEm, baseSize)
     val textMargin = emToPx(TEXT_MARGIN_EM, baseSize)
     val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
     val marginHPx = remToPx(cfg.marginH.toDouble(), baseSize)
@@ -108,8 +127,9 @@ private class BarGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val borderLottie = hexToLottie(cfg.borderColor)
     val nameCLottie = hexToLottie(cfg.nameColor)
     val infoCLottie = hexToLottie(cfg.infoColor)
+    val detailCLottie = hexToLottie(cfg.detailColor)
 
-    val textBlockW = max(nameM.width, infoM.width) + textMargin + TEXT_BLOCK_SLACK_PX
+    val textBlockW = maxOf(nameM.width, infoM.width, detailM.width) + textMargin + TEXT_BLOCK_SLACK_PX
     val logoSpace = if (cfg.logoEnabled) logoSizePx + logoMargin else 0.0
     val totalContentW = textBlockW + barWidth + logoSpace
     val bgW = totalContentW + emToPx(BG_PADDING_EM, baseSize)
@@ -140,6 +160,13 @@ private class BarGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     val nameY = baseY - lineSpacingPx / 2 - nameSizePx * UPPER_LINE_FACTOR
     val infoY = baseY + lineSpacingPx / 2 + infoSizePx * LOWER_LINE_FACTOR
 
+    /**
+     * One more row below info's — purely additive, same as `SpecLayoutContext.detailLineY`: name
+     * and info are computed exactly as if Detail did not exist, so `detailExtraEm` is what makes
+     * room for this without moving them.
+     */
+    val detailY = infoY + lineSpacingPx + infoSizePx * DETAIL_ROW_GAP_FACTOR + detailSizePx * LOWER_LINE_FACTOR
+
     /** Which way each line flies in, and how Lottie should justify it. */
     val justify = when {
         isRight -> JUSTIFY_RIGHT
@@ -148,8 +175,10 @@ private class BarGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
     }
     private val nameSlideDir = if (isRight) 1.0 else -1.0
     private val infoSlideDir = if (isRight || isCenter) 1.0 else -1.0
+    private val detailSlideDir = if (isRight || isCenter) 1.0 else -1.0
     val nameSlideOffset = (nameM.width + SLIDE_CLEARANCE_PX) * nameSlideDir
     val infoSlideOffset = (infoM.width + SLIDE_CLEARANCE_PX) * infoSlideDir
+    val detailSlideOffset = (detailM.width + SLIDE_CLEARANCE_PX) * detailSlideDir
 
     val namePctStart = if (isCenter) NAME_START_CENTRE_PCT else NAME_START_PCT
 
@@ -161,8 +190,9 @@ class Style1Bar : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
         val g = BarGeometry(builder, cfg)
         builder.addLogo(g)
-        if (!cfg.hideName) builder.addMaskedLine(g, BarLine(g, isName = true))
-        if (!cfg.hideInfo) builder.addMaskedLine(g, BarLine(g, isName = false))
+        if (!cfg.hideName) builder.addMaskedLine(g, BarLine(g, BarLineKind.NAME))
+        if (!cfg.hideInfo) builder.addMaskedLine(g, BarLine(g, BarLineKind.INFO))
+        if (!cfg.hideDetail) builder.addMaskedLine(g, BarLine(g, BarLineKind.DETAIL))
         builder.addAccentBar(g)
         if (cfg.bgEnabled) builder.addBackground(g)
     }
@@ -200,25 +230,75 @@ private fun LottieBuilder.addLogo(g: BarGeometry) {
     )
 }
 
+private enum class BarLineKind { NAME, INFO, DETAIL }
+
 /**
- * One of the two text lines, resolved from the geometry.
+ * One of the (up to) three text lines, resolved from the geometry.
  *
- * The name and the info line differ only in which half of the config they read, so this says that
- * once rather than passing a dozen parallel arguments down to the layer builder.
+ * The three lines differ only in which slice of the config they read, so this says that once
+ * rather than passing a dozen parallel arguments down to the layer builder.
  */
-private class BarLine(g: BarGeometry, isName: Boolean) {
-    val maskName = if (isName) "Name Mask" else "Info Mask"
-    val layerName = if (isName) "Name" else "Info"
-    val width = if (isName) g.nameM.width else g.infoM.width
-    val sizePx = if (isName) g.nameSizePx else g.infoSizePx
-    val y = if (isName) g.nameY else g.infoY
-    val slideOffset = if (isName) g.nameSlideOffset else g.infoSlideOffset
-    val startPct = if (isName) g.namePctStart else INFO_START_PCT
-    val text = if (isName) g.cfg.nameText else g.cfg.infoText
-    val weight = if (isName) g.cfg.nameWeight else g.cfg.infoWeight
-    val color = if (isName) g.nameCLottie else g.infoCLottie
-    val transform = if (isName) g.cfg.nameTransform else g.cfg.infoTransform
-    val alpha = if (isName) g.cfg.nameColorAlpha else g.cfg.infoColorAlpha
+private class BarLine(g: BarGeometry, kind: BarLineKind) {
+    val maskName = when (kind) {
+        BarLineKind.NAME -> "Name Mask"
+        BarLineKind.INFO -> "Info Mask"
+        BarLineKind.DETAIL -> "Detail Mask"
+    }
+    val layerName = when (kind) {
+        BarLineKind.NAME -> "Name"
+        BarLineKind.INFO -> "Info"
+        BarLineKind.DETAIL -> "Detail"
+    }
+    val width = when (kind) {
+        BarLineKind.NAME -> g.nameM.width
+        BarLineKind.INFO -> g.infoM.width
+        BarLineKind.DETAIL -> g.detailM.width
+    }
+    val sizePx = when (kind) {
+        BarLineKind.NAME -> g.nameSizePx
+        BarLineKind.INFO -> g.infoSizePx
+        BarLineKind.DETAIL -> g.detailSizePx
+    }
+    val y = when (kind) {
+        BarLineKind.NAME -> g.nameY
+        BarLineKind.INFO -> g.infoY
+        BarLineKind.DETAIL -> g.detailY
+    }
+    val slideOffset = when (kind) {
+        BarLineKind.NAME -> g.nameSlideOffset
+        BarLineKind.INFO -> g.infoSlideOffset
+        BarLineKind.DETAIL -> g.detailSlideOffset
+    }
+    val startPct = when (kind) {
+        BarLineKind.NAME -> g.namePctStart
+        BarLineKind.INFO -> INFO_START_PCT
+        BarLineKind.DETAIL -> DETAIL_START_PCT
+    }
+    val text = when (kind) {
+        BarLineKind.NAME -> g.cfg.nameText
+        BarLineKind.INFO -> g.cfg.infoText
+        BarLineKind.DETAIL -> g.cfg.detailText
+    }
+    val weight = when (kind) {
+        BarLineKind.NAME -> g.cfg.nameWeight
+        BarLineKind.INFO -> g.cfg.infoWeight
+        BarLineKind.DETAIL -> g.cfg.detailWeight
+    }
+    val color = when (kind) {
+        BarLineKind.NAME -> g.nameCLottie
+        BarLineKind.INFO -> g.infoCLottie
+        BarLineKind.DETAIL -> g.detailCLottie
+    }
+    val transform = when (kind) {
+        BarLineKind.NAME -> g.cfg.nameTransform
+        BarLineKind.INFO -> g.cfg.infoTransform
+        BarLineKind.DETAIL -> g.cfg.detailTransform
+    }
+    val alpha = when (kind) {
+        BarLineKind.NAME -> g.cfg.nameColorAlpha
+        BarLineKind.INFO -> g.cfg.infoColorAlpha
+        BarLineKind.DETAIL -> g.cfg.detailColorAlpha
+    }
 }
 
 /** A line and the mask that wipes it in: identical machinery for the name and the info line. */

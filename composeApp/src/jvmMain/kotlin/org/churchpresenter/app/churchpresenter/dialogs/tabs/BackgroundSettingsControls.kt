@@ -77,6 +77,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 import kotlin.math.roundToInt
 
 /** The one editor, for whichever surface the rail has open. */
@@ -86,6 +87,7 @@ internal fun BackgroundControlsColumn(
     settings: AppSettings,
     onConfigChange: (BackgroundConfig) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File? = null,
     modifier: Modifier = Modifier
 ) {
     val config = settings.backgroundSettings.configFor(scope)
@@ -101,10 +103,12 @@ internal fun BackgroundControlsColumn(
         ) {
             BackgroundTypeSegments(scope = scope, config = config, onConfigChange = onConfigChange)
             BackgroundSourceSection(
+                scope = scope,
                 settings = settings,
                 config = config,
                 onConfigChange = onConfigChange,
-                onSettingsChange = onSettingsChange
+                onSettingsChange = onSettingsChange,
+                bibleLowerThirdsDir = bibleLowerThirdsDir,
             )
             if (config.backgroundType in ADJUSTABLE_TYPES) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -215,10 +219,12 @@ internal fun BackgroundTypeRow(
 /** Whatever the chosen type needs said about it: a color, a file, or a gradient's two ends. */
 @Composable
 private fun BackgroundSourceSection(
+    scope: BackgroundScope,
     settings: AppSettings,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File?,
 ) {
     val onPexelsKey: (String) -> Unit = { key ->
         onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pexelsApiKey = key)) }
@@ -255,6 +261,8 @@ private fun BackgroundSourceSection(
         }
         Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
+        Constants.BACKGROUND_LOTTIE ->
+            LottieBandSourceSection(scope, settings, config, onConfigChange, bibleLowerThirdsDir)
         else -> Unit
     }
 }

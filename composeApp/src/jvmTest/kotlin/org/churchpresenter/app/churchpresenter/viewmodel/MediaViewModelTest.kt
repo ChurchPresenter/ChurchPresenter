@@ -430,4 +430,201 @@ class MediaViewModelTest {
         val vm = MediaViewModel()
         assertEquals("0:01", vm.formatTime(1_999), "1.999s is still in its first second")
     }
+
+    // ── A cue's play request ────────────────────────────────────────────────────
+
+    @Test
+    fun `a request for a clip not yet loaded waits for it`() {
+        val vm = MediaViewModel()
+        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        assertFalse(vm.isPlaying, "nothing to play yet")
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.isPlaying)
+        assertFalse(vm.isLooping, "once is once")
+        assertEquals(0, vm.loopCount)
+    }
+
+    @Test
+    fun `a request for one clip does not start another`() {
+        val vm = loaded("/media/last-week.mp4")
+        vm.requestPlayback(plays = 1, url = "/media/this-week.mp4")
+        assertFalse(vm.isPlaying, "last week's clip was loaded, not the one asked for")
+
+        vm.loadMediaFromSchedule("/media/this-week.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.isPlaying)
+    }
+
+    @Test
+    fun `a request on a loaded clip plays it at once and tells the app`() {
+        val started = mutableListOf<Pair<String, String>>()
+        val vm = loaded("/media/clip.mp4")
+        vm.onCuePlaybackStarted = { url, type -> started.add(url to type) }
+
+        vm.requestPlayback(plays = 3, url = "/media/clip.mp4")
+
+        assertTrue(vm.isPlaying)
+        assertTrue(vm.isLooping)
+        assertEquals(2, vm.loopCount, "three plays is the first plus two repeats")
+        assertEquals(listOf("/media/clip.mp4" to Constants.MEDIA_TYPE_LOCAL), started)
+    }
+
+    @Test
+    fun `zero plays loops until something else goes live`() {
+        val vm = loaded("/media/clip.mp4")
+
+        vm.requestPlayback(plays = 0, url = "/media/clip.mp4")
+
+        assertTrue(vm.isLooping)
+        assertEquals(0, vm.loopCount, "no count means for ever")
+    }
+
+    @Test
+    fun `a request is spent once carried out`() {
+        val vm = loaded("/media/clip.mp4")
+        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        vm.pause()
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertFalse(vm.isPlaying, "reloading the same clip by hand must not replay the cue")
+    }
+
+    // ── Subtitles ───────────────────────────────────────────────────────────────
+
+    private val english = SubtitleTrack(id = 3, name = "English")
+    private val spanish = SubtitleTrack(id = 4, name = "Spanish")
+
+    @Test
+    fun `nothing is chosen before the player has listed the tracks`() {
+        val vm = loaded()
+        assertEquals("", vm.subtitleUrl)
+        assertTrue(vm.subtitleTracks.isEmpty())
+        assertEquals(MediaViewModel.SUBTITLES_UNDECIDED, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `embedded tracks start hidden`() {
+        val vm = loaded()
+
+        vm.setSubtitleTracks(listOf(english, spanish))
+
+        assertEquals(listOf(english, spanish), vm.subtitleTracks)
+        assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `a subtitle file the operator chose is shown once VLC lists it`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+
+        vm.setSubtitleTracks(listOf(english, spanish))
+
+        assertEquals("/media/en.srt", vm.subtitleUrl)
+        assertEquals(spanish.id, vm.selectedSubtitleTrack, "the file is the last track VLC adds")
+    }
+
+    @Test
+    fun `a file whose track never appears leaves subtitles off`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/broken.srt")
+
+        vm.setSubtitleTracks(emptyList())
+
+        assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `a track the operator picked survives the list being reported again`() {
+        val vm = loaded()
+        vm.setSubtitleTracks(listOf(english, spanish))
+        vm.selectSubtitleTrack(english.id)
+
+        vm.setSubtitleTracks(listOf(english, spanish))
+
+        assertEquals(english.id, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `turning subtitles off survives the list being reported again`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+        vm.setSubtitleTracks(listOf(english))
+        vm.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
+
+        vm.setSubtitleTracks(listOf(english))
+
+        assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `a chosen track that has gone from the list falls back to off`() {
+        val vm = loaded()
+        vm.setSubtitleTracks(listOf(english, spanish))
+        vm.selectSubtitleTrack(spanish.id)
+
+        vm.setSubtitleTracks(listOf(english))
+
+        assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `choosing another subtitle file forgets the old tracks and the old choice`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+        vm.setSubtitleTracks(listOf(english))
+
+        vm.setSubtitleFile("/media/es.srt")
+
+        assertEquals("/media/es.srt", vm.subtitleUrl)
+        assertTrue(vm.subtitleTracks.isEmpty())
+        assertEquals(MediaViewModel.SUBTITLES_UNDECIDED, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `loading other media drops the subtitle file`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+        vm.setSubtitleTracks(listOf(english))
+
+        vm.loadMedia("/media/other.mp4", Constants.MEDIA_TYPE_LOCAL)
+
+        assertEquals("", vm.subtitleUrl)
+        assertTrue(vm.subtitleTracks.isEmpty())
+        assertEquals(MediaViewModel.SUBTITLES_UNDECIDED, vm.selectedSubtitleTrack)
+    }
+
+    @Test
+    fun `a schedule item brings its subtitle file with it`() {
+        val vm = MediaViewModel()
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL, "/media/en.srt")
+
+        assertEquals("/media/en.srt", vm.subtitleUrl)
+    }
+
+    @Test
+    fun `a schedule item without one clears the previous subtitle file`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+
+        vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
+
+        assertEquals("", vm.subtitleUrl)
+    }
+
+    @Test
+    fun `unloading clears the subtitles`() {
+        val vm = loaded()
+        vm.setSubtitleFile("/media/en.srt")
+        vm.setSubtitleTracks(listOf(english))
+
+        vm.unload()
+
+        assertEquals("", vm.subtitleUrl)
+        assertTrue(vm.subtitleTracks.isEmpty())
+        assertEquals(MediaViewModel.SUBTITLES_UNDECIDED, vm.selectedSubtitleTrack)
+    }
 }

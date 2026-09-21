@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -11,9 +12,9 @@ import kotlin.test.assertTrue
 /**
  * Resolving one output's overrides against the global settings document.
  *
- * The rule these hold to: an override supplies appearance and nothing else. Whatever names a folder,
- * selects content or sizes a panel comes from the global document however the override was written,
- * because an output holding its own copy of those could point at a library the operator has moved.
+ * The rule these hold to: an override says what one screen *changed*, and nothing else. A setting it
+ * does not mention follows the document — today, and after that setting's neighbours have been added
+ * to, renamed around or defaulted differently. A screen can only hold a value it was given.
  */
 class OutputSettingsResolutionTest {
 
@@ -28,7 +29,7 @@ class OutputSettingsResolutionTest {
         assertSame(
             global,
             global.resolvedFor(ScreenAssignment()),
-            "the common path must not allocate: the presenter windows key remember off this object",
+            "the common path must not pay for a copy, and the presenter windows key remember off it",
         )
     }
 
@@ -39,214 +40,239 @@ class OutputSettingsResolutionTest {
 
     @Test
     fun `any one override is enough to make an output customized`() {
-        val each = listOf(
-            ScreenAssignment(stageMonitorOverride = StageMonitorSettings()),
-            ScreenAssignment(bibleOverride = BibleSettings()),
-            ScreenAssignment(songOverride = SongSettings()),
-            ScreenAssignment(dictionaryOverride = DictionarySettings()),
-        )
-        for (assignment in each) assertTrue(assignment.isCustomized)
-    }
-
-    // ── Each override replaces only its own section ─────────────────────────────────────────────
-
-    @Test
-    fun `a stage monitor override replaces the stage monitor settings and nothing else`() {
-        val global = AppSettings()
-        val mine = StageMonitorSettings(metronomePosition = MetronomePosition.CENTER)
-        val resolved = global.resolvedFor(ScreenAssignment(stageMonitorOverride = mine))
-
-        assertEquals(MetronomePosition.CENTER, resolved.stageMonitorSettings.metronomePosition)
-        assertSame(global.songSettings, resolved.songSettings, "songs must be left alone")
-        assertSame(global.bibleSettings, resolved.bibleSettings, "and so must the Bible")
-        assertSame(global.dictionarySettings, resolved.dictionarySettings)
+        assertTrue(ScreenAssignment(songOverride = JsonObject(emptyMap())).isCustomized)
+        assertTrue(ScreenAssignment(bibleOverride = JsonObject(emptyMap())).isCustomized)
+        assertTrue(ScreenAssignment(dictionaryOverride = JsonObject(emptyMap())).isCustomized)
+        assertTrue(ScreenAssignment(backgroundOverride = JsonObject(emptyMap())).isCustomized)
+        assertTrue(ScreenAssignment(stageMonitorOverride = JsonObject(emptyMap())).isCustomized)
     }
 
     @Test
-    fun `a dictionary override is taken whole because it is nothing but appearance`() {
-        val global = AppSettings()
-        val mine = DictionarySettings(wordColor = "#FF0000", wordFontSize = 12)
-        val resolved = global.resolvedFor(ScreenAssignment(dictionaryOverride = mine))
+    fun `a screen with its own styles and no differences yet draws the document`() {
+        val global = AppSettings(songSettings = SongSettings(lyricsColor = "#ABCDEF"))
+        val on = ScreenAssignment(songOverride = JsonObject(emptyMap()))
+        assertTrue(on.isCustomized, "the switch is on")
+        assertEquals("#ABCDEF", global.resolvedFor(on).songSettings.lyricsColor)
+    }
 
-        assertSame(mine, resolved.dictionarySettings)
+    // ── What an override stores ─────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `only what the screen changed is stored`() {
+        val global = SongSettings(lyricsColor = "#FFFFFF", lyricsFontSize = 70, marginTop = 54)
+        val edited = global.copy(lyricsColor = "#FF0000")
+        val stored = assertNotNullOverride(songOverrideOf(global, edited))
+
+        assertEquals(setOf("lyricsColor"), stored.keys, "one change stores one key")
     }
 
     @Test
-    fun `two outputs resolve independently from one global document`() {
-        val global = AppSettings()
-        val red = ScreenAssignment(songOverride = SongSettings(lyricsColor = "#FF0000"))
-        val blue = ScreenAssignment(songOverride = SongSettings(lyricsColor = "#0000FF"))
-
-        assertEquals("#FF0000", global.resolvedFor(red).songSettings.lyricsColor)
-        assertEquals("#0000FF", global.resolvedFor(blue).songSettings.lyricsColor)
-        assertEquals(
-            SongSettings().lyricsColor,
-            global.songSettings.lyricsColor,
-            "and the global document itself is untouched by either",
-        )
+    fun `a screen that changed nothing stores nothing`() {
+        val global = SongSettings(lyricsColor = "#FFFFFF")
+        assertNull(songOverrideOf(global, global))
     }
 
-    // ── Song: appearance over the global library ────────────────────────────────────────────────
+    @Test
+    fun `a nested record stores the field that changed, not the record`() {
+        val global = SongSettings()
+        val edited = global.copy(outlines = global.outlines.copy(lyrics = global.outlines.lyrics.copy(enabled = true)))
+        val stored = assertNotNullOverride(songOverrideOf(global, edited))
+
+        assertEquals(setOf("outlines"), stored.keys)
+        val outlines = stored["outlines"] as JsonObject
+        assertEquals(setOf("lyrics"), outlines.keys, "the other nine profiles are not this screen's business")
+        assertEquals(setOf("enabled"), (outlines["lyrics"] as JsonObject).keys)
+    }
 
     @Test
-    fun `a song override keeps the global library and list columns`() {
+    fun `a setting the screen never mentioned follows the document, however late it was added`() {
+        // What a screen customized before a setting existed carries: no key for it at all.
+        val override = JsonObject(emptyMap())
         val global = SongSettings(
-            storageDirectory = "/church/songs",
-            songFiles = listOf("a.song", "b.song"),
-            colWidthTitle = 321,
-            lyricsPanelWidthDp = 654,
-            editorShowChords = false,
-            lyricsColor = "#FFFFFF",
+            translations = listOf(
+                SongTranslationSettings(overrideStyle = true, lyrics = SongTextStyle(color = "#2B14CC")),
+            ),
         )
-        val override = SongSettings(
-            storageDirectory = "/somewhere/stale",
-            songFiles = listOf("gone.song"),
-            colWidthTitle = 10,
-            lyricsPanelWidthDp = 20,
-            editorShowChords = true,
-            lyricsColor = "#00FF00",
-        )
-        val resolved = global.withAppearanceOf(override)
+        val resolved = withSparseOverride(global, override, SongSettings.serializer())
 
-        assertEquals("#00FF00", resolved.lyricsColor, "appearance comes from the override")
-        assertEquals("/church/songs", resolved.storageDirectory, "the library does not")
-        assertEquals(listOf("a.song", "b.song"), resolved.songFiles)
-        assertEquals(321, resolved.colWidthTitle)
-        assertEquals(654, resolved.lyricsPanelWidthDp)
-        assertFalse(resolved.editorShowChords, "nor does an editor preference")
+        assertTrue(resolved.translationSettings(0).overrideStyle)
+        assertEquals(
+            "#2B14CC",
+            resolved.translationSettings(0).lyrics.color,
+            "this is the whole point: a snapshot pinned it to the class default and the global did nothing",
+        )
     }
-
-    // ── Bible: the global stack decides which translations, the override how they look ──────────
 
     @Test
-    fun `a bible override keeps the global library selection and panels`() {
-        val global = BibleSettings(
-            storageDirectory = "/church/bibles",
-            bibleFiles = listOf("KJV.spb"),
-            bibleColWidthBook = 111,
-            splitBrowseMode = true,
-            crossReferencesEnabled = false,
-            verticalAlignment = "Top",
-        )
-        val override = BibleSettings(
-            storageDirectory = "/stale",
-            bibleFiles = listOf("gone.spb"),
-            bibleColWidthBook = 9,
-            splitBrowseMode = false,
-            crossReferencesEnabled = true,
-            verticalAlignment = "Middle",
-        )
-        val resolved = global.withAppearanceOf(override)
+    fun `what the screen did say still wins`() {
+        val global = SongSettings(lyricsColor = "#FFFFFF")
+        val edited = global.copy(lyricsColor = "#FF0000")
+        val stored = songOverrideOf(global, edited)
+        // The document moves on; the screen's own choice does not move with it.
+        val later = global.copy(lyricsColor = "#00FF00", lyricsFontSize = 90)
+        val resolved = withSparseOverride(later, stored, SongSettings.serializer())
 
-        assertEquals("Middle", resolved.verticalAlignment, "appearance comes from the override")
-        assertEquals("/church/bibles", resolved.storageDirectory)
-        assertEquals(listOf("KJV.spb"), resolved.bibleFiles)
-        assertEquals(111, resolved.bibleColWidthBook)
-        assertTrue(resolved.splitBrowseMode)
-        assertFalse(resolved.crossReferencesEnabled)
+        assertEquals("#FF0000", resolved.lyricsColor, "the screen said this")
+        assertEquals(90, resolved.lyricsFontSize, "and said nothing about this")
     }
+
+    // ── What a screen may not say ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a song override never carries the library or the list columns`() {
+        val global = SongSettings(storageDirectory = "/church/songs", colWidthTitle = 321)
+        val edited = global.copy(storageDirectory = "/somewhere/stale", colWidthTitle = 10, lyricsColor = "#00FF00")
+        val stored = assertNotNullOverride(songOverrideOf(global, edited))
+
+        assertEquals(setOf("lyricsColor"), stored.keys, "the folder and the columns are one per install")
+    }
+
+    @Test
+    fun `a bible override never carries the library selection or the panels`() {
+        val global = BibleSettings(storageDirectory = "/church/bibles", splitBrowseMode = true)
+        val edited = global.copy(storageDirectory = "/stale", splitBrowseMode = false, verticalAlignment = "Middle")
+        val stored = assertNotNullOverride(bibleOverrideOf(global, edited))
+
+        assertEquals(setOf("verticalAlignment"), stored.keys)
+    }
+
+    // ── The translation stack: styled per screen, chosen per install ────────────────────────────
 
     @Test
     fun `the resolved stack is the global one, in the global order`() {
-        val global = stack("KJV.spb", "SYN.spb", "LUT.spb")
-        val override = stack("LUT.spb", "KJV.spb")     // a different set, in a different order
-        val resolved = global.withAppearanceOf(override)
+        val global = AppSettings(bibleSettings = stack("KJV.spb", "SYN.spb", "LUT.spb"))
+        val override = bibleOverrideOf(global.bibleSettings, stack("LUT.spb", "KJV.spb"))
+        val resolved = global.resolvedFor(ScreenAssignment(bibleOverride = override))
 
         assertEquals(
             listOf("KJV.spb", "SYN.spb", "LUT.spb"),
-            resolved.translationList().map { it.fileName },
+            resolved.bibleSettings.translationList().map { it.fileName },
             "which translations present, and in what order, is the global document's decision",
         )
     }
 
     @Test
     fun `each translation takes its styling from the override, matched by file name`() {
-        val global = stack("KJV.spb", "SYN.spb")
-        val override = BibleSettings(
+        val global = AppSettings(bibleSettings = stack("KJV.spb", "SYN.spb"))
+        val customized = BibleSettings(
             translations = listOf(
                 BibleTranslationSettings(fileName = "SYN.spb", textFontSize = 44),
                 BibleTranslationSettings(fileName = "KJV.spb", textFontSize = 22),
             ),
         )
-        val resolved = global.withAppearanceOf(override)
+        val resolved = global.resolvedFor(
+            ScreenAssignment(bibleOverride = bibleOverrideOf(global.bibleSettings, customized)),
+        )
 
-        assertEquals(22, resolved.translationList()[0].textFontSize, "KJV takes KJV's size, not the first entry's")
-        assertEquals(44, resolved.translationList()[1].textFontSize)
+        assertEquals(22, resolved.bibleSettings.translationList()[0].textFontSize, "KJV takes KJV's size")
+        assertEquals(44, resolved.bibleSettings.translationList()[1].textFontSize)
     }
 
     @Test
     fun `a translation added after the override was made keeps the global styling`() {
-        val global = BibleSettings(
-            translations = listOf(
-                BibleTranslationSettings(fileName = "KJV.spb", textFontSize = 70),
-                BibleTranslationSettings(fileName = "NEW.spb", textFontSize = 65),
+        val before = stack("KJV.spb")
+        val override = bibleOverrideOf(
+            before,
+            BibleSettings(translations = listOf(BibleTranslationSettings(fileName = "KJV.spb", textFontSize = 22))),
+        )
+        val global = AppSettings(
+            bibleSettings = BibleSettings(
+                translations = listOf(
+                    BibleTranslationSettings(fileName = "KJV.spb"),
+                    BibleTranslationSettings(fileName = "NEW.spb", textFontSize = 55),
+                ),
             ),
         )
-        val override = BibleSettings(
-            translations = listOf(BibleTranslationSettings(fileName = "KJV.spb", textFontSize = 22)),
-        )
-        val resolved = global.withAppearanceOf(override)
+        val resolved = global.resolvedFor(ScreenAssignment(bibleOverride = override))
 
-        assertEquals(22, resolved.translationList()[0].textFontSize)
+        assertEquals(22, resolved.bibleSettings.translationList()[0].textFontSize)
         assertEquals(
-            65,
-            resolved.translationList()[1].textFontSize,
-            "the newcomer must keep the global styling rather than vanish from the output",
+            55,
+            resolved.bibleSettings.translationList()[1].textFontSize,
+            "a translation the override has never heard of is not left unstyled",
         )
-    }
-
-    @Test
-    fun `a translation the global stack has dropped does not reappear`() {
-        val global = stack("KJV.spb")
-        val override = stack("KJV.spb", "REMOVED.spb")
-        val resolved = global.withAppearanceOf(override)
-
-        assertEquals(listOf("KJV.spb"), resolved.translationList().map { it.fileName })
     }
 
     @Test
     fun `a translation's rename comes from the global entry`() {
-        val global = BibleSettings(
-            translations = listOf(
-                BibleTranslationSettings(fileName = "KJV.spb", customName = "Pew Bible", customAbbreviation = "PEW"),
+        val global = AppSettings(
+            bibleSettings = BibleSettings(
+                translations = listOf(BibleTranslationSettings(fileName = "KJV.spb", customName = "King James")),
             ),
         )
-        val override = BibleSettings(
+        val customized = BibleSettings(
             translations = listOf(
-                BibleTranslationSettings(fileName = "KJV.spb", customName = "Stale", customAbbreviation = "OLD"),
+                BibleTranslationSettings(fileName = "KJV.spb", customName = "stale", textFontSize = 22),
             ),
         )
-        val resolved = global.withAppearanceOf(override)
+        val resolved = global.resolvedFor(
+            ScreenAssignment(bibleOverride = bibleOverrideOf(global.bibleSettings, customized)),
+        )
 
-        assertEquals("Pew Bible", resolved.translationList()[0].customName)
-        assertEquals("PEW", resolved.translationList()[0].customAbbreviation)
+        assertEquals("King James", resolved.bibleSettings.translationList()[0].customName)
+        assertEquals(22, resolved.bibleSettings.translationList()[0].textFontSize)
+    }
+
+    // ── The other three categories ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a stage monitor override changes the stage monitor and nothing else`() {
+        val global = AppSettings(
+            stageMonitorSettings = StageMonitorSettings(),
+            songSettings = SongSettings(lyricsColor = "#ABCDEF"),
+        )
+        val customized = global.stageMonitorSettings.copy(layout = StageMonitorLayout.LEFT_RIGHT)
+        val resolved = global.resolvedFor(
+            ScreenAssignment(
+                stageMonitorOverride = stageMonitorOverrideOf(global.stageMonitorSettings, customized),
+            ),
+        )
+
+        assertEquals(StageMonitorLayout.LEFT_RIGHT, resolved.stageMonitorSettings.layout)
+        assertEquals("#ABCDEF", resolved.songSettings.lyricsColor, "one category at a time")
+    }
+
+    @Test
+    fun `two outputs resolve independently from one global document`() {
+        val global = AppSettings(songSettings = SongSettings(lyricsColor = "#FFFFFF"))
+        val first = ScreenAssignment(
+            songOverride = songOverrideOf(global.songSettings, global.songSettings.copy(lyricsColor = "#FF0000")),
+        )
+        val second = ScreenAssignment(
+            songOverride = songOverrideOf(global.songSettings, global.songSettings.copy(lyricsColor = "#0000FF")),
+        )
+
+        assertEquals("#FF0000", global.resolvedFor(first).songSettings.lyricsColor)
+        assertEquals("#0000FF", global.resolvedFor(second).songSettings.lyricsColor)
+        assertEquals("#FFFFFF", global.songSettings.lyricsColor, "and the document is untouched")
     }
 
     // ── Persistence ─────────────────────────────────────────────────────────────────────────────
 
     @Test
     fun `an assignment written before the overrides existed loads with none of them`() {
-        val json = Json { ignoreUnknownKeys = true }
-        val decoded = json.decodeFromString<ScreenAssignment>("""{"targetDisplay":1}""")
-
-        assertNull(decoded.stageMonitorOverride)
-        assertNull(decoded.bibleOverride)
-        assertNull(decoded.songOverride)
-        assertNull(decoded.dictionaryOverride)
-        assertFalse(decoded.isCustomized, "an old document must keep following the global settings")
+        val assignment = Json { ignoreUnknownKeys = true }
+            .decodeFromString<ScreenAssignment>("""{"targetDisplay":1}""")
+        assertNull(assignment.songOverride)
+        assertFalse(assignment.isCustomized)
     }
 
     @Test
     fun `an override round-trips through json`() {
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-        val original = ScreenAssignment(
-            songOverride = SongSettings(lyricsColor = "#ABCDEF"),
-            dictionaryOverride = DictionarySettings(wordFontSize = 13),
+        val global = SongSettings(lyricsColor = "#FFFFFF")
+        val assignment = ScreenAssignment(
+            songOverride = songOverrideOf(global, global.copy(lyricsColor = "#FF0000")),
         )
-        val decoded = json.decodeFromString<ScreenAssignment>(json.encodeToString(original))
+        val json = Json { ignoreUnknownKeys = true }
+        val read = json.decodeFromString<ScreenAssignment>(json.encodeToString(assignment))
 
-        assertEquals(original, decoded)
-        assertEquals("#ABCDEF", decoded.songOverride?.lyricsColor)
-        assertEquals(13, decoded.dictionaryOverride?.wordFontSize)
+        assertEquals(assignment.songOverride, read.songOverride)
+        assertEquals(
+            "#FF0000",
+            withSparseOverride(global, read.songOverride, SongSettings.serializer()).lyricsColor,
+        )
     }
+
+    private fun assertNotNullOverride(tree: JsonObject?): JsonObject =
+        tree ?: error("expected the screen to have stored something")
 }

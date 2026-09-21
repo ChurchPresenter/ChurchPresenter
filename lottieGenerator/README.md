@@ -8,7 +8,7 @@ Built with Kotlin Multiplatform + Compose Desktop. Can run standalone or embedde
 
 - **12 animation styles** — Bar, Boxed, Circular, Banner, Gradient Bar, Line Split, Random Fade, Diagonal, Diagonal Wipe, Double Line, News Ticker, News Badge
 - **Live preview** — Real-time Lottie animation preview with play/pause and seek
-- **Full customization** — Text, fonts (12 families), colors, shape, logo, timing, position, canvas size
+- **Full customization** — Text, fonts (18 families, including Cyrillic, Arabic, Devanagari, Thai, Lao and Tamil), colors, shape, logo, timing, position, canvas size
 - **Preset system** — Save and load animation presets
 - **Color theme library** — 8 built-in themes + save custom themes (shared with ChurchPresenter)
 - **Logo support** — Import and embed logos from file system

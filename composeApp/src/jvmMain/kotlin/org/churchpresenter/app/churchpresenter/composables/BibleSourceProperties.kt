@@ -58,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
+import org.churchpresenter.theme.components.DropdownSelector
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 /** The font name needs the room; its size is three digits. */
@@ -300,6 +301,8 @@ internal fun BibleProperties(
         strikethrough = source.strikethrough,
         onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
         showShadow = false,
+        outline = source.outline,
+        onOutlineChange = { onUpdate(source.copy(outline = it)) },
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -336,6 +339,8 @@ internal fun BibleProperties(
         strikethrough = source.referenceStrikethrough,
         onStrikethroughChange = { onUpdate(source.copy(referenceStrikethrough = it)) },
         showShadow = false,
+        outline = source.referenceOutline,
+        onOutlineChange = { onUpdate(source.copy(referenceOutline = it)) },
     )
 
     Spacer(modifier = Modifier.height(4.dp))

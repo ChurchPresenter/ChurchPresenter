@@ -67,7 +67,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState

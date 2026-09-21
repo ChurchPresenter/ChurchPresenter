@@ -352,31 +352,36 @@ class SongsViewModel(
     fun selectSongByDetails(songNumber: Int, title: String, songbook: String, songId: String = ""): Boolean {
         val allSongs = _songsData.value.getSongs()
 
-        // 1. Primary: stable songId "songbook::number" — unambiguous across songbooks
-        val songData = allSongs.find { songId.isNotBlank() && it.songId == songId }
+        // 1. Primary: stable songId "songbook::number". Unambiguous across songbooks, but not
+        // within one: a real library repeats a number in a book, and the id is built from the
+        // number -- so among the songs that share it, the one whose title matches wins, and
+        // only then the first.
+        val songData = allSongs.filter { songId.isNotBlank() && it.songId == songId }.preferringTitle(title)
         // 2. Fallback: songbook + number (old saved schedules without songId, and every mirrored
         // Instance Link schedule item — the wire protocol has no songId field at all, only a plain
         // Int songNumber). Compare numerically, not as raw strings: a catalog entry's number may be
         // zero-padded (e.g. "0042") while songNumber is always a plain Int (42) with no way to
         // recover the original padding, so a string comparison would silently never match.
-            ?: allSongs.find {
+            ?: allSongs.filter {
                 it.songbook.equals(songbook, ignoreCase = true) &&
                     (it.number.toIntOrNull()?.let { n -> n == songNumber } ?: (it.number == songNumber.toString()))
-            }
+            }.preferringTitle(title)
         // 3. Last resort: title only
             ?: allSongs.find { it.title.equals(title, ignoreCase = true) }
 
         if (songData == null) return false
 
-        // Find index in _filteredSongItems (what the UI renders) by songId
-        var idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
+        // Find index in _filteredSongItems (what the UI renders). By the song's file, not its
+        // id: the id is what three same-numbered songs share, and matching on it here would
+        // undo the choice just made above.
+        var idx = _filteredSongItems.value.indexOfFirst { it.isSameSongAs(songData) }
 
         if (idx < 0) {
             // Song is outside current filter — clear filters so the song stays visible at the correct index
             _selectedSongbook.value = ""
             _searchQuery.value = ""
             applyFilters()
-            idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
+            idx = _filteredSongItems.value.indexOfFirst { it.isSameSongAs(songData) }
             if (idx < 0) return false
         }
 
@@ -388,6 +393,24 @@ class SongsViewModel(
 
     /** Selects a song by its stable songId alone, clearing filters if needed to reveal it. */
     fun selectSongById(songId: String): Boolean = selectSongByDetails(0, "", "", songId)
+
+    /**
+     * Of songs that share an id, the one titled [title]; failing that, the first. Null when there
+     * are none. A blank [title] -- a caller that only has an id -- takes the first, as before.
+     */
+    private fun List<SongItem>.preferringTitle(title: String): SongItem? =
+        firstOrNull { title.isNotBlank() && it.title.equals(title.trim(), ignoreCase = true) } ?: firstOrNull()
+
+    /**
+     * Whether this is the same library song as [other]. By file where both know theirs -- the one
+     * thing three same-numbered songs cannot share -- and by id plus title otherwise.
+     */
+    private fun SongItem.isSameSongAs(other: SongItem): Boolean =
+        if (sourceFile.isNotBlank() && other.sourceFile.isNotBlank()) {
+            sourceFile == other.sourceFile
+        } else {
+            songId == other.songId && title.equals(other.title, ignoreCase = true)
+        }
 
     fun selectSection(index: Int) {
         // Clamped, because the index does not always come from the rendered list: a phone pushes one

@@ -97,12 +97,37 @@ class AutoFitUtilsTest {
         }
     }
 
+    /** The same sweep, but on a portrait-shaped box -- narrow with height to spare. */
+    @Test
+    fun `more vertical room never yields a smaller font in a portrait box`() {
+        val text = "Amazing grace how sweet the sound"
+        var previous = 0
+        for (h in listOf(200, 400, 800, 1600, 3200)) {
+            val size = calculateAutoFitFontSize(measurer, text, style, 900, h)
+            assertTrue(size >= previous, "height $h gave $size, smaller than the previous $previous")
+            previous = size
+        }
+    }
+
     @Test
     fun `a narrower box never yields a larger font`() {
         val text = "Amazing grace how sweet the sound"
         val wide = calculateAutoFitFontSize(measurer, text, style, 1600, 400)
         val narrow = calculateAutoFitFontSize(measurer, text, style, 600, 400)
         assertTrue(narrow <= wide, "narrow box gave $narrow, larger than the wide box's $wide")
+    }
+
+    @Test
+    fun `the returned size fits a portrait-shaped box`() {
+        val text = "Amazing grace how sweet the sound\nThat saved a wretch like me"
+        listOf(900 to 1600, 600 to 1200).forEach { (w, h) ->
+            val size = calculateAutoFitFontSize(measurer, text, style, w, h)
+            assertTrue(
+                measuredHeight(text, size, w) <= h,
+                "auto-fit returned $size but that overflows a ${w}x${h} box " +
+                    "(measured ${measuredHeight(text, size, w)})",
+            )
+        }
     }
 
     @Test
@@ -140,6 +165,34 @@ class AutoFitUtilsTest {
         val a = calculateAutoFitForAllSections(measurer, shortOnly, style, 1600, 900)
         val b = calculateAutoFitForAllSections(measurer, withLongSection, style, 1600, 900)
         assertTrue(b < a, "adding a longer section did not shrink the fit ($b vs $a)")
+    }
+
+    /** The same property, on a portrait-shaped box -- the box the vertical-output bug lives in. */
+    @Test
+    fun `the whole song is sized by its most demanding section in a portrait box`() {
+        val shortOnly = listOf(section("Short line"))
+        val withLongSection = listOf(
+            section("Short line"),
+            section("A considerably longer line of lyrics that needs far more horizontal room"),
+        )
+        val a = calculateAutoFitForAllSections(measurer, shortOnly, style, 900, 1600)
+        val b = calculateAutoFitForAllSections(measurer, withLongSection, style, 900, 1600)
+        assertTrue(b < a, "adding a longer section did not shrink the fit ($b vs $a)")
+    }
+
+    @Test
+    fun `no line wraps at the chosen size in a portrait box`() {
+        val line = "A considerably longer line of lyrics that needs plenty of horizontal room"
+        val w = 600
+        val size = calculateAutoFitForAllSections(measurer, listOf(section(line)), style, w, 1200)
+        val measured = measurer.measure(
+            text = line,
+            style = style.copy(fontSize = size.sp),
+            constraints = Constraints(),
+            density = Density(1f),
+        )
+        assertTrue(measured.size.width <= w, "line is ${measured.size.width}px wide at size $size, box is ${w}px")
+        assertEquals(1, measured.lineCount, "line wrapped, but this fit is supposed to prevent wrapping")
     }
 
     @Test

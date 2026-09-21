@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -40,6 +41,8 @@ data class SongTextStyle(
     val autoFit: Boolean = true,
     /** The line background and the border box, both drawn behind and around this element. */
     val backdrop: TextBackdrop = TextBackdrop(),
+    /** The stroke drawn around this element's glyphs, under the fill. */
+    val outline: TextOutline = TextOutline(),
 )
 
 /**

@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Ta bort ”%1$s”?</string>
     <string name="delete_confirm_action">Ta bort</string>
     <string name="song_count">%1$s sånger</string>
+    <string name="no_song_folder">Ingen sångmapp är inställd ännu — välj en under Inställningar → Sånger, så kan sånger läggas till här.</string>
+    <string name="column_duration">Längd</string>
 </resources>

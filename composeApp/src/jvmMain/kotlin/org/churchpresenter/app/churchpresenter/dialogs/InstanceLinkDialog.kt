@@ -74,7 +74,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings

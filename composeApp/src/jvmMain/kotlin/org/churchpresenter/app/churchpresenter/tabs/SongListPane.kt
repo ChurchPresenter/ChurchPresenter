@@ -122,7 +122,7 @@ import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.composer
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.core.models.songs.SongItem

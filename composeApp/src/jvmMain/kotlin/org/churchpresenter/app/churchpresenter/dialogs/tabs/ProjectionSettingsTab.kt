@@ -22,7 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.core.models.scene.Scene
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -283,11 +283,12 @@ fun ProjectionSettingsTab(
             changed = true
         }
         for (idx in assignments.indices) {
+            val current = assignments[idx]
             // Only resolve auto (-1) to actual display; preserve none (-2)
-            if (assignments[idx].targetDisplay == -1) {
+            if (current.targetDisplay == -1) {
                 val device = nonPrimaryDevices.getOrNull(idx)
-                if (device != null) {
-                    assignments[idx] = assignments[idx].copy(
+                assignments[idx] = if (device != null) {
+                    current.copy(
                         targetDisplay = device.index,
                         targetBoundsX = device.boundsX,
                         targetBoundsY = device.boundsY,
@@ -295,9 +296,37 @@ fun ProjectionSettingsTab(
                         targetBoundsH = device.boundsH
                     )
                 } else {
-                    // No physical display available for this slot (e.g. DeckLink-only) — set to None
-                    assignments[idx] = assignments[idx].copy(targetDisplay = Constants.KEY_TARGET_NONE)
+                    // No physical display available for this slot (e.g. DeckLink-only) — set to
+                    // None and clear its bounds, or a slot that later stands in as a dev fallback
+                    // window keeps reporting the display it used to drive instead of its own
+                    // configured devWindowWidth/Height (outputSizeOf prefers real bounds whenever
+                    // they are non-zero).
+                    current.copy(
+                        targetDisplay = Constants.KEY_TARGET_NONE,
+                        targetBoundsX = Int.MIN_VALUE,
+                        targetBoundsY = Int.MIN_VALUE,
+                        targetBoundsW = 0,
+                        targetBoundsH = 0
+                    )
                 }
+                changed = true
+            } else if (
+                current.targetType == "screen" &&
+                current.targetDisplay >= 0 &&
+                screenDevicesAll.none { it.index == current.targetDisplay }
+            ) {
+                // An explicit (non-auto) display index that no longer corresponds to an attached
+                // monitor — unplugged, or this machine has fewer screens than when it was saved.
+                // Same reset as the auto case above, and for the same reason: leaving the stale
+                // targetBoundsW/H in place makes a slot that now stands in as a dev fallback
+                // window permanently report the disconnected monitor's old resolution.
+                assignments[idx] = current.copy(
+                    targetDisplay = Constants.KEY_TARGET_NONE,
+                    targetBoundsX = Int.MIN_VALUE,
+                    targetBoundsY = Int.MIN_VALUE,
+                    targetBoundsW = 0,
+                    targetBoundsH = 0
+                )
                 changed = true
             }
         }

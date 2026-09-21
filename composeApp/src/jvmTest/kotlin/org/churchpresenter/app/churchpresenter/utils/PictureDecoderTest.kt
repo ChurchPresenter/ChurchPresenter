@@ -193,4 +193,38 @@ class PictureDecoderTest {
 
     private fun ftyp(brand: String): ByteArray =
         byteArrayOf(0, 0, 0, 0x18) + "ftyp".toByteArray() + brand.toByteArray() + ByteArray(4)
+
+    // ── decodeScaled ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a picture larger than the cap is scaled down, preserving aspect ratio`() {
+        // 12x9: width is the binding constraint at maxWidth=6 (scale 0.5) vs. the generous
+        // maxHeight=100 (scale ~11), so the smaller scale wins and height follows it, not the cap.
+        val scaled = PictureDecoder.decodeScaled(write("large.png", "png"), maxWidth = 6, maxHeight = 100)
+
+        assertEquals(6, scaled.width)
+        assertEquals(4, scaled.height, "9 scaled by the same 0.5 as the width, not squashed to 100")
+    }
+
+    @Test
+    fun `a picture already within the cap is returned as decoded, never upscaled`() {
+        val scaled = PictureDecoder.decodeScaled(write("small.png", "png"), maxWidth = 1920, maxHeight = 1080)
+
+        assertEquals(12, scaled.width)
+        assertEquals(9, scaled.height)
+    }
+
+    @Test
+    fun `decodeScaledOrNull returns null for a file no decoder can read`() {
+        val broken = File(folder, "truncated.jpeg").also { it.writeText("this is not a JPEG") }
+
+        assertNull(PictureDecoder.decodeScaledOrNull(broken, maxWidth = 100, maxHeight = 100))
+    }
+
+    @Test
+    fun `decodeScaled throws for a file no decoder can read, like decode`() {
+        val broken = File(folder, "truncated.jpeg").also { it.writeText("this is not a JPEG") }
+
+        assertFailsWith<Exception> { PictureDecoder.decodeScaled(broken, maxWidth = 100, maxHeight = 100) }
+    }
 }

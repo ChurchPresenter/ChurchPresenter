@@ -113,6 +113,32 @@ class SongsFilteringTest {
     }
 
     @Test
+    fun `three songs sharing a number in one book are told apart by title`() {
+        val vm = vmWith(
+            "Hymnal" to listOf(
+                "1" to "Great Is Thy Faithfulness",
+                "1" to "Silent Night",
+                "1" to "Amazing Grace",
+                "2" to "How Great Thou Art",
+            ),
+        )
+
+        assertTrue(vm.selectSongByDetails(1, "Silent Night", "Hymnal", songId = "Hymnal::1"))
+        assertEquals("Silent Night", vm.selectedTitle())
+
+        assertTrue(vm.selectSongByDetails(1, "amazing grace", "Hymnal", songId = "Hymnal::1"))
+        assertEquals("Amazing Grace", vm.selectedTitle(), "case does not matter")
+
+        assertTrue(vm.selectSongByDetails(1, "", "Hymnal", songId = "Hymnal::1"))
+        assertEquals("Great Is Thy Faithfulness", vm.selectedTitle(), "no title: the first, as before")
+
+        assertTrue(vm.selectSongByDetails(1, "Silent Night", "Hymnal", songId = ""))
+        assertEquals("Silent Night", vm.selectedTitle(), "and by number without an id")
+    }
+
+    private fun SongsViewModel.selectedTitle() = filteredSongItems.value[selectedSongIndex.value].title
+
+    @Test
     fun `selecting by details for a song the library lacks is refused`() {
         val vm = vmWith(*defaultCatalog)
 

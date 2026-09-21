@@ -49,4 +49,24 @@ data class BackgroundConfig(
     val aboveBandType: String = Constants.BACKGROUND_DEFAULT,
     val aboveBandColor: String = "#000000",
     val aboveBandOpacity: Float = 1.0f,
+    /**
+     * Whether [aboveBandColor] is painted behind the band too, not just above it.
+     *
+     * On (the default): the wash sits behind the whole output, so wherever the band's own fill
+     * fades toward transparent — the top edge of any gradient style, or a band opacity under
+     * 100% — the wash shows through instead of raw black. Off restores the original, stricter
+     * split: the wash stops exactly at the band's own top edge and nothing is painted behind the
+     * band itself, which matters when the band is meant to key clean on its own (a `Transparent`
+     * band with a wash configured above it, composited for OBS/NDI) and any colour bleeding
+     * through a translucent part of it would be wrong for that specific setup.
+     */
+    val aboveBandFillsBehindBand: Boolean = true,
+    /**
+     * The Lottie template a [Constants.BACKGROUND_LOTTIE] lower third plays. Unlike every other
+     * type this is not a backdrop under the text: the file carries the text layers and the
+     * presenter fills them in, so the band's whole look — motion included — comes from here.
+     * Empty, or a file that no longer exists, falls back to the classic band. Appended last for
+     * the same positional-construction reason as [camera].
+     */
+    val backgroundLottie: String = "",
 )

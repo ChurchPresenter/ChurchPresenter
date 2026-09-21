@@ -163,6 +163,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             transform = songNumberLowerThirdTransform,
             position = songNumberLowerThirdPosition,
             backdrop = songNumberLowerThirdBackdrop,
+            outline = outlines.songNumberLowerThird,
         )
     } else {
         SongElementStyle(
@@ -183,6 +184,7 @@ private fun SongSettings.numberStyle(target: SongStyleTarget): SongElementStyle 
             transform = songNumberTransform,
             position = songNumberPosition,
             backdrop = songNumberBackdrop,
+            outline = outlines.songNumber,
         )
     }
 
@@ -206,6 +208,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             transform = titleLowerThirdTransform,
             position = titleLowerThirdPosition,
             backdrop = titleLowerThirdBackdrop,
+            outline = outlines.titleLowerThird,
         )
     } else {
         SongElementStyle(
@@ -226,6 +229,7 @@ private fun SongSettings.titleStyle(target: SongStyleTarget): SongElementStyle =
             transform = titleTransform,
             position = titlePosition,
             backdrop = titleBackdrop,
+            outline = outlines.title,
         )
     }
 
@@ -248,8 +252,9 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = lyricsLowerThirdWordSpacing,
             transform = lyricsLowerThirdTransform,
             chordColor = lyricsLowerThirdChordColor,
-        autoFit = lyricsLowerThirdFontSizeAutoFit,
+            autoFit = lyricsLowerThirdFontSizeAutoFit,
             backdrop = lyricsLowerThirdBackdrop,
+            outline = outlines.lyricsLowerThird,
         )
     } else {
         SongElementStyle(
@@ -269,8 +274,9 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             wordSpacing = lyricsWordSpacing,
             transform = lyricsTransform,
             chordColor = lyricsChordColor,
-        autoFit = lyricsFontSizeAutoFit,
+            autoFit = lyricsFontSizeAutoFit,
             backdrop = lyricsBackdrop,
+            outline = outlines.lyrics,
         )
     }
 
@@ -294,6 +300,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             transform = lowerThirdLookAheadTransform,
             autoFit = lowerThirdLookAheadFontSizeAutoFit,
             backdrop = lowerThirdLookAheadBackdrop,
+            outline = outlines.lookAheadLowerThird,
         )
     } else {
         SongElementStyle(
@@ -314,6 +321,7 @@ private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementSty
             transform = lookAheadTransform,
             autoFit = lookAheadFontSizeAutoFit,
             backdrop = lookAheadBackdrop,
+            outline = outlines.lookAhead,
         )
     }
 
@@ -337,6 +345,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             transform = lowerThirdLookAheadNextTransform,
             autoFit = lowerThirdLookAheadNextFontSizeAutoFit,
             backdrop = lowerThirdLookAheadNextBackdrop,
+            outline = outlines.nextSectionLowerThird,
         )
     } else {
         SongElementStyle(
@@ -357,6 +366,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
             transform = lookAheadNextTransform,
             autoFit = lookAheadNextFontSizeAutoFit,
             backdrop = lookAheadNextBackdrop,
+            outline = outlines.nextSection,
         )
     }
 

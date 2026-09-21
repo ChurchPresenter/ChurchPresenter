@@ -127,6 +127,50 @@ class InstallHelpersTest {
         assertTrue(BibleInstallSupport.extractEntries(notAZip, dir) { true }.isEmpty())
     }
 
+    // ── usableDirectory ─────────────────────────────────────────────────────────
+
+    @Test
+    fun `an existing writable directory is usable`() {
+        assertTrue(BibleInstallSupport.usableDirectory(dir))
+    }
+
+    @Test
+    fun `a missing directory is created and is then usable`() {
+        val missing = File(dir, "not-yet-created")
+        assertTrue(BibleInstallSupport.usableDirectory(missing))
+        assertTrue(missing.isDirectory)
+    }
+
+    @Test
+    fun `a plain file is not a usable directory`() {
+        val file = File(dir, "not-a-directory").apply { writeText("x") }
+        assertFalse(BibleInstallSupport.usableDirectory(file))
+    }
+
+    /**
+     * `exists()`/`isDirectory` alone accepted this exact folder — a Start Menu shortcuts folder was
+     * reported as `bibleSettings.storageDirectory` on one machine, existed, and still failed three
+     * calls deep inside `copyChannel`'s `FileOutputStream` open with a raw `FileNotFoundException`
+     * (Sentry CHURCH-PRESENTER-DESKTOP-6K). `usableDirectory` has to catch that itself by actually
+     * proving a file can be created, not just that the directory is there.
+     */
+    @Test
+    fun `a directory that exists but cannot be written into is not usable`() {
+        val readOnly = File(dir, "read-only").apply { mkdirs() }
+        assertTrue(readOnly.setWritable(false), "test precondition: the OS must honour the read-only bit")
+        try {
+            assertFalse(BibleInstallSupport.usableDirectory(readOnly))
+        } finally {
+            readOnly.setWritable(true)
+        }
+    }
+
+    @Test
+    fun `checking usability leaves no probe file behind`() {
+        BibleInstallSupport.usableDirectory(dir)
+        assertTrue(dir.listFiles()?.isEmpty() != false, "the write-test probe must clean up after itself")
+    }
+
     // ── downloadRetryDelayMs ────────────────────────────────────────────────────
 
     /**

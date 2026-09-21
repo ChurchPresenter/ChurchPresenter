@@ -179,6 +179,11 @@ internal fun ShapeSection(viewModel: LottieGenState) {
                 LottieCheckbox(Strings.hideInfo, cfg.hideInfo,
                     { viewModel.updateConfig { c -> c.copy(hideInfo = it) } }, Modifier.weight(1f))
             }
+            FieldRow {
+                LottieCheckbox(Strings.hideDetail, cfg.hideDetail,
+                    { viewModel.updateConfig { c -> c.copy(hideDetail = it) } }, Modifier.weight(1f))
+                Box(Modifier.weight(1f))
+            }
         }
     }
 }

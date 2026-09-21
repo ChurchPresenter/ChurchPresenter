@@ -26,7 +26,25 @@ class NdiSender(
     /** The name the key sender appears under, for [NdiOutputMode.FILL_AND_KEY]. */
     val keyName: String get() = keyNameFor(name)
 
+    /**
+     * Guards [send] against a concurrent [close].
+     *
+     * [send] is driven by exactly one pump thread and [close] is driven by whichever thread stops
+     * that pump — plus, by this class's own contract above, a JVM shutdown hook — so the two
+     * genuinely can run at once. Without this, `close()` on one thread can call `sendDestroy` (which
+     * frees the native sender and its buffer) while `send()` on the other thread is still inside
+     * `sendVideo` with the now-freed handle/buffer — a JNA use-after-free surfacing as
+     * "Error: Invalid memory access" (Sentry CHURCH-PRESENTER-DESKTOP-6H). Locking only these two
+     * methods keeps the reused-buffer, single-writer contract for [send] intact; it just makes
+     * teardown wait for whatever frame is already in flight instead of racing it.
+     */
+    private val lifecycleLock = Any()
+
+    // Volatile so isOpen — read on the pump thread — sees close()'s write from whatever thread
+    // called it (a shutdown hook, per this class's own contract) without needing lifecycleLock too.
+    @Volatile
     private var fillHandle = 0L
+    @Volatile
     private var keyHandle = 0L
     private var fillBytes = ByteArray(0)
     private var keyBytes = ByteArray(0)
@@ -92,8 +110,8 @@ class NdiSender(
      * [argb] is the caller's buffer and is only read, never kept — the conversion writes into this
      * sender's own, which is grown once and then reused for the life of the output.
      */
-    fun send(argb: IntArray, width: Int, height: Int) {
-        if (fillHandle == 0L) return
+    fun send(argb: IntArray, width: Int, height: Int): Unit = synchronized(lifecycleLock) {
+        if (fillHandle == 0L) return@synchronized
         val needed = frameSizeBytes(width, height)
         if (fillBytes.size != needed) fillBytes = ByteArray(needed)
         argbToNdiBytes(argb, fillBytes, opaque = mode != NdiOutputMode.ALPHA)
@@ -101,7 +119,7 @@ class NdiSender(
             fillHandle,
             NdiVideoFrame(fillBytes, width, height, mode.pixelFormat, frameRateNumerator(fps), DEFAULT_FRAME_RATE_D),
         )
-        if (keyHandle == 0L) return
+        if (keyHandle == 0L) return@synchronized
         if (keyPixels.size != argb.size) keyPixels = IntArray(argb.size)
         argbToLuminanceKey(argb, keyPixels)
         if (keyBytes.size != needed) keyBytes = ByteArray(needed)
@@ -122,7 +140,7 @@ class NdiSender(
      * leaves its source advertised — a receiver holds the last frame it got and shows a frozen
      * lower third rather than nothing.
      */
-    fun close() {
+    fun close(): Unit = synchronized(lifecycleLock) {
         if (keyHandle != 0L) {
             library.sendDestroy(keyHandle)
             keyHandle = 0L

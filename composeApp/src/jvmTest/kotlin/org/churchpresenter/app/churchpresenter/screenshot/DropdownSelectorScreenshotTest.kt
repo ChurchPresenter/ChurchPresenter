@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import kotlin.test.Test
 
 class DropdownSelectorScreenshotTest {
@@ -41,6 +41,21 @@ class DropdownSelectorScreenshotTest {
         },
     ) {
         DropdownSelector(label = "SCOPE", value = "all", options = scopes, onValueChange = {}, modifier = box)
+    }
+
+    /** Past eight rows the menu is capped and scrolls, with a bar beside the rows. */
+    @Test
+    fun `a long list, open`() = captureComponent(
+        SECTION,
+        "long_list_open",
+        rootIndex = 1,
+        drive = {
+            onNodeWithText("Item 1").performClick()
+            waitForIdle()
+        },
+    ) {
+        val items = (1..20).map { "i$it" to "Item $it" }
+        DropdownSelector(label = "TEMPLATE", value = "i1", options = items, onValueChange = {}, modifier = box)
     }
 
     @Test

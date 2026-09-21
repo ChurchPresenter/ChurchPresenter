@@ -107,6 +107,13 @@ fun SongsTab(
     hostWindow: AwtWindow? = null,
     viewModel: SongsViewModel,
     appSettings: AppSettings,
+    /** How long a song usually stays on screen here, measured -- see `LiveDurationLog`. */
+    typicalSongSeconds: (SongItem) -> Int? = { null },
+    /**
+     * The song that has just gone live from this tab -- which is where songs are actually
+     * presented from, rather than from a schedule row.
+     */
+    onSongWentLive: (SongItem) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
@@ -220,6 +227,10 @@ fun SongsTab(
                     songbook = song.songbook,
                     author = song.author
                 )
+                // The start of the song's measurement, under the same guard as the statistics:
+                // every way of going live from this tab ends up here, and a section change on a
+                // song already up is not a new song.
+                onSongWentLive(song)
                 // Bilingual worship actually happening, rather than merely being configured. Sits
                 // under the same "different song went live" guard so a service counts songs, not
                 // section changes.
@@ -644,6 +655,7 @@ fun SongsTab(
         tuning = dialogs.editing?.let { appSettings.tuningFor(it.songId) } ?: SongTuning(),
         showTuningFields = hasStageMonitorScreen,
         chordsVisible = appSettings.songSettings.editorShowChords,
+        typicalSeconds = dialogs.editing?.let(typicalSongSeconds),
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },
@@ -724,6 +736,7 @@ fun SongsTab(
         theme = theme,
         showTuningFields = hasStageMonitorScreen,
         chordsVisible = appSettings.songSettings.editorShowChords,
+        typicalSeconds = dialogs.editing?.let(typicalSongSeconds),
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },

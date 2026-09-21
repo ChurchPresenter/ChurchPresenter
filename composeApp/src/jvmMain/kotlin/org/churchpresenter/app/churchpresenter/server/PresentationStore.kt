@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import io.ktor.serialization.kotlinx.json.json
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -187,6 +188,13 @@ internal class PresentationStore(
             jpegSlides to deck.slides.map { it.notes }
         } catch (_: SlideCacheSupersededException) {
             // A tab render took the entry over after this one started; it finishes the job.
+            null
+        } catch (_: FileNotFoundException) {
+            // The same supersession, caught one step later: `putSlide` had already returned this
+            // slide's File when the other writer's `init` deleted the directory out from under it,
+            // so the read that follows sees a missing file instead of SlideCacheSupersededException.
+            // Same race, same outcome — the client's 404-retry path picks it up once the other
+            // writer commits (Sentry CHURCH-PRESENTER-DESKTOP-6J).
             null
         } finally {
             if (!committed) writer.abort()

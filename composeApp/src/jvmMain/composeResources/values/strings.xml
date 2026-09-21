@@ -7,6 +7,10 @@
     <string name="no_song_selected">No song selected</string>
     <string name="go_live">Go Live</string>
     <string name="add_to_schedule">Add to Schedule</string>
+    <string name="save_preset">Save preset</string>
+    <string name="preset_name">Preset name</string>
+    <string name="preset_name_hint">Sunday announcements</string>
+    <string name="preset_replaces">A preset called %1$s already exists and will be replaced.</string>
     <string name="copy_verse">Copy Verse</string>
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>
@@ -219,6 +223,9 @@
     <string name="diagnostic_info_save_failed">Failed to save diagnostic info.</string>
     <string name="open_converter">Converter</string>
     <string name="open_song_library">Song Library Manager</string>
+    <string name="open_calendar_manager">Calendar Manager</string>
+    <string name="calendar_locate_file_title">Find %1$s</string>
+    <string name="calendar_locate_folder_title">Find the folder %1$s</string>
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>
@@ -591,6 +598,7 @@
     <string name="background_camera_option">Camera</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Follow Default</string>
+    <string name="background_lottie_option">Lottie</string>
     <string name="background_video">Background Video:</string>
 
     <!-- Projection Settings -->
@@ -735,6 +743,17 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detailed</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="schedule_kind_cue">Cue</string>
+    <string name="schedule_kind_ministry">Ministry</string>
+    <string name="schedule_cue_fired">Fired %1$s</string>
+    <string name="schedule_cue_skipped">Skipped %1$s — something else was live</string>
+    <string name="schedule_behind_plan">%1$s behind</string>
+    <string name="schedule_ahead_of_plan">%1$s ahead</string>
+    <string name="schedule_on_plan">on plan</string>
+    <string name="schedule_timing_loop">Loops</string>
+    <string name="schedule_timing_times">Plays %1$d×</string>
+    <string name="schedule_timing_next">then next item</string>
+    <string name="schedule_timing_blank">then blank</string>
     <string name="tooltip_schedule_options">Schedule Options</string>
     <string name="schedule_show_buttons_under_title">Show buttons under title</string>
     <string name="schedule_option_item_count">Item Count</string>
@@ -897,9 +916,19 @@
     <string name="song_chunk_verse">1 Verse</string>
     <string name="song_chunk_line">1 Line</string>
     <string name="song_language_scope">Lang</string>
+    <string name="song_style_language">Styling</string>
     <string name="song_preview_chords">Chords</string>
     <string name="song_preview_look_ahead">Look ahead</string>
     <string name="song_preview_label">Preview</string>
+    <string name="customize_element_slide">Slide</string>
+    <string name="song_primary_language">1st Language</string>
+    <string name="song_secondary_language">2nd Language</string>
+    <string name="text_outline">Outline</string>
+    <string name="text_outline_width">Width</string>
+    <string name="text_style_outline">O</string>
+    <string name="tooltip_outline">Outline</string>
+    <string name="tooltip_outline_options">Outline options</string>
+    <string name="outline_show">Show outline</string>
     <string name="bible_translation_spacing">Space between translations</string>
     <string name="bible_translation_divider">Show divider between translations</string>
     <string name="pixels_short">px</string>
@@ -951,6 +980,16 @@
     <string name="display_lower_third">Lower Third</string>
     <string name="lower_third_height">Band height %</string>
     <string name="lower_third_band">Lower Third Band</string>
+    <string name="lower_third_animation">Lower Third Animation</string>
+    <string name="lower_third_animation_use_lottie">Animate the band with a Lottie template</string>
+    <string name="lower_third_animation_file">Template</string>
+    <string name="lower_third_animation_none">No template selected</string>
+    <string name="lower_third_animation_generate">Generate…</string>
+    <string name="lower_third_animation_clear">Clear template</string>
+    <string name="lottie_files_filter">Lottie files</string>
+    <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
+    <string name="song_lottie_unsupported_note">The template decides the layout and where the title sits. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough, word spacing, look-ahead and chords do not apply.</string>
+    <string name="bible_lottie_unsupported_note">The template decides the layout, the reference position and how two languages share the band. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough and word spacing do not apply.</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
@@ -1001,6 +1040,7 @@
     <string name="customize_screen_geometry_unknown">%1$s</string>
     <string name="customize_motion">Motion</string>
     <string name="customize_layout">Layout</string>
+    <string name="customize_marker">Marker</string>
     <string name="customize_bilingual">Bilingual</string>
     <string name="customize_no_preview">No preview for this section</string>
     <string name="customize_bible">Bible</string>
@@ -1027,6 +1067,7 @@
     <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
+    <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
     <string name="customize_style">Style</string>
     <string name="customize_letter_spacing">Letter spacing</string>
@@ -1084,6 +1125,9 @@
     <string name="add_ndi_output">Add Output</string>
     <string name="ndi_output_numbered">NDI Output %1$d</string>
     <string name="preview_output">Preview output</string>
+    <string name="preview_output_mode_disabled_warning">This output does not currently show this content.</string>
+    <string name="preview_output_partial_translations_warning">This output does not show every translation in your stack.</string>
+    <string name="preview_output_single_language_warning">This output shows only one language, not both.</string>
     <string name="output_resolution">Resolution</string>
     <string name="output_resolution_custom">Custom…</string>
     <string name="output_resolution_custom_title">Custom resolution</string>
@@ -1156,6 +1200,7 @@
     <string name="background_above_band_caption">Above The Band</string>
     <string name="background_above_band_fill">Fill Color</string>
     <string name="background_above_band_opacity">Fill Opacity</string>
+    <string name="background_above_band_fills_behind_band">Fill behind the band too</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>
@@ -1241,6 +1286,10 @@
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
     <string name="media_loop_count">Loops</string>
+    <string name="media_subtitles">Subtitles</string>
+    <string name="media_subtitles_off">Off</string>
+    <string name="media_subtitles_load_file">Load subtitle file…</string>
+    <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
     <string name="media_open_in_browser">Open in Browser</string>
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
@@ -1870,6 +1919,7 @@
     <string name="song_chords_used">%1$d used</string>
     <string name="song_insert_chord">Insert chord</string>
     <string name="song_stats">%1$d sections · %2$d lines · %3$d words</string>
+    <string name="song_typical_live">usually %1$s live</string>
 
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Song Samples</string>
@@ -1949,6 +1999,8 @@
     <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>
     <string name="tooltip_directory_not_writable">Cannot write to this directory. Choose a different location or change permissions.</string>
     <string name="launch_on_login">Launch at login</string>
+    <string name="start_outputs_hidden">Start with output screens hidden</string>
+    <string name="start_outputs_hidden_hint">Outputs stay off at launch until you press the display button in the sidebar</string>
     <string name="analytics_reporting">Share anonymous crash &amp; analytics reports</string>
     <string name="send_test_event">Send test event</string>
     <string name="test_event_title">Sentry test event</string>
@@ -1972,11 +2024,19 @@
     <string name="system_storage_status_not_found">Folder not found</string>
     <string name="system_storage_status_read_only">Read only</string>
     <string name="system_storage_status_linked">Linked</string>
+    <string name="calendar_storage">Calendar</string>
+    <string name="calendar_storage_status_default">App data folder</string>
+    <string name="use_default_directory">Use Default</string>
     <string name="system_storage_status_file_count">%1$d files</string>
     <string name="system_storage_status_needs_converting">%1$d need converting</string>
     <string name="system_manage_settings">Manage settings</string>
     <string name="file_not_supported_short">not supported</string>
     <string name="analytics_reporting_hint">Helps us find issues faster. No content or lyrics are ever sent.</string>
+    <string name="tab_label_style">Tab labels</string>
+    <string name="tab_label_style_hint">How the tabs across the top of the window are labelled.</string>
+    <string name="tab_label_style_text">Text only</string>
+    <string name="tab_label_style_icons_and_text">Icons and text</string>
+    <string name="tab_label_style_icons">Icons only</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>

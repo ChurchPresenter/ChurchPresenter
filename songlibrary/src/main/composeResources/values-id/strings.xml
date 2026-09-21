@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">Hapus “%1$s”?</string>
     <string name="delete_confirm_action">Hapus</string>
     <string name="song_count">%1$s lagu</string>
+    <string name="no_song_folder">Folder lagu belum diatur — pilih satu di Pengaturan → Lagu, lalu lagu dapat ditambahkan di sini.</string>
+    <string name="column_duration">Durasi</string>
 </resources>

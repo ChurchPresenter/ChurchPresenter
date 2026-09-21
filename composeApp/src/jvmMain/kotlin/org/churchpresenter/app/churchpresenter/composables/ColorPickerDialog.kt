@@ -55,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.recent
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
+import org.churchpresenter.theme.components.SettingsTextField
 
 private const val HUE_DEGREES = 360f
 private const val HUE_SECTOR_DEGREES = 60f

@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,8 +32,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
@@ -59,6 +66,14 @@ internal const val BACKGROUND_BLUR_OVERSCAN = 1.08f
  * layer's.
  */
 internal const val BLUR_EDGE_BLEED = 3f
+
+/**
+ * How far past the band's own top edge [AboveBandFill] is grown when [BackgroundConfig
+ * .aboveBandFillsBehindBand] is off, as a fraction of the output's full height — a few pixels on
+ * any realistic output, hidden under the band drawn after it. Guards against the two
+ * independently-rounded complementary fractions leaving a real gap.
+ */
+internal const val ABOVE_BAND_OVERLAP_FRACTION = 0.006f
 
 /** A percentage as a fraction. */
 internal const val PERCENT = 100f
@@ -100,8 +115,26 @@ internal fun backgroundBlurRadius(blurReferencePx: Int, width: Dp): Dp =
 /** The output height every stored size is measured against, as [BACKGROUND_REFERENCE_WIDTH] is. */
 internal const val REFERENCE_HEIGHT = 1080f
 
-/** The range a presenter's scale is held to, so an absurd output cannot produce absurd type. */
-internal const val MIN_PRESENTER_SCALE = 0.5f
+/**
+ * The range a presenter's scale is held to, so an absurd output cannot produce absurd type.
+ *
+ * [MIN_PRESENTER_SCALE] used to be 0.5 -- comfortably below every 16:9-family preset
+ * ([org.churchpresenter.app.churchpresenter.utils.OutputGeometry], 1280x720 up), so nobody noticed it
+ * was also above the ratio a genuinely narrow output computes. `presenterScale` takes the *smaller*
+ * of the width and height ratio against the 1920x1080 reference specifically so a mismatched aspect
+ * ratio is respected; flooring that result at 0.5 threw the answer away for anything narrower than
+ * that, which every vertical/mobile output is. A 720x1280 target computed 0.375 and was floored up to
+ * 0.5 -- 33% larger than the space actually available -- which is what let lyrics overflow a portrait
+ * output while a landscape one of any shipped size never showed the bug.
+ *
+ * 0.15 is chosen against [org.churchpresenter.app.churchpresenter.composables.RESOLUTION_RANGE]'s own
+ * floor of 16: a width or height of 16 against the 1920x1080 reference computes a ratio near 0.008,
+ * far below any legible floor, so a genuinely pathological output (not merely narrow, but tiny) still
+ * needs a floor to keep type from vanishing -- it will still overflow that output, same as it always
+ * has, because there is no scale that both fits 16px and stays readable. Every realistic vertical
+ * preset and custom resolution sits above 0.15, so the floor no longer fires for them.
+ */
+internal const val MIN_PRESENTER_SCALE = 0.15f
 internal const val MAX_PRESENTER_SCALE = 3.0f
 
 /**
@@ -250,7 +283,14 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
     )
 
 /**
- * What to wash over the part of a lower-third output the band does not cover, or null for nothing.
+ * The wash's colour (or null for nothing) and whether it is painted behind the band too — see
+ * [resolveAboveBand].
+ */
+internal data class AboveBand(val fill: Color?, val fillsBehindBand: Boolean)
+
+/**
+ * What to wash over the part of a lower-third output the band does not cover, or null for nothing,
+ * and whether that wash is also painted behind the band itself.
  *
  * The band and the area above it are two different decisions, so this does not go through
  * [resolveBackground]: a quick-tray pick or a song's own background replaces the *band*, and
@@ -263,50 +303,100 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
  * surface can carry a picture of its own while still taking the shared wash above it. Reading the
  * band's type instead would have made "has its own picture" silently mean "loses the wash".
  *
- * `Transparent` at the end of the chain returns null rather than [Color.Transparent]: nothing is
- * drawn there at all, which is what a Browser Source or NDI alpha output needs in order to key.
+ * `Transparent` at the end of the chain returns a null fill rather than [Color.Transparent]:
+ * nothing is drawn there at all, which is what a Browser Source or NDI alpha output needs in order
+ * to key. [AboveBand.fillsBehindBand] follows the same defer chain independently of the colour, so
+ * a surface can inherit the Default's wash colour while overriding just the behind-band choice.
  */
-internal fun aboveBandFill(settings: BackgroundSettings, config: BackgroundConfig): Color? {
+internal fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundConfig): AboveBand {
     val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
+    val fillsBehindBand =
+        if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand
     val type = if (defers) settings.defaultLowerThirdAboveBandType else config.aboveBandType
-    if (type != Constants.BACKGROUND_COLOR) return null
+    if (type != Constants.BACKGROUND_COLOR) return AboveBand(null, fillsBehindBand)
     val hex = if (defers) settings.defaultLowerThirdAboveBandColor else config.aboveBandColor
     val opacity = if (defers) settings.defaultLowerThirdAboveBandOpacity else config.aboveBandOpacity
-    return parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f))
+    return AboveBand(parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f)), fillsBehindBand)
 }
 
 /**
- * [fill] painted over everything above a lower-third band [bandFraction] of the output tall.
+ * [fill] painted over the part of a lower-third output above the band, and — when
+ * [fillsBehindBand] is set — behind the band too.
  *
- * Sized as the band's complement — `fillMaxHeight(1f - bandFraction)` against the same constraint
- * the band's own `fillMaxHeight(bandFraction)` reads — so the two either meet exactly or overlap by
- * a single pixel the band then draws over. Measuring a height in Dp instead can round the other
- * way and leave a hairline of whatever is behind, which on an alpha output is a transparent line.
+ * [fillsBehindBand] is the default. A one-pixel gap at the exact `1f - bandFraction` boundary was
+ * the first theory here (two `fillMaxHeight` calls rounding independently and not always summing
+ * back to the parent's exact height), and that alone was worth closing, but it was not the actual
+ * defect: a band whose own fill fades toward transparent at its edge — any gradient stop that
+ * starts at less than full alpha, which is the *default* shape for the gradient styles, not an
+ * edge case — showed several pixels of raw black there, not a hairline, because nothing behind the
+ * band down to the true background was ever anything but the window's own clear colour.
+ * `bandFraction` said nothing about it either way; the band was simply never backed by this fill
+ * in the first place. With [fillsBehindBand] on, [fill] covers the full frame and the band —
+ * drawn afterward, in front — paints over it wherever the band itself is opaque, exactly as
+ * before; where the band fades toward transparent, this fill shows through instead of black, on
+ * this opaque preview window and on a real alpha output alike (a fade to transparent still keys
+ * to nothing, it just no longer keys through a black fringe first — #561).
  *
- * Draws nothing at all when [fill] is null; see [aboveBandFill] for why that is not black at 0%.
+ * [fillsBehindBand] off restores the original split, for a surface that wants the wash to stop
+ * exactly at the band: sized as the band's complement plus a small guaranteed overlap — grown past
+ * the exact boundary and hidden under the band, drawn after it — rather than the bare
+ * `fillMaxHeight(1f - bandFraction)` this once was, which could round to a real gap the same way.
+ * This is the setting to turn off for a band that must key clean on its own — a `Transparent` band
+ * with a wash configured above it — where any colour bleeding through a translucent part of the
+ * band would be wrong for that specific setup.
  */
 @Composable
-internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float) {
+internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float, fillsBehindBand: Boolean) {
     if (fill == null) return
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(1f - bandFraction)
-            .align(Alignment.TopCenter)
-            .background(fill)
-    )
+    if (fillsBehindBand) {
+        Box(modifier = Modifier.fillMaxSize().background(fill))
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight((1f - bandFraction + ABOVE_BAND_OVERLAP_FRACTION).coerceAtMost(1f))
+                .align(Alignment.TopCenter)
+                .background(fill)
+        )
+    }
 }
 
-/** [background]'s picture, decoded once per path. Null unless it is an image that still exists. */
+/**
+ * [background]'s picture, decoded once per path. Null unless it is an image that still exists, and
+ * briefly null again right after the path changes, while the new one is still decoding.
+ *
+ * The decode runs on [Dispatchers.IO], not inline in `remember` — a stock/Pexels background is
+ * already a small, web-sized download, but an operator's own photo has no such cap, and decoding
+ * one at full native resolution synchronously on the composition thread is what turned "add a
+ * background" into a multi-second freeze of every output sharing it (#549). The result is also
+ * scaled to the output's own pixel size ([PictureDecoder.decodeScaled]) — no point holding, or
+ * re-uploading to the GPU, more pixels than this surface will ever show.
+ */
 @Composable
-internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThird: Boolean): ImageBitmap? =
-    remember(background.type, background.imagePath, isLowerThird) {
-        if (background.type == Constants.BACKGROUND_IMAGE && background.imagePath.isNotEmpty()) {
+internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThird: Boolean): ImageBitmap? {
+    val containerSize = LocalWindowInfo.current.containerSize
+    val maxWidth = containerSize.width.takeIf { it > 0 } ?: BACKGROUND_REFERENCE_WIDTH.toInt()
+    val maxHeight = containerSize.height.takeIf { it > 0 } ?: REFERENCE_HEIGHT.toInt()
+    var bitmap by remember(background.type, background.imagePath, isLowerThird) {
+        mutableStateOf<ImageBitmap?>(null)
+    }
+    LaunchedEffect(background.type, background.imagePath, isLowerThird, maxWidth, maxHeight) {
+        bitmap = if (background.type == Constants.BACKGROUND_IMAGE && background.imagePath.isNotEmpty()) {
             // PictureDecoder, not Skia directly — see PresenterScreen for why.
             val file = File(background.imagePath)
-            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-        } else null
+            if (file.exists()) {
+                withContext(Dispatchers.IO) {
+                    PictureDecoder.decodeScaledOrNull(file, maxWidth, maxHeight)?.toComposeImageBitmap()
+                }
+            } else {
+                null
+            }
+        } else {
+            null
+        }
     }
+    return bitmap
+}
 
 /** The modifier that paints [background] — the colour, the gradient or the picture itself. */
 internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBitmap?): Modifier = when {

@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
@@ -29,6 +30,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import java.io.File
@@ -155,6 +157,41 @@ class SystemSettingsTabTest {
      */
     private fun flushEventQueue() = SwingUtilities.invokeAndWait { }
 
+    // ── Tab labels ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `picking a tab label style stores it through the callback`() = runComposeUiTest {
+        var applied: AppSettings? = null
+        val initial = AppSettings()
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(
+                    settings = initial,
+                    onSettingsChange = { transform -> applied = transform(initial) },
+                )
+            }
+        }
+
+        onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
+        waitForIdle()
+        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
+        waitForIdle()
+
+        assertEquals(TabLabelStyle.ICONS_AND_TEXT, applied?.tabLabelStyle)
+    }
+
+    @Test
+    fun `the tab label dropdown shows the stored style`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
+            }
+        }
+
+        onNode(hasText("Icons only") and hasClickAction()).assertExists()
+        onNode(hasText("Text only") and hasClickAction()).assertDoesNotExist()
+    }
+
     // ── Switches ──────────────────────────────────────────────────────────────
 
     @Test
@@ -189,8 +226,8 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Both switches are off here; analytics is the second one declared, after launch-at-login.
-        onAllNodes(isToggleable())[1].performScrollTo().performClick()
+        // All switches are off here; analytics is the third one declared, after launch-at-login and start-hidden.
+        onAllNodes(isToggleable())[2].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -254,7 +291,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(2)
+        onAllNodes(isToggleable()).assertCountEquals(3)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
@@ -451,13 +488,15 @@ class SystemSettingsTabTest {
             "Lower Third",
             "Presentation",
             "Media",
+            "Calendar",
             "General",
             "Manage settings",
         ).forEach { title ->
             onAllNodesWithText(title).onFirst().assertExists("the $title heading must render")
         }
-        onAllNodesWithText("Browse...").assertCountEquals(6)
+        onAllNodesWithText("Browse...").assertCountEquals(7)
         onAllNodesWithText("Set All").assertCountEquals(6)
+        onAllNodesWithText("Use Default").assertCountEquals(1)
     }
 
     @Test
@@ -523,6 +562,11 @@ class SystemSettingsTabTest {
             }
         }
 
+        // The scan runs off the composition, so the empty verdict arrives a frame or more later --
+        // every sibling test here waits for its own chip to appear for the same reason. Asserting
+        // straight after `setContent` passed alone and failed in the full suite, where four forks
+        // share the machine and the scan has not come back yet.
+        waitUntil { onAllNodesWithText("No files detected").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("No files detected").onFirst()
             .assertExists("a directory with no bible files says so instead of listing nothing")
     }
@@ -1162,7 +1206,7 @@ class SystemSettingsTabTest {
         val missing = File(tempDir(), "moved-away")
         showAllFolders(bible.path, missing.path)
 
-        waitUntil { onAllNodesWithText("5 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 need attention").onFirst()
             .assertExists("the folder that is gone is counted as needing attention")
     }
@@ -1172,7 +1216,7 @@ class SystemSettingsTabTest {
         val dir = tempDir()
         showAllFolders(dir.path, tempDir().path)
 
-        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("7 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("need attention", substring = true).assertCountEquals(0)
     }
 
@@ -1181,7 +1225,8 @@ class SystemSettingsTabTest {
         setContent { MaterialTheme { SystemSettingsTab() } }
 
         waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
-        onAllNodesWithText("0 linked").onFirst().assertExists("nothing is linked before anything is chosen")
+        onAllNodesWithText("1 linked").onFirst()
+            .assertExists("only the calendar, at its default, is linked before anything is chosen")
     }
 
     @Test

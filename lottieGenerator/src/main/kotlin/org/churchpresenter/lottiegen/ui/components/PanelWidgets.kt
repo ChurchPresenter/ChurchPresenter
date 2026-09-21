@@ -1,6 +1,8 @@
 package org.churchpresenter.lottiegen.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,11 +16,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,10 +34,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
+
+/** Hover tooltip wrapper for control-panel widgets. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HoverTooltip(text: String, content: @Composable () -> Unit) {
+    TooltipArea(
+        tooltip = {
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface
+            ) {
+                Text(
+                    text,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .widthIn(max = 320.dp)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+        },
+        content = content
+    )
+}
+
+/** The amber used to warn that a field won't render — not a Material or [Tokens] role. */
+private val WarningAmber = Color(0xFFFFC107)
+
+/** Marks a field whose own "Hide X" checkbox is checked elsewhere in the panel. */
+@Composable
+fun HiddenFieldWarning(tooltip: String) {
+    HoverTooltip(tooltip) {
+        Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = WarningAmber,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
 
 /** A square check with the accent fill when on, a hollow outline when off. */
 @Composable
@@ -181,11 +231,23 @@ fun SubtleButton(
 /** The small ✕ used to remove a saved preset or colour theme. */
 @Composable
 fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete") {
+    SmallIconButton(Icons.Default.Close, onClick, contentDescription)
+}
+
+/** The small pencil that opens a row's fuller controls. */
+@Composable
+fun EditIconButton(onClick: () -> Unit, contentDescription: String = "Edit") {
+    SmallIconButton(Icons.Default.Edit, onClick, contentDescription)
+}
+
+/** A 24dp bordered chip around one icon, the shape the ✕ and the pencil share. */
+@Composable
+private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val border by animateColorAsState(
         if (hovered) Tokens.BorderHover else Tokens.SubtleBorder,
-        label = "deleteBtnBorder"
+        label = "smallIconBtnBorder"
     )
 
     Box(
@@ -199,7 +261,7 @@ fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete")
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            Icons.Default.Close,
+            icon,
             contentDescription = contentDescription,
             tint = Tokens.SmallBtnText,
             modifier = Modifier.size(13.dp)

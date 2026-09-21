@@ -4,8 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
@@ -69,7 +70,7 @@ private val FONT_FIELD_WIDTH = 190.dp
 private val COLOR_SWATCH_WIDTH = 104.dp
 private val FACE_BUTTON_SIZE = 26.dp
 
-/** The two spacing sliders share the second row evenly, whatever the reference position leaves. */
+/** The two spacing sliders have a row to themselves and halve it. */
 private const val SPACING_WEIGHT = 1f
 
 private val TRANSFORM_BUTTON_WIDTH = 96.dp
@@ -83,6 +84,7 @@ private val TRANSFORM_BUTTON_WIDTH = 96.dp
  * pointed at; [style] is that profile, read through [elementStyle], and [onStyleChange] writes the
  * edited copy back through [withElementStyle].
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BibleTypographyPanel(
     translation: BibleTranslationSettings,
@@ -97,9 +99,16 @@ internal fun BibleTypographyPanel(
     autoFit: (() -> Unit)?,
     autoFitEnabled: Boolean,
     modifier: Modifier = Modifier,
+    /**
+     * The row of element chips, translation name and Reset above the controls.
+     *
+     * Off for the per-output Customize dialog, which selects the element and the translation with
+     * chips of its own above the pane and would otherwise draw both twice.
+     */
+    showHeader: Boolean = true,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ElementHeaderRow(
+        if (showHeader) ElementHeaderRow(
             translation = translation,
             moduleTitle = moduleTitle,
             element = element,
@@ -107,21 +116,25 @@ internal fun BibleTypographyPanel(
             onTranslationChange = onTranslationChange,
             onReset = onReset,
         )
-        Row(
+        // The colour and the four face buttons, then the font and its size: two rows rather than
+        // one flowing across three cells. All three together come to more than the pane, so the
+        // single row wrapped wherever it happened to run out -- which put the size box on a line of
+        // its own, away from the font it sizes. Splitting them deliberately keeps the pair that
+        // belong together together at any width.
+        ColorControl(style, onStyleChange)
+        // Flowing, not a hard row. Every cell holds fixed-size controls, so a `Row` that runs out
+        // of width clips the last one instead of shrinking it -- and a clipped control is still
+        // *there*, so it keeps its semantics and a click aimed at it silently lands on nothing.
+        // That is what the outline button cost when it joined the strip: Auto went off the end and
+        // the fit it triggers stopped happening, with the panel looking perfectly normal.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Top,
         ) {
-            // Every cell but the font dropdown holds fixed-size controls, so they take their own
-            // width and the dropdown absorbs whatever is left. Sharing the row out by weight
-            // instead gave the colour cell less than its swatch and four buttons needed, and
-            // clipped the underline and strikethrough buttons clean off.
-            ColorControl(style, onStyleChange)
             FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
             SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
-            // The slack goes here rather than into the font field, which at a weight grew to half
-            // the panel to show a name no longer than "Times New Roman".
-            Spacer(Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -136,6 +149,16 @@ internal fun BibleTypographyPanel(
             if (element == BibleStyleElement.REFERENCE) {
                 PositionControl(style, onStyleChange)
             }
+        }
+        // The two sliders take a row of their own rather than the tail of the one above. They are
+        // the only controls here that stretch, so in a narrow column -- the per-output Customize
+        // dialog's is 430dp -- everything fixed beside them was measured first and the pair was
+        // left sharing whatever was over, which on the reference element was about 90dp each.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            verticalAlignment = Alignment.Top,
+        ) {
             // Explicitly keyed, because the control above them comes and goes with the element. A
             // composable's identity is its call-site *position*, so without a key of their own the
             // two sliders shift a slot as the reference position appears, and each one inherits the
@@ -160,17 +183,11 @@ internal fun BibleTypographyPanel(
                 )
             }
         }
-        // Bottom-aligned, not top: the transform cell carries a caption above its buttons and the
-        // shadow controls do not, so aligning the tops left the shadow checkbox floating level with
-        // that caption instead of with the buttons it sits beside.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            TransformControl(style, onStyleChange)
-            ShadowControl(style, onStyleChange, Modifier.weight(1f))
-        }
+        TransformControl(style, onStyleChange)
+        // A row of its own. The transform's four segments are 96dp each, so beside them the shadow
+        // cell had nothing left in a narrow column and its three fields were crushed to their
+        // padding the moment the box was ticked.
+        ShadowControl(style, onStyleChange, Modifier.fillMaxWidth())
     }
 }
 
@@ -203,6 +220,8 @@ private fun ColorControl(
             showShadow = false,
             backdrop = style.backdrop,
             onBackdropChange = { onStyleChange(style.copy(backdrop = it)) },
+            outline = style.outline,
+            onOutlineChange = { onStyleChange(style.copy(outline = it)) },
             buttonSize = FACE_BUTTON_SIZE,
         )
     }
@@ -355,10 +374,10 @@ private fun ShadowControl(
         // at their height whether they are showing or not -- see [ShadowDetailRowHeight].
         modifier = modifier.heightIn(min = ShadowDetailRowHeight),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        // Bottom, not centre. The controls this row sits beside are bottom-aligned, and the row is
-        // held taller than the checkbox by the reservation above -- so centring it left the box
-        // floating nine pixels above the buttons next to it whenever the details were folded away.
-        verticalAlignment = Alignment.Bottom,
+        // Centred. It was bottom-aligned while it shared a row with the text transform, to sit level
+        // with those buttons; on a row of its own that left it hanging below the fields beside it,
+        // which are the full height the reservation holds.
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         LabeledCheckbox(
             checked = style.shadow,

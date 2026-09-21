@@ -80,7 +80,7 @@ import churchpresenter.composeapp.generated.resources.stt_word_highlighting
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
@@ -353,6 +353,10 @@ internal fun STTSettingsDialogContent(
                             backdrop = sttSettings.backdrop,
                             onBackdropChange = { updated ->
                                 onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backdrop = updated)) }
+                            },
+                            outline = sttSettings.outline,
+                            onOutlineChange = { updated ->
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(outline = updated)) }
                             },
                         )
                         AnimatedVisibility(visible = sttSettings.shadow) {

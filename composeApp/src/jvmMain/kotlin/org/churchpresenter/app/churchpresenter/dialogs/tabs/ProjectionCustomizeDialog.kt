@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Settings
@@ -30,11 +29,11 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -55,13 +54,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
+import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.customize
 import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_count
 import churchpresenter.composeapp.generated.resources.customize_dialog_subtitle
 import churchpresenter.composeapp.generated.resources.customize_dialog_title
-import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.customize_done
+import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.customize_pane_header
 import churchpresenter.composeapp.generated.resources.customize_reset_to_global
 import churchpresenter.composeapp.generated.resources.customize_songs
@@ -69,7 +69,18 @@ import churchpresenter.composeapp.generated.resources.customize_tooltip_none
 import churchpresenter.composeapp.generated.resources.customize_tooltip_overwritten
 import churchpresenter.composeapp.generated.resources.customize_tooltip_separator
 import churchpresenter.composeapp.generated.resources.stage_monitor
+import churchpresenter.composeapp.generated.resources.symbol_cancel
+import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.tab_dictionary
+import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.settings.backgroundOverrideOf
+import org.churchpresenter.settings.bibleOverrideOf
+import org.churchpresenter.settings.dictionaryOverrideOf
+import org.churchpresenter.settings.songOverrideOf
+import org.churchpresenter.settings.stageMonitorOverrideOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.ScreenAssignment
@@ -104,17 +115,45 @@ internal enum class CustomizePane(val icon: ImageVector, val hasOverride: Boolea
         DICTIONARY -> assignment.dictionaryOverride != null
     }
 
-    /** [assignment] with this category's override taken from [edited], or cleared when [on] is false. */
-    fun applied(assignment: ScreenAssignment, edited: AppSettings, on: Boolean = true): ScreenAssignment =
-        when (this) {
+    /**
+     * [assignment] with this category's override taken from [edited], or cleared when [on] is false.
+     *
+     * What is stored is the *difference* between [edited] and [global] -- see `sparseOverrideOf`.
+     * An empty tree is not the same as no tree: a screen switched on and not yet changed has its
+     * own styles and is simply agreeing with the document on all of them, which is why the empty
+     * case stores an empty object rather than null and leaves the switch reading on.
+     */
+    fun applied(
+        assignment: ScreenAssignment,
+        global: AppSettings,
+        edited: AppSettings,
+        on: Boolean = true,
+    ): ScreenAssignment {
+        fun tree(diff: JsonObject?): JsonObject? = if (on) diff ?: JsonObject(emptyMap()) else null
+        return when (this) {
             STAGE_MONITOR -> assignment.copy(
-                stageMonitorOverride = if (on) edited.stageMonitorSettings else null,
+                stageMonitorOverride = tree(
+                    stageMonitorOverrideOf(global.stageMonitorSettings, edited.stageMonitorSettings),
+                ),
             )
-            BIBLE -> assignment.copy(bibleOverride = if (on) edited.bibleSettings else null)
-            SONGS -> assignment.copy(songOverride = if (on) edited.songSettings else null)
-            BACKGROUND -> assignment.copy(backgroundOverride = if (on) edited.backgroundSettings else null)
-            DICTIONARY -> assignment.copy(dictionaryOverride = if (on) edited.dictionarySettings else null)
+            BIBLE -> assignment.copy(
+                bibleOverride = tree(bibleOverrideOf(global.bibleSettings, edited.bibleSettings)),
+            )
+            SONGS -> assignment.copy(
+                songOverride = tree(songOverrideOf(global.songSettings, edited.songSettings)),
+            )
+            BACKGROUND -> assignment.copy(
+                backgroundOverride = tree(
+                    backgroundOverrideOf(global.backgroundSettings, edited.backgroundSettings),
+                ),
+            )
+            DICTIONARY -> assignment.copy(
+                dictionaryOverride = tree(
+                    dictionaryOverrideOf(global.dictionarySettings, edited.dictionarySettings),
+                ),
+            )
         }
+    }
 }
 
 /** The categories [displayMode] can actually use, in rail order. */
@@ -178,6 +217,7 @@ internal fun CustomizePane.label(): String = when (this) {
 internal fun OutputCustomizeDialog(
     screenLabel: String,
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     globalSettings: AppSettings,
     onApply: (ScreenAssignment) -> Unit,
     onDismiss: () -> Unit,
@@ -203,21 +243,42 @@ internal fun OutputCustomizeDialog(
     fun edit(transform: (AppSettings) -> AppSettings) {
         val edited = transform(draft)
         draft = edited
+        val next = pane.applied(assignment, globalSettings, edited)
         // An edit switches the category on if it was not already: the operator has just said what
         // this screen should look like, and storing that is the whole point of having typed it.
-        onApply(pane.applied(assignment, edited))
+        onApply(next)
     }
 
     fun setOverridden(on: Boolean) {
-        val next = pane.applied(assignment, draft, on)
+        val next = pane.applied(assignment, globalSettings, draft, on)
         // Turning a category off puts the global values back on screen, not the ones just abandoned.
         draft = globalSettings.resolvedFor(next)
         onApply(next)
     }
 
+    // The assignment as it was when the dialog opened. Every edit above writes straight into the
+    // Options draft, so "Cancel" has to put this back rather than merely close.
+    val initial = remember { assignment }
+    // The Options dialog's own Apply, so Done saves rather than leaving the change in a draft that
+    // the Options dialog's Cancel can still throw away. Null where there is no draft -- a test
+    // composing this dialog alone -- and Done then just closes.
+    val applySettings = LocalApplySettings.current
+    // Whether Apply was pressed from here: a cancel after that has to re-apply the restored
+    // assignment, or the projector keeps the styling the operator just backed out of.
+    var appliedHere by remember { mutableStateOf(false) }
+    fun done() {
+        applySettings?.invoke()
+        onDismiss()
+    }
+    fun cancel() {
+        onApply(initial)
+        if (appliedHere) applySettings?.invoke()
+        onDismiss()
+    }
+
     val overridden = pane.isOverridden(assignment)
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = ::cancel,
         modifier = Modifier.width(DIALOG_WIDTH),
         shape = RoundedCornerShape(14.dp),
         // The card layer of the settings ramp, so the rail and the control column read as one
@@ -234,12 +295,17 @@ internal fun OutputCustomizeDialog(
                 customized = panes.count { it.isOverridden(assignment) },
                 total = panes.count { it.hasOverride },
                 onOverriddenChange = ::setOverridden,
-                onDismiss = onDismiss,
             )
         },
         text = {
             CompositionLocalProvider(
                 LocalOutputStyleScope provides OutputStyleScope.forDisplayMode(assignment.displayMode),
+                // The accent fill on the selected segment, the same one the global Bible and Song
+                // tabs provide over themselves. Without it the dialog drew every segmented control
+                // it borrows from those tabs -- the element selector, the text transform, the title
+                // slide's own selector -- in the neutral tone, so the same control read one colour
+                // on the tab and another here.
+                LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT,
             ) {
                 Row(modifier = Modifier.fillMaxWidth().height(BODY_HEIGHT)) {
                     CustomizeRail(
@@ -257,10 +323,15 @@ internal fun OutputCustomizeDialog(
                         live = overridden || !pane.hasOverride,
                         draft = draft,
                         assignment = assignment,
+                        outputKind = outputKind,
                         translationIndex = translationIndex,
                         onTranslationChange = { pickedTranslation = it },
                         onElementChange = { pickedElement = it },
                         onSettingsChange = ::edit,
+                        // Straight to the assignment, not through `edit`: this is a property of the
+                        // screen rather than of its styling, and `edit` stores only what a
+                        // `SongSettings` diff can hold.
+                        onAssignmentChange = onApply,
                     )
                 }
             }
@@ -270,21 +341,27 @@ internal fun OutputCustomizeDialog(
                 pane = pane,
                 overridden = overridden,
                 onReset = { setOverridden(false) },
-                onDismiss = onDismiss,
+                onApply = applySettings?.let { apply -> { appliedHere = true; apply() } },
+                onCancel = ::cancel,
+                onDone = ::done,
             )
         },
     )
 }
 
 /**
- * Reset to global, the hint, and -- when an Options draft is there to apply -- Apply beside Done.
+ * Reset to global, the hint, and the closing row: Cancel, which puts the assignment back the way
+ * the dialog found it; Apply, when an Options draft is there to apply, which saves without
+ * closing; and Done, which saves and closes.
  */
 @Composable
 private fun CustomizeDialogButtons(
     pane: CustomizePane,
     overridden: Boolean,
     onReset: () -> Unit,
-    onDismiss: () -> Unit,
+    onApply: (() -> Unit)?,
+    onCancel: () -> Unit,
+    onDone: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         OutlinedButton(
@@ -307,39 +384,52 @@ private fun CustomizeDialogButtons(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        // Apply: the Options dialog's own, offered here so a change can be seen on the
-        // screen without closing this dialog and finding that button first. Only where a
-        // draft exists to apply -- a test composing this dialog alone gets Done alone.
-        LocalApplySettings.current?.let { apply ->
-            OutlinedButton(
-                shape = RoundedCornerShape(8.dp),
-                onClick = apply,
-                contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
+        // The same buttons, in the same styles, as the Options dialog's own row below this one: a
+        // plain-text Cancel, a secondary Apply and a primary Done.
+        TextButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = onCancel,
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            modifier = Modifier.testTag(CUSTOMIZE_CANCEL_TAG),
+        ) {
+            Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        // Apply: the Options dialog's own, offered here so a change can be seen on the screen
+        // without closing this dialog and finding that button first. Only where a draft exists
+        // to apply -- a test composing this dialog alone gets Cancel and Done.
+        if (onApply != null) {
+            Button(
+                shape = RoundedCornerShape(6.dp),
+                onClick = onApply,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
                 modifier = Modifier.testTag(CUSTOMIZE_APPLY_TAG),
             ) {
-                Text(
-                    text = stringResource(Res.string.apply),
-                    style = MaterialTheme.typography.labelMedium,
-                )
+                Text(stringResource(Res.string.apply))
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
         Button(
-            shape = RoundedCornerShape(8.dp),
-            onClick = onDismiss,
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp),
+            shape = RoundedCornerShape(6.dp),
+            onClick = onDone,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            modifier = Modifier.testTag(CUSTOMIZE_DONE_TAG),
         ) {
-            Text(
-                text = stringResource(Res.string.customize_done),
-                style = MaterialTheme.typography.labelMedium,
-            )
+            Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.customize_done)}")
         }
     }
 }
 
 /**
  * Icon badge, the screen's name, how many of its categories are customized — and, on the right, the
- * selected category's own on/off switch.
+ * selected category's own on/off switch. No corner close: the row of buttons below is where the
+ * dialog is left, and each of those says what happens to the edits.
  */
 @Composable
 private fun CustomizeDialogHeader(
@@ -349,7 +439,6 @@ private fun CustomizeDialogHeader(
     customized: Int,
     total: Int,
     onOverriddenChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -398,13 +487,6 @@ private fun CustomizeDialogHeader(
                 modifier = Modifier.testTag(CUSTOMIZE_OVERRIDE_SWITCH_TAG),
             )
         }
-        IconButton(onClick = onDismiss) {
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = stringResource(Res.string.customize_done),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
     }
 }
 
@@ -423,6 +505,7 @@ private fun CustomizeDialogHeader(
 @Composable
 internal fun CustomizeOutputCell(
     assignment: ScreenAssignment,
+    outputKind: OutputKind,
     screenLabel: String,
     settings: AppSettings,
     onApply: (ScreenAssignment) -> Unit,
@@ -494,6 +577,7 @@ internal fun CustomizeOutputCell(
         OutputCustomizeDialog(
             screenLabel = screenLabel,
             assignment = assignment,
+            outputKind = outputKind,
             globalSettings = settings,
             onApply = onApply,
             onDismiss = { showDialog = false },
@@ -503,6 +587,12 @@ internal fun CustomizeOutputCell(
 
 /** Test handle for the Apply button, which appears only under an Options dialog. */
 internal const val CUSTOMIZE_APPLY_TAG = "customize_apply"
+
+/** Test handle for the Cancel button, which restores the assignment the dialog opened with. */
+internal const val CUSTOMIZE_CANCEL_TAG = "customize_cancel"
+
+/** Test handle for the Done button, which applies and closes. */
+internal const val CUSTOMIZE_DONE_TAG = "customize_done"
 
 /** Test handle for one rail row, by `CustomizePane` name. */
 internal fun railTag(paneName: String): String = "customize_rail_$paneName"

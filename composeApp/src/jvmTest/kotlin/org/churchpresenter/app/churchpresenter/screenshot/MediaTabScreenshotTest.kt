@@ -13,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.tabs.mediaButton
 import org.churchpresenter.app.churchpresenter.tabs.mediaTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -37,6 +38,8 @@ class MediaTabScreenshotTest {
         presenter: Boolean = true,
         vlcAvailable: Boolean = true,
         width: Dp? = null,
+        /** 1 to photograph an open popup, which is its own compose root. */
+        rootIndex: Int = 0,
         drive: ComposeUiTest.(MediaViewModel) -> Unit = { waitForIdle() },
     ) = stackedThemes(SECTION, name) { mode, file ->
         mediaTab(
@@ -46,7 +49,7 @@ class MediaTabScreenshotTest {
             themeMode = mode,
         ) { vm, _ ->
             drive(vm)
-            captureTo(file)
+            captureTo(file, rootIndex)
         }
     }
 
@@ -101,7 +104,29 @@ class MediaTabScreenshotTest {
     }
 
     @Test
-    fun `the recents bar, one entry pinned`() = shoot("recent_files") { vm ->
+    fun `subtitles showing, the button lit`() = shoot("subtitles_on") { vm ->
+        loadVideo(vm)
+        vm.setSubtitleFile("$FIXTURES/Welcome Loop.srt")
+        vm.setSubtitleTracks(listOf(SubtitleTrack(id = 2, name = "Track 1 - [English]")))
+        waitForIdle()
+    }
+
+    @Test
+    fun `the subtitle menu open, with an embedded track ticked`() = shoot("subtitles_menu", rootIndex = 1) { vm ->
+        loadVideo(vm)
+        vm.setSubtitleTracks(
+            listOf(
+                SubtitleTrack(id = 2, name = "Track 1 - [English]"),
+                SubtitleTrack(id = 3, name = "Track 2 - [Spanish]"),
+            )
+        )
+        vm.selectSubtitleTrack(2)
+        mediaButton(MediaLabel.SUBTITLES).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `the recents bar, one entry pinned`()= shoot("recent_files") { vm ->
         RecentMediaFiles.add("$FIXTURES/Baptism Testimony.mp4")
         RecentMediaFiles.add("$FIXTURES/Welcome Loop.mp4")
         RecentMediaFiles.togglePin("$FIXTURES/Welcome Loop.mp4")

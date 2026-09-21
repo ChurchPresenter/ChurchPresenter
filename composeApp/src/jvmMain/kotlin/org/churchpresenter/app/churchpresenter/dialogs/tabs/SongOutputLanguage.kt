@@ -101,6 +101,19 @@ internal fun SongLanguageScopeButtons(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     target: SongStyleTarget,
+    /**
+     * One output's own mode, for the per-output Customize dialog.
+     *
+     * Without it this control speaks for *every* output of [target]'s shape, through
+     * [withSongLanguage], which writes `projectionSettings.screenAssignments`. That is right on the
+     * global tab and wrong twice over in the dialog: the dialog stores only the difference between
+     * two `SongSettings`, so a change to the assignments is never carried out of it -- the dialog's
+     * own preview reads the edited draft and looked right while the screen kept showing both
+     * languages -- and even if it were, it would have been applied to every screen rather than to
+     * the one being customized.
+     */
+    outputMode: String? = null,
+    onOutputModeChange: ((String) -> Unit)? = null,
 ) {
     SegmentedButton(
         items = listOf(
@@ -108,9 +121,13 @@ internal fun SongLanguageScopeButtons(
             SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, stringResource(Res.string.song_language_primary)),
             SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, stringResource(Res.string.song_language_secondary)),
         ),
-        selectedValue = settings.songLanguageFor(target),
+        selectedValue = outputMode ?: settings.songLanguageFor(target),
         onValueChange = { lang ->
-            onSettingsChange { s -> s.withSongLanguage(target, lang) }
+            if (onOutputModeChange != null) {
+                onOutputModeChange(lang)
+            } else {
+                onSettingsChange { s -> s.withSongLanguage(target, lang) }
+            }
         },
         buttonWidth = LANGUAGE_BUTTON_WIDTH,
         buttonHeight = 30.dp,

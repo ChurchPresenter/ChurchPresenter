@@ -86,6 +86,16 @@ internal fun ComposeUiTest.positionButton(group: Int, above: Boolean): Semantics
 internal fun ComposeUiTest.styleButton(group: Int, label: String): SemanticsNodeInteraction =
     onAllNodes(hasClickAction() and hasText(label))[group]
 
+/**
+ * One Shadow checkbox, [group] counting them in composition order as [styleButton] does.
+ *
+ * Shadow is not one of the face buttons beside it: the shared typography panels draw it as a
+ * `LabeledCheckbox` whose three detail controls fold out alongside, because those need somewhere to
+ * live and a glyph button has no room for them. The "S" next to B/I/U is strikethrough.
+ */
+internal fun ComposeUiTest.shadowCheckbox(group: Int = 0): SemanticsNodeInteraction =
+    onAllNodes(isToggleable() and hasText("Shadow"))[group]
+
 /** One segmented button, e.g. `segmentedButton("1 Line", ModeRow.LOWER_THIRD)`. */
 internal fun ComposeUiTest.segmentedButton(text: String, row: Int): SemanticsNodeInteraction =
     onAllNodesWithText(text)[row]

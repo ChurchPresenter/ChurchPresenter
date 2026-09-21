@@ -1,0 +1,116 @@
+package org.churchpresenter.app.churchpresenter.composables
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabIndicatorScope
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.TabLabelStyle
+
+private val TAB_ICON_SIZE = 20.dp
+
+val LABELED_TAB_MIN_WIDTH = 100.dp
+
+@Composable
+fun TabIndicatorScope.LabeledTabIndicator(selectedTabIndex: Int) {
+    TabRowDefaults.PrimaryIndicator(Modifier.tabIndicatorOffset(selectedTabIndex), width = Dp.Unspecified)
+}
+
+@Composable
+fun LabeledTab(
+    name: String,
+    icon: ImageVector,
+    selected: Boolean,
+    labelStyle: TabLabelStyle,
+    onClick: () -> Unit,
+    textStyle: TextStyle? = null,
+    color: Color = Color.Unspecified,
+) {
+    when (labelStyle) {
+        TabLabelStyle.TEXT -> Tab(
+            selected = selected,
+            onClick = onClick,
+            text = { TabName(name, textStyle, color) },
+        )
+        TabLabelStyle.ICONS_AND_TEXT -> Tab(
+            selected = selected,
+            onClick = onClick,
+            text = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TabIcon(icon, color)
+                    TabName(name, textStyle, color)
+                }
+            },
+        )
+        TabLabelStyle.ICONS -> TabNameTooltip(name) {
+            Tab(
+                selected = selected,
+                onClick = onClick,
+                modifier = Modifier.widthIn(min = LABELED_TAB_MIN_WIDTH),
+                icon = { TabIcon(icon, color, contentDescription = name) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun TabName(name: String, textStyle: TextStyle?, color: Color) {
+    if (textStyle != null) {
+        Text(text = name, style = textStyle, color = color, maxLines = 1, softWrap = false)
+    } else {
+        Text(text = name, color = color, maxLines = 1, softWrap = false)
+    }
+}
+
+@Composable
+private fun TabIcon(icon: ImageVector, color: Color, contentDescription: String? = null) {
+    Icon(
+        imageVector = icon,
+        contentDescription = contentDescription,
+        tint = color.takeOrElse { LocalContentColor.current },
+        modifier = Modifier.size(TAB_ICON_SIZE),
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TabNameTooltip(name: String, content: @Composable () -> Unit) {
+    ConditionalTooltipArea(
+        tooltip = {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
+                Text(
+                    text = name,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        },
+        content = content,
+    )
+}

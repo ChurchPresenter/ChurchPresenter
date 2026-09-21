@@ -69,9 +69,13 @@ class RegistryStyleSmokeTest {
     }
 
     /**
-     * Every element in a spec must survive into the composition as its own layer. Zero
-     * warnings alone would not catch an element the layout silently declines to build,
-     * which is how a decoration disappears in the app while the tests stay green.
+     * Every element in a spec must survive into the composition as its own layer, in at least
+     * one reachable config. Zero warnings alone would not catch an element the layout silently
+     * declines to build, which is how a decoration disappears in the app while the tests stay
+     * green. Checked across both `hideDetail` states — not just `false` — because a `DETAIL_HIDDEN`
+     * / `DETAIL_VISIBLE` pair (the two-variant workaround for a decoration whose position depends
+     * on Detail's own visibility, e.g. Style 15's baseline rule) means each half only ever builds
+     * in one of the two.
      */
     @Test
     fun everyElementBecomesALayer() {
@@ -80,28 +84,29 @@ class RegistryStyleSmokeTest {
                 javaClass.getResourceAsStream(entry.resource)!!
                     .bufferedReader(Charsets.UTF_8).use { it.readText() }
             )
-            val generator = SpecStyleGenerator(spec)
-            val json = LottieGenerator.generate(
-                LottieGenConfig(
-                    style = entry.id,
-                    logoEnabled = true,
-                    bgEnabled = true,
-                    // The logo layer is only built when real image data is present, so a
-                    // stub asset is required to exercise the logo slot at all.
-                    logoData = STUB_LOGO,
-                    logoW = 64,
-                    logoH = 64
-                ),
-                generator
-            )
-            val layerNames = json["layers"]!!.jsonArray
-                .map { it.jsonObject["nm"]!!.jsonPrimitive.content }
-                .toSet()
+            val layerNames = listOf(true, false).flatMap { hideDetail ->
+                val generator = SpecStyleGenerator(spec)
+                val json = LottieGenerator.generate(
+                    LottieGenConfig(
+                        style = entry.id,
+                        logoEnabled = true,
+                        bgEnabled = true,
+                        // The logo layer is only built when real image data is present, so a
+                        // stub asset is required to exercise the logo slot at all.
+                        logoData = STUB_LOGO,
+                        logoW = 64,
+                        logoH = 64,
+                        hideDetail = hideDetail
+                    ),
+                    generator
+                )
+                json["layers"]!!.jsonArray.map { it.jsonObject["nm"]!!.jsonPrimitive.content }
+            }.toSet()
             for (element in spec.elements) {
                 assertTrue(
                     element.name in layerNames,
-                    "${entry.resource}: element '${element.name}' (${element.id}) built no layer; " +
-                        "layers were $layerNames"
+                    "${entry.resource}: element '${element.name}' (${element.id}) built no layer in " +
+                        "either hideDetail state; layers were $layerNames"
                 )
             }
         }
@@ -144,7 +149,7 @@ class RegistryStyleSmokeTest {
                 }
             }
 
-            // Hiding either line must not break layout or drop the composition.
+            // Hiding any line must not break layout or drop the composition.
             for ((hideName, hideInfo) in listOf(true to false, false to true)) {
                 val generator = SpecStyleGenerator(spec)
                 val json = LottieGenerator.generate(
@@ -152,6 +157,19 @@ class RegistryStyleSmokeTest {
                     generator
                 )
                 val where = "${entry.resource} [hideName=$hideName hideInfo=$hideInfo]"
+                assertTrue(json["layers"]!!.jsonArray.isNotEmpty(), "$where produced no layers")
+                assertTrue(generator.lastWarnings.isEmpty(), "$where warned: ${generator.lastWarnings}")
+            }
+
+            // The optional third line, on: must not break layout or drop the composition,
+            // whether or not the style's own spec actually places a detail element.
+            run {
+                val generator = SpecStyleGenerator(spec)
+                val json = LottieGenerator.generate(
+                    LottieGenConfig(style = entry.id, hideDetail = false, detailText = "Detail line"),
+                    generator
+                )
+                val where = "${entry.resource} [hideDetail=false]"
                 assertTrue(json["layers"]!!.jsonArray.isNotEmpty(), "$where produced no layers")
                 assertTrue(generator.lastWarnings.isEmpty(), "$where warned: ${generator.lastWarnings}")
             }

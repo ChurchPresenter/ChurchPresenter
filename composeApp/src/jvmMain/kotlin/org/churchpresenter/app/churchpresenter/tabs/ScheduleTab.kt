@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,8 +66,14 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
+import org.churchpresenter.calendar.model.planDrift
+import kotlinx.coroutines.delay
+import org.churchpresenter.calendar.model.scheduleClocks
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DragItemGeometry
@@ -89,6 +96,9 @@ import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
+
+/** How often the live row's behind/ahead badge is re-reckoned. */
+private const val DRIFT_TICK_MS = 1_000L
 
 private const val FALLBACK_DRAG_ITEM_HEIGHT = 50f
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -116,7 +126,8 @@ data class ScheduleTabActions(
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
-    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
+        { _, _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     val addAnnouncement: (
         text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String,
@@ -125,12 +136,19 @@ data class ScheduleTabActions(
         animationType: String, animationDuration: Int, loopCount: Int, isTimer: Boolean,
         timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String,
         timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int,
-        targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop,
-    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+        targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop, outline: TextOutline,
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
+    val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
+    /** Selects a row, so the Schedule shows what the automation has just put on screen. */
+    val selectItem: (id: String) -> Unit = {},
+    val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
+    /** The loaded service's `HH:mm` start, the clock column's anchor where no row is pinned. */
+    val setServiceStart: (startTime: String?) -> Unit = {},
 )
 
 private const val ZOOM_DEFAULT = 100
@@ -167,6 +185,7 @@ fun ScheduleTab(
     onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
     onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
     onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
+    onPresentCue: ((ScheduleItem.CueItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -241,14 +260,16 @@ fun ScheduleTab(
                 addSong          = { songNumber, title, songbook, songId -> viewModel.addSong(songNumber, title, songbook, songId) },
                 addPicture       = { folderPath, folderName, imageCount -> viewModel.addPicture(folderPath, folderName, imageCount) },
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
-                addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
+                addMedia         = { mediaUrl, mediaTitle, mediaType, subtitleUrl ->
+                    viewModel.addMedia(mediaUrl, mediaTitle, mediaType, subtitleUrl)
+                },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
                 addAnnouncement  = {
                     text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline,
                     shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position,
                     animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes,
                     timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour,
-                    targetMinute, targetSecond, liveClockFormat, backdrop,
+                    targetMinute, targetSecond, liveClockFormat, backdrop, outline,
                     ->
                     viewModel.addAnnouncement(
                         text, textColor, backgroundColor, fontSize, fontType, bold, italic,
@@ -256,13 +277,18 @@ fun ScheduleTab(
                         horizontalAlignment, position, animationType, animationDuration, loopCount,
                         isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor,
                         timerExpiredText, timerMode, targetHour, targetMinute, targetSecond,
-                        liveClockFormat, backdrop,
+                        liveClockFormat, backdrop, outline,
                     )
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
                 addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) },
-                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) }
+                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) },
+                addCue           = { item -> viewModel.addCue(item) },
+                addRow           = { item, timing -> viewModel.addRow(item, timing) },
+                selectItem       = { id -> viewModel.selectOnly(id) },
+                setServiceStart  = { viewModel.setServiceStart(it) },
+                currentTiming    = { viewModel.timing.toMap() },
             )
         )
     }
@@ -294,12 +320,38 @@ fun ScheduleTab(
             onRedo = { viewModel.redo() },
             onAddLabel = onAddLabel,
             onImportPlanningCenter = { showPlanningCenterImport = true },
+            onOpenCalendar = LocalOpenCalendar.current,
             onClearSchedule = { viewModel.clearSchedule() },
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
             onToggleButton = onToggleToolbarButton
         )
+
+        // When each row is expected to go live, reckoned from the first pinned row across the
+        // whole schedule -- so every row shows a time, not only the ones carrying a pin.
+        val rowClocks = remember(scheduleItems, viewModel.timing, viewModel.serviceStartTime) {
+            scheduleClocks(scheduleItems, viewModel.timing, viewModel.serviceStartTime)
+        }
+        // How far the service is from its plan, on the row that is live: reckoned from when it
+        // went live against when the plan said, and growing once it overruns its length -- so it
+        // ticks. Null when nothing is live or the plan has no time for it.
+        val liveRowId = viewModel.liveRowId
+        val liveSince = viewModel.liveSince
+        var driftNow by remember { mutableStateOf(viewModel.clock()) }
+        LaunchedEffect(liveRowId, liveSince) {
+            while (liveRowId != null) {
+                driftNow = viewModel.clock()
+                delay(DRIFT_TICK_MS)
+            }
+        }
+        val drift = remember(liveRowId, liveSince, driftNow, rowClocks, viewModel.timing) {
+            if (liveRowId == null || liveSince == null) {
+                null
+            } else {
+                planDrift(liveRowId, liveSince, driftNow, rowClocks, viewModel.timing)
+            }
+        }
 
         val viewModelState = rememberUpdatedState(viewModel)
         var listHeightPx by remember { mutableStateOf(0) }
@@ -467,8 +519,11 @@ fun ScheduleTab(
                             .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
                             .reorderGesture(index, requireShift = true)
                     ) {
+                        CompositionLocalProvider(LocalLiveDrift provides drift.takeIf { item.id == liveRowId }) {
                         ScheduleItemRow(
                             item = item,
+                            timing = viewModel.timingFor(item.id),
+                            clock = rowClocks[item.id],
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
                             legacyRowActions = legacyRowActions,
@@ -499,7 +554,8 @@ fun ScheduleTab(
                                     onPresentLowerThird = onPresentLowerThird,
                                     onPresentWebsite = onPresentWebsite,
                                     onPresentDictionary = onPresentDictionary,
-                                    onPresentScene = onPresentScene
+                                    onPresentScene = onPresentScene,
+                                    onPresentCue = onPresentCue,
                                 )
                             },
                             onEditLabel = {
@@ -507,6 +563,7 @@ fun ScheduleTab(
                             },
                             onNoteChanged = { viewModel.setNote(item.id, it) }
                         )
+                        }
                     }
                 }
             }

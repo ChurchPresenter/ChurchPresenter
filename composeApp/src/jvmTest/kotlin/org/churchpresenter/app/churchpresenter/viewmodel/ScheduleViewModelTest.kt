@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.schedule.RowTiming
 
 /**
  * The schedule is the spine of a service: every item the operator will present, in order, with
@@ -100,6 +101,24 @@ class ScheduleViewModelTest {
         assertTrue(vm.scheduleItems[1] is ScheduleItem.BibleVerseItem)
         assertTrue(vm.scheduleItems[2] is ScheduleItem.LabelItem)
         assertTrue(vm.scheduleItems[3] is ScheduleItem.WebsiteItem)
+    }
+
+    @Test
+    fun `a media item keeps the subtitle file it was added with`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local", subtitleUrl = "/media/clip.srt")
+
+        assertEquals("/media/clip.srt", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
+    }
+
+    @Test
+    fun `a media item added without a subtitle file has none`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local")
+
+        assertEquals("", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
     }
 
     // ── Removing ────────────────────────────────────────────────────────────────
@@ -417,5 +436,120 @@ class ScheduleViewModelTest {
 
         vm.addSong(1, "Local again", "Hymnal")
         assertEquals(listOf("Local again"), vm.titles)
+    }
+
+    // ── Planned rows ────────────────────────────────────────────────────────────
+
+    private fun plannedSong(id: String = "planned-1") =
+        ScheduleItem.SongItem(id = id, songNumber = 1, title = "Planned", songbook = "Hymnal", songId = "Hymnal::1")
+
+    @Test
+    fun `a planned row is added whole with its timing`() {
+        val vm = newViewModel()
+        val timing = RowTiming(startAt = "09:45")
+
+        vm.addRow(plannedSong(), timing)
+
+        assertEquals("planned-1", vm.scheduleItems.single().id, "the id is kept so the timing still points at it")
+        assertEquals(timing, vm.timingFor("planned-1"))
+        assertTrue(vm.canUndo)
+    }
+
+    @Test
+    fun `default timing is not stored`() {
+        val vm = newViewModel()
+
+        vm.addRow(plannedSong("a"), RowTiming())
+        vm.addRow(plannedSong("b"), null)
+
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("a"))
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("b"))
+        assertTrue(vm.timing.isEmpty())
+    }
+
+    @Test
+    fun `a planned row is pushed to the primary while following one`() {
+        val vm = newViewModel()
+        val pushed = mutableListOf<ScheduleItem>()
+        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.applyRemoteSchedule(emptyList())
+
+        vm.addRow(plannedSong(), RowTiming(startAt = "09:45"))
+
+        assertEquals(listOf("planned-1"), pushed.map { it.id })
+        assertTrue(vm.scheduleItems.isEmpty(), "the primary's schedule comes back as a broadcast")
+    }
+
+    @Test
+    fun `a cue row can be ticked off and back on in place`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        vm.addRow(ScheduleItem.CueItem(id = "cue", action = "blank"), null)
+
+        vm.setCueEnabled("cue", enabled = false)
+
+        val cue = vm.scheduleItems[1] as ScheduleItem.CueItem
+        assertFalse(cue.enabled)
+        assertEquals(listOf("song", "cue"), vm.scheduleItems.map { it.id }, "in place, not moved")
+
+        vm.undo()
+        assertTrue((vm.scheduleItems[1] as ScheduleItem.CueItem).enabled)
+    }
+
+    @Test
+    fun `ticking something that is not a cue does nothing`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        val before = vm.scheduleItems.toList()
+
+        vm.setCueEnabled("song", enabled = false)
+        vm.setCueEnabled("missing", enabled = false)
+
+        assertEquals(before, vm.scheduleItems)
+    }
+
+    // ── The live row, and the service start ─────────────────────────────────────
+
+    @Test
+    fun `presenting a row marks it live, with the time, and the automation's select does too`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha", "Beta")
+        val (alpha, beta) = vm.scheduleItems
+        assertNull(vm.liveRowId)
+
+        val at = java.time.LocalTime.of(10, 2)
+        vm.markLive(alpha.id, at)
+        assertEquals(alpha.id, vm.liveRowId)
+        assertEquals(at, vm.liveSince)
+
+        vm.presentItem(item = beta, onPresenting = {})
+        assertEquals(beta.id, vm.liveRowId, "every present path marks the row")
+
+        vm.selectOnly(alpha.id)
+        assertEquals(alpha.id, vm.liveRowId, "the engine's select is a go-live too")
+        assertEquals(alpha.id, vm.selectedItemId)
+
+        vm.presentItem(item = ScheduleItem.LabelItem("h", "Worship", "#FFF", "#000"), onPresenting = {})
+        assertEquals(alpha.id, vm.liveRowId, "a heading cannot be live")
+
+        vm.presentItem(item = ScheduleItem.MinistryItem("o", "A poem"), onPresenting = {})
+        assertEquals("o", vm.liveRowId, "an off-screen slot is what is happening, even with nothing on screen")
+    }
+
+    @Test
+    fun `the service start is kept with the rows and cleared with them`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha")
+        vm.markLive(vm.scheduleItems.single().id)
+        vm.setServiceStart("10:00")
+        assertEquals("10:00", vm.serviceStartTime)
+
+        vm.clearSchedule()
+        assertNull(vm.serviceStartTime)
+        assertNull(vm.liveRowId)
+        assertNull(vm.liveSince)
+
+        vm.setServiceStart(null)
+        assertNull(vm.serviceStartTime)
     }
 }

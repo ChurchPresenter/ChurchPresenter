@@ -15,8 +15,20 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.DesktopWindows
+import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.SettingsRemote
+import androidx.compose.material.icons.filled.SwitchVideo
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +67,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_settin
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -73,6 +86,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
+import org.churchpresenter.app.churchpresenter.composables.LABELED_TAB_MIN_WIDTH
+import org.churchpresenter.app.churchpresenter.composables.LabeledTab
+import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
@@ -196,65 +212,112 @@ internal fun OptionsDialogContent(
                             scrollState = tabScrollState,
                             containerColor = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface,
-                            edgePadding = 0.dp
+                            edgePadding = 0.dp,
+                            minTabWidth = LABELED_TAB_MIN_WIDTH,
+                            indicator = { LabeledTabIndicator(safeTabIndex) },
                         ) {
-                            Tab(
-                                selected = safeTabIndex == 0,
-                                onClick = { selectedTabIndex = 0 },
-                                text = { Text(stringResource(Res.string.appearance)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 1,
-                                onClick = { selectedTabIndex = 1 },
-                                text = { Text(stringResource(Res.string.bible)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 2,
-                                onClick = { selectedTabIndex = 2 },
-                                text = { Text(stringResource(Res.string.song)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 3,
-                                onClick = { selectedTabIndex = 3 },
-                                text = { Text(stringResource(Res.string.background)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 4,
-                                onClick = { selectedTabIndex = 4 },
-                                text = { Text(stringResource(Res.string.projection)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == 5,
-                                onClick = { selectedTabIndex = 5 },
-                                text = { Text(stringResource(Res.string.server_settings)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == TAB_STAGE_MONITOR,
-                                onClick = { selectedTabIndex = TAB_STAGE_MONITOR },
-                                text = { Text(stringResource(Res.string.stage_monitor)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == TAB_ATEM,
-                                onClick = { selectedTabIndex = TAB_ATEM },
-                                text = { Text(stringResource(Res.string.atem_settings)) }
-                            )
-                            Tab(
-                                selected = safeTabIndex == TAB_DICTIONARY,
-                                onClick = { selectedTabIndex = TAB_DICTIONARY },
-                                text = { Text(stringResource(Res.string.tab_dictionary)) }
-                            )
-                            if (obsManager != null) {
-                                Tab(
-                                    selected = safeTabIndex == TAB_INTEGRATIONS,
-                                    onClick = { selectedTabIndex = TAB_INTEGRATIONS },
-                                    text = { Text(stringResource(Res.string.obs_settings)) }
-                                )
+                            val labelStyle = currentSettings.tabLabelStyle
+                            SettingsTab(
+                                0,
+                                stringResource(Res.string.appearance),
+                                Icons.Filled.Palette,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
                             }
-                            Tab(
-                                selected = safeTabIndex == companionSatelliteTabIndex,
-                                onClick = { selectedTabIndex = companionSatelliteTabIndex },
-                                text = { Text(stringResource(Res.string.companion_satellite_settings)) }
-                            )
+                            SettingsTab(
+                                1,
+                                stringResource(Res.string.bible),
+                                Icons.Filled.MenuBook,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                2,
+                                stringResource(Res.string.song),
+                                Icons.Filled.MusicNote,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_BACKGROUND,
+                                stringResource(Res.string.background),
+                                Icons.Filled.Wallpaper,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_PROJECTION,
+                                stringResource(Res.string.projection),
+                                Icons.Filled.DesktopWindows,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_SERVER,
+                                stringResource(Res.string.server_settings),
+                                Icons.Filled.Dns,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_STAGE_MONITOR,
+                                stringResource(Res.string.stage_monitor),
+                                Icons.Filled.Tv,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_ATEM,
+                                stringResource(Res.string.atem_settings),
+                                Icons.Filled.SwitchVideo,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            SettingsTab(
+                                TAB_DICTIONARY,
+                                stringResource(Res.string.tab_dictionary),
+                                Icons.Filled.Book,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
+                            if (obsManager != null) {
+                                SettingsTab(
+                                    TAB_INTEGRATIONS,
+                                    stringResource(Res.string.obs_settings),
+                                    Icons.Filled.Videocam,
+                                    safeTabIndex,
+                                    labelStyle,
+                                ) {
+                                    selectedTabIndex = it
+                                }
+                            }
+                            SettingsTab(
+                                companionSatelliteTabIndex,
+                                stringResource(Res.string.companion_satellite_settings),
+                                Icons.Filled.SettingsRemote,
+                                safeTabIndex,
+                                labelStyle,
+                            ) {
+                                selectedTabIndex = it
+                            }
                         }
                         TabStripForwardArrow(tabScrollState)
                     }
@@ -285,20 +348,23 @@ internal fun OptionsDialogContent(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             2 -> SongSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             TAB_BACKGROUND -> BackgroundSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
                             )
                             TAB_PROJECTION -> ProjectionSettingsTab(
                                 settings = currentSettings,
@@ -425,3 +491,21 @@ internal fun OptionsDialogContent(
             }
         }
     }
+
+@Composable
+private fun SettingsTab(
+    index: Int,
+    name: String,
+    icon: ImageVector,
+    selectedIndex: Int,
+    labelStyle: TabLabelStyle,
+    onSelect: (Int) -> Unit,
+) {
+    LabeledTab(
+        name = name,
+        icon = icon,
+        selected = selectedIndex == index,
+        labelStyle = labelStyle,
+        onClick = { onSelect(index) },
+    )
+}

@@ -80,6 +80,7 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.background_color_option
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_follow_default_option
+import churchpresenter.composeapp.generated.resources.background_lottie_option
 import churchpresenter.composeapp.generated.resources.background_follows_default
 import churchpresenter.composeapp.generated.resources.background_following_default
 import churchpresenter.composeapp.generated.resources.background_group_defaults
@@ -112,14 +113,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
-import org.churchpresenter.app.churchpresenter.presenter.aboveBandFill
+import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
+import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_SLOTS
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.newQuickBackground
 import org.churchpresenter.app.churchpresenter.composables.quickBackgroundLabel
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
@@ -168,7 +172,9 @@ private const val PREVIEW_DEBOUNCE_MS = 800L
 @Composable
 fun BackgroundSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** Where the Bible band generator saves; null hides its button and leaves the picker. */
+    bibleLowerThirdsDir: File? = null,
 ) {
     val viewModel = remember { BackgroundSettingsViewModel() }
     var scope by remember { mutableStateOf(BackgroundScope.DEFAULT) }
@@ -177,8 +183,10 @@ fun BackgroundSettingsTab(
     // and Songs carry separate heights, which is why this is asked per surface rather than once.
     val bandFraction = settings.bandFractionFor(scope)
     // The shape of the screen this goes out on. The band is a percentage of that screen's height,
-    // so a preview shaped like some other monitor moves the band and everything inside it.
-    val outputAspect = previewOutputSize(settings).aspectRatio
+    // so a preview shaped like some other monitor moves the band and everything inside it. Which
+    // output that is is the operator's call on a multi-output rig -- see PreviewOutputPicker below.
+    val previewOutput = rememberPreviewOutput(settings, Constants.PREVIEW_TAB_BACKGROUND, scope.previewMode())
+    val outputAspect = previewOutput.size.aspectRatio
     val onConfigChange: (BackgroundConfig) -> Unit = { config ->
         viewModel.updateBackground(scope, config, onSettingsChange)
     }
@@ -205,6 +213,7 @@ fun BackgroundSettingsTab(
                     settings = settings,
                     onConfigChange = onConfigChange,
                     onSettingsChange = onSettingsChange,
+                    bibleLowerThirdsDir = bibleLowerThirdsDir,
                     modifier = Modifier.width(CONTROLS_WIDTH).fillMaxHeight()
                 )
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -214,12 +223,19 @@ fun BackgroundSettingsTab(
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
+                    PreviewOutputPicker(
+                        settings = settings,
+                        tabId = Constants.PREVIEW_TAB_BACKGROUND,
+                        mode = scope.previewMode(),
+                        onSettingsChange = onSettingsChange,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                    )
                     BackgroundStagePreview(
                         config = backgrounds.resolvedConfigFor(scope),
                         // Resolved separately: `resolvedConfigFor` walks the *band's* chain, and
                         // the wash has one of its own — a surface with a picture of its own is not
                         // inheriting a band, but its wash may still be coming from the Default.
-                        aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
+                        aboveBand = resolveAboveBand(backgrounds, backgrounds.configFor(scope)).fill,
                         coverage = scope.coverage,
                         bandFraction = bandFraction,
                         stageAspect = outputAspect,
@@ -318,7 +334,7 @@ private fun BackgroundScopeRow(
         ) {
             BackgroundCoverageFill(
                 config = backgrounds.resolvedConfigFor(scope),
-                aboveBand = aboveBandFill(backgrounds, backgrounds.configFor(scope)),
+                aboveBand = resolveAboveBand(backgrounds, backgrounds.configFor(scope)).fill,
                 coverage = scope.coverage,
                 bandFraction = bandFraction,
                 modifier = Modifier.fillMaxSize()
@@ -499,7 +515,7 @@ private fun BackgroundStagePreview(
                 modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(TV_SCREEN_RADIUS)),
                 blurRadius = backgroundBlurRadius(config.blur, width)
             )
-            Text(
+            if (config.backgroundType != Constants.BACKGROUND_LOTTIE) Text(
                 text = stringResource(Res.string.song_background_sample_line),
                 // Sized off the output's own default rather than a theme style: a line set in
                 // bodyMedium is the dialog's idea of body text, which on a band a tenth of the
@@ -585,9 +601,15 @@ private fun BackgroundCoverageFill(
                 // overscanned, and without this it spills above the band line.
                 .clipToBounds()
         ) {
-            BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
-            if (config.dim > 0) {
-                Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.dim / PERCENT)))
+            if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
+                // The template carries its own sample text, so it stands in for the fill and the
+                // sample line both.
+                BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
+            } else {
+                BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
+                if (config.dim > 0) {
+                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.dim / PERCENT)))
+                }
             }
             // Drawn over the fill rather than between the two boxes: a divider in the layout would
             // take a device-independent pixel out of the weights, and the band would come out
@@ -637,6 +659,7 @@ internal fun backgroundTypeLabel(type: String): StringResource = when (type) {
     Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option
     Constants.BACKGROUND_GRADIENT -> Res.string.gradient_enabled
     Constants.BACKGROUND_FOLLOW_DEFAULT -> Res.string.background_follow_default_option
+    Constants.BACKGROUND_LOTTIE -> Res.string.background_lottie_option
     else -> Res.string.background_default
 }
 

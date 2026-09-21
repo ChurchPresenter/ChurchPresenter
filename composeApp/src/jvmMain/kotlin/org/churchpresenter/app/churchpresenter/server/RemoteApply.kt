@@ -334,6 +334,8 @@ internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (
     is ScheduleItem.WebsiteItem -> item.title to item.url
     is ScheduleItem.SceneItem -> item.sceneName to "Scene"
     is ScheduleItem.DictionaryItem -> item.word to item.number
+    is ScheduleItem.CueItem -> item.displayText to item.absoluteTime
+    is ScheduleItem.MinistryItem -> item.title to item.detail
 }
 
 /**
@@ -424,10 +426,14 @@ internal suspend fun emitRemoteTabSelection(
     songFlow: MutableSharedFlow<ScheduleItem.SongItem>,
     pictureFlow: MutableSharedFlow<ScheduleItem.PictureItem>,
     presentationFlow: MutableSharedFlow<ScheduleItem.PresentationItem>,
+    mediaFlow: MutableSharedFlow<ScheduleItem.MediaItem>,
 ): Boolean = when (item) {
     is ScheduleItem.SongItem -> { songFlow.emit(item); true }
     is ScheduleItem.PictureItem -> { pictureFlow.emit(item); true }
     is ScheduleItem.PresentationItem -> { presentationFlow.emit(item); true }
+    // Without this a projected video set the presenter to MEDIA mode and played nothing: the file
+    // is loaded by the Media tab, which only learns of it by being handed the item.
+    is ScheduleItem.MediaItem -> { mediaFlow.emit(item); true }
     else -> false
 }
 
@@ -504,11 +510,14 @@ internal fun executeProjectItem(
         }
 
         is ScheduleItem.MediaItem -> {
-            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType, item.subtitleUrl)
             presenterManager.setCurrentMedia(item.mediaUrl, item.mediaType)
             presenterManager.setPresentingMode(Presenting.MEDIA)
             presenterManager.setShowPresenterWindow(true)
         }
+
+        // A cue is fired through `fireCue`, never projected as content; a remote asking for it gets nothing.
+        is ScheduleItem.CueItem -> Unit
 
         is ScheduleItem.DictionaryItem -> {
             presenterManager.setDisplayedDictionaryEntry(
@@ -576,15 +585,41 @@ internal fun executeProjectItem(
  * announcement items onto the presenter *without* adding them to the schedule, so routing it
  * through here would start adding a row every time one is projected.
  *
- * @return true when a schedule action fired; false for the types that are not schedule content
- *         (label, lower third — and scene, which has an `addScene` action no remote path uses).
+ * @return true when a schedule action fired; false for the types a plain remote add does not
+ *         carry (label, lower third, scene) unless [wholePlan] asks for them.
  */
 internal fun addScheduleItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
+    /**
+     * Whether the row types no remote path sends — a section heading, a lower third, a scene — are
+     * added too.
+     *
+     * False for every remote path, which is exactly what it has always done: those arrive one item
+     * at a time from a phone, and a heading is not something a remote client adds. The Calendar
+     * Manager passes true, because a planned run of show is loaded **whole** — its headings are
+     * part of the plan, and a scene that was copied out of the Schedule tab has to survive the
+     * trip back into it.
+     */
+    wholePlan: Boolean = false,
     onSongAdded: (ScheduleItem.SongItem) -> Unit = {}
 ): Boolean {
+    // One guard rather than three inside the branches below, which would put this function over
+    // detekt's ReturnCount limit.
+    if (!wholePlan && item.isPlanOnly()) return false
     when (item) {
+        is ScheduleItem.LabelItem ->
+            scheduleActions.addLabel(item.text, item.textColor, item.backgroundColor)
+
+        is ScheduleItem.LowerThirdItem -> scheduleActions.addLowerThird(
+            item.presetId,
+            item.presetLabel,
+            item.pauseAtFrame,
+            item.pauseDurationMs,
+        )
+
+        is ScheduleItem.SceneItem -> scheduleActions.addScene(item.sceneId, item.sceneName)
+
         is ScheduleItem.SongItem -> {
             scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
             onSongAdded(item)
@@ -615,7 +650,8 @@ internal fun addScheduleItem(
         is ScheduleItem.MediaItem -> scheduleActions.addMedia(
             item.mediaUrl,
             item.mediaTitle,
-            item.mediaType
+            item.mediaType,
+            item.subtitleUrl
         )
 
         is ScheduleItem.DictionaryItem -> scheduleActions.addDictionary(
@@ -629,11 +665,26 @@ internal fun addScheduleItem(
 
         is ScheduleItem.WebsiteItem -> scheduleActions.addWebsite(item.url, item.title)
 
+        is ScheduleItem.CueItem -> scheduleActions.addCue(item)
+
         else -> return false
     }
     return true
 }
 
+
+/**
+ * The row types only a whole plan carries — never sent one at a time by a remote client.
+ *
+ * A heading and a scene are structure a phone does not add, and a lower third is triggered from the
+ * Lower Third tab rather than queued remotely. [addScheduleItem] skips all three unless it is being
+ * asked to load a plan.
+ */
+private fun ScheduleItem.isPlanOnly(): Boolean =
+    this is ScheduleItem.LabelItem ||
+        this is ScheduleItem.LowerThirdItem ||
+        this is ScheduleItem.SceneItem ||
+        this is ScheduleItem.CueItem
 
 /** The BIBLE half of [applyRemoteLiveState]: either this instance's own wording, or the primary's. */
 private fun applyRemoteBible(

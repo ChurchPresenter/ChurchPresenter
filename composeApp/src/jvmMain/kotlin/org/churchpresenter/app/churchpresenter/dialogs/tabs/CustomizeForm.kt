@@ -20,8 +20,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.theme.components.DropdownSelector
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.vertical_alignment
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import androidx.compose.foundation.layout.FlowRow
@@ -159,17 +163,24 @@ internal fun NumberControl(
     autoLabel: String? = null,
     auto: Boolean = false,
     onAutoChange: (Boolean) -> Unit = {},
+    /**
+     * A width of the caller's own, for a row that has to hold several of these at once.
+     *
+     * The derived width below is generous by design -- it is sized so a long caption is never
+     * clipped -- which is right for a lone field and wrong for four of them side by side.
+     */
+    width: Dp? = null,
 ) {
     // Widened to fit its own caption when the caption is long — the label is drawn inside the box,
     // so a fixed width clipped "Intensity (%)" to "Intensit…".
-    val width = (label.length * NUMBER_CHAR_WIDTH + NUMBER_PADDING)
+    val fieldWidth = width ?: (label.length * NUMBER_CHAR_WIDTH + NUMBER_PADDING)
         .coerceAtLeast(NUMBER_FIELD_WIDTH.value).dp
     NumberSettingsTextField(
         label = label,
         initialText = value,
         onValueChange = onValueChange,
         range = range,
-        modifier = Modifier.width(width),
+        modifier = Modifier.width(fieldWidth),
     )
     if (autoLabel != null) {
         // The Song tab's Auto-fit box, not a drawn square of this dialog's own.
@@ -204,6 +215,22 @@ internal fun VerticalAlignControl(selected: String, onSelect: (String) -> Unit) 
         middleValue = Constants.MIDDLE,
         bottomValue = Constants.BOTTOM,
     )
+}
+
+/**
+ * Where the block of text sits on the slide, top to bottom.
+ *
+ * One value for the whole category rather than one per element, which is why it sits beside the
+ * typography panel instead of inside it: that panel edits one element's profile, and the lyrics,
+ * the verse and its reference move down the slide together as one block. Only the element that
+ * *is* the block carries it -- a look-ahead line cannot be placed independently of the lyrics it
+ * sits under, and the title slide has a control of its own.
+ */
+@Composable
+internal fun BlockVerticalAlignmentRow(selected: String, onSelect: (String) -> Unit) {
+    LabeledControl(stringResource(Res.string.vertical_alignment).removeSuffix(":")) {
+        VerticalAlignControl(selected = selected, onSelect = onSelect)
+    }
 }
 
 /** Above / below, for the things that sit either side of the text they belong to. */
@@ -284,6 +311,12 @@ internal fun ChoiceControl(
      * whose labels are known to fit it -- the derived width below is generous by design.
      */
     buttonWidth: Dp? = null,
+    /**
+     * How many segments one row holds before the rest continue on the next. A segmented control
+     * is one row of equal widths, so a long list — the seven background types — runs off the
+     * column unless it is broken up; the rows still act as one choice.
+     */
+    maxPerRow: Int = Int.MAX_VALUE,
     onSelect: (String) -> Unit,
 ) {
     // Sized to the longest label rather than a fixed width: `SegmentedButton` gives every segment
@@ -292,13 +325,19 @@ internal fun ChoiceControl(
     val width = buttonWidth ?: (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
         .coerceAtLeast(CHOICE_MIN_WIDTH.value).dp
     CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
-        SegmentedButton(
-            items = options.map { (value, label) -> SegmentedButtonItem(value, label) },
-            selectedValue = selected,
-            onValueChange = onSelect,
-            buttonWidth = width,
-            buttonHeight = CHOICE_HEIGHT,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(CHOICE_ROW_GAP)) {
+            options.chunked(maxPerRow.coerceAtLeast(1)).forEach { row ->
+                SegmentedButton(
+                    items = row.map { (value, label) -> SegmentedButtonItem(value, label) },
+                    selectedValue = selected,
+                    onValueChange = onSelect,
+                    buttonWidth = width,
+                    buttonHeight = CHOICE_HEIGHT,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                )
+            }
+        }
     }
 }
+
+private val CHOICE_ROW_GAP = 6.dp

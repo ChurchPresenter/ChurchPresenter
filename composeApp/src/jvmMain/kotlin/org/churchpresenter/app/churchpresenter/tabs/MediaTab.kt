@@ -32,6 +32,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -80,9 +82,11 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
@@ -93,6 +97,7 @@ import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_stop
+import churchpresenter.composeapp.generated.resources.ic_subtitles
 import churchpresenter.composeapp.generated.resources.ic_volume_off
 import churchpresenter.composeapp.generated.resources.ic_volume_up
 import churchpresenter.composeapp.generated.resources.loop_off
@@ -108,6 +113,10 @@ import churchpresenter.composeapp.generated.resources.media_network_url
 import churchpresenter.composeapp.generated.resources.media_no_source
 import churchpresenter.composeapp.generated.resources.media_now_playing
 import churchpresenter.composeapp.generated.resources.media_now_presenting
+import churchpresenter.composeapp.generated.resources.media_subtitles
+import churchpresenter.composeapp.generated.resources.media_subtitles_files
+import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
+import churchpresenter.composeapp.generated.resources.media_subtitles_off
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -129,7 +138,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
+import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -152,6 +163,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -174,7 +186,9 @@ fun MediaTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit)? = null,
+    /** Save preset, to the left of Add to Schedule: the same media, kept for the Calendar Manager. */
+    onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -260,12 +274,18 @@ fun MediaTab(
                 localUrl = it.mediaUrl,
                 remoteStreamUrl = instanceLinkMediaStreamUrl?.invoke(it.id)
             )
-            viewModel.loadMediaFromSchedule(url = effectiveUrl, title = it.mediaTitle, type = it.mediaType)
+            viewModel.loadMediaFromSchedule(
+                url = effectiveUrl,
+                title = it.mediaTitle,
+                type = it.mediaType,
+                subtitleUrl = it.subtitleUrl
+            )
             focusRequester.requestFocus()
         }
     }
 
     val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
 
     Column(
         modifier = modifier
@@ -418,9 +438,20 @@ fun MediaTab(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+                if (onSavePreset != null) {
+                    SavePresetButton(
+                        onClick = { onSavePreset(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.save_preset)
+                    )
+                }
                 if (onAddToSchedule != null) {
                     AddToScheduleButton(
-                        onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                        onClick = {
+                            onAddToSchedule(
+                                viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType, viewModel.subtitleUrl
+                            )
+                        },
                         enabled = viewModel.isLoaded,
                         tooltipText = stringResource(Res.string.add_to_schedule)
                     )
@@ -432,12 +463,22 @@ fun MediaTab(
                             presenterManager.setShowPresenterWindow(true)
                             presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
                             viewModel.play()
+                            wentLive(
+                                ScheduleItem.MediaItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    mediaUrl = viewModel.mediaUrl,
+                                    mediaTitle = viewModel.mediaTitle,
+                                    mediaType = viewModel.mediaType,
+                                    subtitleUrl = viewModel.subtitleUrl,
+                                )
+                            )
                             onInstanceLinkSendProject?.invoke(
                                 ScheduleItem.MediaItem(
                                     id = java.util.UUID.randomUUID().toString(),
                                     mediaUrl = viewModel.mediaUrl,
                                     mediaTitle = viewModel.mediaTitle,
-                                    mediaType = viewModel.mediaType
+                                    mediaType = viewModel.mediaType,
+                                    subtitleUrl = viewModel.subtitleUrl
                                 )
                             )
                         },
@@ -656,6 +697,95 @@ fun MediaTab(
                             onValueChange = { viewModel.setLoopCount(it) }
                         )
                     }
+                }
+            }
+
+            // Divider
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+            // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
+            var subtitlesExpanded by remember { mutableStateOf(false) }
+            val subtitlesLabel = stringResource(Res.string.media_subtitles)
+            val subtitlesShowing = viewModel.selectedSubtitleTrack >= 0
+            val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
+            val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
+            Box {
+                TooltipArea(
+                    tooltip = { TransportTooltip(subtitlesLabel) },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
+                ) {
+                    IconButton(
+                        onClick = { subtitlesExpanded = true },
+                        enabled = viewModel.isLoaded && !viewModel.isAudioFile,
+                        modifier = Modifier.size(30.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (subtitlesShowing) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                Color.Transparent
+                            },
+                            contentColor = if (subtitlesShowing) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                transportTint
+                            },
+                            disabledContentColor = transportTint,
+                        )
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.ic_subtitles),
+                            contentDescription = subtitlesLabel,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+                DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.media_subtitles_off)) },
+                        onClick = {
+                            viewModel.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
+                            subtitlesExpanded = false
+                        },
+                        trailingIcon = {
+                            if (!subtitlesShowing) {
+                                Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
+                            }
+                        }
+                    )
+                    viewModel.subtitleTracks.forEach { track ->
+                        DropdownMenuItem(
+                            text = { Text(track.name) },
+                            onClick = {
+                                viewModel.selectSubtitleTrack(track.id)
+                                subtitlesExpanded = false
+                            },
+                            trailingIcon = {
+                                if (viewModel.selectedSubtitleTrack == track.id) {
+                                    Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
+                                }
+                            }
+                        )
+                    }
+                    DropdownMenuItem(
+                        text = { Text(subtitleFileTitle) },
+                        onClick = {
+                            subtitlesExpanded = false
+                            scope.launch {
+                                val f = FileChooser.platformInstance.chooseSingle(
+                                    path = Path(appSettings.mediaStorageDirectory),
+                                    title = subtitleFileTitle,
+                                    filters = listOf(
+                                        FileNameExtensionFilter(subtitleFilesLabel, "srt", "vtt", "ass", "ssa", "sub")
+                                    ),
+                                    selectDirectory = false
+                                )
+                                if (f != null) viewModel.setSubtitleFile(f.absolutePathString())
+                            }
+                        }
+                    )
                 }
             }
 

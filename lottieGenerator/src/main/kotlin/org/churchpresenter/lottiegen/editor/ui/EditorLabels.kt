@@ -24,6 +24,8 @@ object EditorLabels {
         VisibilityRule.LOGO_ENABLED -> Strings.editorRuleLogo
         VisibilityRule.NAME_VISIBLE -> Strings.editorRuleName
         VisibilityRule.INFO_VISIBLE -> Strings.editorRuleInfo
+        VisibilityRule.DETAIL_VISIBLE -> Strings.editorRuleDetail
+        VisibilityRule.DETAIL_HIDDEN -> Strings.editorRuleDetailHidden
         VisibilityRule.BORDER_SET -> Strings.editorRuleBorder
     }
 
@@ -39,12 +41,14 @@ object EditorLabels {
         LineAnchor.BLOCK_CENTER -> Strings.editorLineBlock
         LineAnchor.NAME_LINE -> Strings.editorLineName
         LineAnchor.INFO_LINE -> Strings.editorLineInfo
+        LineAnchor.DETAIL_LINE -> Strings.editorLineDetail
     }
 
 
     fun role(role: ColorRole): String = when (role) {
         ColorRole.NAME -> Strings.editorRoleName
         ColorRole.INFO -> Strings.editorRoleInfo
+        ColorRole.DETAIL -> Strings.editorRoleDetail
         ColorRole.ACCENT -> Strings.editorRoleAccent
         ColorRole.BG -> Strings.editorRoleBg
         ColorRole.BORDER -> Strings.editorRoleBorder
@@ -61,6 +65,7 @@ object EditorLabels {
     fun textField(field: TextFieldRef): String = when (field) {
         TextFieldRef.NAME -> Strings.editorFieldName
         TextFieldRef.INFO -> Strings.editorFieldInfo
+        TextFieldRef.DETAIL -> Strings.editorFieldDetail
     }
 
 

@@ -83,6 +83,7 @@ import org.jetbrains.compose.resources.painterResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.theme.components.DropdownSelector
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f
@@ -275,6 +276,8 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
         strikethrough = source.strikethrough,
         onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
         showShadow = false,
+        outline = source.outline,
+        onOutlineChange = { onUpdate(source.copy(outline = it)) },
     )
     Row(
         verticalAlignment = Alignment.CenterVertically,

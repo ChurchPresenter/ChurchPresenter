@@ -29,6 +29,9 @@ private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 private const val VERSION_HIDDEN_TABS = 5
 private const val VERSION_SCREEN_ASSIGNMENTS = 6
 
+/** The Schedule toolbar gained a Calendar button that starts hidden. */
+private const val VERSION_CALENDAR_BUTTON = 11
+
 /** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
 private val CompanionSurfacePlacementPrefixes = listOf("tab", "leftSidebar", "rightSidebar")
@@ -48,6 +51,8 @@ class SettingsManager {
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
+    /** Where the lower-third band generator saves its templates, and where the picker starts. */
+    val bibleLowerThirdsDir: File = bibleLowerThirdsDir(appDataDir)
 
     private val jsonFormat = Json {
         ignoreUnknownKeys = true // ignore extra fields in JSON
@@ -63,6 +68,9 @@ class SettingsManager {
         }
         if (!lottiePresetsDir.exists()) {
             lottiePresetsDir.mkdirs()
+        }
+        if (!bibleLowerThirdsDir.exists()) {
+            bibleLowerThirdsDir.mkdirs()
         }
     }
 
@@ -96,6 +104,7 @@ class SettingsManager {
         7 to ::migrateStageMonitorZoneNames,
         8 to ::migrateLowerThirdHeight,
         9 to ::migrateSongNumberCorner,
+        10 to ::migrateSparseOutputOverrides,
     )
 
     fun loadSettings(): AppSettings {
@@ -157,6 +166,13 @@ class SettingsManager {
         }
         var settings = jsonFormat.decodeFromString<AppSettings>(migrated)
         if (fromVersion < VERSION_HIDDEN_TABS) settings = migrateHiddenTabs(settings, raw)
+        if (fromVersion < VERSION_CALENDAR_BUTTON) {
+            // The Schedule toolbar's Calendar button is new and starts hidden -- see
+            // AppSettings.hiddenScheduleButtons. A file written before it existed has an explicit
+            // list that cannot mention it, so without this every existing install would open with
+            // a button nobody asked for.
+            settings = settings.copy(hiddenScheduleButtons = settings.hiddenScheduleButtons + "CALENDAR")
+        }
         if (fromVersion < VERSION_SCREEN_ASSIGNMENTS) {
             // The primary/secondary bible pair became an ordered list of any length. Typed rather
             // than raw, because the conversion is a field-by-field restructure the data class
@@ -559,6 +575,72 @@ class SettingsManager {
      * document is pinned to [Constants.NONE] and keeps drawing the number exactly where it was; the
      * corner is offered to them in settings rather than applied to them.
      */
+    /**
+     * Turns each output's override from a whole settings snapshot into the difference it meant.
+     *
+     * An override used to be a complete copy of the settings, taken when the screen was first
+     * customized. Every field the operator never touched sat in it at whatever value it had that
+     * day, and beat the document for ever after -- so a setting *added* later arrived at its class
+     * default on that screen, and the global one silently did nothing there. That is not a
+     * hypothetical: a second language set to blue for the whole install came out white on the one
+     * screen that had been customized, and nothing in the interface explained why.
+     *
+     * Diffing the snapshot against the document recovers what the operator actually chose: a field
+     * that matches the document was never a decision, and drops out. What is left is the screen's
+     * own, and everything else follows the document again -- including everything added from here
+     * on. The keys named in [SONG_GLOBAL_KEYS] and [BIBLE_GLOBAL_KEYS] drop out regardless: a
+     * snapshot may carry a library folder the operator has since moved, and no screen should hold
+     * one at all.
+     */
+    private fun migrateSparseOutputOverrides(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        val assignments = projection["screenAssignments"]?.jsonArray ?: return raw
+
+        fun globalTree(name: String): JsonObject? = root[name]?.jsonObject
+
+        // Each override key, the document section it is a difference from, and what it never keeps.
+        val categories = listOf(
+            Triple("songOverride", "songSettings", SONG_GLOBAL_KEYS),
+            Triple("bibleOverride", "bibleSettings", BIBLE_GLOBAL_KEYS),
+            Triple("dictionaryOverride", "dictionarySettings", emptySet()),
+            Triple("backgroundOverride", "backgroundSettings", emptySet()),
+            Triple("stageMonitorOverride", "stageMonitorSettings", emptySet()),
+        )
+
+        fun slimmed(assignment: JsonObject): JsonObject = buildJsonObject {
+            assignment.forEach { (key, value) ->
+                val category = categories.firstOrNull { it.first == key }
+                val snapshot = value as? JsonObject
+                if (category == null || snapshot == null) {
+                    put(key, value)
+                    return@forEach
+                }
+                val global = globalTree(category.second)
+                if (global == null) {
+                    put(key, value)
+                    return@forEach
+                }
+                val atomic = if (key == "bibleOverride") setOf(BIBLE_STACK_KEY) else emptySet()
+                val diff = diffObjects(global, snapshot, atomic)
+                put(key, JsonObject(diff.filterKeys { it !in category.third }))
+            }
+        }
+
+        return buildJsonObject {
+            root.forEach { (key, value) -> if (key != "projectionSettings") put(key, value) }
+            put(
+                "projectionSettings",
+                buildJsonObject {
+                    projection.forEach { (key, value) ->
+                        if (key != "screenAssignments") put(key, value)
+                    }
+                    put("screenAssignments", JsonArray(assignments.map { slimmed(it.jsonObject) }))
+                },
+            )
+        }.toString()
+    }
+
     private fun migrateSongNumberCorner(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
         val song = root["songSettings"]?.jsonObject ?: return raw
@@ -620,5 +702,13 @@ class SettingsManager {
         } catch (_: Exception) {
             // Silently handle error
         }
+    }
+
+    companion object {
+        /**
+         * The band templates folder under [appDataDir], for a caller with no manager at hand —
+         * the per-output customise dialog sits several composables away from the one that has it.
+         */
+        fun bibleLowerThirdsDir(appDataDir: File = AppDataDir.resolve()): File = File(appDataDir, "bible_lower_thirds")
     }
 }

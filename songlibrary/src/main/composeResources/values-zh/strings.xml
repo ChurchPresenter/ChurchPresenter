@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">删除“%1$s”？</string>
     <string name="delete_confirm_action">删除</string>
     <string name="song_count">%1$s 首歌曲</string>
+    <string name="no_song_folder">尚未设置歌曲文件夹 — 请在“设置 → 歌曲”中选择一个，之后就可以在这里添加歌曲。</string>
+    <string name="column_duration">时长</string>
 </resources>

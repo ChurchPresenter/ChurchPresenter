@@ -29,7 +29,7 @@ import churchpresenter.composeapp.generated.resources.show_abbreviation
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.stringResource

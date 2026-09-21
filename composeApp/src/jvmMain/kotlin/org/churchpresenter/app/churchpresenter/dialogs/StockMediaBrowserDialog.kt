@@ -86,7 +86,7 @@ import churchpresenter.composeapp.generated.resources.stock_photo_source_pexels
 import churchpresenter.composeapp.generated.resources.stock_photo_source_pixabay
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.viewmodel.StockDownloadError
 import org.churchpresenter.app.churchpresenter.viewmodel.StockMediaViewModel

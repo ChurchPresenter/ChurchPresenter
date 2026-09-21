@@ -79,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.composables.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollColumn
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -88,7 +89,6 @@ import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderLi
 import org.churchpresenter.app.churchpresenter.composables.rememberBiblePreviewVerses
 import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -99,6 +99,7 @@ import org.churchpresenter.settings.removeBibleTranslation
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 /** The rail is a fixed column of cards; the styling side takes whatever is left. */
 private val RAIL_MIN_WIDTH = 300.dp
@@ -161,7 +162,9 @@ private const val CHIP_COMPACT_COLUMNS = 3
 fun BibleSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    /** Where the Bible band generator saves; null hides its button and leaves the picker. */
+    bibleLowerThirdsDir: File? = null,
 ) {
     val availableFonts = rememberSystemFonts()
     // Null while the folder is still being read. Walking it and reading a header out of every module
@@ -208,6 +211,7 @@ fun BibleSettingsTab(
                     LeftRail(
                         settings = settings,
                         onSettingsChange = onSettingsChange,
+                        bibleLowerThirdsDir = bibleLowerThirdsDir,
                         bibleFilesInDirectory = bibleFilesInDirectory,
                         bibleFileDisplayNames = bibleFileDisplayNames,
                         scanning = listing == null,
@@ -242,6 +246,7 @@ fun BibleSettingsTab(
 private fun LeftRail(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    bibleLowerThirdsDir: File?,
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
     scanning: Boolean,
@@ -265,6 +270,7 @@ private fun LeftRail(
             onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdHeightPercent = percent)) }
         },
     )
+    LowerThirdAnimationSection(settings, onSettingsChange, bibleLowerThirdsDir)
     MarginsSection(settings, onSettingsChange)
 }
 
@@ -788,8 +794,9 @@ private fun StylePane(
     val sampleVerses = bibleSampleVerses(translations, previewVerses, sampleSlot, moduleTitles)
     // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
     // one to whichever the tab is styling for its duration, so a hall with a single full-screen
-    // projector can still be shown what its lower third would look like.
-    val hasOutputForTarget = settings.projectionSettings.screenAssignments.any { it.isLiveOutput() }
+    // projector can still be shown what its lower third would look like. `hasAnyOpenOutput` counts a
+    // single-monitor dev machine's dev-fallback window too -- see its own doc comment.
+    val hasOutputForTarget = hasAnyOpenOutput(settings)
     OnScreenPreviewEffect(
         active = previewOnScreen && sampleVerses.isNotEmpty(),
         settings = settings,
@@ -801,7 +808,12 @@ private fun StylePane(
         manager.setDisplayedVerses(sampleVerses)
         manager.setPresentingMode(Presenting.BIBLE)
     }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    // Scrolls, with the bar down its edge that the rail beside it already has. The panel below the
+    // preview is a whole form and grew a row when the shadow controls stopped sharing one with the
+    // text transform; without this its last rows are simply unreachable on a window short enough --
+    // not merely below the fold but with nothing to scroll, which is how a test reaching for the
+    // shadow checkbox found "no parent layout with a Scroll SemanticsAction".
+    SettingsScrollColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         TargetSwitchRow(
             settings = settings,
             translations = translations,
@@ -811,20 +823,12 @@ private fun StylePane(
             onTargetChange = onTargetChange,
             moduleTitles = moduleTitles,
         )
-        // Centred and capped rather than filling the pane: see SETTINGS_PREVIEW_MAX_HEIGHT.
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            BiblePreviewPanel(
-                settings = settings,
-                target = target,
-                selectedVerses = sampleVerses,
-                modifier = Modifier.width(
-                    minOf(
-                        maxWidth,
-                        SETTINGS_PREVIEW_MAX_HEIGHT * previewOutputSize(settings).aspectRatio,
-                    ),
-                ),
-            )
-        }
+        BiblePreviewWithOutputPicker(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            target = target,
+            selectedVerses = sampleVerses,
+        )
         SettingsPreviewSampleRow(
             slot = sampleSlot,
             onSlotChange = { sampleSlot = it },
@@ -837,7 +841,7 @@ private fun StylePane(
         // into whatever composes there next -- which is how the controls below ended up wired to a
         // previous selection's state.
         val translation = translations.getOrNull(selectedIndex)
-        if (translation == null) return@Column
+        if (translation == null) return@SettingsScrollColumn
         val style = translation.elementStyle(element, target)
         val verses = presenterManager?.selectedVerses?.value.orEmpty()
         val canMeasure = presenterManager != null &&

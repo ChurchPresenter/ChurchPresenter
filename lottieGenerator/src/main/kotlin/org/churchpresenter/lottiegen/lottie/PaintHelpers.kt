@@ -65,6 +65,71 @@ fun makeGradientFill(
 }
 
 
+/** A linear gradient from [startColor] at [startPt] to [endColor] at [endPt], fully opaque at both ends. */
+fun makeTwoColorGradientFill(
+    startColor: List<Double>,
+    endColor: List<Double>,
+    opacity: Double = 100.0,
+    startPt: List<Double>,
+    endPt: List<Double>,
+): JsonObject = makeGradientFillStops(listOf(startColor, endColor), opacity, startPt, endPt)
+
+/**
+ * A linear gradient through [colors], spread evenly from [startPt] to [endPt].
+ *
+ * [stopAlphas] gives each stop its own opacity, 0..1, which is how a gradient fades out rather than
+ * merely darkening, and [rampEnd] is where the last colour is reached, 0..1 — past it the
+ * gradient holds that colour, so a lower end finishes the blend sooner.
+ *
+ * Lottie keeps colour stops and alpha stops in the same array — every colour stop first, then
+ * every alpha stop — so the two are written one after the other below. Omitting the alphas
+ * leaves the gradient opaque and [opacity] alone governs it, which is what a plain ramp wants.
+ */
+fun makeGradientFillStops(
+    colors: List<List<Double>>,
+    opacity: Double = 100.0,
+    startPt: List<Double>,
+    endPt: List<Double>,
+    stopAlphas: List<Double> = List(colors.size) { 1.0 },
+    rampEnd: Double = 1.0,
+): JsonObject = buildJsonObject {
+    require(colors.size >= 2) { "A gradient needs at least two colours" }
+    require(stopAlphas.size == colors.size) { "A gradient needs one alpha per colour stop" }
+    // The blend is squeezed into 0..rampEnd; past the last stop a Lottie gradient holds that
+    // colour, so a lower end means the transition finishes sooner and stays flat after it.
+    val step = rampEnd.coerceIn(MIN_RAMP_END, 1.0) / (colors.size - 1)
+    put("ty", JsonPrimitive("gf"))
+    put("o", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", JsonPrimitive(opacity))
+    })
+    put("r", JsonPrimitive(1))
+    put("bm", JsonPrimitive(0))
+    put("t", JsonPrimitive(1))
+    put("s", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", jsonArrayOf(startPt))
+    })
+    put("e", buildJsonObject {
+        put("a", JsonPrimitive(0))
+        put("k", jsonArrayOf(endPt))
+    })
+    put("g", buildJsonObject {
+        put("p", JsonPrimitive(colors.size))
+        put("k", buildJsonObject {
+            put("a", JsonPrimitive(0))
+            put("k", buildJsonArray {
+                colors.forEachIndexed { i, c ->
+                    add(JsonPrimitive(i * step)); c.take(RGB_CHANNELS).forEach { add(JsonPrimitive(it)) }
+                }
+                stopAlphas.forEachIndexed { i, a ->
+                    add(JsonPrimitive(i * step)); add(JsonPrimitive(a.coerceIn(0.0, 1.0)))
+                }
+            })
+        })
+    })
+}
+
 fun makeStroke(color: List<Double>, width: Double, opacity: Double = 100.0, dashPx: Double = 0.0): JsonObject? {
     if (width <= 0) return null
     return buildJsonObject {
@@ -137,3 +202,9 @@ private fun makeDashArray(dashPx: Double): JsonArray = buildJsonArray {
         })
     })
 }
+
+/** A gradient stop carries red, green and blue; alpha is a separate stop list. */
+private const val RGB_CHANNELS = 3
+
+/** A ramp has to have some length; zero would put every stop on top of the last. */
+private const val MIN_RAMP_END = 0.01

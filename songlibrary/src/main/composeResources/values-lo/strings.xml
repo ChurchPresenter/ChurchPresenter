@@ -55,4 +55,6 @@
     <string name="delete_confirm_one">ລຶບ “%1$s” ບໍ?</string>
     <string name="delete_confirm_action">ລຶບ</string>
     <string name="song_count">%1$s ເພງ</string>
+    <string name="no_song_folder">ຍັງບໍ່ໄດ້ຕັ້ງໂຟນເດີເພງ — ເລືອກໃນ ການຕັ້ງຄ່າ → ເພງ ແລ້ວຈຶ່ງເພີ່ມເພງໄດ້ຢູ່ນີ້.</string>
+    <string name="column_duration">ໄລຍະເວລາ</string>
 </resources>
