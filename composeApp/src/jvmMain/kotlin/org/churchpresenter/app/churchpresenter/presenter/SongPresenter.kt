@@ -55,6 +55,7 @@ import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
@@ -500,10 +501,14 @@ fun SongPresenter(
                 // How many blocks the frame is actually divided into. One language fills it; more
                 // split it, in whichever direction the layout says.
                 val drawnLanguages = activeLanguages.size.coerceAtLeast(1)
-                val sideBySide = drawnLanguages > 1 &&
-                        ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
-                val topBottom = drawnLanguages > 1 &&
-                        ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM
+                // [bilingualLayout]'s value as the grid it lays blocks out in. A row (1 × N) or a
+                // column (N × 1) still divides by however many languages are actually drawn, exactly
+                // as it always did; only a real two-dimensional grid (2 × 2 today) divides by its own
+                // fixed row/column counts instead.
+                val (gridRows, gridCols) = bilingualGrid(ss.bilingualLayout)
+                val sideBySide = drawnLanguages > 1 && gridRows == 1 && gridCols > 1
+                val topBottom = drawnLanguages > 1 && gridCols == 1 && gridRows > 1
+                val grid2x2 = drawnLanguages > 1 && gridRows == 2 && gridCols == 2
 
                 // The real output's own box, in the same reference space the rest of this fit and
                 // scaleFactor's own 1920x1080 assumption are measured in -- not the literal 1920x1080
@@ -521,8 +526,13 @@ fun SongPresenter(
                         appSettings.projectionSettings.windowRight -
                         appSettings.songSettings.marginLeft - appSettings.songSettings.marginRight
                 // Side by side, each language gets a column; the fit has to hold in the narrowest
-                // of them, which with equal weights is every one of them.
-                val refWidth = if (sideBySide) fullWidth / drawnLanguages else fullWidth
+                // of them, which with equal weights is every one of them. A 2x2 grid's columns are
+                // narrower still, but only ever two of them regardless of how many languages fill it.
+                val refWidth = when {
+                    sideBySide -> fullWidth / drawnLanguages
+                    grid2x2 -> fullWidth / gridCols
+                    else -> fullWidth
+                }
                 val fullHeight = if (isLowerThird) {
                     (referenceBoxHeight * appSettings.songSettings.lowerThirdHeightPercent / 100).toInt() -
                             appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom -
@@ -533,7 +543,11 @@ fun SongPresenter(
                             appSettings.songSettings.marginTop - appSettings.songSettings.marginBottom
                 }
                 // Stacked, each language gets a band of the height on the same reasoning.
-                val refHeight = if (topBottom) fullHeight / drawnLanguages else fullHeight
+                val refHeight = when {
+                    topBottom -> fullHeight / drawnLanguages
+                    grid2x2 -> fullHeight / gridRows
+                    else -> fullHeight
+                }
                 // The same tracking the lines are drawn with. Spacing is stored in pixels against
                 // the profile's own font size and converted to `em`, so the value does not change
                 // as the search tries sizes -- it scales with whichever one it settles on, exactly
@@ -948,10 +962,13 @@ fun SongPresenter(
                         ?: titleHorizontalAlignment
 
                     val isMultiLanguage = languageBlocks.size > 1
-                    // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
-                    // through to the stacked branch below, which already special-cases
-                    // isLowerThird (true for vertical too) with a compact stacked layout.
-                    val useSideBySide = appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && !isLowerThirdVertical
+                    // Row, column or 2x2 grid, from the same [bilingualGrid] mapping the auto-fit
+                    // above already read. A vertical lower third is too narrow for a row or a 2x2
+                    // grid -- both fall through to the stacked branch below, which already
+                    // special-cases isLowerThird (true for vertical too) with a compact stack.
+                    val (gridRows, gridCols) = bilingualGrid(appSettings.songSettings.bilingualLayout)
+                    val useSideBySide = gridRows == 1 && gridCols > 1 && !isLowerThirdVertical
+                    val useGrid2x2 = gridRows == 2 && gridCols == 2 && !isLowerThirdVertical
 
                     // Look-ahead text style with full font controls
                     val laBaseShadow = Shadow(
@@ -1305,7 +1322,34 @@ fun SongPresenter(
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
                                 if (isMultiLanguage) {
-                                    if (useSideBySide) {
+                                    if (useGrid2x2) {
+                                        // Two rows of up to two languages each. `chunked(2)` on
+                                        // however many blocks there are: a third or fourth language
+                                        // starts the second row, and a lone third fills it alone
+                                        // rather than waiting on a fourth that was never selected.
+                                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                            languageBlocks.chunked(2).forEachIndexed { rowIndex, row ->
+                                                if (rowIndex > 0) {
+                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                }
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                                ) {
+                                                    row.forEach { block ->
+                                                        Column(
+                                                            modifier = Modifier.weight(1f),
+                                                            verticalArrangement = Arrangement.Bottom,
+                                                        ) {
+                                                            LanguageLines(block)
+                                                            EndOfSongIndicator()
+                                                            LookAheadPlaceholder(block)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else if (useSideBySide) {
                                         // A column each, equally weighted. `SpaceEvenly` and equal
                                         // weights agree at any count, so three and four languages
                                         // divide the width the way two always did.

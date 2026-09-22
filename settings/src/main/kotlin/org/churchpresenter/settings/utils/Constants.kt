@@ -121,8 +121,18 @@ object Constants {
     const val SONG_LANG_OFF = "off"
 
     // Bilingual Layout
+    //
+    // Every value a bilingual/multilingual band or full screen can be arranged in, as a row×col
+    // grid holding 1 to 4 languages. The two original values keep their original names and
+    // strings -- no settings migration needed -- and read as 1 row × 2 cols and 2 rows × 1 col
+    // respectively; see [bilingualGrid] below for the full mapping, including these two.
     const val BILINGUAL_SIDE_BY_SIDE = "side_by_side"
     const val BILINGUAL_TOP_BOTTOM = "top_bottom"
+    const val BILINGUAL_GRID_1X3 = "grid_1x3"
+    const val BILINGUAL_GRID_3X1 = "grid_3x1"
+    const val BILINGUAL_GRID_1X4 = "grid_1x4"
+    const val BILINGUAL_GRID_4X1 = "grid_4x1"
+    const val BILINGUAL_GRID_2X2 = "grid_2x2"
 
     // Section Types
     const val SECTION_TYPE_SONG = "song"
@@ -383,4 +393,22 @@ object Constants {
         const val OS_NAME = "os.name"
         const val USER_HOME = "user.home"
     }
+}
+
+/**
+ * [value] (one of the `Constants.BILINGUAL_*` strings) as the rows × cols grid it lays languages
+ * out in -- the single place that mapping is made, so a picker offering these values and a
+ * presenter laying blocks out by them can never disagree.
+ *
+ * An unrecognized value (a settings file from before a grid this large existed, or simply
+ * corrupted) reads as [Constants.BILINGUAL_SIDE_BY_SIDE] always has: one row, two columns.
+ */
+fun bilingualGrid(value: String): Pair<Int, Int> = when (value) {
+    Constants.BILINGUAL_TOP_BOTTOM -> 2 to 1
+    Constants.BILINGUAL_GRID_1X3 -> 1 to 3
+    Constants.BILINGUAL_GRID_3X1 -> 3 to 1
+    Constants.BILINGUAL_GRID_1X4 -> 1 to 4
+    Constants.BILINGUAL_GRID_4X1 -> 4 to 1
+    Constants.BILINGUAL_GRID_2X2 -> 2 to 2
+    else -> 1 to 2
 }

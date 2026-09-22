@@ -13,8 +13,12 @@ class SongBandSlotsTest {
     private companion object {
         const val TEXT_1 = BibleLottieTemplate.LAYER_TEXT_1
         const val TEXT_2 = BibleLottieTemplate.LAYER_TEXT_2
+        const val TEXT_3 = BibleLottieTemplate.LAYER_TEXT_3
+        const val TEXT_4 = BibleLottieTemplate.LAYER_TEXT_4
         const val REFERENCE_1 = BibleLottieTemplate.LAYER_REFERENCE_1
         const val REFERENCE_2 = BibleLottieTemplate.LAYER_REFERENCE_2
+        const val REFERENCE_3 = BibleLottieTemplate.LAYER_REFERENCE_3
+        const val REFERENCE_4 = BibleLottieTemplate.LAYER_REFERENCE_4
     }
 
     private val verse = LyricSection(
@@ -30,6 +34,14 @@ class SongBandSlotsTest {
             ),
         ),
     )
+
+    /** The same verse in four languages, for the tests past two slots. */
+    private val fourLanguageVerse = verse.copy(
+        translations = verse.translations + listOf(
+            SectionTranslation(title = "Grâce infinie", lines = listOf("Grâce infinie, quel doux son")),
+            SectionTranslation(title = "Oore-ofe", lines = listOf("Oore-ofe, ohun didun yi")),
+        ),
+    )
     private val chorus = verse.copy(header = "[Chorus]", type = Constants.SECTION_TYPE_CHORUS)
     private val lineMode = SongSettings(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)
     private val verseMode = SongSettings(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)
@@ -39,10 +51,10 @@ class SongBandSlotsTest {
         settings: SongSettings = lineMode,
         language: String = Constants.SONG_LANG_PRIMARY,
         line: Int = 0,
-        second: Boolean = false,
+        availableSlots: Int = 1,
         all: List<LyricSection> = listOf(verse, chorus),
         index: Int = 0,
-    ) = songBandSlots(SongBandPage(section, all, index, line), settings, language, second, isKey = false)
+    ) = songBandSlots(SongBandPage(section, all, index, line), settings, language, availableSlots, isKey = false)
 
     private fun Map<String, BandSlotText>.text(name: String) = getValue(name).text
 
@@ -56,10 +68,10 @@ class SongBandSlotsTest {
 
     @Test
     fun `languages go to the slots the template has`() {
-        val both = slots(language = Constants.SONG_LANG_BOTH, second = true)
+        val both = slots(language = Constants.SONG_LANG_BOTH, availableSlots = 2)
         assertEquals("Amazing grace, how sweet the sound", both.text(TEXT_1))
         assertEquals("Sublime gracia del Señor", both.text(TEXT_2))
-        val stacked = slots(language = Constants.SONG_LANG_BOTH, second = false)
+        val stacked = slots(language = Constants.SONG_LANG_BOTH, availableSlots = 1)
         assertEquals("Amazing grace, how sweet the sound\nSublime gracia del Señor", stacked.text(TEXT_1))
         assertEquals("", stacked.text(TEXT_2))
         assertEquals("Sublime gracia del Señor", slots(language = Constants.SONG_LANG_SECONDARY).text(TEXT_1))
@@ -84,7 +96,7 @@ class SongBandSlotsTest {
         assertEquals("", never.text(REFERENCE_1))
         val secondTitle = slots(
             language = Constants.SONG_LANG_BOTH,
-            second = true,
+            availableSlots = 2,
             settings = lineMode.copy(
                 titleLowerThirdDisplay = Constants.EVERY_PAGE,
                 showNumberLowerThird = Constants.NONE,
@@ -106,12 +118,12 @@ class SongBandSlotsTest {
         val settings = lineMode.copy(titleSlideShowCcli = true, titleSlideShowTempo = true)
         val pages = listOf(titleSlide, verse)
         val both = Constants.SONG_LANG_BOTH
-        val two = slots(section = titleSlide, settings = settings, language = both, second = true, all = pages)
+        val two = slots(section = titleSlide, settings = settings, language = both, availableSlots = 2, all = pages)
         assertEquals("12 – Amazing Grace", two.text(TEXT_1))
         assertEquals("Sublime Gracia", two.text(TEXT_2))
         assertEquals("John Newton  ·  Traditional", two.text(REFERENCE_1))
         assertEquals("CCLI #22025  ·  ♩ = 84 BPM", two.text(REFERENCE_2))
-        val one = slots(section = titleSlide, settings = settings, language = both, second = false, all = pages)
+        val one = slots(section = titleSlide, settings = settings, language = both, availableSlots = 1, all = pages)
         assertEquals("12 – Amazing Grace\nSublime Gracia", one.text(TEXT_1))
         assertEquals("John Newton  ·  Traditional  ·  CCLI #22025  ·  ♩ = 84 BPM", one.text(REFERENCE_1))
         assertEquals("", one.text(REFERENCE_2))
@@ -126,11 +138,83 @@ class SongBandSlotsTest {
             lyricsLowerThirdTransform = Constants.TEXT_TRANSFORM_UPPERCASE,
         )
         val page = SongBandPage(verse, listOf(verse), 0, 0)
-        val normal = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, false, isKey = false)
+        val normal = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false)
         assertEquals(44, normal.getValue(TEXT_1).style.fontSizePt)
         assertEquals("AMAZING GRACE, HOW SWEET THE SOUND", normal.text(TEXT_1))
         assertEquals("Georgia", normal.getValue(REFERENCE_1).style.font.family)
-        val key = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, false, isKey = true)
+        val key = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = true)
         assertEquals(Color.White, key.getValue(TEXT_1).style.color)
+    }
+
+    // ── Three and four languages ────────────────────────────────────────────
+
+    @Test
+    fun `a four-slot template gets all four languages, one per slot`() {
+        val four = slots(
+            section = fourLanguageVerse,
+            language = Constants.SONG_LANG_BOTH,
+            availableSlots = 4,
+        )
+        assertEquals("Amazing grace, how sweet the sound", four.text(TEXT_1))
+        assertEquals("Sublime gracia del Señor", four.text(TEXT_2))
+        assertEquals("Grâce infinie, quel doux son", four.text(TEXT_3))
+        assertEquals("Oore-ofe, ohun didun yi", four.text(TEXT_4))
+    }
+
+    @Test
+    fun `a four-language song on a two-slot template shows only the first two, not crammed`() {
+        val two = slots(
+            section = fourLanguageVerse,
+            language = Constants.SONG_LANG_BOTH,
+            availableSlots = 2,
+        )
+        assertEquals("Amazing grace, how sweet the sound", two.text(TEXT_1))
+        assertEquals("Sublime gracia del Señor", two.text(TEXT_2))
+    }
+
+    @Test
+    fun `the third and fourth language modes reach their own language on any template`() {
+        assertEquals(
+            "Grâce infinie, quel doux son",
+            slots(section = fourLanguageVerse, language = Constants.SONG_LANG_THIRD).text(TEXT_1),
+        )
+        assertEquals(
+            "Oore-ofe, ohun didun yi",
+            slots(section = fourLanguageVerse, language = Constants.SONG_LANG_FOURTH).text(TEXT_1),
+        )
+    }
+
+    @Test
+    fun `a language the song does not have falls back to the primary`() {
+        assertEquals(
+            "Amazing grace, how sweet the sound",
+            slots(section = verse, language = Constants.SONG_LANG_FOURTH).text(TEXT_1),
+            "the verse fixture has no fourth language",
+        )
+    }
+
+    @Test
+    fun `each of the four languages carries its own title once the title is shown`() {
+        val settings = lineMode.copy(
+            titleLowerThirdDisplay = Constants.EVERY_PAGE,
+            showNumberLowerThird = Constants.NONE,
+        )
+        val four = slots(
+            section = fourLanguageVerse,
+            language = Constants.SONG_LANG_BOTH,
+            availableSlots = 4,
+            settings = settings,
+        )
+        assertEquals("Amazing Grace", four.text(REFERENCE_1))
+        assertEquals("Sublime Gracia", four.text(REFERENCE_2))
+        assertEquals("Grâce infinie", four.text(REFERENCE_3))
+        assertEquals("Oore-ofe", four.text(REFERENCE_4))
+    }
+
+    @Test
+    fun `slots past the languages a section has are left empty, not stale from a bigger section`() {
+        val two = slots(section = verse, language = Constants.SONG_LANG_BOTH, availableSlots = 4)
+        assertEquals("", two.text(TEXT_3))
+        assertEquals("", two.text(TEXT_4))
     }
 }

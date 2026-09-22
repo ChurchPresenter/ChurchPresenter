@@ -19,6 +19,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/** The first and second cells, read the way every test below already reads them. */
+private val BandSlots.text1 get() = slots[0].text
+private val BandSlots.reference2 get() = slots.getOrNull(1)?.reference
+
 class BibleLottieGeneratorTest {
 
     private fun generate(cfg: BibleLottieGenConfig = BibleLottieGenConfig()): JsonObject =

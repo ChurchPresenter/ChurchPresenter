@@ -1142,9 +1142,15 @@ class BibleSettingsTabTest {
         onAllNodesWithText("LOWER THIRD").onFirst()
             .assertExists("the lower-third arrangement is named")
         onAllNodesWithText("Bilingual Layout").assertCountEquals(2)
-        // Both options of both rows: the caption used to sit beside the buttons, which pushed the
-        // second option of each pair off the pane and out of the layout entirely.
-        onAllNodesWithText("Left / Right").assertCountEquals(2)
-        onAllNodesWithText("Top / Bottom").assertCountEquals(2)
+        // All seven options of both rows: the caption used to sit beside the buttons, which pushed
+        // later options off the pane, and a full-width label pushed the row to wrap and corrupted an
+        // unrelated sibling's measurement further down the rail -- see `BilingualLayoutFlowButtons`.
+        onAllNodesWithText("L / R").assertCountEquals(2)
+        onAllNodesWithText("T / B").assertCountEquals(2)
+        onAllNodesWithText("1x3").assertCountEquals(2)
+        onAllNodesWithText("3x1").assertCountEquals(2)
+        onAllNodesWithText("1x4").assertCountEquals(2)
+        onAllNodesWithText("4x1").assertCountEquals(2)
+        onAllNodesWithText("2x2").assertCountEquals(2)
     }
 }

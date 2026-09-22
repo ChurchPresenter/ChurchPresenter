@@ -2086,6 +2086,13 @@
     <string name="bilingual_layout">Bilingual Layout:</string>
     <string name="bilingual_left_right">Left / Right</string>
     <string name="bilingual_top_bottom">Top / Bottom</string>
+    <string name="bilingual_left_right_short">L / R</string>
+    <string name="bilingual_top_bottom_short">T / B</string>
+    <string name="bilingual_grid_1x3">1x3</string>
+    <string name="bilingual_grid_3x1">3x1</string>
+    <string name="bilingual_grid_1x4">1x4</string>
+    <string name="bilingual_grid_4x1">4x1</string>
+    <string name="bilingual_grid_2x2">2x2</string>
     <string name="look_ahead_fullscreen">Look Ahead (Fullscreen)</string>
     <string name="look_ahead_next_fullscreen">Look Ahead Next Section (Fullscreen)</string>
     <string name="look_ahead_lower_third">Look Ahead (Lower Third)</string>

@@ -43,10 +43,12 @@ internal fun SongSettings.titleSlotStyle(isKey: Boolean) = BandSlotStyle(
 )
 
 /**
- * What the song band shows, by slot: the lyric in `Text1` (and the second language in `Text2`
- * when the template has it), the song title in `Reference1` on the pages the Title display
- * rule allows. One line or the whole section, and which language, follow the lower-third song
- * settings the classic band reads; look-ahead and chords have no slot and are left out.
+ * What the song band shows, by slot: each active language's lyric in its own `TextN` (as many as
+ * the template has, up to four), the song title in `Reference1` on the pages the Title display
+ * rule allows, and languages 2-4's own titles in `ReferenceN` alongside them once
+ * [Constants.SONG_LANG_BOTH] is drawing more than one. One line or the whole section, and which
+ * language(s), follow the lower-third song settings the classic band reads; look-ahead and chords
+ * have no slot and are left out.
  */
 /** [text] in this style, cased the way the style says. */
 private fun BandSlotStyle.slot(text: String): BandSlotText = BandSlotText(applyTextTransform(text, transform), this)
@@ -59,11 +61,22 @@ internal data class SongBandPage(
     val lineIndex: Int,
 )
 
+/**
+ * [languageDisplay]'s active languages against a song of [available] languages, and against
+ * [availableSlots] -- however many `TextN`/`ReferenceN` pairs the loaded template actually has.
+ *
+ * More languages than slots: the first [availableSlots] of them, the same "first two of the stack"
+ * rule the Bible band already lived by before this had a third or fourth slot to reach for -- no
+ * cramming two languages' lines into one box.
+ */
+private fun slottedLanguages(languageDisplay: String, available: Int, availableSlots: Int): List<Int> =
+    songLanguageSelection(languageDisplay, emptyList(), available).take(availableSlots.coerceAtLeast(1))
+
 internal fun songBandSlots(
     page: SongBandPage,
     settings: SongSettings,
     languageDisplay: String,
-    hasSecondSlot: Boolean,
+    availableSlots: Int,
     isKey: Boolean,
 ): Map<String, BandSlotText> {
     val section = page.section
@@ -73,39 +86,23 @@ internal fun songBandSlots(
     val lyrics = settings.lyricsSlotStyle(isKey)
     val title = settings.titleSlotStyle(isKey)
     val language = languageDisplay.ifBlank { settings.lowerThirdLanguageDisplay }
+    val slots = BibleLottieTemplate.TEXT_SLOT_LAYERS
     // The title slide is its own thing, laid across the slots the template has: the titles in
-    // the text slots — one language each when there are two — and the credits on the reference
-    // lines, so it fits a design made for lyrics and their title.
+    // the text slots — one language each — and the credits split across the reference lines, so
+    // it fits a design made for lyrics and their title rather than needing one of its own.
     if (section.type == Constants.SECTION_TYPE_TITLE_SLIDE) {
         val languages = songLanguageSelection(language, emptyList(), section.translations.size + 1)
         val lines = titleSlideLines(section, settings, languages)
         val headings = lines.filter { it.element == SongStyleElement.TITLE || it.element == SongStyleElement.NUMBER }
         val credits = lines.filter { it !in headings }.map { it.plainText }
-        val text1: String
-        val text2: String
-        if (hasSecondSlot && headings.size >= 2) {
-            text1 = headings.first().plainText
-            text2 = headings.drop(1).joinToString("\n") { it.plainText }
-        } else {
-            text1 = headings.joinToString("\n") { it.plainText }
-            text2 = ""
+        val headingSlots = spreadAcrossSlots(headings.map { it.plainText }, availableSlots)
+        val creditSlots = spreadAcrossSlots(splitEvenly(credits, availableSlots), availableSlots)
+        return buildMap {
+            slots.forEachIndexed { i, (textLayer, refLayer) ->
+                put(textLayer, title.slot(headingSlots.getOrElse(i) { "" }))
+                put(refLayer, BandSlotText(creditSlots.getOrElse(i) { "" }, title))
+            }
         }
-        val reference1: String
-        val reference2: String
-        if (hasSecondSlot && credits.size >= 2) {
-            val half = (credits.size + 1) / 2
-            reference1 = credits.take(half).joinToString(CREDIT_SEPARATOR)
-            reference2 = credits.drop(half).joinToString(CREDIT_SEPARATOR)
-        } else {
-            reference1 = credits.joinToString(CREDIT_SEPARATOR)
-            reference2 = ""
-        }
-        return mapOf(
-            BibleLottieTemplate.LAYER_TEXT_1 to title.slot(text1),
-            BibleLottieTemplate.LAYER_TEXT_2 to title.slot(text2),
-            BibleLottieTemplate.LAYER_REFERENCE_1 to BandSlotText(reference1, title),
-            BibleLottieTemplate.LAYER_REFERENCE_2 to BandSlotText(reference2, title),
-        )
     }
     val lineMode = settings.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
     fun pick(lines: List<String>): List<String> = when {
@@ -113,46 +110,84 @@ internal fun songBandSlots(
         lineMode -> listOf(lines[lineIndex.coerceIn(0, lines.lastIndex)])
         else -> lines
     }
+    val allLines = section.allLanguageLines()
+    val allTitles = section.allLanguageTitles()
     val primary = pick(section.lines)
-    val secondary = pick(section.secondaryLines)
-    val text1: List<String>
-    val text2: List<String>
-    when (language) {
-        Constants.SONG_LANG_SECONDARY -> {
-            text1 = secondary.ifEmpty { primary }
-            text2 = emptyList()
-        }
-        Constants.SONG_LANG_THIRD, Constants.SONG_LANG_FOURTH -> {
-            val index = if (language == Constants.SONG_LANG_THIRD) 2 else 3
-            text1 = pick(section.allLanguageLines().getOrElse(index) { emptyList() }).ifEmpty { primary }
-            text2 = emptyList()
-        }
-        Constants.SONG_LANG_BOTH -> if (hasSecondSlot) {
-            text1 = primary
-            text2 = secondary
-        } else {
-            text1 = primary + secondary
-            text2 = emptyList()
-        }
-        else -> {
-            text1 = primary
-            text2 = emptyList()
-        }
-    }
     val showTitle = shouldShowText(settings.titleLowerThirdDisplay, section, allSections, displaySectionIndex)
     val showNumber = section.songNumber > 0 &&
         shouldShowText(settings.showNumberLowerThird, section, allSections, displaySectionIndex)
-    val titleText = if (!showTitle) "" else listOfNotNull(
+    val primaryTitleText = if (!showTitle) "" else listOfNotNull(
         section.songNumber.takeIf { showNumber }?.let { "$it." },
         section.title.takeIf { it.isNotBlank() },
     ).joinToString(" ")
-    val secondaryTitle = if (showTitle && text2.isNotEmpty()) section.secondaryTitle else ""
-    return mapOf(
-        BibleLottieTemplate.LAYER_TEXT_1 to lyrics.slot(text1.joinToString("\n")),
-        BibleLottieTemplate.LAYER_TEXT_2 to lyrics.slot(text2.joinToString("\n")),
-        BibleLottieTemplate.LAYER_REFERENCE_1 to title.slot(titleText),
-        BibleLottieTemplate.LAYER_REFERENCE_2 to title.slot(secondaryTitle),
-    )
+    // Language[0] is always the primary; every mode falls back to it when its own pick has nothing.
+    val languageTexts: List<String>
+    val languageTitles: List<String>
+    when (language) {
+        Constants.SONG_LANG_SECONDARY, Constants.SONG_LANG_THIRD, Constants.SONG_LANG_FOURTH -> {
+            val index = when (language) {
+                Constants.SONG_LANG_SECONDARY -> 1
+                Constants.SONG_LANG_THIRD -> 2
+                else -> 3
+            }
+            val chosen = pick(allLines.getOrElse(index) { emptyList() }).ifEmpty { primary }
+            languageTexts = listOf(chosen.joinToString("\n"))
+            languageTitles = listOf(primaryTitleText)
+        }
+        Constants.SONG_LANG_BOTH -> if (availableSlots <= 1) {
+            // A single-slot template has nowhere to put a second language but beside the first, so
+            // every active language's lines flatten into one list before the one join at the end --
+            // unlike two-plus slots, this has always crammed rather than dropped, and still does.
+            // Flattened rather than joined per language and then joined again: a language with
+            // nothing to show (an untranslated line, in line mode) must contribute no blank line of
+            // its own, the same as `primary + secondary` never did for the original two.
+            val everyActive =
+                songLanguageSelection(Constants.SONG_LANG_BOTH, emptyList(), allLines.size.coerceAtLeast(1))
+            val flatLines = everyActive.flatMap { pick(allLines.getOrElse(it) { emptyList() }) }
+            languageTexts = listOf(flatLines.joinToString("\n"))
+            languageTitles = listOf(primaryTitleText)
+        } else {
+            val active = slottedLanguages(Constants.SONG_LANG_BOTH, allLines.size.coerceAtLeast(1), availableSlots)
+            languageTexts = active.map { pick(allLines.getOrElse(it) { emptyList() }).joinToString("\n") }
+            languageTitles = active.mapIndexed { position, index ->
+                if (position == 0) {
+                    primaryTitleText
+                } else if (!showTitle) {
+                    ""
+                } else {
+                    allTitles.getOrElse(index) { "" }.ifBlank { section.title }
+                }
+            }
+        }
+        else -> {
+            languageTexts = listOf(primary.joinToString("\n"))
+            languageTitles = listOf(primaryTitleText)
+        }
+    }
+    return buildMap {
+        slots.forEachIndexed { i, (textLayer, refLayer) ->
+            put(textLayer, lyrics.slot(languageTexts.getOrElse(i) { "" }))
+            put(refLayer, title.slot(languageTitles.getOrElse(i) { "" }))
+        }
+    }
+}
+
+/**
+ * [items], one per slot up to [count] -- or all of them joined into the one slot there is, when
+ * there is only one.
+ */
+private fun spreadAcrossSlots(items: List<String>, count: Int): List<String> =
+    if (count <= 1) listOf(items.joinToString("\n")) else List(count) { items.getOrElse(it) { "" } }
+
+/**
+ * [items] joined across [count] slots as evenly as they fit -- one bucket when there is one slot
+ * or nothing to split, otherwise as many buckets as there are items, up to [count].
+ */
+private fun splitEvenly(items: List<String>, count: Int): List<String> {
+    if (count <= 1 || items.size <= 1) return listOf(items.joinToString(CREDIT_SEPARATOR))
+    val buckets = count.coerceAtMost(items.size)
+    val perBucket = (items.size + buckets - 1) / buckets
+    return items.chunked(perBucket).map { it.joinToString(CREDIT_SEPARATOR) }
 }
 
 /** The song band: this page's lyric and title in the song settings' lower-third faces. */
@@ -173,16 +208,16 @@ internal fun BoxScope.SongLottieBand(
     showBackground: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val hasSecondSlot = template.hasLayer(BibleLottieTemplate.LAYER_TEXT_2)
+    val availableSlots = template.textSlotCount
     val page = SongBandPage(section, allSections, displaySectionIndex, lineIndex)
     val outgoingPage = outgoingSection?.let {
         SongBandPage(it, allSections, displaySectionIndex, outgoingLineIndex)
     }
-    val slots = remember(page, settings, languageDisplay, hasSecondSlot, isKey) {
-        songBandSlots(page, settings, languageDisplay, hasSecondSlot, isKey)
+    val slots = remember(page, settings, languageDisplay, availableSlots, isKey) {
+        songBandSlots(page, settings, languageDisplay, availableSlots, isKey)
     }
-    val outgoingSlots = remember(outgoingPage, settings, languageDisplay, hasSecondSlot, isKey) {
-        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, hasSecondSlot, isKey) }
+    val outgoingSlots = remember(outgoingPage, settings, languageDisplay, availableSlots, isKey) {
+        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, availableSlots, isKey) }
     }
     LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier)
 }
