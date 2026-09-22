@@ -206,6 +206,10 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    /** Content-region width/offset, the section label and the song number's own offset, folded
+     * into one field -- see [SongLayoutExtras] for why. */
+    val layoutExtras: SongLayoutExtras = SongLayoutExtras(),
+
     /**
      * How much of the output's height the lower-third band takes, as a whole percentage. 10..60.
      *

@@ -403,11 +403,23 @@ class OBSWebSocketManagerTest {
         obs.connectTo(first)
 
         // NB: not connectTo() here — the status is already CONNECTED from the first link, so
-        // waiting on it would pass instantly without the second handshake having happened.
+        // waiting on it would pass instantly without the second handshake having happened. But
+        // connect() flips it to CONNECTING synchronously before this call returns, so by the time
+        // the waits below start it can never be a stale CONNECTED from the first link — only
+        // CONNECTING, or CONNECTED once the second handshake has actually finished.
         obs.connect("127.0.0.1", second.port, "")
 
+        // Session teardown (cancelling the first link) and the second handshake are two
+        // independent coroutines racing each other, so the two session-count waits below say
+        // nothing about whether the second handshake itself has completed — asserting on `status`
+        // right after them raced it and failed under load. Waiting for `status` directly, on the
+        // signal the assertion actually cares about, is what `connectTo()` does; it is only unsafe
+        // to call *before* issuing the second `connect()`, not after.
         awaitUntil("the second link to be established") { second.sessions.size == 1 }
         awaitUntil("the first link to be dropped") { first.sessions.isEmpty() }
+        awaitUntil("the second handshake to complete") {
+            obs.status.value == OBSWebSocketManager.ConnectionStatus.CONNECTED
+        }
         assertEquals(OBSWebSocketManager.ConnectionStatus.CONNECTED, obs.status.value)
     }
 

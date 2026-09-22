@@ -83,6 +83,10 @@ import java.io.File
 private const val SHADOW_OFFSET_PX = 6f
 private const val INDICATOR_REPEAT_COUNT = 3
 
+/** The look-ahead spacer and the stacked-language block gap, both `12` at every render call site. */
+private const val LOOK_AHEAD_SPACER_REFERENCE_GAP = 12
+private const val LANGUAGE_BLOCK_REFERENCE_GAP = 12
+
 /** The app's own background-type name for one of [SongBackgroundType]'s. */
 internal fun songBackgroundTypeConstant(type: String): String = when (type) {
     SongBackgroundType.IMAGE -> Constants.BACKGROUND_IMAGE
@@ -196,6 +200,9 @@ fun SongPresenter(
     val titleColor = remember(ss.titleColor, ss.titleLowerThirdColor, isLowerThird, isKey) {
         if (isKey) Color.White
         else parseHexColor(if (isLowerThird) ss.titleLowerThirdColor else ss.titleColor)
+    }
+    val sectionLabelColor = remember(ss.layoutExtras.sectionLabel.color, isKey) {
+        if (isKey) Color.White else parseHexColor(ss.layoutExtras.sectionLabel.color)
     }
     val lyricsColor = remember(ss.lyricsColor, ss.lyricsLowerThirdColor,
         ss.lookAheadColor, ss.lowerThirdLookAheadColor, isLowerThird, lookAheadEnabled, isKey) {
@@ -642,6 +649,21 @@ fun SongPresenter(
                     if (maxNum > 0) {
                         reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
                     }
+                }
+                // The fixed dp gaps the real layout draws that a section's own measured lines don't
+                // account for: the spacer before the look-ahead line (`LookAheadSpacer`, drawn once
+                // per language block) and the gaps between stacked-language blocks (`grid2x2`'s row
+                // gap and `topBottom`'s band gap). At low font sizes these are negligible against the
+                // text; near the real ceiling they are not, and a search that never reserved them
+                // chose a size the real layout then clipped by exactly this much. Both are `12` in
+                // this same reference space at every one of their call sites below -- see
+                // `LookAheadSpacer`, `LookAheadPlaceholder` and the two per-language `Spacer`s in the
+                // grid2x2/topBottom render branches.
+                if (lookAheadEnabled && !fitIsLineMode) {
+                    reserved += LOOK_AHEAD_SPACER_REFERENCE_GAP
+                }
+                if (drawnLanguages > 1 && (topBottom || grid2x2)) {
+                    reserved += (drawnLanguages - 1) * LANGUAGE_BLOCK_REFERENCE_GAP
                 }
 
                 calculateAutoFitForAllSections(
@@ -1227,6 +1249,25 @@ fun SongPresenter(
                     }
 
                     @Composable
+                    fun SectionLabelPart() {
+                        if (!ss.layoutExtras.sectionLabel.enabled || isTitleSlide) return
+                        val label = section.header?.takeIf { it.isNotBlank() }
+                            ?: section.type.replaceFirstChar { it.uppercase() }.takeIf { it.isNotBlank() }
+                            ?: return
+                        OutlinedText(
+                            modifier = Modifier.fillMaxWidth(),
+                            outline = TextOutline(),
+                            scaleFactor = scaleFactor,
+                            textAlign = TextAlign.Center,
+                            fontFamily = titleFontFamily,
+                            fontSize = (ss.layoutExtras.sectionLabel.fontSize * scaleFactor).sp,
+                            text = label,
+                            color = sectionLabelColor,
+                            style = TextStyle.Default,
+                        )
+                    }
+
+                    @Composable
                     fun TitlePart(
                         modifier: Modifier = Modifier,
                         visibilityAlpha: Float = 1f,
@@ -1309,6 +1350,7 @@ fun SongPresenter(
                     val blockContainers = (lyricsBlocks + laBlocks)
                         .fold(Modifier as Modifier) { acc, block -> acc.then(block.containerModifier) }
                     Column(modifier = Modifier.fillMaxSize().then(blockContainers)) {
+                        SectionLabelPart()
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 
@@ -1431,15 +1473,10 @@ fun SongPresenter(
                     // would otherwise share with the title: it costs the lyrics no height and does
                     // not shift when the title's row grows or is left off a slide.
                     if (numberInCorner && shouldShowSongNumber) {
+                        val numberOffset =
+                            if (isLowerThird) ss.layoutExtras.numberLowerThirdOffset else ss.layoutExtras.numberOffset
                         NumberPart(
-                            modifier = Modifier.align(
-                                when (songNumberCorner) {
-                                    Constants.TOP_LEFT -> Alignment.TopStart
-                                    Constants.TOP_RIGHT -> Alignment.TopEnd
-                                    Constants.BOTTOM_LEFT -> Alignment.BottomStart
-                                    else -> Alignment.BottomEnd
-                                },
-                            ),
+                            modifier = Modifier.songNumberCornerOffset(songNumberCorner, numberOffset),
                             fillWidth = false,
                         )
                     }

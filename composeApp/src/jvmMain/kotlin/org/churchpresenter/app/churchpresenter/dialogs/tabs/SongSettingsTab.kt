@@ -49,6 +49,8 @@ import churchpresenter.composeapp.generated.resources.song_show_on_title_slide
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import churchpresenter.composeapp.generated.resources.song_language_scope
 import churchpresenter.composeapp.generated.resources.song_number_corner
+import churchpresenter.composeapp.generated.resources.song_number_offset_x
+import churchpresenter.composeapp.generated.resources.song_number_offset_y
 import churchpresenter.composeapp.generated.resources.song_preview_label
 import churchpresenter.composeapp.generated.resources.song_preview_look_ahead
 import org.churchpresenter.theme.components.DropdownSelector
@@ -60,10 +62,12 @@ import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
+import org.churchpresenter.app.churchpresenter.composables.SliderNumberField
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -85,6 +89,7 @@ private val SCOPE_BUTTON_WIDTH = 82.dp
 
 /** Wide enough for "Bottom Right" and the chevron, so no corner reads ellipsized. */
 private val CORNER_DROPDOWN_WIDTH = 118.dp
+private val NUMBER_OFFSET_FIELD_WIDTH = 56.dp
 
 /** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
 private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
@@ -165,6 +170,19 @@ fun SongSettingsTab(
                             settings, onSettingsChange, bibleLowerThirdsDir, scope = BackgroundScope.SONG_LOWER_THIRD,
                         )
                         SongMarginsSection(settings, onSettingsChange)
+                        ContentRegionSection(
+                            region = settings.songSettings.layoutExtras.contentRegion,
+                            onRegionChange = { region ->
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        songSettings = s.songSettings.copy(
+                                            layoutExtras = s.songSettings.layoutExtras.copy(contentRegion = region),
+                                        ),
+                                    )
+                                }
+                            },
+                        )
+                        SongSectionLabelSection(settings, onSettingsChange)
                     }
                     SettingsScrollbar(scrollState)
                 }
@@ -551,6 +569,9 @@ internal fun SongElementOptions(
         }
     }
     SongAppearanceRow(settings, onSettingsChange, element, target)
+    if (element == SongStyleElement.NUMBER) {
+        SongNumberOffsetControls(settings, onSettingsChange, target)
+    }
 }
 
 /** What the title slide draws, for the element selected -- its own view of [SongElementOptions]. */
@@ -662,14 +683,15 @@ private fun SongAppearanceRow(
         // The number only. A corner takes it out of the row it shares with the title, so there is
         // no such choice to offer for the title itself.
         if (element == SongStyleElement.NUMBER) {
+            val corner = settings.songSettings.numberCorner(target.isLowerThird)
             LabeledControl(stringResource(Res.string.song_number_corner)) {
                 DropdownSelector(
                     label = "",
-                    value = settings.songSettings.numberCorner(target.isLowerThird),
+                    value = corner,
                     options = songNumberCornerOptions(),
-                    onValueChange = { corner ->
+                    onValueChange = { newCorner ->
                         onSettingsChange { s ->
-                            s.copy(songSettings = s.songSettings.withNumberCorner(target.isLowerThird, corner))
+                            s.copy(songSettings = s.songSettings.withNumberCorner(target.isLowerThird, newCorner))
                         }
                     },
                     compact = true,
@@ -688,6 +710,59 @@ private fun SongAppearanceRow(
                 label = stringResource(Res.string.number_before_title),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.testTag("song_songNumberBeforeTitle"),
+            )
+        }
+    }
+}
+
+/**
+ * A free nudge on top of [SongAppearanceRow]'s corner, so the number can be walked into wherever a
+ * background image's own box for it actually is. Meaningless with no corner chosen, and drawn as
+ * its own full-width block rather than folded into that row's [FlowRow] -- a [SliderNumberField]
+ * needs real width to be usable, which a row of otherwise-compact controls doesn't have to spare.
+ */
+@Composable
+private fun SongNumberOffsetControls(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    target: SongStyleTarget,
+) {
+    val corner = settings.songSettings.numberCorner(target.isLowerThird)
+    if (corner == Constants.NONE) return
+    val offset = settings.songSettings.numberOffset(target.isLowerThird)
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        ControlColumn(stringResource(Res.string.song_number_offset_x), Modifier.weight(1f)) {
+            SliderNumberField(
+                value = offset.xPercent,
+                range = SongNumberOffset.PERCENT_RANGE,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(
+                            songSettings = s.songSettings.withNumberOffset(
+                                target.isLowerThird, offset.copy(xPercent = value),
+                            ),
+                        )
+                    }
+                },
+                fieldWidth = NUMBER_OFFSET_FIELD_WIDTH,
+                modifier = Modifier.testTag("song_number_offset_x"),
+            )
+        }
+        ControlColumn(stringResource(Res.string.song_number_offset_y), Modifier.weight(1f)) {
+            SliderNumberField(
+                value = offset.yPercent,
+                range = SongNumberOffset.PERCENT_RANGE,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(
+                            songSettings = s.songSettings.withNumberOffset(
+                                target.isLowerThird, offset.copy(yPercent = value),
+                            ),
+                        )
+                    }
+                },
+                fieldWidth = NUMBER_OFFSET_FIELD_WIDTH,
+                modifier = Modifier.testTag("song_number_offset_y"),
             )
         }
     }

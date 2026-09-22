@@ -267,6 +267,12 @@ private fun LeftRail(
     )
     LowerThirdAnimationSection(settings, onSettingsChange, bibleLowerThirdsDir)
     MarginsSection(settings, onSettingsChange)
+    ContentRegionSection(
+        region = settings.bibleSettings.contentRegion,
+        onRegionChange = { region ->
+            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(contentRegion = region)) }
+        },
+    )
 }
 
 /** Which Bibles are in the stack, in what order, and the picker that adds the next one. */

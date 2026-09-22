@@ -248,7 +248,10 @@ internal fun OffscreenOutputContent(
                                     if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
                                         MediaPresenter(
                                             modifier = Modifier.fillMaxSize(),
-                                            transitionAlpha = presenterManager.mediaTransitionAlpha.value
+                                            transitionAlpha = presenterManager.mediaTransitionAlpha.value,
+                                            outputRole = outputRole,
+                                            showSubtitles = screenAssignment.showSubtitles,
+                                            mediaSettings = appSettings.mediaSettings,
                                         )
                                     }
                                 }

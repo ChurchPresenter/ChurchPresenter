@@ -28,6 +28,7 @@ data class AppSettings(
     val qaSettings: QASettings = QASettings(),
     val presentationRemoteSettings: PresentationRemoteSettings = PresentationRemoteSettings(),
     val sttSettings: STTSettings = STTSettings(),
+    val mediaSettings: MediaSettings = MediaSettings(),
     val bibleEngineSettings: BibleEngineSettings = BibleEngineSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
     val stageMonitorSettings: StageMonitorSettings = StageMonitorSettings(),

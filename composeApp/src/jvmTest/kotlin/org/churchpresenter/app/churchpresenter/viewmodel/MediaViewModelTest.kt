@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.settings.utils.Constants
+import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -626,5 +628,54 @@ class MediaViewModelTest {
         assertEquals("", vm.subtitleUrl)
         assertTrue(vm.subtitleTracks.isEmpty())
         assertEquals(MediaViewModel.SUBTITLES_UNDECIDED, vm.selectedSubtitleTrack)
+    }
+
+    // ── App-rendered cues (SRT/WebVTT) ───────────────────────────────────────────
+
+    private fun srtFile(): String {
+        val file = createTempFile(suffix = ".srt").toFile()
+        file.writeText("1\n00:00:01,000 --> 00:00:04,000\nHello there\n")
+        file.deleteOnExit()
+        return file.absolutePath
+    }
+
+    @Test
+    fun `an srt file is parsed into cues the app renders itself`() {
+        val vm = loaded()
+
+        vm.setSubtitleFile(srtFile())
+
+        assertEquals(listOf(1_000L to 4_000L), vm.subtitleCues.map { it.startMs to it.endMs })
+    }
+
+    @Test
+    fun `an unparsed subtitle format leaves no app-rendered cues`() {
+        val vm = loaded()
+
+        vm.setSubtitleFile("/media/en.ass")
+
+        assertTrue(vm.subtitleCues.isEmpty(), "VLC renders this format directly; the app draws nothing")
+    }
+
+    @Test
+    fun `clearing the subtitle file clears its cues too`() {
+        val vm = loaded()
+        vm.setSubtitleFile(srtFile())
+
+        vm.setSubtitleFile("")
+
+        assertTrue(vm.subtitleCues.isEmpty())
+    }
+
+    @Test
+    fun `the active cue follows the current playback position`() {
+        val vm = loaded()
+        vm.setSubtitleFile(srtFile())
+
+        vm.setCurrentPosition(2_000L) // inside the cue's 1_000..4_000 window
+        assertEquals("Hello there", vm.activeSubtitleCue?.text)
+
+        vm.setCurrentPosition(0L) // before the cue starts
+        assertNull(vm.activeSubtitleCue)
     }
 }
