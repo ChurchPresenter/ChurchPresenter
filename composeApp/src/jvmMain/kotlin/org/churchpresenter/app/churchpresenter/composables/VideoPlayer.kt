@@ -710,7 +710,7 @@ internal class FramePingPong(width: Int, height: Int) {
  * The RV32 buffer format VLC renders into, re-allocating the [FramePingPong] pair whenever the
  * source size changes.
  */
-private fun rv32BufferFormatCallback(pingPong: MutableState<FramePingPong?>) =
+internal fun rv32BufferFormatCallback(pingPong: MutableState<FramePingPong?>) =
     object : BufferFormatCallback {
         override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
             val w = sourceWidth.coerceAtLeast(1)
@@ -727,7 +727,7 @@ private fun rv32BufferFormatCallback(pingPong: MutableState<FramePingPong?>) =
  * to [displayHolder], and bumps [frameVersion]. Runs on VLC's own render thread, so it does no
  * conversion work: that happens in the composable's frame loop.
  */
-private fun frameRenderCallback(
+internal fun frameRenderCallback(
     pingPong: MutableState<FramePingPong?>,
     displayHolder: MutableState<BufferedImage?>,
     firstFrameCaptured: MutableState<Boolean>,
