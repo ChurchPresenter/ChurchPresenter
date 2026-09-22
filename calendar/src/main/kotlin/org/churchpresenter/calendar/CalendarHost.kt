@@ -155,8 +155,15 @@ data class CalendarHost(
     val cloudSync: CalendarCloudSync? = null,
 )
 
-/** The cloud sync switch as the settings dialog draws it: what it reads, and what a flip does. */
-class CalendarCloudSync(val enabled: () -> Boolean, val setEnabled: (Boolean) -> Unit)
+/**
+ * The cloud sync switch as the settings dialog draws it: what it reads, what a flip does, and
+ * [invitePhone], which has the app show the QR a phone scans to be enrolled from anywhere.
+ */
+class CalendarCloudSync(
+    val enabled: () -> Boolean,
+    val setEnabled: (Boolean) -> Unit,
+    val invitePhone: () -> Unit = {},
+)
 
 /**
  * One book of the primary Bible, flattened to exactly what the picker draws.

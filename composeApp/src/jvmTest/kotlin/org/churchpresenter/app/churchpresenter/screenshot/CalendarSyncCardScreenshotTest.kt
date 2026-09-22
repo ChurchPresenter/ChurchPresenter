@@ -194,6 +194,7 @@ class CalendarSyncCardScreenshotTest {
                 enrollment = CalendarEnrollment(
                     relayUrl = "https://sync.churchpresenter.org",
                     instanceId = "3f7c1a9e-2b4d-4e6f-8a1b-2c3d4e5f6a7b",
+                    deviceId = "9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d",
                     deviceToken = "d".repeat(43),
                     instanceKey = "k".repeat(43),
                 ),

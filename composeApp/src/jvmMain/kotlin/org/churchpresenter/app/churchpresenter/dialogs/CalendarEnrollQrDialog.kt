@@ -25,6 +25,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_body
+import churchpresenter.composeapp.generated.resources.calendar_enroll_invite_failed
 import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_title
 import churchpresenter.composeapp.generated.resources.close
 import kotlinx.coroutines.delay
@@ -32,13 +33,16 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.connectionQrBitmap
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
+import org.churchpresenter.app.churchpresenter.server.CalendarInvite
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.calendarSyncStatusText
+import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 
-/** The QR a just-approved phone scans to finish enrolling. Drawn only; there is no text form. */
+/** The QR a phone scans to enroll -- or, when the relay could not be asked, what went wrong. */
 @Composable
-fun CalendarEnrollQrDialog(enrollment: CalendarEnrollment, onDismiss: () -> Unit) {
+fun CalendarEnrollQrDialog(invite: CalendarInvite, onDismiss: () -> Unit) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < DARK_LUMINANCE
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
@@ -52,7 +56,10 @@ fun CalendarEnrollQrDialog(enrollment: CalendarEnrollment, onDismiss: () -> Unit
         resizable = false,
     ) {
         AppWindowRoot(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
-            CalendarEnrollQrContent(enrollment, onDismiss)
+            when (invite) {
+                is CalendarInvite.Ready -> CalendarEnrollQrContent(invite.enrollment, onDismiss)
+                is CalendarInvite.Failed -> CalendarInviteFailedContent(invite.status, onDismiss)
+            }
         }
     }
 }
@@ -85,6 +92,34 @@ internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: 
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
+            )
+            Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+/** No QR: the relay could not be asked for a device. Says why, in the sync card's own words. */
+@Composable
+internal fun CalendarInviteFailedContent(status: CalendarSyncStatus, onDismiss: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.calendar_enroll_invite_failed),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                text = calendarSyncStatusText(status),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.error,
             )
             Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
