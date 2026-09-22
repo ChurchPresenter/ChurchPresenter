@@ -239,7 +239,8 @@ class SongSettingsTabTest {
             ),
         ),
     ) { get ->
-        onNodeWithText("Secondary").performClick()
+        // The style switch above the preview is captioned "Language 2" as well; the Lang row is the later one.
+        onAllNodesWithText("Language 2").onLast().performClick()
         waitForIdle()
 
         val screens = get().projectionSettings.screenAssignments
@@ -358,7 +359,7 @@ class SongSettingsTabTest {
         waitForIdle()
         assertEquals(true, song(get).lyricsBold, "styled away from the default first")
 
-        onNodeWithText("Reset").performClick()
+        onNodeWithText("Reset").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(
@@ -376,7 +377,7 @@ class SongSettingsTabTest {
         onNodeWithText("B").performClick()
         waitForIdle()
 
-        onNodeWithText("Reset").performClick()
+        onNodeWithText("Reset").performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(false, song(get).lyricsBold, "the full-screen profile was reset")

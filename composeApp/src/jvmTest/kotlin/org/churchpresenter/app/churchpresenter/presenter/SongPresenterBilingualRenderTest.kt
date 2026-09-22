@@ -21,6 +21,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,11 +56,10 @@ class SongPresenterBilingualRenderTest {
     ) = LyricSection(
         header = header,
         title = "Amazing Grace",
-        secondaryTitle = "Chudnaya blagodat",
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = primary,
-        secondaryLines = secondary,
+        translations = listOf(SectionTranslation(title = "Chudnaya blagodat", lines = secondary)),
         isLastSection = isLast,
     )
 
@@ -142,6 +142,111 @@ class SongPresenterBilingualRenderTest {
         ) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
             onNodeWithText("Chudnaya blagodat", substring = true).assertExists()
+        }
+    }
+
+    /** A section carrying up to three translations besides the primary, one line each. */
+    private fun multilingual(
+        primary: String = "Amazing grace how sweet the sound",
+        translations: List<String> = listOf("Chudnaya blagodat", "Erstaunliche Gnade", "Gracia asombrosa"),
+        isLast: Boolean = false,
+    ) = LyricSection(
+        header = "[Verse 1]",
+        title = "Amazing Grace",
+        songNumber = 42,
+        type = Constants.SECTION_TYPE_VERSE,
+        lines = listOf(primary),
+        translations = translations.map { SectionTranslation(title = it, lines = listOf(it)) },
+        isLastSection = isLast,
+    )
+
+    @Test
+    fun `a 2x2 grid shows all four languages, two to a row`() {
+        present(multilingual(), settings(layout = Constants.BILINGUAL_GRID_2X2)) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+    }
+
+    @Test
+    fun `a 2x2 grid with an odd third language still fills its own row`() {
+        present(
+            multilingual(translations = listOf("Chudnaya blagodat", "Erstaunliche Gnade")),
+            settings(layout = Constants.BILINGUAL_GRID_2X2),
+        ) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat", "Erstaunliche Gnade",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+    }
+
+    @Test
+    fun `a 2x2 grid on a lower third draws every language`() {
+        present(
+            multilingual(),
+            settings(layout = Constants.BILINGUAL_GRID_2X2),
+            isLowerThird = true,
+        ) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+    }
+
+    @Test
+    fun `a 2x2 grid on a vertical lower third falls back to the stacked band`() {
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    Box(screen) {
+                        SongPresenter(
+                            lyricSection = multilingual(),
+                            appSettings = settings(layout = Constants.BILINGUAL_GRID_2X2),
+                            isLowerThird = true,
+                            isLowerThirdVertical = true,
+                        )
+                    }
+                }
+            }
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+    }
+
+    @Test
+    fun `1x3 and 3x1 grids draw three languages`() {
+        present(multilingual(), settings(layout = Constants.BILINGUAL_GRID_1X3)) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+        present(multilingual(), settings(layout = Constants.BILINGUAL_GRID_3X1)) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+    }
+
+    @Test
+    fun `1x4 and 4x1 grids draw all four languages`() {
+        present(multilingual(), settings(layout = Constants.BILINGUAL_GRID_1X4)) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
+        }
+        present(multilingual(), settings(layout = Constants.BILINGUAL_GRID_4X1)) {
+            listOf(
+                "Amazing grace how sweet the sound", "Chudnaya blagodat",
+                "Erstaunliche Gnade", "Gracia asombrosa",
+            ).forEach { onNodeWithText(it, substring = true).assertExists("$it went missing") }
         }
     }
 

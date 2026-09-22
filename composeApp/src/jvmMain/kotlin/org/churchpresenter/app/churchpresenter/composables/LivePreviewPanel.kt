@@ -519,6 +519,7 @@ private fun SingleDisplayPreview(
                                     showBackground = showsBackground && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = outputSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode,
+                                    languageSelection = screenAssignment.songTranslations,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(

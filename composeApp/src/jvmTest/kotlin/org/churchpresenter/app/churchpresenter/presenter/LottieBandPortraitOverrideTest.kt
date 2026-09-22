@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -162,7 +163,7 @@ class LottieBandPortraitOverrideTest {
                 LyricSection(
                     type = "verse",
                     lines = listOf("Amazing grace, how sweet the sound"),
-                    secondaryLines = listOf("Дивная благодать"),
+                    translations = listOf(SectionTranslation(lines = listOf("Дивная благодать"))),
                 ),
             )
             manager.setPresentingMode(Presenting.LYRICS)

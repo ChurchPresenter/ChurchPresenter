@@ -251,7 +251,7 @@ class EditSongDialogScreenshotTest {
         )
         val BAND = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
 
-        const val SECONDARY_PANE = "Secondary"
+        const val SECONDARY_PANE = "Language 2"
         const val ADD_NEW = "Add New..."
     }
 }

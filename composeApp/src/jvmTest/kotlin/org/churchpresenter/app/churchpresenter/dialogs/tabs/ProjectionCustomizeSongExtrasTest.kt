@@ -14,7 +14,6 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
-import androidx.compose.ui.test.onAllNodesWithText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -167,9 +166,7 @@ class ProjectionCustomizeSongExtrasTest {
             // The lyrics start with no backing, so the dialog opens on Off — which shows its Style
             // row and its hint, and no presets at all.
             onNodeWithText("STYLE").assertExists()
-            // The song-language row behind the dialog is captioned "Both" too, so this is the one
-            // in the dialog that has just opened -- the later of the two roots, as elsewhere.
-            onAllNodesWithText("Both")[1].assertExists()
+            onNodeWithText("Both").assertExists()
             onNodeWithText("PRESETS").assertDoesNotExist()
         }
     }
