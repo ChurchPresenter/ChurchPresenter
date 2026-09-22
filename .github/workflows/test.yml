@@ -292,10 +292,11 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
-      # The 75% line-coverage floor, off the execution data the tests above just produced. Its
-      # denominator excludes the app-entry wiring that only runs under a real display -- see
-      # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
-      # regression is reported alongside test failures rather than hidden behind them.
+      # The six-counter floors (85% on most, 79% branch, 75% complexity), off the execution data the
+      # tests above just produced. Their denominator excludes the app-entry wiring that only runs
+      # under a real display -- see jacocoTestCoverageVerification in composeApp/build.gradle.kts.
+      # `if: always()` so a coverage regression is reported alongside test failures rather than
+      # hidden behind them.
       #
       # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
       # right for a developer running it directly, but here the suite has already run in the step
@@ -578,6 +579,32 @@ jobs:
                   if len(parts) == 4 and parts[0] == "FLOOR":
                       floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
 
+          # Classes a module's verification task leaves out of its floor but its report keeps in.
+          # composeApp's report is all-inclusive on purpose (main.kt shows at 0%, which is the truth),
+          # while jacocoTestCoverageVerification excludes `MainKt*` -- the app entry, only runnable
+          # under a display. Reading the report's totals against the verification's floors compared
+          # two different sets of classes and flagged four counters on every PR while the real gate
+          # passed. Keep this in step with that task's `exclude(...)` list in composeApp/build.gradle.kts.
+          GATE_EXCLUDED = {"composeApp": ("org/churchpresenter/app/churchpresenter/MainKt",)}
+
+          def totals(root, excluded):
+              """Covered/total per counter: the report's own totals, or the sum over the gated classes."""
+              sums = {}
+              if excluded:
+                  counters = [
+                      c
+                      for cls in root.iter("class")
+                      if not any(cls.get("name", "").startswith(x) for x in excluded)
+                      for c in cls.findall("counter")
+                  ]
+              else:
+                  counters = root.findall("counter")
+              for c in counters:
+                  missed, covered = int(c.get("missed")), int(c.get("covered"))
+                  m, k = sums.get(c.get("type"), (0, 0))
+                  sums[c.get("type")] = (m + missed, k + covered)
+              return {t: 100 * k / (m + k) for t, (m, k) in sums.items() if m + k}
+
           # Only modules that actually produced a report in THIS run. The sub-builds are gated on
           # their own directories, so a run that skipped them simply has no section for them.
           found = {}
@@ -588,12 +615,7 @@ jobs:
                       root = ET.parse(path).getroot()
                   except ET.ParseError:
                       continue
-                  ratios = {}
-                  for c in root.findall("counter"):
-                      missed, covered = int(c.get("missed")), int(c.get("covered"))
-                      total = missed + covered
-                      if total:
-                          ratios[c.get("type")] = 100 * covered / total
+                  ratios = totals(root, GATE_EXCLUDED.get(module))
                   if ratios:
                       found[module] = ratios
 
