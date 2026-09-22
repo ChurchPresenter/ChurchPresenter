@@ -15,32 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.pixels_short
-import churchpresenter.composeapp.generated.resources.dictionary_settings_transitions
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.fade_out
-import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.shadow_opacity
 import churchpresenter.composeapp.generated.resources.shadow_size
 import churchpresenter.composeapp.generated.resources.shadow_settings
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.customize_group_margins
-import churchpresenter.composeapp.generated.resources.customize_group_typography
-import churchpresenter.composeapp.generated.resources.customize_letter_spacing
-import churchpresenter.composeapp.generated.resources.customize_text_transform
-import churchpresenter.composeapp.generated.resources.customize_transform_capitalize
-import churchpresenter.composeapp.generated.resources.customize_transform_lowercase
-import churchpresenter.composeapp.generated.resources.customize_transform_none
-import churchpresenter.composeapp.generated.resources.customize_transform_uppercase
-import churchpresenter.composeapp.generated.resources.customize_word_spacing
-import churchpresenter.composeapp.generated.resources.every_page
-import churchpresenter.composeapp.generated.resources.first_page
-import churchpresenter.composeapp.generated.resources.none
-import org.churchpresenter.settings.textTransformOptions
-import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -82,18 +61,6 @@ internal fun PaneScaffold(content: @Composable ColumnScope.() -> Unit) {
         )
         SettingsScrollbar(scrollState)
     }
-}
-
-/** The transform picker, labelled by example — AA, aa, Aa — rather than by name. */
-@Composable
-internal fun transformOptions(): List<Pair<String, String>> {
-    val labels = listOf(
-        stringResource(Res.string.customize_transform_none),
-        stringResource(Res.string.customize_transform_uppercase),
-        stringResource(Res.string.customize_transform_lowercase),
-        stringResource(Res.string.customize_transform_capitalize),
-    )
-    return textTransformOptions().zip(labels)
 }
 
 /**
@@ -140,109 +107,7 @@ internal fun ShadowRows(
     }
 }
 
-/** Fade in, fade out and how long they take — the transition block every content type carries. */
-@Composable
-internal fun TransitionsGroup(
-    fadeIn: Boolean,
-    fadeOut: Boolean,
-    durationMs: Float,
-    onFadeIn: (Boolean) -> Unit,
-    onFadeOut: (Boolean) -> Unit,
-    onDuration: (Float) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.dictionary_settings_transitions)) {
-        CustomizeRow(stringResource(Res.string.fade_in), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.fade_in), fadeIn, onFadeIn)
-        }
-        CustomizeRow(stringResource(Res.string.fade_out), labelInsideControl = true) {
-            ToggleControl(stringResource(Res.string.fade_out), fadeOut, onFadeOut)
-        }
-        CustomizeRow(stringResource(Res.string.transition_duration), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.transition_duration),
-                value = durationMs.toInt(),
-                onValueChange = { v -> onDuration(v.toFloat()) },
-                range = DURATION_RANGE,
-            )
-        }
-    }
-}
-
-/** Letter spacing, word spacing and case — the three rows every text pane carries. */
-@Composable
-internal fun TypographyGroup(
-    letterSpacing: Int,
-    wordSpacing: Int,
-    transform: String,
-    onLetterSpacing: (Int) -> Unit,
-    onWordSpacing: (Int) -> Unit,
-    onTransform: (String) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.customize_group_typography)) {
-        val pixels = stringResource(Res.string.pixels_short)
-        CustomizeRow(stringResource(Res.string.customize_letter_spacing)) {
-            SliderControl(letterSpacing, onLetterSpacing, SPACING_RANGE_MIN..SPACING_RANGE_MAX, pixels)
-        }
-        CustomizeRow(stringResource(Res.string.customize_word_spacing)) {
-            SliderControl(wordSpacing, onWordSpacing, SPACING_RANGE_MIN..SPACING_RANGE_MAX, pixels)
-        }
-        CustomizeRow(stringResource(Res.string.customize_text_transform)) {
-            ChoiceControl(transformOptions(), transform, onSelect = onTransform)
-        }
-    }
-}
-
-// ── Bible ───────────────────────────────────────────────────────────────────────────────────────
-
-// ── Song ────────────────────────────────────────────────────────────────────────────────────────
-
-// ── Dictionary ──────────────────────────────────────────────────────────────────────────────────
-
-// ── Background ──────────────────────────────────────────────────────────────────────────────────
-
 // ── Shared bits ─────────────────────────────────────────────────────────────────────────────────
-
-/**
- * The four margins, one field each — the same four the Bible and Song tabs offer.
- *
- * They were a Top/bottom and a Left/right pair, each writing the same number into both sides, so
- * an output could not be nudged down off a bezel or in from one edge without moving the opposite
- * margin with it. The settings have always held four values; only this dialog collapsed them.
- */
-@Composable
-internal fun MarginsGroup(
-    top: Int,
-    bottom: Int,
-    left: Int,
-    right: Int,
-    onTop: (Int) -> Unit,
-    onBottom: (Int) -> Unit,
-    onLeft: (Int) -> Unit,
-    onRight: (Int) -> Unit,
-) {
-    CustomizeGroup(stringResource(Res.string.customize_group_margins)) {
-        CustomizeRow(stringResource(Res.string.top), labelInsideControl = true) {
-            NumberControl(stringResource(Res.string.top), top, onTop, MARGIN_RANGE)
-        }
-        CustomizeRow(stringResource(Res.string.bottom), labelInsideControl = true) {
-            NumberControl(stringResource(Res.string.bottom), bottom, onBottom, MARGIN_RANGE)
-        }
-        CustomizeRow(stringResource(Res.string.left), labelInsideControl = true) {
-            NumberControl(stringResource(Res.string.left), left, onLeft, MARGIN_RANGE)
-        }
-        CustomizeRow(stringResource(Res.string.right), labelInsideControl = true) {
-            NumberControl(stringResource(Res.string.right), right, onRight, MARGIN_RANGE)
-        }
-    }
-}
-
-/** None / first page / every page, the vocabulary the title and number already use. */
-@Composable
-internal fun showOptions(): List<Pair<String, String>> = listOf(
-    Constants.NONE to stringResource(Res.string.none),
-    Constants.FIRST_PAGE to stringResource(Res.string.first_page),
-    Constants.EVERY_PAGE to stringResource(Res.string.every_page),
-)
 
 internal val FONT_SIZE_RANGE = 8..150
 internal val MARGIN_RANGE = 0..500

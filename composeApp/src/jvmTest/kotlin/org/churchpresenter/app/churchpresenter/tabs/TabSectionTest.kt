@@ -5,6 +5,9 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsNotSelected
@@ -20,6 +23,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.hasText
+import org.churchpresenter.settings.TabLabelMargin
+import org.churchpresenter.app.churchpresenter.composables.LABELED_TAB_MIN_WIDTH
+import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
 import org.churchpresenter.settings.TabLabelStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,6 +54,7 @@ class TabSectionTest {
         selectedTabIndex: Int = 0,
         width: Int = 2_000,
         labelStyle: TabLabelStyle = TabLabelStyle.TEXT,
+        labelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
         onTabSelected: (Int) -> Unit = {},
     ) {
         setContent {
@@ -55,6 +63,7 @@ class TabSectionTest {
                     visibleTabs = visibleTabs,
                     selectedTabIndex = selectedTabIndex,
                     labelStyle = labelStyle,
+                    labelMargin = labelMargin,
                     onTabSelected = onTabSelected,
                 )
             }
@@ -198,6 +207,63 @@ class TabSectionTest {
     fun `every tab has an icon of its own`() {
         val icons = Tabs.entries.map { tabIcon(it) }
         assertEquals(icons.size, icons.toSet().size, "two tabs sharing an icon are indistinguishable as icons")
+    }
+
+    // ── Spacing ─────────────────────────────────────────────────────────────────
+
+    /**
+     * How wide the Bible tab is drawn at each spacing, smallest first -- one composition, the spacing
+     * switched through state, so five sizes cost one test's setup rather than five.
+     */
+    private fun bibleTabWidths(style: TabLabelStyle): List<Float> {
+        val widths = mutableListOf<Float>()
+        runComposeUiTest {
+            var margin by mutableStateOf(TabLabelMargin.SMALL)
+            setContent {
+                Box(Modifier.width(2_000.dp)) {
+                    TabSection(
+                        visibleTabs = listOf(Tabs.BIBLE, Tabs.SONGS),
+                        labelStyle = style,
+                        labelMargin = margin,
+                        onTabSelected = {},
+                    )
+                }
+            }
+            for (next in TabLabelMargin.entries) {
+                margin = next
+                waitForIdle()
+                val tab =
+                    if (style == TabLabelStyle.ICONS) iconTabs()[0] else onNode(isSelectable() and hasText("Bible"))
+                widths += tab.fetchSemanticsNode().boundsInRoot.width
+            }
+        }
+        return widths
+    }
+
+    @Test
+    fun `each step of spacing gives a named tab more room than the one before`() {
+        for (style in listOf(TabLabelStyle.TEXT, TabLabelStyle.ICONS_AND_TEXT)) {
+            val widths = bibleTabWidths(style)
+            assertEquals(widths.sorted(), widths, "$style: $widths")
+            assertEquals(widths.size, widths.toSet().size, "$style: every step must change something -- $widths")
+        }
+    }
+
+    @Test
+    fun `each step of spacing widens an icon-only tab too`() {
+        val widths = bibleTabWidths(TabLabelStyle.ICONS)
+
+        assertEquals(widths.sorted(), widths, "$widths")
+        assertEquals(widths.size, widths.toSet().size, "every step must change something -- $widths")
+    }
+
+    @Test
+    fun `only icon-only tabs are held to a minimum width`() {
+        for (margin in TabLabelMargin.entries) {
+            assertEquals(0.dp, labeledTabMinWidth(TabLabelStyle.TEXT, margin), "$margin")
+            assertEquals(0.dp, labeledTabMinWidth(TabLabelStyle.ICONS_AND_TEXT, margin), "$margin")
+        }
+        assertEquals(LABELED_TAB_MIN_WIDTH, labeledTabMinWidth(TabLabelStyle.ICONS, TabLabelMargin.NORMAL))
     }
 
     // ── Selection ───────────────────────────────────────────────────────────────
