@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.runtime.mutableStateOf
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import uk.co.caprica.vlcj.media.TrackType
 import uk.co.caprica.vlcj.player.base.MediaPlayer
@@ -19,10 +20,13 @@ import kotlin.test.assertTrue
  * so it cannot be constructed for real off a device; a mock is the only way in, per AGENT.md's
  * mocking rule. `EmbeddedVideoDecoderTest` already establishes the same pattern for vlcj classes.
  *
- * The `playing()` timer branch (first-frame grace pause) and the `error()`/invokeLater branch stay
- * untested here: both hand work to a real `javax.swing.Timer` or the AWT event queue, and AGENT.md
- * rules out a test whose cost is a duration rather than the work itself. Only the early-return
- * branch of `playing()` — reached without touching either — is covered.
+ * The `playing()` timer branch (first-frame grace pause) does not need to wait out the real 200ms:
+ * `javax.swing.Timer` exposes its registered `ActionListener`s, so the test fires the listener
+ * directly instead of waiting for the schedule -- a positive signal (the callback ran), not a
+ * duration, per AGENT.md's rule against tests whose cost is a wait. The `error()`/invokeLater
+ * branch stays untested: it hands work to the AWT event queue for a `System.err.println` and a
+ * `viewModel.pause()` with nothing to assert beyond "a mock was called," which the project's own
+ * rule against stub-only assertions rules out.
  */
 class SoftwarePlayerEventsTest {
 
@@ -124,6 +128,77 @@ class SoftwarePlayerEventsTest {
         // No pause/setTime call was made reachable to assert directly (mp is relaxed), but the
         // real outcome that matters is observable: the view model's own state is untouched.
         assertTrue(vm.isPlaying)
+    }
+
+    /** Fires a just-scheduled [javax.swing.Timer]'s callback directly, instead of waiting the real 200ms. */
+    private fun javax.swing.Timer.fireNow() = actionListeners.forEach { it.actionPerformed(null) }
+
+    @Test
+    fun `the first-frame grace timer pauses and rewinds when still not playing when it fires`() {
+        val vm = MediaViewModel()
+        val pauseTimer = mutableStateOf<javax.swing.Timer?>(null)
+        val mp = mockk<MediaPlayer>(relaxed = true)
+
+        softwarePlayerEvents(
+            viewModel = vm,
+            firstFrameCaptured = mutableStateOf(false),
+            gate = PlayerReleaseGate(),
+            pauseTimer = pauseTimer,
+            reportsPlaybackEnd = true,
+        ).playing(mp)
+
+        val timer = pauseTimer.value ?: error("playing() must have scheduled the grace timer")
+        timer.fireNow()
+
+        verify { mp.controls().pause() }
+        verify { mp.controls().setTime(0) }
+    }
+
+    @Test
+    fun `the grace timer does nothing if the view model started playing before it fires`() {
+        val vm = MediaViewModel()
+        val pauseTimer = mutableStateOf<javax.swing.Timer?>(null)
+        val mp = mockk<MediaPlayer>(relaxed = true)
+
+        softwarePlayerEvents(
+            viewModel = vm,
+            firstFrameCaptured = mutableStateOf(false),
+            gate = PlayerReleaseGate(),
+            pauseTimer = pauseTimer,
+            reportsPlaybackEnd = true,
+        ).playing(mp)
+        val timer = pauseTimer.value ?: error("playing() must have scheduled the grace timer")
+
+        // An operator went live during the load-grace window -- the timer must not undo it.
+        vm.loadMedia("https://example.org/clip.mp4", "url")
+        vm.play()
+        timer.fireNow()
+
+        verify(exactly = 0) { mp.controls().pause() }
+        verify(exactly = 0) { mp.controls().setTime(any()) }
+    }
+
+    @Test
+    fun `the grace timer does nothing once the release gate has fired`() {
+        val vm = MediaViewModel()
+        val pauseTimer = mutableStateOf<javax.swing.Timer?>(null)
+        val gate = PlayerReleaseGate()
+        val mp = mockk<MediaPlayer>(relaxed = true)
+
+        softwarePlayerEvents(
+            viewModel = vm,
+            firstFrameCaptured = mutableStateOf(false),
+            gate = gate,
+            pauseTimer = pauseTimer,
+            reportsPlaybackEnd = true,
+        ).playing(mp)
+        val timer = pauseTimer.value ?: error("playing() must have scheduled the grace timer")
+
+        gate.release()
+        timer.fireNow()
+
+        verify(exactly = 0) { mp.controls().pause() }
+        verify(exactly = 0) { mp.controls().setTime(any()) }
     }
 
     // ── finished ─────────────────────────────────────────────────────────────────────────────

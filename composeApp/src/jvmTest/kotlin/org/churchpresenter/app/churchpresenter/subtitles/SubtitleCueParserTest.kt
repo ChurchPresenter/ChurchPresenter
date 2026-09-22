@@ -99,12 +99,38 @@ class SubtitleCueParserTest {
         assertEquals(SubtitleCue(1_000, 2_000, "Hi"), SubtitleCueParser.parseWebVtt(vtt).single())
     }
 
+    @Test
+    fun `vtt timecodes without an hour component parse with hours treated as zero`() {
+        val vtt = """
+            WEBVTT
+
+            01:02.500 --> 01:05.000
+            Short form
+        """.trimIndent()
+
+        assertEquals(SubtitleCue(62_500, 65_000, "Short form"), SubtitleCueParser.parseWebVtt(vtt).single())
+    }
+
+    @Test
+    fun `a block whose text is blank after the arrow line yields no cue`() {
+        val srt = "1\n00:00:01,000 --> 00:00:02,000\n"
+        assertTrue(SubtitleCueParser.parseSrt(srt).isEmpty())
+    }
+
     // ── parseSubtitleFile dispatch ──────────────────────────────────────
 
     @Test
     fun `an srt file on disk is parsed by extension`() {
         val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
         temp.writeText("1\n00:00:01,000 --> 00:00:02,000\nHi\n")
+        assertEquals(listOf(SubtitleCue(1_000, 2_000, "Hi")), SubtitleCueParser.parseSubtitleFile(temp))
+        temp.delete()
+    }
+
+    @Test
+    fun `a vtt file on disk is parsed by extension`() {
+        val temp = kotlin.io.path.createTempFile(suffix = ".vtt").toFile()
+        temp.writeText("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\nHi\n")
         assertEquals(listOf(SubtitleCue(1_000, 2_000, "Hi")), SubtitleCueParser.parseSubtitleFile(temp))
         temp.delete()
     }

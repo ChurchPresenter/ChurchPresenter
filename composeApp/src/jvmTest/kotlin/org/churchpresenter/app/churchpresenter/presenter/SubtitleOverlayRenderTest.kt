@@ -75,6 +75,48 @@ class SubtitleOverlayRenderTest {
     }
 
     @Test
+    fun `bold italic underline shadow, a transparent background and left-right alignment all render`() =
+        runComposeUiTest {
+            setContent {
+                Box(
+                    modifier = Modifier.testTag("overlay").size(200.dp).background(Color.Black)
+                ) {
+                    SubtitleOverlay(
+                        cue = cue,
+                        mediaSettings = MediaSettings(
+                            bold = true,
+                            italic = true,
+                            underline = true,
+                            shadow = true,
+                            backgroundColor = "transparent",
+                            position = Constants.BOTTOM_LEFT,
+                        ),
+                    )
+                }
+            }
+
+            val colors = distinctColors(onNodeWithTag("overlay").captureToImage())
+            assertTrue(colors.size > 1, "styled text over the transparent-background card should still draw")
+        }
+
+    @Test
+    fun `right-aligned position renders without error`() = runComposeUiTest {
+        setContent {
+            Box(
+                modifier = Modifier.testTag("overlay").size(200.dp).background(Color.Black)
+            ) {
+                SubtitleOverlay(
+                    cue = cue,
+                    mediaSettings = MediaSettings(position = Constants.BOTTOM_RIGHT),
+                )
+            }
+        }
+
+        val colors = distinctColors(onNodeWithTag("overlay").captureToImage())
+        assertTrue(colors.size > 1, "a right-aligned cue should still draw its card")
+    }
+
+    @Test
     fun `the key output role forces a white card regardless of the configured colour`() = runComposeUiTest {
         setContent {
             Box(
