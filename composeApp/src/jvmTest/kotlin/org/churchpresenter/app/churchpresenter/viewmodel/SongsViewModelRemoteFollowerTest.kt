@@ -164,6 +164,31 @@ class SongsViewModelRemoteFollowerTest {
     }
 
     @Test
+    fun `losing the link puts the local library back in place of the mirrored catalog`() {
+        val vm = follower { n, _ -> detail(n) }
+        assertEquals(listOf("Grace"), vm.filteredSongItems.value.map { it.title })
+
+        vm.setInstanceLinkSource(active = false, catalog = null, fetchDetail = null)
+
+        assertTrue(vm.filteredSongItems.value.none { it.title == "Grace" }, "the primary's songs must not linger")
+    }
+
+    @Test
+    fun `losing a link that was never up changes nothing`() {
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
+        val before = vm.filteredSongItems.value
+
+        vm.setInstanceLinkSource(active = false, catalog = null, fetchDetail = null)
+
+        assertEquals(before, vm.filteredSongItems.value)
+    }
+
+    @Test
     fun `selecting an out-of-range index does not fetch`() {
         val vm = follower { _, _ -> detail("0042") }
 
