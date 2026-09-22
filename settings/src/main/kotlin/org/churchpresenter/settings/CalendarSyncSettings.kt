@@ -27,6 +27,7 @@ data class CalendarSyncSettings(
 
     companion object {
         const val DEFAULT_RELAY_URL = "https://sync.churchpresenter.org"
-        const val CLIENT_KEY_URL = "https://churchpresenter.org/api/relay-config"
+        // The www host: the apex answers with a redirect, and a key is fetched, never followed to.
+        const val CLIENT_KEY_URL = "https://www.churchpresenter.org/api/relay-config"
     }
 }

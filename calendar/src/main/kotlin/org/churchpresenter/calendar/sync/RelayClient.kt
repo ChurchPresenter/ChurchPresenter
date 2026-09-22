@@ -24,7 +24,11 @@ fun interface RelayTransport {
 /** [RelayTransport] over the JDK client; TLS only. */
 class HttpRelayTransport(
     private val timeout: Duration = Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS),
-    private val client: HttpClient = HttpClient.newBuilder().connectTimeout(timeout).build(),
+    private val client: HttpClient = HttpClient.newBuilder()
+        .connectTimeout(timeout)
+        // A host that moved -- apex to www -- must not read as a reply of its own.
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .build(),
 ) : RelayTransport {
     override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
         val uri = URI.create(url)
@@ -50,8 +54,11 @@ sealed class RelayFailure(message: String, cause: Throwable? = null) : Exception
     /** The instance id is already registered to another desktop. */
     class Taken : RelayFailure("instance id already registered")
 
+    /** This address is refused for the rest of the day -- too many wrong keys from it. */
+    class Banned : RelayFailure("this address is blocked by the relay for the rest of the day")
+
     /** The relay did not accept the client key; fetch a fresh one and try again. */
-    class ClientKey : RelayFailure("relay refused the client key")
+    class ClientKey(detail: String = "relay refused the client key") : RelayFailure(detail)
 
     /** The relay moved on since our cursor; pull again before pushing. */
     class Conflict : RelayFailure("relay state changed since last pull")
@@ -164,12 +171,13 @@ private const val HTTP_CONFLICT = 409
 private const val HTTP_PRECONDITION_FAILED = 412
 private const val MAX_ERROR_CHARS = 200
 private const val CLIENT_KEY_ERROR = "\"client_key\""
+private const val BANNED_ERROR = "\"banned\""
 
 /** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
 private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
     HTTP_UNAUTHORIZED ->
         if (reply.body.contains(CLIENT_KEY_ERROR)) RelayFailure.ClientKey() else RelayFailure.Unauthorized()
-    HTTP_FORBIDDEN -> RelayFailure.Unauthorized()
+    HTTP_FORBIDDEN -> if (reply.body.contains(BANNED_ERROR)) RelayFailure.Banned() else RelayFailure.Unauthorized()
     HTTP_CONFLICT -> if (registering) RelayFailure.Taken() else RelayFailure.Conflict()
     HTTP_PRECONDITION_FAILED -> RelayFailure.Conflict()
     else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
