@@ -130,6 +130,17 @@ internal class BibleLottieTemplate(
 
     fun hasLayer(name: String): Boolean = name in layerNames
 
+    /**
+     * How many `TextN`/`ReferenceN` pairs this template actually has, 1 to 4 -- counted from
+     * `Text1` up to the first one missing, so a template with `Text1`/`Text2`/`Text4` but no
+     * `Text3` (not something the generator can produce, but not impossible to hand-edit) reports 2
+     * rather than reaching past a gap.
+     */
+    val textSlotCount: Int
+        get() = TEXT_SLOT_LAYERS.indexOfFirst { (text, _) -> !hasLayer(text) }
+            .let { if (it == -1) TEXT_SLOT_LAYERS.size else it }
+            .coerceAtLeast(1)
+
     companion object {
         const val SEGMENT_BG_IN = "bg_in"
         const val SEGMENT_TEXT_IN = "text_in"
@@ -139,12 +150,24 @@ internal class BibleLottieTemplate(
 
         const val LAYER_TEXT_1 = "Text1"
         const val LAYER_TEXT_2 = "Text2"
+        const val LAYER_TEXT_3 = "Text3"
+        const val LAYER_TEXT_4 = "Text4"
         const val LAYER_REFERENCE_1 = "Reference1"
         const val LAYER_REFERENCE_2 = "Reference2"
+        const val LAYER_REFERENCE_3 = "Reference3"
+        const val LAYER_REFERENCE_4 = "Reference4"
         const val SHADOW_SUFFIX = "Shadow"
         const val BAND_PREFIX = "Band"
 
-        val TEXT_LAYERS = listOf(LAYER_TEXT_1, LAYER_REFERENCE_1, LAYER_TEXT_2, LAYER_REFERENCE_2)
+        /** [LAYER_TEXT_1]/[LAYER_REFERENCE_1] through the fourth, in slot order. */
+        val TEXT_SLOT_LAYERS = listOf(
+            LAYER_TEXT_1 to LAYER_REFERENCE_1,
+            LAYER_TEXT_2 to LAYER_REFERENCE_2,
+            LAYER_TEXT_3 to LAYER_REFERENCE_3,
+            LAYER_TEXT_4 to LAYER_REFERENCE_4,
+        )
+
+        val TEXT_LAYERS = TEXT_SLOT_LAYERS.flatMap { (text, reference) -> listOf(text, reference) }
     }
 }
 

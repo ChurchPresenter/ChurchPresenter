@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -47,8 +48,6 @@ import churchpresenter.composeapp.generated.resources.bible_translation_divider
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bible_translations
 import churchpresenter.composeapp.generated.resources.bilingual_layout
-import churchpresenter.composeapp.generated.resources.bilingual_left_right
-import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
@@ -118,10 +117,6 @@ private val TARGET_BUTTON_WIDTH = 110.dp
 
 /** The gap between a layout row's caption and the segmented button under it. */
 private val LAYOUT_ROW_CAPTION_GAP = 8.dp
-
-/** A layout row offers exactly Left/Right and Top/Bottom, and the two share the row's width. */
-private const val BILINGUAL_SEGMENTS = 2
-private val LAYOUT_SEGMENT_HEIGHT = 34.dp
 
 /** Tracking on the small uppercase scope word, which needs air to read as a label and not a word. */
 private val SCOPE_LETTER_SPACING = 0.9.sp
@@ -489,31 +484,16 @@ private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val segmentWidth = maxWidth / BILINGUAL_SEGMENTS
-        SegmentedButton(
-            items = listOf(
-                SegmentedButtonItem(
-                    Constants.BILINGUAL_SIDE_BY_SIDE,
-                    stringResource(Res.string.bilingual_left_right),
-                ),
-                SegmentedButtonItem(
-                    Constants.BILINGUAL_TOP_BOTTOM,
-                    stringResource(Res.string.bilingual_top_bottom),
-                ),
-            ),
-            selectedValue = selected,
-            onValueChange = onSelect,
-            // Half the row each, so the pair fills the rail exactly rather than leaving a ragged
-            // margin that changes with its width. `SegmentedButton` takes a fixed segment width and
-            // clips its label at one line, so the width is measured here instead: at `bodyMedium`,
-            // sized to match the captions and checkbox labels around it, the longest shipped label
-            // ("Слева / Справа") no longer fits the 120.dp this used to be pinned at.
-            buttonWidth = segmentWidth,
-            buttonHeight = LAYOUT_SEGMENT_HEIGHT,
-            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-        )
-        }
+        // A `FlowRow` of individual buttons rather than `SegmentedButton` (Song's own picker,
+        // [BilingualLayoutButtons]): at the rail's ~330dp usable width, eight buttons need to wrap,
+        // and every way of making `SegmentedButton` itself wrap -- its own `compactColumns`, and a
+        // hand-split into two stacked rows -- corrupted a *later*, unrelated sibling two rows of
+        // it down this same scrollable rail: the transition duration slider measured to zero size
+        // on its very next frame. That happened only when this row was called twice back to back
+        // (full screen, then lower third) and produced more than one row of buttons; a `FlowRow`
+        // wraps on its own single measure pass rather than nesting another nested layout to do it,
+        // and does not reproduce it.
+        BilingualLayoutFlowButtons(selected = selected, onSelect = onSelect)
     }
 }
 
@@ -553,22 +533,26 @@ private fun MiscellaneousSection(
         // Where two or more translations sit relative to each other, per output shape. Two
         // controls rather than one because the two shapes have always disagreed -- a full screen
         // stacks, a band splits 50/50 -- and both of those defaults are kept.
-        BibleLayoutRow(
-            label = stringResource(Res.string.full_screen),
-            selected = settings.bibleSettings.bilingualLayout,
-            onSelect = { value ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayout = value)) }
-            },
-        )
-        BibleLayoutRow(
-            label = stringResource(Res.string.lower_third_size),
-            selected = settings.bibleSettings.bilingualLayoutLowerThird,
-            onSelect = { value ->
-                onSettingsChange { s ->
-                    s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayoutLowerThird = value))
-                }
-            },
-        )
+        key("fullScreen") {
+            BibleLayoutRow(
+                label = stringResource(Res.string.full_screen),
+                selected = settings.bibleSettings.bilingualLayout,
+                onSelect = { value ->
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayout = value)) }
+                },
+            )
+        }
+        key("lowerThird") {
+            BibleLayoutRow(
+                label = stringResource(Res.string.lower_third_size),
+                selected = settings.bibleSettings.bilingualLayoutLowerThird,
+                onSelect = { value ->
+                    onSettingsChange { s ->
+                        s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayoutLowerThird = value))
+                    }
+                },
+            )
+        }
         LongVerseSplitSlider(settings, onSettingsChange)
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         // The plain on/off flags, kept together below the rule -- everything above it is a value.

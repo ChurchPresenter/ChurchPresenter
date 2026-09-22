@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -220,17 +221,21 @@ class ProjectionSettingsTabContentOutputsTest {
     }
 
     @Test
-    fun `the Songs language dropdown stores the picked mode`() = projectionTab { get ->
+    fun `the Songs language picker stores the ticked languages`() = projectionTab { get ->
         openContentOutputs()
-        // Songs is the only dropdown left in the dialog.
-        onAllNodesWithText("Both")[0].performClick()
+        onNodeWithTag(TranslationPickerTags.SONG.trigger).performScrollTo().performClick()
         waitForIdle()
-        onNodeWithText("Language 1").performClick()
-        waitForIdle()
+        // Untick the three languages this song is not being shown in, leaving the primary alone.
+        // An untouched output stores an empty list meaning "all of them", so the first tick is what
+        // turns the selection into an explicit one.
+        for (index in 1..3) {
+            onNodeWithTag(TranslationPickerTags.SONG.row(index)).performScrollTo().performClick()
+            waitForIdle()
+        }
 
-        assertEquals(Constants.SONG_LANG_PRIMARY, row0(get).songMode, "picking Language 1 must be stored")
+        assertEquals(listOf(0), row0(get).songTranslations, "the remaining tick must be stored")
         assertEquals(Constants.SONG_LANG_BOTH, row0(get).bibleMode, "Bible must be untouched")
-        onNodeWithText("Songs · Language 1").assertExists("the preview must name the chosen mode")
+        onNodeWithText("Songs (Language 1)").assertExists("the preview must name the chosen language")
     }
 
     @Test

@@ -6,6 +6,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/** The first and second cells, read the way every test below already reads them. */
+private val BandSlots.text1 get() = slots[0].text
+private val BandSlots.reference1 get() = slots[0].reference
+private val BandSlots.text2 get() = slots.getOrNull(1)?.text
+private val BandSlots.reference2 get() = slots.getOrNull(1)?.reference
+
 class BandLayoutTest {
 
     private val cfg = BibleLottieGenConfig(canvasW = 1000, canvasH = 200, paddingPx = 10, insetPx = 0)
@@ -98,6 +104,55 @@ class BandLayoutTest {
         assertTrue(BandStyle.DIAGONAL_STRIPES.textInsets().right > 0.0)
         assertEquals(StyleInsets(), BandStyle.CORNER_BRACKETS.textInsets(), "brackets live in the padding")
         assertEquals(StyleInsets(), BandStyle.SPLIT_VERTICAL.textInsets(), "one language on each half")
+    }
+
+    @Test
+    fun `a 2x2 grid gives every cell a quarter of the inner area`() {
+        val slots = computeSlots(cfg.copy(layout = SlotLayout.GRID_2X2))
+        assertEquals(4, slots.count)
+        val topLeft = slots.slots[0]
+        val topRight = slots.slots[1]
+        val bottomLeft = slots.slots[2]
+        assertEquals(topLeft.text.w, topRight.text.w)
+        assertEquals(topLeft.text.h, bottomLeft.text.h)
+        assertEquals(topLeft.text.right + 10.0, topRight.text.x, "one padding between the columns")
+        assertTrue(bottomLeft.text.y > topLeft.text.bottom, "the second row starts under the first")
+        assertEquals(topLeft.text.x, bottomLeft.text.x, "columns line up top to bottom")
+    }
+
+    @Test
+    fun `a 1x4 grid gives every cell an equal share of the width, in reading order`() {
+        val slots = computeSlots(cfg.copy(layout = SlotLayout.GRID_1X4))
+        assertEquals(4, slots.count)
+        val widths = slots.slots.map { it.text.w }
+        assertEquals(widths[0], widths[1], 0.001)
+        assertEquals(widths[0], widths[2], 0.001)
+        assertEquals(widths[0], widths[3], 0.001)
+        for (i in 1..3) {
+            assertTrue(slots.slots[i].text.x > slots.slots[i - 1].text.x, "cell $i sits right of cell ${i - 1}")
+        }
+    }
+
+    @Test
+    fun `a 3x1 grid stacks three equal rows`() {
+        val slots = computeSlots(cfg.copy(layout = SlotLayout.GRID_3X1))
+        assertEquals(3, slots.count)
+        val heights = slots.slots.map { it.text.h }
+        assertEquals(heights[0], heights[1], 0.001)
+        assertEquals(heights[0], heights[2], 0.001)
+        assertTrue(slots.slots[1].text.y > slots.slots[0].text.bottom)
+        assertTrue(slots.slots[2].text.y > slots.slots[1].text.bottom)
+    }
+
+    @Test
+    fun `SINGLE, SIDE_BY_SIDE and STACKED keep their original geometry under the grid model`() {
+        assertEquals(1, SlotLayout.SINGLE.cellCount)
+        assertEquals(2, SlotLayout.SIDE_BY_SIDE.cellCount)
+        assertEquals(2, SlotLayout.STACKED.cellCount)
+        assertEquals(1, SlotLayout.SIDE_BY_SIDE.rows)
+        assertEquals(2, SlotLayout.SIDE_BY_SIDE.cols)
+        assertEquals(2, SlotLayout.STACKED.rows)
+        assertEquals(1, SlotLayout.STACKED.cols)
     }
 
     @Test

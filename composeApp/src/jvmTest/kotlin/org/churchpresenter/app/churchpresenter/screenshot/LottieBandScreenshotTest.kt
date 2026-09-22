@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.core.models.songs.SectionTranslation
+import org.churchpresenter.core.models.songs.SongTranslation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -389,18 +391,17 @@ class LottieBandScreenshotTest {
     private fun song(secondary: List<String> = emptyList()) = LyricSection(
         header = "[Verse 1]",
         title = "Amazing Grace",
-        secondaryTitle = "О, благодать",
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = VERSE_LINES,
-        secondaryLines = secondary,
+        translations = listOf(SectionTranslation(title = "О, благодать", lines = secondary)),
     )
 
     private fun introSlide() = titleSlideSection(
         SongItem(
             number = "427",
             title = "Amazing Grace",
-            secondaryTitle = "О, благодать",
+            translations = listOf(SongTranslation(title = "О, благодать")),
             author = "John Newton",
             composer = "William Walker",
             ccliNumber = "22025",

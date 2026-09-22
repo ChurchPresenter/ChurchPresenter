@@ -129,16 +129,16 @@ class BibleSettingsTabMiscTest {
         showTab()
         assertEquals(
             2,
-            onAllNodesWithText("Left / Right").fetchSemanticsNodes().size,
+            onAllNodesWithText("L / R").fetchSemanticsNodes().size,
             "one row for the full screen and one for the band",
         )
-        assertEquals(2, onAllNodesWithText("Top / Bottom").fetchSemanticsNodes().size)
+        assertEquals(2, onAllNodesWithText("T / B").fetchSemanticsNodes().size)
     }
 
     @Test
     fun `the full screen's row writes the full screen's layout`() = runComposeUiTest {
         val harness = showTab()
-        layoutSegment(row = 0, label = "Left / Right")
+        layoutSegment(row = 0, label = "L / R")
 
         val bible = harness.current.bibleSettings
         assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, bible.bilingualLayout)
@@ -152,7 +152,7 @@ class BibleSettingsTabMiscTest {
     @Test
     fun `the band's row writes the band's layout`() = runComposeUiTest {
         val harness = showTab()
-        layoutSegment(row = 1, label = "Top / Bottom")
+        layoutSegment(row = 1, label = "T / B")
 
         val bible = harness.current.bibleSettings
         assertEquals(Constants.BILINGUAL_TOP_BOTTOM, bible.bilingualLayoutLowerThird)
@@ -173,7 +173,7 @@ class BibleSettingsTabMiscTest {
     @Test
     fun `re-picking the layout already in force leaves it there`() = runComposeUiTest {
         val harness = showTab()
-        layoutSegment(row = 0, label = "Top / Bottom")
+        layoutSegment(row = 0, label = "T / B")
         assertEquals(Constants.BILINGUAL_TOP_BOTTOM, harness.current.bibleSettings.bilingualLayout)
     }
 

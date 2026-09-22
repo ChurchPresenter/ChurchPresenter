@@ -116,11 +116,23 @@ object Constants {
     const val SONG_LANG_BOTH = "both"
     const val SONG_LANG_PRIMARY = "primary"
     const val SONG_LANG_SECONDARY = "secondary"
+    const val SONG_LANG_THIRD = "third"
+    const val SONG_LANG_FOURTH = "fourth"
     const val SONG_LANG_OFF = "off"
 
     // Bilingual Layout
+    //
+    // Every value a bilingual/multilingual band or full screen can be arranged in, as a row×col
+    // grid holding 1 to 4 languages. The two original values keep their original names and
+    // strings -- no settings migration needed -- and read as 1 row × 2 cols and 2 rows × 1 col
+    // respectively; see [bilingualGrid] below for the full mapping, including these two.
     const val BILINGUAL_SIDE_BY_SIDE = "side_by_side"
     const val BILINGUAL_TOP_BOTTOM = "top_bottom"
+    const val BILINGUAL_GRID_1X3 = "grid_1x3"
+    const val BILINGUAL_GRID_3X1 = "grid_3x1"
+    const val BILINGUAL_GRID_1X4 = "grid_1x4"
+    const val BILINGUAL_GRID_4X1 = "grid_4x1"
+    const val BILINGUAL_GRID_2X2 = "grid_2x2"
 
     // Section Types
     const val SECTION_TYPE_SONG = "song"
@@ -382,3 +394,32 @@ object Constants {
         const val USER_HOME = "user.home"
     }
 }
+
+/**
+ * [value] (one of the `Constants.BILINGUAL_*` strings) as the rows × cols grid it lays languages
+ * out in -- the single place that mapping is made, so a picker offering these values and a
+ * presenter laying blocks out by them can never disagree.
+ *
+ * An unrecognized value (a settings file from before a grid this large existed, or simply
+ * corrupted) reads as [Constants.BILINGUAL_SIDE_BY_SIDE] always has: one row, two columns.
+ */
+fun bilingualGrid(value: String): Pair<Int, Int> = when (value) {
+    Constants.BILINGUAL_TOP_BOTTOM -> BILINGUAL_ROWS_2 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_1X3 -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_3
+    Constants.BILINGUAL_GRID_3X1 -> BILINGUAL_ROWS_3 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_1X4 -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_4
+    Constants.BILINGUAL_GRID_4X1 -> BILINGUAL_ROWS_4 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_2X2 -> BILINGUAL_ROWS_2 to BILINGUAL_COLS_2
+    else -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_2
+}
+
+// Named rather than left as literals: `bilingualGrid`'s own `when` tripped detekt's MagicNumber
+// rule on the ones past 2, which it leaves alone by default.
+private const val BILINGUAL_ROWS_1 = 1
+private const val BILINGUAL_ROWS_2 = 2
+private const val BILINGUAL_ROWS_3 = 3
+private const val BILINGUAL_ROWS_4 = 4
+private const val BILINGUAL_COLS_1 = 1
+private const val BILINGUAL_COLS_2 = 2
+private const val BILINGUAL_COLS_3 = 3
+private const val BILINGUAL_COLS_4 = 4

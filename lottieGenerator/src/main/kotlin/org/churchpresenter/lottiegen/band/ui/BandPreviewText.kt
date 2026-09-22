@@ -44,20 +44,25 @@ internal fun rememberPreviewTextMotion(
     if (!cfg.textAnimation.isRuntimeDriven) return null
     val slots = computeSlots(cfg)
     val docs = readTextDocuments(jsonString)
-    val samples = mapOf(
-        BandLayerNames.TEXT_1 to cfg.previewText1,
-        BandLayerNames.REFERENCE_1 to cfg.previewReference1,
-        BandLayerNames.TEXT_2 to cfg.previewText2,
-        BandLayerNames.REFERENCE_2 to cfg.previewReference2,
+    val previews = listOf(
+        cfg.previewText1 to cfg.previewReference1,
+        cfg.previewText2 to cfg.previewReference2,
+        cfg.previewText3 to cfg.previewReference3,
+        cfg.previewText4 to cfg.previewReference4,
     )
+    val samples = BandLayerNames.SLOT_LAYER_NAMES.take(slots.count).flatMapIndexed { i, (textLayer, refLayer) ->
+        val (text, reference) = previews[i]
+        listOf(textLayer to text, refLayer to reference)
+    }.toMap()
     val ticker = TickerSetup(cfg, timeline, samples, docs)
     return rememberLottieDynamicProperties(cfg, timeline, jsonString) {
         if (cfg.textAnimation == TextAnimation.TICKER) {
-            tickerLayer(BandLayerNames.TEXT_1, slots.text1, ticker)
-            slots.text2?.let { tickerLayer(BandLayerNames.TEXT_2, it, ticker) }
-            // The reference rides at the head of the ticker line; its own slot goes quiet.
-            textLayer(BandLayerNames.REFERENCE_1) { text { "" } }
-            textLayer(BandLayerNames.REFERENCE_2) { text { "" } }
+            slots.slots.forEachIndexed { i, _ ->
+                val (textLayer, refLayer) = BandLayerNames.SLOT_LAYER_NAMES[i]
+                tickerLayer(textLayer, slots.slots[i].text, ticker)
+                // The reference rides at the head of the ticker line; its own slot goes quiet.
+                textLayer(refLayer) { text { "" } }
+            }
         } else {
             samples.keys.forEach { name ->
                 textLayer(name) { text { original -> revealedText(cfg.textAnimation, timeline, original, frame) } }

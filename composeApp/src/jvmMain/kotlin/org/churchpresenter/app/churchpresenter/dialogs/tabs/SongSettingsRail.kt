@@ -24,7 +24,14 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.bilingual_layout
 import churchpresenter.composeapp.generated.resources.bilingual_left_right
+import churchpresenter.composeapp.generated.resources.bilingual_left_right_short
 import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
+import churchpresenter.composeapp.generated.resources.bilingual_top_bottom_short
+import churchpresenter.composeapp.generated.resources.bilingual_grid_1x3
+import churchpresenter.composeapp.generated.resources.bilingual_grid_3x1
+import churchpresenter.composeapp.generated.resources.bilingual_grid_1x4
+import churchpresenter.composeapp.generated.resources.bilingual_grid_4x1
+import churchpresenter.composeapp.generated.resources.bilingual_grid_2x2
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.enabled
 import churchpresenter.composeapp.generated.resources.end_of_song_spacing
@@ -195,32 +202,93 @@ internal fun SongLyricsLayoutSection(
                 fontSize = MaterialTheme.typography.labelSmall.fontSize,
             )
         }
-        // Only meaningful with two languages on screen, so it follows the switch above rather than
-        // standing there offering a choice that changes nothing.
+        // Only meaningful with two or more languages on screen, so it follows the switch above
+        // rather than standing there offering a choice that changes nothing.
         if (bilingual) {
             ControlColumn(stringResource(Res.string.bilingual_layout), Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    items = listOf(
-                        SegmentedButtonItem(
-                            Constants.BILINGUAL_SIDE_BY_SIDE,
-                            stringResource(Res.string.bilingual_left_right),
-                        ),
-                        SegmentedButtonItem(
-                            Constants.BILINGUAL_TOP_BOTTOM,
-                            stringResource(Res.string.bilingual_top_bottom),
-                        ),
-                    ),
-                    selectedValue = song.bilingualLayout,
-                    onValueChange = { value ->
+                BilingualLayoutButtons(
+                    selected = song.bilingualLayout,
+                    onSelect = { value ->
                         onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = value)) }
                     },
-                    buttonWidth = 120.dp,
-                    buttonHeight = 32.dp,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
                 )
             }
         }
     }
+}
+
+/**
+ * The eight row×col grids a bilingual/multilingual song or Bible passage can be arranged in, from
+ * [bilingualGrid] -- shared with the Bible settings tab so the two tabs offer the same switch rather
+ * than two separately hand-built ones.
+ */
+@Composable
+internal fun BilingualLayoutButtons(selected: String, onSelect: (String) -> Unit) {
+    SegmentedButton(
+        items = listOf(
+            SegmentedButtonItem(Constants.BILINGUAL_SIDE_BY_SIDE, stringResource(Res.string.bilingual_left_right)),
+            SegmentedButtonItem(Constants.BILINGUAL_TOP_BOTTOM, stringResource(Res.string.bilingual_top_bottom)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_1X3, stringResource(Res.string.bilingual_grid_1x3)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_3X1, stringResource(Res.string.bilingual_grid_3x1)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_1X4, stringResource(Res.string.bilingual_grid_1x4)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_4X1, stringResource(Res.string.bilingual_grid_4x1)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_2X2, stringResource(Res.string.bilingual_grid_2x2)),
+        ),
+        selectedValue = selected,
+        onValueChange = onSelect,
+        buttonWidth = 96.dp,
+        buttonHeight = 32.dp,
+        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+        compactColumns = BILINGUAL_LAYOUT_COMPACT_COLUMNS,
+    )
+}
+
+/**
+ * The same eight grids as [BilingualLayoutButtons], as individual toggle buttons in a `FlowRow`
+ * instead of one `SegmentedButton`.
+ *
+ * The Bible tab's rail calls its layout row twice, back to back (full screen, then lower third) --
+ * and there, [BilingualLayoutButtons] wrapping to a second row, by any means (its own
+ * `compactColumns`, or a hand split into two stacked `SegmentedButton`s), corrupted a *later*,
+ * unrelated sibling further down that same scrollable rail: the transition duration slider measured
+ * to zero size on its very next frame. It did not reproduce on the Song tab, which only calls the
+ * picker once. A `FlowRow` wraps on its own single measure pass rather than nesting another layout
+ * to do it, and does not reproduce it either -- so the Bible tab uses this, and the Song tab, called
+ * once, keeps the segmented look.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun BilingualLayoutFlowButtons(selected: String, onSelect: (String) -> Unit) {
+    // One flat, unwrapped row, at a narrow enough width and with short enough labels to fit the
+    // rail without wrapping -- not [BilingualLayoutButtons]'s own `compactColumns`, and not a
+    // `FlowRow`. Both of those wrap to a second row, and on the Bible tab specifically -- where this
+    // row is drawn twice, full screen then lower third -- a second row by either means corrupted a
+    // *later*, unrelated sibling further down this same scrollable rail: the transition duration
+    // slider measured to zero size on its very next frame, reproducibly, however the wrap was done.
+    // It never reproduced on the Song tab, which calls the wrapped version once. Short labels and a
+    // single row sidestep the wrap entirely rather than the interaction that broke it.
+    SegmentedButton(
+        items = listOf(
+            SegmentedButtonItem(
+                Constants.BILINGUAL_SIDE_BY_SIDE,
+                stringResource(Res.string.bilingual_left_right_short),
+            ),
+            SegmentedButtonItem(
+                Constants.BILINGUAL_TOP_BOTTOM,
+                stringResource(Res.string.bilingual_top_bottom_short),
+            ),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_1X3, stringResource(Res.string.bilingual_grid_1x3)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_3X1, stringResource(Res.string.bilingual_grid_3x1)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_1X4, stringResource(Res.string.bilingual_grid_1x4)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_4X1, stringResource(Res.string.bilingual_grid_4x1)),
+            SegmentedButtonItem(Constants.BILINGUAL_GRID_2X2, stringResource(Res.string.bilingual_grid_2x2)),
+        ),
+        selectedValue = selected,
+        onValueChange = onSelect,
+        buttonWidth = FLOW_BUTTON_WIDTH,
+        buttonHeight = FLOW_BUTTON_HEIGHT,
+        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+    )
 }
 
 /** How a slide arrives and leaves, and how far the end-of-song marker sits from the last line. */
@@ -363,3 +431,12 @@ private const val TRANSITION_MIN_MS = 100f
 private const val TRANSITION_MAX_MS = 2000f
 private const val TRANSITION_STEP_MS = 50f
 private const val DISABLED_ALPHA = 0.38f
+
+/** Wraps the eight-value bilingual layout switch to three a row rather than one long strip. */
+private const val BILINGUAL_LAYOUT_COMPACT_COLUMNS = 3
+
+/** [BilingualLayoutFlowButtons]'s own button height, matching [BilingualLayoutButtons]'s. */
+private val FLOW_BUTTON_HEIGHT = 34.dp
+
+/** Narrow enough that all seven of [BilingualLayoutFlowButtons]'s short labels fit one rail row. */
+private val FLOW_BUTTON_WIDTH = 46.dp

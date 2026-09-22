@@ -61,10 +61,22 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 
 private const val SHADOW_OFFSET_PX = 6f
+
+/**
+ * The most translations the lower third's own 3/4-language grid will ever draw, whatever
+ * `bilingualLayoutLowerThird`'s grid or the translation stack itself carries -- a narrow band
+ * has room for a 2x2 at most, not [org.churchpresenter.settings.utils.Constants.MAX_BIBLE_TRANSLATIONS]'s
+ * full six the full-screen stack allows.
+ */
+private const val MAX_BIBLE_BAND_TRANSLATIONS = 4
+
+/** The gap between the lower third grid's rows and its columns, in the 1920x1080 reference space. */
+private const val LOWER_THIRD_GRID_GAP_DP = 12
 
 /**
  * The smallest scale the search below will go down to before giving up.
@@ -210,10 +222,14 @@ fun BiblePresenter(
             ?: BibleTranslationSettings()
     }
 
-    // The first two translations, which the lower third renders. Full screen draws the whole stack
-    // instead; a missing entry falls back to defaults so an unconfigured slot still has a style.
+    // The first two translations, which the lower third's classic (non-Lottie) band renders, and
+    // the third and fourth, which only the Lottie band's own 3/4-slot templates reach. Full screen
+    // draws the whole stack instead; a missing entry falls back to defaults so an unconfigured slot
+    // still has a style.
     val t0 = slotStyle(0)
     val t1 = slotStyle(1)
+    val t2 = slotStyle(2)
+    val t3 = slotStyle(3)
 
     // Resolve font families — use lower-third-specific values when applicable
     val primaryBibleFontStyle = remember(
@@ -480,8 +496,7 @@ fun BiblePresenter(
                     // The outgoing verses go through the same per-output translation filter, so a
                     // screen assigned one translation plays out the verse it was actually showing.
                     outgoingVerses = versesForOutput(LocalBandOutgoing.current.verses),
-                    t0 = t0,
-                    t1 = t1,
+                    translations = listOf(t0, t1, t2, t3),
                     bandFraction = lowerThirdFraction,
                     bandClock = LocalLottieBandClock.current,
                     isKey = isKey,
@@ -741,6 +756,127 @@ fun BiblePresenter(
                 val showParallelLayout = isParallelIntended && secondary != null && (!isLowerThird || t1.lowerThirdEnabled)
                 val showSecondary = secondary != null && showParallelLayout
 
+                // Every translation's own text -- styled, coloured, sized and outlined from its own
+                // profile rather than from `t0`/`t1` -- shared by the full-screen stack below and by
+                // the lower third's own 3/4-language grid further down. The lower third's original
+                // two-language layouts style directly from `t0`/`t1` and do not use these.
+                fun alignment(value: String) = when (value) {
+                    Constants.LEFT -> TextAlign.Start
+                    Constants.RIGHT -> TextAlign.End
+                    else -> TextAlign.Center
+                }
+                fun textStyle(item: BibleTranslationSettings): TextStyle {
+                    val shadowEnabled = item.textShadow
+                    val shadow = if (shadowEnabled) scaleElementShadow(
+                        item.textShadowColor,
+                        item.textShadowSize,
+                        item.textShadowOpacity,
+                    ) else null
+                    return TextStyle(
+                        fontWeight = if (item.textBold) FontWeight.Bold else FontWeight.Normal,
+                        fontStyle = if (item.textItalic) FontStyle.Italic else FontStyle.Normal,
+                        textDecoration = combinedTextDecoration(item.textUnderline, item.textStrikethrough),
+                        letterSpacing = spacingEm(item.textLetterSpacing, item.textFontSize).em,
+                        shadow = shadow,
+                    )
+                }
+                fun referenceStyle(item: BibleTranslationSettings): TextStyle {
+                    val shadowEnabled = item.referenceShadow
+                    val shadow = if (shadowEnabled) scaleElementShadow(
+                        item.referenceShadowColor,
+                        item.referenceShadowSize,
+                        item.referenceShadowOpacity,
+                    ) else null
+                    return TextStyle(
+                        fontWeight = if (item.referenceBold) FontWeight.Bold else FontWeight.Normal,
+                        fontStyle = if (item.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                        textDecoration = combinedTextDecoration(
+                            item.referenceUnderline,
+                            item.referenceStrikethrough,
+                        ),
+                        letterSpacing = spacingEm(item.referenceLetterSpacing, item.referenceFontSize).em,
+                        shadow = shadow,
+                    )
+                }
+                // The stack's equivalent of the pText/prText helpers above: this path styles
+                // every translation from its own profile rather than from t0/t1, so the
+                // transform and word spacing have to be read per item.
+                fun itemText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
+                    raw,
+                    item.textTransform,
+                    spacingEm(item.textLetterSpacing, item.textFontSize),
+                    spacingEm(item.textWordSpacing, item.textFontSize),
+                )
+                fun itemRefText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
+                    raw,
+                    item.referenceTransform,
+                    spacingEm(item.referenceLetterSpacing, item.referenceFontSize),
+                    spacingEm(item.referenceWordSpacing, item.referenceFontSize),
+                )
+                // One translation, laid out inside whatever slot the container gives it, fit to a
+                // [fitScale] the caller has already solved for -- so a full-screen stack of six and a
+                // lower-third grid of four can each run their own search and share this one drawer.
+                val translationBlock: @Composable (SelectedVerse, BibleTranslationSettings, Float) -> Unit =
+                    { verse, item, fitScale ->
+                        val textSize = (item.textFontSize * scaleFactor * fitScale).sp
+                        val refSize = (item.referenceFontSize * scaleFactor * fitScale).sp
+                        val textFont = systemFontFamilyOrDefault(item.textFontType)
+                        val refFont = systemFontFamilyOrDefault(item.referenceFontType)
+                        val textColor = if (isKey) Color.White else parseHexColor(item.textColor)
+                        val refColor = if (isKey) Color.White else parseHexColor(item.referenceColor)
+                        val textAlign = alignment(item.textHorizontalAlignment)
+                        val refAlign = alignment(item.referenceHorizontalAlignment)
+                        val refPosition = item.referencePosition
+                        // Per translation, not per profile: every one in the stack draws
+                        // from its own settings, so each needs a painter of its own.
+                        val itemTextPainter =
+                            rememberTextBackdropPainter(item.textBackdropFor(isLowerThird))
+                        val itemRefPainter =
+                            rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
+                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                            if (refPosition == Constants.POSITION_ABOVE) {
+                                OutlinedText(
+                                    text = itemRefText(item, buildRefText(verse, item)),
+                                    modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                    outline = item.referenceOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
+                                    color = refColor,
+                                    fontFamily = refFont,
+                                    fontSize = refSize,
+                                    textAlign = refAlign,
+                                    style = referenceStyle(item),
+                                    onTextLayout = itemRefPainter::onTextLayout,
+                                )
+                            }
+                            OutlinedText(
+                                text = itemText(item, verse.verseText),
+                                modifier = Modifier.fillMaxWidth().then(itemTextPainter.modifier),
+                                outline = item.textOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                color = textColor,
+                                fontFamily = textFont,
+                                fontSize = textSize,
+                                textAlign = textAlign,
+                                style = textStyle(item),
+                                onTextLayout = itemTextPainter::onTextLayout,
+                            )
+                            if (refPosition == Constants.POSITION_BELOW) {
+                                OutlinedText(
+                                    text = itemRefText(item, buildRefText(verse, item)),
+                                    modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
+                                    outline = item.referenceOutlineFor(isLowerThird),
+                                    scaleFactor = scaleFactor,
+                                    color = refColor,
+                                    fontFamily = refFont,
+                                    fontSize = refSize,
+                                    textAlign = refAlign,
+                                    style = referenceStyle(item),
+                                    onTextLayout = itemRefPainter::onTextLayout,
+                                )
+                            }
+                        }
+                    }
+
                 // Full screen always draws the ordered stack, however many translations there are:
                 // each line reads its own style profile and a shared fit scale keeps the whole stack
                 // on screen. The lower third keeps its own one/two-language layouts below, because a
@@ -795,59 +931,6 @@ fun BiblePresenter(
                             } else {
                                 constraints.maxWidth
                             }
-                        fun alignment(value: String) = when (value) {
-                            Constants.LEFT -> TextAlign.Start
-                            Constants.RIGHT -> TextAlign.End
-                            else -> TextAlign.Center
-                        }
-                        fun textStyle(item: BibleTranslationSettings): TextStyle {
-                            val shadowEnabled = item.textShadow
-                            val shadow = if (shadowEnabled) scaleElementShadow(
-                                item.textShadowColor,
-                                item.textShadowSize,
-                                item.textShadowOpacity,
-                            ) else null
-                            return TextStyle(
-                                fontWeight = if (item.textBold) FontWeight.Bold else FontWeight.Normal,
-                                fontStyle = if (item.textItalic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = combinedTextDecoration(item.textUnderline, item.textStrikethrough),
-                                letterSpacing = spacingEm(item.textLetterSpacing, item.textFontSize).em,
-                                shadow = shadow,
-                            )
-                        }
-                        fun referenceStyle(item: BibleTranslationSettings): TextStyle {
-                            val shadowEnabled = item.referenceShadow
-                            val shadow = if (shadowEnabled) scaleElementShadow(
-                                item.referenceShadowColor,
-                                item.referenceShadowSize,
-                                item.referenceShadowOpacity,
-                            ) else null
-                            return TextStyle(
-                                fontWeight = if (item.referenceBold) FontWeight.Bold else FontWeight.Normal,
-                                fontStyle = if (item.referenceItalic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = combinedTextDecoration(
-                                    item.referenceUnderline,
-                                    item.referenceStrikethrough,
-                                ),
-                                letterSpacing = spacingEm(item.referenceLetterSpacing, item.referenceFontSize).em,
-                                shadow = shadow,
-                            )
-                        }
-                        // The stack's equivalent of the pText/prText helpers above: this path styles
-                        // every translation from its own profile rather than from t0/t1, so the
-                        // transform and word spacing have to be read per item.
-                        fun itemText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
-                            raw,
-                            item.textTransform,
-                            spacingEm(item.textLetterSpacing, item.textFontSize),
-                            spacingEm(item.textWordSpacing, item.textFontSize),
-                        )
-                        fun itemRefText(item: BibleTranslationSettings, raw: String) = styledDisplayText(
-                            raw,
-                            item.referenceTransform,
-                            spacingEm(item.referenceLetterSpacing, item.referenceFontSize),
-                            spacingEm(item.referenceWordSpacing, item.referenceFontSize),
-                        )
                         fun blockHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
                             val textSize = (item.textFontSize * scaleFactor * scale).sp
                             val refSize = (item.referenceFontSize * scaleFactor * scale).sp
@@ -890,69 +973,6 @@ fun BiblePresenter(
                         // measurement and returns 1f when it fits, so gating here measured every
                         // translation twice over.
                         val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
-                        // The type of one translation, laid out inside whatever slot the container gives it.
-                        // Hoisted so the two containers below share it: they differ only in the axis they lay
-                        // their slots out on and in the divider that separates them, never in the text.
-                        val translationBlock: @Composable (SelectedVerse, BibleTranslationSettings) -> Unit =
-                            { verse, item ->
-                                val textSize = (item.textFontSize * scaleFactor * fitScale).sp
-                                val refSize = (item.referenceFontSize * scaleFactor * fitScale).sp
-                                val textFont = systemFontFamilyOrDefault(item.textFontType)
-                                val refFont = systemFontFamilyOrDefault(item.referenceFontType)
-                                val textColor = if (isKey) Color.White else parseHexColor(item.textColor)
-                                val refColor = if (isKey) Color.White else parseHexColor(item.referenceColor)
-                                val textAlign = alignment(item.textHorizontalAlignment)
-                                val refAlign = alignment(item.referenceHorizontalAlignment)
-                                val refPosition = item.referencePosition
-                                // Per translation, not per profile: every one in the stack draws
-                                // from its own settings, so each needs a painter of its own.
-                                val itemTextPainter =
-                                    rememberTextBackdropPainter(item.textBackdropFor(isLowerThird))
-                                val itemRefPainter =
-                                    rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
-                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                    if (refPosition == Constants.POSITION_ABOVE) {
-                                        OutlinedText(
-                                            text = itemRefText(item, buildRefText(verse, item)),
-                                            modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
-                                            outline = item.referenceOutlineFor(isLowerThird),
-                                            scaleFactor = scaleFactor,
-                                            color = refColor,
-                                            fontFamily = refFont,
-                                            fontSize = refSize,
-                                            textAlign = refAlign,
-                                            style = referenceStyle(item),
-                                            onTextLayout = itemRefPainter::onTextLayout,
-                                        )
-                                    }
-                                    OutlinedText(
-                                        text = itemText(item, verse.verseText),
-                                        modifier = Modifier.fillMaxWidth().then(itemTextPainter.modifier),
-                                        outline = item.textOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        color = textColor,
-                                        fontFamily = textFont,
-                                        fontSize = textSize,
-                                        textAlign = textAlign,
-                                        style = textStyle(item),
-                                        onTextLayout = itemTextPainter::onTextLayout,
-                                    )
-                                    if (refPosition == Constants.POSITION_BELOW) {
-                                        OutlinedText(
-                                            text = itemRefText(item, buildRefText(verse, item)),
-                                            modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
-                                            outline = item.referenceOutlineFor(isLowerThird),
-                                            scaleFactor = scaleFactor,
-                                            color = refColor,
-                                            fontFamily = refFont,
-                                            fontSize = refSize,
-                                            textAlign = refAlign,
-                                            style = referenceStyle(item),
-                                            onTextLayout = itemRefPainter::onTextLayout,
-                                        )
-                                    }
-                                }
-                            }
                         val dividerColor = if (isKey) Color.White else Color.White.copy(alpha = DIVIDER_ALPHA)
                         // Half the spacing either side of the divider, so the rule sits on the centre line of
                         // the gap whether or not it is drawn -- as it did when this was one Column.
@@ -964,7 +984,7 @@ fun BiblePresenter(
                                         modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds(),
                                         contentAlignment = contentAlignment,
                                     ) {
-                                        translationBlock(verse, item)
+                                        translationBlock(verse, item, fitScale)
                                     }
                                     if (index < visible.lastIndex) {
                                         Spacer(modifier = Modifier.width(halfGap))
@@ -982,7 +1002,7 @@ fun BiblePresenter(
                                         modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds(),
                                         contentAlignment = contentAlignment,
                                     ) {
-                                        translationBlock(verse, item)
+                                        translationBlock(verse, item, fitScale)
                                     }
                                     if (index < visible.lastIndex) {
                                         Spacer(modifier = Modifier.height(halfGap))
@@ -990,6 +1010,94 @@ fun BiblePresenter(
                                             HorizontalDivider(color = dividerColor, thickness = 1.dp)
                                         }
                                         Spacer(modifier = Modifier.height(halfGap))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return
+                }
+
+                // The lower third's own grid, from `bilingualLayoutLowerThird` -- read once here so
+                // both the new 3/4-translation branch and the [bandSplits] gate below agree on it.
+                // A vertical strip has no width to split, so it always stacks (one column) regardless
+                // of what is configured, exactly as the single Top/Bottom choice always has.
+                val (lowerThirdGridRows, lowerThirdGridCols) = bilingualGrid(bs.bilingualLayoutLowerThird)
+                // Three or four languages, only when the band is actually configured for that many
+                // and asked to show them. Two keep the layouts proven below, byte-for-byte unchanged
+                // -- this is new capability, not a rewrite of what was already there.
+                val lowerThirdMultiVisible = if (showParallelLayout && !isLowerThirdVertical &&
+                    lowerThirdGridRows * lowerThirdGridCols > 2
+                ) {
+                    val cells = (lowerThirdGridRows * lowerThirdGridCols).coerceAtMost(MAX_BIBLE_BAND_TRANSLATIONS)
+                    verses.take(cells).mapIndexedNotNull { index, verse ->
+                        val style = when (index) {
+                            0 -> t0
+                            1 -> t1
+                            // Not `t0`/`t1`'s own resolution shape (that pair is looked up against
+                            // `effectiveVerses`, the output's own list) -- looked up against this
+                            // call's own `verses`/`translationStack` instead, which is what every
+                            // other slot beyond the first two has to go on.
+                            else -> translationStack.firstOrNull { it.fileName == verse.translationFileName }
+                                ?: translationStack.getOrNull(index)
+                                ?: BibleTranslationSettings()
+                        }
+                        // The first two are already gated by `showParallelLayout` above; a third or
+                        // fourth translation switched off for the lower third specifically drops out
+                        // here rather than displacing the ones after it.
+                        if (index > 1 && !style.lowerThirdEnabled) null else verse to style
+                    }
+                } else {
+                    emptyList()
+                }
+                if (lowerThirdMultiVisible.size > 2) {
+                    // Same shape of fit-search and grid the full-screen stack above uses, bounded to
+                    // this band's own box instead of the whole output, and laid out in the configured
+                    // rows x cols rather than always one row or one column.
+                    BoxWithConstraints(modifier = innerModifier, contentAlignment = Alignment.BottomCenter) {
+                        val cols = lowerThirdGridCols.coerceAtLeast(1)
+                        val rows = ((lowerThirdMultiVisible.size + cols - 1) / cols).coerceAtLeast(1)
+                        fun gapPx(scale: Float) = with(density) { (LOWER_THIRD_GRID_GAP_DP * scale).dp.roundToPx() }
+                        fun cellWidth(scale: Float): Int =
+                            ((constraints.maxWidth - (cols - 1) * gapPx(scale)) / cols).coerceAtLeast(1)
+                        fun cellHeight(scale: Float): Int =
+                            ((constraints.maxHeight - (rows - 1) * gapPx(scale)) / rows).coerceAtLeast(1)
+                        fun blockHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                            val textSize = (item.textFontSize * scaleFactor * scale).sp
+                            val refSize = (item.referenceFontSize * scaleFactor * scale).sp
+                            val textFont = systemFontFamilyOrDefault(item.textFontType)
+                            val refFont = systemFontFamilyOrDefault(item.referenceFontType)
+                            val widthConstraint = Constraints(maxWidth = cellWidth(scale))
+                            return textMeasurer.measure(
+                                itemText(item, verse.verseText),
+                                textStyle(item).copy(fontFamily = textFont, fontSize = textSize),
+                                constraints = widthConstraint,
+                            ).size.height +
+                                textMeasurer.measure(
+                                    itemRefText(item, buildRefText(verse, item)),
+                                    referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
+                                    constraints = widthConstraint,
+                                ).size.height
+                        }
+                        fun everyBlockFits(scale: Float): Boolean {
+                            val cell = cellHeight(scale)
+                            return lowerThirdMultiVisible.all { (verse, item) ->
+                                blockHeight(verse, item, scale) <= cell
+                            }
+                        }
+                        val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
+                        val gap = with(density) { gapPx(fitScale).toDp() }
+                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                            lowerThirdMultiVisible.chunked(cols).forEachIndexed { rowIndex, row ->
+                                if (rowIndex > 0) Spacer(modifier = Modifier.height(gap))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(gap),
+                                ) {
+                                    row.forEach { (verse, item) ->
+                                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+                                            translationBlock(verse, item, fitScale)
+                                        }
                                     }
                                 }
                             }
@@ -1008,8 +1116,7 @@ fun BiblePresenter(
                 // vertical strip still stacks whatever the setting says — it has no width to split.
                 // A band splits across its width only when it has a width to split: a vertical strip
                 // and a Top/Bottom choice both send it to the stacked branch instead.
-                val bandSplits = bs.bilingualLayoutLowerThird == Constants.BILINGUAL_SIDE_BY_SIDE &&
-                    !isLowerThirdVertical
+                val bandSplits = lowerThirdGridRows == 1 && lowerThirdGridCols > 1 && !isLowerThirdVertical
                 if (showParallelLayout && isLowerThird && bandSplits) {
                     val sec = secondary
                     // Lower third: side-by-side Row layout (50/50) with matched auto-fit
