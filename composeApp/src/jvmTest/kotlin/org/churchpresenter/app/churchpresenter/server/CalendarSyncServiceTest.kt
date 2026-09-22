@@ -54,14 +54,14 @@ class CalendarSyncServiceTest {
                 """{"id":"$it","nameBox":"","pairedAt":"2026-09-20T00:00:00Z","lastSeen":""}"""
             }
 
+        private fun clientKeyReply(): RelayReply =
+            if (keyEndpointDown) RelayReply(503, "{}") else RelayReply(200, """{"clientKey":"$clientKey"}""")
+
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
             calls += "$method $url"
             if (relayDown) throw IOException("relay down")
             if (slowMs > 0) Thread.sleep(slowMs)
-            if (url == CalendarSyncSettings.CLIENT_KEY_URL) {
-                if (keyEndpointDown) return RelayReply(503, "{}")
-                return RelayReply(200, """{"clientKey":"$clientKey"}""")
-            }
+            if (url == CalendarSyncSettings.CLIENT_KEY_URL) return clientKeyReply()
             if (headers["X-Client-Key"] != clientKey || refuseKeyOnce) {
                 refuseKeyOnce = false
                 return RelayReply(401, """{"error":"client_key"}""")

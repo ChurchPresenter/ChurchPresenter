@@ -138,7 +138,8 @@ class SongLanguageLinesTest {
     fun `a block carries its own look-ahead from its own language`() {
         val next = section(lines = listOf("I once was lost"), translations = listOf(listOf("Я был слепой")))
 
-        val blocks = songLanguageBlocks(section(), next, languages = listOf(0, 1), modes = modes(lookAheadEnabled = true))
+        val blocks =
+            songLanguageBlocks(section(), next, languages = listOf(0, 1), modes = modes(lookAheadEnabled = true))
 
         assertEquals(listOf("I once was lost"), blocks[0].lookAheadLines)
         assertEquals(listOf("Я был слепой"), blocks[1].lookAheadLines)
