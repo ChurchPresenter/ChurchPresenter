@@ -1269,6 +1269,10 @@ class SystemSettingsTabTest {
         setContent { MaterialTheme { SystemSettingsTab() } }
 
         waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
+        // The calendar's folder is checked off the UI thread, so the count is 0 until that lands --
+        // wait for the number itself, as the two counting tests above do, rather than for the six
+        // rows that are "Not set" the instant they compose.
+        waitUntil { onAllNodesWithText("1 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 linked").onFirst()
             .assertExists("only the calendar, at its default, is linked before anything is chosen")
     }

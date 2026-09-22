@@ -124,8 +124,9 @@ import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollReply
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
+import org.churchpresenter.app.churchpresenter.server.CalendarInvite
+import org.churchpresenter.app.churchpresenter.server.asInvite
 import org.churchpresenter.app.churchpresenter.dialogs.enrollCodeText
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -1035,7 +1036,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             val remoteActivityNotifications =
                                 remember { mutableStateListOf<RemoteActivityNotification>() }
                             // The QR a just-approved phone scans to get its calendar token and key.
-                            var calendarEnrollQr by remember { mutableStateOf<CalendarEnrollment?>(null) }
+                            var calendarEnrollQr by remember { mutableStateOf<CalendarInvite?>(null) }
 
                             LaunchedEffect(remoteClientManager.blockedClients, sessionBlockedClients.toList()) {
                                 companionServer.blockedClientIds =
@@ -1105,7 +1106,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             // sat in the queue.
                                             if (pending.decision.isCompleted) return@launch
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
-                                            calendarEnrollQr = enrollment
+                                            calendarEnrollQr = enrollment?.let { CalendarInvite.Ready(it) }
                                             pending.decision.complete(
                                                 if (enrollment == null) {
                                                     CalendarEnrollDecision.RelayFailed
@@ -2044,6 +2045,11 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 )
                                                 settingsManager.saveSettings(appSettings)
                                             },
+                                            invitePhone = {
+                                                coroutineScope.launch {
+                                                    calendarEnrollQr = calendarSync.invitePhone().asInvite(calendarSync)
+                                                }
+                                            },
                                         ),
                                         // How long a row runs by itself, so a plan does not have
                                         // to be timed by hand: a clip's own duration, read from
@@ -2199,8 +2205,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onDismiss = { pendingUpdateResult = null }
                             )
 
-                            calendarEnrollQr?.let { enrollment ->
-                                CalendarEnrollQrDialog(enrollment = enrollment, onDismiss = { calendarEnrollQr = null })
+                            calendarEnrollQr?.let { invite ->
+                                CalendarEnrollQrDialog(invite = invite, onDismiss = { calendarEnrollQr = null })
                             }
 
                             val currentRemote = remoteEventQueue.firstOrNull()

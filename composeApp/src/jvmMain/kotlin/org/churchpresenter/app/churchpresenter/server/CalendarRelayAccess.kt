@@ -34,9 +34,16 @@ internal class CalendarRelayAccess(
     /** How long a song usually runs here, for the catalog the phones plan with; null when never measured. */
     private val typicalSeconds: (SongItem) -> Int? = { null },
 ) {
-    /** Runs [block] with a client key, fetching one first if none is cached and once more if the relay refuses it. */
+    /**
+     * Runs [block] with a client key, fetching one first if none is cached and once more if the
+     * relay refuses it. Never with none: a call without a key is a wrong-key attempt as far as the
+     * relay is concerned, and twenty of those in a day ban the address -- so a key that cannot be
+     * fetched fails here, before anything is sent.
+     */
     fun <T> withClientKey(block: () -> T): T {
-        if (settings().clientKey.isEmpty()) refreshClientKey()
+        if (settings().clientKey.isEmpty() && !refreshClientKey()) {
+            throw RelayFailure.ClientKey("could not fetch the client key from the website")
+        }
         return try {
             block()
         } catch (_: RelayFailure.ClientKey) {
