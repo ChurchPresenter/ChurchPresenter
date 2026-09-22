@@ -270,6 +270,9 @@ data class BibleSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    /** Shrinks/repositions the whole verse-text block -- see [ContentRegion]. */
+    val contentRegion: ContentRegion = ContentRegion(),
+
     /**
      * How much of the output's height the lower-third band takes, as a whole percentage. 10..60.
      *

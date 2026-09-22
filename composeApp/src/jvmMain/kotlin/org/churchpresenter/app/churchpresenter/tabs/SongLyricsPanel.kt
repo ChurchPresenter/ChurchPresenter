@@ -137,7 +137,15 @@ internal fun RowScope.SongLyricsPanel(
         // "Back to Live" button — shown when browsing a different song than what's live.
         // Compares songId, not index/position, so this stays correct even when the live
         // song has been filtered out of the visible list by a search.
-        if (isPresenting && live.songId != null && currentSong?.songId != live.songId) {
+        //
+        // Hidden while the Edit Song dialog (or new/delete) is open: that dialog is a separate
+        // top-level window sitting in front of this panel, so the button's effect -- updating this
+        // panel's own selection -- happens somewhere the user looking at the dialog cannot see,
+        // and looks like it did nothing. There is nothing useful to "go back to" here until that
+        // dialog closes and this panel is visible again.
+        val dialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
+        val showBackToLive = isPresenting && live.songId != null && currentSong?.songId != live.songId
+        if (showBackToLive && !dialogOpen) {
             Button(
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),

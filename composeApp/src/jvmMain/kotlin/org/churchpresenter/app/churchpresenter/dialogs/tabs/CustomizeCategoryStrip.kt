@@ -40,9 +40,14 @@ import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
+import churchpresenter.composeapp.generated.resources.content_region
+import churchpresenter.composeapp.generated.resources.content_region_width
+import churchpresenter.composeapp.generated.resources.content_region_x_offset
+import churchpresenter.composeapp.generated.resources.content_region_y_offset
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.ScreenAssignment
@@ -166,6 +171,12 @@ private fun BibleStrip(
             range = SPACING_RANGE_MIN..SPACING_RANGE_MAX,
         )
     }
+    // Full screen only: a lower third's own width IS the band, so narrowing/shifting it the way a
+    // video mixer split would is meaningless there -- the band already leaves the rest of the
+    // screen alone.
+    if (!lowerThird) {
+        ContentRegionStripRow(bs.contentRegion) { v -> update { it.copy(contentRegion = v) } }
+    }
     // The two shapes keep separate values: a full screen stacks by default and a band splits by
     // default, which is what they have always drawn, so one shared field could not have preserved
     // both. Whichever shape this output is, it edits its own.
@@ -279,6 +290,13 @@ private fun SongStrip(
             }
         }
     }
+    // Full screen only, for the same reason as the Bible strip's own: a lower third's width already
+    // is the band, so there is nothing here for it to narrow or shift.
+    if (!lowerThird) {
+        ContentRegionStripRow(ss.layoutExtras.contentRegion) { v ->
+            update { it.copy(layoutExtras = it.layoutExtras.copy(contentRegion = v)) }
+        }
+    }
     // How the two languages sit against each other -- the one control the global Song tab has at
     // this level that this dialog was missing. It is a property of the slide rather than of the
     // lyrics or the title, so it belongs on the strip and not under a chip; and it is one stored
@@ -311,6 +329,37 @@ private fun DictionaryStrip(ds: DictionarySettings, update: ((DictionarySettings
         onCrossfade = {},
         onDuration = { v -> update { it.copy(transitionDuration = v) } },
     )
+}
+
+/**
+ * Width and X/Y offset for the whole content block -- the Customize dialog's own view of
+ * [ContentRegionSection] on the global tabs, one field per output rather than one for the install.
+ */
+@Composable
+private fun ContentRegionStripRow(region: ContentRegion, onChange: (ContentRegion) -> Unit) {
+    StripRow(stringResource(Res.string.content_region)) {
+        NumberControl(
+            label = stringResource(Res.string.content_region_width),
+            value = region.widthPercent,
+            onValueChange = { v -> onChange(region.copy(widthPercent = v)) },
+            range = ContentRegion.WIDTH_RANGE,
+            width = MARGIN_FIELD_WIDTH,
+        )
+        NumberControl(
+            label = stringResource(Res.string.content_region_x_offset),
+            value = region.xOffsetPercent,
+            onValueChange = { v -> onChange(region.copy(xOffsetPercent = v)) },
+            range = ContentRegion.OFFSET_RANGE,
+            width = MARGIN_FIELD_WIDTH,
+        )
+        NumberControl(
+            label = stringResource(Res.string.content_region_y_offset),
+            value = region.yOffsetPercent,
+            onValueChange = { v -> onChange(region.copy(yOffsetPercent = v)) },
+            range = ContentRegion.OFFSET_RANGE,
+            width = MARGIN_FIELD_WIDTH,
+        )
+    }
 }
 
 /** The four insets, in the order the mockup reads them: top, bottom, left, right. */

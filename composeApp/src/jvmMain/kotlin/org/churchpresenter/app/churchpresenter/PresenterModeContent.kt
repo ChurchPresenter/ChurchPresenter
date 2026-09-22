@@ -11,6 +11,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
@@ -104,6 +105,11 @@ internal fun PresenterModeContent(
         Presenting.BIBLE ->
             if (screenAssignment.showBible) {
                 BiblePresenter(
+                    modifier = if (screenAssignment.isLowerThird) {
+                        Modifier
+                    } else {
+                        Modifier.contentRegion(appSettings.bibleSettings.contentRegion)
+                    },
                     selectedVerses = displayedVerses,
                     appSettings = appSettings,
                     isLowerThird = screenAssignment.isLowerThird,
@@ -119,6 +125,11 @@ internal fun PresenterModeContent(
         Presenting.LYRICS ->
             if (screenAssignment.showSongs) {
                 SongPresenter(
+                    modifier = if (screenAssignment.isLowerThird) {
+                        Modifier
+                    } else {
+                        Modifier.contentRegion(appSettings.songSettings.layoutExtras.contentRegion)
+                    },
                     lyricSection = displayedLyricSection,
                     appSettings = appSettings,
                     isLowerThird = screenAssignment.isLowerThird,

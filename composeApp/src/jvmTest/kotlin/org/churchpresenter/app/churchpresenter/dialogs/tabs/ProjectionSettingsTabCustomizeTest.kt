@@ -255,7 +255,7 @@ class ProjectionSettingsTabCustomizeTest {
             openCustomize(row = 0)
             selectPane(CustomizePane.BIBLE)
             enableOverride()
-            onNodeWithText("Left / Right").performClick()
+            onNodeWithText("Left / Right").performScrollTo().performClick()
             waitForIdle()
 
             val bible = assertNotNull(

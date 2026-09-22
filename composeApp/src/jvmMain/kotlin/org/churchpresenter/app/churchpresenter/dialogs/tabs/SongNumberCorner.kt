@@ -7,6 +7,7 @@ import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.song_number_corner_off
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
+import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -24,6 +25,18 @@ internal fun SongSettings.numberCorner(lowerThird: Boolean): String =
 /** The inverse of [numberCorner]. */
 internal fun SongSettings.withNumberCorner(lowerThird: Boolean, value: String): SongSettings =
     if (lowerThird) copy(songNumberLowerThirdCorner = value) else copy(songNumberCorner = value)
+
+/** The fine X/Y nudge on top of [numberCorner], for [lowerThird]'s output. */
+internal fun SongSettings.numberOffset(lowerThird: Boolean): SongNumberOffset =
+    if (lowerThird) layoutExtras.numberLowerThirdOffset else layoutExtras.numberOffset
+
+/** The inverse of [numberOffset]. */
+internal fun SongSettings.withNumberOffset(lowerThird: Boolean, value: SongNumberOffset): SongSettings =
+    if (lowerThird) {
+        copy(layoutExtras = layoutExtras.copy(numberLowerThirdOffset = value))
+    } else {
+        copy(layoutExtras = layoutExtras.copy(numberOffset = value))
+    }
 
 /** Off, then the four corners — the dropdown's options, keyed by what is stored. */
 @Composable
