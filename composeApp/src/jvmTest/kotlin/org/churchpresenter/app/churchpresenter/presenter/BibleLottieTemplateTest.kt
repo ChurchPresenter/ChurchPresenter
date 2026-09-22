@@ -185,6 +185,45 @@ class BibleLottieTemplateTest {
         assertEquals("Regular", BandFontKey("A", bold = false, italic = false).styleName)
     }
 
+    @Test
+    fun `a file with no fonts block of its own is given one`() {
+        val bare = """{"layers":[{"nm":"Text1","t":{"d":{"k":[{"s":{"f":"Arial-Regular"}}]}}}]}"""
+
+        val rewritten = Json.parseToJsonElement(
+            rewriteTemplateFonts(bare, mapOf("Text1" to BandFontKey("Georgia", bold = false, italic = false))),
+        ).jsonObject
+
+        val list = rewritten["fonts"]!!.jsonObject["list"]!!.jsonArray.map { it.jsonObject }
+        assertEquals(listOf("Georgia-Regular"), list.map { it["fName"]!!.jsonPrimitive.content })
+    }
+
+    @Test
+    fun `a layer the rewrite cannot reach into is left exactly as it was`() {
+        // Each of these is missing one step of the path to a text document: no `t`, no `d`, no `k`,
+        // a keyframe that is not an object, and a keyframe with no `s`. None may be rewritten, and
+        // none may be dropped either -- a band draws whatever layers the file has.
+        val layers = listOf(
+            """{"nm":"Text1"}""",
+            """{"nm":"Text1","t":{}}""",
+            """{"nm":"Text1","t":{"d":{}}}""",
+            """{"nm":"Text1","t":{"d":{"k":["not an object"]}}}""",
+            """{"nm":"Text1","t":{"d":{"k":[{"noS":1}]}}}""",
+            """"a layer that is not an object at all"""",
+            """{"noName":1}""",
+        )
+        val faces = mapOf("Text1" to BandFontKey("Georgia", bold = false, italic = false))
+
+        layers.forEach { layer ->
+            val json = """{"layers":[$layer]}"""
+            val rewritten = Json.parseToJsonElement(rewriteTemplateFonts(json, faces)).jsonObject
+            assertEquals(
+                Json.parseToJsonElement(json).jsonObject["layers"],
+                rewritten["layers"],
+                "an unreachable layer is carried through untouched",
+            )
+        }
+    }
+
     // ── What a file leaves out, or gets wrong ───────────────────────────────────
 
     /** The smallest playable Lottie, with [extra] spliced into its top-level object. */
