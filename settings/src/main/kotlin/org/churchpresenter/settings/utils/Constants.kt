@@ -404,11 +404,22 @@ object Constants {
  * corrupted) reads as [Constants.BILINGUAL_SIDE_BY_SIDE] always has: one row, two columns.
  */
 fun bilingualGrid(value: String): Pair<Int, Int> = when (value) {
-    Constants.BILINGUAL_TOP_BOTTOM -> 2 to 1
-    Constants.BILINGUAL_GRID_1X3 -> 1 to 3
-    Constants.BILINGUAL_GRID_3X1 -> 3 to 1
-    Constants.BILINGUAL_GRID_1X4 -> 1 to 4
-    Constants.BILINGUAL_GRID_4X1 -> 4 to 1
-    Constants.BILINGUAL_GRID_2X2 -> 2 to 2
-    else -> 1 to 2
+    Constants.BILINGUAL_TOP_BOTTOM -> BILINGUAL_ROWS_2 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_1X3 -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_3
+    Constants.BILINGUAL_GRID_3X1 -> BILINGUAL_ROWS_3 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_1X4 -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_4
+    Constants.BILINGUAL_GRID_4X1 -> BILINGUAL_ROWS_4 to BILINGUAL_COLS_1
+    Constants.BILINGUAL_GRID_2X2 -> BILINGUAL_ROWS_2 to BILINGUAL_COLS_2
+    else -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_2
 }
+
+// Named rather than left as literals: `bilingualGrid`'s own `when` tripped detekt's MagicNumber
+// rule on the ones past 2, which it leaves alone by default.
+private const val BILINGUAL_ROWS_1 = 1
+private const val BILINGUAL_ROWS_2 = 2
+private const val BILINGUAL_ROWS_3 = 3
+private const val BILINGUAL_ROWS_4 = 4
+private const val BILINGUAL_COLS_1 = 1
+private const val BILINGUAL_COLS_2 = 2
+private const val BILINGUAL_COLS_3 = 3
+private const val BILINGUAL_COLS_4 = 4
