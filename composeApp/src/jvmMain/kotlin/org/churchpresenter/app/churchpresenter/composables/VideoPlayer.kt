@@ -752,7 +752,7 @@ private fun frameRenderCallback(
  * decoder is the one that tells the view model the file ended — see the parameter on
  * [SoftwareVideoPlayer].
  */
-private fun softwarePlayerEvents(
+internal fun softwarePlayerEvents(
     viewModel: MediaViewModel,
     firstFrameCaptured: MutableState<Boolean>,
     gate: PlayerReleaseGate,
