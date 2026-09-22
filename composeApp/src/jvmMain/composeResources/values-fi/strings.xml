@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Anna tälle kielelle oma ulkoasu</string>
     <string name="song_translation_title">Kielen %1$d otsikko</string>
     <string name="tooltip_preview_settings">Esikatseluasetukset</string>
+    <string name="media_subtitle_settings">Tekstitysasetukset</string>
+    <string name="media_subtitle_settings_hint">Koskee SRT/WebVTT-tekstitystiedostoja, jotka sovellus piirtää itse. Upotettu raita tai ASS/SSA/SUB-tiedosto säilyttää VLC:n oman ulkoasun.</string>
+    <string name="media_subtitle_text_color">Tekstin väri</string>
+    <string name="media_subtitle_background_color">Taustaväri</string>
+    <string name="media_subtitle_font">Fontti</string>
+    <string name="media_subtitle_size">Koko</string>
+    <string name="media_subtitle_position">Sijainti</string>
+    <string name="media_subtitle_opacity">Peittävyys:</string>
+    <string name="media_subtitle_max_lines">Enintään rivejä</string>
+    <string name="tooltip_media_subtitle_settings">Tekstityksen näyttöasetukset</string>
 </resources>

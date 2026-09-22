@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Ge det här språket egen stil</string>
     <string name="song_translation_title">Titel för Språk %1$d</string>
     <string name="tooltip_preview_settings">Förhandsgranskningsinställningar</string>
+    <string name="media_subtitle_settings">Undertextinställningar</string>
+    <string name="media_subtitle_settings_hint">Gäller SRT/WebVTT-undertextfiler, som appen ritar själv. Ett inbäddat spår eller en ASS/SSA/SUB-fil behåller VLC:s eget utseende.</string>
+    <string name="media_subtitle_text_color">Textfärg</string>
+    <string name="media_subtitle_background_color">Bakgrundsfärg</string>
+    <string name="media_subtitle_font">Teckensnitt</string>
+    <string name="media_subtitle_size">Storlek</string>
+    <string name="media_subtitle_position">Placering</string>
+    <string name="media_subtitle_opacity">Opacitet:</string>
+    <string name="media_subtitle_max_lines">Högsta antal rader</string>
+    <string name="tooltip_media_subtitle_settings">Visningsinställningar för undertexter</string>
 </resources>

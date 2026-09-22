@@ -2888,4 +2888,14 @@
     <string name="song_translation_own_style">Deze taal een eigen stijl geven</string>
     <string name="song_translation_title">Titel van Taal %1$d</string>
     <string name="tooltip_preview_settings">Voorbeeldinstellingen</string>
+    <string name="media_subtitle_settings">Ondertitelinstellingen</string>
+    <string name="media_subtitle_settings_hint">Geldt voor SRT/WebVTT-ondertitelbestanden, die de app zelf tekent. Een ingesloten track of een ASS/SSA/SUB-bestand behoudt de eigen weergave van VLC.</string>
+    <string name="media_subtitle_text_color">Tekstkleur</string>
+    <string name="media_subtitle_background_color">Achtergrondkleur</string>
+    <string name="media_subtitle_font">Lettertype</string>
+    <string name="media_subtitle_size">Grootte</string>
+    <string name="media_subtitle_position">Positie</string>
+    <string name="media_subtitle_opacity">Dekking:</string>
+    <string name="media_subtitle_max_lines">Max. regels:</string>
+    <string name="tooltip_media_subtitle_settings">Ondertitel-weergave-instellingen</string>
 </resources>

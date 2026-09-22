@@ -2911,4 +2911,14 @@
     <string name="song_translation_own_style">இந்த மொழிக்கு அதன் சொந்த பாணியைக் கொடு</string>
     <string name="song_translation_title">மொழி %1$d தலைப்பு</string>
     <string name="tooltip_preview_settings">முன்னோட்ட அமைப்புகள்</string>
+    <string name="media_subtitle_settings">வசன அமைப்புகள்</string>
+    <string name="media_subtitle_settings_hint">பயன்பாடே வரையும் SRT/WebVTT வசன கோப்புகளுக்குப் பொருந்தும். உட்பொதிந்த தடம் அல்லது ASS/SSA/SUB கோப்பு VLC-யின் சொந்த தோற்றத்தையே தக்க வைக்கும்.</string>
+    <string name="media_subtitle_text_color">உரை நிறம்</string>
+    <string name="media_subtitle_background_color">பின்னணி நிறம்</string>
+    <string name="media_subtitle_font">எழுத்துரு</string>
+    <string name="media_subtitle_size">அளவு</string>
+    <string name="media_subtitle_position">இடம்</string>
+    <string name="media_subtitle_opacity">ஒளிபுகாநிலை:</string>
+    <string name="media_subtitle_max_lines">அதிகபட்ச வரிகள்</string>
+    <string name="tooltip_media_subtitle_settings">வசன காட்சி அமைப்புகள்</string>
 </resources>

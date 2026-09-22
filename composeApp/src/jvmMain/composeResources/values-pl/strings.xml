@@ -2860,4 +2860,14 @@
     <string name="song_translation_own_style">Nadaj temu językowi własny styl</string>
     <string name="song_translation_title">Tytuł dla Języka %1$d</string>
     <string name="tooltip_preview_settings">Ustawienia podglądu</string>
+    <string name="media_subtitle_settings">Ustawienia napisów</string>
+    <string name="media_subtitle_settings_hint">Dotyczy plików napisów SRT/WebVTT, które aplikacja rysuje samodzielnie. Wbudowana ścieżka lub plik ASS/SSA/SUB zachowują własny wygląd VLC.</string>
+    <string name="media_subtitle_text_color">Kolor tekstu</string>
+    <string name="media_subtitle_background_color">Kolor tła</string>
+    <string name="media_subtitle_font">Czcionka</string>
+    <string name="media_subtitle_size">Rozmiar</string>
+    <string name="media_subtitle_position">Pozycja</string>
+    <string name="media_subtitle_opacity">Przezroczystość:</string>
+    <string name="media_subtitle_max_lines">Maks. wierszy:</string>
+    <string name="tooltip_media_subtitle_settings">Ustawienia wyświetlania napisów</string>
 </resources>

@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Bigyan ang wikang ito ng sarili nitong istilo</string>
     <string name="song_translation_title">Pamagat ng Wika %1$d</string>
     <string name="tooltip_preview_settings">Mga setting ng preview</string>
+    <string name="media_subtitle_settings">Mga Setting ng Subtitle</string>
+    <string name="media_subtitle_settings_hint">Nalalapat sa mga SRT/WebVTT subtitle file, na iginuhit mismo ng app. Ang naka-embed na track o isang ASS/SSA/SUB file ay pinapanatili ang sariling itsura ng VLC.</string>
+    <string name="media_subtitle_text_color">Kulay ng teksto</string>
+    <string name="media_subtitle_background_color">Kulay ng background</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Laki</string>
+    <string name="media_subtitle_position">Posisyon</string>
+    <string name="media_subtitle_opacity">Opacity:</string>
+    <string name="media_subtitle_max_lines">Pinakamaraming linya</string>
+    <string name="tooltip_media_subtitle_settings">Mga Setting ng Display ng Subtitle</string>
 </resources>

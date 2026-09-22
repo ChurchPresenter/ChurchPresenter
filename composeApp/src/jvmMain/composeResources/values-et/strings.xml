@@ -2893,4 +2893,14 @@
     <string name="song_translation_own_style">Anna sellele keelele oma stiil</string>
     <string name="song_translation_title">Keele %1$d pealkiri</string>
     <string name="tooltip_preview_settings">Eelvaate seaded</string>
+    <string name="media_subtitle_settings">Subtiitrite seaded</string>
+    <string name="media_subtitle_settings_hint">Kehtib SRT/WebVTT subtiitrifailide kohta, mida rakendus joonistab ise. Manustatud rada või ASS/SSA/SUB-fail säilitab VLC enda välimuse.</string>
+    <string name="media_subtitle_text_color">Teksti värv</string>
+    <string name="media_subtitle_background_color">Taustavärv</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Suurus</string>
+    <string name="media_subtitle_position">Asukoht</string>
+    <string name="media_subtitle_opacity">Läbipaistmatus:</string>
+    <string name="media_subtitle_max_lines">Maksimaalne ridade arv</string>
+    <string name="tooltip_media_subtitle_settings">Subtiitrite kuva seaded</string>
 </resources>

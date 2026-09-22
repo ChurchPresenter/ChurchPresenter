@@ -2890,4 +2890,14 @@
     <string name="song_translation_own_style">Dă acestei limbi un stil propriu</string>
     <string name="song_translation_title">Titlu pentru Limba %1$d</string>
     <string name="tooltip_preview_settings">Setări de previzualizare</string>
+    <string name="media_subtitle_settings">Setări subtitrări</string>
+    <string name="media_subtitle_settings_hint">Se aplică fișierelor de subtitrare SRT/WebVTT, pe care aplicația le desenează singură. O pistă încorporată sau un fișier ASS/SSA/SUB păstrează aspectul propriu al VLC.</string>
+    <string name="media_subtitle_text_color">Culoare Text</string>
+    <string name="media_subtitle_background_color">Culoare Fundal</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Dimensiune</string>
+    <string name="media_subtitle_position">Poziție</string>
+    <string name="media_subtitle_opacity">Opacitate:</string>
+    <string name="media_subtitle_max_lines">Max. Linii:</string>
+    <string name="tooltip_media_subtitle_settings">Setări afișare subtitrări</string>
 </resources>

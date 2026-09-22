@@ -2861,4 +2861,14 @@
     <string name="song_translation_own_style">Dieser Sprache ein eigenes Aussehen geben</string>
     <string name="song_translation_title">Titel für Sprache %1$d</string>
     <string name="tooltip_preview_settings">Vorschau-Einstellungen</string>
+    <string name="media_subtitle_settings">Untertitel-Einstellungen</string>
+    <string name="media_subtitle_settings_hint">Gilt für SRT/WebVTT-Untertiteldateien, die die App selbst zeichnet. Eine eingebettete Spur oder eine ASS/SSA/SUB-Datei behält das eigene Erscheinungsbild von VLC.</string>
+    <string name="media_subtitle_text_color">Textfarbe</string>
+    <string name="media_subtitle_background_color">Hintergrundfarbe</string>
+    <string name="media_subtitle_font">Schriftart</string>
+    <string name="media_subtitle_size">Größe</string>
+    <string name="media_subtitle_position">Position</string>
+    <string name="media_subtitle_opacity">Deckkraft:</string>
+    <string name="media_subtitle_max_lines">Max. Zeilen:</string>
+    <string name="tooltip_media_subtitle_settings">Untertitel-Anzeigeeinstellungen</string>
 </resources>

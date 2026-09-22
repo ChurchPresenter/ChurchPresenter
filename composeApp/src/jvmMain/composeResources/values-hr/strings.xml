@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Daj ovom jeziku vlastiti izgled</string>
     <string name="song_translation_title">Naslov za Jezik %1$d</string>
     <string name="tooltip_preview_settings">Postavke pregleda</string>
+    <string name="media_subtitle_settings">Postavke titlova</string>
+    <string name="media_subtitle_settings_hint">Primjenjuje se na SRT/WebVTT datoteke titlova, koje aplikacija sama iscrtava. Ugrađena traka ili ASS/SSA/SUB datoteka zadržavaju vlastiti izgled VLC-a.</string>
+    <string name="media_subtitle_text_color">Boja teksta</string>
+    <string name="media_subtitle_background_color">Boja pozadine</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Veličina</string>
+    <string name="media_subtitle_position">Položaj</string>
+    <string name="media_subtitle_opacity">Neprozirnost:</string>
+    <string name="media_subtitle_max_lines">Najviše redaka</string>
+    <string name="tooltip_media_subtitle_settings">Postavke prikaza titlova</string>
 </resources>

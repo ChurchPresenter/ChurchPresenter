@@ -2889,4 +2889,14 @@
     <string name="song_translation_own_style">Dar a este idioma um estilo próprio</string>
     <string name="song_translation_title">Título do Idioma %1$d</string>
     <string name="tooltip_preview_settings">Configurações de pré-visualização</string>
+    <string name="media_subtitle_settings">Configurações de Legendas</string>
+    <string name="media_subtitle_settings_hint">Aplica-se a arquivos de legenda SRT/WebVTT, que o aplicativo desenha por conta própria. Uma faixa incorporada ou um arquivo ASS/SSA/SUB mantém a aparência própria do VLC.</string>
+    <string name="media_subtitle_text_color">Cor do Texto</string>
+    <string name="media_subtitle_background_color">Cor de Fundo</string>
+    <string name="media_subtitle_font">Fonte</string>
+    <string name="media_subtitle_size">Tamanho</string>
+    <string name="media_subtitle_position">Posição</string>
+    <string name="media_subtitle_opacity">Opacidade:</string>
+    <string name="media_subtitle_max_lines">Máx. de Linhas:</string>
+    <string name="tooltip_media_subtitle_settings">Configurações de Exibição de Legendas</string>
 </resources>

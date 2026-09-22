@@ -2860,4 +2860,14 @@
     <string name="song_translation_own_style">Надати цій мові власний стиль</string>
     <string name="song_translation_title">Заголовок для Мови %1$d</string>
     <string name="tooltip_preview_settings">Налаштування перегляду</string>
+    <string name="media_subtitle_settings">Налаштування субтитрів</string>
+    <string name="media_subtitle_settings_hint">Застосовується до файлів субтитрів SRT/WebVTT, які застосунок малює сам. Вбудована доріжка або файл ASS/SSA/SUB зберігають власний вигляд VLC.</string>
+    <string name="media_subtitle_text_color">Колір тексту</string>
+    <string name="media_subtitle_background_color">Колір фону</string>
+    <string name="media_subtitle_font">Шрифт</string>
+    <string name="media_subtitle_size">Розмір</string>
+    <string name="media_subtitle_position">Положення</string>
+    <string name="media_subtitle_opacity">Прозорість:</string>
+    <string name="media_subtitle_max_lines">Макс. рядків:</string>
+    <string name="tooltip_media_subtitle_settings">Налаштування відображення субтитрів</string>
 </resources>

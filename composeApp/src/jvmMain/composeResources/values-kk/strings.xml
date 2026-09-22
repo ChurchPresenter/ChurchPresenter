@@ -2861,4 +2861,14 @@
     <string name="song_translation_own_style">Бұл тілге өз стилін беру</string>
     <string name="song_translation_title">%1$d-тіл тақырыбы</string>
     <string name="tooltip_preview_settings">Алдын ала қарау параметрлері</string>
+    <string name="media_subtitle_settings">Субтитр параметрлері</string>
+    <string name="media_subtitle_settings_hint">Бағдарлама өзі салатын SRT/WebVTT субтитр файлдарына қолданылады. Ендірілген трек немесе ASS/SSA/SUB файлы VLC-тің өз көрінісін сақтайды.</string>
+    <string name="media_subtitle_text_color">Мәтін түсі</string>
+    <string name="media_subtitle_background_color">Фон түсі</string>
+    <string name="media_subtitle_font">Қаріп</string>
+    <string name="media_subtitle_size">Өлшем</string>
+    <string name="media_subtitle_position">Орын</string>
+    <string name="media_subtitle_opacity">Мөлдірлік:</string>
+    <string name="media_subtitle_max_lines">Макс. жолдар:</string>
+    <string name="tooltip_media_subtitle_settings">Субтитрді көрсету параметрлері</string>
 </resources>

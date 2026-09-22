@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Bu dile kendi stilini ver</string>
     <string name="song_translation_title">Dil %1$d Başlığı</string>
     <string name="tooltip_preview_settings">Önizleme Ayarları</string>
+    <string name="media_subtitle_settings">Altyazı Ayarları</string>
+    <string name="media_subtitle_settings_hint">Uygulamanın kendisinin çizdiği SRT/WebVTT altyazı dosyaları için geçerlidir. Gömülü bir iz veya ASS/SSA/SUB dosyası VLC'nin kendi görünümünü korur.</string>
+    <string name="media_subtitle_text_color">Yazı rengi</string>
+    <string name="media_subtitle_background_color">Arka plan rengi</string>
+    <string name="media_subtitle_font">Yazı tipi</string>
+    <string name="media_subtitle_size">Boyut</string>
+    <string name="media_subtitle_position">Konum</string>
+    <string name="media_subtitle_opacity">Saydamsızlık:</string>
+    <string name="media_subtitle_max_lines">En çok satır</string>
+    <string name="tooltip_media_subtitle_settings">Altyazı Gösterim Ayarları</string>
 </resources>

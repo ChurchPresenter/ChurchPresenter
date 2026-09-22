@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">为此语言设置专属样式</string>
     <string name="song_translation_title">语言 %1$d 标题</string>
     <string name="tooltip_preview_settings">预览设置</string>
+    <string name="media_subtitle_settings">字幕设置</string>
+    <string name="media_subtitle_settings_hint">适用于应用自行绘制的 SRT/WebVTT 字幕文件。内嵌轨道或 ASS/SSA/SUB 文件将保留 VLC 自身的外观。</string>
+    <string name="media_subtitle_text_color">文字颜色</string>
+    <string name="media_subtitle_background_color">背景颜色</string>
+    <string name="media_subtitle_font">字体</string>
+    <string name="media_subtitle_size">大小</string>
+    <string name="media_subtitle_position">位置</string>
+    <string name="media_subtitle_opacity">不透明度：</string>
+    <string name="media_subtitle_max_lines">最多行数</string>
+    <string name="tooltip_media_subtitle_settings">字幕显示设置</string>
 </resources>

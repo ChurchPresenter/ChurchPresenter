@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">この言語に独自のスタイルを設定</string>
     <string name="song_translation_title">言語%1$dのタイトル</string>
     <string name="tooltip_preview_settings">プレビュー設定</string>
+    <string name="media_subtitle_settings">字幕設定</string>
+    <string name="media_subtitle_settings_hint">アプリ自身が描画するSRT/WebVTT字幕ファイルに適用されます。埋め込みトラックやASS/SSA/SUBファイルはVLC独自の見た目のままになります。</string>
+    <string name="media_subtitle_text_color">文字色</string>
+    <string name="media_subtitle_background_color">背景色</string>
+    <string name="media_subtitle_font">フォント</string>
+    <string name="media_subtitle_size">サイズ</string>
+    <string name="media_subtitle_position">位置</string>
+    <string name="media_subtitle_opacity">不透明度:</string>
+    <string name="media_subtitle_max_lines">最大行数</string>
+    <string name="tooltip_media_subtitle_settings">字幕表示設定</string>
 </resources>

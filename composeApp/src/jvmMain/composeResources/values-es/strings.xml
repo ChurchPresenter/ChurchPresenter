@@ -2888,4 +2888,14 @@
     <string name="song_translation_own_style">Dar a este idioma su propio estilo</string>
     <string name="song_translation_title">Título del Idioma %1$d</string>
     <string name="tooltip_preview_settings">Ajustes de vista previa</string>
+    <string name="media_subtitle_settings">Ajustes de subtítulos</string>
+    <string name="media_subtitle_settings_hint">Se aplica a los archivos de subtítulos SRT/WebVTT, que la aplicación dibuja por sí misma. Una pista incrustada o un archivo ASS/SSA/SUB conservan el aspecto propio de VLC.</string>
+    <string name="media_subtitle_text_color">Color del texto</string>
+    <string name="media_subtitle_background_color">Color de fondo</string>
+    <string name="media_subtitle_font">Fuente</string>
+    <string name="media_subtitle_size">Tamaño</string>
+    <string name="media_subtitle_position">Posición</string>
+    <string name="media_subtitle_opacity">Opacidad:</string>
+    <string name="media_subtitle_max_lines">Líneas máximas:</string>
+    <string name="tooltip_media_subtitle_settings">Ajustes de visualización de subtítulos</string>
 </resources>

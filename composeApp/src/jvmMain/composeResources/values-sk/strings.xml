@@ -2890,4 +2890,14 @@
     <string name="song_translation_own_style">Dať tomuto jazyku vlastný vzhľad</string>
     <string name="song_translation_title">Názov pre Jazyk %1$d</string>
     <string name="tooltip_preview_settings">Nastavenia náhľadu</string>
+    <string name="media_subtitle_settings">Nastavenia titulkov</string>
+    <string name="media_subtitle_settings_hint">Platí pre súbory titulkov SRT/WebVTT, ktoré aplikácia vykresľuje sama. Vložená stopa alebo súbor ASS/SSA/SUB si zachovávajú vlastný vzhľad VLC.</string>
+    <string name="media_subtitle_text_color">Farba textu</string>
+    <string name="media_subtitle_background_color">Farba pozadia</string>
+    <string name="media_subtitle_font">Písmo</string>
+    <string name="media_subtitle_size">Veľkosť</string>
+    <string name="media_subtitle_position">Pozícia</string>
+    <string name="media_subtitle_opacity">Nepriehľadnosť:</string>
+    <string name="media_subtitle_max_lines">Max. riadkov:</string>
+    <string name="tooltip_media_subtitle_settings">Nastavenia zobrazenia titulkov</string>
 </resources>

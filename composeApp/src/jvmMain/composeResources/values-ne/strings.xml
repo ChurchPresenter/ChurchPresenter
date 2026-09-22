@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">यो भाषालाई आफ्नै शैली दिनुहोस्</string>
     <string name="song_translation_title">भाषा %1$d को शीर्षक</string>
     <string name="tooltip_preview_settings">पूर्वावलोकन सेटिङहरू</string>
+    <string name="media_subtitle_settings">उपशीर्षक सेटिङहरू</string>
+    <string name="media_subtitle_settings_hint">यो SRT/WebVTT उपशीर्षक फाइलहरूमा लागू हुन्छ, जुन एपले आफैं कोर्छ। कुनै इम्बेडेड ट्र्याक वा ASS/SSA/SUB फाइलले VLC को आफ्नै रूप कायम राख्छ।</string>
+    <string name="media_subtitle_text_color">पाठको रङ</string>
+    <string name="media_subtitle_background_color">पृष्ठभूमिको रङ</string>
+    <string name="media_subtitle_font">अक्षर</string>
+    <string name="media_subtitle_size">आकार</string>
+    <string name="media_subtitle_position">स्थान</string>
+    <string name="media_subtitle_opacity">गाढापन:</string>
+    <string name="media_subtitle_max_lines">अधिकतम हरफ</string>
+    <string name="tooltip_media_subtitle_settings">उपशीर्षक प्रदर्शन सेटिङहरू</string>
 </resources>

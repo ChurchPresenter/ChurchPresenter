@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Piešķirt šai valodai savu stilu</string>
     <string name="song_translation_title">%1$d. valodas nosaukums</string>
     <string name="tooltip_preview_settings">Priekšskatījuma iestatījumi</string>
+    <string name="media_subtitle_settings">Subtitru iestatījumi</string>
+    <string name="media_subtitle_settings_hint">Attiecas uz SRT/WebVTT subtitru failiem, kurus lietotne zīmē pati. Iegultais celiņš vai ASS/SSA/SUB fails saglabā VLC pašu izskatu.</string>
+    <string name="media_subtitle_text_color">Teksta krāsa</string>
+    <string name="media_subtitle_background_color">Fona krāsa</string>
+    <string name="media_subtitle_font">Fonts</string>
+    <string name="media_subtitle_size">Izmērs</string>
+    <string name="media_subtitle_position">Novietojums</string>
+    <string name="media_subtitle_opacity">Necaurspīdīgums:</string>
+    <string name="media_subtitle_max_lines">Maks. rindu</string>
+    <string name="tooltip_media_subtitle_settings">Subtitru rādīšanas iestatījumi</string>
 </resources>

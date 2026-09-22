@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Ipe lugha hii mtindo wake mwenyewe</string>
     <string name="song_translation_title">Kichwa cha Lugha %1$d</string>
     <string name="tooltip_preview_settings">Mipangilio ya onyesho la awali</string>
+    <string name="media_subtitle_settings">Mipangilio ya Manukuu</string>
+    <string name="media_subtitle_settings_hint">Inatumika kwa faili za manukuu za SRT/WebVTT, ambazo programu huchora yenyewe. Wimbo uliopachikwa au faili ya ASS/SSA/SUB huhifadhi mwonekano wa VLC wenyewe.</string>
+    <string name="media_subtitle_text_color">Rangi ya maandishi</string>
+    <string name="media_subtitle_background_color">Rangi ya mandharinyuma</string>
+    <string name="media_subtitle_font">Fonti</string>
+    <string name="media_subtitle_size">Ukubwa</string>
+    <string name="media_subtitle_position">Nafasi</string>
+    <string name="media_subtitle_opacity">Ung'aavu:</string>
+    <string name="media_subtitle_max_lines">Mistari ya juu zaidi</string>
+    <string name="tooltip_media_subtitle_settings">Mipangilio ya Onyesho la Manukuu</string>
 </resources>

@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">ໃຫ້ພາສານີ້ມີຮູບແບບຂອງມັນເອງ</string>
     <string name="song_translation_title">ຫົວຂໍ້ຂອງພາສາ %1$d</string>
     <string name="tooltip_preview_settings">ການຕັ້ງຄ່າການສະແດງຕົວຢ່າງ</string>
+    <string name="media_subtitle_settings">ການຕັ້ງຄ່າຄຳບັນຍາຍ</string>
+    <string name="media_subtitle_settings_hint">ນຳໃຊ້ກັບໄຟລ໌ຄຳບັນຍາຍ SRT/WebVTT, ເຊິ່ງແອັບແຕ້ມເອງ. ແທຣັກຝັງໃນ ຫຼື ໄຟລ໌ ASS/SSA/SUB ຈະຮັກສາຮູບລັກສະນະຂອງ VLC ເອງໄວ້.</string>
+    <string name="media_subtitle_text_color">ສີຂໍ້ຄວາມ</string>
+    <string name="media_subtitle_background_color">ສີພື້ນຫຼັງ</string>
+    <string name="media_subtitle_font">ຕົວອັກສອນ</string>
+    <string name="media_subtitle_size">ຂະໜາດ</string>
+    <string name="media_subtitle_position">ຕຳແໜ່ງ</string>
+    <string name="media_subtitle_opacity">ຄວາມທຶບ:</string>
+    <string name="media_subtitle_max_lines">ຈຳນວນແຖວສູງສຸດ</string>
+    <string name="tooltip_media_subtitle_settings">ການຕັ້ງຄ່າການສະແດງຄຳບັນຍາຍ</string>
 </resources>

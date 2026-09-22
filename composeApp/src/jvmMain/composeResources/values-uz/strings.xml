@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Bu tilga o'z uslubini bering</string>
     <string name="song_translation_title">%1$d-til sarlavhasi</string>
     <string name="tooltip_preview_settings">Oldindan ko'rish sozlamalari</string>
+    <string name="media_subtitle_settings">Subtitr sozlamalari</string>
+    <string name="media_subtitle_settings_hint">Ilova o'zi chizadigan SRT/WebVTT subtitr fayllariga tegishli. O'rnatilgan trek yoki ASS/SSA/SUB fayli VLC'ning o'z ko'rinishini saqlaydi.</string>
+    <string name="media_subtitle_text_color">Matn rangi</string>
+    <string name="media_subtitle_background_color">Fon rangi</string>
+    <string name="media_subtitle_font">Shrift</string>
+    <string name="media_subtitle_size">Oʻlcham</string>
+    <string name="media_subtitle_position">Joylashuv</string>
+    <string name="media_subtitle_opacity">Xiralik:</string>
+    <string name="media_subtitle_max_lines">Eng koʻp satr</string>
+    <string name="tooltip_media_subtitle_settings">Subtitrni koʻrsatish sozlamalari</string>
 </resources>

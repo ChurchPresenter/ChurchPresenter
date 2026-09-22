@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">دادن سبک اختصاصی به این زبان</string>
     <string name="song_translation_title">عنوان زبان %1$d</string>
     <string name="tooltip_preview_settings">تنظیمات پیش‌نمایش</string>
+    <string name="media_subtitle_settings">تنظیمات زیرنویس</string>
+    <string name="media_subtitle_settings_hint">برای فایل‌های زیرنویس SRT/WebVTT اعمال می‌شود که برنامه خودش آن‌ها را رسم می‌کند. یک مسیر داخلی یا فایل ASS/SSA/SUB ظاهر خود VLC را حفظ می‌کند.</string>
+    <string name="media_subtitle_text_color">رنگ نوشته</string>
+    <string name="media_subtitle_background_color">رنگ پس‌زمینه</string>
+    <string name="media_subtitle_font">قلم</string>
+    <string name="media_subtitle_size">اندازه</string>
+    <string name="media_subtitle_position">جایگاه</string>
+    <string name="media_subtitle_opacity">کدری:</string>
+    <string name="media_subtitle_max_lines">بیشینهٔ خطوط</string>
+    <string name="tooltip_media_subtitle_settings">تنظیمات نمایش زیرنویس</string>
 </resources>

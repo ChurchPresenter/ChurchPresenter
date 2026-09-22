@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">กำหนดรูปแบบของตัวเองให้ภาษานี้</string>
     <string name="song_translation_title">หัวข้อของภาษา %1$d</string>
     <string name="tooltip_preview_settings">การตั้งค่าการแสดงตัวอย่าง</string>
+    <string name="media_subtitle_settings">การตั้งค่าคำบรรยาย</string>
+    <string name="media_subtitle_settings_hint">ใช้กับไฟล์คำบรรยาย SRT/WebVTT ซึ่งแอปวาดเอง แทร็กที่ฝังไว้หรือไฟล์ ASS/SSA/SUB จะคงรูปลักษณ์ของ VLC เอง</string>
+    <string name="media_subtitle_text_color">สีข้อความ</string>
+    <string name="media_subtitle_background_color">สีพื้นหลัง</string>
+    <string name="media_subtitle_font">ตัวอักษร</string>
+    <string name="media_subtitle_size">ขนาด</string>
+    <string name="media_subtitle_position">ตำแหน่ง</string>
+    <string name="media_subtitle_opacity">ความทึบ:</string>
+    <string name="media_subtitle_max_lines">จำนวนบรรทัดสูงสุด</string>
+    <string name="tooltip_media_subtitle_settings">การตั้งค่าการแสดงคำบรรยาย</string>
 </resources>

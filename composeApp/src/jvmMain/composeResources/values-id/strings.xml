@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">Beri bahasa ini gaya sendiri</string>
     <string name="song_translation_title">Judul Bahasa %1$d</string>
     <string name="tooltip_preview_settings">Pengaturan pratinjau</string>
+    <string name="media_subtitle_settings">Pengaturan Subtitel</string>
+    <string name="media_subtitle_settings_hint">Berlaku untuk file subtitel SRT/WebVTT, yang digambar sendiri oleh aplikasi. Trek tersemat atau file ASS/SSA/SUB mempertahankan tampilan VLC sendiri.</string>
+    <string name="media_subtitle_text_color">Warna teks</string>
+    <string name="media_subtitle_background_color">Warna latar</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Ukuran</string>
+    <string name="media_subtitle_position">Posisi</string>
+    <string name="media_subtitle_opacity">Keburaman:</string>
+    <string name="media_subtitle_max_lines">Baris maksimum</string>
+    <string name="tooltip_media_subtitle_settings">Pengaturan Tampilan Subtitel</string>
 </resources>

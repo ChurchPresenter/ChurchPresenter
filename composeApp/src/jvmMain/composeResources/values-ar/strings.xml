@@ -2905,4 +2905,14 @@
     <string name="song_translation_own_style">منح هذه اللغة نمطها الخاص</string>
     <string name="song_translation_title">عنوان اللغة %1$d</string>
     <string name="tooltip_preview_settings">إعدادات المعاينة</string>
+    <string name="media_subtitle_settings">إعدادات الترجمة</string>
+    <string name="media_subtitle_settings_hint">تُطبَّق على ملفات الترجمة بصيغة SRT/WebVTT، التي يرسمها التطبيق بنفسه. المسار المضمّن أو ملف ASS/SSA/SUB يحتفظ بمظهر VLC الخاص به.</string>
+    <string name="media_subtitle_text_color">لون النص</string>
+    <string name="media_subtitle_background_color">لون الخلفية</string>
+    <string name="media_subtitle_font">الخط</string>
+    <string name="media_subtitle_size">الحجم</string>
+    <string name="media_subtitle_position">الموضع</string>
+    <string name="media_subtitle_opacity">العتامة:</string>
+    <string name="media_subtitle_max_lines">أقصى عدد للأسطر</string>
+    <string name="tooltip_media_subtitle_settings">إعدادات عرض الترجمة</string>
 </resources>
