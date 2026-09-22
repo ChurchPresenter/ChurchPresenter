@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">ஊழியம் முன்னால் நடக்கிறது, திரையில் அல்ல — வரிசையில் நேரம் கொடுங்கள்; தானியக்கமாக்க எதுவும் இல்லை</string>
     <string name="calendar_ministry_what">என்ன நடக்கிறது</string>
     <string name="calendar_ministry_who">யார், அல்லது குறிப்பு</string>
+    <string name="calendar_cloud_sync">மேகம் மற்றும் மொபைல் சாதனங்களுடன் ஒத்திசை</string>
+    <string name="calendar_cloud_sync_sub">ரிலே வழியாக இந்த நாட்காட்டியைத் தொலைபேசிகளுடன் ஒத்திசைவில் வைக்கிறது. அணைத்தால் இதிலிருந்து எதுவும் இந்தக் கணினியை விட்டு வெளியேறாது</string>
 </resources>

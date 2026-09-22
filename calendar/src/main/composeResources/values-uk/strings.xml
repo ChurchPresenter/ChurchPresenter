@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Прославлення відбувається спереду, а не на екрані — задайте тривалість у рядку; автоматизувати нічого</string>
     <string name="calendar_ministry_what">Що відбувається</string>
     <string name="calendar_ministry_who">Хто або примітка</string>
+    <string name="calendar_cloud_sync">Синхронізувати з хмарою та мобільними пристроями</string>
+    <string name="calendar_cloud_sync_sub">Тримає цей календар узгодженим із телефонами через ретранслятор. Якщо вимкнено, нічого не залишає цей комп’ютер</string>
 </resources>

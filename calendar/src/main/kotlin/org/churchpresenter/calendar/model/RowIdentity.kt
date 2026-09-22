@@ -11,8 +11,10 @@ import java.util.UUID
  * and the planned service's own `plannedSeconds` map is keyed by it, so two services copied from
  * the same schedule would share each other's estimates.
  */
-fun ScheduleItem.withNewId(): ScheduleItem {
-    val fresh = UUID.randomUUID().toString()
+fun ScheduleItem.withNewId(): ScheduleItem = withId(UUID.randomUUID().toString())
+
+/** The same row under [fresh] — what a copy and a row arriving from a phone both need. */
+fun ScheduleItem.withId(fresh: String): ScheduleItem {
     return when (this) {
         is ScheduleItem.SongItem -> copy(id = fresh)
         is ScheduleItem.BibleVerseItem -> copy(id = fresh)
@@ -25,7 +27,7 @@ fun ScheduleItem.withNewId(): ScheduleItem {
         is ScheduleItem.WebsiteItem -> copy(id = fresh)
         is ScheduleItem.SceneItem -> copy(id = fresh)
         is ScheduleItem.DictionaryItem -> copy(id = fresh)
-    is ScheduleItem.MinistryItem -> copy(id = fresh)
+        is ScheduleItem.MinistryItem -> copy(id = fresh)
         is ScheduleItem.CueItem -> copy(id = fresh, payload = payload?.withNewId())
     }
 }

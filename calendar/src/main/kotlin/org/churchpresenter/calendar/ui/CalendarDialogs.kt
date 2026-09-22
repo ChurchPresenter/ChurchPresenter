@@ -67,6 +67,7 @@ internal fun CalendarDialogs(
                     state.addItems(service.id, listOf(sectionItem(section.name, section.colorHex)))
                 }
             },
+            cloudSync = host.cloudSync,
             onRemoveTemplate = state::deleteTemplate,
             onRemovePreset = state::deletePreset,
             onDismiss = { dialogs.settingsOpen = false },

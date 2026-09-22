@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Une intervention se passe à l'avant, pas à l'écran — donnez-lui une durée sur la ligne ; rien à automatiser</string>
     <string name="calendar_ministry_what">Ce qui se passe</string>
     <string name="calendar_ministry_who">Qui, ou une note</string>
+    <string name="calendar_cloud_sync">Synchroniser avec le cloud et les appareils mobiles</string>
+    <string name="calendar_cloud_sync_sub">Garde ce calendrier à jour avec les téléphones via le relais. Désactivé, rien ne quitte cet ordinateur</string>
 </resources>

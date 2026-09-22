@@ -79,6 +79,13 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `ui/TimingPanel.kt`, `ui/TimingDraft.kt` | The row editor's Starts / Runs / Repeats / At end panel, and its typed state |
 | `ui/CueToast.kt` | The `Cue fired` card in the window's corner |
 | `ui/` (the rest) | The screens and the three dialogs |
+| `sync/RelayWire.kt` | The wire contract with the relay: `RemoteRow`/`RemoteService` (the sealed plaintext), `SealedRecord`, the request/response shapes, `WireLimits`. the relay's `SYNC.md`, kept with the relay in the website repository, is the spec |
+| `sync/Envelope.kt`, `sync/Sealing.kt` | AES-GCM sealing of what the relay stores |
+| `sync/Projection.kt` | Desktop → wire: a run of show reduced to what a phone may see |
+| `sync/Resolver.kt`, `sync/Sanitize.kt` | Wire → desktop: rows rebuilt against the library, presets and the local copy; strings cleaned and capped |
+| `sync/RelayClient.kt` | The HTTPS calls, over a `RelayTransport` taken as a parameter |
+| `sync/SyncCoordinator.kt` | One round: pull → open → resolve → `mergedWith` → save → push authoritative |
+| `sync/CatalogSync.kt` | The songbooks kept on the relay for the phones (`catalog:<songbook>` records, `CatalogRecord`), pushed only when a book's bytes changed; `catalog-sync.json` remembers what was pushed |
 
 ## Rules
 
@@ -122,6 +129,13 @@ and the module stops compiling with unresolved `Res` references that no source f
   on the first Cyrillic character, so for a Russian song library an un-embedded export is a crash,
   not a degraded one. The face comes from the app through `CalendarHost.pdfFont` rather than being
   bundled twice.
+
+## Sync
+
+- Rows from the relay are rebuilt by `Resolver`; nothing on the wire is deserialized into a
+  `ScheduleItem` directly, and a `ref` resolves only against the local copy of the same service.
+- `Sealing` takes an `Envelope`; the key comes from `:settings` through the app, never from here.
+- `RelayClient` is the only network code in this module.
 
 ## `calendar.json`
 

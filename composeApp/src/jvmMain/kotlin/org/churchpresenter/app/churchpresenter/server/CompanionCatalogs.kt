@@ -56,7 +56,14 @@ internal fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
                 bookName = bookName,
                 songTotal = bookSongs.size,
                 songs = bookSongs.map { s ->
-                    SongDto(id = indexMap[s] ?: 0, number = s.number, title = s.title, tune = s.tune, author = s.author)
+                    SongDto(
+                        id = indexMap[s] ?: 0,
+                        number = s.number,
+                        title = s.title,
+                        tune = s.tune,
+                        author = s.author,
+                        secondaryTitle = s.secondaryTitle,
+                    )
                 }
             )
         }

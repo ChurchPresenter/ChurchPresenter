@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_section_add
 import org.churchpresenter.calendar.generated.resources.calendar_section_insert
@@ -63,7 +64,7 @@ import org.churchpresenter.calendar.model.SectionStyle
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.calendar.model.clockText
 
-private val DIALOG_WIDTH = 560.dp
+private val DIALOG_WIDTH = 640.dp
 private val BODY_HEIGHT = 340.dp
 private val SWATCH_BUTTON = 26.dp
 private val HEX_FIELD = 82.dp
@@ -91,6 +92,7 @@ fun CalendarSettingsDialog(
     onRemoveTemplate: (id: String) -> Unit,
     onRemovePreset: (id: String) -> Unit,
     onDismiss: () -> Unit,
+    cloudSync: CalendarCloudSync? = null,
 ) {
     var tab by remember { mutableStateOf(initialTab) }
 
@@ -130,7 +132,7 @@ fun CalendarSettingsDialog(
 
                     SettingsTab.TEMPLATES -> TemplatesTab(templates, onRemoveTemplate)
                     SettingsTab.PRESETS -> PresetsTab(presets, onRemovePreset)
-                    SettingsTab.DEFAULTS -> DefaultsTab(preferences, onPreferencesChange)
+                    SettingsTab.DEFAULTS -> DefaultsTab(preferences, onPreferencesChange, cloudSync)
                 }
             }
         }

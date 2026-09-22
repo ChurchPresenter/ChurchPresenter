@@ -59,6 +59,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.calendar.sync.Projection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AtemSettings
@@ -299,6 +300,16 @@ class CompanionServer {
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile internal var _songs: List<SongItem> = emptyList()
+
+    /**
+     * How long a song typically runs here, from the app's duration log; null for one never measured.
+     * Set by the app once the log exists; the server itself keeps no durations.
+     */
+    @Volatile var typicalSeconds: (SongItem) -> Int? = { null }
+
+    /** The library as songbook records, with each song's usual length, for a phone planning a service. */
+    fun songCatalog(): SongCatalogRecordsResponse =
+        SongCatalogRecordsResponse(Projection.catalog(_songs, typicalSeconds).values.toList())
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
@@ -438,6 +449,12 @@ class CompanionServer {
     /** Emitted when a remote client requests an item to be sent directly to projection. */
     val onProject = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a phone on the LAN asks to plan the calendar through the relay. */
+    val onCalendarEnroll = MutableSharedFlow<PendingCalendarEnroll>(
+        extraBufferCapacity = 8,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -982,6 +999,7 @@ class CompanionServer {
                     presentations._slideBytes, json, scope
                 )
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
+                calendarSyncRoutes(this@CompanionServer, json)
                 mediaAndAssetRoutes(
                     this@CompanionServer, PictureLibrary.DEVICE_UPLOADS_FOLDER_ID, _backgroundSettings,
                     _fileUploadEnabled, pictures.catalog, pictures.catalogs, pictures.files,

@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Služba se děje vpředu, ne na obrazovce — dejte jí délku v řádku; není co automatizovat</string>
     <string name="calendar_ministry_what">Co se děje</string>
     <string name="calendar_ministry_who">Kdo nebo poznámka</string>
+    <string name="calendar_cloud_sync">Synchronizovat s cloudem a mobilními zařízeními</string>
+    <string name="calendar_cloud_sync_sub">Udržuje tento kalendář v souladu s telefony přes relé. Vypnuto: nic z něj tento počítač neopustí</string>
 </resources>
