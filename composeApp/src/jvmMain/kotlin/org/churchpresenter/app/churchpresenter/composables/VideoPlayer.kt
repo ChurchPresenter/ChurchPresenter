@@ -853,7 +853,7 @@ private fun MediaPlayer.playSoftware(
  * VLC was never handed that file, so it has no track for it to select.
  */
 @Composable
-private fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate: PlayerReleaseGate) {
+internal fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate: PlayerReleaseGate) {
     if (viewModel.subtitleCues.isNotEmpty()) return
     // Keyed on the resolved selection alone, not on `subtitleTracks` too: that list is reassigned
     // once per embedded track VLC reports (`elementaryStreamAdded` fires per track), and keying on
