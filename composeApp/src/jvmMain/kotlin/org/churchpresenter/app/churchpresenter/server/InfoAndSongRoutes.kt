@@ -23,6 +23,8 @@ import org.churchpresenter.settings.utils.Constants
  * load-bearing. Private state arrives as identically-named parameters; [server] carries what must
  * be read per request.
  */
+private val catalogJson = Json { encodeDefaults = true; explicitNulls = false }
+
 internal fun Route.infoAndSongRoutes(
     server: CompanionServer,
     _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
@@ -79,6 +81,17 @@ private fun Route.songRoutes(
     json: Json,
     scope: CoroutineScope,
 ) {
+                /**
+                 * GET /api/song-catalog — the songbooks with each song's usual length, for planning.
+                 * Written with its own encoder: the server's keeps nulls for the overlay page, and a
+                 * library of songs with no second title has no business carrying one each.
+                 */
+                get(Constants.ENDPOINT_SONG_CATALOG) {
+                    if (!server.checkApiKey(call)) return@get
+                    val body = catalogJson.encodeToString(SongCatalogRecordsResponse.serializer(), server.songCatalog())
+                    call.respondText(body, ContentType.Application.Json)
+                }
+
                 get(Constants.ENDPOINT_SONGS) {
                     if (!server.checkApiKey(call)) return@get
                     val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]

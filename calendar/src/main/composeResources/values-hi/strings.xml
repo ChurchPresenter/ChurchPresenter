@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">सेवा आगे होती है, स्क्रीन पर नहीं — पंक्ति में इसे अवधि दें; स्वचालित करने को कुछ नहीं</string>
     <string name="calendar_ministry_what">क्या होता है</string>
     <string name="calendar_ministry_who">कौन, या नोट</string>
+    <string name="calendar_cloud_sync">क्लाउड और मोबाइल डिवाइस के साथ सिंक करें</string>
+    <string name="calendar_cloud_sync_sub">रिले के ज़रिए इस कैलेंडर को फ़ोन के साथ मेल में रखता है। बंद होने पर इसका कुछ भी इस कंप्यूटर से बाहर नहीं जाता</string>
 </resources>

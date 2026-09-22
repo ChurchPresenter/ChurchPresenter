@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">الخدمة تحدث في المقدمة لا على الشاشة — أعطها مدة في الصف؛ لا شيء لأتمتته</string>
     <string name="calendar_ministry_what">ما يحدث</string>
     <string name="calendar_ministry_who">مَن، أو ملاحظة</string>
+    <string name="calendar_cloud_sync">المزامنة مع السحابة والأجهزة المحمولة</string>
+    <string name="calendar_cloud_sync_sub">يبقي هذا التقويم متوافقًا مع الهواتف عبر المُرحِّل. عند الإيقاف لا يغادر شيء منه هذا الحاسوب</string>
 </resources>

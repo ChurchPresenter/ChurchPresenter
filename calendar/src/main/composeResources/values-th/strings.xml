@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">การรับใช้เกิดขึ้นด้านหน้า ไม่ใช่บนจอ — กำหนดความยาวในแถว ไม่มีอะไรให้ทำอัตโนมัติ</string>
     <string name="calendar_ministry_what">เกิดอะไรขึ้น</string>
     <string name="calendar_ministry_who">ใคร หรือหมายเหตุ</string>
+    <string name="calendar_cloud_sync">ซิงค์กับคลาวด์และอุปกรณ์มือถือ</string>
+    <string name="calendar_cloud_sync_sub">ทำให้ปฏิทินนี้ตรงกับโทรศัพท์ผ่านรีเลย์ เมื่อปิด จะไม่มีสิ่งใดออกจากคอมพิวเตอร์เครื่องนี้</string>
 </resources>

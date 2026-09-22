@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">ການຮັບໃຊ້ເກີດຂຶ້ນຢູ່ທາງໜ້າ ບໍ່ແມ່ນຢູ່ຈໍ — ກຳນົດຄວາມຍາວໃນແຖວ; ບໍ່ມີຫຍັງໃຫ້ອັດຕະໂນມັດ</string>
     <string name="calendar_ministry_what">ມີຫຍັງເກີດຂຶ້ນ</string>
     <string name="calendar_ministry_who">ໃຜ ຫຼື ໝາຍເຫດ</string>
+    <string name="calendar_cloud_sync">ຊິງຄ໌ກັບຄລາວ ແລະ ອຸປະກອນມືຖື</string>
+    <string name="calendar_cloud_sync_sub">ຮັກສາປະຕິທິນນີ້ໃຫ້ກົງກັບໂທລະສັບຜ່ານຣີເລ. ເມື່ອປິດ ຈະບໍ່ມີສິ່ງໃດອອກຈາກຄອມພິວເຕີເຄື່ອງນີ້</string>
 </resources>

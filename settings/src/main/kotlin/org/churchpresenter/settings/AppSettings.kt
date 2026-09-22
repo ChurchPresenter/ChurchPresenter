@@ -79,6 +79,7 @@ data class AppSettings(
     val obsSettings: OBSSettings = OBSSettings(),
     val atemSettings: AtemSettings = AtemSettings(),
     val planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
+    val calendarSync: CalendarSyncSettings = CalendarSyncSettings(),
     val companionSatelliteConnections: List<CompanionSatelliteSettings> = listOf(CompanionSatelliteSettings()),
     val instanceLink: InstanceLinkSettings = InstanceLinkSettings(),
     val songFavorites: List<String> = emptyList(),

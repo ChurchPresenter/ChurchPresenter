@@ -65,6 +65,7 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allowed_clients
@@ -136,6 +137,7 @@ import org.churchpresenter.settings.AtemSettings
 import java.net.URLEncoder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
@@ -150,22 +152,13 @@ fun ServerSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     companionServer: CompanionServer,
-    remoteClientManager: RemoteClientManager
+    remoteClientManager: RemoteClientManager,
+    calendarSync: CalendarSyncService? = null,
 ) {
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
     val copyText: (String) -> Unit = { text ->
         SystemClipboard.copy(text)
-    }
-
-    var portText by remember(settings.serverSettings.port) {
-        mutableStateOf(settings.serverSettings.port.toString())
-    }
-    var hostText by remember(settings.serverSettings.serverHost) {
-        mutableStateOf(settings.serverSettings.serverHost)
-    }
-    var apiKeyText by remember(settings.serverSettings.apiKey) {
-        mutableStateOf(settings.serverSettings.apiKey)
     }
 
     LaunchedEffect(settings.serverSettings.apiKeyEnabled, settings.serverSettings.apiKey) {
@@ -198,608 +191,738 @@ fun ServerSettingsTab(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // ── Card 1: Server ────────────────────────────────────────────────
-            SettingsSection(title = stringResource(Res.string.companion_server)) {
-                Text(
-                    text = stringResource(Res.string.server_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                HorizontalDivider()
-
-                // ── Enable toggle + status in one row ─────────────────────────
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.enable_server),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Switch(
-                        checked = isRunning,
-                        onCheckedChange = { enable ->
-                            val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
-                            if (enable) {
-                                companionServer.start(port, hostText.trim())
-                                onSettingsChange { s ->
-                                    s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port))
-                                }
-                            } else {
-                                companionServer.stop()
-                                onSettingsChange { s ->
-                                    s.copy(serverSettings = s.serverSettings.copy(enabled = false))
-                                }
-                            }
-                        }
-                    )
-                    Text(
-                        text = if (isRunning) stringResource(Res.string.server_running)
-                               else stringResource(Res.string.server_stopped),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isRunning) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                HorizontalDivider()
-
-                // ── Port + note/Restart in one row ────────────────────────────
-                SettingRow(label = stringResource(Res.string.server_port)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        SettingsTextField(
-                            value = portText,
-                            onValueChange = { v ->
-                                if (v.length <= 5 && v.all(Char::isDigit)) {
-                                    portText = v
-                                    v.toIntOrNull()?.let { port ->
-                                        onSettingsChange { s ->
-                                            s.copy(serverSettings = s.serverSettings.copy(port = port))
-                                        }
-                                    }
-                                }
-                            },
-                            modifier = Modifier.width(100.dp),
-                            singleLine = true,
-                            enabled = !isRunning,
-                            placeholder = { Text(stringResource(Res.string.server_port_hint)) }
-                        )
-                        if (isRunning) {
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                    val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
-                                    companionServer.stop()
-                                    companionServer.start(port, hostText.trim())
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary
-                                )
-                            ) {
-                                Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)
-                            }
-                        } else {
-                            Text(
-                                text = stringResource(Res.string.server_port_note),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                // ── Host Override ─────────────────────────────────────────────
-                SettingRow(label = stringResource(Res.string.server_host_label)) {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        SettingsTextField(
-                            value = hostText,
-                            onValueChange = { v ->
-                                hostText = v
-                                onSettingsChange { s ->
-                                    s.copy(serverSettings = s.serverSettings.copy(serverHost = v.trim()))
-                                }
-                            },
-                            modifier = Modifier.width(280.dp),
-                            singleLine = true,
-                            enabled = !isRunning,
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.server_host_hint),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        )
-                        Text(
-                            text = stringResource(Res.string.server_host_note),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // ── Server URL + Copy + QR in one row (shown when running) ───
-                if (isRunning && serverUrl.isNotBlank()) {
-                    var showConnectionQrDialog by remember { mutableStateOf(false) }
-                    SettingRow(label = stringResource(Res.string.server_url_label)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            SettingsTextField(
-                                value = serverUrl,
-                                onValueChange = {},
-                                readOnly = true,
-                                modifier = Modifier.widthIn(max = 280.dp),
-                            )
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { showConnectionQrDialog = true },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                            ) {
-                                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
-                    if (showConnectionQrDialog) {
-                        ConnectionQrDialog(
-                            serverUrl = serverUrl,
-                            apiKey = if (settings.serverSettings.apiKeyEnabled && apiKeyText.isNotBlank()) apiKeyText else null,
-                            onDismiss = { showConnectionQrDialog = false }
-                        )
-                    }
-                } // end if (isRunning && serverUrl.isNotBlank())
-
-                HorizontalDivider()
-
-                // ── API Key protection toggle ─────────────────────────────────
-                SettingRow(label = stringResource(Res.string.api_key_protection)) {
-                    Switch(
-                        checked = settings.serverSettings.apiKeyEnabled,
-                        onCheckedChange = { enabled ->
-                            onSettingsChange { s ->
-                                s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
-                            }
-                        }
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.browser_source_note_in_server_settings),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // ── API Key field + Generate + Copy all in one row ────────────
-                if (settings.serverSettings.apiKeyEnabled) {
-                    SettingRow(label = stringResource(Res.string.api_key_label)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            SettingsTextField(
-                                value = apiKeyText,
-                                onValueChange = { v ->
-                                    apiKeyText = v
-                                    onSettingsChange { s ->
-                                        s.copy(serverSettings = s.serverSettings.copy(apiKey = v))
-                                    }
-                                },
-                                modifier = Modifier.width(350.dp),
-                                singleLine = true,
-                                placeholder = {
-                                    Text(
-                                        stringResource(Res.string.api_key_hint),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            )
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                    val newKey = UUID.randomUUID().toString().replace("-", "")
-                                    apiKeyText = newKey
-                                    onSettingsChange { s ->
-                                        s.copy(serverSettings = s.serverSettings.copy(apiKey = newKey))
-                                    }
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            ) {
-                                Text(stringResource(Res.string.generate_api_key), style = MaterialTheme.typography.labelSmall)
-                            }
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { copyText(apiKeyText) },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
-                }
-
-                // ── Allow File Upload toggle ──────────────────────────────────
-                SettingRow(label = stringResource(Res.string.allow_file_upload)) {
-                    Switch(
-                        checked = settings.serverSettings.fileUploadEnabled,
-                        onCheckedChange = { enabled ->
-                            onSettingsChange { s ->
-                                s.copy(serverSettings = s.serverSettings.copy(fileUploadEnabled = enabled))
-                            }
-                        }
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.allow_file_upload_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // ── Max media upload size (only relevant when uploads are enabled) ──
-                if (settings.serverSettings.fileUploadEnabled) {
-                    var maxMbText by remember(settings.serverSettings.maxMediaUploadMb) {
-                        mutableStateOf(settings.serverSettings.maxMediaUploadMb.toString())
-                    }
-                    SettingRow(label = stringResource(Res.string.max_media_upload_label)) {
-                        SettingsTextField(
-                            value = maxMbText,
-                            onValueChange = { v ->
-                                if (v.length <= 5 && v.all(Char::isDigit)) {
-                                    maxMbText = v
-                                    v.toIntOrNull()?.takeIf { it > 0 }?.let { mb ->
-                                        onSettingsChange { s ->
-                                            s.copy(serverSettings = s.serverSettings.copy(maxMediaUploadMb = mb))
-                                        }
-                                    }
-                                }
-                            },
-                            modifier = Modifier.width(100.dp),
-                            singleLine = true,
-                            placeholder = { Text(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB.toString()) }
-                        )
-                    }
-                    Text(
-                        text = stringResource(Res.string.max_media_upload_description, Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            ServerCard(
+                settings = settings,
+                onSettingsChange = onSettingsChange,
+                companionServer = companionServer,
+                isRunning = isRunning,
+                serverUrl = serverUrl,
+                copyText = copyText,
+            )
 
             // ── Card 2: Remote Clients ────────────────────────────────────────
-            SettingsSection(title = stringResource(Res.string.remote_clients_title)) {
-                Text(
-                    text = stringResource(Res.string.remote_clients_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            RemoteClientsCard(companionServer = companionServer, remoteClientManager = remoteClientManager)
+
+            // ── Card: Calendar on phones ───────────────────────────────────────
+            if (calendarSync != null) {
+                CalendarSyncCard(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    sync = calendarSync,
+                    labelFor = remoteClientManager::getLabel,
                 )
-
-                Spacer(Modifier.height(4.dp))
-
-                val connectedInstanceLinkFollowers by companionServer.connectedInstanceLinkFollowers
-                    .collectAsState()
-                if (connectedInstanceLinkFollowers.isNotEmpty()) {
-                    Text(
-                        text = stringResource(
-                            Res.string.instance_link_followers_connected_count,
-                            connectedInstanceLinkFollowers.size
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.height(4.dp))
-                }
-
-                // ── Allowed clients list ──────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.allowed_clients),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(Res.string.allowed_clients_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                val allowedClients = remoteClientManager.allowedClients.toList().sorted()
-                if (allowedClients.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.no_allowed_clients),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                } else {
-                    allowedClients.forEach { clientId ->
-                        key(clientId) {
-                            ClientRow(
-                                clientId = clientId,
-                                label = remoteClientManager.getLabel(clientId),
-                                onSetLabel = { remoteClientManager.setLabel(clientId, it) },
-                                statusColor = MaterialTheme.colorScheme.primary,
-                                statusLabel = stringResource(Res.string.allowed_clients),
-                                onRemove = { remoteClientManager.removeAllowed(clientId) },
-                                isInstanceLinkFollower = clientId in connectedInstanceLinkFollowers
-                            )
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(4.dp))
-
-                // ── Blocked clients list ──────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.blocked_clients),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = stringResource(Res.string.blocked_clients_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                val blockedClients = remoteClientManager.blockedClients.toList().sorted()
-                if (blockedClients.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.no_blocked_clients),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                } else {
-                    blockedClients.forEach { clientId ->
-                        key(clientId) {
-                            ClientRow(
-                                clientId = clientId,
-                                label = remoteClientManager.getLabel(clientId),
-                                onSetLabel = { remoteClientManager.setLabel(clientId, it) },
-                                statusColor = MaterialTheme.colorScheme.error,
-                                statusLabel = stringResource(Res.string.blocked_clients),
-                                onRemove = { remoteClientManager.removeBlocked(clientId) },
-                                isInstanceLinkFollower = clientId in connectedInstanceLinkFollowers
-                            )
-                        }
-                    }
-                }
             }
 
             // ── Card: Lower Third Triggers (Bitfocus Companion) ───────────────
-            run {
-                val lowerThirdFolder = settings.streamingSettings.lowerThirdFolder
-                // `isLottieFile` reads each JSON in full, so this is the folder's whole weight in
-                // bytes — off the composition thread. The card is a list of trigger URLs, so a
-                // frame of it empty says nothing misleading.
-                val lowerThirds by produceState(emptyList<java.io.File>(), lowerThirdFolder, isRunning) {
-                    value = withContext(Dispatchers.IO) {
-                        java.io.File(lowerThirdFolder)
-                            .takeIf { lowerThirdFolder.isNotEmpty() && it.isDirectory }
-                            ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
-                            ?.sortedBy { it.nameWithoutExtension.lowercase() }
-                            ?.toList()
-                            ?: emptyList()
-                    }
-                }
-                val atemConfigured = settings.atemSettings.host.isNotBlank()
-
-                // Default key target (1-based) for the "+ key" URLs, matching the configured key
-                // type. DSK ignores M/E and uses the DSK number; both carry an explicit keytype so
-                // the copied URL behaves as shown regardless of later setting changes.
-                val keyTypeParam = atemKeyTypeParam(settings.atemSettings)
-                val keyTarget = atemKeyTarget(settings.atemSettings)
-                val apiKeyOrBlank = effectiveApiKey(settings.serverSettings)
-
-                fun triggerUrl(name: String, withKey: Boolean): String =
-                    lowerThirdTriggerUrl(serverUrl, name, withKey, apiKeyOrBlank)
-
-                fun stillUrl(name: String, withKey: Boolean): String =
-                    atemMediaUrl(serverUrl, "still", name, if (withKey) keyTarget else "", apiKeyOrBlank)
-
-                fun clipUrl(name: String, withKey: Boolean): String =
-                    atemMediaUrl(serverUrl, "clip", name, if (withKey) keyTarget else "", apiKeyOrBlank)
-
-                fun keyOnUrl() = atemKeyUrl(serverUrl, on = true, keyTypeParam = keyTypeParam, apiKey = apiKeyOrBlank)
-                fun keyOffUrl() = atemKeyUrl(serverUrl, on = false, keyTypeParam = keyTypeParam, apiKey = apiKeyOrBlank)
-
-                SettingsSection(title = stringResource(Res.string.companion_lt_triggers)) {
-                    Text(
-                        text = stringResource(Res.string.companion_lt_triggers_desc),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = stringResource(Res.string.companion_atem_upload_note),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
-                    )
-                    if (atemConfigured) {
-                        Text(
-                            text = stringResource(Res.string.companion_atem_clip_key_note),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    when {
-                        !isRunning || serverUrl.isBlank() -> Text(
-                            text = stringResource(Res.string.companion_lt_server_off),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                        lowerThirds.isEmpty() -> Text(
-                            text = stringResource(Res.string.companion_lt_none),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                        else -> lowerThirds.forEach { file ->
-                            val name = file.nameWithoutExtension
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Button(
-                                        shape = RoundedCornerShape(6.dp),
-                                        onClick = { copyText(triggerUrl(name, withKey = true)) },
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    ) { Text(stringResource(Res.string.companion_lt_copy_key), style = MaterialTheme.typography.labelSmall) }
-                                    Button(
-                                        shape = RoundedCornerShape(6.dp),
-                                        onClick = { copyText(triggerUrl(name, withKey = false)) },
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
-                                    ) { Text(stringResource(Res.string.companion_lt_copy_nokey), style = MaterialTheme.typography.labelSmall) }
-                                    if (atemConfigured) {
-                                        Button(
-                                            shape = RoundedCornerShape(6.dp),
-                                            onClick = { copyText(stillUrl(name, withKey = true)) },
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                            )
-                                        ) { Text(stringResource(Res.string.companion_atem_still_key), style = MaterialTheme.typography.labelSmall) }
-                                        Button(
-                                            shape = RoundedCornerShape(6.dp),
-                                            onClick = { copyText(stillUrl(name, withKey = false)) },
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        ) { Text(stringResource(Res.string.companion_atem_still_only), style = MaterialTheme.typography.labelSmall) }
-                                        Button(
-                                            shape = RoundedCornerShape(6.dp),
-                                            onClick = { copyText(clipUrl(name, withKey = true)) },
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                            )
-                                        ) { Text(stringResource(Res.string.companion_atem_clip_key), style = MaterialTheme.typography.labelSmall) }
-                                        Button(
-                                            shape = RoundedCornerShape(6.dp),
-                                            onClick = { copyText(clipUrl(name, withKey = false)) },
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        ) { Text(stringResource(Res.string.companion_atem_clip_only), style = MaterialTheme.typography.labelSmall) }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (isRunning && serverUrl.isNotBlank()) {
-                        Spacer(Modifier.height(4.dp))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        Spacer(Modifier.height(4.dp))
-
-                        // Key controls — only when ATEM is configured
-                        if (atemConfigured) {
-                            Text(
-                                text = stringResource(Res.string.companion_atem_key_section),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = stringResource(Res.string.companion_atem_key_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(
-                                    shape = RoundedCornerShape(6.dp),
-                                    onClick = { copyText(keyOnUrl()) },
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                ) { Text(stringResource(Res.string.companion_atem_key_on), style = MaterialTheme.typography.labelSmall) }
-                                Button(
-                                    shape = RoundedCornerShape(6.dp),
-                                    onClick = { copyText(keyOffUrl()) },
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                    )
-                                ) { Text(stringResource(Res.string.companion_atem_key_off), style = MaterialTheme.typography.labelSmall) }
-                            }
-                            Spacer(Modifier.height(4.dp))
-                        }
-
-                        // Take-down actions — available whenever the server is running.
-                        // "Hide Lower Third" clears only a lower third; "Clear Display" clears any
-                        // output (Bible, song, lower third, …) via POST /api/clear.
-                        Text(
-                            text = stringResource(Res.string.companion_lt_takedown_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { copyText(lowerThirdHideUrl(serverUrl, apiKeyOrBlank)) },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { copyText(clearDisplayUrl(serverUrl, apiKeyOrBlank)) },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError
-                                )
-                            ) { Text(stringResource(Res.string.tooltip_clear_display), style = MaterialTheme.typography.labelSmall) }
-                        }
-                    }
-                }
-            }
+            CompanionTriggersCard(
+                settings = settings,
+                isRunning = isRunning,
+                serverUrl = serverUrl,
+                copyText = copyText,
+            )
         }
         SettingsScrollbar(scrollState)
     }
+}
+
+@Composable
+private fun ServerCard(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    companionServer: CompanionServer,
+    isRunning: Boolean,
+    serverUrl: String,
+    copyText: (String) -> Unit,
+) {
+    var portText by remember(settings.serverSettings.port) {
+        mutableStateOf(settings.serverSettings.port.toString())
+    }
+    var hostText by remember(settings.serverSettings.serverHost) {
+        mutableStateOf(settings.serverSettings.serverHost)
+    }
+    var apiKeyText by remember(settings.serverSettings.apiKey) {
+        mutableStateOf(settings.serverSettings.apiKey)
+    }
+
+    SettingsSection(title = stringResource(Res.string.companion_server)) {
+        Text(
+            text = stringResource(Res.string.server_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        HorizontalDivider()
+
+        // ── Enable toggle + status in one row ─────────────────────────
+        ServerEnableRow(
+            isRunning = isRunning,
+            onEnable = { enable ->
+                val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                if (enable) {
+                    companionServer.start(port, hostText.trim())
+                    onSettingsChange { s ->
+                        s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port))
+                    }
+                } else {
+                    companionServer.stop()
+                    onSettingsChange { s ->
+                        s.copy(serverSettings = s.serverSettings.copy(enabled = false))
+                    }
+                }
+            },
+        )
+
+        HorizontalDivider()
+
+        // ── Port + note/Restart in one row ────────────────────────────
+        ServerPortRow(
+            portText = portText,
+            isRunning = isRunning,
+            onPortText = { v ->
+                portText = v
+                v.toIntOrNull()?.let { port ->
+                    onSettingsChange { s ->
+                        s.copy(serverSettings = s.serverSettings.copy(port = port))
+                    }
+                }
+            },
+            onRestart = {
+                val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                companionServer.stop()
+                companionServer.start(port, hostText.trim())
+            },
+        )
+
+        // ── Host Override ─────────────────────────────────────────────
+        ServerHostRow(
+            hostText = hostText,
+            isRunning = isRunning,
+            onHostText = { v ->
+                hostText = v
+                onSettingsChange { s ->
+                    s.copy(serverSettings = s.serverSettings.copy(serverHost = v.trim()))
+                }
+            },
+        )
+
+        // ── Server URL + Copy + QR in one row (shown when running) ───
+        if (isRunning && serverUrl.isNotBlank()) {
+            ServerUrlRow(
+                serverUrl = serverUrl,
+                apiKey = if (settings.serverSettings.apiKeyEnabled && apiKeyText.isNotBlank()) apiKeyText else null,
+            )
+        }
+
+        HorizontalDivider()
+
+        ApiKeySection(
+            settings = settings,
+            onSettingsChange = onSettingsChange,
+            apiKeyText = apiKeyText,
+            onApiKeyText = { apiKeyText = it },
+            copyText = copyText,
+        )
+
+        FileUploadSection(settings = settings, onSettingsChange = onSettingsChange)
+    }
+}
+
+@Composable
+private fun ServerEnableRow(isRunning: Boolean, onEnable: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.enable_server),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Switch(checked = isRunning, onCheckedChange = onEnable)
+        Text(
+            text = if (isRunning) stringResource(Res.string.server_running)
+                   else stringResource(Res.string.server_stopped),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isRunning) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun ServerPortRow(
+    portText: String,
+    isRunning: Boolean,
+    onPortText: (String) -> Unit,
+    onRestart: () -> Unit,
+) {
+    SettingRow(label = stringResource(Res.string.server_port)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SettingsTextField(
+                value = portText,
+                onValueChange = { v ->
+                    if (v.length <= 5 && v.all(Char::isDigit)) onPortText(v)
+                },
+                modifier = Modifier.width(100.dp),
+                singleLine = true,
+                enabled = !isRunning,
+                placeholder = { Text(stringResource(Res.string.server_port_hint)) }
+            )
+            if (isRunning) {
+                Button(
+                    shape = RoundedCornerShape(6.dp),
+                    onClick = onRestart,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)
+                }
+            } else {
+                Text(
+                    text = stringResource(Res.string.server_port_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServerHostRow(hostText: String, isRunning: Boolean, onHostText: (String) -> Unit) {
+    SettingRow(label = stringResource(Res.string.server_host_label)) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            SettingsTextField(
+                value = hostText,
+                onValueChange = onHostText,
+                modifier = Modifier.width(280.dp),
+                singleLine = true,
+                enabled = !isRunning,
+                placeholder = {
+                    Text(
+                        stringResource(Res.string.server_host_hint),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            )
+            Text(
+                text = stringResource(Res.string.server_host_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun ServerUrlRow(serverUrl: String, apiKey: String?) {
+    var showConnectionQrDialog by remember { mutableStateOf(false) }
+    SettingRow(label = stringResource(Res.string.server_url_label)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            SettingsTextField(
+                value = serverUrl,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier.widthIn(max = 280.dp),
+            )
+            Button(
+                shape = RoundedCornerShape(6.dp),
+                onClick = { showConnectionQrDialog = true },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) {
+                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+    if (showConnectionQrDialog) {
+        ConnectionQrDialog(
+            serverUrl = serverUrl,
+            apiKey = apiKey,
+            onDismiss = { showConnectionQrDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ApiKeySection(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    apiKeyText: String,
+    onApiKeyText: (String) -> Unit,
+    copyText: (String) -> Unit,
+) {
+    // ── API Key protection toggle ─────────────────────────────────
+    SettingRow(label = stringResource(Res.string.api_key_protection)) {
+        Switch(
+            checked = settings.serverSettings.apiKeyEnabled,
+            onCheckedChange = { enabled ->
+                onSettingsChange { s ->
+                    s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
+                }
+            }
+        )
+    }
+    Text(
+        text = stringResource(Res.string.browser_source_note_in_server_settings),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    // ── API Key field + Generate + Copy all in one row ────────────
+    if (settings.serverSettings.apiKeyEnabled) {
+        val setApiKey: (String) -> Unit = { key ->
+            onApiKeyText(key)
+            onSettingsChange { s ->
+                s.copy(serverSettings = s.serverSettings.copy(apiKey = key))
+            }
+        }
+        SettingRow(label = stringResource(Res.string.api_key_label)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                SettingsTextField(
+                    value = apiKeyText,
+                    onValueChange = setApiKey,
+                    modifier = Modifier.width(350.dp),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            stringResource(Res.string.api_key_hint),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                )
+                CopyUrlButton(
+                    text = stringResource(Res.string.generate_api_key),
+                    tone = ButtonTone.PRIMARY,
+                    onClick = { setApiKey(UUID.randomUUID().toString().replace("-", "")) },
+                )
+                CopyUrlButton(
+                    text = stringResource(Res.string.copy_api_key),
+                    tone = ButtonTone.SECONDARY,
+                    onClick = { copyText(apiKeyText) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FileUploadSection(settings: AppSettings, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
+    // ── Allow File Upload toggle ──────────────────────────────────
+    SettingRow(label = stringResource(Res.string.allow_file_upload)) {
+        Switch(
+            checked = settings.serverSettings.fileUploadEnabled,
+            onCheckedChange = { enabled ->
+                onSettingsChange { s ->
+                    s.copy(serverSettings = s.serverSettings.copy(fileUploadEnabled = enabled))
+                }
+            }
+        )
+    }
+    Text(
+        text = stringResource(Res.string.allow_file_upload_description),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    // ── Max media upload size (only relevant when uploads are enabled) ──
+    if (settings.serverSettings.fileUploadEnabled) {
+        var maxMbText by remember(settings.serverSettings.maxMediaUploadMb) {
+            mutableStateOf(settings.serverSettings.maxMediaUploadMb.toString())
+        }
+        SettingRow(label = stringResource(Res.string.max_media_upload_label)) {
+            SettingsTextField(
+                value = maxMbText,
+                onValueChange = { v ->
+                    if (v.length <= 5 && v.all(Char::isDigit)) {
+                        maxMbText = v
+                        v.toIntOrNull()?.takeIf { it > 0 }?.let { mb ->
+                            onSettingsChange { s ->
+                                s.copy(serverSettings = s.serverSettings.copy(maxMediaUploadMb = mb))
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.width(100.dp),
+                singleLine = true,
+                placeholder = { Text(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB.toString()) }
+            )
+        }
+        Text(
+            text = stringResource(Res.string.max_media_upload_description, Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun RemoteClientsCard(companionServer: CompanionServer, remoteClientManager: RemoteClientManager) {
+    SettingsSection(title = stringResource(Res.string.remote_clients_title)) {
+        Text(
+            text = stringResource(Res.string.remote_clients_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        val connectedInstanceLinkFollowers by companionServer.connectedInstanceLinkFollowers
+            .collectAsState()
+        if (connectedInstanceLinkFollowers.isNotEmpty()) {
+            Text(
+                text = stringResource(
+                    Res.string.instance_link_followers_connected_count,
+                    connectedInstanceLinkFollowers.size
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(4.dp))
+        }
+
+        // ── Allowed clients list ──────────────────────────────────────
+        ClientList(
+            title = stringResource(Res.string.allowed_clients),
+            description = stringResource(Res.string.allowed_clients_description),
+            emptyText = stringResource(Res.string.no_allowed_clients),
+            clients = remoteClientManager.allowedClients.toList().sorted(),
+            statusColor = MaterialTheme.colorScheme.primary,
+            remoteClientManager = remoteClientManager,
+            followers = connectedInstanceLinkFollowers,
+            onRemove = remoteClientManager::removeAllowed,
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        // ── Blocked clients list ──────────────────────────────────────
+        ClientList(
+            title = stringResource(Res.string.blocked_clients),
+            description = stringResource(Res.string.blocked_clients_description),
+            emptyText = stringResource(Res.string.no_blocked_clients),
+            clients = remoteClientManager.blockedClients.toList().sorted(),
+            statusColor = MaterialTheme.colorScheme.error,
+            remoteClientManager = remoteClientManager,
+            followers = connectedInstanceLinkFollowers,
+            onRemove = remoteClientManager::removeBlocked,
+        )
+    }
+}
+
+@Composable
+private fun ClientList(
+    title: String,
+    description: String,
+    emptyText: String,
+    clients: List<String>,
+    statusColor: Color,
+    remoteClientManager: RemoteClientManager,
+    followers: Set<String>,
+    onRemove: (String) -> Unit,
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = statusColor
+    )
+    Text(
+        text = description,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    if (clients.isEmpty()) {
+        Text(
+            text = emptyText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    } else {
+        clients.forEach { clientId ->
+            key(clientId) {
+                ClientRow(
+                    clientId = clientId,
+                    label = remoteClientManager.getLabel(clientId),
+                    onSetLabel = { remoteClientManager.setLabel(clientId, it) },
+                    statusColor = statusColor,
+                    statusLabel = title,
+                    onRemove = { onRemove(clientId) },
+                    isInstanceLinkFollower = clientId in followers
+                )
+            }
+        }
+    }
+}
+
+/** The URLs one lower third can be copied as: the trigger, and the ATEM still and clip uploads. */
+private class TriggerUrls(
+    private val serverUrl: String,
+    private val keyTarget: String,
+    private val apiKey: String,
+) {
+    fun trigger(name: String, withKey: Boolean): String = lowerThirdTriggerUrl(serverUrl, name, withKey, apiKey)
+    fun still(name: String, withKey: Boolean): String =
+        atemMediaUrl(serverUrl, "still", name, if (withKey) keyTarget else "", apiKey)
+    fun clip(name: String, withKey: Boolean): String =
+        atemMediaUrl(serverUrl, "clip", name, if (withKey) keyTarget else "", apiKey)
+}
+
+@Composable
+private fun CompanionTriggersCard(
+    settings: AppSettings,
+    isRunning: Boolean,
+    serverUrl: String,
+    copyText: (String) -> Unit,
+) {
+    val lowerThirdFolder = settings.streamingSettings.lowerThirdFolder
+    // `isLottieFile` reads each JSON in full, so this is the folder's whole weight in
+    // bytes — off the composition thread. The card is a list of trigger URLs, so a
+    // frame of it empty says nothing misleading.
+    val lowerThirds by produceState(emptyList<java.io.File>(), lowerThirdFolder, isRunning) {
+        value = withContext(Dispatchers.IO) {
+            java.io.File(lowerThirdFolder)
+                .takeIf { lowerThirdFolder.isNotEmpty() && it.isDirectory }
+                ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
+                ?.sortedBy { it.nameWithoutExtension.lowercase() }
+                ?.toList()
+                ?: emptyList()
+        }
+    }
+    val atemConfigured = settings.atemSettings.host.isNotBlank()
+
+    // Default key target (1-based) for the "+ key" URLs, matching the configured key
+    // type. DSK ignores M/E and uses the DSK number; both carry an explicit keytype so
+    // the copied URL behaves as shown regardless of later setting changes.
+    val keyTypeParam = atemKeyTypeParam(settings.atemSettings)
+    val apiKeyOrBlank = effectiveApiKey(settings.serverSettings)
+    val urls = TriggerUrls(serverUrl, atemKeyTarget(settings.atemSettings), apiKeyOrBlank)
+
+    SettingsSection(title = stringResource(Res.string.companion_lt_triggers)) {
+        Text(
+            text = stringResource(Res.string.companion_lt_triggers_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = stringResource(Res.string.companion_atem_upload_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
+        )
+        if (atemConfigured) {
+            Text(
+                text = stringResource(Res.string.companion_atem_clip_key_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        when {
+            !isRunning || serverUrl.isBlank() -> Text(
+                text = stringResource(Res.string.companion_lt_server_off),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+            lowerThirds.isEmpty() -> Text(
+                text = stringResource(Res.string.companion_lt_none),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+            else -> lowerThirds.forEach { file ->
+                LowerThirdTriggerRow(
+                    name = file.nameWithoutExtension,
+                    urls = urls,
+                    atemConfigured = atemConfigured,
+                    copyText = copyText,
+                )
+            }
+        }
+
+        if (isRunning && serverUrl.isNotBlank()) {
+            Spacer(Modifier.height(4.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+            Spacer(Modifier.height(4.dp))
+
+            // Key controls — only when ATEM is configured
+            if (atemConfigured) {
+                AtemKeySection(
+                    serverUrl = serverUrl,
+                    keyTypeParam = keyTypeParam,
+                    apiKey = apiKeyOrBlank,
+                    copyText = copyText,
+                )
+            }
+
+            TakedownSection(serverUrl = serverUrl, apiKey = apiKeyOrBlank, copyText = copyText)
+        }
+    }
+}
+
+@Composable
+private fun LowerThirdTriggerRow(
+    name: String,
+    urls: TriggerUrls,
+    atemConfigured: Boolean,
+    copyText: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            CopyUrlButton(
+                text = stringResource(Res.string.companion_lt_copy_key),
+                tone = ButtonTone.PRIMARY,
+                horizontalPadding = 10.dp,
+                onClick = { copyText(urls.trigger(name, withKey = true)) },
+            )
+            CopyUrlButton(
+                text = stringResource(Res.string.companion_lt_copy_nokey),
+                tone = ButtonTone.SECONDARY,
+                horizontalPadding = 10.dp,
+                onClick = { copyText(urls.trigger(name, withKey = false)) },
+            )
+            if (atemConfigured) {
+                CopyUrlButton(
+                    text = stringResource(Res.string.companion_atem_still_key),
+                    tone = ButtonTone.PRIMARY,
+                    horizontalPadding = 10.dp,
+                    onClick = { copyText(urls.still(name, withKey = true)) },
+                )
+                CopyUrlButton(
+                    text = stringResource(Res.string.companion_atem_still_only),
+                    tone = ButtonTone.SECONDARY,
+                    horizontalPadding = 10.dp,
+                    onClick = { copyText(urls.still(name, withKey = false)) },
+                )
+                CopyUrlButton(
+                    text = stringResource(Res.string.companion_atem_clip_key),
+                    tone = ButtonTone.PRIMARY,
+                    horizontalPadding = 10.dp,
+                    onClick = { copyText(urls.clip(name, withKey = true)) },
+                )
+                CopyUrlButton(
+                    text = stringResource(Res.string.companion_atem_clip_only),
+                    tone = ButtonTone.SECONDARY,
+                    horizontalPadding = 10.dp,
+                    onClick = { copyText(urls.clip(name, withKey = false)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AtemKeySection(serverUrl: String, keyTypeParam: String, apiKey: String, copyText: (String) -> Unit) {
+    Text(
+        text = stringResource(Res.string.companion_atem_key_section),
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Text(
+        text = stringResource(Res.string.companion_atem_key_desc),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        CopyUrlButton(
+            text = stringResource(Res.string.companion_atem_key_on),
+            tone = ButtonTone.PRIMARY,
+            onClick = { copyText(atemKeyUrl(serverUrl, on = true, keyTypeParam = keyTypeParam, apiKey = apiKey)) },
+        )
+        CopyUrlButton(
+            text = stringResource(Res.string.companion_atem_key_off),
+            tone = ButtonTone.SECONDARY,
+            onClick = { copyText(atemKeyUrl(serverUrl, on = false, keyTypeParam = keyTypeParam, apiKey = apiKey)) },
+        )
+    }
+    Spacer(Modifier.height(4.dp))
+}
+
+/**
+ * Take-down actions — available whenever the server is running. "Hide Lower Third" clears only a
+ * lower third; "Clear Display" clears any output (Bible, song, lower third, …) via POST /api/clear.
+ */
+@Composable
+private fun TakedownSection(serverUrl: String, apiKey: String, copyText: (String) -> Unit) {
+    Text(
+        text = stringResource(Res.string.companion_lt_takedown_desc),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        CopyUrlButton(
+            text = stringResource(Res.string.companion_lt_copy_hide),
+            tone = ButtonTone.ERROR_CONTAINER,
+            onClick = { copyText(lowerThirdHideUrl(serverUrl, apiKey)) },
+        )
+        CopyUrlButton(
+            text = stringResource(Res.string.tooltip_clear_display),
+            tone = ButtonTone.ERROR,
+            onClick = { copyText(clearDisplayUrl(serverUrl, apiKey)) },
+        )
+    }
+}
+
+private enum class ButtonTone { PRIMARY, SECONDARY, ERROR_CONTAINER, ERROR }
+
+/** The small labelled button every copy-a-URL action on this tab is drawn as. */
+@Composable
+private fun CopyUrlButton(
+    text: String,
+    tone: ButtonTone,
+    onClick: () -> Unit,
+    horizontalPadding: Dp = 12.dp,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val colors = when (tone) {
+        ButtonTone.PRIMARY -> ButtonDefaults.buttonColors(
+            containerColor = scheme.primaryContainer,
+            contentColor = scheme.onPrimaryContainer
+        )
+        ButtonTone.SECONDARY -> ButtonDefaults.buttonColors(
+            containerColor = scheme.secondaryContainer,
+            contentColor = scheme.onSecondaryContainer
+        )
+        ButtonTone.ERROR_CONTAINER -> ButtonDefaults.buttonColors(
+            containerColor = scheme.errorContainer,
+            contentColor = scheme.onErrorContainer
+        )
+        ButtonTone.ERROR -> ButtonDefaults.buttonColors(
+            containerColor = scheme.error,
+            contentColor = scheme.onError
+        )
+    }
+    Button(
+        shape = RoundedCornerShape(6.dp),
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 6.dp),
+        colors = colors
+    ) { Text(text, style = MaterialTheme.typography.labelSmall) }
 }
 
 @Composable
