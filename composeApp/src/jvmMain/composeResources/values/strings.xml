@@ -743,6 +743,7 @@
     <string name="tooltip_presentation_remote">Open Remote Control</string>
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_stt_settings">STT Display Settings</string>
+    <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
@@ -1305,6 +1306,15 @@
     <string name="media_subtitles_load_file">Load subtitle file…</string>
     <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
+    <string name="media_subtitle_settings">Subtitle Settings</string>
+    <string name="media_subtitle_settings_hint">Applies to SRT/WebVTT subtitle files, which the app draws itself. An embedded track or an ASS/SSA/SUB file keeps VLC's own look.</string>
+    <string name="media_subtitle_text_color">Text Color</string>
+    <string name="media_subtitle_background_color">Background Color</string>
+    <string name="media_subtitle_font">Font</string>
+    <string name="media_subtitle_size">Size</string>
+    <string name="media_subtitle_position">Position</string>
+    <string name="media_subtitle_opacity">Opacity:</string>
+    <string name="media_subtitle_max_lines">Max Lines</string>
     <string name="media_open_in_browser">Open in Browser</string>
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
     <string name="media_local_preview_note">Local video — use controls above to manage playback.</string>

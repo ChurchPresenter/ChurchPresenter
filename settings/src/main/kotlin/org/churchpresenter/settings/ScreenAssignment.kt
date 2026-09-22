@@ -61,6 +61,9 @@ data class ScreenAssignment(
     val songTranslations: List<Int> = emptyList(),
     val showPictures: Boolean = true,
     val showMedia: Boolean = true,
+    /** Whether this output draws the app-rendered subtitle overlay for the loaded clip's SRT/VTT
+     *  file. Basic on/off only -- a per-output *track* choice belongs to #475, not this. */
+    val showSubtitles: Boolean = true,
     val showStreaming: Boolean = true,
     val showAnnouncements: Boolean = true,
     val showWebsite: Boolean = true,

@@ -166,7 +166,10 @@ internal fun PresenterModeContent(
                 } else {
                     MediaPresenter(
                         modifier = Modifier.fillMaxSize(),
-                        transitionAlpha = mediaTransitionAlpha
+                        transitionAlpha = mediaTransitionAlpha,
+                        outputRole = outputRole,
+                        showSubtitles = screenAssignment.showSubtitles,
+                        mediaSettings = appSettings.mediaSettings,
                     )
                 }
             }

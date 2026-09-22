@@ -13,8 +13,10 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
@@ -40,6 +42,7 @@ import java.nio.file.Paths
 import java.util.Locale
 import javax.swing.SwingUtilities
 import androidx.compose.foundation.Image
+import org.churchpresenter.app.churchpresenter.utils.DevFlags
 
 private const val POSITION_POLL_MS = 200
 private const val VOLUME_PERCENT_SCALE = 100
@@ -173,19 +176,33 @@ internal object SharedVideoOutput {
 }
 
 /**
+ * A 1×1 transparent stand-in, drawn by [SharedVideoOutputDisplay] before any real frame exists.
+ *
+ * Every output window that can show media -- the presenter window, an NDI/Browser Source output --
+ * composes this the moment it opens, long before a clip is ever loaded. Skipping the `Image` call
+ * entirely until the first real frame (as this used to) meant that window's graphics surface had
+ * never actually drawn a bitmap through Skia until the moment Go Live handed it its first one --
+ * texture upload and shader compilation for that surface were still cold, paid for exactly when a
+ * decoder was also actively converting and delivering frames, and the two together were the
+ * stutter on the very first clip of a session. Drawing this placeholder as soon as the window
+ * exists moves that one-time cost there instead, where nothing else is competing for it.
+ */
+private val emptyFramePlaceholder: ImageBitmap by lazy {
+    BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).toComposeImageBitmap()
+}
+
+/**
  * Lightweight Compose composable that displays the latest frame from [SharedVideoOutput].
  * Uses no VLC instance — just renders the ImageBitmap written by the master SoftwareVideoPlayer.
  */
 @Composable
 fun SharedVideoOutputDisplay(modifier: Modifier = Modifier) {
-    SharedVideoOutput.frame.value?.let { bitmap ->
-        Image(
-            bitmap = bitmap,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = modifier
-        )
-    }
+    Image(
+        bitmap = SharedVideoOutput.frame.value ?: emptyFramePlaceholder,
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+    )
 }
 
 /** Custom VLC installation directory. Set from saved settings before first VLC access. */
@@ -479,7 +496,19 @@ fun VideoPlayer(
                         // otherwise pause a player that has already been released.
                         pauseTimer.value?.stop()
                         pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
-                            gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
+                            gate.ifLive {
+                                if (!viewModel.isPlaying) {
+                                    mediaPlayer.controls().pause()
+                                    // Rewinds to the start of the file this load-grace decode
+                                    // ran ahead into, so the first real Go Live resumes from an
+                                    // explicit seek -- exactly what Stop does before a second
+                                    // Play -- rather than from wherever those ~200ms of decode
+                                    // happened to land. An operator-initiated pause mid-playback
+                                    // never reaches this branch (firstFrameCaptured is already
+                                    // true by then), so nothing here touches a real pause.
+                                    mediaPlayer.controls().setTime(0)
+                                }
+                            }
                         }.also { it.isRepeats = false; it.start() }
                     } else {
                         SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
@@ -533,14 +562,16 @@ fun VideoPlayer(
         // Stay muted until playback is actually requested. Loading always briefly starts the
         // VLC pipeline to capture a first frame (see playing() below), and without this guard
         // that grace window would be audible even though the file is meant to load paused.
-        if (!audioEnabled || !viewModel.isPlaying) mp.audio().setVolume(0)
-        else mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+        //
+        // Muted, not silenced by volume: the real volume is set here too, so libVLC's audio
+        // output device is asked to exist during this load grace window rather than for the
+        // first time at Go Live -- see the isPlaying effect below for why that ordering matters.
+        if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+        mp.audio().setMute(!audioEnabled || !viewModel.isPlaying)
 
         // When the caller has determined this instance must never produce audio (e.g. a
         // background decoder mounted only to keep rendering a paused frame), disable the
-        // audio track outright with :no-audio. Volume-0 alone can still leak a brief pop
-        // because libvlc's audio output is created asynchronously as playback starts, so
-        // the gain isn't guaranteed to apply before the very first samples flow.
+        // audio track outright with :no-audio.
         if (!audioEnabled) mp.media().play(mrl, ":no-audio")
         else mp.media().play(mrl)  // VideoPlayer is audio-only; no codec override needed
         // Auto-pause is handled by the playing() event listener above.
@@ -554,11 +585,13 @@ fun VideoPlayer(
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
-                // Restore real volume now that playback is genuinely resuming — the load
-                // above may have muted the player to silence the first-frame grace window.
-                if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+                // Lifts the mute the load effect set for the first-frame grace window — the
+                // audio device itself has been live since load, so this is not the first time
+                // it's asked to exist.
+                if (audioEnabled) mp.audio().setMute(false)
                 mp.controls().play()
             } else {
+                if (audioEnabled) mp.audio().setMute(true)
                 mp.controls().pause()
             }
         }
@@ -610,8 +643,15 @@ private fun rememberSurfaceFactory(): MediaPlayerFactory? = remember {
 }
 
 /**
- * Turns each captured frame into an [ImageBitmap] on the composition's own coroutine rather than on
- * VLC's render thread, which must not be blocked or the audio pipeline stutters. Capped at ~60fps.
+ * Turns each captured frame into an [ImageBitmap] rather than on VLC's render thread, which must
+ * not be blocked or the audio pipeline stutters. Capped at ~60fps.
+ *
+ * The actual conversion runs on [Dispatchers.Default], not on the polling loop's own coroutine:
+ * `LaunchedEffect` otherwise runs on the composition's dispatcher, the same one that drives
+ * Compose's own recomposition and layout -- and `toComposeImageBitmap()` is real work, a full-frame
+ * pixel copy done up to 60 times a second. Left there, it competed directly with the rest of the
+ * app's UI work on the one thread both needed, which is what read as stutter across the whole
+ * window, video included, not only the video.
  */
 @Composable
 private fun ConvertFramesOffRenderThread(
@@ -627,7 +667,7 @@ private fun ConvertFramesOffRenderThread(
                 lastVersion = v
                 val img = holder.value
                 if (img != null) {
-                    val bitmap = img.toComposeImageBitmap()
+                    val bitmap = withContext(Dispatchers.Default) { img.toComposeImageBitmap() }
                     out.value = bitmap
                     SharedVideoOutput.frame.value = bitmap
                 }
@@ -638,15 +678,44 @@ private fun ConvertFramesOffRenderThread(
 }
 
 /**
- * The RV32 buffer format VLC renders into, re-allocating the backing [BufferedImage] whenever the
+ * Two same-sized [BufferedImage]s so VLC's render thread and the composable's own conversion
+ * coroutine ([ConvertFramesOffRenderThread]) are never touching the same one at once.
+ *
+ * Before this, both sides shared one [BufferedImage] and mutated/read its backing `int[]` in
+ * place: VLC could start copying frame N+1's pixels into that array while the coroutine was still
+ * mid-read of frame N for `toComposeImageBitmap()`, tearing the frame -- a torn frame reads on
+ * screen as a glitch, and since neither side is throttled to the other's pace, it recurred rather
+ * than being a one-off. [writeTarget] is always the buffer nobody is reading: the previous
+ * [completeWrite] handed the just-finished one off for display and only then flipped which one
+ * VLC writes into next, so a buffer is never both the current write target and the current display
+ * source at the same time.
+ */
+internal class FramePingPong(width: Int, height: Int) {
+    private val bufferA = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+    private val bufferB = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+    private var nextIsA = true
+
+    /** Where the render callback copies the next frame's pixels. */
+    val writeTarget: BufferedImage get() = if (nextIsA) bufferA else bufferB
+
+    /** Called once that copy finishes: hands back the now-complete buffer and flips the target. */
+    fun completeWrite(): BufferedImage {
+        val completed = writeTarget
+        nextIsA = !nextIsA
+        return completed
+    }
+}
+
+/**
+ * The RV32 buffer format VLC renders into, re-allocating the [FramePingPong] pair whenever the
  * source size changes.
  */
-private fun rv32BufferFormatCallback(holder: MutableState<BufferedImage?>) =
+internal fun rv32BufferFormatCallback(pingPong: MutableState<FramePingPong?>) =
     object : BufferFormatCallback {
         override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
             val w = sourceWidth.coerceAtLeast(1)
             val h = sourceHeight.coerceAtLeast(1)
-            holder.value = BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
+            pingPong.value = FramePingPong(w, h)
             return RV32BufferFormat(w, h)
         }
 
@@ -654,21 +723,25 @@ private fun rv32BufferFormatCallback(holder: MutableState<BufferedImage?>) =
     }
 
 /**
- * Copies each decoded frame into the [BufferedImage] and bumps [frameVersion]. Runs on VLC's own
- * render thread, so it does no conversion work: that happens in the composable's frame loop.
+ * Copies each decoded frame into [pingPong]'s current write target, publishes the completed buffer
+ * to [displayHolder], and bumps [frameVersion]. Runs on VLC's own render thread, so it does no
+ * conversion work: that happens in the composable's frame loop.
  */
-private fun frameRenderCallback(
-    holder: MutableState<BufferedImage?>,
+internal fun frameRenderCallback(
+    pingPong: MutableState<FramePingPong?>,
+    displayHolder: MutableState<BufferedImage?>,
     firstFrameCaptured: MutableState<Boolean>,
     frameVersion: MutableState<Long>,
 ) = RenderCallback { _, nativeBuffers, _ ->
-    val img = holder.value ?: return@RenderCallback
+    val pp = pingPong.value ?: return@RenderCallback
     if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
-    val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
+    val target = pp.writeTarget
+    val pixelData = (target.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
     try {
         val buf = nativeBuffers[0] ?: return@RenderCallback
         buf.rewind()
         buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / RV32_BYTES_PER_PIXEL))
+        displayHolder.value = pp.completeWrite()
         firstFrameCaptured.value = true
         frameVersion.value++  // signal new frame available, conversion happens off-thread
     } catch (_: Throwable) { }
@@ -679,7 +752,7 @@ private fun frameRenderCallback(
  * decoder is the one that tells the view model the file ended — see the parameter on
  * [SoftwareVideoPlayer].
  */
-private fun softwarePlayerEvents(
+internal fun softwarePlayerEvents(
     viewModel: MediaViewModel,
     firstFrameCaptured: MutableState<Boolean>,
     gate: PlayerReleaseGate,
@@ -710,7 +783,19 @@ private fun softwarePlayerEvents(
             // embedded player above.
             pauseTimer.value?.stop()
             pauseTimer.value = javax.swing.Timer(POSITION_POLL_MS) {
-                gate.ifLive { if (!viewModel.isPlaying) mediaPlayer.controls().pause() }
+                gate.ifLive {
+                    if (!viewModel.isPlaying) {
+                        mediaPlayer.controls().pause()
+                        // Rewinds to the start of the file this load-grace decode ran ahead
+                        // into, so the first real Go Live resumes from an explicit seek --
+                        // exactly what Stop does before a second Play -- rather than from
+                        // wherever those ~200ms of decode happened to land. An operator-
+                        // initiated pause mid-playback never reaches this branch
+                        // (firstFrameCaptured is already true by then), so nothing here
+                        // touches a real pause.
+                        mediaPlayer.controls().setTime(0)
+                    }
+                }
             }.also { it.isRepeats = false; it.start() }
         } else {
             SwingUtilities.invokeLater { gate.ifLive { mediaPlayer.controls().pause() } }
@@ -727,28 +812,57 @@ private fun softwarePlayerEvents(
     }
 }
 
-/** The media options the software player loads [subtitleUrl] and its audio setting with. */
-internal fun softwarePlayOptions(audioEnabled: Boolean, subtitleUrl: String): Array<String> {
+/**
+ * The media options the software player loads [subtitleUrl] and its audio setting with.
+ *
+ * [appRendersSubtitles] is true when `MediaViewModel.subtitleCues` parsed something out of
+ * [subtitleUrl] -- the app is drawing that file itself (`SubtitleOverlay`), so VLC must not also
+ * be handed `:sub-file=`, or the same text would be burned into the frame a second time.
+ */
+internal fun softwarePlayOptions(
+    audioEnabled: Boolean,
+    subtitleUrl: String,
+    appRendersSubtitles: Boolean = false,
+    forceAvcodec: Boolean = DevFlags.forceAvcodec,
+): Array<String> {
+    val codec = if (forceAvcodec) arrayOf(VLC_OPT_SOFTWARE_CODEC) else emptyArray()
     val base = if (audioEnabled) {
-        arrayOf(VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
+        codec + arrayOf(VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
     } else {
-        arrayOf(VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_NO_AUDIO)
+        codec + arrayOf(VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_NO_AUDIO)
     }
-    return base + subtitleMediaOptions(subtitleUrl)
+    return if (appRendersSubtitles) base else base + subtitleMediaOptions(subtitleUrl)
 }
 
-private fun MediaPlayer.playSoftware(mrl: String, audioEnabled: Boolean, subtitleUrl: String) {
-    val options = softwarePlayOptions(audioEnabled, subtitleUrl)
+private fun MediaPlayer.playSoftware(
+    mrl: String,
+    audioEnabled: Boolean,
+    subtitleUrl: String,
+    appRendersSubtitles: Boolean,
+) {
+    val options = softwarePlayOptions(audioEnabled, subtitleUrl, appRendersSubtitles)
     // media().play takes its options as a vararg; this is the one call that spreads them.
     @Suppress("SpreadOperator")
     media().play(mrl, *options)
 }
 
-/** Applies the view model's chosen subtitle track live, without reloading the media. */
+/**
+ * Applies the view model's chosen subtitle track live, without reloading the media.
+ *
+ * Skipped entirely when the app is rendering the subtitles itself (`subtitleCues` non-empty) --
+ * VLC was never handed that file, so it has no track for it to select.
+ */
 @Composable
 private fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate: PlayerReleaseGate) {
-    // Nothing is sent until the player has listed the tracks and the choice has been resolved.
-    LaunchedEffect(viewModel.selectedSubtitleTrack, viewModel.subtitleTracks) {
+    if (viewModel.subtitleCues.isNotEmpty()) return
+    // Keyed on the resolved selection alone, not on `subtitleTracks` too: that list is reassigned
+    // once per embedded track VLC reports (`elementaryStreamAdded` fires per track), and keying on
+    // it re-sent the *same* selection to VLC on every one of those -- `setTrack` is not a no-op
+    // when the id is unchanged, so a file with several embedded tracks flashed the subtitle
+    // renderer once per track while it was still being discovered. Nothing here needs the list
+    // itself: `selectedSubtitleTrack` already flips from `SUBTITLES_UNDECIDED` to a resolved value
+    // (see `setSubtitleTracks`) the moment there's something to resolve it with.
+    LaunchedEffect(viewModel.selectedSubtitleTrack) {
         val track = viewModel.selectedSubtitleTrack
         if (track != MediaViewModel.SUBTITLES_UNDECIDED) {
             SwingUtilities.invokeLater { gate.ifLive { mp.subpictures().setTrack(track) } }
@@ -771,13 +885,16 @@ fun SoftwareVideoPlayer(
     // spends a repeat, so a mirror mounted on the same view model reporting it too would spend
     // two. The Media tab's decoder and MainDesktop's are already mutually exclusive; a mirror
     // (the stage monitor) passes false.
-    reportsPlaybackEnd: Boolean = true
+    reportsPlaybackEnd: Boolean = true,
 ) {
     if (!isVlcAvailable) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
     val frameVersion = remember { mutableStateOf(0L) }
+    // The last COMPLETE frame -- what ConvertFramesOffRenderThread reads. The pair it was copied
+    // from is FramePingPong's own concern; nothing here reads a buffer VLC might still be writing.
     val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
+    val framePingPong = remember { mutableStateOf<FramePingPong?>(null) }
 
     // On macOS, factory.mediaPlayers().newEmbeddedMediaPlayer() does NOT deliver video
     // frames to a callback surface — that requires CallbackMediaPlayerComponent.
@@ -801,8 +918,8 @@ fun SoftwareVideoPlayer(
 
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
-        val bufferFormatCallback = rv32BufferFormatCallback(bufferedImageHolder)
-        val renderCallback = frameRenderCallback(bufferedImageHolder, firstFrameCaptured, frameVersion)
+        val bufferFormatCallback = rv32BufferFormatCallback(framePingPong)
+        val renderCallback = frameRenderCallback(framePingPong, bufferedImageHolder, firstFrameCaptured, frameVersion)
 
         // Setting a new video surface here replaces the component's internal surface,
         // directing all decoded frames to our renderCallback instead.
@@ -850,8 +967,17 @@ fun SoftwareVideoPlayer(
         // Stay muted until playback is actually requested. Loading always briefly starts the
         // VLC pipeline to capture a first frame (see playing() below), and without this guard
         // that grace window would be audible even though the video is meant to load paused.
-        if (!audioEnabled || !viewModel.isPlaying) mp.audio().setVolume(0)
-        else mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+        //
+        // Muted, not silenced by volume: the real volume is set here too, so libVLC's audio
+        // output device is asked to exist -- and negotiate with the OS -- during this load
+        // grace window rather than for the first time at Go Live. That negotiation is the
+        // asynchronous part the comment below already flags; setting volume 0 at load and only
+        // setting the real volume once Go Live is pressed meant Go Live was the first moment
+        // that device was ever actually needed, which is a plausible stall of its own layered
+        // on top of decode ramping up -- the isPlaying effect below only ever lifts a mute now,
+        // it does not ask for a device for the first time.
+        if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+        mp.audio().setMute(!audioEnabled || !viewModel.isPlaying)
 
         // :codec=avcodec forces FFmpeg software decoding, bypassing VideoToolbox.
         // Required for Dolby Vision HEVC / 10-bit files where VideoToolbox outputs zero-copy
@@ -859,10 +985,8 @@ fun SoftwareVideoPlayer(
         // :avcodec-fast reduces per-frame overhead; :clock-jitter=0 tightens frame scheduling.
         // When the caller has determined this instance must never produce audio (e.g. a
         // background decoder mounted only to keep rendering a paused frame), :no-audio
-        // disables the audio track outright — volume-0 alone can still leak a brief pop
-        // because libvlc's audio output is created asynchronously as playback starts, so
-        // the gain isn't guaranteed to apply before the very first samples flow.
-        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl)
+        // disables the audio track outright.
+        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.subtitleCues.isNotEmpty())
         // Auto-pause is handled by the playing() event listener above.
     }
 
@@ -876,11 +1000,13 @@ fun SoftwareVideoPlayer(
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
-                // Restore real volume now that playback is genuinely resuming — the load
-                // above may have muted the player to silence the first-frame grace window.
-                if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+                // Lifts the mute the load effect set for the first-frame grace window — the
+                // audio device itself has been live since load, so this is not the first time
+                // it's asked to exist.
+                if (audioEnabled) mp.audio().setMute(false)
                 mp.controls().play()
             } else {
+                if (audioEnabled) mp.audio().setMute(true)
                 mp.controls().pause()
             }
         }
